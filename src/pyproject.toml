@@ -1,0 +1,61 @@
+[project]
+name = "victorias-connectors-office365-test"
+version = "0.0.0dev1"
+requires-python = ">=3.9"
+description = "FastAPI Runtime for Azure Functions Python Worker"
+authors = [
+    { name = "Azure Functions team at Microsoft Corp.", email = "azurefunctions@microsoft.com" }
+]
+keywords = ["azure", "functions", "azurefunctions",
+            "python", "serverless", "fastapi"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: MacOS :: MacOS X",
+    "Environment :: Web Environment",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers"
+]
+dependencies = [
+    "azure-functions",
+]
+
+[project.urls]
+Documentation = "https://github.com/Azure/azure-functions-python-worker/blob/dev/runtimes/fastapi/README.md"
+Repository = "https://github.com/Azure/azure-functions-python-worker"
+
+[project.optional-dependencies]
+dev = [
+    "flake8==6.*",
+    "mypy",
+    "pytest",
+    "pytest-asyncio",
+    "httpx",  # For FastAPI testing
+    "requests==2.*",
+    "coverage",
+    "pytest-sugar",
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-randomly",
+    "pytest-instafail",
+    "pytest-rerunfailures",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["azure_workflows_connectors_sdk"]
+
+
+[tool.setuptools.package-data]
+azure_workflows_connectors_sdk = ["py.typed"]
