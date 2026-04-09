@@ -9,7 +9,7 @@ Prerequisites:
 3. Connection runtime URL from Azure Portal
 
 Installation:
-    pip install azure-identity aiohttp
+    pip install <TBD>
 
 Usage:
     python sample_teams_usage.py

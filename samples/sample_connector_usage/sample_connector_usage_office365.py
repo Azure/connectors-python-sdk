@@ -5,7 +5,7 @@ Sample program demonstrating how to use the Connector SDK with generated connect
 
 This sample shows the usage pattern. For actual usage, you need to:
 1. Generate connector code using LogicAppsCompiler CLI (see GENERATION.md)
-2. Install the SDK: pip install azure-workflows-connectors-sdk
+2. Install the SDK: pip install <TBD>
 3. Use the generated typed client classes
 """
 
@@ -63,8 +63,8 @@ async def main():
         print("    token_provider = ConnectionStringTokenProvider(api_key)")
         print(f"    Created with key: {api_key[:min(4, len(api_key))]}...")
     except ImportError:
-        print("  Note: azure-workflows-connectors-sdk not installed")
-        print("  Run: pip install azure-workflows-connectors-sdk")
+        print("  Note: <TBD> not installed")
+        print("  Run: pip install <TBD>")
     except Exception as ex:
         print(f"  Error: {ex}")
 
@@ -183,7 +183,7 @@ async def main():
     print()
     print("Next steps:")
     print("  1. Run LogicAppsCompiler CLI to generate connector code")
-    print("  2. Install the SDK: pip install azure-workflows-connectors-sdk")
+    print("  2. Install the SDK: pip install <TBD>")
     print("  3. Use typed clients with the connection runtime URL from Azure Portal")
     print("  4. Deploy to Azure Functions or run locally")
 
