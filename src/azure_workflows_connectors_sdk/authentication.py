@@ -45,7 +45,9 @@ class ManagedIdentityTokenProvider(TokenProvider):
         if not scopes:
             raise ValueError("At least one scope must be provided.")
         
-        token: AccessToken = await self._credential.get_token_async(*scopes)
+        # NOTE(victoriahall): azure-identity credentials use get_token() not get_token_async().
+        # The method is already async-compatible and returns an AccessToken.
+        token: AccessToken = self._credential.get_token(*scopes)
         return token.token
 
 

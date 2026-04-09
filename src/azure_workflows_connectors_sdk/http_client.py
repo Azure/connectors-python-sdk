@@ -4,6 +4,7 @@
 
 import asyncio
 import json
+from dataclasses import asdict, is_dataclass
 from typing import Any, Dict, List, Optional, TypeVar, Generic
 from urllib.parse import urljoin
 import aiohttp
@@ -101,7 +102,18 @@ class ConnectorHttpClient:
             "Content-Type": "application/json",
         }
 
-        json_body = json.dumps(body) if body is not None else None
+        # NOTE(victoriahall): Convert dataclass objects to dictionaries for JSON serialization.
+        # Generated connector clients pass dataclass instances as body parameters.
+        json_body = None
+        if body is not None:
+            if is_dataclass(body):
+                # Convert dataclass to dict, excluding None values
+                body_dict = asdict(body)
+                # Filter out None values to avoid sending null fields
+                body_dict = {k: v for k, v in body_dict.items() if v is not None}
+                json_body = json.dumps(body_dict)
+            else:
+                json_body = json.dumps(body)
 
         return await self._send_with_retry(session, method, url, headers, json_body)
 

@@ -25,7 +25,8 @@ classifiers = [
     "Intended Audience :: Developers"
 ]
 dependencies = [
-    "azure-functions",
+    "aiohttp",
+    "azure-identity",
 ]
 
 [project.urls]
