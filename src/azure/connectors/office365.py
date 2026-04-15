@@ -6,8 +6,9 @@
 from dataclasses import dataclass, field
 from typing import Optional, List, Any, Dict
 from datetime import datetime
+from urllib.parse import quote
 
-from azure_workflows_connectors_sdk import (
+from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorClientOptions,
     TokenProvider,
@@ -17,12 +18,6 @@ from azure_workflows_connectors_sdk import (
 
 
 # Type Definitions
-
-@dataclass
-class GraphCalendarEventListClientReceive:
-    """Response for When an upcoming event is starting soon (V3)"""
-
-    pass
 
 @dataclass
 class GraphOutlookCategory:
@@ -49,179 +44,8 @@ class BatchOperationResult:
     pass
 
 @dataclass
-class GraphClientReceiveMessage:
-    """Response for Get email (V2)"""
-
-    pass
-
-@dataclass
-class BatchResponseGraphClientReceiveMessage:
-    """Response for Get emails (V3)"""
-
-    pass
-
-@dataclass
-class TriggerBatchResponseGraphClientReceiveMessage:
-    """Response for When a new email arrives (V3)"""
-
-    pass
-
-@dataclass
 class SubscriptionResponse:
     """Response for Send email with options"""
-
-    pass
-
-@dataclass
-class GraphCalendarEventClientReceive:
-    """Response for Create event (V4)"""
-
-    pass
-
-@dataclass
-class EntityListResponseGraphCalendarEventClientReceive:
-    """Response for Get calendar view of events (V3)"""
-
-    pass
-
-@dataclass
-class GraphCalendarEventListWithActionType:
-    """Response for When an event is added, updated or deleted (V3)"""
-
-    pass
-
-@dataclass
-class EntityListResponseGraphContactFolder:
-    """Response for Get contact folders (V2)"""
-
-    pass
-
-@dataclass
-class MarkAsReadV3Input:
-    """Mark as read or unread (V3)"""
-
-    is_read: Optional[bool] = None
-    """Mark as read/unread."""
-
-@dataclass
-class GetAttachmentV2Response:
-    """Response for Get Attachment (V2)"""
-
-    id: Optional[str] = None
-    """Id of the attachment."""
-    name: Optional[str] = None
-    """Name of attachment."""
-    content_type: Optional[str] = None
-    """Content type of attachment."""
-    size: Optional[int] = None
-    """Size of attachment."""
-    content_bytes: Optional[str] = None
-    """Content of attachment."""
-    is_inline: Optional[bool] = None
-    """Set to true if this is an inline attachment."""
-    last_modified_date_time: Optional[str] = None
-    """The date and time when the attachment was last modified."""
-    content_id: Optional[str] = None
-    """Content Id"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
-
-@dataclass
-class GetRoomListsV2Response:
-    """Response for Get room lists (V2)"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-    """value"""
-
-@dataclass
-class GetRoomsV2Response:
-    """Response for Get rooms (V2)"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-    """value"""
-
-@dataclass
-class GetRoomsInRoomListV2Response:
-    """Response for Get rooms in room list (V2)"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-    """value"""
-
-@dataclass
-class FindMeetingTimesV2Input:
-    """Find meeting times (V2)"""
-
-    required_attendees: Optional[str] = None
-    """List of semicolon separated email addresses"""
-    optional_attendees: Optional[str] = None
-    """List of semicolon separated email addresses"""
-    resource_attendees: Optional[str] = None
-    """Resource attendees for the event separated by semicolons"""
-    meeting_duration: Optional[int] = None
-    """Duration of the meeting in minutes"""
-    start: Optional[str] = None
-    """Start time for meeting time suggestions"""
-    end: Optional[str] = None
-    """End time for meeting time suggestions"""
-    max_candidates: Optional[int] = None
-    """The maximum number of meeting suggestions to return in the response"""
-    minimum_attendee_percentage: Optional[str] = None
-    """The minimum required confidence for a time slot to be returned in the response"""
-    is_organizer_optional: Optional[bool] = None
-    """true if the organizer doesn't have to attend. The default is false"""
-    activity_domain: Optional[str] = None
-    """Work, Personal, Unrestricted, or Unknown"""
-
-@dataclass
-class FindMeetingTimesV2Response:
-    """Response for Find meeting times (V2)"""
-
-    empty_suggestions_reason: Optional[str] = None
-    """Empty Suggestions Reason"""
-    meeting_time_suggestions: Optional[MeetingTimeSuggestionsV2] = None
-
-@dataclass
-class SetAutomaticRepliesSettingV2Input:
-    """Set up automatic replies (V2)"""
-
-    automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
-
-@dataclass
-class SetAutomaticRepliesSettingV2Response:
-    """Response for Set up automatic replies (V2)"""
-
-    automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
-
-@dataclass
-class GetMailTipsV2Input:
-    """Get mail tips for a mailbox (V2)"""
-
-    mail_tips_options: Optional[str] = None
-    """Flags that represents the mailtips."""
-    email_addresses: Optional[List[str]] = None
-    """Address of the mailbox to get mail tips for."""
-
-@dataclass
-class GetMailTipsV2Response:
-    """Response for Get mail tips for a mailbox (V2)"""
-
-    value: Optional[List[MailTipsClientReceiveV2]] = None
-
-@dataclass
-class CalendarGetTablesV2Response:
-    """Response for Get calendars (V2)"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-    """value"""
-
-@dataclass
-class ContactResponseV2:
-    """Response for Get contact (V2)"""
-
-    pass
-
-@dataclass
-class EntityListResponseContactResponseV2:
-    """Response for Get contacts (V2)"""
 
     pass
 
@@ -248,6 +72,183 @@ class MCPQueryResponse:
     """Response for Email Management MCP Server"""
 
     pass
+
+@dataclass
+class GraphCalendarEventClientReceive:
+    """Response for Get event (V3)"""
+
+    pass
+
+@dataclass
+class GraphCalendarEventListClientReceive:
+    """Response for Get events (V4)"""
+
+    pass
+
+@dataclass
+class GraphCalendarEventListWithActionType:
+    """Response for When an event is added, updated or deleted (V3)"""
+
+    pass
+
+@dataclass
+class CalendarGetTablesResponse:
+    """Response for Get calendars (V2)"""
+
+    value: Optional[List[Dict[str, Any]]] = None
+    """value"""
+
+@dataclass
+class ContactResponse:
+    """Response for Get contact (V2)"""
+
+    pass
+
+@dataclass
+class EntityListResponseContactResponse:
+    """Response for Get contacts (V2)"""
+
+    pass
+
+@dataclass
+class EntityListResponseGraphContactFolder:
+    """Response for Get contact folders (V2)"""
+
+    pass
+
+@dataclass
+class FindMeetingTimesInput:
+    """Find meeting times (V2)"""
+
+    required_attendees: Optional[str] = None
+    """List of semicolon separated email addresses"""
+    optional_attendees: Optional[str] = None
+    """List of semicolon separated email addresses"""
+    resource_attendees: Optional[str] = None
+    """Resource attendees for the event separated by semicolons"""
+    meeting_duration: Optional[int] = None
+    """Duration of the meeting in minutes"""
+    start: Optional[str] = None
+    """Start time for meeting time suggestions"""
+    end: Optional[str] = None
+    """End time for meeting time suggestions"""
+    max_candidates: Optional[int] = None
+    """The maximum number of meeting suggestions to return in the response"""
+    minimum_attendee_percentage: Optional[str] = None
+    """The minimum required confidence for a time slot to be returned in the response"""
+    is_organizer_optional: Optional[bool] = None
+    """true if the organizer doesn't have to attend. The default is false"""
+    activity_domain: Optional[str] = None
+    """Work, Personal, Unrestricted, or Unknown"""
+
+@dataclass
+class FindMeetingTimesResponse:
+    """Response for Find meeting times (V2)"""
+
+    empty_suggestions_reason: Optional[str] = None
+    """Empty Suggestions Reason"""
+    meeting_time_suggestions: Optional[MeetingTimeSuggestionsV2] = None
+
+@dataclass
+class GetAttachmentResponse:
+    """Response for Get Attachment (V2)"""
+
+    id: Optional[str] = None
+    """Id of the attachment."""
+    name: Optional[str] = None
+    """Name of attachment."""
+    content_type: Optional[str] = None
+    """Content type of attachment."""
+    size: Optional[int] = None
+    """Size of attachment."""
+    content_bytes: Optional[str] = None
+    """Content of attachment."""
+    is_inline: Optional[bool] = None
+    """Set to true if this is an inline attachment."""
+    last_modified_date_time: Optional[str] = None
+    """The date and time when the attachment was last modified."""
+    content_id: Optional[str] = None
+    """Content Id"""
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+
+@dataclass
+class GraphClientReceiveMessage:
+    """Response for Get email (V2)"""
+
+    pass
+
+@dataclass
+class BatchResponseGraphClientReceiveMessage:
+    """Response for Get emails (V3)"""
+
+    pass
+
+@dataclass
+class EntityListResponseGraphCalendarEventClientReceive:
+    """Response for Get calendar view of events (V3)"""
+
+    pass
+
+@dataclass
+class GetMailTipsInput:
+    """Get mail tips for a mailbox (V2)"""
+
+    mail_tips_options: Optional[str] = None
+    """Flags that represents the mailtips."""
+    email_addresses: Optional[List[str]] = None
+    """Address of the mailbox to get mail tips for."""
+
+@dataclass
+class GetMailTipsResponse:
+    """Response for Get mail tips for a mailbox (V2)"""
+
+    value: Optional[List[MailTipsClientReceiveV2]] = None
+
+@dataclass
+class GetRoomListsResponse:
+    """Response for Get room lists (V2)"""
+
+    value: Optional[List[Dict[str, Any]]] = None
+    """value"""
+
+@dataclass
+class GetRoomsResponse:
+    """Response for Get rooms (V2)"""
+
+    value: Optional[List[Dict[str, Any]]] = None
+    """value"""
+
+@dataclass
+class GetRoomsInRoomListResponse:
+    """Response for Get rooms in room list (V2)"""
+
+    value: Optional[List[Dict[str, Any]]] = None
+    """value"""
+
+@dataclass
+class MarkAsReadInput:
+    """Mark as read or unread (V3)"""
+
+    is_read: Optional[bool] = None
+    """Mark as read/unread."""
+
+@dataclass
+class TriggerBatchResponseGraphClientReceiveMessage:
+    """Response for When an email is flagged (V4)"""
+
+    pass
+
+@dataclass
+class SetAutomaticRepliesSettingInput:
+    """Set up automatic replies (V2)"""
+
+    automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
+
+@dataclass
+class SetAutomaticRepliesSettingResponse:
+    """Response for Set up automatic replies (V2)"""
+
+    automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
 
 @dataclass
 class TableMetadata:
@@ -1581,85 +1582,6 @@ class GraphContactFolder:
     """The ID of the parent folder"""
 
 @dataclass
-class EntityListResponseContactResponse:
-    """Definition: EntityListResponse[ContactResponse]"""
-
-    value: Optional[List[ContactResponse]] = None
-    """List of values"""
-
-@dataclass
-class ContactResponse:
-    """Definition: ContactResponse"""
-
-    given_name: Optional[str] = None
-    """The contact's given name"""
-    home_phones: Optional[List[str]] = None
-    """The contact's home phone numbers"""
-    id: Optional[str] = None
-    """The contact's unique identifier."""
-    parent_folder_id: Optional[str] = None
-    """The ID of the contact's parent folder"""
-    birthday: Optional[str] = None
-    """The contact's birthday"""
-    file_as: Optional[str] = None
-    """The name the contact is filed under"""
-    display_name: Optional[str] = None
-    """The contact's display name"""
-    initials: Optional[str] = None
-    """The contact's initials"""
-    middle_name: Optional[str] = None
-    """The contact's middle name"""
-    nick_name: Optional[str] = None
-    """The contact's nickname"""
-    surname: Optional[str] = None
-    """The contact's surname"""
-    title: Optional[str] = None
-    """The contact's title"""
-    generation: Optional[str] = None
-    """The contact's generation"""
-    email_addresses: Optional[List[EmailAddress]] = None
-    """The contact's email addresses"""
-    im_addresses: Optional[List[str]] = None
-    """The contact's instant messaging (IM) addresses"""
-    job_title: Optional[str] = None
-    """The contact's job title"""
-    company_name: Optional[str] = None
-    """The name of the contact's company"""
-    department: Optional[str] = None
-    """The contact's department"""
-    office_location: Optional[str] = None
-    """The location of the contact's office"""
-    profession: Optional[str] = None
-    """The contact's profession"""
-    business_home_page: Optional[str] = None
-    """The business home page of the contact"""
-    assistant_name: Optional[str] = None
-    """The name of the contact's assistant"""
-    manager: Optional[str] = None
-    """The name of the contact's manager"""
-    business_phones: Optional[List[str]] = None
-    """The contact's business phone numbers"""
-    mobile_phone1: Optional[str] = None
-    """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddress] = None
-    business_address: Optional[PhysicalAddress] = None
-    other_address: Optional[PhysicalAddress] = None
-    yomi_company_name: Optional[str] = None
-    """The phonetic Japanese company name of the contact"""
-    yomi_given_name: Optional[str] = None
-    """The phonetic Japanese given name (first name) of the contact"""
-    yomi_surname: Optional[str] = None
-    """The phonetic Japanese surname (last name) of the contact"""
-    categories: Optional[List[str]] = None
-    """The categories associated with the contact"""
-    change_key: Optional[str] = None
-    """Identifies the version of the event object"""
-    date_time_created: Optional[str] = None
-    """The time the contact was created"""
-    date_time_last_modified: Optional[str] = None
-    """The time the contact was modified"""
-
-@dataclass
 class Contact:
     """Definition: Contact"""
 
@@ -1874,6 +1796,13 @@ class DateTimeTimeZoneV2:
     """TimeZone (example: 'Pacific Standard Time')"""
 
 @dataclass
+class EntityListResponseContactResponseV2:
+    """Definition: EntityListResponse[ContactResponse]_V2"""
+
+    value: Optional[List[ContactResponseV2]] = None
+    """List of values"""
+
+@dataclass
 class EmailAddressV2:
     """Definition: EmailAddress_V2"""
 
@@ -1898,6 +1827,78 @@ class PhysicalAddressV2:
 @dataclass
 class ContactV2:
     """Definition: Contact_V2"""
+
+    id: Optional[str] = None
+    """The contact's unique identifier."""
+    parent_folder_id: Optional[str] = None
+    """The ID of the contact's parent folder"""
+    birthday: Optional[str] = None
+    """The contact's birthday"""
+    file_as: Optional[str] = None
+    """The name the contact is filed under"""
+    display_name: Optional[str] = None
+    """The contact's display name"""
+    given_name: Optional[str] = None
+    """The contact's given name"""
+    initials: Optional[str] = None
+    """The contact's initials"""
+    middle_name: Optional[str] = None
+    """The contact's middle name"""
+    nick_name: Optional[str] = None
+    """The contact's nickname"""
+    surname: Optional[str] = None
+    """The contact's surname"""
+    title: Optional[str] = None
+    """The contact's title"""
+    generation: Optional[str] = None
+    """The contact's generation"""
+    email_addresses: Optional[List[EmailAddressV2]] = None
+    """The contact's email addresses"""
+    im_addresses: Optional[List[str]] = None
+    """The contact's instant messaging (IM) addresses"""
+    job_title: Optional[str] = None
+    """The contact's job title"""
+    company_name: Optional[str] = None
+    """The name of the contact's company"""
+    department: Optional[str] = None
+    """The contact's department"""
+    office_location: Optional[str] = None
+    """The location of the contact's office"""
+    profession: Optional[str] = None
+    """The contact's profession"""
+    business_home_page: Optional[str] = None
+    """The business home page of the contact"""
+    assistant_name: Optional[str] = None
+    """The name of the contact's assistant"""
+    manager: Optional[str] = None
+    """The name of the contact's manager"""
+    home_phones: Optional[List[str]] = None
+    """The contact's home phone numbers"""
+    business_phones: Optional[List[str]] = None
+    """The contact's business phone numbers"""
+    mobile_phone: Optional[str] = None
+    """The contact's mobile phone number"""
+    home_address: Optional[PhysicalAddressV2] = None
+    business_address: Optional[PhysicalAddressV2] = None
+    other_address: Optional[PhysicalAddressV2] = None
+    yomi_company_name: Optional[str] = None
+    """The phonetic Japanese company name of the contact"""
+    yomi_given_name: Optional[str] = None
+    """The phonetic Japanese given name (first name) of the contact"""
+    yomi_surname: Optional[str] = None
+    """The phonetic Japanese surname (last name) of the contact"""
+    categories: Optional[List[str]] = None
+    """The categories associated with the contact"""
+    change_key: Optional[str] = None
+    """Identifies the version of the event object"""
+    created_date_time: Optional[str] = None
+    """The time the contact was created"""
+    last_modified_date_time: Optional[str] = None
+    """The time the contact was modified"""
+
+@dataclass
+class ContactResponseV2:
+    """Definition: ContactResponse_V2"""
 
     id: Optional[str] = None
     """The contact's unique identifier."""
@@ -2037,40 +2038,6 @@ class Office365Client(ConnectorClientBase):
     def connector_name(self) -> str:
         return "office365"
 
-    async def on_upcoming_events_v3_async(
-        self,
-        table: Optional[str],
-        look_ahead_time_in_minutes: Optional[str] = None,
-    ):
-        """
-        When an upcoming event is starting soon (V3)
-
-        This operation triggers a flow when an upcoming calendar event is starting.
-        """
-        path = f"{self._connection_runtime_url}/v3/Events/OnUpcomingEvents"
-        query_params = []
-        if table is not None:
-            query_params.append(f"table={table}")
-        if look_ahead_time_in_minutes is not None:
-            query_params.append(f"lookAheadTimeInMinutes={look_ahead_time_in_minutes}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
     async def get_outlook_category_names_async(
         self,
     ):
@@ -2111,11 +2078,11 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/Draft"
         query_params = []
         if message_id is not None:
-            query_params.append(f"messageId={message_id}")
+            query_params.append(f"messageId={quote(str(message_id).lower() if isinstance(message_id, bool) else str(message_id))}")
         if draft_type is not None:
-            query_params.append(f"draftType={draft_type}")
+            query_params.append(f"draftType={quote(str(draft_type).lower() if isinstance(draft_type, bool) else str(draft_type))}")
         if comment is not None:
-            query_params.append(f"comment={comment}")
+            query_params.append(f"comment={quote(str(comment).lower() if isinstance(comment, bool) else str(comment))}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2147,7 +2114,7 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/Draft"
         query_params = []
         if message_id is not None:
-            query_params.append(f"messageId={message_id}")
+            query_params.append(f"messageId={quote(str(message_id).lower() if isinstance(message_id, bool) else str(message_id))}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2162,7 +2129,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation sends a Draft message.
         """
-        path = f"{self._connection_runtime_url}/Draft/Send/{{quote(str(message_id))}}"
+        path = f"{self._connection_runtime_url}/Draft/Send/{quote(str(message_id))}"
 
         await self.http_client.send_async("POST", path, body=None)
 
@@ -2179,9 +2146,9 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/Mail/Category"
         query_params = []
         if message_id is not None:
-            query_params.append(f"messageId={message_id}")
+            query_params.append(f"messageId={quote(str(message_id).lower() if isinstance(message_id, bool) else str(message_id))}")
         if category is not None:
-            query_params.append(f"category={category}")
+            query_params.append(f"category={quote(str(category).lower() if isinstance(category, bool) else str(category))}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2197,412 +2164,13 @@ class Office365Client(ConnectorClientBase):
 
         This operation assigns an Outlook category to multiple emails.
         """
-        path = f"{self._connection_runtime_url}/Mail/Category/Bulk/{{quote(str(category_name))}}"
+        path = f"{self._connection_runtime_url}/Mail/Category/Bulk/{quote(str(category_name))}"
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def send_email_v2_async(
-        self,
-        input: ClientSendHtmlMessage,
-    ):
-        """
-        Send an email (V2)
-
-        This operation sends an email message.
-        """
-        path = f"{self._connection_runtime_url}/v2/Mail"
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def get_email_v2_async(
-        self,
-        message_id: str,
-        mailbox_address: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        internet_message_id: Optional[str] = None,
-    ):
-        """
-        Get email (V2)
-
-        This operation gets an email by id.
-        """
-        path = f"{self._connection_runtime_url}/v2/Mail/{{quote(str(message_id))}}"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if include_attachments is not None:
-            query_params.append(f"includeAttachments={include_attachments}")
-        if internet_message_id is not None:
-            query_params.append(f"internetMessageId={internet_message_id}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_emails_v3_async(
-        self,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-        fetch_only_unread: Optional[str] = None,
-        fetch_only_flagged: Optional[str] = None,
-        mailbox_address: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        search_query: Optional[str] = None,
-        top: Optional[str] = None,
-    ):
-        """
-        Get emails (V3)
-
-        This operation gets emails from a folder via graph apis. Please note that filtering related to these fields: To, Cc, To Or Cc, From, Importance, Fetch Only With Attachments, Subject Filter, is performed using first 250 items in a given mail folder. To avoid that limitation you can use 'Search Query' field.
-        """
-        path = f"{self._connection_runtime_url}/v3/Mail"
-        query_params = []
-        if folder_path is not None:
-            query_params.append(f"folderPath={folder_path}")
-        if to is not None:
-            query_params.append(f"to={to}")
-        if cc is not None:
-            query_params.append(f"cc={cc}")
-        if to_or_cc is not None:
-            query_params.append(f"toOrCc={to_or_cc}")
-        if from_ is not None:
-            query_params.append(f"from={from_}")
-        if importance is not None:
-            query_params.append(f"importance={importance}")
-        if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={fetch_only_with_attachment}")
-        if subject_filter is not None:
-            query_params.append(f"subjectFilter={subject_filter}")
-        if fetch_only_unread is not None:
-            query_params.append(f"fetchOnlyUnread={fetch_only_unread}")
-        if fetch_only_flagged is not None:
-            query_params.append(f"fetchOnlyFlagged={fetch_only_flagged}")
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if include_attachments is not None:
-            query_params.append(f"includeAttachments={include_attachments}")
-        if search_query is not None:
-            query_params.append(f"searchQuery={search_query}")
-        if top is not None:
-            query_params.append(f"top={top}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def move_v2_async(
-        self,
-        message_id: str,
-        folder_path: Optional[str],
-        mailbox_address: Optional[str] = None,
-    ):
-        """
-        Move email (V2)
-
-        This operation moves an email to the specified folder within the same mailbox.
-        """
-        path = f"{self._connection_runtime_url}/v2/Mail/Move/{{quote(str(message_id))}}"
-        query_params = []
-        if folder_path is not None:
-            query_params.append(f"folderPath={folder_path}")
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def reply_to_v3_async(
-        self,
-        input: ReplyHtmlMessage,
-        message_id: str,
-        mailbox_address: Optional[str] = None,
-    ):
-        """
-        Reply to email (V3)
-
-        This operation replies to an email.
-        """
-        path = f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{{quote(str(message_id))}}"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def on_new_email_v3_async(
-        self,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When a new email arrives (V3)
-
-        This operation triggers a flow when a new email arrives. It will skip any email that has a total message size greater than the limit put by your Exchange Admin or 50 MB, whichever is less. It may also skip protected emails and emails with invalid body or attachments.
-        """
-        path = f"{self._connection_runtime_url}/v3/Mail/OnNewEmail"
-        query_params = []
-        if folder_path is not None:
-            query_params.append(f"folderPath={folder_path}")
-        if to is not None:
-            query_params.append(f"to={to}")
-        if cc is not None:
-            query_params.append(f"cc={cc}")
-        if to_or_cc is not None:
-            query_params.append(f"toOrCc={to_or_cc}")
-        if from_ is not None:
-            query_params.append(f"from={from_}")
-        if importance is not None:
-            query_params.append(f"importance={importance}")
-        if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={fetch_only_with_attachment}")
-        if include_attachments is not None:
-            query_params.append(f"includeAttachments={include_attachments}")
-        if subject_filter is not None:
-            query_params.append(f"subjectFilter={subject_filter}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def on_flagged_email_v3_async(
-        self,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When an email is flagged (V3)
-
-        This operation triggers a flow when an email is flagged.
-        """
-        path = f"{self._connection_runtime_url}/v3/Mail/OnFlaggedEmail"
-        query_params = []
-        if folder_path is not None:
-            query_params.append(f"folderPath={folder_path}")
-        if to is not None:
-            query_params.append(f"to={to}")
-        if cc is not None:
-            query_params.append(f"cc={cc}")
-        if to_or_cc is not None:
-            query_params.append(f"toOrCc={to_or_cc}")
-        if from_ is not None:
-            query_params.append(f"from={from_}")
-        if importance is not None:
-            query_params.append(f"importance={importance}")
-        if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={fetch_only_with_attachment}")
-        if include_attachments is not None:
-            query_params.append(f"includeAttachments={include_attachments}")
-        if subject_filter is not None:
-            query_params.append(f"subjectFilter={subject_filter}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def on_flagged_email_v4_async(
-        self,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When an email is flagged (V4)
-
-        This operation triggers a flow when an email is flagged.
-        """
-        path = f"{self._connection_runtime_url}/v4/Mail/OnFlaggedEmail"
-        query_params = []
-        if folder_path is not None:
-            query_params.append(f"folderPath={folder_path}")
-        if to is not None:
-            query_params.append(f"to={to}")
-        if cc is not None:
-            query_params.append(f"cc={cc}")
-        if to_or_cc is not None:
-            query_params.append(f"toOrCc={to_or_cc}")
-        if from_ is not None:
-            query_params.append(f"from={from_}")
-        if importance is not None:
-            query_params.append(f"importance={importance}")
-        if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={fetch_only_with_attachment}")
-        if include_attachments is not None:
-            query_params.append(f"includeAttachments={include_attachments}")
-        if subject_filter is not None:
-            query_params.append(f"subjectFilter={subject_filter}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def on_new_mention_me_email_v3_async(
-        self,
-        message_id_to_fire_on_first_trigger_run: Optional[str] = None,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When a new email mentioning me arrives (V3)
-
-        This operation triggers a flow when a new email mentioning me arrives. It will skip any email that has a total message size greater than the limit put by your Exchange Admin or 50 MB, whichever is less. It may also skip protected emails and emails with invalid body or attachments.
-        """
-        path = f"{self._connection_runtime_url}/v3/Mail/OnNewMentionMeEmail"
-        query_params = []
-        if message_id_to_fire_on_first_trigger_run is not None:
-            query_params.append(f"messageIdToFireOnFirstTriggerRun={message_id_to_fire_on_first_trigger_run}")
-        if folder_path is not None:
-            query_params.append(f"folderPath={folder_path}")
-        if to is not None:
-            query_params.append(f"to={to}")
-        if cc is not None:
-            query_params.append(f"cc={cc}")
-        if to_or_cc is not None:
-            query_params.append(f"toOrCc={to_or_cc}")
-        if from_ is not None:
-            query_params.append(f"from={from_}")
-        if importance is not None:
-            query_params.append(f"importance={importance}")
-        if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={fetch_only_with_attachment}")
-        if include_attachments is not None:
-            query_params.append(f"includeAttachments={include_attachments}")
-        if subject_filter is not None:
-            query_params.append(f"subjectFilter={subject_filter}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
                 response.status,
                 response.text,
             )
@@ -2665,897 +2233,6 @@ class Office365Client(ConnectorClientBase):
         import json
         return json.loads(response.text)
 
-    async def shared_mailbox_send_email_v2_async(
-        self,
-        input: SharedMailboxClientSendHtmlMessage,
-    ):
-        """
-        Send an email from a shared mailbox (V2)
-
-        This operation sends an email from a shared mailbox. Your account should have permission to access the mailbox for this operation to succeed.
-        """
-        path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def shared_mailbox_on_new_email_v2_async(
-        self,
-        mailbox_address: Optional[str],
-        folder_id: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        has_attachments: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When a new email arrives in a shared mailbox (V2)
-
-        This operation triggers a flow when a new email arrives in a shared mailbox. Your account should have permission to access the mailbox for this operation to succeed. It will skip any email that has a total message size greater than the limit put by your Exchange Admin or 50 MB, whichever is less. It may also skip protected emails and emails with invalid body or attachments.
-        """
-        path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail/OnNewEmail"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if folder_id is not None:
-            query_params.append(f"folderId={folder_id}")
-        if to is not None:
-            query_params.append(f"to={to}")
-        if cc is not None:
-            query_params.append(f"cc={cc}")
-        if to_or_cc is not None:
-            query_params.append(f"toOrCc={to_or_cc}")
-        if from_ is not None:
-            query_params.append(f"from={from_}")
-        if importance is not None:
-            query_params.append(f"importance={importance}")
-        if has_attachments is not None:
-            query_params.append(f"hasAttachments={has_attachments}")
-        if include_attachments is not None:
-            query_params.append(f"includeAttachments={include_attachments}")
-        if subject_filter is not None:
-            query_params.append(f"subjectFilter={subject_filter}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def v4_calendar_get_items_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-    ):
-        """
-        Get events (V4)
-
-        This operation gets events from a calendar using Graph API. (V4)
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{{quote(str(table))}}/items"
-        query_params = []
-        if filter is not None:
-            query_params.append(f"$filter={filter}")
-        if orderby is not None:
-            query_params.append(f"$orderby={orderby}")
-        if top is not None:
-            query_params.append(f"$top={top}")
-        if skip is not None:
-            query_params.append(f"$skip={skip}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def v4_calendar_post_item_async(
-        self,
-        input: GraphCalendarEventClient,
-        table: str,
-    ):
-        """
-        Create event (V4)
-
-        This operation creates a new event in a calendar.
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{{quote(str(table))}}/items"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_events_calendar_view_v3_async(
-        self,
-        calendar_id: Optional[str],
-        start_date_time_utc: Optional[str],
-        end_date_time_utc: Optional[str],
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-        search: Optional[str] = None,
-    ):
-        """
-        Get calendar view of events (V3)
-
-        This operation gets all events (including instances of recurrences) in a calendar using Graph API. Recurrence property is null in this case.
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/items/calendarview"
-        query_params = []
-        if calendar_id is not None:
-            query_params.append(f"calendarId={calendar_id}")
-        if start_date_time_utc is not None:
-            query_params.append(f"startDateTimeUtc={start_date_time_utc}")
-        if end_date_time_utc is not None:
-            query_params.append(f"endDateTimeUtc={end_date_time_utc}")
-        if filter is not None:
-            query_params.append(f"$filter={filter}")
-        if orderby is not None:
-            query_params.append(f"$orderby={orderby}")
-        if top is not None:
-            query_params.append(f"$top={top}")
-        if skip is not None:
-            query_params.append(f"$skip={skip}")
-        if search is not None:
-            query_params.append(f"search={search}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def v3_calendar_get_item_async(
-        self,
-        table: str,
-        id: str,
-    ):
-        """
-        Get event (V3)
-
-        This operation gets a specific event from a calendar using Graph API. (V3)
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{{quote(str(table))}}/items/{{quote(str(id))}}"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def v4_calendar_patch_item_async(
-        self,
-        input: GraphCalendarEventClient,
-        table: str,
-        id: str,
-    ):
-        """
-        Update event (V4)
-
-        This operation updates an event in a calendar using Graph API.
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{{quote(str(table))}}/items/{{quote(str(id))}}"
-
-        response = await self.http_client.send_async("PATCH", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"PATCH {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def calendar_get_on_new_items_v3_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-    ):
-        """
-        When a new event is created (V3)
-
-        This operation triggers a flow when a new event is created in a calendar. (V3)
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{{quote(str(table))}}/onnewitems"
-        query_params = []
-        if filter is not None:
-            query_params.append(f"$filter={filter}")
-        if orderby is not None:
-            query_params.append(f"$orderby={orderby}")
-        if top is not None:
-            query_params.append(f"$top={top}")
-        if skip is not None:
-            query_params.append(f"$skip={skip}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def calendar_get_on_updated_items_v3_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-    ):
-        """
-        When an event is modified (V3)
-
-        This operation triggers a flow when an event is modified in a calendar. (V3)
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{{quote(str(table))}}/onupdateditems"
-        query_params = []
-        if filter is not None:
-            query_params.append(f"$filter={filter}")
-        if orderby is not None:
-            query_params.append(f"$orderby={orderby}")
-        if top is not None:
-            query_params.append(f"$top={top}")
-        if skip is not None:
-            query_params.append(f"$skip={skip}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def calendar_get_on_changed_items_v3_async(
-        self,
-        table: str,
-        incoming_days: Optional[str] = None,
-        past_days: Optional[str] = None,
-    ):
-        """
-        When an event is added, updated or deleted (V3)
-
-        This operation triggers a flow when an event is added, updated or deleted in a calendar. (V3) This is not available in Mooncake.
-        """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{{quote(str(table))}}/onchangeditems"
-        query_params = []
-        if incoming_days is not None:
-            query_params.append(f"incomingDays={incoming_days}")
-        if past_days is not None:
-            query_params.append(f"pastDays={past_days}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def contact_get_tables_v2_async(
-        self,
-    ):
-        """
-        Get contact folders (V2)
-
-        This operation lists available contacts folders using Graph API
-        """
-        path = f"{self._connection_runtime_url}/v2/datasets/contacts/tables"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def export_email_v2_async(
-        self,
-        message_id: str,
-        mailbox_address: Optional[str] = None,
-    ):
-        """
-        Export email (V2)
-
-        Export the content of the email in the EML file format.
-        """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/messages/{{quote(str(message_id))}}/$value"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def flag_v2_async(
-        self,
-        input: UpdateEmailFlag,
-        message_id: str,
-        mailbox_address: Optional[str] = None,
-    ):
-        """
-        Flag email (V2)
-
-        This operation updates an email flag.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{{quote(str(message_id))}}/flag"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        await self.http_client.send_async("PATCH", path, body=input)
-
-    async def mark_as_read_v3_async(
-        self,
-        input: MarkAsReadV3Input,
-        message_id: str,
-        mailbox_address: Optional[str] = None,
-    ):
-        """
-        Mark as read or unread (V3)
-
-        This operation marks an email as read/unread.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v3/v1.0/me/messages/{{quote(str(message_id))}}/markAsRead"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        await self.http_client.send_async("PATCH", path, body=input)
-
-    async def delete_email_v2_async(
-        self,
-        message_id: str,
-        mailbox_address: Optional[str] = None,
-    ):
-        """
-        Delete email (V2)
-
-        This operation deletes an email by id.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{{quote(str(message_id))}}"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        await self.http_client.send_async("DELETE", path, body=None)
-
-    async def get_attachment_v2_async(
-        self,
-        message_id: str,
-        attachment_id: str,
-        mailbox_address: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
-        """
-        Get Attachment (V2)
-
-        This operation gets an email attachment by id.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{{quote(str(message_id))}}/attachments/{{quote(str(attachment_id))}}"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if extract_sensitivity_label is not None:
-            query_params.append(f"extractSensitivityLabel={extract_sensitivity_label}")
-        if fetch_sensitivity_label_metadata is not None:
-            query_params.append(f"fetchSensitivityLabelMetadata={fetch_sensitivity_label_metadata}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def respond_to_event_v2_async(
-        self,
-        input: ResponseToEventInvite,
-        event_id: str,
-        response: str,
-    ):
-        """
-        Respond to an event invite (V2)
-
-        Respond to an event invite.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/events/{{quote(str(event_id))}}/{{quote(str(response))}}"
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def forward_email_v2_async(
-        self,
-        input: DirectForwardMessage,
-        message_id: str,
-        mailbox_address: Optional[str] = None,
-    ):
-        """
-        Forward an email (V2)
-
-        Forward an email.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{{quote(str(message_id))}}/forward"
-        query_params = []
-        if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={mailbox_address}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def get_room_lists_v2_async(
-        self,
-    ):
-        """
-        Get room lists (V2)
-
-        Get all the room lists defined in the user's tenant
-        """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findRoomLists"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_rooms_v2_async(
-        self,
-    ):
-        """
-        Get rooms (V2)
-
-        Get all the meeting rooms defined in the user's tenant
-        """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findRooms"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_rooms_in_room_list_v2_async(
-        self,
-        room_list: str,
-    ):
-        """
-        Get rooms in room list (V2)
-
-        Get the meeting rooms in a specific room list
-        """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findRooms(RoomList='{{quote(str(room_list))}}')"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def find_meeting_times_v2_async(
-        self,
-        input: FindMeetingTimesV2Input,
-    ):
-        """
-        Find meeting times (V2)
-
-        Find meeting time suggestions based on organizer, attendee availability, and time or location constraints
-        """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findMeetingTimes"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def set_automatic_replies_setting_v2_async(
-        self,
-        input: SetAutomaticRepliesSettingV2Input,
-    ):
-        """
-        Set up automatic replies (V2)
-
-        Set the automatic replies setting for your mailbox.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/mailboxSettings"
-
-        response = await self.http_client.send_async("PATCH", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"PATCH {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_mail_tips_v2_async(
-        self,
-        input: GetMailTipsV2Input,
-    ):
-        """
-        Get mail tips for a mailbox (V2)
-
-        Get mail tips for a mailbox such as automatic replies / OOF message or if the mailbox is full. This is not available in GccHigh and Mooncake.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/getMailTips"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def calendar_get_tables_v2_async(
-        self,
-        skip: Optional[str] = None,
-        top: Optional[str] = None,
-        order_by: Optional[str] = None,
-    ):
-        """
-        Get calendars (V2)
-
-        This operation lists available calendars.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
-        query_params = []
-        if skip is not None:
-            query_params.append(f"skip={skip}")
-        if top is not None:
-            query_params.append(f"top={top}")
-        if order_by is not None:
-            query_params.append(f"orderBy={order_by}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def calendar_delete_item_v2_async(
-        self,
-        calendar: str,
-        event: str,
-    ):
-        """
-        Delete event (V2)
-
-        This operation deletes an event in a calendar.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars/{{quote(str(calendar))}}/events/{{quote(str(@event))}}"
-
-        await self.http_client.send_async("DELETE", path, body=None)
-
-    async def contact_get_item_v2_async(
-        self,
-        folder: str,
-        id: str,
-    ):
-        """
-        Get contact (V2)
-
-        This operation gets a specific contact from a contacts folder.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{{quote(str(folder))}}/contacts/{{quote(str(id))}}"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def contact_delete_item_v2_async(
-        self,
-        folder: str,
-        id: str,
-    ):
-        """
-        Delete contact (V2)
-
-        This operation deletes a contact from a contacts folder.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{{quote(str(folder))}}/contacts/{{quote(str(id))}}"
-
-        await self.http_client.send_async("DELETE", path, body=None)
-
-    async def contact_patch_item_v2_async(
-        self,
-        input: ContactV2,
-        folder: str,
-        id: str,
-    ):
-        """
-        Update contact (V2)
-
-        This operation updates a contact in a contacts folder.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{{quote(str(folder))}}/contacts/{{quote(str(id))}}"
-
-        response = await self.http_client.send_async("PATCH", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"PATCH {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def contact_get_items_v2_async(
-        self,
-        folder: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-    ):
-        """
-        Get contacts (V2)
-
-        This operation gets contacts from a contacts folder.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{{quote(str(folder))}}/contacts"
-        query_params = []
-        if filter is not None:
-            query_params.append(f"$filter={filter}")
-        if orderby is not None:
-            query_params.append(f"$orderby={orderby}")
-        if top is not None:
-            query_params.append(f"$top={top}")
-        if skip is not None:
-            query_params.append(f"$skip={skip}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def contact_post_item_v2_async(
-        self,
-        input: ContactV2,
-        folder: str,
-    ):
-        """
-        Create contact (V2)
-
-        This operation creates a new contact in a contacts folder.
-        """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{{quote(str(folder))}}/contacts"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
     async def update_my_contact_photo_async(
         self,
         input: UpdateMyContactPhotoInput,
@@ -3567,7 +2244,7 @@ class Office365Client(ConnectorClientBase):
 
         Updates the photo of the specified contact of the current user. The size of the photo must be less than 4 MB.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{{quote(str(folder))}}/contacts/{{quote(str(id))}}/photo/$value"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}/photo/$value"
 
         await self.http_client.send_async("PUT", path, body=input)
 
@@ -3610,7 +2287,7 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/mcp/EmailsManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={session_id}")
+            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3642,7 +2319,7 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/mcp/MeetingManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={session_id}")
+            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3674,7 +2351,7 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/mcp/ContactsManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={session_id}")
+            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3693,3 +2370,1271 @@ class Office365Client(ConnectorClientBase):
         import json
         return json.loads(response.text)
 
+    async def calendar_delete_item_async(
+        self,
+        calendar: str,
+        event: str,
+    ):
+        """
+        Delete event (V2)
+
+        This operation deletes an event in a calendar.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars/{quote(str(calendar))}/events/{quote(str(event))}"
+
+        await self.http_client.send_async("DELETE", path, body=None)
+
+    async def calendar_get_item_async(
+        self,
+        table: str,
+        id: str,
+    ):
+        """
+        Get event (V3)
+
+        This operation gets a specific event from a calendar using Graph API. (V3)
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/items/{quote(str(id))}"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def calendar_get_items_async(
+        self,
+        table: str,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+        top: Optional[str] = None,
+        skip: Optional[str] = None,
+    ):
+        """
+        Get events (V4)
+
+        This operation gets events from a calendar using Graph API. (V4)
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{quote(str(table))}/items"
+        query_params = []
+        if filter is not None:
+            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+        if orderby is not None:
+            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+        if top is not None:
+            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+        if skip is not None:
+            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def calendar_get_on_changed_items_async(
+        self,
+        table: str,
+        incoming_days: Optional[str] = None,
+        past_days: Optional[str] = None,
+    ):
+        """
+        When an event is added, updated or deleted (V3)
+
+        This operation triggers a flow when an event is added, updated or deleted in a calendar. (V3) This is not available in Mooncake.
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/onchangeditems"
+        query_params = []
+        if incoming_days is not None:
+            query_params.append(f"incomingDays={quote(str(incoming_days).lower() if isinstance(incoming_days, bool) else str(incoming_days))}")
+        if past_days is not None:
+            query_params.append(f"pastDays={quote(str(past_days).lower() if isinstance(past_days, bool) else str(past_days))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def calendar_get_on_new_items_async(
+        self,
+        table: str,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+        top: Optional[str] = None,
+        skip: Optional[str] = None,
+    ):
+        """
+        When a new event is created (V3)
+
+        This operation triggers a flow when a new event is created in a calendar. (V3)
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/onnewitems"
+        query_params = []
+        if filter is not None:
+            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+        if orderby is not None:
+            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+        if top is not None:
+            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+        if skip is not None:
+            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def calendar_get_on_updated_items_async(
+        self,
+        table: str,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+        top: Optional[str] = None,
+        skip: Optional[str] = None,
+    ):
+        """
+        When an event is modified (V3)
+
+        This operation triggers a flow when an event is modified in a calendar. (V3)
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/onupdateditems"
+        query_params = []
+        if filter is not None:
+            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+        if orderby is not None:
+            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+        if top is not None:
+            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+        if skip is not None:
+            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def calendar_get_tables_async(
+        self,
+        skip: Optional[str] = None,
+        top: Optional[str] = None,
+        order_by: Optional[str] = None,
+    ):
+        """
+        Get calendars (V2)
+
+        This operation lists available calendars.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
+        query_params = []
+        if skip is not None:
+            query_params.append(f"skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+        if top is not None:
+            query_params.append(f"top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+        if order_by is not None:
+            query_params.append(f"orderBy={quote(str(order_by).lower() if isinstance(order_by, bool) else str(order_by))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def calendar_patch_item_async(
+        self,
+        input: GraphCalendarEventClient,
+        table: str,
+        id: str,
+    ):
+        """
+        Update event (V4)
+
+        This operation updates an event in a calendar using Graph API.
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{quote(str(table))}/items/{quote(str(id))}"
+
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"PATCH {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def calendar_post_item_async(
+        self,
+        input: GraphCalendarEventClient,
+        table: str,
+    ):
+        """
+        Create event (V4)
+
+        This operation creates a new event in a calendar.
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{quote(str(table))}/items"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"POST {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def contact_delete_item_async(
+        self,
+        folder: str,
+        id: str,
+    ):
+        """
+        Delete contact (V2)
+
+        This operation deletes a contact from a contacts folder.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}"
+
+        await self.http_client.send_async("DELETE", path, body=None)
+
+    async def contact_get_item_async(
+        self,
+        folder: str,
+        id: str,
+    ):
+        """
+        Get contact (V2)
+
+        This operation gets a specific contact from a contacts folder.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def contact_get_items_async(
+        self,
+        folder: str,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+        top: Optional[str] = None,
+        skip: Optional[str] = None,
+    ):
+        """
+        Get contacts (V2)
+
+        This operation gets contacts from a contacts folder.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts"
+        query_params = []
+        if filter is not None:
+            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+        if orderby is not None:
+            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+        if top is not None:
+            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+        if skip is not None:
+            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def contact_get_tables_async(
+        self,
+    ):
+        """
+        Get contact folders (V2)
+
+        This operation lists available contacts folders using Graph API
+        """
+        path = f"{self._connection_runtime_url}/v2/datasets/contacts/tables"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def contact_patch_item_async(
+        self,
+        input: ContactV2,
+        folder: str,
+        id: str,
+    ):
+        """
+        Update contact (V2)
+
+        This operation updates a contact in a contacts folder.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}"
+
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"PATCH {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def contact_post_item_async(
+        self,
+        input: ContactV2,
+        folder: str,
+    ):
+        """
+        Create contact (V2)
+
+        This operation creates a new contact in a contacts folder.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"POST {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def delete_email_async(
+        self,
+        message_id: str,
+        mailbox_address: Optional[str] = None,
+    ):
+        """
+        Delete email (V2)
+
+        This operation deletes an email by id.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        await self.http_client.send_async("DELETE", path, body=None)
+
+    async def export_email_async(
+        self,
+        message_id: str,
+        mailbox_address: Optional[str] = None,
+    ):
+        """
+        Export email (V2)
+
+        Export the content of the email in the EML file format.
+        """
+        path = f"{self._connection_runtime_url}/codeless/beta/me/messages/{quote(str(message_id))}/$value"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        return response.content
+
+    async def find_meeting_times_async(
+        self,
+        input: FindMeetingTimesInput,
+    ):
+        """
+        Find meeting times (V2)
+
+        Find meeting time suggestions based on organizer, attendee availability, and time or location constraints
+        """
+        path = f"{self._connection_runtime_url}/codeless/beta/me/findMeetingTimes"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"POST {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def flag_async(
+        self,
+        input: UpdateEmailFlag,
+        message_id: str,
+        mailbox_address: Optional[str] = None,
+    ):
+        """
+        Flag email (V2)
+
+        This operation updates an email flag.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}/flag"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        await self.http_client.send_async("PATCH", path, body=input)
+
+    async def forward_email_async(
+        self,
+        input: DirectForwardMessage,
+        message_id: str,
+        mailbox_address: Optional[str] = None,
+    ):
+        """
+        Forward an email (V2)
+
+        Forward an email.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}/forward"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        await self.http_client.send_async("POST", path, body=input)
+
+    async def get_attachment_async(
+        self,
+        message_id: str,
+        attachment_id: str,
+        mailbox_address: Optional[str] = None,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
+    ):
+        """
+        Get Attachment (V2)
+
+        This operation gets an email attachment by id.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}/attachments/{quote(str(attachment_id))}"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if extract_sensitivity_label is not None:
+            query_params.append(f"extractSensitivityLabel={quote(str(extract_sensitivity_label).lower() if isinstance(extract_sensitivity_label, bool) else str(extract_sensitivity_label))}")
+        if fetch_sensitivity_label_metadata is not None:
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(str(fetch_sensitivity_label_metadata).lower() if isinstance(fetch_sensitivity_label_metadata, bool) else str(fetch_sensitivity_label_metadata))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def get_email_async(
+        self,
+        message_id: str,
+        mailbox_address: Optional[str] = None,
+        include_attachments: Optional[str] = None,
+        internet_message_id: Optional[str] = None,
+    ):
+        """
+        Get email (V2)
+
+        This operation gets an email by id.
+        """
+        path = f"{self._connection_runtime_url}/v2/Mail/{quote(str(message_id))}"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if include_attachments is not None:
+            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+        if internet_message_id is not None:
+            query_params.append(f"internetMessageId={quote(str(internet_message_id).lower() if isinstance(internet_message_id, bool) else str(internet_message_id))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def get_emails_async(
+        self,
+        folder_path: Optional[str] = None,
+        to: Optional[str] = None,
+        cc: Optional[str] = None,
+        to_or_cc: Optional[str] = None,
+        from_: Optional[str] = None,
+        importance: Optional[str] = None,
+        fetch_only_with_attachment: Optional[str] = None,
+        subject_filter: Optional[str] = None,
+        fetch_only_unread: Optional[str] = None,
+        fetch_only_flagged: Optional[str] = None,
+        mailbox_address: Optional[str] = None,
+        include_attachments: Optional[str] = None,
+        search_query: Optional[str] = None,
+        top: Optional[str] = None,
+    ):
+        """
+        Get emails (V3)
+
+        This operation gets emails from a folder via graph apis. Please note that filtering related to these fields: To, Cc, To Or Cc, From, Importance, Fetch Only With Attachments, Subject Filter, is performed using first 250 items in a given mail folder. To avoid that limitation you can use 'Search Query' field.
+        """
+        path = f"{self._connection_runtime_url}/v3/Mail"
+        query_params = []
+        if folder_path is not None:
+            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+        if to is not None:
+            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+        if cc is not None:
+            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+        if to_or_cc is not None:
+            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+        if from_ is not None:
+            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+        if importance is not None:
+            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+        if fetch_only_with_attachment is not None:
+            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+        if subject_filter is not None:
+            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+        if fetch_only_unread is not None:
+            query_params.append(f"fetchOnlyUnread={quote(str(fetch_only_unread).lower() if isinstance(fetch_only_unread, bool) else str(fetch_only_unread))}")
+        if fetch_only_flagged is not None:
+            query_params.append(f"fetchOnlyFlagged={quote(str(fetch_only_flagged).lower() if isinstance(fetch_only_flagged, bool) else str(fetch_only_flagged))}")
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if include_attachments is not None:
+            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+        if search_query is not None:
+            query_params.append(f"searchQuery={quote(str(search_query).lower() if isinstance(search_query, bool) else str(search_query))}")
+        if top is not None:
+            query_params.append(f"top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def get_events_calendar_view_async(
+        self,
+        calendar_id: Optional[str],
+        start_date_time_utc: Optional[str],
+        end_date_time_utc: Optional[str],
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+        top: Optional[str] = None,
+        skip: Optional[str] = None,
+        search: Optional[str] = None,
+    ):
+        """
+        Get calendar view of events (V3)
+
+        This operation gets all events (including instances of recurrences) in a calendar using Graph API. Recurrence property is null in this case.
+        """
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/items/calendarview"
+        query_params = []
+        if calendar_id is not None:
+            query_params.append(f"calendarId={quote(str(calendar_id).lower() if isinstance(calendar_id, bool) else str(calendar_id))}")
+        if start_date_time_utc is not None:
+            query_params.append(f"startDateTimeUtc={quote(str(start_date_time_utc).lower() if isinstance(start_date_time_utc, bool) else str(start_date_time_utc))}")
+        if end_date_time_utc is not None:
+            query_params.append(f"endDateTimeUtc={quote(str(end_date_time_utc).lower() if isinstance(end_date_time_utc, bool) else str(end_date_time_utc))}")
+        if filter is not None:
+            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+        if orderby is not None:
+            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+        if top is not None:
+            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+        if skip is not None:
+            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+        if search is not None:
+            query_params.append(f"search={quote(str(search).lower() if isinstance(search, bool) else str(search))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def get_mail_tips_async(
+        self,
+        input: GetMailTipsInput,
+    ):
+        """
+        Get mail tips for a mailbox (V2)
+
+        Get mail tips for a mailbox such as automatic replies / OOF message or if the mailbox is full. This is not available in GccHigh and Mooncake.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/getMailTips"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"POST {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def get_room_lists_async(
+        self,
+    ):
+        """
+        Get room lists (V2)
+
+        Get all the room lists defined in the user's tenant
+        """
+        path = f"{self._connection_runtime_url}/codeless/beta/me/findRoomLists"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def get_rooms_async(
+        self,
+    ):
+        """
+        Get rooms (V2)
+
+        Get all the meeting rooms defined in the user's tenant
+        """
+        path = f"{self._connection_runtime_url}/codeless/beta/me/findRooms"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def get_rooms_in_room_list_async(
+        self,
+        room_list: str,
+    ):
+        """
+        Get rooms in room list (V2)
+
+        Get the meeting rooms in a specific room list
+        """
+        path = f"{self._connection_runtime_url}/codeless/beta/me/findRooms(RoomList='{quote(str(room_list))}')"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def mark_as_read_async(
+        self,
+        input: MarkAsReadInput,
+        message_id: str,
+        mailbox_address: Optional[str] = None,
+    ):
+        """
+        Mark as read or unread (V3)
+
+        This operation marks an email as read/unread.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v3/v1.0/me/messages/{quote(str(message_id))}/markAsRead"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        await self.http_client.send_async("PATCH", path, body=input)
+
+    async def move_async(
+        self,
+        message_id: str,
+        folder_path: Optional[str],
+        mailbox_address: Optional[str] = None,
+    ):
+        """
+        Move email (V2)
+
+        This operation moves an email to the specified folder within the same mailbox.
+        """
+        path = f"{self._connection_runtime_url}/v2/Mail/Move/{quote(str(message_id))}"
+        query_params = []
+        if folder_path is not None:
+            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"POST {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def on_flagged_email_async(
+        self,
+        folder_path: Optional[str] = None,
+        to: Optional[str] = None,
+        cc: Optional[str] = None,
+        to_or_cc: Optional[str] = None,
+        from_: Optional[str] = None,
+        importance: Optional[str] = None,
+        fetch_only_with_attachment: Optional[str] = None,
+        include_attachments: Optional[str] = None,
+        subject_filter: Optional[str] = None,
+    ):
+        """
+        When an email is flagged (V4)
+
+        This operation triggers a flow when an email is flagged.
+        """
+        path = f"{self._connection_runtime_url}/v4/Mail/OnFlaggedEmail"
+        query_params = []
+        if folder_path is not None:
+            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+        if to is not None:
+            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+        if cc is not None:
+            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+        if to_or_cc is not None:
+            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+        if from_ is not None:
+            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+        if importance is not None:
+            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+        if fetch_only_with_attachment is not None:
+            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+        if include_attachments is not None:
+            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+        if subject_filter is not None:
+            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def on_new_email_async(
+        self,
+        folder_path: Optional[str] = None,
+        to: Optional[str] = None,
+        cc: Optional[str] = None,
+        to_or_cc: Optional[str] = None,
+        from_: Optional[str] = None,
+        importance: Optional[str] = None,
+        fetch_only_with_attachment: Optional[str] = None,
+        include_attachments: Optional[str] = None,
+        subject_filter: Optional[str] = None,
+    ):
+        """
+        When a new email arrives (V3)
+
+        This operation triggers a flow when a new email arrives. It will skip any email that has a total message size greater than the limit put by your Exchange Admin or 50 MB, whichever is less. It may also skip protected emails and emails with invalid body or attachments.
+        """
+        path = f"{self._connection_runtime_url}/v3/Mail/OnNewEmail"
+        query_params = []
+        if folder_path is not None:
+            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+        if to is not None:
+            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+        if cc is not None:
+            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+        if to_or_cc is not None:
+            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+        if from_ is not None:
+            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+        if importance is not None:
+            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+        if fetch_only_with_attachment is not None:
+            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+        if include_attachments is not None:
+            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+        if subject_filter is not None:
+            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def on_new_mention_me_email_async(
+        self,
+        message_id_to_fire_on_first_trigger_run: Optional[str] = None,
+        folder_path: Optional[str] = None,
+        to: Optional[str] = None,
+        cc: Optional[str] = None,
+        to_or_cc: Optional[str] = None,
+        from_: Optional[str] = None,
+        importance: Optional[str] = None,
+        fetch_only_with_attachment: Optional[str] = None,
+        include_attachments: Optional[str] = None,
+        subject_filter: Optional[str] = None,
+    ):
+        """
+        When a new email mentioning me arrives (V3)
+
+        This operation triggers a flow when a new email mentioning me arrives. It will skip any email that has a total message size greater than the limit put by your Exchange Admin or 50 MB, whichever is less. It may also skip protected emails and emails with invalid body or attachments.
+        """
+        path = f"{self._connection_runtime_url}/v3/Mail/OnNewMentionMeEmail"
+        query_params = []
+        if message_id_to_fire_on_first_trigger_run is not None:
+            query_params.append(f"messageIdToFireOnFirstTriggerRun={quote(str(message_id_to_fire_on_first_trigger_run).lower() if isinstance(message_id_to_fire_on_first_trigger_run, bool) else str(message_id_to_fire_on_first_trigger_run))}")
+        if folder_path is not None:
+            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+        if to is not None:
+            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+        if cc is not None:
+            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+        if to_or_cc is not None:
+            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+        if from_ is not None:
+            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+        if importance is not None:
+            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+        if fetch_only_with_attachment is not None:
+            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+        if include_attachments is not None:
+            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+        if subject_filter is not None:
+            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def on_upcoming_events_async(
+        self,
+        table: Optional[str],
+        look_ahead_time_in_minutes: Optional[str] = None,
+    ):
+        """
+        When an upcoming event is starting soon (V3)
+
+        This operation triggers a flow when an upcoming calendar event is starting.
+        """
+        path = f"{self._connection_runtime_url}/v3/Events/OnUpcomingEvents"
+        query_params = []
+        if table is not None:
+            query_params.append(f"table={quote(str(table).lower() if isinstance(table, bool) else str(table))}")
+        if look_ahead_time_in_minutes is not None:
+            query_params.append(f"lookAheadTimeInMinutes={quote(str(look_ahead_time_in_minutes).lower() if isinstance(look_ahead_time_in_minutes, bool) else str(look_ahead_time_in_minutes))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def reply_to_async(
+        self,
+        input: ReplyHtmlMessage,
+        message_id: str,
+        mailbox_address: Optional[str] = None,
+    ):
+        """
+        Reply to email (V3)
+
+        This operation replies to an email.
+        """
+        path = f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{quote(str(message_id))}"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        await self.http_client.send_async("POST", path, body=input)
+
+    async def respond_to_event_async(
+        self,
+        input: ResponseToEventInvite,
+        event_id: str,
+        response: str,
+    ):
+        """
+        Respond to an event invite (V2)
+
+        Respond to an event invite.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/events/{quote(str(event_id))}/{quote(str(response))}"
+
+        await self.http_client.send_async("POST", path, body=input)
+
+    async def send_email_async(
+        self,
+        input: ClientSendHtmlMessage,
+    ):
+        """
+        Send an email (V2)
+
+        This operation sends an email message.
+        """
+        path = f"{self._connection_runtime_url}/v2/Mail"
+
+        await self.http_client.send_async("POST", path, body=input)
+
+    async def set_automatic_replies_setting_async(
+        self,
+        input: SetAutomaticRepliesSettingInput,
+    ):
+        """
+        Set up automatic replies (V2)
+
+        Set the automatic replies setting for your mailbox.
+        """
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/mailboxSettings"
+
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"PATCH {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def shared_mailbox_on_new_email_async(
+        self,
+        mailbox_address: Optional[str],
+        folder_id: Optional[str] = None,
+        to: Optional[str] = None,
+        cc: Optional[str] = None,
+        to_or_cc: Optional[str] = None,
+        from_: Optional[str] = None,
+        importance: Optional[str] = None,
+        has_attachments: Optional[str] = None,
+        include_attachments: Optional[str] = None,
+        subject_filter: Optional[str] = None,
+    ):
+        """
+        When a new email arrives in a shared mailbox (V2)
+
+        This operation triggers a flow when a new email arrives in a shared mailbox. Your account should have permission to access the mailbox for this operation to succeed. It will skip any email that has a total message size greater than the limit put by your Exchange Admin or 50 MB, whichever is less. It may also skip protected emails and emails with invalid body or attachments.
+        """
+        path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail/OnNewEmail"
+        query_params = []
+        if mailbox_address is not None:
+            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+        if folder_id is not None:
+            query_params.append(f"folderId={quote(str(folder_id).lower() if isinstance(folder_id, bool) else str(folder_id))}")
+        if to is not None:
+            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+        if cc is not None:
+            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+        if to_or_cc is not None:
+            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+        if from_ is not None:
+            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+        if importance is not None:
+            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+        if has_attachments is not None:
+            query_params.append(f"hasAttachments={quote(str(has_attachments).lower() if isinstance(has_attachments, bool) else str(has_attachments))}")
+        if include_attachments is not None:
+            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+        if subject_filter is not None:
+            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                f"GET {path}",
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        import json
+        return json.loads(response.text)
+
+    async def shared_mailbox_send_email_async(
+        self,
+        input: SharedMailboxClientSendHtmlMessage,
+    ):
+        """
+        Send an email from a shared mailbox (V2)
+
+        This operation sends an email from a shared mailbox. Your account should have permission to access the mailbox for this operation to succeed.
+        """
+        path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
+
+        await self.http_client.send_async("POST", path, body=input)

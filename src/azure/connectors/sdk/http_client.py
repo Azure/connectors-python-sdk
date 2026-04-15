@@ -68,9 +68,14 @@ class ConnectorHttpClient:
         return self._session
 
     async def close(self):
-        """Close the HTTP session."""
+        """Close the HTTP session and token provider."""
         if self._session and not self._session.closed:
             await self._session.close()
+            self._session = None
+        
+        # Close the token provider if it has a close method
+        if hasattr(self._token_provider, 'close'):
+            await self._token_provider.close()
 
     async def send_async(
         self,
@@ -109,6 +114,15 @@ class ConnectorHttpClient:
             if is_dataclass(body):
                 # Convert dataclass to dict, excluding None values
                 body_dict = asdict(body)
+                
+                # NOTE(victoriahall): Handle dynamic schemas with additional_properties.
+                # Extract additional_properties and merge into main dict (like .NET [JsonExtensionData]).
+                if 'additional_properties' in body_dict:
+                    additional_props = body_dict.pop('additional_properties')
+                    if additional_props:
+                        # Merge additional properties into the main dictionary
+                        body_dict.update(additional_props)
+                
                 # Filter out None values to avoid sending null fields
                 body_dict = {k: v for k, v in body_dict.items() if v is not None}
                 json_body = json.dumps(body_dict)

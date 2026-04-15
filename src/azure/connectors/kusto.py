@@ -6,8 +6,9 @@
 from dataclasses import dataclass, field
 from typing import Optional, List, Any, Dict
 from datetime import datetime
+from urllib.parse import quote
 
-from azure_workflows_connectors_sdk import (
+from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorClientOptions,
     TokenProvider,
@@ -159,7 +160,7 @@ class KustoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "kusto"
 
-    async def list_kusto_results_post_async(
+    async def list_kusto_results_async(
         self,
         input: QueryAndListSchema,
     ):
@@ -185,7 +186,7 @@ class KustoClient(ConnectorClientBase):
         import json
         return json.loads(response.text)
 
-    async def list_kusto_show_command_results_post_async(
+    async def list_kusto_show_command_results_async(
         self,
         input: ControlCommandAndListSchema,
     ):
@@ -211,7 +212,7 @@ class KustoClient(ConnectorClientBase):
         import json
         return json.loads(response.text)
 
-    async def run_kusto_query_and_visualize_results_post_async(
+    async def run_kusto_query_and_visualize_results_async(
         self,
         input: QueryAndVisualizeSchema,
     ):
@@ -237,7 +238,7 @@ class KustoClient(ConnectorClientBase):
         import json
         return json.loads(response.text)
 
-    async def run_kusto_command_and_visualize_results_post_async(
+    async def run_kusto_command_and_visualize_results_async(
         self,
         input: CommandAndVisualizeSchema,
     ):
@@ -302,7 +303,7 @@ class KustoClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/mcp/KustoQueryManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={session_id}")
+            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -320,4 +321,3 @@ class KustoClient(ConnectorClientBase):
 
         import json
         return json.loads(response.text)
-

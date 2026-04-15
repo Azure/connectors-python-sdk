@@ -10,7 +10,7 @@ generated connector clients.
 
 from .client_base import ConnectorClientBase
 from .options import ConnectorClientOptions
-from .authentication import TokenProvider, ManagedIdentityTokenProvider, ConnectionStringTokenProvider
+from .authentication import TokenProvider, ManagedIdentityTokenProvider, ConnectionStringTokenProvider, AzureIdentityTokenProvider
 from .exceptions import ConnectorException
 from .trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 
@@ -22,6 +22,7 @@ __all__ = [
     "TokenProvider",
     "ManagedIdentityTokenProvider",
     "ConnectionStringTokenProvider",
+    "AzureIdentityTokenProvider",
     "ConnectorException",
     "TriggerCallbackPayload",
     "TriggerCallbackBody",

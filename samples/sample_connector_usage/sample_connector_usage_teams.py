@@ -16,12 +16,12 @@ Usage:
 """
 
 import asyncio
-from azure.identity import DefaultAzureCredential
-from azure_workflows_connectors_sdk.generated.teams_client import TeamsClient
+from azure.identity.aio import DefaultAzureCredential
+from azure.connectors.teams import TeamsClient
 
-# NOTE(victoriahall): Connection runtime URL format:
+# Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/teams/[connection-id]
-CONNECTION_RUNTIME_URL = "https://westus.azure-apihub.net/apim/teams/YOUR-CONNECTION-ID"
+CONNECTION_RUNTIME_URL = ""
 
 
 async def example_1_list_joined_teams():
@@ -32,7 +32,7 @@ async def example_1_list_joined_teams():
     client = TeamsClient(CONNECTION_RUNTIME_URL, credential)
     
     try:
-        teams = await client.list_joined_teams_async()
+        teams = await client.get_all_teams_async()
         
         print(f"Found {len(teams.get('value', []))} teams")
         for team in teams.get('value', [])[:3]:  # Show first 3
@@ -60,36 +60,14 @@ async def example_2_list_associated_teams():
         print(f"Error: {ex}")
 
 
-async def example_3_get_supported_timezones():
-    """Example 3: Get supported Outlook timezones"""
-    print("\n=== Example 3: Get Supported Timezones ===")
-    
-    credential = DefaultAzureCredential()
-    client = TeamsClient(CONNECTION_RUNTIME_URL, credential)
-    
-    try:
-        timezones = await client.get_my_outlook_supported_time_zones_async()
-        
-        print(f"Found {len(timezones.get('value', []))} timezones")
-        for tz in timezones.get('value', [])[:5]:  # Show first 5
-            print(f"  - {tz.get('Alias')} ({tz.get('DisplayName')})")
-            
-    except Exception as ex:
-        print(f"Error: {ex}")
-
-
 async def main():
     """Run all examples"""
     print("Teams Connector SDK - Sample Usage")
     print("=" * 50)
     print()
-    print("NOTE: Update CONNECTION_RUNTIME_URL in this file before running.")
-    print("Get it from Azure Portal > Logic App > Teams Connection > Properties")
-    print()
     
     await example_1_list_joined_teams()
     await example_2_list_associated_teams()
-    await example_3_get_supported_timezones()
     
     print("\n" + "=" * 50)
     print("Sample completed!")

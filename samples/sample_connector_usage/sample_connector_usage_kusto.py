@@ -1,379 +1,384 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Sample program demonstrating Azure Data Explorer (Kusto) connector usage.
+Kusto (Azure Data Explorer) Connector SDK Sample
 
-This sample shows common Kusto operations:
-1. Running KQL queries
-2. Executing control commands
-3. Visualizing query results
-4. Async command execution
-5. MCP (Model Context Protocol) integration
+This sample demonstrates how to use the Kusto connector SDK.
+
+Prerequisites:
+1. Azure subscription with Kusto (Azure Data Explorer) cluster
+2. Kusto connection in Azure Logic Apps
+3. Connection runtime URL from Azure Portal
+4. Kusto cluster URL and database name
+
+Installation:
+    pip install azure-workflows-connectors-sdk
+
+Usage:
+    Set environment variables:
+    $env:KUSTO_CONNECTION_URL = "https://[region].azure-apihub.net/apim/kusto/[connection-id]"
+    $env:KUSTO_CLUSTER_URL = "https://[cluster-name].[region].kusto.windows.net"
+    $env:KUSTO_DATABASE = "[database-name]"
+    
+    python sample_connector_usage_kusto.py
 """
 
 import asyncio
 import os
-from typing import Optional
+
+try:
+    from azure.identity.aio import DefaultAzureCredential
+    from azure.connectors import ConnectorException
+    from azure.connectors.kusto import (
+        KustoClient,
+        QueryAndListSchema,
+        ControlCommandAndListSchema,
+        QueryAndVisualizeSchema,
+    )
+    IMPORTS_AVAILABLE = True
+except ImportError as import_error:
+    IMPORTS_AVAILABLE = False
+    IMPORT_ERROR = str(import_error)
+
+
+# Connection runtime URL format:
+# https://[region].azure-apihub.net/apim/kusto/[connection-id]
+CONNECTION_RUNTIME_URL = os.environ.get(
+    "KUSTO_CONNECTION_URL",
+    ""
+)
+
+# Kusto cluster URL format:
+# https://[cluster-name].[region].kusto.windows.net
+KUSTO_CLUSTER_URL = os.environ.get(
+    "KUSTO_CLUSTER_URL",
+    "https://help.kusto.windows.net"
+)
+
+KUSTO_DATABASE = os.environ.get(
+    "KUSTO_DATABASE",
+    "Samples"
+)
+
+KUSTO_TABLE = os.environ.get(
+    "KUSTO_TABLE",
+    "StormEvents"
+)
+
+
+async def example_1_simple_kql_query():
+    """Example 1: Run a simple KQL query."""
+    print("\n=== Example 1: Simple KQL Query ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            query = f"{KUSTO_TABLE} | take 5"
+            
+            query_request = QueryAndListSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=query,
+            )
+            
+            results = await client.list_kusto_results_async(input=query_request)
+            
+            if results and 'value' in results:
+                print(f"Query executed successfully. Found {len(results['value'])} rows:")
+                for i, row in enumerate(results['value'][:5], 1):
+                    print(f"  Row {i}: {row}")
+            else:
+                print("Query executed but returned no data.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_2_aggregation_query():
+    """Example 2: Run a KQL query with aggregation."""
+    print("\n=== Example 2: Aggregation Query ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            query = f"""
+                {KUSTO_TABLE}
+                | summarize EventCount = count() by State
+                | top 5 by EventCount desc
+            """
+            
+            query_request = QueryAndListSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=query,
+            )
+            
+            results = await client.list_kusto_results_async(input=query_request)
+            
+            if results and 'value' in results:
+                print(f"Top 5 states by event count:")
+                for row in results['value']:
+                    state = row.get('State', 'Unknown')
+                    count = row.get('EventCount', 0)
+                    print(f"  {state}: {count} events")
+            else:
+                print("Query returned no results.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_3_time_based_filtering():
+    """Example 3: Query with time-based filtering."""
+    print("\n=== Example 3: Time-Based Filtering ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            query = f"""
+                {KUSTO_TABLE}
+                | where StartTime > ago(365d)
+                | summarize count() by EventType
+                | order by count_ desc
+                | take 5
+            """
+            
+            query_request = QueryAndListSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=query,
+            )
+            
+            results = await client.list_kusto_results_async(input=query_request)
+            
+            if results and 'value' in results:
+                print(f"Top 5 event types in the last year:")
+                for row in results['value']:
+                    event_type = row.get('EventType', 'Unknown')
+                    count = row.get('count_', 0)
+                    print(f"  {event_type}: {count} events")
+            else:
+                print("Query returned no results.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_4_visualize_results():
+    """Example 4: Query and visualize results as a chart."""
+    print("\n=== Example 4: Visualize Query Results ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            query = f"""
+                {KUSTO_TABLE}
+                | summarize EventCount = count() by bin(StartTime, 30d)
+                | order by StartTime asc
+            """
+            
+            visualize_request = QueryAndVisualizeSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=query,
+                chart_type="timechart",
+            )
+            
+            chart = await client.run_kusto_query_and_visualize_results_async(
+                input=visualize_request
+            )
+            
+            if chart:
+                print("Chart data generated successfully")
+                if isinstance(chart, dict):
+                    if 'value' in chart:
+                        print(f"  Data points: {len(chart['value'])}")
+                    print(f"  Chart type: timechart")
+                else:
+                    print(f"  Chart object returned")
+            else:
+                print("Visualization completed but no chart data returned.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_5_control_command():
+    """Example 5: Run a control command to show database schema."""
+    print("\n=== Example 5: Control Command (Show Tables) ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            command = ".show tables"
+            
+            command_request = ControlCommandAndListSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=command,
+            )
+            
+            results = await client.list_kusto_show_command_results_async(
+                input=command_request
+            )
+            
+            if results and 'value' in results:
+                print(f"Found {len(results['value'])} tables in database '{KUSTO_DATABASE}':")
+                for row in results['value'][:10]:
+                    table_name = row.get('TableName', 'Unknown')
+                    folder = row.get('Folder', '')
+                    print(f"  - {table_name}" + (f" (Folder: {folder})" if folder else ""))
+            else:
+                print("Command executed but returned no results.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_6_table_schema():
+    """Example 6: Get schema information for a specific table."""
+    print("\n=== Example 6: Show Table Schema ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            command = f".show table {KUSTO_TABLE} schema as json"
+            
+            command_request = ControlCommandAndListSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=command,
+            )
+            
+            results = await client.list_kusto_show_command_results_async(
+                input=command_request
+            )
+            
+            if results and 'value' in results and len(results['value']) > 0:
+                print(f"Schema for table '{KUSTO_TABLE}':")
+                schema_row = results['value'][0]
+                if 'Schema' in schema_row:
+                    import json
+                    schema_json = json.loads(schema_row['Schema'])
+                    if 'OrderedColumns' in schema_json:
+                        for col in schema_json['OrderedColumns'][:10]:
+                            col_name = col.get('Name', 'Unknown')
+                            col_type = col.get('Type', 'Unknown')
+                            print(f"  - {col_name}: {col_type}")
+                else:
+                    print(f"  Schema data: {schema_row}")
+            else:
+                print("Command executed but returned no schema.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_7_statistical_analysis():
+    """Example 7: Statistical analysis with percentiles."""
+    print("\n=== Example 7: Statistical Analysis ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            query = f"""
+                {KUSTO_TABLE}
+                | where isnotnull(DamageProperty)
+                | summarize 
+                    p50 = percentile(DamageProperty, 50),
+                    p95 = percentile(DamageProperty, 95),
+                    p99 = percentile(DamageProperty, 99),
+                    max = max(DamageProperty)
+            """
+            
+            query_request = QueryAndListSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=query,
+            )
+            
+            results = await client.list_kusto_results_async(input=query_request)
+            
+            if results and 'value' in results and len(results['value']) > 0:
+                stats = results['value'][0]
+                print("Property damage statistics:")
+                print(f"  50th percentile (median): ${stats.get('p50', 0):,.2f}")
+                print(f"  95th percentile: ${stats.get('p95', 0):,.2f}")
+                print(f"  99th percentile: ${stats.get('p99', 0):,.2f}")
+                print(f"  Maximum: ${stats.get('max', 0):,.2f}")
+            else:
+                print("Query returned no statistics.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_8_error_handling():
+    """Example 8: Demonstrate error handling with invalid query."""
+    print("\n=== Example 8: Error Handling ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            # Intentionally use an invalid table name
+            query = "NonExistentTable | take 10"
+            
+            query_request = QueryAndListSchema(
+                cluster=KUSTO_CLUSTER_URL,
+                db=KUSTO_DATABASE,
+                csl=query,
+            )
+            
+            results = await client.list_kusto_results_async(input=query_request)
+            print(f"Unexpected success: {results}")
+            
+        except ConnectorException as ex:
+            print(f"Expected error caught:")
+            print(f"  Message: {ex}")
+        except Exception as ex:
+            print(f"Unexpected error type: {type(ex).__name__}")
+            print(f"  Message: {ex}")
 
 
 async def main():
-    """Entry point for the Kusto sample."""
-    print("Azure Logic Apps Kusto (Azure Data Explorer) Connector - Sample Usage")
-    print("====================================================================")
+    """Run all examples."""
+    print("Kusto (Azure Data Explorer) Connector SDK - Sample Usage")
+    print("=" * 60)
     print()
-
-    # Example 1: Getting Started
-    print("Example 1: Getting Started with Kusto Connector")
-    print("-----------------------------------------------")
-    print("The Kusto connector provides access to Azure Data Explorer clusters.")
-    print()
-    print("  from azure_workflows_connectors_sdk.generated.KustoExtensions import (")
-    print("      KustoClient")
-    print("  )")
-    print("  from azure_workflows_connectors_sdk import ManagedIdentityTokenProvider")
-    print()
-    print("  # Get connection runtime URL from Azure Portal")
-    print("  connection_url = 'https://...'")
-    print("  connection_id = 'your-connection-id'  # From Azure Portal")
-    print("  token_provider = ManagedIdentityTokenProvider()")
-    print()
-    print("  async with KustoClient(connection_url, token_provider) as client:")
-    print("      # Your Kusto operations here")
-    print("      pass")
-    print()
-
-    # Example 2: Running KQL Queries
-    print("Example 2: Running KQL Queries")
-    print("-------------------------------")
-    print("Execute Kusto Query Language (KQL) queries:")
-    print()
-    print("  async with KustoClient(connection_url, token_provider) as client:")
-    print("      # Simple query - get top 10 rows")
-    print("      query_request = {")
-    print("          'cluster': 'https://mycluster.kusto.windows.net',")
-    print("          'database': 'MyDatabase',")
-    print("          'query': 'MyTable | take 10'")
-    print("      }")
-    print()
-    print("      results = await client.list_kusto_results_post_async(")
-    print("          input=query_request,")
-    print("          connection_id=connection_id,")
-    print("      )")
-    print()
-    print("      # Process results")
-    print("      for row in results['value']:")
-    print("          print(row)")
-    print()
-
-    # Example 3: Advanced KQL Queries
-    print("Example 3: Advanced KQL Queries")
-    print("--------------------------------")
-    print("Use KQL operators for filtering and aggregation:")
-    print()
-    print("  async with KustoClient(connection_url, token_provider) as client:")
-    print()
-    print("      # Time-based filtering")
-    print("      query_request = {")
-    print("          'cluster': 'https://mycluster.kusto.windows.net',")
-    print("          'database': 'Telemetry',")
-    print("          'query': '''")
-    print("              Events")
-    print("              | where Timestamp > ago(1h)")
-    print("              | where Level == 'Error'")
-    print("              | summarize count() by bin(Timestamp, 5m), Component")
-    print("              | order by Timestamp desc")
-    print("          '''")
-    print("      }")
-    print()
-    print("      results = await client.list_kusto_results_post_async(")
-    print("          input=query_request,")
-    print("          connection_id=connection_id,")
-    print("      )")
-    print()
-    print("      # Analyze error patterns")
-    print("      for row in results['value']:")
-    print("          print(f\"{row['Timestamp']}: {row['Component']} - {row['count_']} errors\")")
-    print()
-
-    # Example 4: Visualizing Query Results
-    print("Example 4: Visualizing Query Results")
-    print("------------------------------------")
-    print("Render charts from query results:")
-    print()
-    print("  async with KustoClient(connection_url, token_provider) as client:")
-    print()
-    print("      # Query with visualization")
-    print("      visualize_request = {")
-    print("          'cluster': 'https://mycluster.kusto.windows.net',")
-    print("          'database': 'Metrics',")
-    print("          'query': '''")
-    print("              PerformanceMetrics")
-    print("              | where Timestamp > ago(24h)")
-    print("              | summarize avg(ResponseTime) by bin(Timestamp, 1h)")
-    print("              | render timechart")
-    print("          ''',")
-    print("          'chartType': 'timechart'")
-    print("      }")
-    print()
-    print("      chart = await client.run_kusto_query_and_visualize_results_post_async(")
-    print("          input=visualize_request,")
-    print("          connection_id=connection_id,")
-    print("      )")
-    print()
-    print("      # Chart data can be used for reports or dashboards")
-    print("      print(f\"Chart generated with {len(chart['data'])} data points\")")
-    print()
-
-    # Example 5: Control Commands
-    print("Example 5: Running Control Commands")
-    print("-----------------------------------")
-    print("Execute administrative commands:")
-    print()
-    print("  async with KustoClient(connection_url, token_provider) as client:")
-    print()
-    print("      # Show table schema")
-    print("      command_request = {")
-    print("          'cluster': 'https://mycluster.kusto.windows.net',")
-    print("          'database': 'MyDatabase',")
-    print("          'command': '.show table MyTable schema'")
-    print("      }")
-    print()
-    print("      schema = await client.list_kusto_show_command_results_post_async(")
-    print("          input=command_request,")
-    print("          connection_id=connection_id,")
-    print("      }")
-    print()
-    print("      # Display schema information")
-    print("      for column in schema['value']:")
-    print("          print(f\"{column['ColumnName']}: {column['ColumnType']}\")")
-    print()
-    print("  # Common control commands:")
-    print("  # - .show tables")
-    print("  # - .show table TableName policy caching")
-    print("  # - .show database DatabaseName schema")
-    print("  # - .show cluster")
-    print()
-
-    # Example 6: Async Control Commands
-    print("Example 6: Async Control Commands")
-    print("---------------------------------")
-    print("Run long-running commands asynchronously:")
-    print()
-    print("  async with KustoClient(connection_url, token_provider) as client:")
-    print()
-    print("      # Start async command (can run up to 1 hour)")
-    print("      async_request = {")
-    print("          'cluster': 'https://mycluster.kusto.windows.net',")
-    print("          'database': 'MyDatabase',")
-    print("          'command': '''")
-    print("              .set-or-append async TargetTable <|")
-    print("              SourceTable | where Timestamp > ago(7d)")
-    print("          '''")
-    print("      }")
-    print()
-    print("      result = await client.run_async_control_command_and_wait_async(")
-    print("          input=async_request,")
-    print("          connection_id=connection_id,")
-    print("      }")
-    print()
-    print("      # Check command status")
-    print("      print(f\"Command ID: {result['OperationId']}\")")
-    print("      print(f\"State: {result['State']}\")")
-    print("      print(f\"Status: {result['Status']}\")")
-    print()
-
-    # Example 7: Azure Functions Integration
-    print("Example 7: Azure Functions Integration")
-    print("--------------------------------------")
-    print("Create a function to query Kusto and process results:")
-    print()
-    print("  import azure.functions as func")
-    print("  from azure_workflows_connectors_sdk.generated.KustoExtensions import (")
-    print("      KustoClient")
-    print("  )")
-    print("  from azure_workflows_connectors_sdk import ManagedIdentityTokenProvider")
-    print()
-    print("  app = func.FunctionApp()")
-    print()
-    print("  @app.route(route='query-errors', auth_level=func.AuthLevel.FUNCTION)")
-    print("  async def query_errors(req: func.HttpRequest) -> func.HttpResponse:")
-    print("      connection_url = os.environ['KUSTO_CONNECTION_URL']")
-    print("      connection_id = os.environ['KUSTO_CONNECTION_ID']")
-    print("      token_provider = ManagedIdentityTokenProvider()")
-    print()
-    print("      hours = req.params.get('hours', '1')")
-    print("      query = f'''")
-    print("          Events")
-    print("          | where Timestamp > ago({hours}h)")
-    print("          | where Level == 'Error'")
-    print("          | summarize count() by Component")
-    print("      '''")
-    print()
-    print("      async with KustoClient(connection_url, token_provider) as client:")
-    print("          results = await client.list_kusto_results_post_async(")
-    print("              input={")
-    print("                  'cluster': os.environ['KUSTO_CLUSTER'],")
-    print("                  'database': os.environ['KUSTO_DATABASE'],")
-    print("                  'query': query")
-    print("              },")
-    print("              connection_id=connection_id,")
-    print("          )")
-    print()
-    print("      return func.HttpResponse(")
-    print("          json.dumps(results),")
-    print("          mimetype='application/json',")
-    print("          status_code=200")
-    print("      )")
-    print()
-
-    # Example 8: Error Handling
-    print("Example 8: Error Handling")
-    print("-------------------------")
-    print("Handle Kusto-specific errors:")
-    print()
-    print("  from azure_workflows_connectors_sdk import ConnectorException")
-    print()
-    print("  try:")
-    print("      async with KustoClient(connection_url, token_provider) as client:")
-    print("          results = await client.list_kusto_results_post_async(")
-    print("              input={")
-    print("                  'cluster': 'https://mycluster.kusto.windows.net',")
-    print("                  'database': 'MyDatabase',")
-    print("                  'query': 'InvalidTable | take 10'  # Table doesn't exist")
-    print("              },")
-    print("              connection_id=connection_id,")
-    print("          )")
-    print("  except ConnectorException as ex:")
-    print("      if 'not found' in ex.error_body.lower():")
-    print("          print('Table or database not found')")
-    print("      elif 'syntax error' in ex.error_body.lower():")
-    print("          print('Invalid KQL syntax')")
-    print("      else:")
-    print("          print(f'Kusto error: {ex.message}')")
-    print()
-
-    # Example 9: Common Use Cases
-    print("Example 9: Common Use Cases")
-    print("---------------------------")
-    print()
-    print("  # Use Case 1: Monitor service health")
-    print("  async def monitor_service_health():")
-    print("      async with KustoClient(connection_url, token_provider) as client:")
-    print("          query = '''")
-    print("              HealthChecks")
-    print("              | where Timestamp > ago(5m)")
-    print("              | where Status != 'Healthy'")
-    print("              | summarize count() by Service, Status")
-    print("          '''")
-    print("          ")
-    print("          results = await client.list_kusto_results_post_async(")
-    print("              input={")
-    print("                  'cluster': cluster_url,")
-    print("                  'database': 'Monitoring',")
-    print("                  'query': query")
-    print("              },")
-    print("              connection_id=connection_id,")
-    print("          )")
-    print("          ")
-    print("          # Alert on unhealthy services")
-    print("          for row in results['value']:")
-    print("              if row['count_'] > 0:")
-    print("                  send_alert(row['Service'], row['Status'])")
-    print()
-    print("  # Use Case 2: Generate daily metrics report")
-    print("  async def generate_daily_report():")
-    print("      async with KustoClient(connection_url, token_provider) as client:")
-    print("          query = '''")
-    print("              Requests")
-    print("              | where Timestamp > startofday(now())")
-    print("              | summarize")
-    print("                  TotalRequests = count(),")
-    print("                  AvgDuration = avg(Duration),")
-    print("                  P95Duration = percentile(Duration, 95),")
-    print("                  ErrorRate = countif(Status >= 400) * 100.0 / count()")
-    print("              by bin(Timestamp, 1h)")
-    print("          '''")
-    print("          ")
-    print("          results = await client.list_kusto_results_post_async(")
-    print("              input={")
-    print("                  'cluster': cluster_url,")
-    print("                  'database': 'Telemetry',")
-    print("                  'query': query")
-    print("              },")
-    print("              connection_id=connection_id,")
-    print("          )")
-    print("          ")
-    print("          # Format and send report")
-    print("          return format_report(results)")
-    print()
-    print("  # Use Case 3: Real-time anomaly detection")
-    print("  async def detect_anomalies():")
-    print("      async with KustoClient(connection_url, token_provider) as client:")
-    print("          query = '''")
-    print("              Metrics")
-    print("              | where Timestamp > ago(1h)")
-    print("              | make-series Value=avg(ResponseTime) on Timestamp step 1m")
-    print("              | extend anomalies=series_decompose_anomalies(Value)")
-    print("              | mv-expand Timestamp, Value, anomalies")
-    print("              | where anomalies != 0")
-    print("          '''")
-    print("          ")
-    print("          anomalies = await client.list_kusto_results_post_async(")
-    print("              input={")
-    print("                  'cluster': cluster_url,")
-    print("                  'database': 'Analytics',")
-    print("                  'query': query")
-    print("              },")
-    print("              connection_id=connection_id,")
-    print("          )")
-    print("          ")
-    print("          # Process anomalies")
-    print("          for anomaly in anomalies['value']:")
-    print("              log_anomaly(anomaly['Timestamp'], anomaly['Value'])")
-    print()
-
-    # Example 10: KQL Query Patterns
-    print("Example 10: Useful KQL Query Patterns")
-    print("-------------------------------------")
-    print()
-    print("  # Pattern 1: Time-based filtering")
-    print("  'Events | where Timestamp > ago(1h)'")
-    print("  'Events | where Timestamp between (datetime(2026-01-01) .. datetime(2026-01-31))'")
-    print()
-    print("  # Pattern 2: Aggregations")
-    print("  'Events | summarize count() by Level'")
-    print("  'Metrics | summarize avg(Value), max(Value) by bin(Timestamp, 5m)'")
-    print()
-    print("  # Pattern 3: Joining tables")
-    print("  'Requests | join kind=inner (Users) on UserId'")
-    print()
-    print("  # Pattern 4: Statistical analysis")
-    print("  'Metrics | summarize percentiles(ResponseTime, 50, 95, 99)'")
-    print()
-    print("  # Pattern 5: Text search")
-    print("  'Logs | where Message contains \"error\" or Message contains \"exception\"'")
-    print()
-    print("  # Pattern 6: Top-N queries")
-    print("  'Events | summarize count() by Source | top 10 by count_ desc'")
-    print()
-
-    print("Sample completed successfully!")
-    print()
-    print("Next steps:")
-    print("  1. Generate Kusto connector code using LogicAppsCompiler CLI")
-    print("  2. Get your Kusto cluster URL from Azure Portal")
-    print("  3. Configure connection in Azure Portal (Logic Apps Connectors)")
-    print("  4. Use the connection runtime URL and connection ID in your code")
-    print()
-    print("Common Kusto operations:")
-    print("  - Query data: list_kusto_results_post_async()")
-    print("  - Control commands: list_kusto_show_command_results_post_async()")
-    print("  - Visualize: run_kusto_query_and_visualize_results_post_async()")
-    print("  - Async commands: run_async_control_command_and_wait_async()")
-    print()
-    print("KQL Resources:")
-    print("  - KQL Quick Reference: https://aka.ms/kql")
-    print("  - Azure Data Explorer Docs: https://docs.microsoft.com/azure/data-explorer/")
+    
+    await example_1_simple_kql_query()
+    await example_2_aggregation_query()
+    await example_3_time_based_filtering()
+    await example_4_visualize_results()
+    await example_5_control_command()
+    await example_6_table_schema()
+    await example_7_statistical_analysis()
+    await example_8_error_handling()
+    
+    print("\n" + "=" * 60)
+    print("Sample completed!")
 
 
 if __name__ == "__main__":

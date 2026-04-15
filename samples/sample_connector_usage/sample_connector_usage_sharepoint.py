@@ -1,340 +1,373 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Sample program demonstrating SharePoint Online connector usage.
+SharePoint Online Connector SDK Sample
 
-This sample shows common SharePoint operations:
-1. List management (get lists, create/update/delete items)
-2. File operations (upload, download, get metadata)
-3. Document library operations
+This sample demonstrates how to use the SharePoint Online connector SDK.
+
+Prerequisites:
+1. Azure subscription with SharePoint Online connection
+2. SharePoint Online connection in Azure Logic Apps
+3. Connection runtime URL from Azure Portal
+4. SharePoint site URL
+
+Installation:
+    pip install <TBD>
+
+Usage:
+    Set environment variables:
+    $env:SHAREPOINT_CONNECTION_URL = "https://[region].azure-apihub.net/apim/sharepointonline/[connection-id]"
+    $env:SHAREPOINT_SITE_URL = "https://[tenant].sharepoint.com/sites/[site-name]"
+    
+    python sample_connector_usage_sharepoint.py
 """
 
 import asyncio
 import os
-from typing import Optional
+
+try:
+    from azure.identity.aio import DefaultAzureCredential
+    from azure.connectors import ConnectorException
+    from azure.connectors.sharepointonline import (
+        SharepointonlineClient,
+    )
+    IMPORTS_AVAILABLE = True
+except ImportError as import_error:
+    IMPORTS_AVAILABLE = False
+    IMPORT_ERROR = str(import_error)
+
+#  Connection runtime URL format:
+# https://[region].azure-apihub.net/apim/sharepointonline/[connection-id]
+CONNECTION_RUNTIME_URL = os.environ.get(
+    "SHAREPOINT_CONNECTION_URL",
+    ""
+)
+
+#  SharePoint site URL format:
+# https://[tenant].sharepoint.com/sites/[site-name]
+SHAREPOINT_SITE_URL = os.environ.get(
+    "SHAREPOINT_SITE_URL",
+    ""
+)
+
+
+async def example_1_get_lists():
+    """Example 1: Get all lists and libraries from a SharePoint site."""
+    print("\n=== Example 1: Get Lists and Libraries ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            lists = await client.get_tables_async(dataset=SHAREPOINT_SITE_URL)
+            
+            if lists and 'value' in lists:
+                print(f"Found {len(lists['value'])} lists and libraries:")
+                for list_item in lists['value'][:5]:
+                    display_name = list_item.get('DisplayName', 'Unknown')
+                    name = list_item.get('Name', 'Unknown')
+                    print(f"  - {display_name} ({name})")
+            else:
+                print("No lists found or unexpected response format.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+            print(f"Status code: {ex.status_code}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_2_get_list_items():
+    """Example 2: Get items from a SharePoint list."""
+    print("\n=== Example 2: Get List Items ===")
+    
+    list_name = os.environ.get("TEST_LIST_NAME", "18050732-97a3-4509-b510-a094a5a35947")
+    
+    credential = DefaultAzureCredential()
+    
+    async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            items = await client.get_items_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+            )
+            
+            if items and 'value' in items:
+                print(f"Found {len(items['value'])} items in '{list_name}' list:")
+                for item in items['value']:
+                    title = item.get('Title', 'No Title')
+                    item_id = item.get('Id', 'Unknown')
+                    print(f"  - [{item_id}] {title}")
+            else:
+                print(f"No items found in '{list_name}' list.")
+                print("Note: Set TEST_LIST_NAME environment variable to query a different list")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+            print(f"Status code: {ex.status_code}")
+            if ex.status_code == 404:
+                print(f"Hint: List '{list_name}' may not exist. Check the list name.")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_3_create_list_item():
+    """Example 3: Create a new item in a SharePoint list."""
+    print("\n=== Example 3: Create List Item ===")
+    
+    list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
+    
+    credential = DefaultAzureCredential()
+    
+    async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            new_item = {
+                'Title': 'Test Task from Python SDK',
+            }
+            
+            created = await client.post_item_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                input=new_item,
+            )
+            
+            if created and 'Id' in created:
+                item_id = created['Id']
+                print(f"Created item successfully with ID: {item_id}")
+                print(f"Title: {created.get('Title', 'N/A')}")
+                
+                # Clean up: delete the item we just created
+                await client.delete_item_async(
+                    dataset=SHAREPOINT_SITE_URL,
+                    table=list_name,
+                    id=str(item_id),
+                )
+                print(f"Cleaned up: Deleted test item {item_id}")
+            else:
+                print("Item created but no ID returned.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+            if ex.status_code == 404:
+                print(f"Hint: List '{list_name}' may not exist.")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_4_update_list_item():
+    """Example 4: Create, update, and delete a list item."""
+    print("\n=== Example 4: Update List Item (Full CRUD) ===")
+    
+    list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
+    
+    credential = DefaultAzureCredential()
+    
+    async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            # CREATE
+            print("Creating item...")
+            new_item = {
+                'Title': 'Task to Update',
+            }
+            created = await client.post_item_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                input=new_item,
+            )
+            item_id = created['Id']
+            print(f"  Created item {item_id}: {created.get('Title')}")
+            
+            # READ
+            print("Reading item...")
+            item = await client.get_item_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                id=str(item_id),
+            )
+            print(f"  Read item {item_id}: {item.get('Title')}")
+            
+            # UPDATE
+            print("Updating item...")
+            updates = {
+                'Title': 'Updated Task Title',
+            }
+            await client.patch_item_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                id=str(item_id),
+                input=updates,
+            )
+            
+            # Verify update
+            updated_item = await client.get_item_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                id=str(item_id),
+            )
+            print(f"  Updated item {item_id}: {updated_item.get('Title')}")
+            
+            # DELETE
+            print("Deleting item...")
+            await client.delete_item_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                id=str(item_id),
+            )
+            print(f"  Deleted item {item_id}")
+            
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+            print(f"Status code: {ex.status_code}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_5_query_with_filters():
+    """Example 5: Query list items with OData filters."""
+    print("\n=== Example 5: Query with Filters ===")
+    
+    list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
+    
+    credential = DefaultAzureCredential()
+    
+    async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            # Create some test items first
+            print("Creating test items...")
+            for i in range(3):
+                await client.post_item_async(
+                    dataset=SHAREPOINT_SITE_URL,
+                    table=list_name,
+                    input={'Title': f'Test Item {i + 1}'},
+                )
+            print("  Created 3 test items")
+            
+            # Query with filters
+            print("\nQuerying items (ordered by creation date, top 5)...")
+            items = await client.get_items_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                filter_query=None,
+                order_by='Created desc',
+                top_count=5,
+                skip_count=None,
+            )
+            
+            if items and 'value' in items:
+                print(f"Found {len(items['value'])} items:")
+                for item in items['value']:
+                    title = item.get('Title', 'No Title')
+                    created = item.get('Created', 'Unknown')
+                    print(f"  - {title} (Created: {created})")
+            
+            # Clean up test items
+            print("\nCleaning up test items...")
+            for item in items.get('value', [])[:3]:
+                if 'Test Item' in item.get('Title', ''):
+                    await client.delete_item_async(
+                        dataset=SHAREPOINT_SITE_URL,
+                        table=list_name,
+                        id=str(item['Id']),
+                    )
+            print("  Cleaned up test items")
+            
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+            print(f"Status code: {ex.status_code}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_6_file_operations():
+    """Example 6: File operations - list folders and get file metadata."""
+    print("\n=== Example 6: File Operations ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            # List root folder
+            print("Listing root folder...")
+            root_folder = await client.list_root_folder_async(dataset=SHAREPOINT_SITE_URL)
+            
+            if root_folder and 'value' in root_folder:
+                print(f"Found {len(root_folder['value'])} items in root folder:")
+                for item in root_folder['value'][:5]:
+                    name = item.get('Name', 'Unknown')
+                    is_folder = item.get('IsFolder', False)
+                    item_type = 'Folder' if is_folder else 'File'
+                    print(f"  - {name} ({item_type})")
+            else:
+                print("Root folder is empty or unexpected response format.")
+            
+            # List a specific folder (Shared Documents is common)
+            print("\nListing 'Shared Documents' folder...")
+            folder = await client.list_folder_async(
+                dataset=SHAREPOINT_SITE_URL,
+                id='/Shared Documents',
+            )
+            
+            if folder and 'value' in folder:
+                print(f"Found {len(folder['value'])} items in Shared Documents:")
+                for item in folder['value'][:5]:
+                    name = item.get('Name', 'Unknown')
+                    is_folder = item.get('IsFolder', False)
+                    size = item.get('Size', 0)
+                    item_type = 'Folder' if is_folder else 'File'
+                    print(f"  - {name} ({item_type}, {size} bytes)")
+            
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+            print(f"Status code: {ex.status_code}")
+            if ex.status_code == 404:
+                print("Hint: The folder may not exist or you may not have access.")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_7_error_handling():
+    """Example 7: Demonstrate error handling."""
+    print("\n=== Example 7: Error Handling ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            # Attempt to get an item with an invalid ID
+            invalid_item_id = "99999"
+            list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
+            
+            item = await client.get_item_async(
+                dataset=SHAREPOINT_SITE_URL,
+                table=list_name,
+                id=invalid_item_id,
+            )
+            print(f"Unexpected success: {item}")
+            
+        except ConnectorException as ex:
+            print(f"Expected error caught:")
+            print(f"  Message: {ex}")
+        except Exception as ex:
+            print(f"Unexpected error type: {type(ex).__name__}")
+            print(f"  Message: {ex}")
 
 
 async def main():
-    """Entry point for the SharePoint Online sample."""
-    print("Azure Logic Apps SharePoint Online Connector - Sample Usage")
-    print("===========================================================")
+    """Run all examples."""
+    print("SharePoint Online Connector SDK - Sample Usage")
+    print("=" * 50)
     print()
-
-    # Example 1: Getting Started
-    print("Example 1: Getting Started with SharePoint Online")
-    print("-------------------------------------------------")
-    print("The SharePoint connector provides access to SharePoint lists and document libraries.")
-    print()
-    print("  from azure_workflows_connectors_sdk.generated.sharepointonline_client import (")
-    print("      SharepointonlineClient")
-    print("  )")
-    print("  from azure_workflows_connectors_sdk import ManagedIdentityTokenProvider")
-    print()
-    print("  # Get connection runtime URL from Azure Portal")
-    print("  connection_url = 'https://...'")
-    print("  token_provider = ManagedIdentityTokenProvider()")
-    print()
-    print("  async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("      # Your SharePoint operations here")
-    print("      pass")
-    print()
-
-    # Example 2: Working with SharePoint Sites and Lists
-    print("Example 2: Working with SharePoint Sites and Lists")
-    print("--------------------------------------------------")
-    print("Get datasets (sites) and lists:")
-    print()
-    print("  async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("      # Get all available SharePoint sites")
-    print("      datasets = await client.get_datasets_async()")
-    print("      print(f'Found {len(datasets[\"value\"])} sites')")
-    print()
-    print("      # Get lists from a specific site")
-    print("      site_url = 'https://contoso.sharepoint.com/sites/mysite'")
-    print("      lists = await client.get_tables_async(dataset=site_url)")
-    print("      ")
-    print("      for list_item in lists['value']:")
-    print("          print(f\"List: {list_item['display_name']}\")")
-    print()
-
-    # Example 3: List Item Operations (CRUD)
-    print("Example 3: List Item Operations (Create, Read, Update, Delete)")
-    print("--------------------------------------------------------------")
-    print("Manage items in SharePoint lists:")
-    print()
-    print("  async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("      site_url = 'https://contoso.sharepoint.com/sites/mysite'")
-    print("      list_name = 'Tasks'")
-    print()
-    print("      # CREATE: Add a new item")
-    print("      new_item = {")
-    print("          'Title': 'New Task',")
-    print("          'Description': 'Task created from Python SDK',")
-    print("          'Status': 'Not Started',")
-    print("      }")
-    print("      created = await client.post_item_async(")
-    print("          dataset=site_url,")
-    print("          table=list_name,")
-    print("          input=new_item,")
-    print("      )")
-    print("      item_id = created['Id']")
-    print("      print(f'Created item with ID: {item_id}')")
-    print()
-    print("      # READ: Get a specific item")
-    print("      item = await client.get_item_async(")
-    print("          dataset=site_url,")
-    print("          table=list_name,")
-    print("          id=str(item_id),")
-    print("      )")
-    print("      print(f\"Item title: {item['Title']}\")")
-    print()
-    print("      # UPDATE: Modify the item")
-    print("      updates = {")
-    print("          'Status': 'In Progress',")
-    print("          'Description': 'Updated description',")
-    print("      }")
-    print("      await client.patch_item_async(")
-    print("          dataset=site_url,")
-    print("          table=list_name,")
-    print("          id=str(item_id),")
-    print("          input=updates,")
-    print("      )")
-    print("      print('Item updated successfully')")
-    print()
-    print("      # DELETE: Remove the item")
-    print("      await client.delete_item_async(")
-    print("          dataset=site_url,")
-    print("          table=list_name,")
-    print("          id=str(item_id),")
-    print("      )")
-    print("      print('Item deleted successfully')")
-    print()
-
-    # Example 4: Querying Lists with Filters
-    print("Example 4: Querying Lists with Filters")
-    print("---------------------------------------")
-    print("Use OData query parameters to filter and sort items:")
-    print()
-    print("  async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("      # Get items with filter and sorting")
-    print("      items = await client.get_items_async(")
-    print("          dataset='https://contoso.sharepoint.com/sites/mysite',")
-    print("          table='Tasks',")
-    print("          filter_query=\"Status eq 'In Progress'\",")
-    print("          order_by='Created desc',")
-    print("          top_count=10,")
-    print("      )")
-    print()
-    print("      for item in items['value']:")
-    print("          print(f\"{item['Title']} - {item['Status']}\")")
-    print()
-    print("  # OData filter examples:")
-    print("  # - filter_query=\"Status eq 'Completed'\"")
-    print("  # - filter_query=\"DueDate lt '2026-12-31'\"")
-    print("  # - filter_query=\"Priority ge 5\"")
-    print("  # - order_by='Modified desc' or order_by='Title asc'")
-    print()
-
-    # Example 5: File Operations in Document Libraries
-    print("Example 5: File Operations in Document Libraries")
-    print("------------------------------------------------")
-    print("Upload, download, and manage files:")
-    print()
-    print("  async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("      site_url = 'https://contoso.sharepoint.com/sites/mysite'")
-    print()
-    print("      # UPLOAD: Create a file in a document library")
-    print("      with open('report.pdf', 'rb') as f:")
-    print("          file_content = f.read()")
-    print()
-    print("      uploaded_file = await client.create_file_async(")
-    print("          dataset=site_url,")
-    print("          folder_path='/Shared Documents/Reports',")
-    print("          name='monthly_report.pdf',")
-    print("          input=file_content,")
-    print("      )")
-    print("      file_id = uploaded_file['Id']")
-    print("      print(f'File uploaded: {uploaded_file[\"Name\"]}')")
-    print()
-    print("      # GET METADATA: Get file properties")
-    print("      metadata = await client.get_file_metadata_async(")
-    print("          dataset=site_url,")
-    print("          id=file_id,")
-    print("      )")
-    print("      print(f\"Size: {metadata['Size']} bytes\")")
-    print("      print(f\"Modified: {metadata['LastModified']}\")")
-    print()
-    print("      # DOWNLOAD: Get file content")
-    print("      content = await client.get_file_content_async(")
-    print("          dataset=site_url,")
-    print("          id=file_id,")
-    print("      )")
-    print("      ")
-    print("      # Save downloaded file")
-    print("      with open('downloaded_report.pdf', 'wb') as f:")
-    print("          f.write(content)")
-    print()
-
-    # Example 6: Azure Functions Integration
-    print("Example 6: Azure Functions Integration")
-    print("---------------------------------------")
-    print("Create a function that adds items to a SharePoint list:")
-    print()
-    print("  import azure.functions as func")
-    print("  from azure_workflows_connectors_sdk.generated.sharepointonline_client import (")
-    print("      SharepointonlineClient")
-    print("  )")
-    print("  from azure_workflows_connectors_sdk import ManagedIdentityTokenProvider")
-    print()
-    print("  app = func.FunctionApp()")
-    print()
-    print("  @app.route(route='add-task', auth_level=func.AuthLevel.FUNCTION)")
-    print("  async def add_task(req: func.HttpRequest) -> func.HttpResponse:")
-    print("      connection_url = os.environ['SHAREPOINT_CONNECTION_URL']")
-    print("      site_url = os.environ['SHAREPOINT_SITE_URL']")
-    print("      token_provider = ManagedIdentityTokenProvider()")
-    print()
-    print("      # Get task details from request")
-    print("      req_body = req.get_json()")
-    print("      task_item = {")
-    print("          'Title': req_body.get('title'),")
-    print("          'Description': req_body.get('description'),")
-    print("          'DueDate': req_body.get('due_date'),")
-    print("          'Status': 'Not Started',")
-    print("      }")
-    print()
-    print("      async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("          result = await client.post_item_async(")
-    print("              dataset=site_url,")
-    print("              table='Tasks',")
-    print("              input=task_item,")
-    print("          )")
-    print()
-    print("      return func.HttpResponse(")
-    print("          f\"Task created with ID: {result['Id']}\",")
-    print("          status_code=200")
-    print("      )")
-    print()
-
-    # Example 7: Batch Operations
-    print("Example 7: Batch Operations")
-    print("---------------------------")
-    print("Process multiple items efficiently:")
-    print()
-    print("  async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("      site_url = 'https://contoso.sharepoint.com/sites/mysite'")
-    print()
-    print("      # Get all pending tasks")
-    print("      items = await client.get_items_async(")
-    print("          dataset=site_url,")
-    print("          table='Tasks',")
-    print("          filter_query=\"Status eq 'Not Started'\",")
-    print("      )")
-    print()
-    print("      # Update all items to 'In Progress'")
-    print("      for item in items['value']:")
-    print("          await client.patch_item_async(")
-    print("              dataset=site_url,")
-    print("              table='Tasks',")
-    print("              id=str(item['Id']),")
-    print("              input={'Status': 'In Progress'},")
-    print("          )")
-    print("          print(f\"Updated: {item['Title']}\")")
-    print()
-
-    # Example 8: Error Handling
-    print("Example 8: Error Handling")
-    print("-------------------------")
-    print("Handle SharePoint-specific errors:")
-    print()
-    print("  from azure_workflows_connectors_sdk import ConnectorException")
-    print()
-    print("  try:")
-    print("      async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("          item = await client.get_item_async(")
-    print("              dataset='https://contoso.sharepoint.com/sites/mysite',")
-    print("              table='Tasks',")
-    print("              id='999',  # Non-existent item")
-    print("          )")
-    print("  except ConnectorException as ex:")
-    print("      if ex.status_code == 404:")
-    print("          print('Item not found')")
-    print("      elif ex.status_code == 403:")
-    print("          print('Access denied - check permissions')")
-    print("      else:")
-    print("          print(f'Error: {ex.message}')")
-    print()
-
-    # Example 9: Common Use Cases
-    print("Example 9: Common Use Cases")
-    print("---------------------------")
-    print()
-    print("  # Use Case 1: Create task from email")
-    print("  async def create_task_from_email(email_subject, email_body):")
-    print("      async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("          await client.post_item_async(")
-    print("              dataset=site_url,")
-    print("              table='Tasks',")
-    print("              input={")
-    print("                  'Title': email_subject,")
-    print("                  'Description': email_body,")
-    print("                  'Status': 'Not Started',")
-    print("              },")
-    print("          )")
-    print()
-    print("  # Use Case 2: Archive completed tasks")
-    print("  async def archive_completed_tasks():")
-    print("      async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("          completed = await client.get_items_async(")
-    print("              dataset=site_url,")
-    print("              table='Tasks',")
-    print("              filter_query=\"Status eq 'Completed'\",")
-    print("          )")
-    print("          ")
-    print("          for task in completed['value']:")
-    print("              # Move to archive list")
-    print("              await client.post_item_async(")
-    print("                  dataset=site_url,")
-    print("                  table='ArchivedTasks',")
-    print("                  input=task,")
-    print("              )")
-    print("              # Delete from active list")
-    print("              await client.delete_item_async(")
-    print("                  dataset=site_url,")
-    print("                  table='Tasks',")
-    print("                  id=str(task['Id']),")
-    print("              )")
-    print()
-    print("  # Use Case 3: Bulk upload documents")
-    print("  async def bulk_upload_documents(files_dir):")
-    print("      async with SharepointonlineClient(connection_url, token_provider) as client:")
-    print("          for filename in os.listdir(files_dir):")
-    print("              file_path = os.path.join(files_dir, filename)")
-    print("              with open(file_path, 'rb') as f:")
-    print("                  content = f.read()")
-    print("              ")
-    print("              await client.create_file_async(")
-    print("                  dataset=site_url,")
-    print("                  folder_path='/Shared Documents',")
-    print("                  name=filename,")
-    print("                  input=content,")
-    print("              )")
-    print("              print(f'Uploaded: {filename}')")
-    print()
-
-    print("Sample completed successfully!")
-    print()
-    print("Next steps:")
-    print("  1. Generate SharePoint connector code using LogicAppsCompiler CLI")
-    print("  2. Get your SharePoint site URL from SharePoint portal")
-    print("  3. Configure connection in Azure Portal")
-    print("  4. Use the connection runtime URL in your code")
-    print()
-    print("Common SharePoint operations:")
-    print("  - List management: get_tables_async, get_items_async, post_item_async")
-    print("  - File operations: create_file_async, get_file_content_async, get_file_metadata_async")
-    print("  - Item CRUD: post_item_async, get_item_async, patch_item_async, delete_item_async")
-    print("  - Query filtering: Use filter_query, order_by, top_count, skip_count parameters")
+    
+    await example_1_get_lists()
+    await example_2_get_list_items()
+    await example_3_create_list_item()
+    await example_4_update_list_item()
+    await example_5_query_with_filters()
+    await example_6_file_operations()
+    await example_7_error_handling()
+    
+    print("\n" + "=" * 50)
+    print("Sample completed!")
 
 
 if __name__ == "__main__":

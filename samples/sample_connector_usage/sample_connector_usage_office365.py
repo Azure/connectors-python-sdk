@@ -1,191 +1,190 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Sample program demonstrating how to use the Connector SDK with generated connector clients.
+Office365 Connector SDK Sample
 
-This sample shows the usage pattern. For actual usage, you need to:
-1. Generate connector code using LogicAppsCompiler CLI (see GENERATION.md)
-2. Install the SDK: pip install <TBD>
-3. Use the generated typed client classes
+This sample demonstrates how to use the Office365 connector SDK.
+
+Prerequisites:
+1. Azure subscription with Office365 connection
+2. Office365 connection in Azure Logic Apps
+3. Connection runtime URL from Azure Portal
+
+Installation:
+    pip install <TBD>
+
+Usage:
+    Set environment variable:
+    $env:OFFICE365_CONNECTION_URL = "https://[region].azure-apihub.net/apim/office365/[connection-id]"
+    
+    python sample_connector_usage_office365.py
 """
 
 import asyncio
 import os
-from typing import Optional
+from azure.identity.aio import DefaultAzureCredential
+from azure.connectors import ConnectorException
+from azure.connectors.office365 import (
+    Office365Client,
+    ClientSendHtmlMessage,
+)
+
+# Connection runtime URL format:
+# https://[region].azure-apihub.net/apim/office365/[connection-id]
+CONNECTION_RUNTIME_URL = os.environ.get(
+    "OFFICE365_CONNECTION_URL",
+    ""
+)
+
+
+async def example_1_get_outlook_categories():
+    """Example 1: Get Outlook category names."""
+    print("\n=== Example 1: Get Outlook Category Names ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            categories = await client.get_outlook_category_names_async()
+            
+            if categories and 'value' in categories:
+                print(f"Found {len(categories['value'])} Outlook categories:")
+                for category in categories['value'][:5]:
+                    display_name = category.get('DisplayName', 'Unknown')
+                    color = category.get('Color', 'N/A')
+                    print(f"  - {display_name} (Color: {color})")
+            else:
+                print("No categories found or unexpected response format.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_2_send_email():
+    """Example 2: Send an HTML email."""
+    print("\n=== Example 2: Send Email ===")
+    
+    to_address = os.environ.get("TEST_EMAIL_TO", "victoriahall@microsoft.com")
+    
+    credential = DefaultAzureCredential()
+    
+    async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            email = ClientSendHtmlMessage(
+                to=to_address,
+                subject="Test Email from Office365 Connector SDK",
+                body="<p>This is a test email sent from the <strong>Python Office365 Connector SDK</strong>.</p>",
+            )
+            
+            await client.send_email_async(email)
+            print(f"Email sent successfully to {to_address}")
+            print("Note: Set TEST_EMAIL_TO environment variable to send to a real address")
+            
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_3_get_emails():
+    """Example 3: Get emails from inbox."""
+    print("\n=== Example 3: Get Emails from Inbox ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            emails = await client.get_emails_async()
+            
+            if emails and 'value' in emails:
+                print(f"Found {len(emails['value'])} emails:")
+                for email in emails['value']:
+                    subject = email.get('Subject', 'No Subject')
+                    from_addr = email.get('From', 'Unknown')
+                    received = email.get('DateTimeReceived', 'Unknown')
+                    print(f"  - {subject}")
+                    print(f"    From: {from_addr}")
+                    print(f"    Received: {received}")
+            else:
+                print("No emails found or unexpected response format.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_4_draft_and_send_email():
+    """Example 4: Draft an email and then send it."""
+    print("\n=== Example 4: Draft and Send Email ===")
+    
+    to_address = os.environ.get("TEST_EMAIL_TO", "victoriahall@microsoft.com")
+    
+    credential = DefaultAzureCredential()
+    
+    async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            draft = ClientSendHtmlMessage(
+                to=to_address,
+                subject="Draft Email from SDK",
+                body="<p>This email was created as a draft first.</p>",
+            )
+            
+            draft_response = await client.draft_email_async(draft)
+            print(f"Draft created successfully")
+            
+            if draft_response and 'Id' in draft_response:
+                message_id = draft_response['Id']
+                print(f"Draft message ID: {message_id}")
+                
+                await client.send_draft_email_async(message_id=message_id)
+                print(f"Draft email sent successfully to {to_address}")
+            else:
+                print("Draft created but no ID returned.")
+                
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_5_error_handling():
+    """Example 5: Demonstrate error handling."""
+    print("\n=== Example 5: Error Handling ===")
+    
+    credential = DefaultAzureCredential()
+    
+    async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            # Attempt to get an email with an invalid ID
+            invalid_message_id = "invalid-message-id-12345"
+            email = await client.get_email_async(message_id=invalid_message_id)
+            print(f"Unexpected success: {email}")
+            
+        except ConnectorException as ex:
+            print(f"Expected error caught:")
+            print(f"  Message: {ex}")
+        except Exception as ex:
+            print(f"Unexpected error type: {type(ex).__name__}")
+            print(f"  Message: {ex}")
 
 
 async def main():
-    """Entry point for the sample application."""
-    print("Azure Logic Apps Connector SDK - Sample Usage (Python)")
-    print("======================================================")
+    """Run all examples."""
+    print("Office365 Connector SDK - Sample Usage")
+    print("=" * 50)
     print()
-
-    # Example 1: SDK Runtime Components
-    print("Example 1: SDK Runtime Components")
-    print("----------------------------------")
-    print("The SDK provides runtime infrastructure for generated connector clients:")
-    print()
-    print("  Authentication:")
-    print("    - ManagedIdentityTokenProvider: For Azure-hosted apps")
-    print("    - ConnectionStringTokenProvider: For local development")
-    print()
-    print("  HTTP:")
-    print("    - ConnectorHttpClient: Async HTTP client with aiohttp")
-    print("    - Automatic retry and error handling")
-    print()
-    print("  Base Classes:")
-    print("    - ConnectorClientBase: Base class for all generated clients")
-    print("    - ConnectorClientOptions: Configuration options")
-    print()
-
-    # Example 2: Token Provider Usage
-    print("Example 2: Token Provider Usage")
-    print("-------------------------------")
-
-    try:
-        # Import the SDK (demonstrates that it's installed)
-        from azure_workflows_connectors_sdk import (
-            ManagedIdentityTokenProvider,
-            ConnectionStringTokenProvider,
-        )
-
-        # Managed Identity for Azure-hosted scenarios
-        print("  Managed Identity (for Azure-hosted apps):")
-        print("    from azure_workflows_connectors_sdk import ManagedIdentityTokenProvider")
-        print("    token_provider = ManagedIdentityTokenProvider()")
-        print("    token = await token_provider.get_access_token_async(scopes)")
-        print()
-
-        # Connection String for local development
-        api_key = os.environ.get("CONNECTOR_API_KEY", "demo-key")
-        connection_token_provider = ConnectionStringTokenProvider(api_key)
-        print("  Connection String (for local development):")
-        print("    token_provider = ConnectionStringTokenProvider(api_key)")
-        print(f"    Created with key: {api_key[:min(4, len(api_key))]}...")
-    except ImportError:
-        print("  Note: <TBD> not installed")
-        print("  Run: pip install <TBD>")
-    except Exception as ex:
-        print(f"  Error: {ex}")
-
-    print()
-
-    # Example 3: Generated Client Usage Pattern
-    print("Example 3: Generated Client Usage Pattern")
-    print("------------------------------------------")
-    print("After generating connector code with LogicAppsCompiler CLI:")
-    print()
-    print("  # Using generated Office365Client (from office365_client.py)")
-    print("  from azure_workflows_connectors_sdk.generated.office365_client import (")
-    print("      Office365Client, ClientSendHtmlMessage")
-    print("  )")
-    print("  from azure_workflows_connectors_sdk import ManagedIdentityTokenProvider")
-    print()
-    print("  # Create the client with connection runtime URL")
-    print("  connection_runtime_url = 'https://...'  # From Azure Portal")
-    print("  token_provider = ManagedIdentityTokenProvider()")
-    print()
-    print("  async with Office365Client(connection_runtime_url, token_provider) as client:")
-    print("      # Call typed operations with request dataclasses")
-    print("      email = ClientSendHtmlMessage(")
-    print("          to='recipient@example.com',")
-    print("          subject='Hello from SDK',")
-    print("          body='<p>Email body</p>',")
-    print("      )")
-    print("      await client.send_email_v2_async(email)")
-    print()
-    print("      categories = await client.get_outlook_category_names_async()")
-    print()
-
-    # Example 4: Generation Instructions
-    print("Example 4: How to Generate Connector Code")
-    print("------------------------------------------")
-    print("Use the LogicAppsCompiler CLI from the BPM repository:")
-    print()
-    print("  # Build the generator")
-    print("  dotnet build .\\src\\tools\\CodefulSdkGenerator\\LogicAppsCompiler.Cli -c Release")
-    print()
-    print("  # Generate Office365 connector (Python)")
-    print("  cd src\\tools\\CodefulSdkGenerator\\LogicAppsCompiler.Cli\\bin\\Release")
-    print('  .\\LogicAppsCompiler.exe "..\\..\\..\\..\\..\\..\\PythonSDK\\src\\azure_workflows_connectors_sdk\\generated" --pythonDirectClient --connectors=office365')
-    print()
-    print("See PythonSDK/GENERATION.md for complete documentation.")
-    print()
-
-    # Example 5: Integration with Azure Functions
-    print("Example 5: Azure Functions Integration (Python)")
-    print("------------------------------------------------")
-    print("The generated clients work well with Azure Functions:")
-    print()
-    print("  import azure.functions as func")
-    print("  from azure_workflows_connectors_sdk.generated.office365_client import Office365Client")
-    print("  from azure_workflows_connectors_sdk import ManagedIdentityTokenProvider")
-    print()
-    print("  app = func.FunctionApp()")
-    print()
-    print("  @app.route(route='send-email', auth_level=func.AuthLevel.FUNCTION)")
-    print("  async def send_email(req: func.HttpRequest) -> func.HttpResponse:")
-    print("      connection_url = os.environ['CONNECTION_RUNTIME_URL']")
-    print("      token_provider = ManagedIdentityTokenProvider()")
-    print()
-    print("      async with Office365Client(connection_url, token_provider) as client:")
-    print("          email = ClientSendHtmlMessage(")
-    print("              to=req.params.get('to'),")
-    print("              subject='Hello from Azure Function',")
-    print("              body='<p>Sent from Python!</p>',")
-    print("          )")
-    print("          await client.send_email_v2_async(email)")
-    print()
-    print("      return func.HttpResponse('Email sent!', status_code=200)")
-    print()
-
-    # Example 6: Async Context Manager Pattern
-    print("Example 6: Async Context Manager Pattern")
-    print("-----------------------------------------")
-    print("All generated clients support async context managers:")
-    print()
-    print("  # Automatic cleanup with context manager")
-    print("  async with Office365Client(url, token_provider) as client:")
-    print("      email = ClientSendHtmlMessage(to='...', subject='...', body='...')")
-    print("      await client.send_email_v2_async(email)")
-    print("  # Client automatically closed after exiting context")
-    print()
-    print("  # Manual lifecycle management")
-    print("  client = Office365Client(url, token_provider)")
-    print("  try:")
-    print("      email = ClientSendHtmlMessage(to='...', subject='...', body='...')")
-    print("      await client.send_email_v2_async(email)")
-    print("  finally:")
-    print("      await client.close()")
-    print()
-
-    # Example 7: Error Handling
-    print("Example 7: Error Handling")
-    print("-------------------------")
-    print("The SDK provides structured error handling:")
-    print()
-    print("  from azure_workflows_connectors_sdk import ConnectorException")
-    print("  from azure_workflows_connectors_sdk.generated.office365_client import (")
-    print("      Office365Client, ClientSendHtmlMessage")
-    print("  )")
-    print()
-    print("  try:")
-    print("      async with Office365Client(url, token_provider) as client:")
-    print("          email = ClientSendHtmlMessage(to='...', subject='...', body='...')")
-    print("          await client.send_email_v2_async(email)")
-    print("  except ConnectorException as ex:")
-    print("      print(f'Connector error: {ex.message}')")
-    print("      print(f'Status code: {ex.status_code}')")
-    print("      print(f'Error body: {ex.error_body}')")
-    print()
-
-    print("Sample completed successfully!")
-    print()
-    print("Next steps:")
-    print("  1. Run LogicAppsCompiler CLI to generate connector code")
-    print("  2. Install the SDK: pip install <TBD>")
-    print("  3. Use typed clients with the connection runtime URL from Azure Portal")
-    print("  4. Deploy to Azure Functions or run locally")
+    
+    await example_1_get_outlook_categories()
+    await example_2_send_email()
+    await example_3_get_emails()
+    await example_4_draft_and_send_email()
+    await example_5_error_handling()
+    
+    print("\n" + "=" * 50)
+    print("Sample completed!")
 
 
 if __name__ == "__main__":

@@ -1,18 +1,17 @@
 [project]
-name = "victorias-connectors-office365-test"
-version = "0.0.0dev1"
-requires-python = ">=3.9"
-description = "FastAPI Runtime for Azure Functions Python Worker"
+name = "<TBD>"
+version = "0.1.0dev1"
+requires-python = ">=3.10"
+description = "Azure Logic Apps Connector SDK for Python"
 authors = [
-    { name = "Azure Functions team at Microsoft Corp.", email = "azurefunctions@microsoft.com" }
+    { name = "Azure Logic Apps team at Microsoft Corp.", email = "azurelogicapps@microsoft.com" }
 ]
-keywords = ["azure", "functions", "azurefunctions",
-            "python", "serverless", "fastapi"]
+keywords = ["azure", "connectors", "logic-apps",
+            "python", "serverless"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -26,12 +25,12 @@ classifiers = [
 ]
 dependencies = [
     "aiohttp",
-    "azure-identity",
+    "azure-identity-aio",
 ]
 
 [project.urls]
-Documentation = "https://github.com/Azure/azure-functions-python-worker/blob/dev/runtimes/fastapi/README.md"
-Repository = "https://github.com/Azure/azure-functions-python-worker"
+Documentation = ""
+Repository = ""
 
 [project.optional-dependencies]
 dev = [
@@ -55,8 +54,8 @@ requires = ["setuptools>=61.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["azure_workflows_connectors_sdk"]
+packages = ["azure.connectors"]
 
 
 [tool.setuptools.package-data]
-azure_workflows_connectors_sdk = ["py.typed"]
+azure.connectors = ["py.typed"]
