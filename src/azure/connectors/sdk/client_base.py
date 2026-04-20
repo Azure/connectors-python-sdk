@@ -22,19 +22,21 @@ class ConnectorClientBase(ABC):
         Initialize a ConnectorClientBase.
 
         Args:
-            token_provider: The token provider for authentication. Can be a TokenProvider instance
-                          or an Azure Identity credential (e.g., DefaultAzureCredential from azure.identity.aio).
+            token_provider: The token provider for authentication. Can be
+                a TokenProvider instance or an Azure Identity credential
+                (e.g., DefaultAzureCredential from azure.identity.aio).
             options: Optional connector client options.
         """
         if token_provider is None:
             raise ValueError("token_provider cannot be None")
-        
-        # NOTE(victoriahall): If the user passes an Azure Identity credential directly,
-        # wrap it in an AzureIdentityTokenProvider for compatibility.
+
+        # NOTE(victoriahall): If the user passes an Azure Identity
+        # credential directly, wrap it in an AzureIdentityTokenProvider
+        # for compatibility.
         if not isinstance(token_provider, TokenProvider):
             # Assume it's an Azure Identity credential
             token_provider = AzureIdentityTokenProvider(token_provider)
-        
+
         self._options = options or ConnectorClientOptions()
         self._http_client = ConnectorHttpClient(token_provider, self._options)
 

@@ -34,3 +34,8 @@ Thumbs.db
 
 # Local generator output (staging area — canonical location is src/.../Generated/)
 samples/generated/*.cs
+
+.venv*/
+**/__pycache__/
+**/pytest_cache/
+**/*.pyc

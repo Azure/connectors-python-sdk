@@ -3,8 +3,11 @@
 """Authentication token providers for connector clients."""
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union, Any
-from azure.identity.aio import DefaultAzureCredential, ManagedIdentityCredential
+from typing import List, Optional, Any
+from azure.identity.aio import (
+    DefaultAzureCredential,
+    ManagedIdentityCredential,
+)
 from azure.core.credentials import AccessToken
 
 
@@ -33,8 +36,9 @@ class AzureIdentityTokenProvider(TokenProvider):
         Initialize an AzureIdentityTokenProvider.
 
         Args:
-            credential: An Azure Identity async credential (e.g., DefaultAzureCredential from azure.identity.aio).
-                       Must have an async get_token() method.
+            credential: An Azure Identity async credential (e.g.,
+                DefaultAzureCredential from azure.identity.aio).
+                Must have an async get_token() method.
         """
         if credential is None:
             raise ValueError("credential cannot be None")
@@ -44,16 +48,18 @@ class AzureIdentityTokenProvider(TokenProvider):
         """Get an access token using the Azure Identity credential."""
         if not scopes:
             raise ValueError("At least one scope must be provided.")
-        
-        # NOTE(victoriahall): Azure Identity async credentials use get_token() which is async.
+
+        # NOTE(victoriahall): Azure Identity async credentials use
+        # get_token() which is async.
         token: AccessToken = await self._credential.get_token(*scopes)
         return token.token
-    
+
     async def close(self):
         """Close the underlying credential."""
         if hasattr(self._credential, 'close'):
             result = self._credential.close()
-            # NOTE(victoriahall): Only await if the close() method returns a coroutine.
+            # NOTE(victoriahall): Only await if the close() method
+            # returns a coroutine.
             if hasattr(result, '__await__'):
                 await result
 
@@ -77,17 +83,19 @@ class ManagedIdentityTokenProvider(TokenProvider):
         """Get an access token using managed identity."""
         if not scopes:
             raise ValueError("At least one scope must be provided.")
-        
-        # NOTE(victoriahall): azure-identity async credentials use get_token() which is async.
-        # Must await the call to get the AccessToken.
+
+        # NOTE(victoriahall): azure-identity async credentials use
+        # get_token() which is async. Must await the call to get the
+        # AccessToken.
         token: AccessToken = await self._credential.get_token(*scopes)
         return token.token
-    
+
     async def close(self):
         """Close the underlying credential."""
         if hasattr(self._credential, 'close'):
             result = self._credential.close()
-            # NOTE(victoriahall): Only await if the close() method returns a coroutine.
+            # NOTE(victoriahall): Only await if the close() method
+            # returns a coroutine.
             if hasattr(result, '__await__'):
                 await result
 

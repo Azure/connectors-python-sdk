@@ -11,7 +11,8 @@ T = TypeVar("T")
 @dataclass
 class TriggerCallbackBody(Generic[T]):
     """
-    Inner body of the AI Gateway trigger callback, containing the array of trigger items.
+    Inner body of the AI Gateway trigger callback, containing the
+    array of trigger items.
     """
 
     value: Optional[List[T]] = None
@@ -25,9 +26,10 @@ class TriggerCallbackBody(Generic[T]):
 class TriggerCallbackPayload(Generic[T]):
     """
     Envelope type for AI Gateway trigger callback payloads.
-    
-    The AI Gateway wraps triggerBody() in a {"body":{"value":[...]}} structure.
-    
+
+    The AI Gateway wraps triggerBody() in a {"body":{"value":[...]}}
+    structure.
+
     Type parameter T is the connector-specific trigger item type
     (e.g., GraphClientReceiveMessage for Office 365 email triggers).
     """

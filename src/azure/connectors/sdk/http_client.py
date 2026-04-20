@@ -6,7 +6,6 @@ import asyncio
 import json
 from dataclasses import asdict, is_dataclass
 from typing import Any, Dict, List, Optional, TypeVar, Generic
-from urllib.parse import urljoin
 import aiohttp
 from aiohttp import ClientTimeout
 
@@ -20,7 +19,9 @@ T = TypeVar("T")
 class ConnectorResponse(Generic[T]):
     """Represents a response from a connector operation."""
 
-    def __init__(self, status_code: int, headers: Dict[str, str], value: Optional[T]):
+    def __init__(
+        self, status_code: int, headers: Dict[str, str], value: Optional[T]
+    ):
         """
         Initialize a ConnectorResponse.
 
@@ -72,7 +73,7 @@ class ConnectorHttpClient:
         if self._session and not self._session.closed:
             await self._session.close()
             self._session = None
-        
+
         # Close the token provider if it has a close method
         if hasattr(self._token_provider, 'close'):
             await self._token_provider.close()
@@ -107,29 +108,37 @@ class ConnectorHttpClient:
             "Content-Type": "application/json",
         }
 
-        # NOTE(victoriahall): Convert dataclass objects to dictionaries for JSON serialization.
-        # Generated connector clients pass dataclass instances as body parameters.
+        # NOTE(victoriahall): Convert dataclass objects to dictionaries
+        # for JSON serialization. Generated connector clients pass
+        # dataclass instances as body parameters.
         json_body = None
         if body is not None:
             if is_dataclass(body):
                 # Convert dataclass to dict, excluding None values
                 body_dict = asdict(body)
-                
-                # NOTE(victoriahall): Handle dynamic schemas with additional_properties.
-                # Extract additional_properties and merge into main dict (like .NET [JsonExtensionData]).
+
+                # NOTE(victoriahall): Handle dynamic schemas with
+                # additional_properties. Extract additional_properties and
+                # merge into main dict (like .NET [JsonExtensionData]).
                 if 'additional_properties' in body_dict:
-                    additional_props = body_dict.pop('additional_properties')
+                    additional_props = body_dict.pop(
+                        'additional_properties'
+                    )
                     if additional_props:
-                        # Merge additional properties into the main dictionary
+                        # Merge additional properties into the main dict
                         body_dict.update(additional_props)
-                
+
                 # Filter out None values to avoid sending null fields
-                body_dict = {k: v for k, v in body_dict.items() if v is not None}
+                body_dict = {
+                    k: v for k, v in body_dict.items() if v is not None
+                }
                 json_body = json.dumps(body_dict)
             else:
                 json_body = json.dumps(body)
 
-        return await self._send_with_retry(session, method, url, headers, json_body)
+        return await self._send_with_retry(
+            session, method, url, headers, json_body
+        )
 
     async def _send_with_retry(
         self,
@@ -141,7 +150,7 @@ class ConnectorHttpClient:
     ) -> aiohttp.ClientResponse:
         """Send request with retry logic."""
         last_exception = None
-        
+
         for attempt in range(self._options.max_retry_attempts):
             try:
                 async with session.request(
@@ -149,10 +158,13 @@ class ConnectorHttpClient:
                 ) as response:
                     # For transient errors, retry
                     if response.status >= 500 or response.status == 429:
-                        if attempt < self._options.max_retry_attempts - 1:
+                        if (
+                            attempt <
+                            self._options.max_retry_attempts - 1
+                        ):
                             await self._delay_retry(attempt)
                             continue
-                    
+
                     # Return response for caller to handle
                     response_copy = type('Response', (), {
                         'status': response.status,
@@ -160,7 +172,7 @@ class ConnectorHttpClient:
                         'text': await response.text(),
                     })()
                     return response_copy
-                    
+
             except aiohttp.ClientError as ex:
                 last_exception = ex
                 if attempt < self._options.max_retry_attempts - 1:
@@ -174,13 +186,17 @@ class ConnectorHttpClient:
     async def _delay_retry(self, attempt: int):
         """Calculate and apply retry delay."""
         if self._options.use_exponential_backoff:
-            delay = self._options.initial_retry_delay_seconds * (2 ** attempt)
+            delay = (
+                self._options.initial_retry_delay_seconds * (2 ** attempt)
+            )
         else:
             delay = self._options.initial_retry_delay_seconds
-        
+
         await asyncio.sleep(delay)
 
-    async def get_async(self, request_uri: str, scopes: Optional[List[str]] = None) -> Any:
+    async def get_async(
+        self, request_uri: str, scopes: Optional[List[str]] = None
+    ) -> Any:
         """
         Send a GET request.
 
@@ -192,17 +208,17 @@ class ConnectorHttpClient:
             The deserialized response.
         """
         response = await self.send_async("GET", request_uri, scopes)
-        
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 f"GET {request_uri}",
                 response.status,
                 response.text,
             )
-        
+
         if not response.text:
             return None
-        
+
         return json.loads(response.text)
 
     async def post_async(
@@ -223,15 +239,15 @@ class ConnectorHttpClient:
             The deserialized response.
         """
         response = await self.send_async("POST", request_uri, scopes, body)
-        
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 f"POST {request_uri}",
                 response.status,
                 response.text,
             )
-        
+
         if not response.text:
             return None
-        
+
         return json.loads(response.text)

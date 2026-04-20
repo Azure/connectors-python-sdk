@@ -21,7 +21,9 @@ class ConnectorException(Exception):
         self.status_code = status_code
         self.response_body = response_body
         truncated_body = self._truncate_body(response_body)
-        super().__init__(f"{operation} failed with status {status_code}: {truncated_body}")
+        message = f"{operation} failed with status {status_code}: "
+        message += truncated_body
+        super().__init__(message)
 
     @classmethod
     def _truncate_body(cls, body: str) -> str:

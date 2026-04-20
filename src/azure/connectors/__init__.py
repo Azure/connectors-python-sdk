@@ -13,6 +13,11 @@ from .sdk.options import ConnectorClientOptions
 from .sdk.authentication import TokenProvider, ManagedIdentityTokenProvider, ConnectionStringTokenProvider, AzureIdentityTokenProvider
 from .sdk.exceptions import ConnectorException
 from .sdk.trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
+from .kusto import KustoClient
+from .office365 import Office365Client
+from .sharepointonline import SharepointonlineClient
+from .teams import TeamsClient
+from .msgraph import MsgraphgroupsanduserClient
 
 __version__ = "0.1.0"
 
@@ -26,4 +31,9 @@ __all__ = [
     "ConnectorException",
     "TriggerCallbackPayload",
     "TriggerCallbackBody",
+    "KustoClient",
+    "Office365Client",
+    "SharepointonlineClient",
+    "TeamsClient",
+    "MsgraphgroupsanduserClient",
 ]
