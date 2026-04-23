@@ -60,7 +60,7 @@ This sample shows:
 1. **Python 3.10+** - Async/await support required
 2. **Azure Workflows Connector SDK** - Install via pip:
    ```bash
-   pip install <TBD>
+   pip install azure-connectors
    ```
 3. **Generated connector code** - Use LogicAppsCompiler CLI (see below)
 
@@ -79,7 +79,7 @@ To use real connectors, generate client code using the LogicAppsCompiler CLI:
 
 ```bash
 # Navigate to the BPM repository
-cd c:\Users\victoriahall\Documents\repos\AzureUX-BPM
+cd ...\AzureUX-BPM
 
 # Build the generator
 dotnet build .\src\tools\CodefulSdkGenerator\LogicAppsCompiler.Cli -c Release
@@ -196,7 +196,7 @@ See [GENERATION.md](../../GENERATION.md) for the complete list.
 ## Next Steps
 
 1. Generate connector code for your needed connectors
-2. Install the SDK: `pip install <TBD>`
+2. Install the SDK: `pip install azure-connectors`
 3. Get connection runtime URL from Azure Portal
 4. Use typed clients in your application
 5. Deploy to Azure Functions or run locally

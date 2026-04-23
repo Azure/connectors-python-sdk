@@ -9,7 +9,7 @@ Prerequisites:
 3. Connection runtime URL from Azure Portal
 
 Installation:
-    pip install <TBD>
+    pip install azure-connectors
 
 Usage:
     python sample_teams_usage.py

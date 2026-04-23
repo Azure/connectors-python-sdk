@@ -12,7 +12,7 @@ Prerequisites:
 4. SharePoint site URL
 
 Installation:
-    pip install <TBD>
+    pip install azure-connectors
 
 Usage:
     Set environment variables:

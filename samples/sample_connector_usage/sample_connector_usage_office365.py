@@ -11,7 +11,7 @@ Prerequisites:
 3. Connection runtime URL from Azure Portal
 
 Installation:
-    pip install <TBD>
+    pip install azure-connectors
 
 Usage:
     Set environment variable:
@@ -66,7 +66,7 @@ async def example_2_send_email():
     """Example 2: Send an HTML email."""
     print("\n=== Example 2: Send Email ===")
     
-    to_address = os.environ.get("TEST_EMAIL_TO", "victoriahall@microsoft.com")
+    to_address = os.environ.get("TEST_EMAIL_TO", "<YOUR-EMAIL>@microsoft.com")
     
     credential = DefaultAzureCredential()
     
@@ -120,7 +120,7 @@ async def example_4_draft_and_send_email():
     """Example 4: Draft an email and then send it."""
     print("\n=== Example 4: Draft and Send Email ===")
     
-    to_address = os.environ.get("TEST_EMAIL_TO", "victoriahall@microsoft.com")
+    to_address = os.environ.get("TEST_EMAIL_TO", "<YOUR-EMAIL>@microsoft.com")
     
     credential = DefaultAzureCredential()
     

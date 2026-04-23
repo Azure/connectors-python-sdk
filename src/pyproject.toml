@@ -1,6 +1,6 @@
 [project]
-name = "<TBD>"
-version = "0.1.0dev1"
+name = "azure-connectors"
+version = "0.1.0dev2"
 requires-python = ">=3.10"
 description = "Azure Logic Apps Connector SDK for Python"
 authors = [
@@ -9,7 +9,6 @@ authors = [
 keywords = ["azure", "connectors", "logic-apps",
             "python", "serverless"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -25,12 +24,8 @@ classifiers = [
 ]
 dependencies = [
     "aiohttp",
-    "azure-identity-aio",
+    "azure-identity[aio]",
 ]
-
-[project.urls]
-Documentation = ""
-Repository = ""
 
 [project.optional-dependencies]
 dev = [
@@ -49,13 +44,7 @@ dev = [
     "pytest-rerunfailures",
 ]
 
-[build-system]
-requires = ["setuptools>=61.0", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = ["azure.connectors"]
-
-
-[tool.setuptools.package-data]
-azure.connectors = ["py.typed"]
+[tool.setuptools.packages.find]
+exclude = [
+    'src', 'azure', 'docs', 'tests*', 'samples', 'scripts'
+]
