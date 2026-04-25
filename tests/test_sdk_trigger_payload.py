@@ -181,8 +181,8 @@ class TestTriggerCallbackPayload:
         assert payload.body.value[0].tags == ["tag1", "tag2"]
 
     def test_represents_ai_gateway_structure(self):
-        """Test that structure represents AI Gateway envelope."""
-        # AI Gateway structure: {"body": {"value": [...]}}
+        """Test that structure represents Connector Gateway envelope."""
+        # Connector Gateway structure: {"body": {"value": [...]}}
         items = [TestTriggerItem(id="1", value="data")]
         body = TriggerCallbackBody[TestTriggerItem](value=items)
         payload = TriggerCallbackPayload[TestTriggerItem](body=body)
