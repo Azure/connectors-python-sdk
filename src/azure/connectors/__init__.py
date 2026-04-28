@@ -10,7 +10,12 @@ generated connector clients.
 
 from .sdk.client_base import ConnectorClientBase
 from .sdk.options import ConnectorClientOptions
-from .sdk.authentication import TokenProvider, ManagedIdentityTokenProvider, ConnectionStringTokenProvider, AzureIdentityTokenProvider
+from .sdk.authentication import (
+    TokenProvider,
+    ManagedIdentityTokenProvider,
+    ConnectionStringTokenProvider,
+    AzureIdentityTokenProvider,
+)
 from .sdk.exceptions import ConnectorException
 from .sdk.trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 
