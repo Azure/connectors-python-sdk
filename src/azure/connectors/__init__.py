@@ -17,7 +17,7 @@ from .sdk.trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 # Generated connector clients — some may have import errors from incomplete
 # code generation (e.g., undefined type references). Wrap each import so
 # a single broken connector doesn't prevent the SDK core from loading.
-# See: https://github.com/Azure/connectors-python-sdk/issues/TBD
+# See: https://github.com/Azure/connectors-python-sdk/issues/13
 try:
     from .kusto import KustoClient
 except (ImportError, NameError):
