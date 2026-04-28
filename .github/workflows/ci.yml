@@ -60,7 +60,7 @@ jobs:
       run: pip install -e './src[dev]'
 
     - name: Test with coverage
-      run: pytest --cov=azure.connectors --cov-report=xml:coverage/coverage.xml
+      run: pytest -v --tb=short
       shell: bash
 
     - name: Upload coverage
