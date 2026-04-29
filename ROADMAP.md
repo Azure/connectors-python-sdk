@@ -1,103 +1,269 @@
-# DirectClient SDK Roadmap
+# Python SDK Roadmap
 
 ## Overview
 
-This document tracks the progress of generating DirectClient SDK code for Logic Apps connectors, starting with high-value actions and expanding to triggers in later phases.
+This document tracks the development roadmap for the Azure Connectors Python SDK, including connector support, PyPI publication, samples, and planned features.
 
-## Current Status
+## Current Status (v0.1.0dev2)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| BPM Generator | ⏳ Feature branch awaiting human review | Fixes for WhenWritingNull, nullable types, SharePoint fixes |
-| SDK (Office365) | ✅ Complete | WhenWritingNull fix merged |
-| SDK (SharePoint) | ✅ Complete | Validated end-to-end |
-| SDK (Kusto / ADX) | ✅ Complete | KQL queries, control commands, chart rendering, MCP server |
-| POC | ✅ Complete | Office365 email + SharePoint lists validated |
+| Core SDK | ✅ Complete | Token providers, HTTP client, retry logic, async/await |
+| Office 365 | ✅ Complete | 53 methods, 41 tests, 79% coverage |
+| SharePoint | ✅ Complete | 45 methods, 44 tests, 57% coverage |
+| Teams | ✅ Complete | 49 methods, 27 tests passing, 73% coverage (18 skipped) |
+| Kusto | ✅ Complete | 6 methods, 37 tests, 98% coverage |
+| MS Graph | ✅ Complete | 7 methods, 46 tests |
+| CI/CD | ✅ Complete | GitHub Actions for pytest, flake8, build |
+| PyPI Publishing | ✅ Complete | Release workflow ready |
+| Documentation | ✅ Complete | README, samples, test docs |
 
 ---
 
-## Prioritized Connector List
+## Phase 1: Core Infrastructure & Initial Connectors ✅
 
-Consolidated from: Consumption usage data (30-day), partner team tier analysis (90-day), and agentic solution value assessment.
+**Status:** Complete (v0.1.0dev1 - v0.1.0dev2)
 
-### Phase 1: M365 Core (Agentic Foundation)
+### Completed
 
-These connectors form the backbone of modern agentic solutions with Teams as front-end, Graph as API backbone, and SharePoint/OneDrive for knowledge.
+- [x] Core SDK abstractions (`ConnectorClientBase`, `TokenProvider`, `ConnectorHttpClient`)
+- [x] Authentication providers (Managed Identity, Azure Identity, Connection String)
+- [x] HTTP client with retry logic and exponential backoff
+- [x] Async/await support throughout
+- [x] Type hints and dataclass models
+- [x] Office 365 Outlook connector
+- [x] SharePoint Online connector
+- [x] Microsoft Teams connector
+- [x] Azure Data Explorer (Kusto) connector
+- [x] Microsoft Graph connector
+- [x] Comprehensive test suite (305 tests, 75% coverage)
+- [x] Sample code for all connectors
+- [x] Connection setup PowerShell script
+- [x] GitHub Actions CI/CD
+- [x] PyPI publishing workflow
+- [x] Documentation (README, guides, API docs)
 
-| Priority | Connector | Usage Rank | Partner Tier | 90-Day Executions | Agentic Value | Status |
-|----------|-----------|------------|--------------|-------------------|---------------|--------|
-| 1.0 | **Office 365** | #2/#10 | Tier 1 | 2.67B | Email/Calendar backend | ✅ Complete |
-| 1.1 | **SharePoint Online** | #1/#3 | Tier 1 | 5.74B | Knowledge base, file/list operations | ✅ Complete |
-| 1.2 | **Microsoft Graph** | — | Tier 2 | 820M | Unified M365 API backbone | ⬜ Not started |
-| 1.3 | **Microsoft Teams** | — | Tier 2 | 550M | Preferred front-end, messaging | ⬜ Not started |
-| 1.4 | **OneDrive for Business** | #6 | Tier 2 | 719M | User files, knowledge base | ⬜ Not started |
-| 1.5 | **Office 365 Users** | #16 | Tier 1 | 2.92B | User directory, profile data | ⬜ Not started |
+---
 
-### Phase 2: Data & Integration (Enterprise Core)
+## Phase 2: PyPI Publication & Ecosystem
 
-High-volume connectors for enterprise data and integration scenarios.
+**Target:** Q2 2026
 
-| Priority | Connector | Usage Rank | Partner Tier | 90-Day Executions | Notes | Status |
-|----------|-----------|------------|--------------|-------------------|-------|--------|
-| 2.1 | **Dataverse (CDS)** | #12 | Tier 1 | 2.93B | Power Platform integration | ⬜ Not started |
-| 2.2 | **Excel Online Business** | #9 | Tier 2 | 957M | Spreadsheet operations | ⬜ Not started |
-| 2.3 | **Dynamics 365** | — | Tier 2 | 315M | CRM record operations | ⬜ Not started |
-| 2.4 | **Salesforce** | — | Tier 2 | 127M | CRM operations | ⬜ Not started |
+### Goals
 
-### Phase 3: Azure Services
+- [ ] Publish `azure-connectors` to PyPI
+  - [x] Package metadata and classifiers
+  - [x] Version management workflow
+  - [x] PyPI authentication setup
+  - [ ] First stable release (v0.1.0)
+- [ ] Package distribution
+  - [x] Wheel and source distribution builds
+  - [x] GitHub Releases with artifacts
+  - [ ] TestPyPI validation
+  - [ ] PyPI publication
+- [ ] Documentation enhancements
+  - [ ] Sphinx documentation site
+  - [ ] API reference auto-generation
+  - [ ] Tutorial series
+  - [ ] Migration guide from Logic Apps
 
-Azure-native connectors (some may overlap with existing Functions bindings).
+### Milestones
 
-| Priority | Connector | Usage Rank | Partner Tier | Notes | Status |
-|----------|-----------|------------|--------------|-------|--------|
-| 3.0 | **Azure Data Explorer (Kusto)** | — | — | KQL queries, control commands, chart rendering, MCP server | ✅ Complete |
-| 3.1 | **Azure Blob Storage** | #8/#15 | — | May overlap with Functions binding | ⬜ Evaluate |
-| 3.2 | **Azure Log Analytics** | #7 | — | Query/ingest operations | ⬜ Not started |
-| 3.3 | **Event Hubs** | #14 | — | May overlap with Functions binding | ⬜ Evaluate |
-| 3.4 | **Service Bus** | #4/#13 | — | Functions already supports | ⚠️ Skip (native) |
+| Milestone | Target Date | Status |
+|-----------|-------------|--------|
+| v0.1.0dev2 published to TestPyPI | April 2026 | ⏳ In Progress |
+| Documentation site launched | May 2026 | 📋 Planned |
+| v0.1.0 stable release to PyPI | May 2026 | 📋 Planned |
 
-### Phase 4: Enterprise Systems
+---
 
-Enterprise messaging, databases, and LOB systems.
+## Phase 3: Additional High-Priority Connectors
 
-| Priority | Connector | Usage Rank | Partner Tier | 90-Day Executions | Status |
-|----------|-----------|------------|--------------|-------------------|--------|
-| 4.1 | **JDBC** | — | Tier 2 | 1.24B | Generic database connectivity | ⬜ Not started |
-| 4.2 | **IBM MQ** | — | Tier 2 | 1.02B | Enterprise messaging | ⬜ Not started |
-| 4.3 | **SMTP** | — | Tier 2 | 916M | Email sending | ⬜ Not started |
-| 4.4 | **SFTP** | — | Tier 2 | 251M | File transfer | ⬜ Not started |
-| 4.5 | **Oracle Database** | — | Tier 3 | 109M | Enterprise DB | ⬜ Not started |
-| 4.6 | **ServiceNow** | — | Tier 3 | 41M | ITSM operations | ⬜ Not started |
-| 4.7 | **Snowflake** | — | Tier 3 | 60M | Data warehouse | ⬜ Not started |
-| 4.8 | **SAP** | — | Tier 3 | 25M | ERP integration | ⬜ Not started |
-| 4.9 | **DocuSign** | — | Tier 3 | 27M | E-signature | ⬜ Not started |
+**Target:** Q3 2026
 
-### Phase 5: Triggers (Active Design → **Implementation Planning**)
+### M365 Expansion
 
-Trigger support has moved from design to implementation planning. The BPM runtime trigger architecture has been analyzed, extraction paths identified, and work broken into 12 tasks across 4 sub-phases.
+| Priority | Connector | Use Cases | Status |
+|----------|-----------|-----------|--------|
+| 3.1 | **OneDrive for Business** | File operations, knowledge base | 📋 Planned |
+| 3.2 | **Office 365 Users** | User directory, profile data | 📋 Planned |
+| 3.3 | **Office 365 Groups** | Group management | 📋 Planned |
+| 3.4 | **Planner** | Task management | 📋 Planned |
 
-> **Note on architecture:** The trigger support plan proposes a **Timer+Blob+Queue polling architecture** as the **Phase 5a worker library POC**. This is a fast-iteration stepping stone to validate the model. The long-term **Phase 5b host extension** (described under "Implementation Approach" below) uses connector-infrastructure-managed webhooks where Functions does not poll. Both approaches coexist: the worker library POC proves the end-to-end developer experience; the host extension delivers the production webhook-push model. The trigger support plan's sub-phases (5A–5D) are task groupings within Phase 5a.
+### Data & Integration
 
-**Plans and analysis:** Internal design documents are maintained for trigger architecture, implementation planning, and reference implementation analysis.
+| Priority | Connector | Use Cases | Status |
+|----------|-----------|-----------|--------|
+| 3.5 | **Excel Online** | Spreadsheet operations | 📋 Planned |
+| 3.6 | **Dataverse** | Power Platform integration | 📋 Planned |
+| 3.7 | **SQL Server** | Database operations | 📋 Planned |
 
-#### Team Roles
+### Azure Services
 
-| Team | Responsibility |
-|------|----------------|
-| **Connectors team** | SDK for calling actions + typed trigger data types. Connector-side trigger notification delivery to Functions. |
-| **Functions team** | Implement the Functions extension(s) for triggers and bindings — both strongly-typed and generic approaches, across all supported languages (C#, Python, Node.js, Java). |
-| **Functions PM** | Prioritization of connectors, GTM plan, productization. |
+| Priority | Connector | Use Cases | Status |
+|----------|-----------|-----------|--------|
+| 3.8 | **Azure Blob Storage** | File storage (if not using Functions binding) | 📋 Planned |
+| 3.9 | **Azure Log Analytics** | Query/ingest operations | 📋 Planned |
+| 3.10 | **Event Hubs** | Event streaming (if not using Functions binding) | 📋 Planned |
 
-#### Connector Resource Access Strategy
+---
 
-The SDK currently uses `Microsoft.Web/connections` resources directly for both actions and trigger registration. A new **Connector Gateway** resource (`Microsoft.Web/connectorGateways`) is in development that exposes connections and triggers as data-plane resources without requiring Logic Apps. The Connector Gateway is available in First Release / TIP regions today but is **not yet generally available**.
+## Phase 4: Python Samples & Best Practices
 
-**Current approach:** Continue using `Microsoft.Web/connections` direct access for all SDK work (actions and triggers).
-**Future migration:** Transition to Connector Gateway API when it reaches GA and the API surface stabilizes. This is tracked as a backlog item (see [Execution Plan](#execution-plan)).
+**Target:** Q3 2026
 
-#### Architecture Decision: Webhook Model (Event Grid Analogy)
+### Sample Projects
 
-Connector triggers follow the **Event Grid webhook pattern**:
+- [ ] **Azure Functions samples**
+  - [ ] HTTP trigger with Office 365 email
+  - [ ] Timer trigger with SharePoint list sync
+  - [ ] Blob trigger with Teams notification
+  - [ ] Durable Functions orchestration
+- [ ] **FastAPI integration**
+  - [ ] REST API with connector clients
+  - [ ] Webhook receivers for triggers
+  - [ ] OpenAPI documentation
+- [ ] **Django/Flask examples**
+  - [ ] Web app with connector integration
+  - [ ] Background tasks with celery
+- [ ] **Data processing pipelines**
+  - [ ] Kusto query to DataFrame
+  - [ ] SharePoint to data lake
+  - [ ] Teams bot integration
+
+### Best Practices Documentation
+
+- [ ] Error handling patterns
+- [ ] Retry and timeout configuration
+- [ ] Authentication in production
+- [ ] Performance optimization
+- [ ] Testing strategies
+- [ ] Logging and monitoring
+
+---
+
+## Phase 5: Advanced Features
+
+**Target:** Q4 2026
+
+### SDK Enhancements
+
+- [ ] **Trigger support**
+  - [ ] Polling triggers (webhooks where supported)
+  - [ ] Connector Gateway integration
+  - [ ] Event Grid integration
+- [ ] **Batch operations**
+  - [ ] Bulk send for email
+  - [ ] Batch SharePoint operations
+- [ ] **Streaming support**
+  - [ ] Large file uploads/downloads
+  - [ ] Chunked data transfer
+- [ ] **Caching layer**
+  - [ ] Token caching
+  - [ ] Response caching
+  - [ ] Cache invalidation
+
+### Developer Experience
+
+- [ ] **Code generation CLI**
+  - [ ] Python CLI tool for generating clients
+  - [ ] Custom connector support
+  - [ ] Swagger-to-Python pipeline
+- [ ] **VS Code extension**
+  - [ ] IntelliSense for connector operations
+  - [ ] Code snippets
+  - [ ] Connection manager
+- [ ] **Type stub generation**
+  - [ ] PEP 561 compliance
+  - [ ] Mypy compatibility
+
+---
+
+## Phase 6: Enterprise & Ecosystem
+
+**Target:** 2027
+
+### Enterprise Features
+
+- [ ] **Multi-region support**
+  - [ ] Region affinity configuration
+  - [ ] Cross-region failover
+- [ ] **Compliance & security**
+  - [ ] Private endpoints
+  - [ ] CMK support
+  - [ ] Audit logging
+- [ ] **Performance & scale**
+  - [ ] Connection pooling
+  - [ ] Rate limiting
+  - [ ] Circuit breakers
+
+### Ecosystem Integration
+
+- [ ] **Azure SDK integration**
+  - [ ] Unified configuration
+  - [ ] Shared credential chain
+  - [ ] Consistent logging
+- [ ] **Observability**
+  - [ ] OpenTelemetry support
+  - [ ] Application Insights integration
+  - [ ] Custom metrics
+- [ ] **Language parity**
+  - [ ] Feature alignment with .NET SDK
+  - [ ] Shared test cases
+  - [ ] Cross-language samples
+
+---
+
+## Connector Priority Matrix
+
+Based on usage data, agentic solution value, and community requests:
+
+| Tier | Connectors | Priority |
+|------|------------|----------|
+| **Tier 1** (Complete) | Office 365, SharePoint, Teams, Kusto, MS Graph | ✅ |
+| **Tier 2** (Next) | OneDrive, Excel, Dataverse, SQL | 📋 Q3 2026 |
+| **Tier 3** (Future) | Dynamics 365, Salesforce, Blob Storage, Log Analytics | 📋 Q4 2026 |
+| **Tier 4** (Backlog) | SMTP, SFTP, ServiceNow, Snowflake | 📋 2027 |
+
+---
+
+## Code Generation Status
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| LogicAppsCompiler with `--python` flag | ✅ Available | BPM PR 15456622 |
+| Python output templates | ✅ Complete | Dataclasses, async methods |
+| Type hint generation | ✅ Complete | Full Python 3.10+ typing |
+| Docstring generation | ✅ Complete | From connector metadata |
+| Test generation | 📋 Planned | Auto-generate unit tests |
+
+See [GENERATION.md](GENERATION.md) for code generation documentation.
+
+---
+
+## Community Feedback & Requests
+
+We track community requests in [GitHub Issues](https://github.com/Azure/Connectors-Python-SDK/issues). Top requests:
+
+1. **More connectors** — OneDrive, Excel, Dataverse
+2. **Trigger support** — Polling triggers for Office 365, SharePoint
+3. **Code generation CLI** — Standalone tool for custom connectors
+4. **Better documentation** — More examples, tutorials
+5. **Azure Functions integration** — Native Functions bindings
+
+---
+
+## How to Contribute
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+
+- Requesting new connectors
+- Reporting bugs
+- Submitting pull requests
+- Code generation contributions
+
+For questions and discussions, visit [GitHub Discussions](https://github.com/Azure/LogicApps/discussions).
+
 
 1. **Function app registers** a callback URL with the connector service at deployment time (cloud) or F5 time (local)
 2. **Connector service monitors** for events on its own compute (Logic Apps multi-tenant infrastructure)
@@ -255,7 +421,7 @@ For each new connector, complete these steps:
    - [ ] Monitor Connector Gateway API availability and documentation
    - [ ] Evaluate migration path from `Microsoft.Web/connections` direct access
    - [ ] Update SDK connection setup to support Connector Gateway resource type
-   - [ ] Update POC to validate Connector Gateway–based connection flow
+   - [ ] Update POC to validate AI Gateway–based connection flow
    - [ ] Update `docs/connection-setup.md` with Connector Gateway instructions
 
 1. **Multi-language trigger SDK** (Python, Node.js, Java)

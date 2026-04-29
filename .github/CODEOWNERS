@@ -1,6 +1,2 @@
 # Default owners
-* @Azure/azure-logicapps-team
-
-# SDK components
-/src/ @Azure/azure-logicapps-team
-/tests/ @Azure/azure-logicapps-team
+* @Azure/connectors-sdks

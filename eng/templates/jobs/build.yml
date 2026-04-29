@@ -1,0 +1,39 @@
+jobs:
+  - job: "Build"
+    displayName: 'Build Connectors SDK'
+
+    strategy:
+      matrix:
+        Python310:
+          PYTHON_VERSION: '3.10'
+        Python311:
+          PYTHON_VERSION: '3.11'
+        Python312:
+          PYTHON_VERSION: '3.12'
+        Python313:
+          PYTHON_VERSION: '3.13'
+        Python314:
+          PYTHON_VERSION: '3.14'
+          
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(PYTHON_VERSION)
+      - bash: |
+          python --version
+        displayName: 'Check python version'
+      - task: PipAuthenticate@1
+        displayName: 'Pip Authenticate'
+        inputs:
+          artifactFeeds: 'public/PythonSDK_PublicPackages'
+      - bash: |
+          python -m pip install -U pip
+          python -m pip install build
+          cd src
+          python -m build
+        displayName: 'Build Connectors SDK for $(PYTHON_VERSION)'
+      - bash: |
+          pip install pip-audit
+          cd src
+          pip-audit .
+        displayName: 'Run vulnerability scan'

@@ -1,12 +1,12 @@
 version: 2
 updates:
-  - package-ecosystem: nuget
-    directory: /
+  - package-ecosystem: pip
+    directory: /src
     schedule:
       interval: weekly
     target-branch: main
     groups:
-      nuget-minor-patch:
+      pip-minor-patch:
         update-types:
           - minor
           - patch

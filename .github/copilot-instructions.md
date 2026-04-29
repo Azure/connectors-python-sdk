@@ -1,367 +1,313 @@
-# Copilot Instructions for azure-logicapps-connector-sdk
+# Copilot Instructions for azure-connectors-python-sdk
 
 ## Overview
 
-This repository contains the lightweight SDK for Azure Logic Apps connectors. Code must follow the team's coding conventions based on BPM repo standards.
+This repository contains the Python SDK for Azure Logic Apps connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for async/await patterns, type safety, and API design.
 
 ## Quick Reference: Coding Style Rules
 
 ### File Structure
 
-```csharp
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
+```python
+# ------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+# ------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using Microsoft.Azure.Connectors.Sdk;
+"""Module docstring describing the purpose of this module."""
 
-namespace Microsoft.Azure.Connectors.Sdk
-{
-    public class YourClass
-    {
-    }
-}
+from __future__ import annotations
+
+import asyncio
+from typing import Any, Optional
+
+from azure.connectors.sdk import ConnectorClient
+
+
+class YourClass:
+    """Class docstring."""
+    
+    pass
 ```
 
 **Rules:**
 
-- Copyright header: Use `//----` (4 dashes) format with double space before "All rights reserved"
-- Usings OUTSIDE namespace (standard C# convention)
-- Usings sorted: System.* first, then alphabetically
-- No empty lines between using groups
+- Copyright header: Use `# ----` (4 dashes) format with double space before "All rights reserved"
+- Module docstring immediately after copyright
+- Use `from __future__ import annotations` for forward references
+- Imports sorted: standard library, third-party, local (use `isort`)
+- One blank line between import groups
 
-### Naming and Qualification
+### Naming Conventions
 
 | Element | Rule | Example |
 |---------|------|---------|
-| Static members | Qualify with class name | `MyClass.StaticMethod()` |
-| Instance members | Qualify with `this.` | `this.instanceField` |
-| Private fields | Use `_camelCase` | `private readonly string _connectionString;` |
-| Constants | Qualify with class name | `MyClass.DefaultTimeout` |
-| Local variables | Use complete English terms | `parameter` not `p`, `method` not `m` |
-| Lambda parameters | Use descriptive names | `methods.Where(method => ...)` not `m => ...` |
+| Modules | lowercase with underscores | `http_client.py` |
+| Classes | PascalCase | `ConnectorClient` |
+| Functions/methods | snake_case | `get_connection_status()` |
+| Constants | UPPER_SNAKE_CASE | `DEFAULT_TIMEOUT_SECONDS` |
+| Private members | leading underscore | `_internal_method()`, `_private_attr` |
+| Type variables | PascalCase with suffix | `ResponseT`, `ItemT` |
 
 **Variable naming rules:**
 
 - Use complete, unabbreviated English terms for all identifiers
-- No single-letter variable names, even in lambdas (use `arg`, `item`, `method`, `parameter`)
+- No single-letter variable names except for well-known conventions (`i`, `j` for indices, `e` for exceptions in handlers)
 - No placeholder names (`blah`, `foo`, `temp`, `x`) — always use meaningful names
 
 ### File Organization
 
-**One type per file:**
+**One primary class per module:**
 
-- Declare only one class, struct, enum, or interface per file
-- File name must match the type name
-- Exception: Nested types (e.g., private helper classes) are allowed within the containing type
+- Main class should match the module name (e.g., `http_client.py` contains `HttpClient`)
+- Helper classes and functions can coexist in the same module if tightly coupled
+- Keep modules focused — split large modules into submodules
 
-### Async/Await Format
+### Type Hints
 
-**ALWAYS use this multi-line format:**
+**ALWAYS use type hints for public APIs:**
 
-```csharp
-var result = await this.httpClient
-    .GetAsync(requestUri)
-    .ConfigureAwait(continueOnCapturedContext: false);
+```python
+from typing import Optional
+
+async def get_user(
+    user_id: str,
+    include_details: bool = False,
+) -> Optional[User]:
+    """Retrieve a user by ID."""
+    ...
 ```
 
 **Rules:**
 
-- Period on NEW line, not end of previous line
-- Arguments indented ONE level (4 spaces)
-- ALWAYS use `ConfigureAwait(continueOnCapturedContext: false)` with explicit parameter name
-- Exception: Skip await for lone return statement (unless inside `using` block)
+- Use `from __future__ import annotations` for modern syntax
+- Use `Optional[X]` or `X | None` for nullable types
+- Use `list[str]` (lowercase) instead of `List[str]` (Python 3.9+)
+- Return type is required for all public functions/methods
+- Use `TypedDict` for structured dictionaries
+- Use `Protocol` for duck typing instead of ABCs when appropriate
+
+### Async/Await Patterns
+
+**Use async context managers:**
+
+```python
+async with aiohttp.ClientSession() as session:
+    async with session.get(url) as response:
+        data = await response.json()
+```
+
+**Rules:**
+
+- Use `async with` for resources that need cleanup
+- Prefer `asyncio.gather()` for concurrent operations
+- Never use `asyncio.run()` inside async code
+- Use `asyncio.create_task()` for fire-and-forget operations (with proper error handling)
 
 **DO NOT:**
 
-```csharp
-// Wrong: ConfigureAwait without named parameter
-.ConfigureAwait(false);
+```python
+# Wrong: Blocking call in async function
+response = requests.get(url)  # Use aiohttp instead
 
-// Wrong: Method call on same line as object
-var result = await this.httpClient.GetAsync(requestUri)
-    .ConfigureAwait(continueOnCapturedContext: false);
-
-// Wrong: Dot at end of line
-var result = await this.httpClient.
-    GetAsync(requestUri);
+# Wrong: Manual cleanup without context manager
+session = aiohttp.ClientSession()
+try:
+    ...
+finally:
+    await session.close()  # Use async with instead
 ```
 
-### Method Calls with Multiple Parameters
+### Function Signatures
 
 **Single line** if all parameters fit:
 
-```csharp
-this.DoSomething(param1, param2);
+```python
+def process_item(item: Item, validate: bool = True) -> Result:
 ```
 
-**Boolean parameters MUST always use named arguments:**
+**Multi-line for longer signatures:**
 
-```csharp
-// Correct
-IdentifierNormalizer.Normalize(name, isVariableName: true);
-this.CreateNode(schema, isRequired: false);
-
-// Wrong - unnamed boolean is ambiguous
-IdentifierNormalizer.Normalize(name, true);
-this.CreateNode(schema, false);
-```
-
-**Multi-line with named parameters:**
-
-```csharp
-return await this
-    .ProcessRequestAsync(
-        requestUri: uri,
-        content: payload,
-        cancellationToken: cancellationToken)
-    .ConfigureAwait(continueOnCapturedContext: false);
+```python
+async def create_connection(
+    connection_id: str,
+    connection_type: str,
+    *,
+    timeout_seconds: int = 30,
+    retry_count: int = 3,
+) -> Connection:
 ```
 
 **Rules:**
 
-- Method name on new line after object
-- Each parameter on its own line with name
-- Opening paren stays with method name
-- Closing paren aligns with parameter indent
+- Use keyword-only arguments (after `*`) for optional parameters with defaults
+- Boolean parameters SHOULD use keyword-only to avoid ambiguity
+- Trailing comma after last parameter in multi-line signatures
+- Opening paren stays with function name
+
+### Docstrings
+
+**Use Google-style docstrings:**
+
+```python
+def process_request(
+    request: Request,
+    *,
+    validate: bool = True,
+) -> Response:
+    """Process an incoming request and return the response.
+    
+    Args:
+        request: The request to process.
+        validate: Whether to validate the request before processing.
+    
+    Returns:
+        The processed response.
+    
+    Raises:
+        ValidationError: If validation is enabled and the request is invalid.
+        ConnectionError: If the connection to the backend fails.
+    """
+```
+
+**Rules:**
+
+- First line is a concise summary ending with a period
+- Blank line between summary and sections
+- Document all parameters in `Args:` section
+- Document return value in `Returns:` section (skip for `None`)
+- Document exceptions in `Raises:` section
 
 ### Comments
 
 **Inline comments - use NOTE format:**
 
-```csharp
-// NOTE(username): Explanation of why this code exists.
-var result = DoSomething();
+```python
+# NOTE(username): Explanation of why this code exists.
+result = do_something()
 ```
 
 **Rules:**
 
-- Empty line ABOVE comment (unless first line in block)
-- NO empty line between comment and code it describes
-- Prefix: `// NOTE(username):` where username is your GitHub username
-- Do NOT comment on the 'what' unless the code is obscure; instead comment on the 'why' when appropriate
-
-**XML documentation - required for all public APIs:**
-
-```csharp
-/// <summary>
-/// Processes the incoming request and returns the result.
-/// </summary>
-/// <param name="request">The request to process.</param>
-public async Task<Response> ProcessAsync(Request request)
-```
-
-**Rules:**
-
-- End descriptions with period
-- Do NOT document return values (`<returns>` tag)
-- Use `<see cref="ClassName"/>` for type references
+- Two spaces before inline comment
+- Blank line ABOVE standalone comment (unless first line in block)
+- NO blank line between comment and code it describes
+- Prefix: `# NOTE(username):` where username is your GitHub username
+- Comment on the 'why', not the 'what'
 
 ### Exception Handling
 
-```csharp
-try
-{
-    await this
-        .DoWorkAsync()
-        .ConfigureAwait(continueOnCapturedContext: false);
-}
-catch (SpecificException ex)
-{
-    this.logger.LogError(ex, "Failed: '{Message}'.", ex.Message);
-    throw;
-}
-catch (Exception ex) when (!ex.IsFatal())
-{
-    throw new InvalidOperationException(message: "Operation failed.", innerException: ex);
-}
+```python
+try:
+    result = await client.get_resource(resource_id)
+except SpecificError as e:
+    logger.error("Failed to get resource '%s': %s", resource_id, e)
+    raise
+except Exception as e:
+    raise ConnectorError(
+        f"Unexpected error retrieving resource '{resource_id}'."
+    ) from e
 ```
 
 **Rules:**
 
-- Exception variable name: `ex` (not `exception`)
-- Use exception filter `when (!ex.IsFatal())` for general catches to avoid catching fatal exceptions
+- Exception variable name: `e` (or more specific like `http_error`)
+- Always chain exceptions with `from e` to preserve context
 - Wrap inserted values in single quotes in error messages
 - End error messages with period
-- **All exceptions must have descriptive messages** — never throw exceptions without context
+- **All exceptions must have descriptive messages** — never raise exceptions without context
 
 **DO:**
 
-```csharp
-throw new ArgumentException(message: "Parameter 'connectionId' cannot be null or empty.", paramName: nameof(connectionId));
-throw new InvalidOperationException(message: $"Operation '{operationId}' is not supported.");
+```python
+raise ValueError(f"Parameter 'connection_id' cannot be empty.")
+raise ConnectorError(f"Operation '{operation_id}' is not supported.")
 ```
 
 **DO NOT:**
 
-```csharp
-throw new ArgumentException();  // No message
-throw new InvalidOperationException("error");  // Non-descriptive
+```python
+raise ValueError()  # No message
+raise Exception("error")  # Non-descriptive, too generic
 ```
 
-### String Comparison
+### String Formatting
 
-**ALWAYS use StringComparison:**
+**Use f-strings for simple formatting:**
 
-```csharp
-// Correct
-string.Equals(str1, str2, StringComparison.OrdinalIgnoreCase)
-str.StartsWith(prefix, StringComparison.Ordinal)
+```python
+message = f"Processing request '{request_id}' for user '{user_id}'."
 ```
 
-**DO NOT:**
+**Use logging-style formatting for log messages:**
 
-```csharp
-str1 == str2
-str1.Equals(str2)
-```
-
-### Spacing and Braces
-
-**Empty line after closing brace:**
-
-```csharp
-if (condition)
-{
-    DoSomething();
-}
-
-DoSomethingElse();  // Empty line above
-```
-
-**NO empty line before closing brace:**
-
-```csharp
-// Wrong
-if (condition)
-{
-    DoSomething();
-
-}
-```
-
-**Switch statements - empty line between cases:**
-
-```csharp
-switch (value)
-{
-    case "A":
-        HandleA();
-        break;
-
-    case "B":
-        HandleB();
-        break;
-
-    default:
-        throw new InvalidOperationException();
-}
-```
-
-### Variable Declaration
-
-**Use `var` when type is obvious:**
-
-```csharp
-var items = new List<string>();
-var response = await this.GetResponseAsync();
-```
-
-**Use explicit type for null initialization:**
-
-```csharp
-byte[] buffer = null;  // Not: var buffer = (byte[])null;
-```
-
-### Ternary Operators
-
-**Put `?` and `:` at START of new line:**
-
-```csharp
-var result = condition
-    ? valueIfTrue
-    : valueIfFalse;
-```
-
-### Logical Operators
-
-**Put `||` and `&&` at END of line:**
-
-```csharp
-if (string.IsNullOrEmpty(value1) ||
-    string.IsNullOrEmpty(value2) ||
-    string.IsNullOrEmpty(value3))
-```
-
-**Return statements - first condition on new line:**
-
-```csharp
-return
-    string.IsNullOrEmpty(value1) ||
-    string.IsNullOrEmpty(value2);
-```
-
-### Access Modifiers
-
-**ALWAYS explicit - order: access, static, readonly, other:**
-
-```csharp
-public static readonly string DefaultValue = "default";
-private readonly ILogger _logger;
-internal async Task ProcessAsync()
+```python
+logger.info("Processing request '%s' for user '%s'.", request_id, user_id)
 ```
 
 ### Class Layout Order
 
-1. Constants
-2. Static fields
-3. Instance fields
-4. Constructors
+1. Class docstring
+2. Class-level constants
+3. `__init__` method
+4. `__enter__`/`__exit__` or `__aenter__`/`__aexit__` (context managers)
 5. Properties
 6. Public methods
-7. Internal methods
-8. Private methods
+7. Private methods (`_method`)
+8. Magic methods (`__str__`, `__repr__`, etc.)
 
-Within each group: public → internal → private
+### Module Layout Order
+
+1. Module docstring
+2. `from __future__ import annotations`
+3. Standard library imports
+4. Third-party imports
+5. Local imports
+6. Constants
+7. Type aliases
+8. Classes
+9. Functions
+10. `if __name__ == "__main__":` block (if applicable)
 
 ## Patterns to Avoid
 
 | Anti-Pattern | Correct Pattern |
 |--------------|-----------------|
-| `.Result` on Task | `await task.ConfigureAwait(continueOnCapturedContext: false)` |
-| `.Wait()` on Task | `await task.ConfigureAwait(continueOnCapturedContext: false)` |
-| `Task.Run()` for I/O | `await` the async method directly |
-| `new Exception("msg.")` | `new SpecificException(message: "msg.")` |
-| Magic numbers | Named constants (e.g., `MyClass.DefaultTimeoutSeconds`) |
-| Magic strings (e.g., `"type"`, `"object"`) | Named constants (e.g., `SchemaPropertyNames.Type`) |
-| `[0]` or `.First()` | `.Single()` (or `.SingleOrDefault()` + explicit validation) |
+| `requests` in async code | `aiohttp` with async/await |
+| Mutable default arguments | `None` with default inside function |
+| Bare `except:` | `except Exception as e:` |
+| `isinstance(x, str)` for type unions | Use `typing.Union` or `\|` with type guards |
+| Magic numbers | Named constants (e.g., `DEFAULT_TIMEOUT_SECONDS`) |
+| Magic strings (e.g., `"type"`, `"object"`) | Named constants or enums |
+| `list[0]` without length check | `next(iter(list), None)` or explicit validation |
 
 ## Testing
 
-```csharp
-[TestMethod]
-public async Task MethodName_Scenario_ExpectedResult()
-{
-    // Arrange
-    var input = CreateTestInput();
+```python
+import pytest
+from unittest.mock import AsyncMock, patch
 
-    // Act
-    var result = await this.service
-        .ProcessAsync(input)
-        .ConfigureAwait(continueOnCapturedContext: false);
-
-    // Assert
-    Assert.IsNotNull(result);
-}
+@pytest.mark.asyncio
+async def test_get_user_returns_user_when_found():
+    """Test that get_user returns the user when found."""
+    # Arrange
+    mock_client = AsyncMock()
+    mock_client.get.return_value = {"id": "123", "name": "Test User"}
+    
+    # Act
+    result = await get_user(mock_client, user_id="123")
+    
+    # Assert
+    assert result is not None
+    assert result.id == "123"
 ```
 
 **Rules:**
 
-- Test method naming: `MethodName_Scenario_ExpectedResult`
-- Use async/await, never `.Result`
-- Use `ConfigureAwait(continueOnCapturedContext: false)` in tests too
+- Test function naming: `test_<method>_<scenario>_<expected>` or `test_<behavior>`
+- Use `pytest.mark.asyncio` for async tests
+- Use `AsyncMock` for mocking async functions
+- Follow Arrange-Act-Assert pattern
+- One assertion concept per test (multiple related asserts are OK)
 
 ## Git Workflow
 
@@ -371,15 +317,16 @@ public async Task MethodName_Scenario_ExpectedResult()
 
 ## Releasing a New Version
 
-The release workflow (`.github/workflows/release.yml`) builds, tests, packs, and publishes the NuGet package. There is no version file to update — the version comes from the git tag.
+The release workflow (`.github/workflows/release.yml`) builds, tests, and publishes the package. The version is defined in `pyproject.toml`.
 
 ### Standard Release (tag push)
 
-Creates a GitHub Release with auto-generated notes, publishes to GitHub Packages, and attempts nuget.org:
+Creates a GitHub Release with auto-generated notes and publishes to PyPI:
 
 ```shell
 git checkout main
 git pull origin main
+# Update version in pyproject.toml first
 git tag v1.2.3
 git push origin v1.2.3
 ```
@@ -389,8 +336,10 @@ git push origin v1.2.3
 Use SemVer pre-release suffixes:
 
 ```shell
-git tag v1.2.3-preview.1
-git push origin v1.2.3-preview.1
+git tag v1.2.3a1   # Alpha
+git tag v1.2.3b1   # Beta
+git tag v1.2.3rc1  # Release candidate
+git push origin v1.2.3a1
 ```
 
 ### Manual Dispatch (packages only, no GitHub Release)
@@ -402,7 +351,7 @@ Use when you need to publish without creating a tag or GitHub Release:
 
 ### Re-releasing a Version
 
-If a release fails midway (e.g., build passed but GitHub Release creation failed):
+If a release fails midway:
 
 ```shell
 gh release delete v1.2.3 --yes     # delete the failed GitHub Release (if one was created)
@@ -412,42 +361,57 @@ git tag v1.2.3                     # re-tag on current HEAD
 git push origin v1.2.3             # push to trigger release
 ```
 
-**Note:** `--skip-duplicate` on the NuGet push steps means a re-release will not overwrite a package version that was already published. If the package was pushed successfully but the release failed, re-running will skip the duplicate package and only recreate the GitHub Release. To publish a corrected package, use a new version number.
+**Note:** PyPI does not allow re-uploading the same version. If the package was pushed successfully but the release failed, use a new version number (e.g., `1.2.3.post1`).
 
 ### What the Release Workflow Does
 
-1. Builds and tests in Release configuration
-2. Packs with `PackageVersion` from the tag (strips the `v` prefix)
-3. Uploads `.nupkg` as a build artifact
-4. Pushes to GitHub Packages (`nuget.pkg.github.com/Azure`)
-5. Attempts push to nuget.org (requires `NUGET_API_KEY` secret, continues on error)
-6. Creates a GitHub Release with the `.nupkg` attached (tag push only)
+1. Builds and tests with pytest
+2. Builds wheel and sdist with `python -m build`
+3. Uploads distribution files as build artifacts
+4. Publishes to PyPI (requires `PYPI_API_TOKEN` secret)
+5. Creates a GitHub Release with the distribution files attached (tag push only)
 
 ## Adding a New Connector
 
-When adding a new generated connector client to the SDK:
+When adding a new connector client to the SDK:
 
 ### Steps
 
-1. **Generate the code** using the CodefulSdkGenerator CLI from the BPM repo:
+1. **Create the connector module** in `src/azure/connectors/`:
+   - File name should match the connector API name (e.g., `office365.py`, `sharepointonline.py`)
 
-   ```shell
-   LogicAppsCompiler <outputDir> unused --directClient --connectors=<connector-name>
+2. **Implement the client class** following existing patterns:
+   ```python
+   from azure.connectors.sdk import ConnectorClient
+   
+   class Office365Client(ConnectorClient):
+       """Client for Office 365 connector operations."""
+       
+       async def send_email(self, ...) -> EmailResponse:
+           ...
    ```
 
-2. **Copy the generated file** (`{Connector}Extensions.cs`) to `src/Microsoft.Azure.Connectors.Sdk/Generated/`
-3. **Update `ConnectorNames.cs`** — add the new connector constant in alphabetical order
-4. **Update `ManagedConnectors.cs`** — add the connector name to `AvailableConnectors` and a usage example in the header comment, both in alphabetical order
-5. **Add unit tests** — create `{Connector}ClientTests.cs` in `tests/Microsoft.Azure.Connectors.Sdk.Tests/` following the pattern of existing tests (constructor, dispose, mocked API call, error handling, serialization round-trips)
-6. **Update `ROADMAP.md`** — mark the connector as complete in the appropriate phase
-7. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
-8. **Run all tests** — `dotnet test` must pass with zero failures before committing
-9. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
+3. **Export from `__init__.py`** — add the new client to `src/azure/connectors/__init__.py`
+
+4. **Add unit tests** — create `test_<connector>.py` in `tests/` following the pattern of existing tests:
+   - Constructor tests
+   - Method tests with mocked responses
+   - Error handling tests
+   - Type serialization round-trips
+
+5. **Update `ROADMAP.md`** — mark the connector as complete in the appropriate phase
+
+6. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
+
+7. **Run all tests** — `pytest` must pass with zero failures before committing
+
+8. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
 
 ### Validation checklist
 
-- [ ] Generated file compiles without errors
+- [ ] Module follows naming conventions (`snake_case.py`)
+- [ ] Client class has proper type hints on all public methods
+- [ ] Docstrings present on class and all public methods
 - [ ] Existing connector tests still pass (no regressions)
-- [ ] `ConnectorNames_AllConstantsAreRegistered` test passes (ConnectorNames ↔ ManagedConnectors sync)
-- [ ] New connector tests cover: constructor, null URL, dispose, mocked success, mocked error, exception properties, type serialization round-trips
-- [ ] If the connector uses `[DynamicSchema]`, tests verify the attribute is present on the type
+- [ ] New connector tests cover: constructor, mocked success, mocked error, exception handling
+- [ ] Module exported in `__init__.py`
