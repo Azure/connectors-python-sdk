@@ -3,6 +3,8 @@ name = "azure-connectors"
 version = "0.1.0dev2"
 requires-python = ">=3.10"
 description = "Azure Logic Apps Connector SDK for Python"
+readme = "README.md"
+license = { text = "MIT" }
 authors = [
     { name = "Azure Logic Apps team at Microsoft Corp.", email = "azurelogicapps@microsoft.com" }
 ]
@@ -20,12 +22,18 @@ classifiers = [
     "Operating System :: MacOS :: MacOS X",
     "Environment :: Web Environment",
     "License :: OSI Approved :: MIT License",
-    "Intended Audience :: Developers"
+    "Intended Audience :: Developers",
+    "Typing :: Typed"
 ]
 dependencies = [
     "aiohttp",
     "azure-identity[aio]",
 ]
+
+[project.urls]
+Documentation = "https://github.com/Azure/connectors-python-sdk"
+Repository = "https://github.com/Azure/connectors-python-sdk"
+Changelog = "https://github.com/Azure/connectors-python-sdk/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
@@ -43,6 +51,10 @@ dev = [
     "pytest-instafail",
     "pytest-rerunfailures",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 exclude = [
