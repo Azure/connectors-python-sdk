@@ -1,18 +1,56 @@
 parameters:
   - name: libraryVersion
     type: string
+  - name: blobPath
+    type: string
+    default: 'connectors/python'
+    displayName: 'Blob path prefix under drops container (e.g., connectors/python)'
 
 jobs:
+  - job: PublishRelease
+    displayName: 'Upload artifacts to partner blob for release'
 
-- job: "CreateReleaseBranch"
-  displayName: 'Create Release Branch'
-  pool:
-    name: 1es-pool-azfunc
-    image: 1es-ubuntu-22.04
-    os: linux
-  steps:
-  - powershell: |
-      $githubToken = "$(GithubPat)"
-      $newLibraryVersion = "${{ parameters.libraryVersion }}"
-      
-    displayName: 'Push release/x.y.z'
+    pool:
+      name: 1es-pool-azfunc
+      image: 1es-ubuntu-22.04
+      os: linux
+
+    steps:
+      - checkout: none
+
+      - download: current
+        artifact: azure-connectors
+        displayName: 'Download build artifacts'
+
+      - task: AzurePowerShell@5
+        displayName: 'Upload files to partner drop folder'
+        inputs:
+          azureSubscription: 'azuresdkpartnerdrops'
+          ScriptType: 'InlineScript'
+          azurePowerShellVersion: LatestVersion
+          pwsh: true
+          Inline: |
+            $version = '${{ parameters.libraryVersion }}'
+            $blobPath = '${{ parameters.blobPath }}'
+            $distFolder = '$(Pipeline.Workspace)/azure-connectors/src/dist'
+
+            Write-Host "Uploading Python artifacts for version: $version"
+            Write-Host "Source folder: $distFolder"
+            Write-Host "Destination: https://azuresdkpartnerdrops.blob.core.windows.net/drops/$blobPath/$version/"
+
+            # List files to be uploaded
+            Get-ChildItem -Path $distFolder -Recurse | ForEach-Object {
+              Write-Host "  - $($_.Name)"
+            }
+
+            # Upload all distribution files (whl and tar.gz) to partner blob
+            azcopy copy "$distFolder/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/$blobPath/$version/"
+
+            Write-Host ""
+            Write-Host "Upload complete. To publish to PyPI:"
+            Write-Host "  1. Go to Azure DevOps: python - partner-release pipeline"
+            Write-Host "  2. Click 'Run Pipeline'"
+            Write-Host "  3. Set BlobPath to: $blobPath/$version"
+        env:
+          AZCOPY_AUTO_LOGIN_TYPE: 'PSCRED'
+
