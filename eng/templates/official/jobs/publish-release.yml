@@ -1,0 +1,18 @@
+parameters:
+  - name: libraryVersion
+    type: string
+
+jobs:
+
+- job: "CreateReleaseBranch"
+  displayName: 'Create Release Branch'
+  pool:
+    name: 1es-pool-azfunc
+    image: 1es-ubuntu-22.04
+    os: linux
+  steps:
+  - powershell: |
+      $githubToken = "$(GithubPat)"
+      $newLibraryVersion = "${{ parameters.libraryVersion }}"
+      
+    displayName: 'Push release/x.y.z'

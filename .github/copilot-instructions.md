@@ -1,8 +1,8 @@
-# Copilot Instructions for azure-logicapps-connector-sdk
+# Copilot Instructions for azure-connectors-python-sdk
 
 ## Overview
 
-This repository contains the lightweight SDK for Azure Logic Apps connectors. Code must follow the team's coding conventions based on BPM repo standards.
+This repository contains the Python SDK for Azure Logic Apps connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for async/await patterns, type safety, and API design.
 
 ## Quick Reference: Coding Style Rules
 
