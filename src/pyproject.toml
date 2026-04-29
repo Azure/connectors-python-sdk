@@ -37,7 +37,7 @@ Changelog = "https://github.com/Azure/connectors-python-sdk/blob/main/CHANGELOG.
 
 [project.optional-dependencies]
 dev = [
-    "flake8==6.*",
+    "flake8>=6,<8",
     "mypy",
     "pytest",
     "pytest-asyncio",
