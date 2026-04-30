@@ -3,8 +3,8 @@ parameters:
     type: string
   - name: blobPath
     type: string
-    default: 'connectors/python'
-    displayName: 'Blob path prefix under drops container (e.g., connectors/python)'
+    default: 'azure-connectors/python/connector-sdk/${{ parameters.libraryVersion }}'
+    displayName: 'Blob path under drops container (e.g., azure-connectors/python/connector-sdk/1.0.0)'
 
 jobs:
   - job: "CreateReleaseBranch"
