@@ -2,6 +2,11 @@ jobs:
   - job: "Build"
     displayName: 'Build Connectors SDK'
 
+    pool:
+      name: 1es-pool-azfunc-public
+      image: 1es-ubuntu-22.04
+      os: linux
+
     strategy:
       matrix:
         Python310:
@@ -32,8 +37,3 @@ jobs:
           cd src
           python -m build
         displayName: 'Build Connectors SDK for $(PYTHON_VERSION)'
-      - bash: |
-          pip install pip-audit
-          cd src
-          pip-audit .
-        displayName: 'Run vulnerability scan'

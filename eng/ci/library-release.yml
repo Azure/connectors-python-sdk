@@ -1,3 +1,12 @@
+parameters:
+  - name: libraryVersion
+    type: string
+    displayName: 'Library version to release (e.g., 0.1.0)'
+  - name: blobPath
+    type: string
+    default: 'connectors/python'
+    displayName: 'Blob path prefix under drops container'
+
 resources:
   repositories:
     - repository: 1es
@@ -14,7 +23,16 @@ extends:
       os: windows
 
     stages:
+      - stage: Build
+        displayName: 'Build Connectors SDK'
+        jobs:
+          - template: /eng/templates/official/jobs/build-artifacts.yml@self
+
       - stage: Release
         displayName: 'Release Connectors SDK'
+        dependsOn: Build
         jobs:
           - template: /eng/templates/official/jobs/publish-release.yml@self
+            parameters:
+              libraryVersion: ${{ parameters.libraryVersion }}
+              blobPath: ${{ parameters.blobPath }}

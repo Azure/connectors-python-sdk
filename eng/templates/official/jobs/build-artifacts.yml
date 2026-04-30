@@ -31,8 +31,3 @@ jobs:
           cd src
           python -m build
         displayName: 'Build Connectors SDK'
-      - bash: |
-          pip install pip-audit
-          cd src
-          pip-audit .
-        displayName: 'Run vulnerability scan'

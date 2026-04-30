@@ -229,8 +229,6 @@ azure-connectors/
 ## Related Projects
 
 - **[Connectors .NET SDK](https://github.com/Azure/Connectors-NET-SDK)** — .NET implementation of this SDK
-- **[Connectors Samples](https://github.com/Azure/Connectors-Samples)** — Sample projects using connector SDKs (coming soon)
-- **[Logic Apps](https://github.com/Azure/LogicApps)** — Azure Logic Apps (workflow engine that powers connectors)
 
 ## Contributing
 
@@ -245,7 +243,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 For issues and questions:
 
 - 🐛 **Bug reports:** [File an issue](https://github.com/Azure/Connectors-Python-SDK/issues)
-- 💬 **Questions:** [GitHub Discussions](https://github.com/Azure/LogicApps/discussions)
 - 📚 **Documentation:** See [docs/](docs/) folder
 
 See [SUPPORT.md](SUPPORT.md) for more information.
