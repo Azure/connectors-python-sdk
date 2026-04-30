@@ -1,6 +1,6 @@
 [project]
 name = "azure-connectors"
-version = "0.1.0dev2"
+dynamic = ["version"]
 requires-python = ">=3.10"
 description = "Azure Logic Apps Connector SDK for Python"
 readme = "README.md"
@@ -60,3 +60,6 @@ build-backend = "setuptools.build_meta"
 exclude = [
     'src', 'azure', 'docs', 'tests*', 'samples', 'scripts'
 ]
+
+[tool.setuptools.dynamic]
+version = {attr = "src.azure.connectors.__version__"}
