@@ -18,13 +18,13 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '(\d)+.(\d)+.(\d)+') {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+$' {
             # Create GitHub credential
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
         
             # Heading to Artifact Repository
-            Write-Host "Operating based on $stagingDirectory/connectors-python-sdk"
+            Write-Host "Operating based on connectors-python-sdk"
             git checkout -b "release/$newLibraryVersion"
         
             # Change __init__.py version
@@ -66,7 +66,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '(\d)+.(\d)+.(\d)+') {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+$' {
             # Create GitHub credential
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
@@ -93,7 +93,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '(\d)+.(\d)+.(\d)+') {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+$' {
             # Create GitHub credential
             $credential = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("${githubUser}:${githubToken}"))
         
@@ -128,6 +128,7 @@ jobs:
         instructions: 'Please head to https://github.com/Azure/connectors-python-sdk/releases to finish the release note'
  
   - job: PublishRelease
+    dependsOn: ['CheckGitHubRelease']
     displayName: 'Upload artifacts to partner blob for release'
 
     pool:
