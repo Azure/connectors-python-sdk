@@ -58,8 +58,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 exclude = [
-    'src', 'azure', 'docs', 'tests*', 'samples', 'scripts'
+    'azure', 'docs', 'tests*', 'samples', 'scripts'
 ]
 
 [tool.setuptools.dynamic]
-version = {attr = "src.azure.connectors.__version__"}
+version = {attr = "azure.connectors.__version__"}
