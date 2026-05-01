@@ -6,7 +6,7 @@ parameters:
   - name: blobPath
     type: string
     default: 'azure-connectors/python/connector-sdk'
-    displayName: 'Blob path under drops container (e.g., azure-connectors/python/connector-sdk)'
+    displayName: 'Blob path under drops container'
 
 jobs:
   - job: "CreateReleaseBranch"
