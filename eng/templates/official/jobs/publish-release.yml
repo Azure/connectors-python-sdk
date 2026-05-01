@@ -1,6 +1,8 @@
 parameters:
   - name: libraryVersion
     type: string
+  - name: GithubPat
+    type: string
   - name: blobPath
     type: string
     default: 'azure-connectors/python/connector-sdk'
