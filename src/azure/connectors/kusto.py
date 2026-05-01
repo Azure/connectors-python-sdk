@@ -6,9 +6,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Any, Dict
-from datetime import datetime
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
+import json
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -25,37 +25,49 @@ from azure.connectors.sdk import (
 class Table:
     """Response for Run KQL query"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class VisualizeResults:
     """Response for Run KQL query and render a chart"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class AsyncCommandResult:
     """Response for Run async control command"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class MCPQueryResponse:
     """Response for Kusto Query MCP Server"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ObjectEntity:
     """Definition: Object"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class Row:
     """Definition: Row"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class QueryAndVisualizeSchema:
@@ -65,6 +77,7 @@ class QueryAndVisualizeSchema:
     db: Optional[DatabaseName] = None
     csl: Optional[Query] = None
     chart_type: Optional[ChartType] = None
+
 
 @dataclass
 class CommandAndVisualizeSchema:
@@ -76,6 +89,7 @@ class CommandAndVisualizeSchema:
     """Specify the control command you would like to run"""
     chart_type: Optional[ChartType] = None
 
+
 @dataclass
 class QueryAndListSchema:
     """Definition: QueryAndListSchema"""
@@ -83,6 +97,7 @@ class QueryAndListSchema:
     cluster: Optional[ClusterName] = None
     db: Optional[DatabaseName] = None
     csl: Optional[Query] = None
+
 
 @dataclass
 class ControlCommandAndListSchema:
@@ -93,29 +108,38 @@ class ControlCommandAndListSchema:
     csl: Optional[str] = None
     """Specify the show control command you would like to run"""
 
+
 @dataclass
 class ClusterName:
     """Definition: ClusterName"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DatabaseName:
     """Definition: DatabaseName"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class Query:
     """Definition: Query"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ChartType:
     """Definition: ChartType"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class MCPQueryRequest:
@@ -128,6 +152,7 @@ class MCPQueryRequest:
     result: Optional[Dict[str, Any]] = None
     error: Optional[Dict[str, Any]] = None
     callback_endpoint: Optional[str] = None
+
 
 
 # Client Class
@@ -185,7 +210,6 @@ class KustoClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_kusto_show_command_results_async(
@@ -211,7 +235,6 @@ class KustoClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def run_kusto_query_and_visualize_results_async(
@@ -237,7 +260,6 @@ class KustoClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def run_kusto_command_and_visualize_results_async(
@@ -263,7 +285,6 @@ class KustoClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def run_async_control_command_and_wait_async(
@@ -289,7 +310,6 @@ class KustoClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def mcp_kusto_query_management_async(
@@ -305,7 +325,10 @@ class KustoClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/mcp/KustoQueryManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
+            value = str(session_id)
+            if isinstance(session_id, bool):
+                value = value.lower()
+            query_params.append(f"sessionId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -321,5 +344,4 @@ class KustoClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)

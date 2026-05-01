@@ -6,9 +6,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Any, Dict
+from typing import Optional, Any, Dict, List
 from datetime import datetime
 from urllib.parse import quote
+import json
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -25,73 +26,97 @@ from azure.connectors.sdk import (
 class GraphOutlookCategory:
     """Response for Get Outlook category names"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class OutlookReceiveMessage:
     """Response for Draft an email message"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class AssignCategoryBulkInput:
     """Assign a category to multiple emails"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class BatchOperationResult:
     """Response for Assign a category to multiple emails"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SubscriptionResponse:
     """Response for Send email with options"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class UpdateMyContactPhotoInput:
     """Update my contact's photo"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class HttpRequestInput:
     """Send an HTTP request"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ObjectWithoutType:
     """Response for Send an HTTP request"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class MCPQueryResponse:
-    """Response for Email Management MCP Server"""
+    """Response for Email Management MCP Server (deprecated)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class GraphCalendarEventClientReceive:
     """Response for Get event (V3)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class GraphCalendarEventListClientReceive:
     """Response for Get events (V4)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class GraphCalendarEventListWithActionType:
     """Response for When an event is added, updated or deleted (V3)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CalendarGetTablesResponse:
@@ -100,23 +125,30 @@ class CalendarGetTablesResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class ContactResponse:
     """Response for Get contact (V2)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class EntityListResponseContactResponse:
     """Response for Get contacts (V2)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class EntityListResponseGraphContactFolder:
     """Response for Get contact folders (V2)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class FindMeetingTimesInput:
@@ -143,6 +175,7 @@ class FindMeetingTimesInput:
     activity_domain: Optional[str] = None
     """Work, Personal, Unrestricted, or Unknown"""
 
+
 @dataclass
 class FindMeetingTimesResponse:
     """Response for Find meeting times (V2)"""
@@ -150,6 +183,7 @@ class FindMeetingTimesResponse:
     empty_suggestions_reason: Optional[str] = None
     """Empty Suggestions Reason"""
     meeting_time_suggestions: Optional[MeetingTimeSuggestionsV2] = None
+
 
 @dataclass
 class GetAttachmentResponse:
@@ -173,23 +207,30 @@ class GetAttachmentResponse:
     """Content Id"""
     sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
 
+
 @dataclass
 class GraphClientReceiveMessage:
     """Response for Get email (V2)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class BatchResponseGraphClientReceiveMessage:
     """Response for Get emails (V3)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class EntityListResponseGraphCalendarEventClientReceive:
     """Response for Get calendar view of events (V3)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class GetMailTipsInput:
@@ -200,11 +241,13 @@ class GetMailTipsInput:
     email_addresses: Optional[List[str]] = None
     """Address of the mailbox to get mail tips for."""
 
+
 @dataclass
 class GetMailTipsResponse:
     """Response for Get mail tips for a mailbox (V2)"""
 
     value: Optional[List[MailTipsClientReceiveV2]] = None
+
 
 @dataclass
 class GetRoomListsResponse:
@@ -213,12 +256,14 @@ class GetRoomListsResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class GetRoomsResponse:
     """Response for Get rooms (V2)"""
 
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
+
 
 @dataclass
 class GetRoomsInRoomListResponse:
@@ -227,6 +272,7 @@ class GetRoomsInRoomListResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class MarkAsReadInput:
     """Mark as read or unread (V3)"""
@@ -234,11 +280,14 @@ class MarkAsReadInput:
     is_read: Optional[bool] = None
     """Mark as read/unread."""
 
+
 @dataclass
 class TriggerBatchResponseGraphClientReceiveMessage:
     """Response for When an email is flagged (V4)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SetAutomaticRepliesSettingInput:
@@ -246,11 +295,13 @@ class SetAutomaticRepliesSettingInput:
 
     automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
 
+
 @dataclass
 class SetAutomaticRepliesSettingResponse:
     """Response for Set up automatic replies (V2)"""
 
     automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
+
 
 @dataclass
 class TableMetadata:
@@ -268,6 +319,7 @@ class TableMetadata:
     web_url: Optional[str] = None
     """Url link"""
 
+
 @dataclass
 class TableCapabilitiesMetadata:
     """Definition: TableCapabilitiesMetadata"""
@@ -282,11 +334,14 @@ class TableCapabilitiesMetadata:
     server_paging_options: Optional[List[str]] = None
     """List of supported server-driven paging capabilities"""
 
+
 @dataclass
 class ObjectEntity:
     """Definition: Object"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class TableSortRestrictionsMetadata:
@@ -299,6 +354,7 @@ class TableSortRestrictionsMetadata:
     ascending_only_properties: Optional[List[str]] = None
     """List of properties which support ascending order only"""
 
+
 @dataclass
 class TableFilterRestrictionsMetadata:
     """Definition: TableFilterRestrictionsMetadata"""
@@ -310,6 +366,7 @@ class TableFilterRestrictionsMetadata:
     required_properties: Optional[List[str]] = None
     """List of required properties"""
 
+
 @dataclass
 class TableSelectRestrictionsMetadata:
     """Definition: TableSelectRestrictionsMetadata"""
@@ -317,12 +374,14 @@ class TableSelectRestrictionsMetadata:
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
 
+
 @dataclass
 class CalendarEventList:
     """Definition: CalendarEventList"""
 
     value: Optional[List[CalendarEventBackend]] = None
     """List of calendar items"""
+
 
 @dataclass
 class CalendarEventBackend:
@@ -377,20 +436,22 @@ class CalendarEventBackend:
     """This property specifies the time zone of the meeting start time. The value must be as defined in Windows (example: 'Pacific Standard Time')."""
     subject: Optional[str] = None
     """Event subject"""
-    type: Optional[str] = None
+    type_: Optional[str] = None
     """The event type: Single Instance, Occurrence, Exception, or Series Master"""
     web_link: Optional[str] = None
     """The preview of the message associated with the event"""
     reason: Optional[str] = None
     """The reason property used by O365 sync events protocol, will be 'deleted' if its a deleted event."""
 
+
 @dataclass
 class Attendee:
     """Definition: Attendee"""
 
     status: Optional[ResponseStatus] = None
-    type: Optional[str] = None
+    type_: Optional[str] = None
     email_address: Optional[EmailAddress] = None
+
 
 @dataclass
 class ItemBody:
@@ -398,6 +459,7 @@ class ItemBody:
 
     content_type: Optional[str] = None
     content: Optional[str] = None
+
 
 @dataclass
 class Location:
@@ -407,11 +469,13 @@ class Location:
     address: Optional[PhysicalAddress] = None
     coordinates: Optional[GeoCoordinates] = None
 
+
 @dataclass
 class Recipient:
     """Definition: Recipient"""
 
     email_address: Optional[EmailAddress] = None
+
 
 @dataclass
 class PatternedRecurrence:
@@ -420,6 +484,7 @@ class PatternedRecurrence:
     pattern: Optional[RecurrencePattern] = None
     range: Optional[RecurrenceRange] = None
 
+
 @dataclass
 class ResponseStatus:
     """Definition: ResponseStatus"""
@@ -427,12 +492,14 @@ class ResponseStatus:
     response: Optional[str] = None
     time: Optional[str] = None
 
+
 @dataclass
 class EmailAddress:
     """Definition: EmailAddress"""
 
     name: Optional[str] = None
     address: Optional[str] = None
+
 
 @dataclass
 class PhysicalAddress:
@@ -444,6 +511,7 @@ class PhysicalAddress:
     country_or_region: Optional[str] = None
     postal_code: Optional[str] = None
 
+
 @dataclass
 class GeoCoordinates:
     """Definition: GeoCoordinates"""
@@ -454,11 +522,12 @@ class GeoCoordinates:
     accuracy: Optional[float] = None
     altitude_accuracy: Optional[float] = None
 
+
 @dataclass
 class RecurrencePattern:
     """Definition: RecurrencePattern"""
 
-    type: Optional[str] = None
+    type_: Optional[str] = None
     interval: Optional[int] = None
     month: Optional[int] = None
     day_of_month: Optional[int] = None
@@ -466,14 +535,16 @@ class RecurrencePattern:
     first_day_of_week: Optional[str] = None
     index: Optional[str] = None
 
+
 @dataclass
 class RecurrenceRange:
     """Definition: RecurrenceRange"""
 
-    type: Optional[str] = None
+    type_: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     number_of_occurrences: Optional[int] = None
+
 
 @dataclass
 class CalendarEventListClientReceive:
@@ -481,6 +552,7 @@ class CalendarEventListClientReceive:
 
     value: Optional[List[CalendarEventClientReceive]] = None
     """List of calendar items"""
+
 
 @dataclass
 class CalendarEventClientReceive:
@@ -543,12 +615,14 @@ class CalendarEventClientReceive:
     response_requested: Optional[bool] = None
     """Set to true if the sender would like a response when the event is accepted or declined"""
 
+
 @dataclass
 class PaginatedListResponseCalendarEventClientReceiveStringEnums:
     """Definition: PaginatedListResponse[CalendarEventClientReceiveStringEnums]"""
 
     values: Optional[List[CalendarEventClientReceiveStringEnums]] = None
     """Values"""
+
 
 @dataclass
 class CalendarEventClientReceiveStringEnums:
@@ -611,6 +685,7 @@ class CalendarEventClientReceiveStringEnums:
     response_requested: Optional[bool] = None
     """Set to true if the sender would like a response when the event is accepted or declined"""
 
+
 @dataclass
 class ClientSubscription:
     """Definition: ClientSubscription"""
@@ -618,12 +693,14 @@ class ClientSubscription:
     notification_url: Optional[str] = None
     """Callback url to the flow engine. Expected as part of the request and provided by Flow."""
 
+
 @dataclass
 class EntityListResponseFilePickerFile:
     """Definition: EntityListResponse[FilePickerFile]"""
 
     value: Optional[List[FilePickerFile]] = None
     """List of values"""
+
 
 @dataclass
 class FilePickerFile:
@@ -637,6 +714,7 @@ class FilePickerFile:
     """Set to true if the file is a folder"""
     path: Optional[str] = None
     """Path of the file"""
+
 
 @dataclass
 class ClientSendMessage:
@@ -665,6 +743,7 @@ class ClientSendMessage:
     is_html: Optional[bool] = None
     """Is Html?"""
 
+
 @dataclass
 class ClientSendAttachment:
     """Definition: ClientSendAttachment"""
@@ -673,6 +752,7 @@ class ClientSendAttachment:
     """Attachment name"""
     content_bytes: Optional[str] = None
     """Attachment content"""
+
 
 @dataclass
 class ClientReceiveMessageStringEnums:
@@ -713,6 +793,7 @@ class ClientReceiveMessageStringEnums:
     is_html: Optional[bool] = None
     """Is Html?"""
 
+
 @dataclass
 class ClientReceiveFileAttachment:
     """Definition: ClientReceiveFileAttachment"""
@@ -733,6 +814,7 @@ class ClientReceiveFileAttachment:
     """The date and time when the attachment was last modified"""
     content_id: Optional[str] = None
     """Content Id"""
+
 
 @dataclass
 class ClientSendHtmlMessage:
@@ -759,6 +841,7 @@ class ClientSendHtmlMessage:
     importance: Optional[str] = None
     """Importance"""
 
+
 @dataclass
 class ClientDraftHtmlMessage:
     """Definition: ClientDraftHtmlMessage"""
@@ -784,6 +867,7 @@ class ClientDraftHtmlMessage:
     importance: Optional[str] = None
     """Importance"""
 
+
 @dataclass
 class BatchItemFailureResult:
     """Definition: BatchItemFailureResult"""
@@ -793,12 +877,14 @@ class BatchItemFailureResult:
     error: Optional[str] = None
     """The error message of the failure."""
 
+
 @dataclass
 class BatchResponseClientReceiveMessage:
     """Definition: BatchResponse[ClientReceiveMessage]"""
 
     value: Optional[List[ClientReceiveMessage]] = None
     """A list of the response objects"""
+
 
 @dataclass
 class ClientReceiveMessage:
@@ -839,6 +925,7 @@ class ClientReceiveMessage:
     is_html: Optional[bool] = None
     """Is Html?"""
 
+
 @dataclass
 class GraphClientReceiveFileAttachment:
     """Definition: GraphClientReceiveFileAttachment"""
@@ -859,6 +946,7 @@ class GraphClientReceiveFileAttachment:
     """The date and time when the attachment was last modified"""
     content_id: Optional[str] = None
     """Content Id"""
+
 
 @dataclass
 class ReplyMessage:
@@ -883,6 +971,7 @@ class ReplyMessage:
     attachments: Optional[List[ClientSendAttachment]] = None
     """Details of attachments to be sent along with the reply."""
 
+
 @dataclass
 class ReplyHtmlMessage:
     """Definition: ReplyHtmlMessage"""
@@ -904,12 +993,14 @@ class ReplyHtmlMessage:
     attachments: Optional[List[ClientSendAttachment]] = None
     """Details of attachments to be sent along with the reply."""
 
+
 @dataclass
 class TriggerBatchResponseClientReceiveMessage:
     """Definition: TriggerBatchResponse[ClientReceiveMessage]"""
 
     value: Optional[List[ClientReceiveMessage]] = None
     """A list of the response objects"""
+
 
 @dataclass
 class AutomaticRepliesSettingClient:
@@ -927,6 +1018,7 @@ class AutomaticRepliesSettingClient:
     """Message for people within your organization"""
     external_reply_message: Optional[str] = None
     """Message for people outside your organization"""
+
 
 @dataclass
 class MailTipsClientReceive:
@@ -946,6 +1038,7 @@ class MailTipsClientReceive:
     total_member_count: Optional[int] = None
     """Total member count"""
 
+
 @dataclass
 class MailTipsAutomaticReplies:
     """Definition: MailTipsAutomaticReplies"""
@@ -953,12 +1046,14 @@ class MailTipsAutomaticReplies:
     message: Optional[str] = None
     """Automatic replies message"""
 
+
 @dataclass
 class BatchResponseSensitivityLabel:
     """Definition: BatchResponse[SensitivityLabel]"""
 
     value: Optional[List[SensitivityLabel]] = None
     """A list of the response objects"""
+
 
 @dataclass
 class SensitivityLabel:
@@ -973,12 +1068,14 @@ class SensitivityLabel:
     sub_labels: Optional[List[SensitivityLabel]] = None
     """Gets or sets sub labels."""
 
+
 @dataclass
 class TriggerBatchResponseReceiveMessageMetadata:
     """Definition: TriggerBatchResponse[ReceiveMessageMetadata]"""
 
     value: Optional[List[ReceiveMessageMetadata]] = None
     """A list of the response objects"""
+
 
 @dataclass
 class ReceiveMessageMetadata:
@@ -1007,12 +1104,14 @@ class ReceiveMessageMetadata:
     is_read: Optional[bool] = None
     """Indicates whether the message has been read"""
 
+
 @dataclass
 class DataSetsMetadata:
     """Definition: DataSetsMetadata"""
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
+
 
 @dataclass
 class TabularDataSetsMetadata:
@@ -1029,6 +1128,7 @@ class TabularDataSetsMetadata:
     table_plural_name: Optional[str] = None
     """Table plural display name"""
 
+
 @dataclass
 class BlobDataSetsMetadata:
     """Definition: BlobDataSetsMetadata"""
@@ -1040,6 +1140,7 @@ class BlobDataSetsMetadata:
     url_encoding: Optional[str] = None
     """Blob dataset url encoding"""
 
+
 @dataclass
 class OptionsEmailSubscription:
     """Definition: OptionsEmailSubscription"""
@@ -1047,6 +1148,7 @@ class OptionsEmailSubscription:
     notification_url: Optional[str] = None
     """Gets or sets callback url to flow engine. It is expected as part of request"""
     message: Optional[MessageWithOptions] = None
+
 
 @dataclass
 class MessageWithOptions:
@@ -1077,6 +1179,7 @@ class MessageWithOptions:
     hide_microsoft_footer: Optional[bool] = None
     """If set to Yes, then the Microsoft footer is hidden in the email body."""
 
+
 @dataclass
 class ApprovalEmailResponse:
     """Definition: ApprovalEmailResponse"""
@@ -1090,6 +1193,7 @@ class ApprovalEmailResponse:
     user_id: Optional[str] = None
     """User ID. The value is the user id for both individual users and the members in Distribution Group or Mail Enabled Security Group."""
 
+
 @dataclass
 class ApprovalEmailSubscription:
     """Definition: ApprovalEmailSubscription"""
@@ -1097,6 +1201,7 @@ class ApprovalEmailSubscription:
     notification_url: Optional[str] = None
     """Gets or sets callback url to flow engine. It is expected as part of request"""
     message: Optional[ApprovalMessage] = None
+
 
 @dataclass
 class ApprovalMessage:
@@ -1125,6 +1230,7 @@ class ApprovalMessage:
     show_h_t_m_l_confirmation_dialog: Optional[bool] = None
     """If set to Yes then a dialog wil be shown to confirm selected option of HTML message"""
 
+
 @dataclass
 class SharedMailboxClientSendMessage:
     """Definition: SharedMailboxClientSendMessage"""
@@ -1152,6 +1258,7 @@ class SharedMailboxClientSendMessage:
     is_html: Optional[bool] = None
     """Is Html?"""
 
+
 @dataclass
 class SharedMailboxClientSendHtmlMessage:
     """Definition: SharedMailboxClientSendHtmlMessage"""
@@ -1177,12 +1284,14 @@ class SharedMailboxClientSendHtmlMessage:
     importance: Optional[str] = None
     """Importance"""
 
+
 @dataclass
 class SubscriptionPayloadOutlookReceiveMessage:
     """Definition: SubscriptionPayload[OutlookReceiveMessage]"""
 
     value: Optional[List[SubscriptionPayloadEntityOutlookReceiveMessage]] = None
     """List of values"""
+
 
 @dataclass
 class SubscriptionPayloadEntityOutlookReceiveMessage:
@@ -1198,11 +1307,12 @@ class SubscriptionPayloadEntityOutlookReceiveMessage:
     """Resource"""
     resource_data: Optional[OutlookReceiveMessage] = None
 
+
 @dataclass
 class OutlookReceiveAttachment:
     """Definition: OutlookReceiveAttachment"""
 
-    type: Optional[str] = None
+    type_: Optional[str] = None
     """OData type"""
     id: Optional[str] = None
     """Attachment Id"""
@@ -1227,6 +1337,7 @@ class OutlookReceiveAttachment:
     content_id: Optional[str] = None
     """Content Id"""
 
+
 @dataclass
 class InternetMessageHeader:
     """Definition: InternetMessageHeader"""
@@ -1236,12 +1347,14 @@ class InternetMessageHeader:
     value: Optional[str] = None
     """Header value"""
 
+
 @dataclass
 class SubscriptionPayloadSubscriptionEvent:
     """Definition: SubscriptionPayload[SubscriptionEvent]"""
 
     value: Optional[List[SubscriptionPayloadEntitySubscriptionEvent]] = None
     """List of values"""
+
 
 @dataclass
 class SubscriptionPayloadEntitySubscriptionEvent:
@@ -1257,6 +1370,7 @@ class SubscriptionPayloadEntitySubscriptionEvent:
     """Resource"""
     resource_data: Optional[SubscriptionEvent] = None
 
+
 @dataclass
 class SubscriptionEvent:
     """Definition: SubscriptionEvent"""
@@ -1264,12 +1378,14 @@ class SubscriptionEvent:
     id: Optional[str] = None
     """The Event's unique identifier"""
 
+
 @dataclass
 class EntityListResponseTable:
     """Definition: EntityListResponse[Table]"""
 
     value: Optional[List[Table]] = None
     """List of values"""
+
 
 @dataclass
 class Table:
@@ -1282,6 +1398,7 @@ class Table:
     dynamic_properties: Optional[Dict[str, Any]] = None
     """Additional table properties provided by the connector to the clients."""
 
+
 @dataclass
 class EntityListResponseCalendarEventBackend:
     """Definition: EntityListResponse[CalendarEventBackend]"""
@@ -1289,12 +1406,14 @@ class EntityListResponseCalendarEventBackend:
     value: Optional[List[CalendarEventBackend]] = None
     """List of values"""
 
+
 @dataclass
 class EntityListResponseCalendarEventClientReceiveStringEnums:
     """Definition: EntityListResponse[CalendarEventClientReceiveStringEnums]"""
 
     value: Optional[List[CalendarEventClientReceiveStringEnums]] = None
     """List of values"""
+
 
 @dataclass
 class CalendarEventClient:
@@ -1337,6 +1456,7 @@ class CalendarEventClient:
     response_requested: Optional[bool] = None
     """Set to true if the sender would like a response when the event is accepted or declined"""
 
+
 @dataclass
 class CalendarEventHtmlClient:
     """Definition: CalendarEventHtmlClient"""
@@ -1375,6 +1495,7 @@ class CalendarEventHtmlClient:
     """Status to show during the event"""
     response_requested: Optional[bool] = None
     """Set to true if the sender would like a response when the event is accepted or declined"""
+
 
 @dataclass
 class GraphCalendarEventClient:
@@ -1423,12 +1544,14 @@ class GraphCalendarEventClient:
     sensitivity: Optional[str] = None
     """The possible values are: normal, personal, private, confidential"""
 
+
 @dataclass
 class CalendarEventListWithActionType:
     """Definition: CalendarEventListWithActionType"""
 
     value: Optional[List[CalendarEventClientWithActionType]] = None
     """List of calendar items"""
+
 
 @dataclass
 class CalendarEventClientWithActionType:
@@ -1496,6 +1619,7 @@ class CalendarEventClientWithActionType:
     """Time in minutes before event start to remind"""
     response_requested: Optional[bool] = None
     """Set to true if the sender would like a response when the event is accepted or declined"""
+
 
 @dataclass
 class GraphCalendarEventClientWithActionType:
@@ -1572,6 +1696,7 @@ class GraphCalendarEventClientWithActionType:
     sensitivity: Optional[str] = None
     """The possible values are: normal, personal, private, confidential"""
 
+
 @dataclass
 class GraphContactFolder:
     """Definition: GraphContactFolder"""
@@ -1582,6 +1707,7 @@ class GraphContactFolder:
     """The name of the contacts folder"""
     parent_folder_id: Optional[str] = None
     """The ID of the parent folder"""
+
 
 @dataclass
 class Contact:
@@ -1655,12 +1781,14 @@ class Contact:
     date_time_last_modified: Optional[str] = None
     """The time the contact was modified"""
 
+
 @dataclass
 class DataSetsList:
     """Definition: DataSetsList"""
 
     value: Optional[List[DataSet]] = None
     """List of datasets"""
+
 
 @dataclass
 class DataSet:
@@ -1673,6 +1801,7 @@ class DataSet:
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
 
+
 @dataclass
 class Procedure:
     """Definition: Procedure"""
@@ -1682,12 +1811,14 @@ class Procedure:
     display_name: Optional[str] = None
     """Procedure display name"""
 
+
 @dataclass
 class PassThroughNativeQuery:
     """Definition: PassThroughNativeQuery"""
 
     language: Optional[str] = None
     """Query language"""
+
 
 @dataclass
 class AutomaticRepliesSettingClientV2:
@@ -1705,6 +1836,7 @@ class AutomaticRepliesSettingClientV2:
     """Message for people within your organization"""
     external_reply_message: Optional[str] = None
     """Message for people outside your organization"""
+
 
 @dataclass
 class MailTipsClientReceiveV2:
@@ -1724,6 +1856,7 @@ class MailTipsClientReceiveV2:
     total_member_count: Optional[int] = None
     """Total member count"""
 
+
 @dataclass
 class MailTipsAutomaticRepliesV2:
     """Definition: MailTipsAutomaticReplies_V2"""
@@ -1731,12 +1864,14 @@ class MailTipsAutomaticRepliesV2:
     message: Optional[str] = None
     """Automatic replies message"""
 
+
 @dataclass
 class UpdateEmailFlag:
     """Definition: UpdateEmailFlag"""
 
     flag: Optional[Dict[str, Any]] = None
     """Flag status"""
+
 
 @dataclass
 class ResponseToEventInvite:
@@ -1747,6 +1882,7 @@ class ResponseToEventInvite:
     send_response: Optional[bool] = None
     """Send response to organizer?"""
 
+
 @dataclass
 class DirectForwardMessage:
     """Definition: DirectForwardMessage"""
@@ -1756,17 +1892,22 @@ class DirectForwardMessage:
     to_recipients: Optional[str] = None
     """Semicolon separated list of recipients to forward the message to"""
 
+
 @dataclass
 class MeetingTimeSuggestions:
     """Definition: MeetingTimeSuggestions"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class MeetingTimeSuggestionsV2:
     """Definition: MeetingTimeSuggestions_V2"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class LocationConstraint:
@@ -1779,6 +1920,7 @@ class LocationConstraint:
     locations: Optional[List[Dict[str, Any]]] = None
     """Locations"""
 
+
 @dataclass
 class DateTimeTimeZone:
     """Definition: DateTimeTimeZone"""
@@ -1787,6 +1929,7 @@ class DateTimeTimeZone:
     """DateTime"""
     time_zone: Optional[str] = None
     """TimeZone"""
+
 
 @dataclass
 class DateTimeTimeZoneV2:
@@ -1797,6 +1940,7 @@ class DateTimeTimeZoneV2:
     time_zone: Optional[str] = None
     """TimeZone (example: 'Pacific Standard Time')"""
 
+
 @dataclass
 class EntityListResponseContactResponseV2:
     """Definition: EntityListResponse[ContactResponse]_V2"""
@@ -1804,12 +1948,14 @@ class EntityListResponseContactResponseV2:
     value: Optional[List[ContactResponseV2]] = None
     """List of values"""
 
+
 @dataclass
 class EmailAddressV2:
     """Definition: EmailAddress_V2"""
 
     name: Optional[str] = None
     address: Optional[str] = None
+
 
 @dataclass
 class PhysicalAddressV2:
@@ -1825,6 +1971,7 @@ class PhysicalAddressV2:
     """The contact's country of region."""
     postal_code: Optional[str] = None
     """The contact's postal code."""
+
 
 @dataclass
 class ContactV2:
@@ -1898,6 +2045,7 @@ class ContactV2:
     last_modified_date_time: Optional[str] = None
     """The time the contact was modified"""
 
+
 @dataclass
 class ContactResponseV2:
     """Definition: ContactResponse_V2"""
@@ -1970,6 +2118,7 @@ class ContactResponseV2:
     last_modified_date_time: Optional[str] = None
     """The time the contact was modified"""
 
+
 @dataclass
 class SensitivityLabelMetadata:
     """Definition: sensitivityLabelMetadata"""
@@ -1995,6 +2144,7 @@ class SensitivityLabelMetadata:
     parent_sensitivity_label_id: Optional[str] = None
     """Parent SensitivityLabel Id."""
 
+
 @dataclass
 class MCPQueryRequest:
     """Definition: MCPQueryRequest"""
@@ -2006,6 +2156,7 @@ class MCPQueryRequest:
     result: Optional[Dict[str, Any]] = None
     error: Optional[Dict[str, Any]] = None
     callback_endpoint: Optional[str] = None
+
 
 
 # Client Class
@@ -2062,7 +2213,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def draft_email_async(
@@ -2080,11 +2230,20 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/Draft"
         query_params = []
         if message_id is not None:
-            query_params.append(f"messageId={quote(str(message_id).lower() if isinstance(message_id, bool) else str(message_id))}")
+            value = str(message_id)
+            if isinstance(message_id, bool):
+                value = value.lower()
+            query_params.append(f"messageId={quote(value)}")
         if draft_type is not None:
-            query_params.append(f"draftType={quote(str(draft_type).lower() if isinstance(draft_type, bool) else str(draft_type))}")
+            value = str(draft_type)
+            if isinstance(draft_type, bool):
+                value = value.lower()
+            query_params.append(f"draftType={quote(value)}")
         if comment is not None:
-            query_params.append(f"comment={quote(str(comment).lower() if isinstance(comment, bool) else str(comment))}")
+            value = str(comment)
+            if isinstance(comment, bool):
+                value = value.lower()
+            query_params.append(f"comment={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2100,7 +2259,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def update_draft_email_async(
@@ -2116,7 +2274,10 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/Draft"
         query_params = []
         if message_id is not None:
-            query_params.append(f"messageId={quote(str(message_id).lower() if isinstance(message_id, bool) else str(message_id))}")
+            value = str(message_id)
+            if isinstance(message_id, bool):
+                value = value.lower()
+            query_params.append(f"messageId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2131,7 +2292,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation sends a Draft message.
         """
-        path = f"{self._connection_runtime_url}/Draft/Send/{quote(str(message_id))}"
+        path = f"{self._connection_runtime_url}/Draft/Send/{str(message_id)}"
 
         await self.http_client.send_async("POST", path, body=None)
 
@@ -2148,9 +2309,15 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/Mail/Category"
         query_params = []
         if message_id is not None:
-            query_params.append(f"messageId={quote(str(message_id).lower() if isinstance(message_id, bool) else str(message_id))}")
+            value = str(message_id)
+            if isinstance(message_id, bool):
+                value = value.lower()
+            query_params.append(f"messageId={quote(value)}")
         if category is not None:
-            query_params.append(f"category={quote(str(category).lower() if isinstance(category, bool) else str(category))}")
+            value = str(category)
+            if isinstance(category, bool):
+                value = value.lower()
+            query_params.append(f"category={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2166,7 +2333,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation assigns an Outlook category to multiple emails.
         """
-        path = f"{self._connection_runtime_url}/Mail/Category/Bulk/{quote(str(category_name))}"
+        path = f"{self._connection_runtime_url}/Mail/Category/Bulk/{str(category_name)}"
 
         response = await self.http_client.send_async("POST", path, body=input)
 
@@ -2180,7 +2347,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def send_mail_with_options_async(
@@ -2206,7 +2372,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def send_approval_mail_async(
@@ -2232,7 +2397,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def update_my_contact_photo_async(
@@ -2246,7 +2410,7 @@ class Office365Client(ConnectorClientBase):
 
         Updates the photo of the specified contact of the current user. The size of the photo must be less than 4 MB.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}/photo/$value"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}/photo/$value"
 
         await self.http_client.send_async("PUT", path, body=input)
 
@@ -2273,7 +2437,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def mcp_emails_management_async(
@@ -2282,14 +2445,17 @@ class Office365Client(ConnectorClientBase):
         session_id: Optional[str] = None,
     ):
         """
-        Email Management MCP Server
+        Email Management MCP Server (deprecated)
 
         This MCP server manages email messages from your Office 365 account
         """
         path = f"{self._connection_runtime_url}/mcp/EmailsManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
+            value = str(session_id)
+            if isinstance(session_id, bool):
+                value = value.lower()
+            query_params.append(f"sessionId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2305,7 +2471,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def mcp_meeting_management_async(
@@ -2314,14 +2479,17 @@ class Office365Client(ConnectorClientBase):
         session_id: Optional[str] = None,
     ):
         """
-        Meeting Management MCP Server
+        Meeting Management MCP Server (deprecated)
 
         This MCP server manages events, calendars and meetings
         """
         path = f"{self._connection_runtime_url}/mcp/MeetingManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
+            value = str(session_id)
+            if isinstance(session_id, bool):
+                value = value.lower()
+            query_params.append(f"sessionId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2337,7 +2505,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def mcp_contacts_management_async(
@@ -2353,7 +2520,10 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/mcp/ContactsManagement"
         query_params = []
         if session_id is not None:
-            query_params.append(f"sessionId={quote(str(session_id).lower() if isinstance(session_id, bool) else str(session_id))}")
+            value = str(session_id)
+            if isinstance(session_id, bool):
+                value = value.lower()
+            query_params.append(f"sessionId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2369,7 +2539,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_delete_item_async(
@@ -2382,7 +2551,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation deletes an event in a calendar.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars/{quote(str(calendar))}/events/{quote(str(event))}"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars/{str(calendar)}/events/{str(event)}"
 
         await self.http_client.send_async("DELETE", path, body=None)
 
@@ -2396,7 +2565,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets a specific event from a calendar using Graph API. (V3)
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/items/{quote(str(id))}"
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{str(table)}/items/{str(id)}"
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -2410,7 +2579,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_get_items_async(
@@ -2426,16 +2594,28 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets events from a calendar using Graph API. (V4)
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{quote(str(table))}/items"
+        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{str(table)}/items"
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if orderby is not None:
-            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
         if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
         if skip is not None:
-            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+            value = str(skip)
+            if isinstance(skip, bool):
+                value = value.lower()
+            query_params.append(f"$skip={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2451,7 +2631,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_get_on_changed_items_async(
@@ -2465,12 +2644,18 @@ class Office365Client(ConnectorClientBase):
 
         This operation triggers a flow when an event is added, updated or deleted in a calendar. (V3) This is not available in Mooncake.
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/onchangeditems"
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{str(table)}/onchangeditems"
         query_params = []
         if incoming_days is not None:
-            query_params.append(f"incomingDays={quote(str(incoming_days).lower() if isinstance(incoming_days, bool) else str(incoming_days))}")
+            value = str(incoming_days)
+            if isinstance(incoming_days, bool):
+                value = value.lower()
+            query_params.append(f"incomingDays={quote(value)}")
         if past_days is not None:
-            query_params.append(f"pastDays={quote(str(past_days).lower() if isinstance(past_days, bool) else str(past_days))}")
+            value = str(past_days)
+            if isinstance(past_days, bool):
+                value = value.lower()
+            query_params.append(f"pastDays={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2486,7 +2671,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_get_on_new_items_async(
@@ -2502,16 +2686,28 @@ class Office365Client(ConnectorClientBase):
 
         This operation triggers a flow when a new event is created in a calendar. (V3)
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/onnewitems"
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{str(table)}/onnewitems"
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if orderby is not None:
-            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
         if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
         if skip is not None:
-            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+            value = str(skip)
+            if isinstance(skip, bool):
+                value = value.lower()
+            query_params.append(f"$skip={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2527,7 +2723,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_get_on_updated_items_async(
@@ -2543,16 +2738,28 @@ class Office365Client(ConnectorClientBase):
 
         This operation triggers a flow when an event is modified in a calendar. (V3)
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{quote(str(table))}/onupdateditems"
+        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{str(table)}/onupdateditems"
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if orderby is not None:
-            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
         if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
         if skip is not None:
-            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+            value = str(skip)
+            if isinstance(skip, bool):
+                value = value.lower()
+            query_params.append(f"$skip={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2568,7 +2775,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_get_tables_async(
@@ -2585,11 +2791,20 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
         query_params = []
         if skip is not None:
-            query_params.append(f"skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+            value = str(skip)
+            if isinstance(skip, bool):
+                value = value.lower()
+            query_params.append(f"skip={quote(value)}")
         if top is not None:
-            query_params.append(f"top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"top={quote(value)}")
         if order_by is not None:
-            query_params.append(f"orderBy={quote(str(order_by).lower() if isinstance(order_by, bool) else str(order_by))}")
+            value = str(order_by)
+            if isinstance(order_by, bool):
+                value = value.lower()
+            query_params.append(f"orderBy={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2605,7 +2820,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_patch_item_async(
@@ -2619,7 +2833,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation updates an event in a calendar using Graph API.
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{quote(str(table))}/items/{quote(str(id))}"
+        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{str(table)}/items/{str(id)}"
 
         response = await self.http_client.send_async("PATCH", path, body=input)
 
@@ -2633,7 +2847,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def calendar_post_item_async(
@@ -2646,7 +2859,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation creates a new event in a calendar.
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{quote(str(table))}/items"
+        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{str(table)}/items"
 
         response = await self.http_client.send_async("POST", path, body=input)
 
@@ -2660,7 +2873,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def contact_delete_item_async(
@@ -2673,7 +2885,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation deletes a contact from a contacts folder.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}"
 
         await self.http_client.send_async("DELETE", path, body=None)
 
@@ -2687,7 +2899,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets a specific contact from a contacts folder.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}"
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -2701,7 +2913,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def contact_get_items_async(
@@ -2717,16 +2928,28 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets contacts from a contacts folder.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if orderby is not None:
-            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
         if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
         if skip is not None:
-            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+            value = str(skip)
+            if isinstance(skip, bool):
+                value = value.lower()
+            query_params.append(f"$skip={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2742,7 +2965,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def contact_get_tables_async(
@@ -2767,7 +2989,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def contact_patch_item_async(
@@ -2781,7 +3002,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation updates a contact in a contacts folder.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts/{quote(str(id))}"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}"
 
         response = await self.http_client.send_async("PATCH", path, body=input)
 
@@ -2795,7 +3016,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def contact_post_item_async(
@@ -2808,7 +3028,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation creates a new contact in a contacts folder.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{quote(str(folder))}/contacts"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
 
         response = await self.http_client.send_async("POST", path, body=input)
 
@@ -2822,7 +3042,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def delete_email_async(
@@ -2835,10 +3054,13 @@ class Office365Client(ConnectorClientBase):
 
         This operation deletes an email by id.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{str(message_id)}"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2854,10 +3076,13 @@ class Office365Client(ConnectorClientBase):
 
         Export the content of the email in the EML file format.
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/messages/{quote(str(message_id))}/$value"
+        path = f"{self._connection_runtime_url}/codeless/beta/me/messages/{str(message_id)}/$value"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2895,7 +3120,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def flag_async(
@@ -2909,10 +3133,13 @@ class Office365Client(ConnectorClientBase):
 
         This operation updates an email flag.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}/flag"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{str(message_id)}/flag"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2929,10 +3156,13 @@ class Office365Client(ConnectorClientBase):
 
         Forward an email.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}/forward"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{str(message_id)}/forward"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2951,14 +3181,23 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets an email attachment by id.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{quote(str(message_id))}/attachments/{quote(str(attachment_id))}"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{str(message_id)}/attachments/{str(attachment_id)}"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if extract_sensitivity_label is not None:
-            query_params.append(f"extractSensitivityLabel={quote(str(extract_sensitivity_label).lower() if isinstance(extract_sensitivity_label, bool) else str(extract_sensitivity_label))}")
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
         if fetch_sensitivity_label_metadata is not None:
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(str(fetch_sensitivity_label_metadata).lower() if isinstance(fetch_sensitivity_label_metadata, bool) else str(fetch_sensitivity_label_metadata))}")
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2974,7 +3213,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_email_async(
@@ -2989,14 +3227,23 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets an email by id.
         """
-        path = f"{self._connection_runtime_url}/v2/Mail/{quote(str(message_id))}"
+        path = f"{self._connection_runtime_url}/v2/Mail/{str(message_id)}"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if include_attachments is not None:
-            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+            value = str(include_attachments)
+            if isinstance(include_attachments, bool):
+                value = value.lower()
+            query_params.append(f"includeAttachments={quote(value)}")
         if internet_message_id is not None:
-            query_params.append(f"internetMessageId={quote(str(internet_message_id).lower() if isinstance(internet_message_id, bool) else str(internet_message_id))}")
+            value = str(internet_message_id)
+            if isinstance(internet_message_id, bool):
+                value = value.lower()
+            query_params.append(f"internetMessageId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3012,7 +3259,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_emails_async(
@@ -3040,33 +3286,75 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v3/Mail"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if to is not None:
-            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+            value = str(to)
+            if isinstance(to, bool):
+                value = value.lower()
+            query_params.append(f"to={quote(value)}")
         if cc is not None:
-            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+            value = str(cc)
+            if isinstance(cc, bool):
+                value = value.lower()
+            query_params.append(f"cc={quote(value)}")
         if to_or_cc is not None:
-            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+            value = str(to_or_cc)
+            if isinstance(to_or_cc, bool):
+                value = value.lower()
+            query_params.append(f"toOrCc={quote(value)}")
         if from_ is not None:
-            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+            value = str(from_)
+            if isinstance(from_, bool):
+                value = value.lower()
+            query_params.append(f"from={quote(value)}")
         if importance is not None:
-            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+            value = str(importance)
+            if isinstance(importance, bool):
+                value = value.lower()
+            query_params.append(f"importance={quote(value)}")
         if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+            value = str(fetch_only_with_attachment)
+            if isinstance(fetch_only_with_attachment, bool):
+                value = value.lower()
+            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
         if subject_filter is not None:
-            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+            value = str(subject_filter)
+            if isinstance(subject_filter, bool):
+                value = value.lower()
+            query_params.append(f"subjectFilter={quote(value)}")
         if fetch_only_unread is not None:
-            query_params.append(f"fetchOnlyUnread={quote(str(fetch_only_unread).lower() if isinstance(fetch_only_unread, bool) else str(fetch_only_unread))}")
+            value = str(fetch_only_unread)
+            if isinstance(fetch_only_unread, bool):
+                value = value.lower()
+            query_params.append(f"fetchOnlyUnread={quote(value)}")
         if fetch_only_flagged is not None:
-            query_params.append(f"fetchOnlyFlagged={quote(str(fetch_only_flagged).lower() if isinstance(fetch_only_flagged, bool) else str(fetch_only_flagged))}")
+            value = str(fetch_only_flagged)
+            if isinstance(fetch_only_flagged, bool):
+                value = value.lower()
+            query_params.append(f"fetchOnlyFlagged={quote(value)}")
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if include_attachments is not None:
-            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+            value = str(include_attachments)
+            if isinstance(include_attachments, bool):
+                value = value.lower()
+            query_params.append(f"includeAttachments={quote(value)}")
         if search_query is not None:
-            query_params.append(f"searchQuery={quote(str(search_query).lower() if isinstance(search_query, bool) else str(search_query))}")
+            value = str(search_query)
+            if isinstance(search_query, bool):
+                value = value.lower()
+            query_params.append(f"searchQuery={quote(value)}")
         if top is not None:
-            query_params.append(f"top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"top={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3082,7 +3370,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_events_calendar_view_async(
@@ -3104,21 +3391,45 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/items/calendarview"
         query_params = []
         if calendar_id is not None:
-            query_params.append(f"calendarId={quote(str(calendar_id).lower() if isinstance(calendar_id, bool) else str(calendar_id))}")
+            value = str(calendar_id)
+            if isinstance(calendar_id, bool):
+                value = value.lower()
+            query_params.append(f"calendarId={quote(value)}")
         if start_date_time_utc is not None:
-            query_params.append(f"startDateTimeUtc={quote(str(start_date_time_utc).lower() if isinstance(start_date_time_utc, bool) else str(start_date_time_utc))}")
+            value = str(start_date_time_utc)
+            if isinstance(start_date_time_utc, bool):
+                value = value.lower()
+            query_params.append(f"startDateTimeUtc={quote(value)}")
         if end_date_time_utc is not None:
-            query_params.append(f"endDateTimeUtc={quote(str(end_date_time_utc).lower() if isinstance(end_date_time_utc, bool) else str(end_date_time_utc))}")
+            value = str(end_date_time_utc)
+            if isinstance(end_date_time_utc, bool):
+                value = value.lower()
+            query_params.append(f"endDateTimeUtc={quote(value)}")
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if orderby is not None:
-            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
         if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
         if skip is not None:
-            query_params.append(f"$skip={quote(str(skip).lower() if isinstance(skip, bool) else str(skip))}")
+            value = str(skip)
+            if isinstance(skip, bool):
+                value = value.lower()
+            query_params.append(f"$skip={quote(value)}")
         if search is not None:
-            query_params.append(f"search={quote(str(search).lower() if isinstance(search, bool) else str(search))}")
+            value = str(search)
+            if isinstance(search, bool):
+                value = value.lower()
+            query_params.append(f"search={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3134,7 +3445,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_mail_tips_async(
@@ -3160,7 +3470,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_room_lists_async(
@@ -3185,7 +3494,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_rooms_async(
@@ -3210,7 +3518,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_rooms_in_room_list_async(
@@ -3222,7 +3529,7 @@ class Office365Client(ConnectorClientBase):
 
         Get the meeting rooms in a specific room list
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findRooms(RoomList='{quote(str(room_list))}')"
+        path = f"{self._connection_runtime_url}/codeless/beta/me/findRooms(RoomList='{str(room_list)}')"
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -3236,7 +3543,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def mark_as_read_async(
@@ -3250,10 +3556,13 @@ class Office365Client(ConnectorClientBase):
 
         This operation marks an email as read/unread.
         """
-        path = f"{self._connection_runtime_url}/codeless/v3/v1.0/me/messages/{quote(str(message_id))}/markAsRead"
+        path = f"{self._connection_runtime_url}/codeless/v3/v1.0/me/messages/{str(message_id)}/markAsRead"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3270,12 +3579,18 @@ class Office365Client(ConnectorClientBase):
 
         This operation moves an email to the specified folder within the same mailbox.
         """
-        path = f"{self._connection_runtime_url}/v2/Mail/Move/{quote(str(message_id))}"
+        path = f"{self._connection_runtime_url}/v2/Mail/Move/{str(message_id)}"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3291,7 +3606,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def on_flagged_email_async(
@@ -3314,23 +3628,50 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v4/Mail/OnFlaggedEmail"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if to is not None:
-            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+            value = str(to)
+            if isinstance(to, bool):
+                value = value.lower()
+            query_params.append(f"to={quote(value)}")
         if cc is not None:
-            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+            value = str(cc)
+            if isinstance(cc, bool):
+                value = value.lower()
+            query_params.append(f"cc={quote(value)}")
         if to_or_cc is not None:
-            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+            value = str(to_or_cc)
+            if isinstance(to_or_cc, bool):
+                value = value.lower()
+            query_params.append(f"toOrCc={quote(value)}")
         if from_ is not None:
-            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+            value = str(from_)
+            if isinstance(from_, bool):
+                value = value.lower()
+            query_params.append(f"from={quote(value)}")
         if importance is not None:
-            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+            value = str(importance)
+            if isinstance(importance, bool):
+                value = value.lower()
+            query_params.append(f"importance={quote(value)}")
         if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+            value = str(fetch_only_with_attachment)
+            if isinstance(fetch_only_with_attachment, bool):
+                value = value.lower()
+            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
         if include_attachments is not None:
-            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+            value = str(include_attachments)
+            if isinstance(include_attachments, bool):
+                value = value.lower()
+            query_params.append(f"includeAttachments={quote(value)}")
         if subject_filter is not None:
-            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+            value = str(subject_filter)
+            if isinstance(subject_filter, bool):
+                value = value.lower()
+            query_params.append(f"subjectFilter={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3346,7 +3687,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def on_new_email_async(
@@ -3369,23 +3709,50 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v3/Mail/OnNewEmail"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if to is not None:
-            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+            value = str(to)
+            if isinstance(to, bool):
+                value = value.lower()
+            query_params.append(f"to={quote(value)}")
         if cc is not None:
-            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+            value = str(cc)
+            if isinstance(cc, bool):
+                value = value.lower()
+            query_params.append(f"cc={quote(value)}")
         if to_or_cc is not None:
-            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+            value = str(to_or_cc)
+            if isinstance(to_or_cc, bool):
+                value = value.lower()
+            query_params.append(f"toOrCc={quote(value)}")
         if from_ is not None:
-            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+            value = str(from_)
+            if isinstance(from_, bool):
+                value = value.lower()
+            query_params.append(f"from={quote(value)}")
         if importance is not None:
-            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+            value = str(importance)
+            if isinstance(importance, bool):
+                value = value.lower()
+            query_params.append(f"importance={quote(value)}")
         if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+            value = str(fetch_only_with_attachment)
+            if isinstance(fetch_only_with_attachment, bool):
+                value = value.lower()
+            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
         if include_attachments is not None:
-            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+            value = str(include_attachments)
+            if isinstance(include_attachments, bool):
+                value = value.lower()
+            query_params.append(f"includeAttachments={quote(value)}")
         if subject_filter is not None:
-            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+            value = str(subject_filter)
+            if isinstance(subject_filter, bool):
+                value = value.lower()
+            query_params.append(f"subjectFilter={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3401,7 +3768,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def on_new_mention_me_email_async(
@@ -3425,25 +3791,55 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v3/Mail/OnNewMentionMeEmail"
         query_params = []
         if message_id_to_fire_on_first_trigger_run is not None:
-            query_params.append(f"messageIdToFireOnFirstTriggerRun={quote(str(message_id_to_fire_on_first_trigger_run).lower() if isinstance(message_id_to_fire_on_first_trigger_run, bool) else str(message_id_to_fire_on_first_trigger_run))}")
+            value = str(message_id_to_fire_on_first_trigger_run)
+            if isinstance(message_id_to_fire_on_first_trigger_run, bool):
+                value = value.lower()
+            query_params.append(f"messageIdToFireOnFirstTriggerRun={quote(value)}")
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if to is not None:
-            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+            value = str(to)
+            if isinstance(to, bool):
+                value = value.lower()
+            query_params.append(f"to={quote(value)}")
         if cc is not None:
-            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+            value = str(cc)
+            if isinstance(cc, bool):
+                value = value.lower()
+            query_params.append(f"cc={quote(value)}")
         if to_or_cc is not None:
-            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+            value = str(to_or_cc)
+            if isinstance(to_or_cc, bool):
+                value = value.lower()
+            query_params.append(f"toOrCc={quote(value)}")
         if from_ is not None:
-            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+            value = str(from_)
+            if isinstance(from_, bool):
+                value = value.lower()
+            query_params.append(f"from={quote(value)}")
         if importance is not None:
-            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+            value = str(importance)
+            if isinstance(importance, bool):
+                value = value.lower()
+            query_params.append(f"importance={quote(value)}")
         if fetch_only_with_attachment is not None:
-            query_params.append(f"fetchOnlyWithAttachment={quote(str(fetch_only_with_attachment).lower() if isinstance(fetch_only_with_attachment, bool) else str(fetch_only_with_attachment))}")
+            value = str(fetch_only_with_attachment)
+            if isinstance(fetch_only_with_attachment, bool):
+                value = value.lower()
+            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
         if include_attachments is not None:
-            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+            value = str(include_attachments)
+            if isinstance(include_attachments, bool):
+                value = value.lower()
+            query_params.append(f"includeAttachments={quote(value)}")
         if subject_filter is not None:
-            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+            value = str(subject_filter)
+            if isinstance(subject_filter, bool):
+                value = value.lower()
+            query_params.append(f"subjectFilter={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3459,7 +3855,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def on_upcoming_events_async(
@@ -3475,9 +3870,15 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v3/Events/OnUpcomingEvents"
         query_params = []
         if table is not None:
-            query_params.append(f"table={quote(str(table).lower() if isinstance(table, bool) else str(table))}")
+            value = str(table)
+            if isinstance(table, bool):
+                value = value.lower()
+            query_params.append(f"table={quote(value)}")
         if look_ahead_time_in_minutes is not None:
-            query_params.append(f"lookAheadTimeInMinutes={quote(str(look_ahead_time_in_minutes).lower() if isinstance(look_ahead_time_in_minutes, bool) else str(look_ahead_time_in_minutes))}")
+            value = str(look_ahead_time_in_minutes)
+            if isinstance(look_ahead_time_in_minutes, bool):
+                value = value.lower()
+            query_params.append(f"lookAheadTimeInMinutes={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3493,7 +3894,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def reply_to_async(
@@ -3507,10 +3907,13 @@ class Office365Client(ConnectorClientBase):
 
         This operation replies to an email.
         """
-        path = f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{quote(str(message_id))}"
+        path = f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{str(message_id)}"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3527,7 +3930,7 @@ class Office365Client(ConnectorClientBase):
 
         Respond to an event invite.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/events/{quote(str(event_id))}/{quote(str(response))}"
+        path = f"{self._connection_runtime_url}/codeless/v1.0/me/events/{str(event_id)}/{str(response)}"
 
         await self.http_client.send_async("POST", path, body=input)
 
@@ -3567,7 +3970,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def shared_mailbox_on_new_email_async(
@@ -3591,25 +3993,55 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail/OnNewEmail"
         query_params = []
         if mailbox_address is not None:
-            query_params.append(f"mailboxAddress={quote(str(mailbox_address).lower() if isinstance(mailbox_address, bool) else str(mailbox_address))}")
+            value = str(mailbox_address)
+            if isinstance(mailbox_address, bool):
+                value = value.lower()
+            query_params.append(f"mailboxAddress={quote(value)}")
         if folder_id is not None:
-            query_params.append(f"folderId={quote(str(folder_id).lower() if isinstance(folder_id, bool) else str(folder_id))}")
+            value = str(folder_id)
+            if isinstance(folder_id, bool):
+                value = value.lower()
+            query_params.append(f"folderId={quote(value)}")
         if to is not None:
-            query_params.append(f"to={quote(str(to).lower() if isinstance(to, bool) else str(to))}")
+            value = str(to)
+            if isinstance(to, bool):
+                value = value.lower()
+            query_params.append(f"to={quote(value)}")
         if cc is not None:
-            query_params.append(f"cc={quote(str(cc).lower() if isinstance(cc, bool) else str(cc))}")
+            value = str(cc)
+            if isinstance(cc, bool):
+                value = value.lower()
+            query_params.append(f"cc={quote(value)}")
         if to_or_cc is not None:
-            query_params.append(f"toOrCc={quote(str(to_or_cc).lower() if isinstance(to_or_cc, bool) else str(to_or_cc))}")
+            value = str(to_or_cc)
+            if isinstance(to_or_cc, bool):
+                value = value.lower()
+            query_params.append(f"toOrCc={quote(value)}")
         if from_ is not None:
-            query_params.append(f"from={quote(str(from_).lower() if isinstance(from_, bool) else str(from_))}")
+            value = str(from_)
+            if isinstance(from_, bool):
+                value = value.lower()
+            query_params.append(f"from={quote(value)}")
         if importance is not None:
-            query_params.append(f"importance={quote(str(importance).lower() if isinstance(importance, bool) else str(importance))}")
+            value = str(importance)
+            if isinstance(importance, bool):
+                value = value.lower()
+            query_params.append(f"importance={quote(value)}")
         if has_attachments is not None:
-            query_params.append(f"hasAttachments={quote(str(has_attachments).lower() if isinstance(has_attachments, bool) else str(has_attachments))}")
+            value = str(has_attachments)
+            if isinstance(has_attachments, bool):
+                value = value.lower()
+            query_params.append(f"hasAttachments={quote(value)}")
         if include_attachments is not None:
-            query_params.append(f"includeAttachments={quote(str(include_attachments).lower() if isinstance(include_attachments, bool) else str(include_attachments))}")
+            value = str(include_attachments)
+            if isinstance(include_attachments, bool):
+                value = value.lower()
+            query_params.append(f"includeAttachments={quote(value)}")
         if subject_filter is not None:
-            query_params.append(f"subjectFilter={quote(str(subject_filter).lower() if isinstance(subject_filter, bool) else str(subject_filter))}")
+            value = str(subject_filter)
+            if isinstance(subject_filter, bool):
+                value = value.lower()
+            query_params.append(f"subjectFilter={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3625,7 +4057,6 @@ class Office365Client(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def shared_mailbox_send_email_async(

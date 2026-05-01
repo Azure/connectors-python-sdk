@@ -5,10 +5,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, List, Any, Dict
-from datetime import datetime
+from dataclasses import dataclass
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
+import json
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -30,6 +30,7 @@ class ListUsersResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class ListGroupsByDisplayNameSearchResponse:
     """Response for List Groups By Display Name Search"""
@@ -41,6 +42,7 @@ class ListGroupsByDisplayNameSearchResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class ListSubscribedSkusResponse:
     """Response for List Subscribed Skus"""
@@ -49,6 +51,7 @@ class ListSubscribedSkusResponse:
     """The Odata.context link."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
+
 
 @dataclass
 class ListDirectGroupMembersResponse:
@@ -61,6 +64,7 @@ class ListDirectGroupMembersResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class GetMemberLicenseDetailsResponse:
     """Response for Get Member License Details"""
@@ -69,6 +73,7 @@ class GetMemberLicenseDetailsResponse:
     """The Odata.context link."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
+
 
 @dataclass
 class GetGroupPropertiesResponse:
@@ -141,12 +146,14 @@ class GetGroupPropertiesResponse:
     on_premises_provisioning_errors: Optional[List[str]] = None
     """On premise provisioning errors of the group."""
 
+
 @dataclass
 class GetMemberGroupsInput:
     """Get Member Groups"""
 
     security_enabled_only: Optional[bool] = None
     """Do you want to retrieve security enabled groups only?"""
+
 
 @dataclass
 class GetMemberGroupsResponse:
@@ -156,6 +163,7 @@ class GetMemberGroupsResponse:
     """The Odata.context link."""
     value: Optional[List[str]] = None
     """value"""
+
 
 
 # Client Class
@@ -212,7 +220,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_groups_by_display_name_search_async(
@@ -228,9 +235,15 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
         if search is not None:
-            query_params.append(f"$search={quote(str(search).lower() if isinstance(search, bool) else str(search))}")
+            value = str(search)
+            if isinstance(search, bool):
+                value = value.lower()
+            query_params.append(f"$search={quote(value)}")
         if count is not None:
-            query_params.append(f"$count={quote(str(count).lower() if isinstance(count, bool) else str(count))}")
+            value = str(count)
+            if isinstance(count, bool):
+                value = value.lower()
+            query_params.append(f"$count={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -246,7 +259,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_subscribed_skus_async(
@@ -271,7 +283,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_direct_group_members_async(
@@ -289,11 +300,20 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v1.0/groups/{str(group_id)}/members"
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if select is not None:
-            query_params.append(f"$select={quote(str(select).lower() if isinstance(select, bool) else str(select))}")
+            value = str(select)
+            if isinstance(select, bool):
+                value = value.lower()
+            query_params.append(f"$select={quote(value)}")
         if count is not None:
-            query_params.append(f"$count={quote(str(count).lower() if isinstance(count, bool) else str(count))}")
+            value = str(count)
+            if isinstance(count, bool):
+                value = value.lower()
+            query_params.append(f"$count={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -309,7 +329,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_member_license_details_async(
@@ -325,7 +344,10 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v1.0/users/{str(id)}/licenseDetails"
         query_params = []
         if select is not None:
-            query_params.append(f"$select={quote(str(select).lower() if isinstance(select, bool) else str(select))}")
+            value = str(select)
+            if isinstance(select, bool):
+                value = value.lower()
+            query_params.append(f"$select={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -341,7 +363,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_group_properties_async(
@@ -367,7 +388,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_member_groups_async(
@@ -394,6 +414,4 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
-

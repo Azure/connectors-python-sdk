@@ -19,7 +19,7 @@ class TestCodeQuality(unittest.TestCase):
 
         try:
             subprocess.run(
-                [sys.executable, '-m', 'mypy', '-p', 'azure.connectors.sdk'],
+                [sys.executable, '-m', 'mypy', '-p', 'azure.connectors'],
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

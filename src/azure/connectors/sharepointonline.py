@@ -6,9 +6,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Any, Dict
+from typing import Optional, Any, Dict, List
 from datetime import datetime
 from urllib.parse import quote
+import json
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -25,181 +26,241 @@ from azure.connectors.sdk import (
 class TablesList:
     """Response for Get all lists and libraries"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ApproveHubSiteJoinResponse:
     """Response for Approve hub site join request"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SharingLinkPermission:
     """Response for Create sharing link for a file or folder"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class BlobMetadata:
     """Response for Copy file (deprecated)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SPBlobMetadataResponse:
     """Response for Copy file"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateFileInput:
     """Create file"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class UpdateFileInput:
     """Update file"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class BlobMetadataResponse:
     """Response for Update file"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateNewDocumentSetResponse:
     """Response for Create new document set"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateNewFolderResponse:
     """Response for Create new folder"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SPListExpandedUser:
     """Response for Resolve person"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ItemsList:
     """Response for Get files (properties only)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PostItemInput:
     """Create item"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PostItemResponse:
     """Response for Create item"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class GetItemResponse:
     """Response for Get item"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PatchItemInput:
     """Update item"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PatchItemResponse:
     """Response for Update item"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateApprovalRequestInput:
     """Create an approval request for an item or file"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ApprovalData:
     """Response for Create an approval request for an item or file"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class GetItemChangesResponse:
     """Response for Get changes for an item or a file (properties only)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class Item:
     """Response for Get file properties"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PatchFileItemInput:
     """Update file properties"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PatchFileItemResponse:
     """Response for Update file properties"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SetApprovalStatusOutput:
     """Response for Set content approval status"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SPListItemAttachment:
     """Response for Get attachments"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateAttachmentInput:
     """Add attachment"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DeletedItemList:
     """Response for When a file is deleted"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateContentAssemblyDocumentInput:
     """Generate document using Microsoft Syntex (preview)"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class Table:
     """Response for Get list views"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateAgreementsSolutionDocumentInput:
     """Agreements Solution - Generate document within Agreements Solution workspace"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ApplicationPermissionIdentity:
@@ -207,6 +268,7 @@ class ApplicationPermissionIdentity:
 
     display_name: Optional[str] = None
     """Application display name"""
+
 
 @dataclass
 class BlobDataSetsMetadata:
@@ -219,12 +281,14 @@ class BlobDataSetsMetadata:
     url_encoding: Optional[str] = None
     """Blob dataset url encoding"""
 
+
 @dataclass
 class BlobMetadataPage:
     """Definition: BlobMetadataPage"""
 
     value: Optional[List[BlobMetadata]] = None
     """Blob metadata collection."""
+
 
 @dataclass
 class CopyFileParameters:
@@ -239,6 +303,7 @@ class CopyFileParameters:
     name_conflict_behavior: Optional[int] = None
     """Pick one of the options available"""
 
+
 @dataclass
 class CopyFolderParameters:
     """Definition: CopyFolderParameters"""
@@ -252,6 +317,7 @@ class CopyFolderParameters:
     name_conflict_behavior: Optional[int] = None
     """Pick one of the options available"""
 
+
 @dataclass
 class CreateNewDocumentSetParameters:
     """Definition: CreateNewDocumentSetParameters"""
@@ -262,12 +328,14 @@ class CreateNewDocumentSetParameters:
     """Example: 0x0120D520"""
     dynamic_properties: Optional[Dict[str, Any]] = None
 
+
 @dataclass
 class CreateNewFolderParameters:
     """Definition: CreateNewFolderParameters"""
 
     path: Optional[str] = None
     """Example: folder1/folder2/folder3"""
+
 
 @dataclass
 class DataSet:
@@ -280,6 +348,7 @@ class DataSet:
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
 
+
 @dataclass
 class DataSetsList:
     """Definition: DataSetsList"""
@@ -287,12 +356,14 @@ class DataSetsList:
     value: Optional[List[DataSet]] = None
     """List of datasets"""
 
+
 @dataclass
 class DataSetsMetadata:
     """Definition: DataSetsMetadata"""
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
+
 
 @dataclass
 class DeletedItem:
@@ -311,6 +382,7 @@ class DeletedItem:
     is_folder: Optional[bool] = None
     """A true/false value to indicate if the item is a folder"""
 
+
 @dataclass
 class FileCheckInParameters:
     """Definition: FileCheckInParameters"""
@@ -320,11 +392,13 @@ class FileCheckInParameters:
     checkin_type: Optional[int] = None
     """Select the type of version you would like to check in"""
 
+
 @dataclass
 class GetItemChangesMetadataResponse:
     """Definition: GetItemChangesMetadataResponse"""
 
     schema: Optional[ObjectEntity] = None
+
 
 @dataclass
 class GroupPermissionIdentity:
@@ -332,6 +406,7 @@ class GroupPermissionIdentity:
 
     display_name: Optional[str] = None
     """Group display name"""
+
 
 @dataclass
 class HubSiteJoinApprovalOutput:
@@ -346,6 +421,7 @@ class HubSiteJoinApprovalOutput:
     approval_correlation_id: Optional[str] = None
     """Approval Correlation Id"""
 
+
 @dataclass
 class ItemGrantAccessBody:
     """Definition: ItemGrantAccessBody"""
@@ -358,6 +434,7 @@ class ItemGrantAccessBody:
     """A plain text formatted message that is included in the sharing invitation"""
     send_email: Optional[bool] = None
     """Specify whether recipients should receive an email notification message"""
+
 
 @dataclass
 class ItemPermissionAddBody:
@@ -374,16 +451,18 @@ class ItemPermissionAddBody:
     message: Optional[str] = None
     """A plain text formatted message that is included in the sharing invitation. Maximum length 2000 characters."""
 
+
 @dataclass
 class ItemPermissionCreateLinkBody:
     """Definition: ItemPermissionCreateLinkBody"""
 
-    type: Optional[str] = None
+    type_: Optional[str] = None
     """The type of sharing link to create"""
     scope: Optional[str] = None
     """Choose who your sharing link gives access to. \"Anyone\" option will only work if your administrator has enabled it."""
     expiration_date_time: Optional[str] = None
     """The date after which the link will expire in yyyy-MM-dd format. Only applicable for anonymous links."""
+
 
 @dataclass
 class ItemPermissionRecipient:
@@ -392,12 +471,14 @@ class ItemPermissionRecipient:
     email: Optional[str] = None
     """The email address for the recipient, if the recipient has an associated email address."""
 
+
 @dataclass
 class ItemPermissionUpdateBody:
     """Definition: ItemPermissionUpdateBody"""
 
     roles: Optional[List[str]] = None
     """Specify updated roles for this permission."""
+
 
 @dataclass
 class ItemReference:
@@ -408,6 +489,7 @@ class ItemReference:
     path: Optional[str] = None
     """Path that can be used to navigate to the parent item"""
     sharepoint_ids: Optional[SharePointIds] = None
+
 
 @dataclass
 class MoveFileParameters:
@@ -422,6 +504,7 @@ class MoveFileParameters:
     name_conflict_behavior: Optional[int] = None
     """Pick one of the options available"""
 
+
 @dataclass
 class MoveFolderParameters:
     """Definition: MoveFolderParameters"""
@@ -435,11 +518,14 @@ class MoveFolderParameters:
     name_conflict_behavior: Optional[int] = None
     """Pick one of the options available"""
 
+
 @dataclass
 class ObjectEntity:
     """Definition: Object"""
 
-    pass
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PassThroughNativeQuery:
@@ -447,6 +533,7 @@ class PassThroughNativeQuery:
 
     language: Optional[str] = None
     """Query language"""
+
 
 @dataclass
 class PatchFileItemWithPredictedValuesParameters:
@@ -456,6 +543,7 @@ class PatchFileItemWithPredictedValuesParameters:
     """Enter modelId of the Model which is used for prediction"""
     predict_result: Optional[str] = None
     """Enter request content in JSON"""
+
 
 @dataclass
 class Permission:
@@ -472,6 +560,7 @@ class Permission:
     roles: Optional[List[str]] = None
     """The type of permission - read, write, owner, member"""
 
+
 @dataclass
 class PermissionIdentitySet:
     """Definition: PermissionIdentitySet"""
@@ -480,12 +569,14 @@ class PermissionIdentitySet:
     group: Optional[GroupPermissionIdentity] = None
     user: Optional[UserPermissionIdentity] = None
 
+
 @dataclass
 class PermissionsList:
     """Definition: PermissionsList"""
 
     value: Optional[List[Permission]] = None
     """List of Permissions"""
+
 
 @dataclass
 class Procedure:
@@ -496,12 +587,14 @@ class Procedure:
     display_name: Optional[str] = None
     """Procedure display name"""
 
+
 @dataclass
 class PublishedResult:
     """Definition: PublishedResult"""
 
     is_file_published: Optional[bool] = None
     """A boolean value (true, false) to indicate whether the scheduled version of the file has been published"""
+
 
 @dataclass
 class SharePointHttpRequestBodyParameters:
@@ -515,6 +608,7 @@ class SharePointHttpRequestBodyParameters:
     """Enter JSON object of request headers"""
     body: Optional[str] = None
     """Enter request content in JSON"""
+
 
 @dataclass
 class SharePointIds:
@@ -535,6 +629,7 @@ class SharePointIds:
     web_id: Optional[str] = None
     """The unique identifier (guid) for the item's site (SPWeb)"""
 
+
 @dataclass
 class SharingInvitation:
     """Definition: SharingInvitation"""
@@ -544,6 +639,7 @@ class SharingInvitation:
     sign_in_required: Optional[bool] = None
     """If true the recipient of the invitation needs to sign in in order to access the shared item"""
 
+
 @dataclass
 class SharingLink:
     """Definition: SharingLink"""
@@ -551,11 +647,13 @@ class SharingLink:
     web_url: Optional[str] = None
     """A link to the item"""
 
+
 @dataclass
 class SharingLinkPermissionIdentitySet:
     """Definition: SharingLinkPermissionIdentitySet"""
 
     user: Optional[SharingLinkUserPermissionIdentity] = None
+
 
 @dataclass
 class SharingLinkUserPermissionIdentity:
@@ -566,6 +664,7 @@ class SharingLinkUserPermissionIdentity:
     email: Optional[str] = None
     """User email"""
 
+
 @dataclass
 class SPContentType:
     """Definition: SPContentType"""
@@ -574,6 +673,7 @@ class SPContentType:
     """Content type Id"""
     name: Optional[str] = None
     """Content type name"""
+
 
 @dataclass
 class SPForASelectedFileResponse:
@@ -586,6 +686,7 @@ class SPForASelectedFileResponse:
     file_name: Optional[str] = None
     """File Name"""
 
+
 @dataclass
 class SPListEntity:
     """Definition: SPListEntity"""
@@ -594,6 +695,7 @@ class SPListEntity:
     """The Id of the SPField"""
     entity_type: Optional[str] = None
     """What type of entity (field) this is"""
+
 
 @dataclass
 class TableCapabilitiesMetadata:
@@ -609,6 +711,7 @@ class TableCapabilitiesMetadata:
     server_paging_options: Optional[List[str]] = None
     """List of supported server-driven paging capabilities"""
 
+
 @dataclass
 class TableFilterRestrictionsMetadata:
     """Definition: TableFilterRestrictionsMetadata"""
@@ -619,6 +722,7 @@ class TableFilterRestrictionsMetadata:
     """List of non filterable properties"""
     required_properties: Optional[List[str]] = None
     """List of required properties"""
+
 
 @dataclass
 class TableMetadata:
@@ -636,12 +740,14 @@ class TableMetadata:
     web_url: Optional[str] = None
     """Url link"""
 
+
 @dataclass
 class TableSelectRestrictionsMetadata:
     """Definition: TableSelectRestrictionsMetadata"""
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
+
 
 @dataclass
 class TableSortRestrictionsMetadata:
@@ -653,6 +759,7 @@ class TableSortRestrictionsMetadata:
     """List of unsortable properties"""
     ascending_only_properties: Optional[List[str]] = None
     """List of properties which support ascending order only"""
+
 
 @dataclass
 class TabularDataSetsMetadata:
@@ -669,6 +776,7 @@ class TabularDataSetsMetadata:
     table_plural_name: Optional[str] = None
     """Table plural display name"""
 
+
 @dataclass
 class UserPermissionIdentity:
     """Definition: UserPermissionIdentity"""
@@ -677,6 +785,7 @@ class UserPermissionIdentity:
     """User display name"""
     email: Optional[str] = None
     """User email"""
+
 
 
 # Client Class
@@ -734,7 +843,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def approve_hub_site_join_async(
@@ -750,7 +858,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/approvehubsitejoin"
         query_params = []
         if joining_site_id is not None:
-            query_params.append(f"joiningSiteId={quote(str(joining_site_id).lower() if isinstance(joining_site_id, bool) else str(joining_site_id))}")
+            value = str(joining_site_id)
+            if isinstance(joining_site_id, bool):
+                value = value.lower()
+            query_params.append(f"joiningSiteId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -766,7 +877,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def cancel_hub_site_join_approval_async(
@@ -782,7 +892,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/cancelhubsitejoinapproval"
         query_params = []
         if approval_correlation_id is not None:
-            query_params.append(f"approvalCorrelationId={quote(str(approval_correlation_id).lower() if isinstance(approval_correlation_id, bool) else str(approval_correlation_id))}")
+            value = str(approval_correlation_id)
+            if isinstance(approval_correlation_id, bool):
+                value = value.lower()
+            query_params.append(f"approvalCorrelationId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -814,7 +927,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def copy_file_async(
@@ -833,13 +945,25 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/copyFile"
         query_params = []
         if source is not None:
-            query_params.append(f"source={quote(str(source).lower() if isinstance(source, bool) else str(source))}")
+            value = str(source)
+            if isinstance(source, bool):
+                value = value.lower()
+            query_params.append(f"source={quote(value)}")
         if destination is not None:
-            query_params.append(f"destination={quote(str(destination).lower() if isinstance(destination, bool) else str(destination))}")
+            value = str(destination)
+            if isinstance(destination, bool):
+                value = value.lower()
+            query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
-            query_params.append(f"overwrite={quote(str(overwrite).lower() if isinstance(overwrite, bool) else str(overwrite))}")
+            value = str(overwrite)
+            if isinstance(overwrite, bool):
+                value = value.lower()
+            query_params.append(f"overwrite={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -855,7 +979,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def copy_file_async(
@@ -882,7 +1005,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def copy_folder_async(
@@ -909,7 +1031,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_file_async(
@@ -928,11 +1049,20 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/files"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if name is not None:
-            query_params.append(f"name={quote(str(name).lower() if isinstance(name, bool) else str(name))}")
+            value = str(name)
+            if isinstance(name, bool):
+                value = value.lower()
+            query_params.append(f"name={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -948,7 +1078,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_file_metadata_async(
@@ -975,7 +1104,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def update_file_async(
@@ -1003,7 +1131,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def delete_file_async(
@@ -1034,7 +1161,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/files/{str(id)}/content"
         query_params = []
         if infer_content_type is not None:
-            query_params.append(f"inferContentType={quote(str(infer_content_type).lower() if isinstance(infer_content_type, bool) else str(infer_content_type))}")
+            value = str(infer_content_type)
+            if isinstance(infer_content_type, bool):
+                value = value.lower()
+            query_params.append(f"inferContentType={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1072,7 +1202,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_folder_async(
@@ -1099,7 +1228,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_file_metadata_by_path_async(
@@ -1116,9 +1244,15 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/GetFileByPath"
         query_params = []
         if path is not None:
-            query_params.append(f"path={quote(str(path).lower() if isinstance(path, bool) else str(path))}")
+            value = str(path)
+            if isinstance(path, bool):
+                value = value.lower()
+            query_params.append(f"path={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1134,7 +1268,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_file_content_by_path_async(
@@ -1152,11 +1285,20 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/GetFileContentByPath"
         query_params = []
         if path is not None:
-            query_params.append(f"path={quote(str(path).lower() if isinstance(path, bool) else str(path))}")
+            value = str(path)
+            if isinstance(path, bool):
+                value = value.lower()
+            query_params.append(f"path={quote(value)}")
         if infer_content_type is not None:
-            query_params.append(f"inferContentType={quote(str(infer_content_type).lower() if isinstance(infer_content_type, bool) else str(infer_content_type))}")
+            value = str(infer_content_type)
+            if isinstance(infer_content_type, bool):
+                value = value.lower()
+            query_params.append(f"inferContentType={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1184,7 +1326,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/GetFolder"
         query_params = []
         if id is not None:
-            query_params.append(f"id={quote(str(id).lower() if isinstance(id, bool) else str(id))}")
+            value = str(id)
+            if isinstance(id, bool):
+                value = value.lower()
+            query_params.append(f"id={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1200,7 +1345,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_folder_metadata_by_path_async(
@@ -1217,9 +1361,15 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/GetFolderByPath"
         query_params = []
         if path is not None:
-            query_params.append(f"path={quote(str(path).lower() if isinstance(path, bool) else str(path))}")
+            value = str(path)
+            if isinstance(path, bool):
+                value = value.lower()
+            query_params.append(f"path={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1235,7 +1385,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def http_request_async(
@@ -1267,11 +1416,20 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/joinhubsite"
         query_params = []
         if hub_site_id is not None:
-            query_params.append(f"hubSiteId={quote(str(hub_site_id).lower() if isinstance(hub_site_id, bool) else str(hub_site_id))}")
+            value = str(hub_site_id)
+            if isinstance(hub_site_id, bool):
+                value = value.lower()
+            query_params.append(f"hubSiteId={quote(value)}")
         if approval_token is not None:
-            query_params.append(f"approvalToken={quote(str(approval_token).lower() if isinstance(approval_token, bool) else str(approval_token))}")
+            value = str(approval_token)
+            if isinstance(approval_token, bool):
+                value = value.lower()
+            query_params.append(f"approvalToken={quote(value)}")
         if approval_correlation_id is not None:
-            query_params.append(f"approvalCorrelationId={quote(str(approval_correlation_id).lower() if isinstance(approval_correlation_id, bool) else str(approval_correlation_id))}")
+            value = str(approval_correlation_id)
+            if isinstance(approval_correlation_id, bool):
+                value = value.lower()
+            query_params.append(f"approvalCorrelationId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1301,7 +1459,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def move_folder_async(
@@ -1328,7 +1485,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def notify_hub_site_join_approval_started_async(
@@ -1344,7 +1500,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/notifyhubsitejoinapprovalstarted"
         query_params = []
         if approval_correlation_id is not None:
-            query_params.append(f"approvalCorrelationId={quote(str(approval_correlation_id).lower() if isinstance(approval_correlation_id, bool) else str(approval_correlation_id))}")
+            value = str(approval_correlation_id)
+            if isinstance(approval_correlation_id, bool):
+                value = value.lower()
+            query_params.append(f"approvalCorrelationId={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1373,7 +1532,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_new_document_set_async(
@@ -1401,7 +1559,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_new_folder_async(
@@ -1419,7 +1576,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/createnewfolder"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1435,7 +1595,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def search_for_user_async(
@@ -1454,9 +1613,15 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/entities/{str(entity_id)}/searchforuser"
         query_params = []
         if search_value is not None:
-            query_params.append(f"searchValue={quote(str(search_value).lower() if isinstance(search_value, bool) else str(search_value))}")
+            value = str(search_value)
+            if isinstance(search_value, bool):
+                value = value.lower()
+            query_params.append(f"searchValue={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1472,7 +1637,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_file_items_async(
@@ -1494,17 +1658,35 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/getfileitems"
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if orderby is not None:
-            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
         if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if view_scope_option is not None:
-            query_params.append(f"viewScopeOption={quote(str(view_scope_option).lower() if isinstance(view_scope_option, bool) else str(view_scope_option))}")
+            value = str(view_scope_option)
+            if isinstance(view_scope_option, bool):
+                value = value.lower()
+            query_params.append(f"viewScopeOption={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1520,7 +1702,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_items_async(
@@ -1542,17 +1723,35 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items"
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if orderby is not None:
-            query_params.append(f"$orderby={quote(str(orderby).lower() if isinstance(orderby, bool) else str(orderby))}")
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
         if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if view_scope_option is not None:
-            query_params.append(f"viewScopeOption={quote(str(view_scope_option).lower() if isinstance(view_scope_option, bool) else str(view_scope_option))}")
+            value = str(view_scope_option)
+            if isinstance(view_scope_option, bool):
+                value = value.lower()
+            query_params.append(f"viewScopeOption={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1568,7 +1767,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def post_item_async(
@@ -1586,7 +1784,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1602,7 +1803,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_item_async(
@@ -1620,7 +1820,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1636,7 +1839,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def delete_item_async(
@@ -1670,7 +1872,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1686,7 +1891,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_approval_request_async(
@@ -1705,7 +1909,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/approval"
         query_params = []
         if approval_type is not None:
-            query_params.append(f"approvalType={quote(str(approval_type).lower() if isinstance(approval_type, bool) else str(approval_type))}")
+            value = str(approval_type)
+            if isinstance(approval_type, bool):
+                value = value.lower()
+            query_params.append(f"approvalType={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1721,7 +1928,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_item_changes_async(
@@ -1742,13 +1948,25 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/changes"
         query_params = []
         if since is not None:
-            query_params.append(f"since={quote(str(since).lower() if isinstance(since, bool) else str(since))}")
+            value = str(since)
+            if isinstance(since, bool):
+                value = value.lower()
+            query_params.append(f"since={quote(value)}")
         if until is not None:
-            query_params.append(f"until={quote(str(until).lower() if isinstance(until, bool) else str(until))}")
+            value = str(until)
+            if isinstance(until, bool):
+                value = value.lower()
+            query_params.append(f"until={quote(value)}")
         if include_drafts is not None:
-            query_params.append(f"includeDrafts={quote(str(include_drafts).lower() if isinstance(include_drafts, bool) else str(include_drafts))}")
+            value = str(include_drafts)
+            if isinstance(include_drafts, bool):
+                value = value.lower()
+            query_params.append(f"includeDrafts={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1764,7 +1982,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def check_in_file_async(
@@ -1828,7 +2045,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/getfileitem"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1844,7 +2064,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def grant_access_async(
@@ -1879,7 +2098,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/patchfileitem"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1895,7 +2117,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def patch_file_item_with_predicted_values_async(
@@ -1924,7 +2145,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def set_approval_status_async(
@@ -1944,11 +2164,20 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/setapprovalstatus"
         query_params = []
         if approval_action is not None:
-            query_params.append(f"approvalAction={quote(str(approval_action).lower() if isinstance(approval_action, bool) else str(approval_action))}")
+            value = str(approval_action)
+            if isinstance(approval_action, bool):
+                value = value.lower()
+            query_params.append(f"approvalAction={quote(value)}")
         if comments is not None:
-            query_params.append(f"comments={quote(str(comments).lower() if isinstance(comments, bool) else str(comments))}")
+            value = str(comments)
+            if isinstance(comments, bool):
+                value = value.lower()
+            query_params.append(f"comments={quote(value)}")
         if entity_tag is not None:
-            query_params.append(f"entityTag={quote(str(entity_tag).lower() if isinstance(entity_tag, bool) else str(entity_tag))}")
+            value = str(entity_tag)
+            if isinstance(entity_tag, bool):
+                value = value.lower()
+            query_params.append(f"entityTag={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1964,7 +2193,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def unshare_item_async(
@@ -2007,7 +2235,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_attachment_async(
@@ -2026,7 +2253,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(item_id)}/attachments"
         query_params = []
         if display_name is not None:
-            query_params.append(f"displayName={quote(str(display_name).lower() if isinstance(display_name, bool) else str(display_name))}")
+            value = str(display_name)
+            if isinstance(display_name, bool):
+                value = value.lower()
+            query_params.append(f"displayName={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2042,7 +2272,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def delete_attachment_async(
@@ -2101,9 +2330,15 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onchangeditems"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2119,7 +2354,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_on_deleted_file_items_async(
@@ -2136,7 +2370,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/ondeletedfileitems"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2152,7 +2389,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_on_deleted_items_async(
@@ -2179,7 +2415,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_on_new_file_items_async(
@@ -2197,9 +2432,15 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onnewfileitems"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2215,7 +2456,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_on_new_items_async(
@@ -2232,7 +2472,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onnewitems"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2248,7 +2491,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_on_updated_file_classified_times_async(
@@ -2266,9 +2508,15 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onupdatedfileclassifiedtimes"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2284,7 +2532,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_on_updated_file_items_async(
@@ -2302,9 +2549,15 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onupdatedfileitems"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2320,7 +2573,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_on_updated_items_async(
@@ -2337,7 +2589,10 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onupdateditems"
         query_params = []
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2353,7 +2608,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_content_assembly_document_async(
@@ -2374,11 +2628,20 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/templates/{str(template)}/createnewdocument"
         query_params = []
         if folder_path is not None:
-            query_params.append(f"folderPath={quote(str(folder_path).lower() if isinstance(folder_path, bool) else str(folder_path))}")
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
         if file_name is not None:
-            query_params.append(f"fileName={quote(str(file_name).lower() if isinstance(file_name, bool) else str(file_name))}")
+            value = str(file_name)
+            if isinstance(file_name, bool):
+                value = value.lower()
+            query_params.append(f"fileName={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2394,7 +2657,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_table_views_async(
@@ -2421,7 +2683,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_agreements_solution_document_async(
@@ -2441,11 +2702,20 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/agreements/templates/{str(template)}/createnewdocument"
         query_params = []
         if document_name is not None:
-            query_params.append(f"documentName={quote(str(document_name).lower() if isinstance(document_name, bool) else str(document_name))}")
+            value = str(document_name)
+            if isinstance(document_name, bool):
+                value = value.lower()
+            query_params.append(f"documentName={quote(value)}")
         if table is not None:
-            query_params.append(f"table={quote(str(table).lower() if isinstance(table, bool) else str(table))}")
+            value = str(table)
+            if isinstance(table, bool):
+                value = value.lower()
+            query_params.append(f"table={quote(value)}")
         if view is not None:
-            query_params.append(f"view={quote(str(view).lower() if isinstance(view, bool) else str(view))}")
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2461,7 +2731,6 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def on_new_file_async(
@@ -2479,11 +2748,20 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/triggers/onnewfile"
         query_params = []
         if folder_id is not None:
-            query_params.append(f"folderId={quote(str(folder_id).lower() if isinstance(folder_id, bool) else str(folder_id))}")
+            value = str(folder_id)
+            if isinstance(folder_id, bool):
+                value = value.lower()
+            query_params.append(f"folderId={quote(value)}")
         if infer_content_type is not None:
-            query_params.append(f"inferContentType={quote(str(infer_content_type).lower() if isinstance(infer_content_type, bool) else str(infer_content_type))}")
+            value = str(infer_content_type)
+            if isinstance(infer_content_type, bool):
+                value = value.lower()
+            query_params.append(f"inferContentType={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2514,13 +2792,25 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/triggers/onupdatedfile"
         query_params = []
         if folder_id is not None:
-            query_params.append(f"folderId={quote(str(folder_id).lower() if isinstance(folder_id, bool) else str(folder_id))}")
+            value = str(folder_id)
+            if isinstance(folder_id, bool):
+                value = value.lower()
+            query_params.append(f"folderId={quote(value)}")
         if include_file_content is not None:
-            query_params.append(f"includeFileContent={quote(str(include_file_content).lower() if isinstance(include_file_content, bool) else str(include_file_content))}")
+            value = str(include_file_content)
+            if isinstance(include_file_content, bool):
+                value = value.lower()
+            query_params.append(f"includeFileContent={quote(value)}")
         if infer_content_type is not None:
-            query_params.append(f"inferContentType={quote(str(infer_content_type).lower() if isinstance(infer_content_type, bool) else str(infer_content_type))}")
+            value = str(infer_content_type)
+            if isinstance(infer_content_type, bool):
+                value = value.lower()
+            query_params.append(f"inferContentType={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2551,13 +2841,25 @@ class SharepointonlineClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/extractFolderV2"
         query_params = []
         if source is not None:
-            query_params.append(f"source={quote(str(source).lower() if isinstance(source, bool) else str(source))}")
+            value = str(source)
+            if isinstance(source, bool):
+                value = value.lower()
+            query_params.append(f"source={quote(value)}")
         if destination is not None:
-            query_params.append(f"destination={quote(str(destination).lower() if isinstance(destination, bool) else str(destination))}")
+            value = str(destination)
+            if isinstance(destination, bool):
+                value = value.lower()
+            query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
-            query_params.append(f"overwrite={quote(str(overwrite).lower() if isinstance(overwrite, bool) else str(overwrite))}")
+            value = str(overwrite)
+            if isinstance(overwrite, bool):
+                value = value.lower()
+            query_params.append(f"overwrite={quote(value)}")
         if query_parameters_single_encoded is not None:
-            query_params.append(f"queryParametersSingleEncoded={quote(str(query_parameters_single_encoded).lower() if isinstance(query_parameters_single_encoded, bool) else str(query_parameters_single_encoded))}")
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -2573,5 +2875,4 @@ class SharepointonlineClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
