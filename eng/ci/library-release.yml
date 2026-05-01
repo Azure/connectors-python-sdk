@@ -6,9 +6,6 @@ parameters:
     type: string
     default: 'azure-connectors/python/connector-sdk'
     displayName: 'Blob path prefix under drops container'
-  - name: GithubPat
-    type: string
-    displayName: 'GitHub Personal Access Token'
 
 resources:
   repositories:
@@ -39,4 +36,3 @@ extends:
             parameters:
               libraryVersion: ${{ parameters.libraryVersion }}
               blobPath: ${{ parameters.blobPath }}
-              GithubPat: ${{ parameters.GithubPat }}
