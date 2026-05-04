@@ -43,6 +43,10 @@ try:
     from .msgraphgroupsanduser import MsgraphgroupsanduserClient
 except (ImportError, NameError):
     MsgraphgroupsanduserClient = None  # type: ignore[assignment,misc]
+try:
+    from .office365users import Office365usersClient
+except (ImportError, NameError):
+    Office365usersClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.1.0'
 
@@ -61,4 +65,5 @@ __all__ = [
     'SharepointonlineClient',
     'TeamsClient',
     'MsgraphgroupsanduserClient',
+    'Office365usersClient',
 ]
