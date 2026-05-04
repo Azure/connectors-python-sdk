@@ -4,7 +4,7 @@ parameters:
     displayName: 'Library version to release (e.g., 0.1.0)'
   - name: blobPath
     type: string
-    default: 'connectors/python'
+    default: 'azure-connectors/python/connector-sdk'
     displayName: 'Blob path prefix under drops container'
 
 resources:
