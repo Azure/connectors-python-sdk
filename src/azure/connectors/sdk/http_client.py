@@ -5,7 +5,7 @@
 import asyncio
 import json
 from dataclasses import asdict, is_dataclass
-from typing import Any, Dict, List, Optional, TypeVar, Generic
+from typing import Any, Dict, List, NamedTuple, Optional, TypeVar, Generic, cast
 import aiohttp
 from aiohttp import ClientTimeout
 
@@ -14,6 +14,15 @@ from .options import ConnectorClientOptions
 from .exceptions import ConnectorException
 
 T = TypeVar("T")
+
+
+class _ResponseSnapshot(NamedTuple):
+    """Immutable snapshot of an HTTP response for use after context exits."""
+
+    status: int
+    headers: Dict[str, str]
+    text: str
+    content: bytes
 
 
 class ConnectorResponse(Generic[T]):
@@ -84,7 +93,7 @@ class ConnectorHttpClient:
         url: str,
         scopes: Optional[List[str]] = None,
         body: Optional[Any] = None,
-    ) -> aiohttp.ClientResponse:
+    ) -> _ResponseSnapshot:
         """
         Send an HTTP request with authentication and retry.
 
@@ -113,9 +122,9 @@ class ConnectorHttpClient:
         # dataclass instances as body parameters.
         json_body = None
         if body is not None:
-            if is_dataclass(body):
+            if is_dataclass(body) and not isinstance(body, type):
                 # Convert dataclass to dict, excluding None values
-                body_dict = asdict(body)
+                body_dict = asdict(cast(Any, body))
 
                 # NOTE(victoriahall): Handle dynamic schemas with
                 # additional_properties. Extract additional_properties and
@@ -147,7 +156,7 @@ class ConnectorHttpClient:
         url: str,
         headers: Dict[str, str],
         body: Optional[str],
-    ) -> aiohttp.ClientResponse:
+    ) -> _ResponseSnapshot:
         """Send request with retry logic."""
         last_exception = None
 
@@ -159,19 +168,20 @@ class ConnectorHttpClient:
                     # For transient errors, retry
                     if response.status >= 500 or response.status == 429:
                         if (
-                            attempt <
-                            self._options.max_retry_attempts - 1
+                            attempt < self._options.max_retry_attempts - 1
                         ):
                             await self._delay_retry(attempt)
                             continue
 
                     # Return response for caller to handle
-                    response_copy = type('Response', (), {
-                        'status': response.status,
-                        'headers': dict(response.headers),
-                        'text': await response.text(),
-                    })()
-                    return response_copy
+                    response_text = await response.text()
+                    response_content = await response.read()
+                    return _ResponseSnapshot(
+                        status=response.status,
+                        headers=dict(response.headers),
+                        text=response_text,
+                        content=response_content,
+                    )
 
             except aiohttp.ClientError as ex:
                 last_exception = ex
@@ -180,8 +190,15 @@ class ConnectorHttpClient:
                     continue
                 raise
 
+        # NOTE(victoriahall): If all retries exhausted without returning,
+        # raise the last exception or a generic error.
         if last_exception:
             raise last_exception
+        raise ConnectorException(
+            "Request failed after all retry attempts.",
+            0,
+            "",
+        )
 
     async def _delay_retry(self, attempt: int):
         """Calculate and apply retry delay."""

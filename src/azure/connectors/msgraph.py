@@ -112,7 +112,10 @@ class GetGroupPropertiesResponse:
     membership_rule_processing_state: Optional[str] = None
     """The processing state of the rule that is used for membership evaluation."""
     on_premises_domain_name: Optional[str] = None
-    """Contains the on-premises domainFQDN, also called dnsDomainName synchronized from the on-premises directory."""
+    """
+    Contains the on-premises domainFQDN, also called dnsDomainName synchronized from the on-premises
+    directory.
+    """
     on_premises_last_sync_date_time: Optional[str] = None
     """The time and date at which the tenant was last synced with the on-premise directory."""
     on_premises_net_bios_name: Optional[str] = None
@@ -163,7 +166,6 @@ class GetMemberGroupsResponse:
     """The Odata.context link."""
     value: Optional[List[str]] = None
     """value"""
-
 
 
 # Client Class

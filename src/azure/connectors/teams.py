@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -120,7 +119,10 @@ class CreateTagInput:
     display_name: Optional[str] = None
     """The name of the tag as it appears to the user in Microsoft Teams."""
     members: Optional[str] = None
-    """List of users' IDs separated by semi-colons, identifier must be in a format like '550e8400-e29b-41d4-a716-446655440000'."""
+    """
+    List of users' IDs separated by semi-colons, identifier must be in a format like
+    '550e8400-e29b-41d4-a716-446655440000'.
+    """
 
 
 @dataclass
@@ -136,7 +138,10 @@ class AddMemberToTagInput:
     """Add a member to a team tag"""
 
     user_id: Optional[str] = None
-    """The user's ID of the member to add to the tag, must be in a format like '550e8400-e29b-41d4-a716-446655440000'."""
+    """
+    The user's ID of the member to add to the tag, must be in a format like
+    '550e8400-e29b-41d4-a716-446655440000'.
+    """
 
 
 @dataclass
@@ -678,11 +683,17 @@ class ChatMessage:
     importance: Optional[str] = None
     """The importance of the message. The possible values are: normal, high, urgent."""
     last_modified_date_time: Optional[str] = None
-    """Timestamp when the chat message is created (initial setting) or modified, including when a reaction is added or removed"""
+    """
+    Timestamp when the chat message is created (initial setting) or modified, including when a
+    reaction is added or removed
+    """
     locale: Optional[str] = None
     """Locale of the chat message set by the client."""
     mentions: Optional[List[Dict[str, Any]]] = None
-    """List of entities mentioned in the chat message. Supported entities are: user, bot, team, and channel."""
+    """
+    List of entities mentioned in the chat message. Supported entities are: user, bot, team, and
+    channel.
+    """
     message_type: Optional[str] = None
     """The type of chat message"""
     reactions: Optional[List[Dict[str, Any]]] = None
@@ -692,7 +703,10 @@ class ChatMessage:
     subject: Optional[str] = None
     """The subject of the chat message, optional"""
     summary: Optional[str] = None
-    """Summary text of the message that could be used for push notifications and summary views or fall back views"""
+    """
+    Summary text of the message that could be used for push notifications and summary views or fall
+    back views
+    """
 
 
 @dataclass
@@ -1026,7 +1040,10 @@ class SchedulingGroupResponse:
     display_name: Optional[str] = None
     """The display name for the scheduling group."""
     is_active: Optional[bool] = None
-    """Indicates whether the scheduling group can be used when creating new entities or updating existing ones."""
+    """
+    Indicates whether the scheduling group can be used when creating new entities or updating
+    existing ones.
+    """
     user_ids: Optional[List[str]] = None
     """List of IDs of users in the scheduling group."""
 
@@ -1056,7 +1073,9 @@ class AtMentionBotResponse:
     """Definition: AtMentionBotResponse"""
 
     at_mention: Optional[str] = None
-    """An @mention token for the bot. This property can be inserted into messages and adaptive cards"""
+    """
+    An @mention token for the bot. This property can be inserted into messages and adaptive cards
+    """
 
 
 @dataclass
@@ -1249,7 +1268,6 @@ class VirtualAgentBots:
     """List of the Microsoft Copilot Studio agents"""
 
 
-
 # Client Class
 
 class TeamsClient(ConnectorClientBase):
@@ -1290,7 +1308,8 @@ class TeamsClient(ConnectorClientBase):
         """
         Create a Teams meeting
 
-        Create a meeting with a link at the bottom of the invite to join the meeting online on Microsoft Teams.
+        Create a meeting with a link at the bottom of the invite to join the meeting online on
+        Microsoft Teams.
         """
         path = f"{self._connection_runtime_url}/v1.0/me/calendars/{str(calendarid)}/events"
 
@@ -1338,7 +1357,8 @@ class TeamsClient(ConnectorClientBase):
         """
         List associated teams
 
-        Lists all the teams you are a direct member of, or are a member of a shared channel that is hosted inside the team.
+        Lists all the teams you are a direct member of, or are a member of a shared channel that is
+        hosted inside the team.
         """
         path = f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
 
@@ -1376,9 +1396,13 @@ class TeamsClient(ConnectorClientBase):
         """
         Post a choice of options as the Flow bot to a user
 
-        Send a set of options to a Microsoft Teams user, that they must respond to before the flow will continue. This action will pause the flow until the user response to the options
+        Send a set of options to a Microsoft Teams user, that they must respond to before the flow
+        will continue. This action will pause the flow until the user response to the options
         """
-        path = f"{self._connection_runtime_url}/flowbot/actions/messagewithoptions/recipienttypes/user/$subscriptions"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot/actions/messagewithoptions/recipienttypes/user/$subscriptions"
+        )
 
         await self.http_client.send_async("POST", path, body=input)
 
@@ -1530,7 +1554,10 @@ class TeamsClient(ConnectorClientBase):
         """
         Send a Microsoft Graph HTTP request
 
-        Construct a Microsoft Graph REST API request to invoke against the Microsoft Teams endpoints. These segments are supported: 1st segment: /teams, /me, /users 2nd segment: channels, chats, installedApps, messages, pinnedMessages, onlineMeetings. Learn more: https://docs.microsoft.com/en-us/graph/use-the-api
+        Construct a Microsoft Graph REST API request to invoke against the Microsoft Teams
+        endpoints. These segments are supported: 1st segment: /teams, /me, /users 2nd segment:
+        channels, chats, installedApps, messages, pinnedMessages, onlineMeetings. Learn more:
+        https://docs.microsoft.com/en-us/graph/use-the-api
         """
         path = f"{self._connection_runtime_url}/httprequest"
 
@@ -1547,4 +1574,3 @@ class TeamsClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
-

@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict
 from urllib.parse import quote
 import json
 
@@ -154,7 +154,6 @@ class MCPQueryRequest:
     callback_endpoint: Optional[str] = None
 
 
-
 # Client Class
 
 class KustoClient(ConnectorClientBase):
@@ -194,7 +193,8 @@ class KustoClient(ConnectorClientBase):
         """
         Run KQL query
 
-        Runs the KQL query and returns the result as a set of rows which can be iterated over in the following connectors e.g TableName | take 10.
+        Runs the KQL query and returns the result as a set of rows which can be iterated over in the
+        following connectors e.g TableName | take 10.
         """
         path = f"{self._connection_runtime_url}/ListKustoResults/false"
 
@@ -219,7 +219,8 @@ class KustoClient(ConnectorClientBase):
         """
         Run show control command
 
-        Runs the show control command and returns the result as a set of rows which can be iterated over in the following connectors e.g .show table TableName policy caching.
+        Runs the show control command and returns the result as a set of rows which can be iterated
+        over in the following connectors e.g .show table TableName policy caching.
         """
         path = f"{self._connection_runtime_url}/ListKustoShowCommandResults"
 
@@ -244,7 +245,8 @@ class KustoClient(ConnectorClientBase):
         """
         Run KQL query and render a chart
 
-        Runs the KQL query and returns result as a chart of your choice e.g TableName | where Timestamp > ago(1h) | project timestamp, value.
+        Runs the KQL query and returns result as a chart of your choice e.g TableName | where
+        Timestamp > ago(1h) | project timestamp, value.
         """
         path = f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/false"
 
@@ -269,7 +271,8 @@ class KustoClient(ConnectorClientBase):
         """
         Run control command and render a chart
 
-        Runs the control command and returns the result as a chart of your choice e.g .clear table TableName data.
+        Runs the control command and returns the result as a chart of your choice e.g .clear table
+        TableName data.
         """
         path = f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/true"
 
@@ -294,7 +297,9 @@ class KustoClient(ConnectorClientBase):
         """
         Run async control command
 
-        Runs control command in async mode and returns its ID, state and status on completion. Command can run for maximum 1 hour. The 'async' keyword is mandatory e.g .set-or-append async TargetTable <| SourceTable.
+        Runs control command in async mode and returns its ID, state and status on completion.
+        Command can run for maximum 1 hour. The 'async' keyword is mandatory e.g .set-or-append
+        async TargetTable <| SourceTable.
         """
         path = f"{self._connection_runtime_url}/RunAsyncControlCommandAndWait"
 
