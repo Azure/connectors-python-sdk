@@ -44,21 +44,21 @@ try:
 except (ImportError, NameError):
     MsgraphgroupsanduserClient = None  # type: ignore[assignment,misc]
 
-__version__ = "0.1.0"
+__version__ = '0.1.0'
 
 __all__ = [
-    "ConnectorClientBase",
-    "ConnectorClientOptions",
-    "TokenProvider",
-    "ManagedIdentityTokenProvider",
-    "ConnectionStringTokenProvider",
-    "AzureIdentityTokenProvider",
-    "ConnectorException",
-    "TriggerCallbackPayload",
-    "TriggerCallbackBody",
-    "KustoClient",
-    "Office365Client",
-    "SharepointonlineClient",
-    "TeamsClient",
-    "MsgraphgroupsanduserClient",
+    'ConnectorClientBase',
+    'ConnectorClientOptions',
+    'TokenProvider',
+    'ManagedIdentityTokenProvider',
+    'ConnectionStringTokenProvider',
+    'AzureIdentityTokenProvider',
+    'ConnectorException',
+    'TriggerCallbackPayload',
+    'TriggerCallbackBody',
+    'KustoClient',
+    'Office365Client',
+    'SharepointonlineClient',
+    'TeamsClient',
+    'MsgraphgroupsanduserClient',
 ]

@@ -3,8 +3,8 @@ parameters:
     type: string
   - name: blobPath
     type: string
-    default: 'azure-connectors/python/connector-sdk/${{ parameters.libraryVersion }}'
-    displayName: 'Blob path under drops container (e.g., azure-connectors/python/connector-sdk/1.0.0)'
+    default: 'azure-connectors/python/connector-sdk'
+    displayName: 'Blob path under drops container'
 
 jobs:
   - job: "CreateReleaseBranch"
@@ -18,7 +18,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '^\d+\.\d+\.\d+$' {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+$') {
             # Create GitHub credential
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
@@ -66,7 +66,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '^\d+\.\d+\.\d+$' {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+$') {
             # Create GitHub credential
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
@@ -93,7 +93,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '^\d+\.\d+\.\d+$' {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+$') {
             # Create GitHub credential
             $credential = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("${githubUser}:${githubToken}"))
         
@@ -157,7 +157,7 @@ jobs:
 
             Write-Host "Uploading Python artifacts for version: $version"
             Write-Host "Source folder: $distFolder"
-            Write-Host "Destination: https://azuresdkpartnerdrops.blob.core.windows.net/drops/$blobPath/"
+            Write-Host "Destination: https://azuresdkpartnerdrops.blob.core.windows.net/drops/$blobPath/$version/"
 
             # List files to be uploaded
             Get-ChildItem -Path $distFolder -Recurse | ForEach-Object {
@@ -165,13 +165,13 @@ jobs:
             }
 
             # Upload all distribution files (whl and tar.gz) to partner blob
-            azcopy copy "$distFolder/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/$blobPath/"
+            azcopy copy "$distFolder/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/$blobPath/$version/"
 
             Write-Host ""
             Write-Host "Upload complete. To publish to PyPI:"
             Write-Host "  1. Go to Azure DevOps: python - partner-release pipeline"
             Write-Host "  2. Click 'Run Pipeline'"
-            Write-Host "  3. Set BlobPath to: $blobPath"
+            Write-Host "  3. Set BlobPath to: $blobPath/$version"
         env:
           AZCOPY_AUTO_LOGIN_TYPE: 'PSCRED'
 
