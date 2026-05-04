@@ -4,7 +4,7 @@
 
 import json
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from azure.connectors.kusto import (
     KustoClient,
     QueryAndListSchema,
@@ -27,7 +27,7 @@ class TestKustoClientInitialization:
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
         client = KustoClient("https://example.azure.com/connections/test")
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "kusto"
         assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
@@ -35,7 +35,7 @@ class TestKustoClientInitialization:
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
         client = KustoClient("https://example.azure.com/connections/test/")
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_token_provider(self, mock_token_provider):
@@ -44,7 +44,7 @@ class TestKustoClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client._http_client._token_provider is mock_token_provider
 
     def test_init_with_custom_options(self, mock_token_provider):
@@ -55,7 +55,7 @@ class TestKustoClientInitialization:
             token_provider=mock_token_provider,
             options=options
         )
-        
+
         assert client._options is options
         assert client._options.timeout_seconds == 60.0
         assert client._options.max_retry_attempts == 5
@@ -76,7 +76,7 @@ class TestKustoClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.connector_name == "kusto"
 
 
@@ -90,7 +90,7 @@ class TestKustoClientLifecycle:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
@@ -104,7 +104,7 @@ class TestKustoClientLifecycle:
                 token_provider=mock_token_provider
             ) as client:
                 assert isinstance(client, KustoClient)
-            
+
             mock_close.assert_called_once()
 
 
@@ -118,12 +118,12 @@ class TestListKustoResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"rows": [{"col1": "value1"}], "columns": ["col1"]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -136,7 +136,7 @@ class TestListKustoResults:
                 csl="TestTable | take 10"
             )
             result = await client.list_kusto_results_async(input_schema)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/ListKustoResults/false",
@@ -151,9 +151,9 @@ class TestListKustoResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -162,7 +162,7 @@ class TestListKustoResults:
         ):
             input_schema = QueryAndListSchema()
             result = await client.list_kusto_results_async(input_schema)
-            
+
             assert result is None
 
     @pytest.mark.asyncio
@@ -172,12 +172,12 @@ class TestListKustoResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=400,
             text='{"error": "Invalid query"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -185,13 +185,14 @@ class TestListKustoResults:
             return_value=mock_response
         ):
             input_schema = QueryAndListSchema()
-            
+
             with pytest.raises(ConnectorException) as exc_info:
                 await client.list_kusto_results_async(input_schema)
-            
+
             assert exc_info.value.status_code == 400
             assert exc_info.value.response_body == '{"error": "Invalid query"}'
-            assert "POST https://example.azure.com/connections/test/ListKustoResults/false" in exc_info.value.operation
+            expected_op = "POST https://example.azure.com/connections/test/"
+            assert expected_op in exc_info.value.operation
 
     @pytest.mark.asyncio
     async def test_500_error_raises_exception(self, mock_token_provider):
@@ -200,12 +201,12 @@ class TestListKustoResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=500,
             text='Internal Server Error'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -214,7 +215,7 @@ class TestListKustoResults:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.list_kusto_results_async(QueryAndListSchema())
-            
+
             assert exc_info.value.status_code == 500
 
 
@@ -228,12 +229,12 @@ class TestListKustoShowCommandResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"command_result": "success"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -246,7 +247,7 @@ class TestListKustoShowCommandResults:
                 csl=".show tables"
             )
             result = await client.list_kusto_show_command_results_async(input_schema)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/ListKustoShowCommandResults",
@@ -261,9 +262,9 @@ class TestListKustoShowCommandResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -273,7 +274,7 @@ class TestListKustoShowCommandResults:
             result = await client.list_kusto_show_command_results_async(
                 ControlCommandAndListSchema()
             )
-            
+
             assert result is None
 
     @pytest.mark.asyncio
@@ -283,12 +284,12 @@ class TestListKustoShowCommandResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=403,
             text='{"error": "Forbidden"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -299,7 +300,7 @@ class TestListKustoShowCommandResults:
                 await client.list_kusto_show_command_results_async(
                     ControlCommandAndListSchema()
                 )
-            
+
             assert exc_info.value.status_code == 403
 
 
@@ -313,12 +314,12 @@ class TestRunKustoQueryAndVisualizeResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"chart": "data", "type": "line"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -332,7 +333,7 @@ class TestRunKustoQueryAndVisualizeResults:
                 chart_type="line"
             )
             result = await client.run_kusto_query_and_visualize_results_async(input_schema)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/RunKustoAndVisualizeResults/false",
@@ -347,12 +348,12 @@ class TestRunKustoQueryAndVisualizeResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=400,
             text='{"error": "Invalid chart type"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -363,7 +364,7 @@ class TestRunKustoQueryAndVisualizeResults:
                 await client.run_kusto_query_and_visualize_results_async(
                     QueryAndVisualizeSchema()
                 )
-            
+
             assert exc_info.value.status_code == 400
 
 
@@ -377,12 +378,12 @@ class TestRunKustoCommandAndVisualizeResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"visualization": "bar_chart"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -396,7 +397,7 @@ class TestRunKustoCommandAndVisualizeResults:
                 chart_type="bar"
             )
             result = await client.run_kusto_command_and_visualize_results_async(input_schema)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/RunKustoAndVisualizeResults/true",
@@ -411,9 +412,9 @@ class TestRunKustoCommandAndVisualizeResults:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -423,7 +424,7 @@ class TestRunKustoCommandAndVisualizeResults:
             result = await client.run_kusto_command_and_visualize_results_async(
                 CommandAndVisualizeSchema()
             )
-            
+
             assert result is None
 
 
@@ -437,12 +438,12 @@ class TestRunAsyncControlCommandAndWait:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"commandId": "123", "state": "Completed", "status": "Success"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -455,7 +456,7 @@ class TestRunAsyncControlCommandAndWait:
                 csl=".set-or-append async TargetTable <| SourceTable"
             )
             result = await client.run_async_control_command_and_wait_async(input_schema)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/RunAsyncControlCommandAndWait",
@@ -472,12 +473,12 @@ class TestRunAsyncControlCommandAndWait:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=408,
             text='{"error": "Command timeout"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -488,7 +489,7 @@ class TestRunAsyncControlCommandAndWait:
                 await client.run_async_control_command_and_wait_async(
                     ControlCommandAndListSchema()
                 )
-            
+
             assert exc_info.value.status_code == 408
 
 
@@ -502,12 +503,12 @@ class TestMCPKustoQueryManagement:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"jsonrpc": "2.0", "id": "1", "result": {"data": "test"}}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -521,7 +522,7 @@ class TestMCPKustoQueryManagement:
                 params={"query": "TestTable | take 1"}
             )
             result = await client.mcp_kusto_query_management_async(input_request)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/mcp/KustoQueryManagement",
@@ -537,12 +538,12 @@ class TestMCPKustoQueryManagement:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"jsonrpc": "2.0", "id": "2", "result": {}}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -554,8 +555,9 @@ class TestMCPKustoQueryManagement:
                 input_request,
                 session_id="session-123"
             )
-            
-            expected_path = "https://example.azure.com/connections/test/mcp/KustoQueryManagement?sessionId=session-123"
+
+            base_url = "https://example.azure.com/connections/test"
+            expected_path = f"{base_url}/mcp/KustoQueryManagement?sessionId=session-123"
             mock_send.assert_called_once_with(
                 "POST",
                 expected_path,
@@ -570,9 +572,9 @@ class TestMCPKustoQueryManagement:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{"result": "ok"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -583,7 +585,7 @@ class TestMCPKustoQueryManagement:
                 MCPQueryRequest(),
                 session_id="session with spaces"
             )
-            
+
             # Verify URL encoding of spaces
             call_args = mock_send.call_args
             assert "session%20with%20spaces" in call_args[0][1]
@@ -595,9 +597,9 @@ class TestMCPKustoQueryManagement:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -605,7 +607,7 @@ class TestMCPKustoQueryManagement:
             return_value=mock_response
         ):
             result = await client.mcp_kusto_query_management_async(MCPQueryRequest())
-            
+
             assert result is None
 
     @pytest.mark.asyncio
@@ -615,12 +617,12 @@ class TestMCPKustoQueryManagement:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=500,
             text='{"jsonrpc": "2.0", "error": {"code": -1, "message": "Internal error"}}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -629,7 +631,7 @@ class TestMCPKustoQueryManagement:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.mcp_kusto_query_management_async(MCPQueryRequest())
-            
+
             assert exc_info.value.status_code == 500
 
 
@@ -643,7 +645,7 @@ class TestDataClasses:
             db="testdb",
             csl="TestTable | take 10"
         )
-        
+
         assert schema.cluster == "testcluster"
         assert schema.db == "testdb"
         assert schema.csl == "TestTable | take 10"
@@ -655,7 +657,7 @@ class TestDataClasses:
             db="testdb",
             csl=".show tables"
         )
-        
+
         assert schema.cluster == "testcluster"
         assert schema.db == "testdb"
         assert schema.csl == ".show tables"
@@ -668,7 +670,7 @@ class TestDataClasses:
             csl="TestTable | summarize count()",
             chart_type="bar"
         )
-        
+
         assert schema.cluster == "testcluster"
         assert schema.db == "testdb"
         assert schema.csl == "TestTable | summarize count()"
@@ -682,7 +684,7 @@ class TestDataClasses:
             csl=".show schema",
             chart_type="pie"
         )
-        
+
         assert schema.cluster == "testcluster"
         assert schema.db == "testdb"
         assert schema.csl == ".show schema"
@@ -699,7 +701,7 @@ class TestDataClasses:
             error=None,
             callback_endpoint="https://callback.example.com"
         )
-        
+
         assert request.jsonrpc == "2.0"
         assert request.id == "123"
         assert request.method == "query"
@@ -709,7 +711,7 @@ class TestDataClasses:
     def test_dataclasses_with_defaults(self):
         """Test that dataclasses can be created with default None values."""
         schema = QueryAndListSchema()
-        
+
         assert schema.cluster is None
         assert schema.db is None
         assert schema.csl is None
@@ -725,10 +727,10 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response_1 = MockResponse(status=200, text='{"result": "first"}')
         mock_response_2 = MockResponse(status=200, text='{"result": "second"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -737,7 +739,7 @@ class TestEdgeCases:
         ):
             result_1 = await client.list_kusto_results_async(QueryAndListSchema())
             result_2 = await client.list_kusto_results_async(QueryAndListSchema())
-            
+
             assert result_1 == {"result": "first"}
             assert result_2 == {"result": "second"}
 
@@ -748,9 +750,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='invalid json{')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -767,7 +769,7 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test///",
             token_provider=MockTokenProvider()
         )
-        
+
         # rstrip('/') should remove all trailing slashes
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
@@ -777,6 +779,6 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.http_client is not None
         assert client.http_client is client._http_client

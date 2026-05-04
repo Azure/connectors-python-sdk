@@ -9,8 +9,6 @@ from azure.connectors.teams import (
     CreateChannelInput,
     CreateTagInput,
     AddMemberToTagInput,
-    DynamicGetMessageDetailsSchema,
-    DynamicListMembersSchema,
     CreateATeamInput,
     AddMemberToTeamInput,
     AddMemberToChannelInput,
@@ -28,7 +26,7 @@ class TestTeamsClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_trailing_slash(self, mock_token_provider):
@@ -37,7 +35,7 @@ class TestTeamsClientInitialization:
             "https://example.azure.com/connections/test/",
             token_provider=mock_token_provider
         )
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_token_provider(self, mock_token_provider):
@@ -46,7 +44,7 @@ class TestTeamsClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client is not None
 
     def test_init_with_custom_options(self, mock_token_provider):
@@ -57,7 +55,7 @@ class TestTeamsClientInitialization:
             token_provider=mock_token_provider,
             options=options
         )
-        
+
         assert client is not None
 
     def test_init_with_empty_url_raises_error(self, mock_token_provider):
@@ -76,7 +74,7 @@ class TestTeamsClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.connector_name == "teams"
 
 
@@ -90,7 +88,7 @@ class TestTeamsClientLifecycle:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
@@ -102,11 +100,11 @@ class TestTeamsClientLifecycle:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             async with client:
                 assert client is not None
-            
+
             mock_close.assert_called_once()
 
 
@@ -120,12 +118,12 @@ class TestTeamsMeetingOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=201,
             text='{"id": "meeting123", "joinUrl": "https://teams.microsoft.com/l/meetup/..."}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -134,7 +132,7 @@ class TestTeamsMeetingOperations:
         ) as mock_send:
             input_data = NewMeeting()
             result = await client.create_teams_meeting_async(input_data, "calendar123")
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v1.0/me/calendars/calendar123/events" in call_args[0][1]
@@ -147,9 +145,9 @@ class TestTeamsMeetingOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=400, text='{"error": "Bad Request"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -159,7 +157,7 @@ class TestTeamsMeetingOperations:
             input_data = NewMeeting()
             with pytest.raises(ConnectorException) as exc_info:
                 await client.create_teams_meeting_async(input_data, "calendar123")
-            
+
             assert exc_info.value.status_code == 400
 
 
@@ -173,12 +171,12 @@ class TestTeamsListOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"id": "team1", "displayName": "Team 1"}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -186,7 +184,7 @@ class TestTeamsListOperations:
             return_value=mock_response
         ):
             result = await client.get_all_teams_async()
-            
+
             assert "value" in result
             assert len(result["value"]) == 1
 
@@ -197,9 +195,9 @@ class TestTeamsListOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text='')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -207,7 +205,7 @@ class TestTeamsListOperations:
             return_value=mock_response
         ):
             result = await client.get_all_teams_async()
-            
+
             assert result is None
 
     @pytest.mark.asyncio
@@ -217,12 +215,12 @@ class TestTeamsListOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"tenantId": "tenant1", "teamId": "team1"}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -230,7 +228,7 @@ class TestTeamsListOperations:
             return_value=mock_response
         ):
             result = await client.get_all_associated_teams_async()
-            
+
             assert "value" in result
 
 
@@ -433,12 +431,12 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": []}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -447,7 +445,7 @@ class TestEdgeCases:
         ):
             result1 = await client.get_all_teams_async()
             result2 = await client.get_all_teams_async()
-            
+
             assert result1 is not None
             assert result2 is not None
 
@@ -458,9 +456,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='invalid json')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -477,7 +475,7 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test///",
             token_provider=mock_token_provider
         )
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     @pytest.mark.asyncio
@@ -487,7 +485,7 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.http_client is not None
         assert client._http_client is not None
 
@@ -498,9 +496,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=500, text='{"error": "Internal Server Error"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -509,7 +507,7 @@ class TestEdgeCases:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_all_teams_async()
-            
+
             assert exc_info.value.status_code == 500
 
     @pytest.mark.asyncio
@@ -519,9 +517,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=404, text='{"error": "Not Found"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -530,5 +528,5 @@ class TestEdgeCases:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_all_teams_async()
-            
+
             assert exc_info.value.status_code == 404
