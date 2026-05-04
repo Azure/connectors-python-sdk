@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from azure.connectors.msgraph import (
+from azure.connectors.msgraphgroupsanduser import (
     MsgraphgroupsanduserClient,
     ListUsersResponse,
     ListGroupsByDisplayNameSearchResponse,

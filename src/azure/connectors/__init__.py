@@ -40,7 +40,7 @@ try:
 except (ImportError, NameError):
     TeamsClient = None  # type: ignore[assignment,misc]
 try:
-    from .msgraph import MsgraphgroupsanduserClient
+    from .msgraphgroupsanduser import MsgraphgroupsanduserClient
 except (ImportError, NameError):
     MsgraphgroupsanduserClient = None  # type: ignore[assignment,misc]
 
