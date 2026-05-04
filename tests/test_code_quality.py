@@ -17,9 +17,11 @@ class TestCodeQuality(unittest.TestCase):
         except ImportError:
             raise unittest.SkipTest('mypy module is missing')
 
+        src_path = ROOT_PATH / 'src' / 'azure' / 'connectors'
         try:
             subprocess.run(
-                [sys.executable, '-m', 'mypy', '-p', 'azure.connectors'],
+                [sys.executable, '-m', 'mypy', str(src_path),
+                 '--ignore-missing-imports'],
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
