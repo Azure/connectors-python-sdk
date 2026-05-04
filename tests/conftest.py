@@ -3,7 +3,6 @@
 """Pytest configuration and shared fixtures."""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 from azure.connectors.sdk import TokenProvider
 
 

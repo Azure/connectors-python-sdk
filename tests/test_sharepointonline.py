@@ -4,14 +4,13 @@
 
 import json
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from azure.connectors.sharepointonline import (
     SharepointonlineClient,
     CreateFileInput,
     UpdateFileInput,
     PostItemInput,
     PatchItemInput,
-    PatchFileItemInput,
     CreateApprovalRequestInput,
     ItemPermissionCreateLinkBody,
 )
@@ -29,7 +28,7 @@ class TestSharepointonlineClientInitialization:
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
         client = SharepointonlineClient("https://example.azure.com/connections/test")
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "sharepointonline"
         assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
@@ -37,7 +36,7 @@ class TestSharepointonlineClientInitialization:
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
         client = SharepointonlineClient("https://example.azure.com/connections/test/")
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_token_provider(self, mock_token_provider):
@@ -46,7 +45,7 @@ class TestSharepointonlineClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client._http_client._token_provider is mock_token_provider
 
     def test_init_with_custom_options(self, mock_token_provider):
@@ -57,7 +56,7 @@ class TestSharepointonlineClientInitialization:
             token_provider=mock_token_provider,
             options=options
         )
-        
+
         assert client._options is options
         assert client._options.timeout_seconds == 60.0
         assert client._options.max_retry_attempts == 5
@@ -78,7 +77,7 @@ class TestSharepointonlineClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.connector_name == "sharepointonline"
 
 
@@ -92,7 +91,7 @@ class TestSharepointonlineClientLifecycle:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
@@ -106,7 +105,7 @@ class TestSharepointonlineClientLifecycle:
                 token_provider=mock_token_provider
             ) as client:
                 assert isinstance(client, SharepointonlineClient)
-            
+
             mock_close.assert_called_once()
 
 
@@ -120,12 +119,15 @@ class TestGetAllTables:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"name": "Documents", "id": "list1"}, {"name": "Lists", "id": "list2"}]}'
+            text=(
+                '{"value": [{"name": "Documents", "id": "list1"}, '
+                '{"name": "Lists", "id": "list2"}]}'
+            )
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -133,7 +135,7 @@ class TestGetAllTables:
             return_value=mock_response
         ) as mock_send:
             result = await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/datasets/" in call_args[0][1]
@@ -148,17 +150,19 @@ class TestGetAllTables:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{"value": []}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site with spaces")
-            
+            await client.get_all_tables_async(
+                "https://contoso.sharepoint.com/sites/site with spaces"
+            )
+
             call_args = mock_send.call_args
             path = call_args[0][1]
             # URL encoding should handle special characters
@@ -171,9 +175,9 @@ class TestGetAllTables:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -190,12 +194,12 @@ class TestGetAllTables:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=404,
             text='{"error": "Site not found"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -204,7 +208,7 @@ class TestGetAllTables:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_all_tables_async("https://contoso.sharepoint.com/sites/missing")
-            
+
             assert exc_info.value.status_code == 404
 
 
@@ -218,12 +222,15 @@ class TestFileOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=201,
-            text='{"Id": "file123", "Name": "document.docx", "Path": "/Shared Documents/document.docx"}'
+            text=(
+                '{"Id": "file123", "Name": "document.docx", '
+                '"Path": "/Shared Documents/document.docx"}'
+            )
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -237,7 +244,7 @@ class TestFileOperations:
                 "/Shared Documents",
                 "document.docx"
             )
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert result["Id"] == "file123"
@@ -250,12 +257,12 @@ class TestFileOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"Id": "file123", "Name": "report.pdf", "Size": 1024}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -266,7 +273,7 @@ class TestFileOperations:
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123"
             )
-            
+
             assert result["Id"] == "file123"
             assert result["Name"] == "report.pdf"
             assert result["Size"] == 1024
@@ -278,12 +285,12 @@ class TestFileOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"Id": "file123", "Name": "updated.docx"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -296,7 +303,7 @@ class TestFileOperations:
                 "file123",
                 input_data
             )
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "PUT"
             assert result["Name"] == "updated.docx"
@@ -308,9 +315,9 @@ class TestFileOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -321,7 +328,7 @@ class TestFileOperations:
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123"
             )
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert result is None
@@ -339,7 +346,7 @@ class TestFileOperations:
             text="",
             content=file_content
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -350,7 +357,7 @@ class TestFileOperations:
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123"
             )
-            
+
             assert result == file_content
 
 
@@ -364,12 +371,15 @@ class TestFolderOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"Name": "Folder1", "IsFolder": true}, {"Name": "File1.txt", "IsFolder": false}]}'
+            text=(
+                '{"value": [{"Name": "Folder1", "IsFolder": true}, '
+                '{"Name": "File1.txt", "IsFolder": false}]}'
+            )
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -379,7 +389,7 @@ class TestFolderOperations:
             result = await client.list_root_folder_async(
                 "https://contoso.sharepoint.com/sites/site1"
             )
-            
+
             assert "value" in result
             assert len(result["value"]) == 2
 
@@ -390,12 +400,12 @@ class TestFolderOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"Name": "SubFolder", "IsFolder": true}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -406,7 +416,7 @@ class TestFolderOperations:
                 "https://contoso.sharepoint.com/sites/site1",
                 "folder123"
             )
-            
+
             assert "value" in result
 
     @pytest.mark.asyncio
@@ -416,12 +426,12 @@ class TestFolderOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=201,
             text='{"Id": "folder456", "Name": "NewFolder", "Path": "/Shared Documents/NewFolder"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -434,7 +444,7 @@ class TestFolderOperations:
                 "/Shared Documents",
                 "NewFolder"
             )
-            
+
             assert result["Name"] == "NewFolder"
 
     @pytest.mark.asyncio
@@ -444,12 +454,12 @@ class TestFolderOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"Id": "folder123", "Name": "Documents", "ItemCount": 10}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -460,7 +470,7 @@ class TestFolderOperations:
                 "https://contoso.sharepoint.com/sites/site1",
                 "folder123"
             )
-            
+
             assert result["ItemCount"] == 10
 
 
@@ -474,12 +484,12 @@ class TestItemOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"Id": 1, "Title": "Item 1"}, {"Id": 2, "Title": "Item 2"}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -490,7 +500,7 @@ class TestItemOperations:
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList"
             )
-            
+
             assert "value" in result
             assert len(result["value"]) == 2
 
@@ -501,12 +511,12 @@ class TestItemOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=201,
             text='{"Id": 3, "Title": "New Item"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -519,7 +529,7 @@ class TestItemOperations:
                 "CustomList",
                 input_data
             )
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert result["Id"] == 3
@@ -531,12 +541,12 @@ class TestItemOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"Id": 1, "Title": "Item 1", "Status": "Active"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -548,7 +558,7 @@ class TestItemOperations:
                 "CustomList",
                 1
             )
-            
+
             assert result["Id"] == 1
             assert result["Status"] == "Active"
 
@@ -559,12 +569,12 @@ class TestItemOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"Id": 1, "Title": "Updated Item"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -578,7 +588,7 @@ class TestItemOperations:
                 1,
                 input_data
             )
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "PATCH"
             assert result["Title"] == "Updated Item"
@@ -590,9 +600,9 @@ class TestItemOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -604,7 +614,7 @@ class TestItemOperations:
                 "CustomList",
                 1
             )
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert result is None
@@ -620,12 +630,12 @@ class TestSharingOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"link": {"webUrl": "https://contoso.sharepoint.com/share/abc123"}}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -639,7 +649,7 @@ class TestSharingOperations:
                 "Documents",
                 "item123"
             )
-            
+
             assert "link" in result
 
     @pytest.mark.asyncio
@@ -649,9 +659,9 @@ class TestSharingOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text='')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -666,7 +676,7 @@ class TestSharingOperations:
                 "Documents",
                 "item123"
             )
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert result is None
@@ -682,12 +692,12 @@ class TestCopyMoveOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"Id": "file456", "Name": "document_copy.docx"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -700,7 +710,7 @@ class TestCopyMoveOperations:
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1"
             )
-            
+
             assert result["Name"] == "document_copy.docx"
 
     @pytest.mark.asyncio
@@ -710,12 +720,12 @@ class TestCopyMoveOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"Id": "file123", "Path": "/Archive/document.docx"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -728,7 +738,7 @@ class TestCopyMoveOperations:
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1"
             )
-            
+
             assert "/Archive/" in result["Path"]
 
     @pytest.mark.asyncio
@@ -738,9 +748,9 @@ class TestCopyMoveOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{"success": true}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -753,7 +763,7 @@ class TestCopyMoveOperations:
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1"
             )
-            
+
             assert result["success"] is True
 
 
@@ -767,12 +777,12 @@ class TestApprovalOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"approvalId": "approval123", "status": "pending"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -787,7 +797,7 @@ class TestApprovalOperations:
                 "item123",
                 "basic"
             )
-            
+
             assert result["status"] == "pending"
 
     @pytest.mark.asyncio
@@ -797,9 +807,9 @@ class TestApprovalOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{"status": "approved"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -812,7 +822,7 @@ class TestApprovalOperations:
                 "item123",
                 "approved"
             )
-            
+
             assert result["status"] == "approved"
 
 
@@ -850,19 +860,20 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response_1 = MockResponse(status=200, text='{"result": "first"}')
         mock_response_2 = MockResponse(status=200, text='{"result": "second"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
             new_callable=AsyncMock,
             side_effect=[mock_response_1, mock_response_2]
         ):
-            result_1 = await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
-            result_2 = await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
-            
+            site_url = "https://contoso.sharepoint.com/sites/site1"
+            result_1 = await client.get_all_tables_async(site_url)
+            result_2 = await client.get_all_tables_async(site_url)
+
             assert result_1 == {"result": "first"}
             assert result_2 == {"result": "second"}
 
@@ -873,9 +884,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='invalid json{')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -892,7 +903,7 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test///",
             token_provider=MockTokenProvider()
         )
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_http_client_property_access(self, mock_token_provider):
@@ -901,7 +912,7 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.http_client is not None
         assert client.http_client is client._http_client
 
@@ -912,17 +923,19 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{"value": []}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site-name/subsite")
-            
+            await client.get_all_tables_async(
+                "https://contoso.sharepoint.com/sites/site-name/subsite"
+            )
+
             # Verify the call was made (URL encoding handled internally)
             mock_send.assert_called_once()
 
@@ -933,12 +946,12 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=500,
             text='{"error": "Internal Server Error"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -947,5 +960,5 @@ class TestEdgeCases:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
-            
+
             assert exc_info.value.status_code == 500

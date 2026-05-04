@@ -67,6 +67,8 @@ class AzureIdentityTokenProvider(TokenProvider):
 class ManagedIdentityTokenProvider(TokenProvider):
     """Token provider using Azure Managed Identity."""
 
+    _credential: ManagedIdentityCredential | DefaultAzureCredential
+
     def __init__(self, client_id: Optional[str] = None):
         """
         Initialize a new ManagedIdentityTokenProvider.

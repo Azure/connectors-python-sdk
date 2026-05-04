@@ -33,5 +33,5 @@ jobs:
           python -m pip install -U -e .[dev]
         displayName: 'Install dependencies'
       - bash: |
-          python -m pytest --cache-clear --cov=./azure --cov-report=xml --cov-branch tests --ignore=tests/test_code_quality.py
+          python -m pytest --cache-clear --cov=./azure --cov-report=xml --cov-branch tests
         displayName: 'Test with pytest'

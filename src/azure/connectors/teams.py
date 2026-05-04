@@ -6,9 +6,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Any, Dict
-from datetime import datetime
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
+import json
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -28,6 +28,7 @@ class NewMeetingRespone:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class GetAllTeamsResponse:
     """Response for List joined teams"""
@@ -35,6 +36,7 @@ class GetAllTeamsResponse:
     context: Optional[str] = None
     value: Optional[List[Dict[str, Any]]] = None
     """List of the teams you are a member of"""
+
 
 @dataclass
 class GetAllAssociatedTeamsResponse:
@@ -44,6 +46,7 @@ class GetAllAssociatedTeamsResponse:
     value: Optional[List[AssociatedTeamInfo]] = None
     """List of the teams you are associated with"""
 
+
 @dataclass
 class GetChannelsForGroupResponse:
     """Response for List channels"""
@@ -51,6 +54,7 @@ class GetChannelsForGroupResponse:
     context: Optional[str] = None
     value: Optional[List[GetChannelResponse]] = None
     """List of one or more channels for a specific team"""
+
 
 @dataclass
 class CreateChannelInput:
@@ -60,6 +64,7 @@ class CreateChannelInput:
     """Optional textual description for the channel"""
     display_name: Optional[str] = None
     """Channel name as it appears in Microsoft Teams"""
+
 
 @dataclass
 class CreateChannelResponse:
@@ -72,12 +77,14 @@ class CreateChannelResponse:
     id: Optional[str] = None
     """The channel's unique identifier"""
 
+
 @dataclass
 class GetChannelResponse:
     """Response for Get details for a specific channel in a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class GetAllChannelsForTeamResponse:
@@ -87,6 +94,7 @@ class GetAllChannelsForTeamResponse:
     value: Optional[List[ChannelWithOwnerTeamId]] = None
     """List of one or more channels for a specific team"""
 
+
 @dataclass
 class GetChatsResponse:
     """Response for List chats"""
@@ -95,12 +103,14 @@ class GetChatsResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """List of one or more chats you are a part of"""
 
+
 @dataclass
 class GetTagsResponseSchema:
     """Response for List all tags for a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateTagInput:
@@ -109,7 +119,11 @@ class CreateTagInput:
     display_name: Optional[str] = None
     """The name of the tag as it appears to the user in Microsoft Teams."""
     members: Optional[str] = None
-    """List of users' IDs separated by semi-colons, identifier must be in a format like '550e8400-e29b-41d4-a716-446655440000'."""
+    """
+    List of users' IDs separated by semi-colons, identifier must be in a format like
+    '550e8400-e29b-41d4-a716-446655440000'.
+    """
+
 
 @dataclass
 class CreateTagResponseSchema:
@@ -118,12 +132,17 @@ class CreateTagResponseSchema:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class AddMemberToTagInput:
     """Add a member to a team tag"""
 
     user_id: Optional[str] = None
-    """The user's ID of the member to add to the tag, must be in a format like '550e8400-e29b-41d4-a716-446655440000'."""
+    """
+    The user's ID of the member to add to the tag, must be in a format like
+    '550e8400-e29b-41d4-a716-446655440000'.
+    """
+
 
 @dataclass
 class AddMemberToTagResponseSchema:
@@ -132,12 +151,14 @@ class AddMemberToTagResponseSchema:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class GetTagMembersResponseSchema:
     """Response for List the members of a team tag"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class AtMentionTagResponse:
@@ -146,12 +167,14 @@ class AtMentionTagResponse:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class GetMessagesFromConversationResponse:
     """Response for Get messages in a channel"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicGetMessageDetailsResponseSchema:
@@ -160,12 +183,14 @@ class DynamicGetMessageDetailsResponseSchema:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class ListRepliesResponseSchema:
     """Response for List replies of a channel message"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ListMembersResponseSchema:
@@ -174,6 +199,7 @@ class ListMembersResponseSchema:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class ChatMessageList:
     """Response for When a new channel message is added"""
@@ -181,11 +207,13 @@ class ChatMessageList:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class WebhookChatMessageTriggerInput:
     """When a new chat message is added"""
 
     notification_url: Optional[str] = None
+
 
 @dataclass
 class GetTeamResponse:
@@ -194,12 +222,14 @@ class GetTeamResponse:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class AtMentionUser:
     """Response for Get an @mention token for a user"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class OnGroupMemberChangeResponse:
@@ -208,12 +238,14 @@ class OnGroupMemberChangeResponse:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class NewChatResponse:
     """Response for Create a chat"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class CreateATeamInput:
@@ -226,12 +258,14 @@ class CreateATeamInput:
     visibility: Optional[str] = None
     """The visibility of the the team"""
 
+
 @dataclass
 class CreateATeamResponse:
     """Response for Create a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class AddMemberToTeamInput:
@@ -242,6 +276,7 @@ class AddMemberToTeamInput:
     owner: Optional[bool] = None
     """True, if the user should be a team owner"""
 
+
 @dataclass
 class AddMemberToChannelInput:
     """Add a member to a channel"""
@@ -251,12 +286,14 @@ class AddMemberToChannelInput:
     owner: Optional[bool] = None
     """True, if the user should be a channel owner"""
 
+
 @dataclass
 class PostToConversationResponse:
     """Response for Post message in a chat or channel"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class PostCardAndWaitForResponseInput:
@@ -265,12 +302,14 @@ class PostCardAndWaitForResponseInput:
     notification_url: Optional[str] = None
     body: Optional[Dict[str, Any]] = None
 
+
 @dataclass
 class DynamicPostGatherInputToConversationResponse:
     """Response for Post adaptive card and wait for a response"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class HttpRequestInput:
@@ -279,6 +318,7 @@ class HttpRequestInput:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class ObjectWithoutType:
     """Response for Send a Microsoft Graph HTTP request"""
@@ -286,12 +326,14 @@ class ObjectWithoutType:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class ObjectEntity:
     """Definition: Object"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ConnectorMetadata:
@@ -301,11 +343,13 @@ class ConnectorMetadata:
     activitytype: Optional[str] = None
     schema: Optional[ObjectEntity] = None
 
+
 @dataclass
 class PostFeedSchema:
     """Definition: PostFeedSchema"""
 
     schema: Optional[ObjectEntity] = None
+
 
 @dataclass
 class PostMessageSchema:
@@ -313,11 +357,13 @@ class PostMessageSchema:
 
     schema: Optional[ObjectEntity] = None
 
+
 @dataclass
 class PostCardSchema:
     """Definition: PostCardSchema"""
 
     schema: Optional[ObjectEntity] = None
+
 
 @dataclass
 class PostCardAndWaitSchema:
@@ -325,11 +371,13 @@ class PostCardAndWaitSchema:
 
     schema: Optional[ObjectEntity] = None
 
+
 @dataclass
 class UnifiedActionSchema:
     """Definition: UnifiedActionSchema"""
 
     schema: Optional[ObjectEntity] = None
+
 
 @dataclass
 class GetMessageDetailsSchema:
@@ -337,11 +385,13 @@ class GetMessageDetailsSchema:
 
     schema: Optional[ObjectEntity] = None
 
+
 @dataclass
 class ListMembersSchema:
     """Definition: ListMembersSchema"""
 
     schema: Optional[ObjectEntity] = None
+
 
 @dataclass
 class DynamicGetMessageDetailsSchema:
@@ -350,12 +400,14 @@ class DynamicGetMessageDetailsSchema:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicListMembersSchema:
     """Definition: DynamicListMembersSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicUserNotificationRequest:
@@ -364,12 +416,14 @@ class DynamicUserNotificationRequest:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicPostConversationNotificationRequest:
     """Definition: DynamicPostConversationNotificationRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicChannelNotificationRequest:
@@ -378,12 +432,14 @@ class DynamicChannelNotificationRequest:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicPostFeedNotificationRequest:
     """Definition: DynamicPostFeedNotificationRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicPostMessageRequest:
@@ -392,12 +448,14 @@ class DynamicPostMessageRequest:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicReplyMessageRequest:
     """Definition: DynamicReplyMessageRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicPostCardRequest:
@@ -406,12 +464,14 @@ class DynamicPostCardRequest:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicPostCardAndWaitRequest:
     """Definition: DynamicPostCardAndWaitRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicReplyCardRequest:
@@ -420,12 +480,14 @@ class DynamicReplyCardRequest:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicUpdateCardRequest:
     """Definition: DynamicUpdateCardRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicUserAdaptiveCardRequest:
@@ -434,12 +496,14 @@ class DynamicUserAdaptiveCardRequest:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicChannelAdaptiveCardRequest:
     """Definition: DynamicChannelAdaptiveCardRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicUserMessageWithOptionsSubscriptionRequest:
@@ -448,12 +512,14 @@ class DynamicUserMessageWithOptionsSubscriptionRequest:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicUserMessageWithOptionsSubscriptionResult:
     """Definition: DynamicUserMessageWithOptionsSubscriptionResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicSelectedMessageTriggerResult:
@@ -462,12 +528,14 @@ class DynamicSelectedMessageTriggerResult:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicComposeMessageTriggerResult:
     """Definition: DynamicComposeMessageTriggerResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicCardResponseTriggerResult:
@@ -476,11 +544,13 @@ class DynamicCardResponseTriggerResult:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class WebhookTriggerSchema:
     """Definition: WebhookTriggerSchema"""
 
     schema: Optional[ObjectEntity] = None
+
 
 @dataclass
 class MessageReactionWebhookResponseSchema:
@@ -504,12 +574,14 @@ class MessageReactionWebhookResponseSchema:
     message_reaction: Optional[str] = None
     """Message reaction used"""
 
+
 @dataclass
 class ChatMessageWebhookResponseSchema:
     """Definition: ChatMessageWebhookResponseSchema"""
 
     value: Optional[List[Dict[str, Any]]] = None
     """Message details response"""
+
 
 @dataclass
 class DynamicWebhookTriggerRequestSchema:
@@ -518,12 +590,14 @@ class DynamicWebhookTriggerRequestSchema:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicKeywordWebhookTriggerResponseSchema:
     """Definition: DynamicKeywordWebhookTriggerResponseSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicAtMentionWebhookTriggerResponseSchema:
@@ -532,12 +606,14 @@ class DynamicAtMentionWebhookTriggerResponseSchema:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicNewMessageWebhookTriggerResponseSchema:
     """Definition: DynamicNewMessageWebhookTriggerResponseSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicPostToConversationResponse:
@@ -546,11 +622,13 @@ class DynamicPostToConversationResponse:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicResponseSchema:
     """Definition: DynamicResponseSchema"""
 
     schema: Optional[ObjectEntity] = None
+
 
 @dataclass
 class MessageId:
@@ -559,12 +637,14 @@ class MessageId:
     id: Optional[str] = None
     """Unique message identifier"""
 
+
 @dataclass
 class DynamicUserFlowContinuationSubscriptionResult:
     """Definition: DynamicUserFlowContinuationSubscriptionResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class DynamicChannelFlowContinuationSubscriptionResult:
@@ -573,12 +653,14 @@ class DynamicChannelFlowContinuationSubscriptionResult:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class DynamicGatherInputSubscriptionResult:
     """Definition: DynamicGatherInputSubscriptionResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class ChatMessage:
@@ -601,11 +683,17 @@ class ChatMessage:
     importance: Optional[str] = None
     """The importance of the message. The possible values are: normal, high, urgent."""
     last_modified_date_time: Optional[str] = None
-    """Timestamp when the chat message is created (initial setting) or modified, including when a reaction is added or removed"""
+    """
+    Timestamp when the chat message is created (initial setting) or modified, including when a
+    reaction is added or removed
+    """
     locale: Optional[str] = None
     """Locale of the chat message set by the client."""
     mentions: Optional[List[Dict[str, Any]]] = None
-    """List of entities mentioned in the chat message. Supported entities are: user, bot, team, and channel."""
+    """
+    List of entities mentioned in the chat message. Supported entities are: user, bot, team, and
+    channel.
+    """
     message_type: Optional[str] = None
     """The type of chat message"""
     reactions: Optional[List[Dict[str, Any]]] = None
@@ -615,7 +703,11 @@ class ChatMessage:
     subject: Optional[str] = None
     """The subject of the chat message, optional"""
     summary: Optional[str] = None
-    """Summary text of the message that could be used for push notifications and summary views or fall back views"""
+    """
+    Summary text of the message that could be used for push notifications and summary views or fall
+    back views
+    """
+
 
 @dataclass
 class AssociatedTeamInfo:
@@ -628,12 +720,14 @@ class AssociatedTeamInfo:
     tenant_id: Optional[str] = None
     """The ID of the Microsoft Entra tenant this team belongs to"""
 
+
 @dataclass
 class ChannelWithOwnerTeamId:
     """Definition: ChannelWithOwnerTeamId"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class WebhookRequest:
@@ -642,6 +736,7 @@ class WebhookRequest:
     notification_url: Optional[str] = None
     """Specify a well-formed URL of the endpoint that will receive notifications"""
 
+
 @dataclass
 class GetTimeOffReasonsResponse:
     """Definition: GetTimeOffReasonsResponse"""
@@ -649,6 +744,7 @@ class GetTimeOffReasonsResponse:
     context: Optional[str] = None
     value: Optional[List[Dict[str, Any]]] = None
     """The list of time off reasons."""
+
 
 @dataclass
 class TimeOffRequestResponse:
@@ -682,6 +778,7 @@ class TimeOffRequestResponse:
     """End of time requested off"""
     time_off_reason_id: Optional[str] = None
     """The ID of the TimeOff Reason"""
+
 
 @dataclass
 class OfferShiftRequestResponse:
@@ -717,6 +814,7 @@ class OfferShiftRequestResponse:
     """The message from the manager"""
     manager_user_id: Optional[str] = None
     """The ID of the manager that responded"""
+
 
 @dataclass
 class SwapShiftsChangeRequestResponse:
@@ -755,6 +853,7 @@ class SwapShiftsChangeRequestResponse:
     manager_user_id: Optional[str] = None
     """The ID of the manager that responded"""
 
+
 @dataclass
 class OpenShiftChangeRequestResponse:
     """Definition: OpenShiftChangeRequestResponse"""
@@ -784,6 +883,7 @@ class OpenShiftChangeRequestResponse:
     open_shift_id: Optional[str] = None
     """The ID of the open shift being requested"""
 
+
 @dataclass
 class EditOpenShiftRequest:
     """Definition: EditOpenShiftRequest"""
@@ -791,6 +891,7 @@ class EditOpenShiftRequest:
     scheduling_group_id: Optional[str] = None
     """Scheduling Group ID"""
     shared_open_shift: Optional[Dict[str, Any]] = None
+
 
 @dataclass
 class OpenShiftResponse:
@@ -807,6 +908,7 @@ class OpenShiftResponse:
     last_modified_by: Optional[LastModifiedBy] = None
     shared_open_shift: Optional[SharedOpenShift] = None
     draft_open_shift: Optional[DraftOpenShift] = None
+
 
 @dataclass
 class SharedOpenShift:
@@ -826,6 +928,7 @@ class SharedOpenShift:
     """Open Slot Count"""
     activities: Optional[Activities] = None
 
+
 @dataclass
 class DraftOpenShift:
     """Definition: DraftOpenShift"""
@@ -843,6 +946,7 @@ class DraftOpenShift:
     open_slot_count: Optional[int] = None
     """Open Slot Count"""
     activities: Optional[Activities] = None
+
 
 @dataclass
 class ShiftResponse:
@@ -862,6 +966,7 @@ class ShiftResponse:
     shared_shift: Optional[SharedShift] = None
     draft_shift: Optional[DraftShift] = None
 
+
 @dataclass
 class SharedShift:
     """Definition: SharedShift"""
@@ -877,6 +982,7 @@ class SharedShift:
     theme: Optional[str] = None
     """Theme"""
     activities: Optional[Activities] = None
+
 
 @dataclass
 class DraftShift:
@@ -894,6 +1000,7 @@ class DraftShift:
     """Theme"""
     activities: Optional[Activities] = None
 
+
 @dataclass
 class ScheduleResponse:
     """Definition: ScheduleResponse"""
@@ -907,6 +1014,7 @@ class ScheduleResponse:
     provision_status_code: Optional[str] = None
     """The Provision Status Code of the schedule."""
 
+
 @dataclass
 class ThemeEditor:
     """Definition: ThemeEditor"""
@@ -914,12 +1022,14 @@ class ThemeEditor:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class Activities:
     """Definition: Activities"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class SchedulingGroupResponse:
@@ -930,9 +1040,13 @@ class SchedulingGroupResponse:
     display_name: Optional[str] = None
     """The display name for the scheduling group."""
     is_active: Optional[bool] = None
-    """Indicates whether the scheduling group can be used when creating new entities or updating existing ones."""
+    """
+    Indicates whether the scheduling group can be used when creating new entities or updating
+    existing ones.
+    """
     user_ids: Optional[List[str]] = None
     """List of IDs of users in the scheduling group."""
+
 
 @dataclass
 class AtMentionUserV1:
@@ -940,6 +1054,7 @@ class AtMentionUserV1:
 
     at_mention: Optional[str] = None
     """An @mention token for the user. This property can be inserted into messages"""
+
 
 @dataclass
 class BotMentionRequest:
@@ -952,12 +1067,16 @@ class BotMentionRequest:
     name: Optional[str] = None
     """The bot's display name"""
 
+
 @dataclass
 class AtMentionBotResponse:
     """Definition: AtMentionBotResponse"""
 
     at_mention: Optional[str] = None
-    """An @mention token for the bot. This property can be inserted into messages and adaptive cards"""
+    """
+    An @mention token for the bot. This property can be inserted into messages and adaptive cards
+    """
+
 
 @dataclass
 class ChannelIdForTeam:
@@ -966,11 +1085,13 @@ class ChannelIdForTeam:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class ChannelIds:
     """Definition: ChannelIds"""
 
     channel: Optional[ChannelIdForTeam] = None
+
 
 @dataclass
 class ChatId:
@@ -979,12 +1100,14 @@ class ChatId:
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
 
+
 @dataclass
 class BotIdForChat:
     """Definition: BotIdForChat"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class NewChat:
@@ -994,8 +1117,7 @@ class NewChat:
     """Title, displayed only in group chats"""
     members: Optional[str] = None
     """User's IDs, separated by semicolons"""
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+
 
 @dataclass
 class NewMeeting:
@@ -1034,6 +1156,7 @@ class NewMeeting:
     online_meeting_provider: Optional[str] = None
     """Represents the online meeting service provider"""
 
+
 @dataclass
 class LastModifiedBy:
     """Definition: LastModifiedBy"""
@@ -1046,6 +1169,7 @@ class LastModifiedBy:
     """Conversation"""
     user: Optional[Dict[str, Any]] = None
     """User"""
+
 
 @dataclass
 class MemberSettings:
@@ -1062,6 +1186,7 @@ class MemberSettings:
     allow_create_update_remove_connectors: Optional[bool] = None
     """If set to true, members can add, update, and remove connectors"""
 
+
 @dataclass
 class GuestSettings:
     """Definition: GuestSettings"""
@@ -1070,6 +1195,7 @@ class GuestSettings:
     """If set to true, guests can add and update channels"""
     allow_delete_channels: Optional[bool] = None
     """If set to true, guests can delete channels"""
+
 
 @dataclass
 class MessagingSettings:
@@ -1086,6 +1212,7 @@ class MessagingSettings:
     allow_channel_mentions: Optional[bool] = None
     """If set to true, @channel mentions are allowed"""
 
+
 @dataclass
 class FunSettings:
     """Definition: FunSettings"""
@@ -1099,12 +1226,14 @@ class FunSettings:
     allow_custom_memes: Optional[bool] = None
     """If set to true, enables users to include custom memes"""
 
+
 @dataclass
 class DiscoverySettings:
     """Definition: DiscoverySettings"""
 
     show_in_teams_search_and_suggestions: Optional[bool] = None
     """If set to true, the team is visible via search and suggestions from the Teams client"""
+
 
 @dataclass
 class SelectedMessageTriggerMetadata:
@@ -1113,6 +1242,7 @@ class SelectedMessageTriggerMetadata:
     teams_flow_run_context: Optional[ObjectEntity] = None
     card_outputs: Optional[ObjectEntity] = None
 
+
 @dataclass
 class ComposeMessageTriggerMetadata:
     """Definition: ComposeMessageTriggerMetadata"""
@@ -1120,12 +1250,14 @@ class ComposeMessageTriggerMetadata:
     teams_flow_run_context: Optional[ObjectEntity] = None
     card_outputs: Optional[ObjectEntity] = None
 
+
 @dataclass
 class CardResponseTriggerMetadata:
     """Definition: CardResponseTriggerMetadata"""
 
     teams_flow_run_context: Optional[ObjectEntity] = None
     card_outputs: Optional[ObjectEntity] = None
+
 
 @dataclass
 class VirtualAgentBots:
@@ -1176,7 +1308,8 @@ class TeamsClient(ConnectorClientBase):
         """
         Create a Teams meeting
 
-        Create a meeting with a link at the bottom of the invite to join the meeting online on Microsoft Teams.
+        Create a meeting with a link at the bottom of the invite to join the meeting online on
+        Microsoft Teams.
         """
         path = f"{self._connection_runtime_url}/v1.0/me/calendars/{str(calendarid)}/events"
 
@@ -1192,7 +1325,6 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_all_teams_async(
@@ -1217,7 +1349,6 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_all_associated_teams_async(
@@ -1226,7 +1357,8 @@ class TeamsClient(ConnectorClientBase):
         """
         List associated teams
 
-        Lists all the teams you are a direct member of, or are a member of a shared channel that is hosted inside the team.
+        Lists all the teams you are a direct member of, or are a member of a shared channel that is
+        hosted inside the team.
         """
         path = f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
 
@@ -1242,507 +1374,7 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
-
-    async def get_channels_for_group_async(
-        self,
-    ):
-        """
-        List channels
-
-        Lists all the channels for a specific team
-        """
-        path = f"{self._connection_runtime_url}/beta/groups/{groupId}/channels"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def create_channel_async(
-        self,
-        input: CreateChannelInput,
-    ):
-        """
-        Create a channel
-
-        Create a new channel within a specified team
-        """
-        path = f"{self._connection_runtime_url}/beta/groups/{groupId}/channels"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_channel_async(
-        self,
-    ):
-        """
-        Get details for a specific channel in a team
-
-        Get the channel details
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/channels/{channelId}"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_all_channels_for_team_async(
-        self,
-    ):
-        """
-        List all channels
-
-        Lists all the channels for a specific team, including channels that are shared with the team
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/allChannels"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_chats_async(
-        self,
-    ):
-        """
-        List chats
-
-        Lists recent chats you are a part of
-        """
-        path = f"{self._connection_runtime_url}/flowbot/actions/listchats/chattypes/{chatType}/topic/{topic}/expandmembers/false"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_tags_async(
-        self,
-    ):
-        """
-        List all tags for a team
-
-        Lists the team's tags
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/tags"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def create_tag_async(
-        self,
-        input: CreateTagInput,
-    ):
-        """
-        Create a tag for a team
-
-        Creates a tag in a team
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/tags"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def add_member_to_tag_async(
-        self,
-        input: AddMemberToTagInput,
-    ):
-        """
-        Add a member to a team tag
-
-        Adds a user to a team tag
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/tags/{tagId}/members"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_tag_members_async(
-        self,
-    ):
-        """
-        List the members of a team tag
-
-        Lists the members of a team tag
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/tags/{tagId}/members"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def delete_tag_member_async(
-        self,
-        tag_member_id: str,
-    ):
-        """
-        Delete a member from a team tag
-
-        Deletes a member from a team tag
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/tags/{tagId}/members/{str(tag_member_id)}"
-
-        await self.http_client.send_async("DELETE", path, body=None)
-
-    async def post_feed_notification_async(
-        self,
-        input: DynamicPostFeedNotificationRequest,
-    ):
-        """
-        Post a feed notification
-
-        Posts a notification to a user's activity feed linking to a chat or team.
-        """
-        path = f"{self._connection_runtime_url}/flowbot/feednotification/poster/{poster}/notificationType/{notificationType}"
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def at_mention_tag_async(
-        self,
-    ):
-        """
-        Get an @mention token for a team tag
-
-        Creates a token that can be inserted into a message or adaptive card sent as a user in a channel to @mention a team tag.
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/tags/{tagId}"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def delete_tag_async(
-        self,
-    ):
-        """
-        Delete a team tag
-
-        Deletes a tag from a team
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/tags/{tagId}"
-
-        await self.http_client.send_async("DELETE", path, body=None)
-
-    async def get_messages_from_channel_async(
-        self,
-    ):
-        """
-        Get messages in a channel
-
-        Gets messages from a channel in a specific team. For shared channels, the team ID must refer to the host team, which is the team that owns the shared channel.
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{groupId}/channels/{channelId}/messages"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def get_message_details_async(
-        self,
-        input: DynamicGetMessageDetailsSchema,
-    ):
-        """
-        Get message details
-
-        Gets the details of a message in a chat or a channel.
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/messages/{messageId}/messageType/{threadType}"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def list_replies_to_message_async(
-        self,
-        top: Optional[str] = None,
-    ):
-        """
-        List replies of a channel message
-
-        List replies to a message in a channel in a specific team. For shared channels, the team ID must refer to the host team, which is the team that owns the shared channel.
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/{groupId}/channels/{channelId}/messages/{messageId}/replies"
-        query_params = []
-        if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def list_members_async(
-        self,
-        input: DynamicListMembersSchema,
-    ):
-        """
-        List members
-
-        List direct members of a group chat or a channel
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/listmembers/threadType/{threadType}"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def on_new_channel_message_async(
-        self,
-        top: Optional[str] = None,
-    ):
-        """
-        When a new channel message is added
-
-        Triggers when a new message is posted to a channel in a team. Note that this trigger only fires when a root messages is added in the channel. Replies to an existing channel message will not result in the trigger event firing. For shared channels, the team ID must refer to the host team, which is the team that owns the shared channel.
-        """
-        path = f"{self._connection_runtime_url}/trigger/beta/teams/{groupId}/channels/{channelId}/messages"
-        query_params = []
-        if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def on_new_channel_message_mentioning_me_async(
-        self,
-        top: Optional[str] = None,
-    ):
-        """
-        When I am mentioned in a channel message
-
-        Triggers when a new message that @mentions the current user is added to a channel in a team. For shared channels, the team ID must refer to the host team, which is the team that owns the shared channel.
-        """
-        path = f"{self._connection_runtime_url}/trigger/beta/teams/{groupId}/channels/{channelId}/messages_mentioningme"
-        query_params = []
-        if top is not None:
-            query_params.append(f"$top={quote(str(top).lower() if isinstance(top, bool) else str(top))}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def webhook_at_mention_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-    ):
-        """
-        When I'm @mentioned
-
-        Triggers when a new message that @mentions the current user is added to a specified chat or channel.
-        """
-        path = f"{self._connection_runtime_url}/beta/subscriptions/atmentiontrigger/threadType/{threadType}"
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def webhook_message_reaction_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-        reaction_key: Optional[str],
-        frequency: Optional[str],
-        running_policy: Optional[str],
-    ):
-        """
-        When someone reacted to a message in chat
-
-        Triggers when someone reacts to a message in a specified chat or channel.
-        """
-        path = f"{self._connection_runtime_url}/beta/subscriptions/messagereactiontrigger/threadType/{threadType}"
-        query_params = []
-        if reaction_key is not None:
-            query_params.append(f"reactionKey={quote(str(reaction_key).lower() if isinstance(reaction_key, bool) else str(reaction_key))}")
-        if frequency is not None:
-            query_params.append(f"frequency={quote(str(frequency).lower() if isinstance(frequency, bool) else str(frequency))}")
-        if running_policy is not None:
-            query_params.append(f"runningPolicy={quote(str(running_policy).lower() if isinstance(running_policy, bool) else str(running_policy))}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        await self.http_client.send_async("POST", path, body=input)
 
     async def webhook_chat_message_trigger_async(
         self,
@@ -1757,38 +1389,6 @@ class TeamsClient(ConnectorClientBase):
 
         await self.http_client.send_async("POST", path, body=input)
 
-    async def webhook_keyword_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-        search: Optional[str],
-    ):
-        """
-        When keywords are mentioned
-
-        Triggers when a keyword is mentioned in a specified chat or channel. Does not trigger if a message is edited.
-        """
-        path = f"{self._connection_runtime_url}/beta/subscriptions/keywordtrigger/threadType/{threadType}"
-        query_params = []
-        if search is not None:
-            query_params.append(f"$search={quote(str(search).lower() if isinstance(search, bool) else str(search))}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def webhook_new_message_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-    ):
-        """
-        When a new message is added to a chat or channel
-
-        Triggers when a new message is posted in a specified chat or channel. Does not trigger if a message is edited.
-        """
-        path = f"{self._connection_runtime_url}/beta/subscriptions/newmessagetrigger/threadType/{threadType}"
-
-        await self.http_client.send_async("POST", path, body=input)
-
     async def subscribe_user_message_with_options_async(
         self,
         input: DynamicUserMessageWithOptionsSubscriptionRequest,
@@ -1796,36 +1396,15 @@ class TeamsClient(ConnectorClientBase):
         """
         Post a choice of options as the Flow bot to a user
 
-        Send a set of options to a Microsoft Teams user, that they must respond to before the flow will continue. This action will pause the flow until the user response to the options
+        Send a set of options to a Microsoft Teams user, that they must respond to before the flow
+        will continue. This action will pause the flow until the user response to the options
         """
-        path = f"{self._connection_runtime_url}/flowbot/actions/messagewithoptions/recipienttypes/user/$subscriptions"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot/actions/messagewithoptions/recipienttypes/user/$subscriptions"
+        )
 
         await self.http_client.send_async("POST", path, body=input)
-
-    async def get_team_async(
-        self,
-    ):
-        """
-        Get a team
-
-        Gets the details for a team in Microsoft Teams.
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{teamId}"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
 
     async def at_mention_user_async(
         self,
@@ -1850,7 +1429,6 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def on_group_membership_removal_async(
@@ -1865,7 +1443,10 @@ class TeamsClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/trigger/v1.0/groups/removal"
         query_params = []
         if select is not None:
-            query_params.append(f"$select={quote(str(select).lower() if isinstance(select, bool) else str(select))}")
+            value = str(select)
+            if isinstance(select, bool):
+                value = value.lower()
+            query_params.append(f"$select={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1881,7 +1462,6 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def on_group_membership_add_async(
@@ -1896,7 +1476,10 @@ class TeamsClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/trigger/v1.0/groups/delta"
         query_params = []
         if select is not None:
-            query_params.append(f"$select={quote(str(select).lower() if isinstance(select, bool) else str(select))}")
+            value = str(select)
+            if isinstance(select, bool):
+                value = value.lower()
+            query_params.append(f"$select={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1912,7 +1495,6 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def create_chat_async(
@@ -1938,32 +1520,6 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
-        return json.loads(response.text)
-
-    async def get_messages_from_chat_async(
-        self,
-    ):
-        """
-        Get messages in a chat
-
-        Retrieves messages from a one on one or group chat
-        """
-        path = f"{self._connection_runtime_url}/beta/chats/{chatId}/messages"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
         return json.loads(response.text)
 
     async def create_a_team_async(
@@ -1989,202 +1545,6 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
-        return json.loads(response.text)
-
-    async def add_member_to_team_async(
-        self,
-        input: AddMemberToTeamInput,
-    ):
-        """
-        Add a member to a team
-
-        Adds a member to a team in Microsoft Teams
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/{teamId}/members"
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def add_member_to_channel_async(
-        self,
-        input: AddMemberToChannelInput,
-    ):
-        """
-        Add a member to a channel
-
-        Adds a member to a channel in Microsoft Teams
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/{groupId}/channels/{channelId}/members"
-
-        await self.http_client.send_async("POST", path, body=input)
-
-    async def remove_member_from_channel_async(
-        self,
-        membership_id: str,
-    ):
-        """
-        Remove a direct member from a channel
-
-        Removes a direct member from a channel in Microsoft Teams
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/{groupId}/channels/{channelId}/members/{str(membership_id)}"
-
-        await self.http_client.send_async("DELETE", path, body=None)
-
-    async def post_message_to_conversation_async(
-        self,
-        input: DynamicPostMessageRequest,
-    ):
-        """
-        Post message in a chat or channel
-
-        Posts a message to a chat or a channel
-        """
-        path = f"{self._connection_runtime_url}/beta/teams/conversation/message/poster/{poster}/location/{location}"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def reply_with_message_to_conversation_async(
-        self,
-        input: DynamicReplyMessageRequest,
-    ):
-        """
-        Reply with a message in a channel
-
-        Replies with a message to a channel's message
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/conversation/replyWithMessage/poster/{poster}/location/{location}"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def post_card_to_conversation_async(
-        self,
-        input: DynamicPostCardRequest,
-    ):
-        """
-        Post card in a chat or channel
-
-        Posts a card to a chat or a channel
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/conversation/adaptivecard/poster/{poster}/location/{location}"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def post_card_and_wait_for_response_async(
-        self,
-        input: PostCardAndWaitForResponseInput,
-    ):
-        """
-        Post adaptive card and wait for a response
-
-        Posts an adaptive card to a chat or a channel and waits for a response from any user. This will pause the flow until any user responds.
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/conversation/gatherinput/poster/{poster}/location/{location}/$subscriptions"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def reply_with_card_to_conversation_async(
-        self,
-        input: DynamicReplyCardRequest,
-    ):
-        """
-        Reply with an adaptive card in a channel
-
-        Replies with an adaptive card to a channel's message
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/conversation/replyWithAdaptivecard/poster/{poster}/location/{location}"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
-        return json.loads(response.text)
-
-    async def update_card_in_conversation_async(
-        self,
-        input: DynamicUpdateCardRequest,
-    ):
-        """
-        Update an adaptive card in a chat or channel
-
-        Updates an existing adaptive card
-        """
-        path = f"{self._connection_runtime_url}/v1.0/teams/conversation/updateAdaptivecard/poster/{poster}/location/{location}"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"POST {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        import json
         return json.loads(response.text)
 
     async def http_request_async(
@@ -2194,7 +1554,10 @@ class TeamsClient(ConnectorClientBase):
         """
         Send a Microsoft Graph HTTP request
 
-        Construct a Microsoft Graph REST API request to invoke against the Microsoft Teams endpoints. These segments are supported: 1st segment: /teams, /me, /users 2nd segment: channels, chats, installedApps, messages, pinnedMessages. Learn more: https://docs.microsoft.com/en-us/graph/use-the-api
+        Construct a Microsoft Graph REST API request to invoke against the Microsoft Teams
+        endpoints. These segments are supported: 1st segment: /teams, /me, /users 2nd segment:
+        channels, chats, installedApps, messages, pinnedMessages, onlineMeetings. Learn more:
+        https://docs.microsoft.com/en-us/graph/use-the-api
         """
         path = f"{self._connection_runtime_url}/httprequest"
 
@@ -2210,5 +1573,4 @@ class TeamsClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
