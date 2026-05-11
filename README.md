@@ -149,8 +149,9 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | 98% | 37 tests |
 | **Microsoft Graph** | `azure.connectors.msgraph` | ✅ Complete | — | 46 tests |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | — | 40 tests |
+| **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | — | 52 tests |
 
-**Total:** 235 connector tests (217 passing, 18 skipped) + 110 SDK component tests
+**Total:** 287 connector tests (269 passing, 18 skipped) + 110 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

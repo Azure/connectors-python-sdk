@@ -18,6 +18,7 @@ python sample_connector_usage_<connector>.py
 
 | Sample | Connector | Environment Variable |
 |--------|-----------|---------------------|
+| `sample_connector_usage_azureblob.py` | Azure Blob Storage | `AZUREBLOB_CONNECTION_URL` |
 | `sample_connector_usage_kusto.py` | Azure Data Explorer | `KUSTO_CONNECTION_URL` |
 | `sample_connector_usage_msgraph.py` | MS Graph Groups & Users | `MSGRAPH_CONNECTION_URL` |
 | `sample_connector_usage_office365.py` | Office 365 Outlook | `OFFICE365_CONNECTION_URL` |

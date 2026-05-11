@@ -47,6 +47,10 @@ try:
     from .office365users import Office365usersClient
 except (ImportError, NameError):
     Office365usersClient = None  # type: ignore[assignment,misc]
+try:
+    from .azureblob import AzureblobClient
+except (ImportError, NameError):
+    AzureblobClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.1.0'
 
@@ -66,4 +70,5 @@ __all__ = [
     'TeamsClient',
     'MsgraphgroupsanduserClient',
     'Office365usersClient',
+    'AzureblobClient',
 ]
