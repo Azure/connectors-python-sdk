@@ -978,13 +978,13 @@ class ClientReceiveMessage:
         """
         importance_map = {"low": 0, "normal": 1, "high": 2}
 
-        if isinstance(payload, str):
+        if isinstance(payload.value, str):
             try:
-                data = json.loads(payload)
+                data = json.loads(payload.value)
             except json.JSONDecodeError as e:
                 raise ValueError(f"Invalid JSON payload: {e}.") from e
         else:
-            data = payload
+            data = payload.value
 
         # NOTE(SDK): Navigate to body.value to extract the list of messages.
         if isinstance(data, dict):
