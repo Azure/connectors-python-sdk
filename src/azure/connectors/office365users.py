@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -537,7 +536,8 @@ class Office365usersClient(ConnectorClientBase):
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(
+                f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 

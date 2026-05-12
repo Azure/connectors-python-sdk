@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -1478,13 +1477,15 @@ class SharedMailboxClientSendHtmlMessage:
 class SubscriptionPayloadOutlookReceiveMessage:
     """Definition: SubscriptionPayload[OutlookReceiveMessage]"""
 
-    value: Optional[List[SubscriptionPayloadEntityOutlookReceiveMessage]] = None
+    value: Optional[
+        List[SubscriptionPayloadEntityOutlookReceiveMessage]
+    ] = None
     """List of values"""
 
 
 @dataclass
 class SubscriptionPayloadEntityOutlookReceiveMessage:
-    """Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]"""
+    """Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]."""
 
     sequence_number: Optional[int] = None
     """Sequence number"""
@@ -3591,7 +3592,8 @@ class Office365Client(ConnectorClientBase):
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(
+                f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -4221,7 +4223,8 @@ class Office365Client(ConnectorClientBase):
             value = str(message_id_to_fire_on_first_trigger_run)
             if isinstance(message_id_to_fire_on_first_trigger_run, bool):
                 value = value.lower()
-            query_params.append(f"messageIdToFireOnFirstTriggerRun={quote(value)}")
+            query_params.append(
+                f"messageIdToFireOnFirstTriggerRun={quote(value)}")
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):

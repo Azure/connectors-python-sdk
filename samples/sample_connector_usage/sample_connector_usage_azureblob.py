@@ -34,13 +34,13 @@ from azure.connectors.azureblob import AzureblobClient, CreateFileInput
 # https://[region].azure-apihub.net/apim/azureblob/[connection-id]
 CONNECTION_RUNTIME_URL = os.environ.get(
     "AZUREBLOB_CONNECTION_URL",
-    "https://8841aefe25e7412a86923fd556ac1a08.03.common.logic-df.azure-apihub.net/apim/azureblob/30658a87afd74f2d9780a19290f85f53"
+    ""
 )
 
 # Storage account name (dataset parameter in API calls)
 STORAGE_ACCOUNT = os.environ.get(
     "TEST_STORAGE_ACCOUNT",
-    "vcentraluseuap"
+    ""
 )
 
 
@@ -48,7 +48,7 @@ async def example_1_get_blob_metadata():
     """Example 1: Get blob metadata by path."""
     print("\n=== Example 1: Get Blob Metadata ===")
     
-    blob_path = os.environ.get("TEST_BLOB_PATH", "test/requirements.txt")
+    blob_path = os.environ.get("TEST_BLOB_PATH", "")
     if not blob_path:
         print("Set TEST_BLOB_PATH environment variable to a blob path.")
         print("Example: $env:TEST_BLOB_PATH = 'container/folder/file.txt'")
@@ -57,34 +57,31 @@ async def example_1_get_blob_metadata():
     credential = DefaultAzureCredential()
     
     async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            metadata = await client.get_file_metadata_by_path_async(
-                dataset=STORAGE_ACCOUNT,
-                path=blob_path,
-            )
-            
-            if metadata:
-                print(f"Blob Metadata for '{blob_path}':")
-                print(f"  Name: {metadata.get('Name', 'N/A')}")
-                print(f"  Path: {metadata.get('Path', 'N/A')}")
-                print(f"  Size: {metadata.get('Size', 'N/A')} bytes")
-                print(f"  Last Modified: {metadata.get('LastModified', 'N/A')}")
-                print(f"  Media Type: {metadata.get('MediaType', 'N/A')}")
-                print(f"  ETag: {metadata.get('ETag', 'N/A')}")
-            else:
-                print(f"No metadata returned for: {blob_path}")
+
+        metadata = await client.get_file_metadata_by_path_async(
+            dataset=STORAGE_ACCOUNT,
+            path=blob_path,
+        )
+        
+        if metadata:
+            print(f"Blob Metadata for '{blob_path}':")
+            print(f"  Name: {metadata.get('Name', 'N/A')}")
+            print(f"  Path: {metadata.get('Path', 'N/A')}")
+            print(f"  Size: {metadata.get('Size', 'N/A')} bytes")
+            print(f"  Last Modified: {metadata.get('LastModified', 'N/A')}")
+            print(f"  Media Type: {metadata.get('MediaType', 'N/A')}")
+            print(f"  ETag: {metadata.get('ETag', 'N/A')}")
+        else:
+            print(f"No metadata returned for: {blob_path}")
                 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+
 
 
 async def example_2_download_blob():
     """Example 2: Download blob content."""
     print("\n=== Example 2: Download Blob Content ===")
     
-    blob_path = os.environ.get("TEST_BLOB_PATH", "test/requirements.txt")
+    blob_path = os.environ.get("TEST_BLOB_PATH", "")
     if not blob_path:
         print("Set TEST_BLOB_PATH environment variable to a blob path.")
         print("Example: $env:TEST_BLOB_PATH = 'container/folder/file.txt'")
@@ -118,7 +115,7 @@ async def example_3_upload_blob():
     """Example 3: Upload a blob."""
     print("\n=== Example 3: Upload Blob ===")
     
-    folder_path = os.environ.get("TEST_FOLDER_PATH", "test")
+    folder_path = os.environ.get("TEST_FOLDER_PATH", "")
     if not folder_path:
         print("Set TEST_FOLDER_PATH environment variable to a container/folder path.")
         print("Example: $env:TEST_FOLDER_PATH = 'mycontainer/uploads'")
@@ -162,7 +159,7 @@ async def example_4_list_blobs():
     """Example 4: List blobs in a container/folder."""
     print("\n=== Example 4: List Blobs ===")
     
-    folder_id = os.environ.get("TEST_FOLDER_ID", "test")
+    folder_id = os.environ.get("TEST_FOLDER_ID", "")
     if not folder_id:
         print("Set TEST_FOLDER_ID environment variable to a folder identifier.")
         print("Example: $env:TEST_FOLDER_ID = 'JTJmbXljb250YWluZXI='  (base64 encoded path)")
@@ -225,7 +222,7 @@ async def example_5_delete_blob():
     """Example 5: Delete a blob."""
     print("\n=== Example 5: Delete Blob ===")
     
-    blob_id = os.environ.get("TEST_BLOB_ID", "test/requirements.txt")
+    blob_id = os.environ.get("TEST_BLOB_ID", "")
     if not blob_id:
         print("Set TEST_BLOB_ID environment variable to a blob identifier.")
         print("Example: $env:TEST_BLOB_ID = 'JTJmbXljb250YWluZXIlMmZmaWxlLnR4dA=='")

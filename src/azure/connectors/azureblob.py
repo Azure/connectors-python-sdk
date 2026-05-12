@@ -435,7 +435,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation creates a SAS link for a blob using the path.
         """
-        path = (
+        url = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{str(storage_account_name)}/CreateSharedLinkByPath"
         )
@@ -446,14 +446,14 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", url, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                url,
                 response.status,
                 response.text,
             )
@@ -557,14 +557,14 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async("GET", url, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                url,
                 response.status,
                 response.text,
             )
@@ -627,7 +627,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation retrieves blob contents using path.
         """
-        path = (
+        url = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{quote(str(dataset), safe='')}/GetFileContentByPath"
         )
@@ -648,14 +648,14 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async("GET", url, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                url,
                 response.status,
                 response.text,
             )
@@ -703,7 +703,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation retrieves blob metadata using path.
         """
-        path = (
+        url = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{quote(str(dataset), safe='')}/GetFileByPath"
         )
@@ -719,14 +719,14 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async("GET", url, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                url,
                 response.status,
                 response.text,
             )
@@ -897,7 +897,7 @@ class AzureblobClient(ConnectorClientBase):
         This operation sets a tier for a block blob on a standard storage
         account using the path.
         """
-        path = (
+        url = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{str(storage_account_name)}/SetBlobTierByPath"
         )
@@ -913,9 +913,9 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"newTier={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            url += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        await self.http_client.send_async("POST", url, body=None)
 
     async def update_file_async(
         self,

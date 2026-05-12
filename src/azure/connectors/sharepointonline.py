@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -682,7 +681,9 @@ class Permission:
     id: Optional[str] = None
     """Permission id"""
     granted_to: Optional[PermissionIdentitySet] = None
-    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = None
+    granted_to_identities: Optional[
+        List[SharingLinkPermissionIdentitySet]
+    ] = None
     """
     For link type permissions, the details of the users to whom permission was
     granted

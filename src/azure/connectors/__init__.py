@@ -4,8 +4,8 @@
 Azure Logic Apps Connector SDK for Python.
 
 This package provides infrastructure for calling Azure Logic Apps connectors
-from Python applications, including authentication, HTTP clients, and strongly-typed
-generated connector clients.
+from Python applications, including authentication, HTTP clients, and
+strongly-typed generated connector clients.
 """
 
 from .sdk.client_base import ConnectorClientBase
