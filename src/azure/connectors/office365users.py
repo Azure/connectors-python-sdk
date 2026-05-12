@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
+from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -26,7 +27,10 @@ class UpdateMyPhotoInput:
     """Update my profile photo"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -42,7 +46,10 @@ class LinklessEntityListResponseListPerson:
     """Response for Get relevant people"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -50,7 +57,10 @@ class ClientPhotoMetadata:
     """Response for Get user photo metadata"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -66,7 +76,10 @@ class HttpRequestInput:
     """Send an HTTP request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -74,7 +87,10 @@ class ObjectWithoutType:
     """Response for Send an HTTP request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -90,7 +106,10 @@ class GraphUser:
     """Response for Get manager (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -98,7 +117,10 @@ class EntityListResponseIReadOnlyListUser:
     """Response for Search for users (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -141,12 +163,13 @@ class ResourceVisualization:
     """The item's title text"""
     type_: Optional[str] = None
     """
-    The item's media type (can be used for filtering for a specific file based on a specific type)
+    The item's media type (can be used for filtering for a specific file based
+    on a specific type)
     """
     media_type: Optional[str] = None
     """
-    The items media type (can be used for filtering for a specific type of file based on supported
-    IANA Media MIME types)
+    The items media type (can be used for filtering for a specific type of file
+    based on supported IANA Media MIME types)
     """
     preview_image_url: Optional[str] = None
     """A URL leading to the preview image for the item"""
@@ -157,7 +180,10 @@ class ResourceVisualization:
     container_display_name: Optional[str] = None
     """A string describing where the item is stored"""
     container_type: Optional[str] = None
-    """Can be used for filtering by the type of container in which the file is stored"""
+    """
+    Can be used for filtering by the type of container in which the file is
+    stored
+    """
 
 
 @dataclass
@@ -216,10 +242,11 @@ class Person:
     """The person's profession"""
     user_principal_name: Optional[str] = None
     """
-    The user principal name(UPN) of the user.The UPN is an Internet-style login name for the user
-    based on the Internet standard RFC 822. By convention, this should map to the user's email
-    name.The general format is alias @domain, where domain must be present in the tenant's
-    collection of verified domains.
+    The user principal name(UPN) of the user.The UPN is an Internet-style login
+    name for the user based on the Internet standard RFC 822. By convention,
+    this should map to the user's email name.The general format is alias
+    @domain, where domain must be present in the tenant's collection of
+    verified domains.
     """
     im_address: Optional[str] = None
     """The person's VOIP SIP address"""
@@ -237,10 +264,11 @@ class ScoredEmailAddress:
     """The email address"""
     relevance_score: Optional[float] = None
     """
-    The relevance score of the email address. A relevance score is used as a sort key, in relation
-    to the other returned results. A higher relevance score value corresponds to a more relevant
-    result. Relevance is determined by the user's communication and collaboration patterns and
-    business relationships.
+    The relevance score of the email address. A relevance score is used as a
+    sort key, in relation to the other returned results. A higher relevance
+    score value corresponds to a more relevant result. Relevance is determined
+    by the user's communication and collaboration patterns and business
+    relationships.
     """
 
 
@@ -252,8 +280,8 @@ class Phone:
     """The phone number"""
     type_: Optional[str] = None
     """
-    The type of phone number. Possible values: home, business, mobile, other, assistant, homeFax,
-    businessFax, otherFax, pager, radio.
+    The type of phone number. Possible values: home, business, mobile, other,
+    assistant, homeFax, businessFax, otherFax, pager, radio.
     """
 
 
@@ -265,8 +293,8 @@ class User:
     """A unique identifier for the user object in the directory."""
     account_enabled: Optional[bool] = None
     """
-    true if the account is enabled; otherwise, false. This property is required when a user is
-    created.
+    true if the account is enabled; otherwise, false. This property is required
+    when a user is created.
     """
     business_phones: Optional[List[str]] = None
     """A list of business phone numbers for the user"""
@@ -275,14 +303,18 @@ class User:
     company_name: Optional[str] = None
     """The name of the company in which the user works."""
     country: Optional[str] = None
-    """The country/region in which the user is located; for example, \"US\" or \"UK\"."""
+    """
+    The country/region in which the user is located; for example, \"US\" or
+    \"UK\".
+    """
     department: Optional[str] = None
     """The name of the department in which the user works."""
     display_name: Optional[str] = None
     """
-    The name displayed in the address book for the user. This is usually the combination of the
-    user's first name, middle initial and last name. This property is required when a user is
-    created and it cannot be cleared during updates.
+    The name displayed in the address book for the user. This is usually the
+    combination of the user's first name, middle initial and last name. This
+    property is required when a user is created and it cannot be cleared during
+    updates.
     """
     given_name: Optional[str] = None
     """The given name (first name) of the user."""
@@ -290,18 +322,23 @@ class User:
     """The user's job title."""
     mail: Optional[str] = None
     """
-    The SMTP/email address for the user, for example, \"jeff@contoso.onmicrosoft.com\". Read-Only.
+    The SMTP/email address for the user, for example,
+    \"jeff@contoso.onmicrosoft.com\". Read-Only.
     """
     mail_nickname: Optional[str] = None
-    """The mail alias for the user. This property must be specified when a user is created."""
+    """
+    The mail alias for the user. This property must be specified when a user is
+    created.
+    """
     mobile_phone: Optional[str] = None
     """The primary cellular telephone number for the user."""
     office_location: Optional[str] = None
     """The office location in the user's place of business."""
     postal_code: Optional[str] = None
     """
-    The postal code for the user's postal address. The postal code is specific to the user's
-    country/region. In the United States of America, this attribute contains the ZIP code.
+    The postal code for the user's postal address. The postal code is specific
+    to the user's country/region. In the United States of America, this
+    attribute contains the ZIP code.
     """
     surname: Optional[str] = None
     """The user's surname (family name or last name)."""
@@ -309,9 +346,10 @@ class User:
     """The primary cellular telephone number for the user."""
     user_principal_name: Optional[str] = None
     """
-    The user principal name (UPN) of the user. The UPN is an Internet-style login name for the user
-    based on the Internet standard RFC 822. By convention, this should map to the user's email name.
-    The general format is alias@domain, where domain must be present in the tenant's collection of
+    The user principal name (UPN) of the user. The UPN is an Internet-style
+    login name for the user based on the Internet standard RFC 822. By
+    convention, this should map to the user's email name. The general format is
+    alias@domain, where domain must be present in the tenant's collection of
     verified domains.
     """
 
@@ -321,7 +359,10 @@ class ObjectEntity:
     """Definition: Object"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -332,8 +373,8 @@ class GraphUserV1:
     """About Me"""
     account_enabled: Optional[bool] = None
     """
-    true if the account is enabled; otherwise, false. This property is required when a user is
-    created.
+    true if the account is enabled; otherwise, false. This property is required
+    when a user is created.
     """
     birthday: Optional[str] = None
     """Birthday"""
@@ -344,7 +385,10 @@ class GraphUserV1:
     company_name: Optional[str] = None
     """The name of the company in which the user works."""
     country: Optional[str] = None
-    """The country/region in which the user is located; for example, \"US\" or \"UK\"."""
+    """
+    The country/region in which the user is located; for example, \"US\" or
+    \"UK\".
+    """
     department: Optional[str] = None
     """The name of the department in which the user works."""
     display_name: Optional[str] = None
@@ -362,7 +406,10 @@ class GraphUserV1:
     mail: Optional[str] = None
     """Mail"""
     mail_nickname: Optional[str] = None
-    """The mail alias for the user. This property must be specified when a user is created."""
+    """
+    The mail alias for the user. This property must be specified when a user is
+    created.
+    """
     mobile_phone: Optional[str] = None
     """Mobile Phone"""
     my_site: Optional[str] = None
@@ -373,8 +420,9 @@ class GraphUserV1:
     """Past Projects"""
     postal_code: Optional[str] = None
     """
-    The postal code for the user's postal address. The postal code is specific to the user's
-    country/region. In the United States of America, this attribute contains the ZIP code.
+    The postal code for the user's postal address. The postal code is specific
+    to the user's country/region. In the United States of America, this
+    attribute contains the ZIP code.
     """
     preferred_language: Optional[str] = None
     """Preferred Language"""
@@ -413,8 +461,10 @@ class Office365usersClient(ConnectorClientBase):
         Initialize a Office365usersClient.
 
         Args:
-            connection_runtime_url: The connection runtime URL from Azure Portal.
-            token_provider: Optional token provider. Defaults to ManagedIdentityTokenProvider.
+            connection_runtime_url: The connection runtime
+                URL from Azure Portal.
+            token_provider: Optional token provider.
+                Defaults to ManagedIdentityTokenProvider.
             options: Optional connector client options.
         """
         if not connection_runtime_url:
@@ -450,7 +500,8 @@ class Office365usersClient(ConnectorClientBase):
         """
         Update my profile photo
 
-        Updates the profile photo of the current user. The size of the photo must be less than 4 MB.
+        Updates the profile photo of the current user. The size of the photo
+        must be less than 4 MB.
         """
         path = f"{self._connection_runtime_url}/codeless/v1.0/me/photo/$value"
 
@@ -467,7 +518,10 @@ class Office365usersClient(ConnectorClientBase):
 
         Retrieves the trending documents for the signed in user
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/insights/trending"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/beta/me/insights/trending"
+        )
         query_params = []
         if filter is not None:
             value = str(filter)
@@ -491,7 +545,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -510,13 +565,17 @@ class Office365usersClient(ConnectorClientBase):
 
         Get relevant people.
         """
-        path = f"{self._connection_runtime_url}/users/{str(user_id)}/relevantpeople"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/users/{str(user_id)}/relevantpeople"
+        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -549,7 +608,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -569,7 +629,10 @@ class Office365usersClient(ConnectorClientBase):
 
         Retrieves the trending documents for a user
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/users/{str(id)}/insights/trending"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/beta/users/{str(id)}/insights/trending"
+        )
         query_params = []
         if filter is not None:
             value = str(filter)
@@ -583,7 +646,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -600,9 +664,10 @@ class Office365usersClient(ConnectorClientBase):
         """
         Send an HTTP request
 
-        Construct a Microsoft Graph REST API request to invoke. These segments are supported: 1st
-        segement: /me, /users/<userId> 2nd segment: messages, mailFolders, events, calendar,
-        calendars, outlook, inferenceClassification. Learn more:
+        Construct a Microsoft Graph REST API request to invoke. These segments
+        are supported: 1st segement: /me, /users/<userId> 2nd segment:
+        messages, mailFolders, events, calendar, calendars, outlook,
+        inferenceClassification. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
         """
         path = f"{self._connection_runtime_url}/codeless/httprequest"
@@ -611,7 +676,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -630,11 +696,14 @@ class Office365usersClient(ConnectorClientBase):
         """
         Get direct reports (V2)
 
-        Retrieves the user profiles of the specified user's direct reports. Learn more about
-        available fields to select:
+        Retrieves the user profiles of the specified user's direct reports.
+        Learn more about available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/users/{str(id)}/directReports"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/users/{str(id)}/directReports"
+        )
         query_params = []
         if select is not None:
             value = str(select)
@@ -653,7 +722,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -671,11 +741,14 @@ class Office365usersClient(ConnectorClientBase):
         """
         Get manager (V2)
 
-        Retrieves the profile of the specified user's manager. Learn more about available fields to
-        select:
+        Retrieves the profile of the specified user's manager. Learn more about
+        available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/users/{str(id)}/manager"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/users/{str(id)}/manager"
+        )
         query_params = []
         if select is not None:
             value = str(select)
@@ -689,7 +762,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -706,7 +780,8 @@ class Office365usersClient(ConnectorClientBase):
         """
         Get my profile (V2)
 
-        Retrieves the profile of the current user. Learn more about available fields to select:
+        Retrieves the profile of the current user. Learn more about available
+        fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
         path = f"{self._connection_runtime_url}/codeless/v1.0/me"
@@ -723,7 +798,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -774,7 +850,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -793,18 +870,22 @@ class Office365usersClient(ConnectorClientBase):
 
         Retrieves the photo of the specified user if they have one
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/users/{str(id)}/photo/$value"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/users/{str(id)}/photo/$value"
+        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def user_profile_async(
         self,
@@ -814,7 +895,8 @@ class Office365usersClient(ConnectorClientBase):
         """
         Get user profile (V2)
 
-        Retrieves the profile of a specific user. Learn more about available fields to select:
+        Retrieves the profile of a specific user. Learn more about available
+        fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
         path = f"{self._connection_runtime_url}/codeless/v1.0/users/{str(id)}"
@@ -831,7 +913,8 @@ class Office365usersClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )

@@ -5,10 +5,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, List, Any, Dict
-from datetime import datetime
+from dataclasses import dataclass
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
+import json
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -30,6 +30,7 @@ class ListUsersResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class ListGroupsByDisplayNameSearchResponse:
     """Response for List Groups By Display Name Search"""
@@ -41,6 +42,7 @@ class ListGroupsByDisplayNameSearchResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class ListSubscribedSkusResponse:
     """Response for List Subscribed Skus"""
@@ -49,6 +51,7 @@ class ListSubscribedSkusResponse:
     """The Odata.context link."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
+
 
 @dataclass
 class ListDirectGroupMembersResponse:
@@ -61,6 +64,7 @@ class ListDirectGroupMembersResponse:
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
+
 @dataclass
 class GetMemberLicenseDetailsResponse:
     """Response for Get Member License Details"""
@@ -69,6 +73,7 @@ class GetMemberLicenseDetailsResponse:
     """The Odata.context link."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
+
 
 @dataclass
 class GetGroupPropertiesResponse:
@@ -105,11 +110,19 @@ class GetGroupPropertiesResponse:
     membership_rule: Optional[str] = None
     """The rule that is used for membership evaluation."""
     membership_rule_processing_state: Optional[str] = None
-    """The processing state of the rule that is used for membership evaluation."""
+    """
+    The processing state of the rule that is used for membership evaluation.
+    """
     on_premises_domain_name: Optional[str] = None
-    """Contains the on-premises domainFQDN, also called dnsDomainName synchronized from the on-premises directory."""
+    """
+    Contains the on-premises domainFQDN, also called dnsDomainName synchronized
+    from the on-premises directory.
+    """
     on_premises_last_sync_date_time: Optional[str] = None
-    """The time and date at which the tenant was last synced with the on-premise directory."""
+    """
+    The time and date at which the tenant was last synced with the on-premise
+    directory.
+    """
     on_premises_net_bios_name: Optional[str] = None
     """Name of networking service for on-premise server."""
     on_premises_sam_account_name: Optional[str] = None
@@ -141,12 +154,14 @@ class GetGroupPropertiesResponse:
     on_premises_provisioning_errors: Optional[List[str]] = None
     """On premise provisioning errors of the group."""
 
+
 @dataclass
 class GetMemberGroupsInput:
     """Get Member Groups"""
 
     security_enabled_only: Optional[bool] = None
     """Do you want to retrieve security enabled groups only?"""
+
 
 @dataclass
 class GetMemberGroupsResponse:
@@ -173,8 +188,10 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         Initialize a MsgraphgroupsanduserClient.
 
         Args:
-            connection_runtime_url: The connection runtime URL from Azure Portal.
-            token_provider: Optional token provider. Defaults to ManagedIdentityTokenProvider.
+            connection_runtime_url: The connection runtime
+                URL from Azure Portal.
+            token_provider: Optional token provider.
+                Defaults to ManagedIdentityTokenProvider.
             options: Optional connector client options.
         """
         if not connection_runtime_url:
@@ -204,7 +221,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -212,7 +230,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_groups_by_display_name_search_async(
@@ -228,9 +245,15 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
         if search is not None:
-            query_params.append(f"$search={quote(str(search).lower() if isinstance(search, bool) else str(search))}")
+            value = str(search)
+            if isinstance(search, bool):
+                value = value.lower()
+            query_params.append(f"$search={quote(value)}")
         if count is not None:
-            query_params.append(f"$count={quote(str(count).lower() if isinstance(count, bool) else str(count))}")
+            value = str(count)
+            if isinstance(count, bool):
+                value = value.lower()
+            query_params.append(f"$count={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -238,7 +261,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -246,7 +270,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_subscribed_skus_async(
@@ -263,7 +286,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -271,7 +295,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def list_direct_group_members_async(
@@ -286,14 +309,26 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Retrieve direct members of a group with count
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups/{str(group_id)}/members"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/groups/{str(group_id)}/members"
+        )
         query_params = []
         if filter is not None:
-            query_params.append(f"$filter={quote(str(filter).lower() if isinstance(filter, bool) else str(filter))}")
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
         if select is not None:
-            query_params.append(f"$select={quote(str(select).lower() if isinstance(select, bool) else str(select))}")
+            value = str(select)
+            if isinstance(select, bool):
+                value = value.lower()
+            query_params.append(f"$select={quote(value)}")
         if count is not None:
-            query_params.append(f"$count={quote(str(count).lower() if isinstance(count, bool) else str(count))}")
+            value = str(count)
+            if isinstance(count, bool):
+                value = value.lower()
+            query_params.append(f"$count={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -301,7 +336,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -309,7 +345,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_member_license_details_async(
@@ -322,10 +357,16 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Retrieve group member(user)'s license details
         """
-        path = f"{self._connection_runtime_url}/v1.0/users/{str(id)}/licenseDetails"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/users/{str(id)}/licenseDetails"
+        )
         query_params = []
         if select is not None:
-            query_params.append(f"$select={quote(str(select).lower() if isinstance(select, bool) else str(select))}")
+            value = str(select)
+            if isinstance(select, bool):
+                value = value.lower()
+            query_params.append(f"$select={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -333,7 +374,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -341,7 +383,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_group_properties_async(
@@ -359,7 +400,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -367,7 +409,6 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
 
     async def get_member_groups_async(
@@ -380,13 +421,17 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Group memberships for a user (member)
         """
-        path = f"{self._connection_runtime_url}/v1.0/users/{str(member_id)}/getMemberGroups"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/users/{str(member_id)}/getMemberGroups"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -394,6 +439,4 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if not response.text:
             return None
 
-        import json
         return json.loads(response.text)
-

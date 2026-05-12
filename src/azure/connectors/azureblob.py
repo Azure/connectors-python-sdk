@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
+from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -26,7 +27,10 @@ class BlobMetadata:
     """Response for Copy blob (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -34,7 +38,10 @@ class CreateBlockBlobInput:
     """Create block blob (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -42,7 +49,10 @@ class CreateFileInput:
     """Create blob (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -50,7 +60,10 @@ class SharedAccessSignature:
     """Response for Create SAS URI by path (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -58,7 +71,10 @@ class SharedAccessSignatureBlobPolicy:
     """Response for Get available access policies (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -66,7 +82,10 @@ class DataWithSensitivityLabelInfo:
     """Response for Get Blob Metadata (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -74,7 +93,10 @@ class ListOfBlobsWithSensitivityLabels:
     """Response for Lists blobs (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -82,7 +104,10 @@ class BlobMetadataPage:
     """Response for Lists blobs in the root folder  (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -90,7 +115,10 @@ class UpdateFileInput:
     """Update blob (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -98,7 +126,10 @@ class ObjectEntity:
     """Definition: Object"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -120,7 +151,10 @@ class BlobMetadataResponse:
     media_type: Optional[str] = None
     """The media type of the file or folder."""
     is_folder: Optional[bool] = None
-    """A boolean value (true, false) to indicate whether or not the blob is a folder."""
+    """
+    A boolean value (true, false) to indicate whether or not the blob is a
+    folder.
+    """
     e_tag: Optional[str] = None
     """The etag of the file or folder."""
     file_locator: Optional[str] = None
@@ -222,8 +256,10 @@ class AzureblobClient(ConnectorClientBase):
         Initialize a AzureblobClient.
 
         Args:
-            connection_runtime_url: The connection runtime URL from Azure Portal.
-            token_provider: Optional token provider. Defaults to ManagedIdentityTokenProvider.
+            connection_runtime_url: The connection runtime
+                URL from Azure Portal.
+            token_provider: Optional token provider.
+                Defaults to ManagedIdentityTokenProvider.
             options: Optional connector client options.
         """
         if not connection_runtime_url:
@@ -250,13 +286,18 @@ class AzureblobClient(ConnectorClientBase):
         """
         Copy blob (V2)
 
-        This operation copies a blob. If blob is being deleted/renamed on server right after it was
-        copied, connector may return HTTP 404 error by it's design. Please use a delay for 1 minute
-        before deleting or renaming newly created blob. Chunk transfer is not supported in this
-        action. If source and destination are present in same storage account, please use relative
-        path. Otherwise, maximum size of a source for copy blob operation is 50 MB.
+        This operation copies a blob. If blob is being deleted/renamed on
+        server right after it was copied, connector may return HTTP 404 error
+        by it's design. Please use a delay for 1 minute before deleting or
+        renaming newly created blob. Chunk transfer is not supported in this
+        action. If source and destination are present in same storage account,
+        please use relative path. Otherwise, maximum size of a source for copy
+        blob operation is 50 MB.
         """
-        path = f"{self._connection_runtime_url}/v2/datasets/{quote(str(dataset), safe='')}/copyFile"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/datasets/{quote(str(dataset), safe='')}/copyFile"
+        )
         query_params = []
         if source is not None:
             value = str(source)
@@ -285,7 +326,8 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -309,7 +351,11 @@ class AzureblobClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/v2/codeless/datasets/{str(storage_account_name)}/CreateBlockBlob"
+            f"/v2"
+            f"/codeless"
+            f"/datasets"
+            f"/{str(storage_account_name)}"
+            f"/CreateBlockBlob"
         )
         query_params = []
         if folder_path is not None:
@@ -340,7 +386,10 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation uploads a blob to Azure Blob Storage.
         """
-        path = f"{self._connection_runtime_url}/v2/datasets/{quote(str(dataset), safe='')}/files"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/datasets/{quote(str(dataset), safe='')}/files"
+        )
         query_params = []
         if folder_path is not None:
             value = str(folder_path)
@@ -364,7 +413,8 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -385,7 +435,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation creates a SAS link for a blob using the path.
         """
-        url = (
+        path = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{str(storage_account_name)}/CreateSharedLinkByPath"
         )
@@ -396,13 +446,14 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", url, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {url}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -474,7 +525,8 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -494,7 +546,10 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation gets available shared access policies for a blob.
         """
-        url = f"{self._connection_runtime_url}/v2/datasets/{str(storage_account_name)}/policies"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/datasets/{str(storage_account_name)}/policies"
+        )
         query_params = []
         if path is not None:
             value = str(path)
@@ -502,13 +557,14 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", url, body=None)
+        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {url}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -531,7 +587,12 @@ class AzureblobClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/files/{str(id)}/content"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/files"
+            f"/{str(id)}"
+            f"/content"
         )
         query_params = []
         if infer_content_type is not None:
@@ -546,12 +607,13 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
 
-        return response.body
+        return response.text.encode('latin-1') if response.text else b''
 
     async def get_file_content_by_path_async(
         self,
@@ -565,7 +627,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation retrieves blob contents using path.
         """
-        url = (
+        path = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{quote(str(dataset), safe='')}/GetFileContentByPath"
         )
@@ -586,18 +648,19 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", url, body=None)
+        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {url}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
 
-        return response.body
+        return response.text.encode('latin-1') if response.text else b''
 
     async def get_file_metadata_async(
         self,
@@ -614,11 +677,12 @@ class AzureblobClient(ConnectorClientBase):
             f"/v2/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", url, body=None)
+        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {url}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -639,7 +703,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation retrieves blob metadata using path.
         """
-        url = (
+        path = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{quote(str(dataset), safe='')}/GetFileByPath"
         )
@@ -655,13 +719,14 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", url, body=None)
+        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {url}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -705,7 +770,8 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -727,7 +793,8 @@ class AzureblobClient(ConnectorClientBase):
         This operation lists blobs in the Azure Blob Storage root folder.
         """
         path = (
-            f"{self._connection_runtime_url}/v2/datasets/{quote(str(dataset), safe='')}/foldersV2"
+            f"{self._connection_runtime_url}"
+            f"/v2/datasets/{quote(str(dataset), safe='')}/foldersV2"
         )
         query_params = []
         if next_page_marker is not None:
@@ -747,7 +814,8 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -767,14 +835,21 @@ class AzureblobClient(ConnectorClientBase):
         """
         When a blob is added or modified (properties only) (V2)
 
-        This operation triggers a flow when one or more blobs are added or modified in a container.
-        This trigger will only fetch the file metadata. To get the file content, you can use the
-        \\"Get file content\\" operation. The trigger does not fire if a file is added/updated in a
-        subfolder. If it is required to trigger on subfolders, multiple triggers should be created.
+        This operation triggers a flow when one or more blobs are added or
+        modified in a container. This trigger will only fetch the file
+        metadata. To get the file content, you can use the \\"Get file
+        content\\" operation. The trigger does not fire if a file is
+        added/updated in a subfolder. If it is required to trigger on
+        subfolders, multiple triggers should be created.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/triggers/batch/onupdatedfile"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/triggers"
+            f"/batch"
+            f"/onupdatedfile"
         )
         query_params = []
         if folder_id is not None:
@@ -799,7 +874,8 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -818,9 +894,10 @@ class AzureblobClient(ConnectorClientBase):
         """
         Set blob tier by path (V2)
 
-        This operation sets a tier for a block blob on a standard storage account using the path.
+        This operation sets a tier for a block blob on a standard storage
+        account using the path.
         """
-        url = (
+        path = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{str(storage_account_name)}/SetBlobTierByPath"
         )
@@ -836,9 +913,9 @@ class AzureblobClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"newTier={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", url, body=None)
+        await self.http_client.send_async("POST", path, body=None)
 
     async def update_file_async(
         self,
@@ -860,7 +937,8 @@ class AzureblobClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"PUT {path}",
+                "PUT",
+                path,
                 response.status,
                 response.text,
             )
