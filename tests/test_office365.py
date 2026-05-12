@@ -4,15 +4,12 @@
 
 import json
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from azure.connectors.office365 import (
     Office365Client,
     ClientDraftHtmlMessage,
-    AssignCategoryBulkInput,
     FindMeetingTimesInput,
-    GetMailTipsInput,
     MarkAsReadInput,
-    SetAutomaticRepliesSettingInput,
     MCPQueryRequest,
     CalendarEventBackend,
     GetAttachmentResponse,
@@ -31,7 +28,7 @@ class TestOffice365ClientInitialization:
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
         client = Office365Client("https://example.azure.com/connections/test")
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "office365"
         assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
@@ -39,7 +36,7 @@ class TestOffice365ClientInitialization:
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
         client = Office365Client("https://example.azure.com/connections/test/")
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_token_provider(self, mock_token_provider):
@@ -48,7 +45,7 @@ class TestOffice365ClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client._http_client._token_provider is mock_token_provider
 
     def test_init_with_custom_options(self, mock_token_provider):
@@ -59,7 +56,7 @@ class TestOffice365ClientInitialization:
             token_provider=mock_token_provider,
             options=options
         )
-        
+
         assert client._options is options
         assert client._options.timeout_seconds == 60.0
         assert client._options.max_retry_attempts == 5
@@ -80,7 +77,7 @@ class TestOffice365ClientInitialization:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.connector_name == "office365"
 
 
@@ -94,7 +91,7 @@ class TestOffice365ClientLifecycle:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
@@ -108,7 +105,7 @@ class TestOffice365ClientLifecycle:
                 token_provider=mock_token_provider
             ) as client:
                 assert isinstance(client, Office365Client)
-            
+
             mock_close.assert_called_once()
 
 
@@ -122,12 +119,12 @@ class TestGetOutlookCategoryNames:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"displayName": "Red category"}, {"displayName": "Blue category"}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -135,7 +132,7 @@ class TestGetOutlookCategoryNames:
             return_value=mock_response
         ) as mock_send:
             result = await client.get_outlook_category_names_async()
-            
+
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/Categories",
@@ -151,9 +148,9 @@ class TestGetOutlookCategoryNames:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -170,12 +167,12 @@ class TestGetOutlookCategoryNames:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=401,
             text='{"error": "Unauthorized"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -184,7 +181,7 @@ class TestGetOutlookCategoryNames:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_outlook_category_names_async()
-            
+
             assert exc_info.value.status_code == 401
 
 
@@ -198,12 +195,12 @@ class TestDraftEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"id": "message123", "subject": "Test Email"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -212,7 +209,7 @@ class TestDraftEmail:
         ) as mock_send:
             input_message = ClientDraftHtmlMessage()
             result = await client.draft_email_async(input_message)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/Draft",
@@ -227,12 +224,12 @@ class TestDraftEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"id": "reply123"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -240,13 +237,13 @@ class TestDraftEmail:
             return_value=mock_response
         ) as mock_send:
             input_message = ClientDraftHtmlMessage()
-            result = await client.draft_email_async(
+            await client.draft_email_async(
                 input_message,
                 message_id="original123",
                 draft_type="reply",
                 comment="Replying to your message"
             )
-            
+
             call_args = mock_send.call_args
             path = call_args[0][1]
             assert "messageId=original123" in path
@@ -260,12 +257,12 @@ class TestDraftEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=400,
             text='{"error": "Invalid email format"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -274,7 +271,7 @@ class TestDraftEmail:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.draft_email_async(ClientDraftHtmlMessage())
-            
+
             assert exc_info.value.status_code == 400
 
 
@@ -288,9 +285,9 @@ class TestUpdateDraftEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -299,7 +296,7 @@ class TestUpdateDraftEmail:
         ) as mock_send:
             input_message = ClientDraftHtmlMessage()
             result = await client.update_draft_email_async(input_message, "message123")
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "PATCH"
             assert "messageId=message123" in call_args[0][1]
@@ -317,9 +314,9 @@ class TestSendDraftEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=202, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -327,7 +324,7 @@ class TestSendDraftEmail:
             return_value=mock_response
         ) as mock_send:
             result = await client.send_draft_email_async("message123")
-            
+
             # NOTE: The generated code uses template syntax instead of f-string interpolation
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -341,9 +338,9 @@ class TestSendDraftEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=202, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -351,7 +348,7 @@ class TestSendDraftEmail:
             return_value=mock_response
         ) as mock_send:
             await client.send_draft_email_async("test123")
-            
+
             call_args = mock_send.call_args
             path = call_args[0][1]
             assert "https://example.azure.com/connections/test/Draft/Send/" in path
@@ -367,9 +364,9 @@ class TestAssignCategory:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{"success": true}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -380,7 +377,7 @@ class TestAssignCategory:
                 message_id="msg123",
                 category="Red category"
             )
-            
+
             call_args = mock_send.call_args
             path = call_args[0][1]
             assert "messageId=msg123" in path
@@ -397,9 +394,9 @@ class TestDeleteEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -407,7 +404,7 @@ class TestDeleteEmail:
             return_value=mock_response
         ) as mock_send:
             result = await client.delete_email_async("message123")
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert result is None
@@ -423,12 +420,15 @@ class TestGetEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
-            text='{"id": "msg123", "subject": "Test", "from": {"emailAddress": {"address": "test@example.com"}}}'
+            text=(
+                '{"id": "msg123", "subject": "Test", '
+                '"from": {"emailAddress": {"address": "test@example.com"}}}'
+            )
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -436,7 +436,7 @@ class TestGetEmail:
             return_value=mock_response
         ):
             result = await client.get_email_async("message123")
-            
+
             assert result["id"] == "msg123"
             assert result["subject"] == "Test"
             assert result["from"]["emailAddress"]["address"] == "test@example.com"
@@ -452,24 +452,24 @@ class TestGetEmails:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"id": "1"}, {"id": "2"}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_emails_async(
+            await client.get_emails_async(
                 folder_path="Inbox",
                 top="10",
                 search_query="subject:Important"
             )
-            
+
             call_args = mock_send.call_args
             path = call_args[0][1]
             assert "folderpath=inbox" in path.lower()
@@ -487,9 +487,9 @@ class TestSendEmail:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=202, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -500,7 +500,7 @@ class TestSendEmail:
             from azure.connectors.office365 import ClientSendHtmlMessage
             email_message = ClientSendHtmlMessage()
             result = await client.send_email_async(email_message)
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/Mail" in call_args[0][1]
@@ -518,12 +518,12 @@ class TestFindMeetingTimes:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"emptySuggestionsReason": "", "meetingTimeSuggestions": []}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -536,7 +536,7 @@ class TestFindMeetingTimes:
                 max_candidates=5
             )
             result = await client.find_meeting_times_async(input_data)
-            
+
             assert "emptySuggestionsReason" in result
 
 
@@ -550,12 +550,15 @@ class TestGetAttachment:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
-            text='{"id": "att123", "name": "document.pdf", "contentType": "application/pdf", "size": 1024}'
+            text=(
+                '{"id": "att123", "name": "document.pdf", '
+                '"contentType": "application/pdf", "size": 1024}'
+            )
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -563,7 +566,7 @@ class TestGetAttachment:
             return_value=mock_response
         ):
             result = await client.get_attachment_async("message123", "att123")
-            
+
             assert result["id"] == "att123"
             assert result["name"] == "document.pdf"
             assert result["contentType"] == "application/pdf"
@@ -579,12 +582,12 @@ class TestMCPEmailsManagement:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"jsonrpc": "2.0", "id": "1", "result": {}}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -593,7 +596,7 @@ class TestMCPEmailsManagement:
         ) as mock_send:
             request = MCPQueryRequest(jsonrpc="2.0", id="1", method="list")
             result = await client.mcp_emails_management_async(request)
-            
+
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/mcp/EmailsManagement",
@@ -608,12 +611,12 @@ class TestMCPEmailsManagement:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"jsonrpc": "2.0", "id": "2", "result": {}}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -621,11 +624,11 @@ class TestMCPEmailsManagement:
             return_value=mock_response
         ) as mock_send:
             request = MCPQueryRequest(jsonrpc="2.0", id="2", method="init")
-            result = await client.mcp_emails_management_async(
+            await client.mcp_emails_management_async(
                 request,
                 session_id="session-abc"
             )
-            
+
             call_args = mock_send.call_args
             path = call_args[0][1]
             assert "sessionId=session-abc" in path
@@ -641,12 +644,12 @@ class TestCalendarMethods:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"name": "Calendar", "id": "cal123"}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -664,12 +667,12 @@ class TestCalendarMethods:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=201,
             text='{"id": "event123", "subject": "Meeting"}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -678,7 +681,7 @@ class TestCalendarMethods:
         ) as mock_send:
             event = CalendarEventBackend()
             result = await client.calendar_post_item_async("Calendar", event)
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert result["id"] == "event123"
@@ -690,9 +693,9 @@ class TestCalendarMethods:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=204, text="")
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -700,7 +703,7 @@ class TestCalendarMethods:
             return_value=mock_response
         ) as mock_send:
             result = await client.calendar_delete_item_async("Calendar", "event123")
-            
+
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert result is None
@@ -716,12 +719,12 @@ class TestContactMethods:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"displayName": "John Doe", "emailAddress": "john@example.com"}]}'
         )
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -743,7 +746,7 @@ class TestDataClasses:
             meeting_duration=60,
             max_candidates=5
         )
-        
+
         assert input_data.required_attendees == "user1@example.com;user2@example.com"
         assert input_data.optional_attendees == "user3@example.com"
         assert input_data.meeting_duration == 60
@@ -763,7 +766,7 @@ class TestDataClasses:
             size=1024,
             is_inline=False
         )
-        
+
         assert response.id == "att123"
         assert response.name == "document.pdf"
         assert response.content_type == "application/pdf"
@@ -773,7 +776,7 @@ class TestDataClasses:
     def test_dataclasses_with_defaults(self):
         """Test that dataclasses can be created with default None values."""
         input_data = FindMeetingTimesInput()
-        
+
         assert input_data.required_attendees is None
         assert input_data.optional_attendees is None
         assert input_data.meeting_duration is None
@@ -789,10 +792,10 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response_1 = MockResponse(status=200, text='{"result": "first"}')
         mock_response_2 = MockResponse(status=200, text='{"result": "second"}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -801,7 +804,7 @@ class TestEdgeCases:
         ):
             result_1 = await client.get_outlook_category_names_async()
             result_2 = await client.get_outlook_category_names_async()
-            
+
             assert result_1 == {"result": "first"}
             assert result_2 == {"result": "second"}
 
@@ -812,9 +815,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='invalid json{')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -831,7 +834,7 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test///",
             token_provider=MockTokenProvider()
         )
-        
+
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_http_client_property_access(self, mock_token_provider):
@@ -840,7 +843,7 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         assert client.http_client is not None
         assert client.http_client is client._http_client
 
@@ -851,9 +854,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -864,7 +867,7 @@ class TestEdgeCases:
                 message_id="msg/123",
                 category="Red & Blue"
             )
-            
+
             call_args = mock_send.call_args
             path = call_args[0][1]
             # Verify special characters are encoded
@@ -878,9 +881,9 @@ class TestEdgeCases:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-        
+
         mock_response = MockResponse(status=200, text='{}')
-        
+
         with patch.object(
             client._http_client,
             'send_async',
@@ -889,9 +892,9 @@ class TestEdgeCases:
         ) as mock_send:
             # Create input with boolean
             input_data = FindMeetingTimesInput(is_organizer_optional=True)
-            
+
             # While we can't directly test query param conversion without reading the actual
             # implementation, we can verify the call succeeds
-            result = await client.find_meeting_times_async(input_data)
-            
+            await client.find_meeting_times_async(input_data)
+
             mock_send.assert_called_once()
