@@ -1,4 +1,4 @@
-[![CI](https://github.com/Azure/Connectors-Python-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/Azure/Connectors-Python-SDK/actions/workflows/ci.yml)
+[![CI](https://dev.azure.com/azfunc/public/_apis/build/status%2Fazure%2Fconnectors-python-sdk%2Fpython-connectors.public?repoName=Azure%2Fconnectors-python-sdk&branchName=main)](https://dev.azure.com/azfunc/public/_build/latest?definitionId=1724&repoName=Azure%2Fconnectors-python-sdk&branchName=main)
 [![PyPI version](https://badge.fury.io/py/azure-connectors.svg)](https://badge.fury.io/py/azure-connectors)
 [![Python versions](https://img.shields.io/pypi/pyversions/azure-connectors.svg)](https://pypi.org/project/azure-connectors/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -6,6 +6,17 @@
 # Azure Connectors Python SDK
 
 Type-safe Python clients for [Azure connectors](https://learn.microsoft.com/connectors/connector-reference/) — call Office 365, SharePoint, Teams, Dataverse, and 1,000+ connectors directly from Azure Functions and other Python apps.
+
+> [!CAUTION]
+> **Early Preview — Not for Production Use**
+>
+> This SDK is currently in early preview and is under active development. It is intended for evaluation, experimentation, and feedback purposes only.
+>
+> - **Do not use this SDK in production environments.**
+> - **Breaking changes should be expected** across APIs, data models, and behavior in future releases.
+> - Features may be added, modified, or removed without prior notice.
+>
+> We welcome feedback and contributions — please [open an issue](https://github.com/Azure/connectors-python-sdk/issues) with questions, suggestions, or bug reports.
 
 ## Why This SDK?
 
