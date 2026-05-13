@@ -370,7 +370,15 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def create_file_async(
         self,
@@ -477,7 +485,15 @@ class AzureblobClient(ConnectorClientBase):
             f"/v2/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def extract_folder_async(
         self,
@@ -914,7 +930,15 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             url += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", url, body=None)
+        response = await self.http_client.send_async("POST", url, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                url,
+                response.status,
+                response.text,
+            )
 
     async def update_file_async(
         self,

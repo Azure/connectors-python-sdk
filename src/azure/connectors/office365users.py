@@ -490,7 +490,15 @@ class Office365usersClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/codeless/v1.0/me"
 
-        await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def update_my_photo_async(
         self,
@@ -504,7 +512,15 @@ class Office365usersClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/codeless/v1.0/me/photo/$value"
 
-        await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async("PUT", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PUT",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def my_trending_documents_async(
         self,

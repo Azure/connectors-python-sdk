@@ -421,7 +421,7 @@ For each new connector, complete these steps:
    - [ ] Monitor Connector Gateway API availability and documentation
    - [ ] Evaluate migration path from `Microsoft.Web/connections` direct access
    - [ ] Update SDK connection setup to support Connector Gateway resource type
-   - [ ] Update POC to validate AI Gateway–based connection flow
+   - [ ] Update POC to validate Connector Gateway–based connection flow
    - [ ] Update `docs/connection-setup.md` with Connector Gateway instructions
 
 1. **Multi-language trigger SDK** (Python, Node.js, Java)

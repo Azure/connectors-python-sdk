@@ -19,6 +19,7 @@ Automates the end-to-end connection lifecycle for SDK-supported connectors, keep
 - Azure CLI installed and authenticated (`az login`)
 - Target subscription and resource group known
 - For deployed scenarios: compute host (e.g., Function App, App Service) with managed identity enabled
+- **Supported regions** for Connector Gateway: `brazilsouth`, `centraluseuap`, `eastus2euap`, `centralusstage`, `eastusstage`. Only the Connector Gateway `location` must be in a supported region; the resource group and Function App can be in any region.
 
 ## Procedure
 
@@ -41,7 +42,7 @@ If none exists, create one:
 $gatewayName = "<gateway-name>"
 $location = "<azure-region>"
 
-$gwBody = "{`"location`":`"$location`",`"properties`":{}}"
+$gwBody = "{`"location`":`"$location`",`"identity`":{`"type`":`"SystemAssigned`"},`"properties`":{}}"
 $tempFile = Join-Path $env:TEMP "gw-body.json"
 [System.IO.File]::WriteAllText($tempFile, $gwBody)
 az rest --method PUT `
@@ -50,12 +51,24 @@ az rest --method PUT `
 Remove-Item $tempFile -ErrorAction SilentlyContinue
 ```
 
+> **Important:** The Connector Gateway must have a managed identity enabled (`SystemAssigned`) for trigger callback authentication. If the Connector Gateway was created without an identity, update it:
+>
+> ```powershell
+> $gwBody = "{`"location`":`"$location`",`"identity`":{`"type`":`"SystemAssigned`"},`"properties`":{}}"
+> $tempFile = Join-Path $env:TEMP "gw-identity.json"
+> [System.IO.File]::WriteAllText($tempFile, $gwBody)
+> az rest --method PUT `
+>     --uri "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$gatewayName?api-version=2026-05-01-preview" `
+>     --body "@$tempFile" --headers "Content-Type=application/json" -o json
+> Remove-Item $tempFile -ErrorAction SilentlyContinue
+> ```
+
 ### Step 2: Create Connection
 
-Supported SDK connector names: `office365`, `sharepointonline`, `teams` (and any `Microsoft.Web/connections` connector name).
+Supported SDK connector names: `azureblob`, `kusto`, `mq`, `msgraphgroupsanduser`, `office365`, `office365users`, `sharepointonline`, `teams` (and any `Microsoft.Web/connections` connector name).
 
 ```powershell
-$connectorName = "<connector-name>"      # e.g., "office365", "sharepointonline", "teams"
+$connectorName = "<connector-name>"      # e.g., "azureblob", "kusto", "mq", "msgraphgroupsanduser", "office365", "office365users", "sharepointonline", "teams"
 $connectionName = "<connection-name>"    # e.g., "office365-test", "sharepoint-test"
 
 $gwId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$gatewayName"
@@ -109,6 +122,8 @@ Write-Output "Runtime URL: $runtimeUrl"
 
 ### Step 5: Add Access Policies
 
+> **Note:** Access policies control which identities can call the connection's runtime URL for connector **actions** (e.g., send email, list files). For **trigger-only** scenarios, the Connector Gateway polls server-side and does not need an access policy on the connection. Skip this step if your function only receives trigger callbacks and does not call connector actions at runtime.
+
 #### For local development (Azure CLI identity)
 
 ```powershell
@@ -144,11 +159,13 @@ Remove-Item $tempFile -ErrorAction SilentlyContinue
 
 ### Step 6: Configure App Settings
 
-The SDK's `ConnectorConnectionResolver` reads connection settings using the Azure Functions `__` (double-underscore) environment variable separator convention.
+> **Note:** Connection app settings are only needed when your function code calls connector **actions** at runtime. For **trigger-only** scenarios, the function receives callbacks directly from the Connector Gateway and does not need these settings. Skip this step if your function only receives trigger callbacks.
+
+The SDK reads connection settings using the `__` (double-underscore) environment variable separator convention common to Azure Functions.
 
 #### Connection setting name
 
-Choose a connection setting name (e.g., `office365`, `sharepoint`, `teams`). This is passed to `ConnectorConnectionResolver.Resolve(connectionSettingName)` and used as the prefix for the `__` keys.
+Choose a connection setting name (e.g., `office365`, `sharepoint`, `teams`). This is used as the prefix for the `__` keys when constructing `ConnectorClientOptions`.
 
 #### Format B — Direct URL (actions only)
 
@@ -164,7 +181,7 @@ Add to `local.settings.json` under `"Values"`:
 
 ```json
 {
-  "{connectionSettingName}__aiGatewayName": "<gateway-name>",
+  "{connectionSettingName}__connectorGatewayName": "<gateway-name>",
   "{connectionSettingName}__connectionName": "<connection-name>"
 }
 ```
@@ -184,7 +201,7 @@ Format A:
 ```powershell
 az functionapp config appsettings set `
     -g $resourceGroup -n $functionAppName `
-    --settings "{connectionSettingName}__aiGatewayName=$gatewayName" "{connectionSettingName}__connectionName=$connectionName"
+    --settings "{connectionSettingName}__connectorGatewayName=$gatewayName" "{connectionSettingName}__connectionName=$connectionName"
 ```
 
 ### Step 7: Verify Connection
@@ -200,4 +217,7 @@ az rest --method GET --uri "$runtimeUrl/datasets" --resource "https://apihub.azu
 
 # Teams — list joined teams to verify Teams connection
 az rest --method GET --uri "$runtimeUrl/beta/me/joinedTeams" --resource "https://apihub.azure.com" -o json
+
+# Azure Blob — list datasets
+az rest --method GET --uri "$runtimeUrl/v2/datasets" --resource "https://apihub.azure.com" -o json
 ```
