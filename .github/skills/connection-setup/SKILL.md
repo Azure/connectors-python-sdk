@@ -157,54 +157,8 @@ Remove-Item $tempFile -ErrorAction SilentlyContinue
 
 > ACL propagation takes 1-5 minutes. If you get 403 errors immediately after adding, wait and retry.
 
-### Step 6: Configure App Settings
 
-> **Note:** Connection app settings are only needed when your function code calls connector **actions** at runtime. For **trigger-only** scenarios, the function receives callbacks directly from the Connector Gateway and does not need these settings. Skip this step if your function only receives trigger callbacks.
-
-The SDK reads connection settings using the `__` (double-underscore) environment variable separator convention common to Azure Functions.
-
-#### Connection setting name
-
-Choose a connection setting name (e.g., `office365`, `sharepoint`, `teams`). This is used as the prefix for the `__` keys when constructing `ConnectorClientOptions`.
-
-#### Format B — Direct URL (actions only)
-
-Add to `local.settings.json` under `"Values"`:
-
-```json
-{
-  "{connectionSettingName}__connectionRuntimeUrl": "<runtime-url-from-step-4>"
-}
-```
-
-#### Format A — Connector Gateway (triggers + actions)
-
-```json
-{
-  "{connectionSettingName}__connectorGatewayName": "<gateway-name>",
-  "{connectionSettingName}__connectionName": "<connection-name>"
-}
-```
-
-#### Deployed compute host (e.g., Function App)
-
-Format B:
-
-```powershell
-az functionapp config appsettings set `
-    -g $resourceGroup -n $functionAppName `
-    --settings "{connectionSettingName}__connectionRuntimeUrl=$runtimeUrl"
-```
-
-Format A:
-
-```powershell
-az functionapp config appsettings set `
-    -g $resourceGroup -n $functionAppName `
-    --settings "{connectionSettingName}__connectorGatewayName=$gatewayName" "{connectionSettingName}__connectionName=$connectionName"
-```
-
-### Step 7: Verify Connection
+### Step 6: Verify Connection
 
 Test the connection works end-to-end:
 
