@@ -25,7 +25,7 @@ Automates the end-to-end connection lifecycle for SDK-supported connectors, keep
 
 ### Step 1: Create or Select Connector Gateway
 
-Check for an existing Connector Gateway in the resource group:
+Check for an existing Connector Namespace in the resource group:
 
 ```powershell
 $subscriptionId = "<subscription-id>"
@@ -46,7 +46,7 @@ $gwBody = "{`"location`":`"$location`",`"identity`":{`"type`":`"SystemAssigned`"
 $tempFile = Join-Path $env:TEMP "gw-body.json"
 [System.IO.File]::WriteAllText($tempFile, $gwBody)
 az rest --method PUT `
-    --uri "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$gatewayName?api-version=2026-05-01-preview" `
+    --uri "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$connectorNamespace?api-version=2026-05-01-preview" `
     --body "@$tempFile" --headers "Content-Type=application/json" -o json
 Remove-Item $tempFile -ErrorAction SilentlyContinue
 ```
