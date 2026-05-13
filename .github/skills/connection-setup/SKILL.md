@@ -39,7 +39,7 @@ az rest --method GET `
 If none exists, create one:
 
 ```powershell
-$gatewayName = "<gateway-name>"
+$connectorNamespace= "<connector-namespace>"
 $location = "<azure-region>"
 
 $gwBody = "{`"location`":`"$location`",`"identity`":{`"type`":`"SystemAssigned`"},`"properties`":{}}"
@@ -51,14 +51,14 @@ az rest --method PUT `
 Remove-Item $tempFile -ErrorAction SilentlyContinue
 ```
 
-> **Important:** The Connector Gateway must have a managed identity enabled (`SystemAssigned`) for trigger callback authentication. If the Connector Gateway was created without an identity, update it:
+> **Important:** The Connector Namespace must have a managed identity enabled (`SystemAssigned`) for trigger callback authentication. If the Connector Namespace was created without an identity, update it:
 >
 > ```powershell
 > $gwBody = "{`"location`":`"$location`",`"identity`":{`"type`":`"SystemAssigned`"},`"properties`":{}}"
 > $tempFile = Join-Path $env:TEMP "gw-identity.json"
 > [System.IO.File]::WriteAllText($tempFile, $gwBody)
 > az rest --method PUT `
->     --uri "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$gatewayName?api-version=2026-05-01-preview" `
+>     --uri "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$connectorNamespace?api-version=2026-05-01-preview" `
 >     --body "@$tempFile" --headers "Content-Type=application/json" -o json
 > Remove-Item $tempFile -ErrorAction SilentlyContinue
 > ```
@@ -71,7 +71,7 @@ Supported SDK connector names: `azureblob`, `kusto`, `mq`, `msgraphgroupsanduser
 $connectorName = "<connector-name>"      # e.g., "azureblob", "kusto", "mq", "msgraphgroupsanduser", "office365", "office365users", "sharepointonline", "teams"
 $connectionName = "<connection-name>"    # e.g., "office365-test", "sharepoint-test"
 
-$gwId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$gatewayName"
+$gwId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$connectorNamespace"
 $connBody = "{`"properties`":{`"connectorName`":`"$connectorName`"}}"
 $tempFile = Join-Path $env:TEMP "conn-body.json"
 [System.IO.File]::WriteAllText($tempFile, $connBody)
@@ -122,7 +122,7 @@ Write-Output "Runtime URL: $runtimeUrl"
 
 ### Step 5: Add Access Policies
 
-> **Note:** Access policies control which identities can call the connection's runtime URL for connector **actions** (e.g., send email, list files). For **trigger-only** scenarios, the Connector Gateway polls server-side and does not need an access policy on the connection. Skip this step if your function only receives trigger callbacks and does not call connector actions at runtime.
+> **Note:** Access policies control which identities can call the connection's runtime URL for connector **actions** (e.g., send email, list files). For **trigger-only** scenarios, the Connector Namespace polls server-side and does not need an access policy on the connection. Skip this step if your function only receives trigger callbacks and does not call connector actions at runtime.
 
 #### For local development (Azure CLI identity)
 
@@ -159,7 +159,7 @@ Remove-Item $tempFile -ErrorAction SilentlyContinue
 
 ### Step 6: Configure App Settings
 
-> **Note:** Connection app settings are only needed when your function code calls connector **actions** at runtime. For **trigger-only** scenarios, the function receives callbacks directly from the Connector Gateway and does not need these settings. Skip this step if your function only receives trigger callbacks.
+> **Note:** Connection app settings are only needed when your function code calls connector **actions** at runtime. For **trigger-only** scenarios, the function receives callbacks directly from the Connector Namespace and does not need these settings. Skip this step if your function only receives trigger callbacks.
 
 The SDK reads connection settings using the `__` (double-underscore) environment variable separator convention common to Azure Functions.
 
