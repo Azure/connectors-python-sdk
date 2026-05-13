@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - SDK component tests: 110 tests (all passing)
   - Test fixtures and mocking infrastructure
 - Sample code for Office 365, SharePoint, Teams, and Kusto
-- Setup script for creating Connector Gateway connections (`Setup-Connection.ps1`)
+- Setup script for creating Connector Namespace connections (`Setup-Connection.ps1`)
 - Documentation:
   - README with quick start examples
   - Connection setup guide (`docs/connection-setup.md`)
