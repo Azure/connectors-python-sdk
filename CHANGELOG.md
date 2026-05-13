@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `ConnectorHttpClient` — HTTP pipeline with configurable retry, exponential backoff
   - `ConnectorClientOptions` — Configuration for timeouts, retries, backoff
   - `ConnectorException` — Typed exceptions with response body truncation
-  - `TriggerCallbackPayload` — Generic types for Connector Gateway trigger integration
+  - `TriggerCallbackPayload` — Generic types for Connector Namespace trigger integration
 - Generated connector clients (auto-generated from Logic Apps swagger):
   - **Office 365 Outlook** (`office365.py`) — 53 methods, 41 tests, 79% coverage
   - **SharePoint Online** (`sharepointonline.py`) — 45 methods, 44 tests, 57% coverage
@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - SDK component tests: 110 tests (all passing)
   - Test fixtures and mocking infrastructure
 - Sample code for Office 365, SharePoint, Teams, and Kusto
-- Setup script for creating Connector Gateway connections (`Setup-Connection.ps1`)
+- Setup script for creating Connector Namespace connections (`Setup-Connection.ps1`)
 - Documentation:
   - README with quick start examples
   - Connection setup guide (`docs/connection-setup.md`)
