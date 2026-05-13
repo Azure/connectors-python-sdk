@@ -977,6 +977,8 @@ class ClientReceiveMessage:
             ValueError: If the payload structure is invalid or cannot be parsed.
         """
         importance_map = {"low": 0, "normal": 1, "high": 2}
+        if not hasattr(payload, "value"):
+            raise ValueError("Payload must have a 'value' attribute.")
 
         if isinstance(payload.value, str):
             try:

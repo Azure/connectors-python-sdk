@@ -787,9 +787,14 @@ class TestDataClasses:
 class TestClientReceiveMessageFromJson:
     """Tests for ClientReceiveMessage.from_json method for SDK-type bindings."""
 
+    def _make_payload(self, value):
+        """Create a payload object with a .value attribute for testing."""
+        from types import SimpleNamespace
+        return SimpleNamespace(value=value)
+
     def test_from_json_parses_single_message_from_dict(self):
         """Test parsing a single message from a dictionary payload."""
-        payload = {
+        payload = self._make_payload({
             "body": {
                 "value": [
                     {
@@ -811,7 +816,7 @@ class TestClientReceiveMessageFromJson:
                     }
                 ]
             }
-        }
+        })
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -834,7 +839,7 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_parses_multiple_messages(self):
         """Test parsing multiple messages from payload."""
-        payload = {
+        payload = self._make_payload({
             "body": {
                 "value": [
                     {"id": "msg1", "subject": "First", "importance": "low"},
@@ -842,7 +847,7 @@ class TestClientReceiveMessageFromJson:
                     {"id": "msg3", "subject": "Third", "importance": "normal"},
                 ]
             }
-        }
+        })
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -859,13 +864,13 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_parses_json_string(self):
         """Test parsing from a JSON string instead of dict."""
-        payload = json.dumps({
+        payload = self._make_payload(json.dumps({
             "body": {
                 "value": [
                     {"id": "test123", "subject": "JSON String Test"}
                 ]
             }
-        })
+        }))
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -875,7 +880,7 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_importance_conversion(self):
         """Test that importance strings are converted to integers."""
-        payload = {
+        payload = self._make_payload({
             "body": {
                 "value": [
                     {"id": "1", "importance": "low"},
@@ -885,7 +890,7 @@ class TestClientReceiveMessageFromJson:
                     {"id": "5", "importance": "HIGH"},
                 ]
             }
-        }
+        })
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -897,7 +902,7 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_importance_as_integer(self):
         """Test that integer importance values are preserved."""
-        payload = {
+        payload = self._make_payload({
             "body": {
                 "value": [
                     {"id": "1", "importance": 0},
@@ -905,7 +910,7 @@ class TestClientReceiveMessageFromJson:
                     {"id": "3", "importance": 2},
                 ]
             }
-        }
+        })
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -915,7 +920,7 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_with_attachments(self):
         """Test parsing messages with attachments."""
-        payload = {
+        payload = self._make_payload({
             "body": {
                 "value": [
                     {
@@ -943,7 +948,7 @@ class TestClientReceiveMessageFromJson:
                     }
                 ]
             }
-        }
+        })
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -971,13 +976,13 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_with_missing_fields(self):
         """Test that missing fields default to None."""
-        payload = {
+        payload = self._make_payload({
             "body": {
                 "value": [
                     {"id": "minimal"}
                 ]
             }
-        }
+        })
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -994,7 +999,7 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_with_empty_value_list(self):
         """Test parsing payload with empty value list."""
-        payload = {"body": {"value": []}}
+        payload = self._make_payload({"body": {"value": []}})
 
         messages = ClientReceiveMessage.from_json(payload)
 
@@ -1002,29 +1007,38 @@ class TestClientReceiveMessageFromJson:
 
     def test_from_json_invalid_json_string_raises_error(self):
         """Test that invalid JSON string raises ValueError."""
+        payload = self._make_payload("not valid json{")
+
         with pytest.raises(ValueError, match="Invalid JSON payload"):
-            ClientReceiveMessage.from_json("not valid json{")
+            ClientReceiveMessage.from_json(payload)
 
     def test_from_json_invalid_value_type_raises_error(self):
         """Test that non-list value raises ValueError."""
-        payload = {"body": {"value": "not a list"}}
+        payload = self._make_payload({"body": {"value": "not a list"}})
 
         with pytest.raises(ValueError, match="Expected 'body.value' to contain a list"):
             ClientReceiveMessage.from_json(payload)
 
     def test_from_json_direct_value_without_body_wrapper(self):
         """Test parsing when value is directly under root without body wrapper."""
-        payload = {
+        payload = self._make_payload({
             "value": [
                 {"id": "direct", "subject": "Direct Access"}
             ]
-        }
+        })
 
         messages = ClientReceiveMessage.from_json(payload)
 
         assert len(messages) == 1
         assert messages[0].id == "direct"
         assert messages[0].subject == "Direct Access"
+
+    def test_from_json_missing_value_attribute_raises_error(self):
+        """Test that payload without .value attribute raises ValueError."""
+        payload = {"body": {"value": []}}  # Plain dict without .value attribute
+
+        with pytest.raises(ValueError, match="Payload must have a 'value' attribute"):
+            ClientReceiveMessage.from_json(payload)
 
 
 class TestEdgeCases:
