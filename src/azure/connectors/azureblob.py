@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -546,7 +545,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation gets available shared access policies for a blob.
         """
-        path = (
+        url = (
             f"{self._connection_runtime_url}"
             f"/v2/datasets/{str(storage_account_name)}/policies"
         )
@@ -613,7 +612,7 @@ class AzureblobClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_content_by_path_async(
         self,
@@ -660,7 +659,7 @@ class AzureblobClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_metadata_async(
         self,

@@ -195,6 +195,7 @@ class ConnectorHttpClient:
         if last_exception:
             raise last_exception
         raise ConnectorException(
+            "RETRY",
             "Request failed after all retry attempts.",
             0,
             "",
@@ -228,7 +229,8 @@ class ConnectorHttpClient:
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {request_uri}",
+                "GET",
+                request_uri,
                 response.status,
                 response.text,
             )
@@ -259,7 +261,8 @@ class ConnectorHttpClient:
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {request_uri}",
+                "POST",
+                request_uri,
                 response.status,
                 response.text,
             )

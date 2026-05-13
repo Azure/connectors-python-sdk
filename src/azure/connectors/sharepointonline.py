@@ -1110,46 +1110,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def copy_file_async(
         self,
+        input: CopyFileParameters,
         dataset: str,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
     ):
         """
-        Copy file (deprecated)
+        Copy file
 
-        Copies a file to a SharePoint site.
+        Copies a file. Works in a similar way to the \"Copy to\" command in
+        SharePoint libraries. Returns information about the new file after
+        copy.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/copyFile"
+            f"/datasets/{quote(str(dataset), safe='')}/copyFileAsync"
         )
-        query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
-        if overwrite is not None:
-            value = str(overwrite)
-            if isinstance(overwrite, bool):
-                value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1363,7 +1339,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_metadata_by_path_async(
         self,
@@ -1456,7 +1432,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_folder_metadata_async(
         self,
@@ -1526,6 +1502,65 @@ class SharepointonlineClient(ConnectorClientBase):
             query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_root_folder_async(
+        self,
+        dataset: str,
+    ):
+        """
+        List files in root folder
+
+        Lists files in the root folder of a SharePoint site.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/folders"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_folder_async(
+        self,
+        dataset: str,
+        id: str,
+    ):
+        """
+        List files in folder
+
+        Lists files in a SharePoint folder.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/folders/{str(id)}"
+        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -2758,7 +2793,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_on_changed_items_async(
         self,
@@ -3338,7 +3373,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def on_updated_file_async(
         self,
@@ -3394,7 +3429,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def extract_folder_async(
         self,

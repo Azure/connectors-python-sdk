@@ -885,7 +885,7 @@ class Office365usersClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def user_profile_async(
         self,
