@@ -19,7 +19,7 @@ Automates the end-to-end connection lifecycle for SDK-supported connectors, keep
 - Azure CLI installed and authenticated (`az login`)
 - Target subscription and resource group known
 - For deployed scenarios: compute host (e.g., Function App, App Service) with managed identity enabled
-- **Supported regions** for Connector Gateway: `brazilsouth`, `centraluseuap`, `eastus2euap`, `centralusstage`, `eastusstage`. Only the Connector Gateway `location` must be in a supported region; the resource group and Function App can be in any region.
+- **Supported regions** for Connector Namespace: `brazilsouth`, `centraluseuap`, `eastus2euap`, `centralusstage`, `eastusstage`. Only the Connector Namespace `location` must be in a supported region; the resource group and Function App can be in any region.
 
 ## Procedure
 
