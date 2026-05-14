@@ -158,7 +158,7 @@ The following connectors have been generated and validated with comprehensive te
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | 57% | 44 tests |
 | **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | 73% | 27 tests |
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | 98% | 37 tests |
-| **Microsoft Graph** | `azure.connectors.msgraph` | ✅ Complete | — | 46 tests |
+| **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | — | 46 tests |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | — | 40 tests |
 | **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | — | 52 tests |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | — | 30 tests |

@@ -380,6 +380,11 @@ class AzureblobClient(ConnectorClientBase):
                 response.text,
             )
 
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def create_file_async(
         self,
         input: CreateFileInput,
