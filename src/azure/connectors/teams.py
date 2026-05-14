@@ -22,11 +22,14 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class NewMeetingRespone:
+class NewMeetingResponse:
     """Response for Create a Teams meeting"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -83,7 +86,10 @@ class GetChannelResponse:
     """Response for Get details for a specific channel in a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -109,7 +115,10 @@ class GetTagsResponseSchema:
     """Response for List all tags for a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -120,8 +129,8 @@ class CreateTagInput:
     """The name of the tag as it appears to the user in Microsoft Teams."""
     members: Optional[str] = None
     """
-    List of users' IDs separated by semi-colons, identifier must be in a format like
-    '550e8400-e29b-41d4-a716-446655440000'.
+    List of users' IDs separated by semi-colons, identifier must be in a format
+    like '550e8400-e29b-41d4-a716-446655440000'.
     """
 
 
@@ -130,7 +139,10 @@ class CreateTagResponseSchema:
     """Response for Create a tag for a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -149,7 +161,10 @@ class AddMemberToTagResponseSchema:
     """Response for Add a member to a team tag"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -157,7 +172,10 @@ class GetTagMembersResponseSchema:
     """Response for List the members of a team tag"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -165,7 +183,10 @@ class AtMentionTagResponse:
     """Response for Get an @mention token for a team tag"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -173,7 +194,10 @@ class GetMessagesFromConversationResponse:
     """Response for Get messages in a channel"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -181,7 +205,10 @@ class DynamicGetMessageDetailsResponseSchema:
     """Response for Get message details"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -189,7 +216,10 @@ class ListRepliesResponseSchema:
     """Response for List replies of a channel message"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -197,7 +227,10 @@ class ListMembersResponseSchema:
     """Response for List members"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -205,7 +238,10 @@ class ChatMessageList:
     """Response for When a new channel message is added"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -220,7 +256,10 @@ class GetTeamResponse:
     """Response for Get a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -228,7 +267,10 @@ class AtMentionUser:
     """Response for Get an @mention token for a user"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -236,7 +278,10 @@ class OnGroupMemberChangeResponse:
     """Response for When a new team member is removed"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -244,7 +289,10 @@ class NewChatResponse:
     """Response for Create a chat"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -264,7 +312,10 @@ class CreateATeamResponse:
     """Response for Create a team"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -292,7 +343,10 @@ class PostToConversationResponse:
     """Response for Post message in a chat or channel"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -308,7 +362,10 @@ class DynamicPostGatherInputToConversationResponse:
     """Response for Post adaptive card and wait for a response"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -316,7 +373,10 @@ class HttpRequestInput:
     """Send a Microsoft Graph HTTP request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -324,7 +384,10 @@ class ObjectWithoutType:
     """Response for Send a Microsoft Graph HTTP request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -332,7 +395,10 @@ class ObjectEntity:
     """Definition: Object"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -398,7 +464,10 @@ class DynamicGetMessageDetailsSchema:
     """Definition: DynamicGetMessageDetailsSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -406,7 +475,10 @@ class DynamicListMembersSchema:
     """Definition: DynamicListMembersSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -414,7 +486,10 @@ class DynamicUserNotificationRequest:
     """Definition: DynamicUserNotificationRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -422,7 +497,10 @@ class DynamicPostConversationNotificationRequest:
     """Definition: DynamicPostConversationNotificationRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -430,7 +508,10 @@ class DynamicChannelNotificationRequest:
     """Definition: DynamicChannelNotificationRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -438,7 +519,10 @@ class DynamicPostFeedNotificationRequest:
     """Definition: DynamicPostFeedNotificationRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -446,7 +530,10 @@ class DynamicPostMessageRequest:
     """Definition: DynamicPostMessageRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -454,7 +541,10 @@ class DynamicReplyMessageRequest:
     """Definition: DynamicReplyMessageRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -462,7 +552,10 @@ class DynamicPostCardRequest:
     """Definition: DynamicPostCardRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -470,7 +563,10 @@ class DynamicPostCardAndWaitRequest:
     """Definition: DynamicPostCardAndWaitRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -478,7 +574,10 @@ class DynamicReplyCardRequest:
     """Definition: DynamicReplyCardRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -486,7 +585,10 @@ class DynamicUpdateCardRequest:
     """Definition: DynamicUpdateCardRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -494,7 +596,10 @@ class DynamicUserAdaptiveCardRequest:
     """Definition: DynamicUserAdaptiveCardRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -502,7 +607,10 @@ class DynamicChannelAdaptiveCardRequest:
     """Definition: DynamicChannelAdaptiveCardRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -510,7 +618,10 @@ class DynamicUserMessageWithOptionsSubscriptionRequest:
     """Definition: DynamicUserMessageWithOptionsSubscriptionRequest"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -518,7 +629,10 @@ class DynamicUserMessageWithOptionsSubscriptionResult:
     """Definition: DynamicUserMessageWithOptionsSubscriptionResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -526,7 +640,10 @@ class DynamicSelectedMessageTriggerResult:
     """Definition: DynamicSelectedMessageTriggerResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -534,7 +651,10 @@ class DynamicComposeMessageTriggerResult:
     """Definition: DynamicComposeMessageTriggerResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -542,7 +662,10 @@ class DynamicCardResponseTriggerResult:
     """Definition: DynamicCardResponseTriggerResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -588,7 +711,10 @@ class DynamicWebhookTriggerRequestSchema:
     """Definition: DynamicWebhookTriggerRequestSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -596,7 +722,10 @@ class DynamicKeywordWebhookTriggerResponseSchema:
     """Definition: DynamicKeywordWebhookTriggerResponseSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -604,7 +733,10 @@ class DynamicAtMentionWebhookTriggerResponseSchema:
     """Definition: DynamicAtMentionWebhookTriggerResponseSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -612,7 +744,10 @@ class DynamicNewMessageWebhookTriggerResponseSchema:
     """Definition: DynamicNewMessageWebhookTriggerResponseSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -620,7 +755,10 @@ class DynamicPostToConversationResponse:
     """Definition: DynamicPostToConversationResponse"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -643,7 +781,10 @@ class DynamicUserFlowContinuationSubscriptionResult:
     """Definition: DynamicUserFlowContinuationSubscriptionResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -651,7 +792,10 @@ class DynamicChannelFlowContinuationSubscriptionResult:
     """Definition: DynamicChannelFlowContinuationSubscriptionResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -659,7 +803,10 @@ class DynamicGatherInputSubscriptionResult:
     """Definition: DynamicGatherInputSubscriptionResult"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -681,18 +828,21 @@ class ChatMessage:
     id: Optional[str] = None
     """Unique ID of the message"""
     importance: Optional[str] = None
-    """The importance of the message. The possible values are: normal, high, urgent."""
+    """
+    The importance of the message. The possible values are: normal, high,
+    urgent.
+    """
     last_modified_date_time: Optional[str] = None
     """
-    Timestamp when the chat message is created (initial setting) or modified, including when a
-    reaction is added or removed
+    Timestamp when the chat message is created (initial setting) or modified,
+    including when a reaction is added or removed
     """
     locale: Optional[str] = None
     """Locale of the chat message set by the client."""
     mentions: Optional[List[Dict[str, Any]]] = None
     """
-    List of entities mentioned in the chat message. Supported entities are: user, bot, team, and
-    channel.
+    List of entities mentioned in the chat message. Supported entities are:
+    user, bot, team, and channel.
     """
     message_type: Optional[str] = None
     """The type of chat message"""
@@ -704,8 +854,8 @@ class ChatMessage:
     """The subject of the chat message, optional"""
     summary: Optional[str] = None
     """
-    Summary text of the message that could be used for push notifications and summary views or fall
-    back views
+    Summary text of the message that could be used for push notifications and
+    summary views or fall back views
     """
 
 
@@ -726,7 +876,10 @@ class ChannelWithOwnerTeamId:
     """Definition: ChannelWithOwnerTeamId"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -734,7 +887,9 @@ class WebhookRequest:
     """Definition: WebhookRequest"""
 
     notification_url: Optional[str] = None
-    """Specify a well-formed URL of the endpoint that will receive notifications"""
+    """
+    Specify a well-formed URL of the endpoint that will receive notifications
+    """
 
 
 @dataclass
@@ -1020,7 +1175,10 @@ class ThemeEditor:
     """Definition: ThemeEditor"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -1028,7 +1186,10 @@ class Activities:
     """Definition: Activities"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -1041,8 +1202,8 @@ class SchedulingGroupResponse:
     """The display name for the scheduling group."""
     is_active: Optional[bool] = None
     """
-    Indicates whether the scheduling group can be used when creating new entities or updating
-    existing ones.
+    Indicates whether the scheduling group can be used when creating new
+    entities or updating existing ones.
     """
     user_ids: Optional[List[str]] = None
     """List of IDs of users in the scheduling group."""
@@ -1053,7 +1214,9 @@ class AtMentionUserV1:
     """Definition: AtMentionUser_V1"""
 
     at_mention: Optional[str] = None
-    """An @mention token for the user. This property can be inserted into messages"""
+    """
+    An @mention token for the user. This property can be inserted into messages
+    """
 
 
 @dataclass
@@ -1074,7 +1237,8 @@ class AtMentionBotResponse:
 
     at_mention: Optional[str] = None
     """
-    An @mention token for the bot. This property can be inserted into messages and adaptive cards
+    An @mention token for the bot. This property can be inserted into messages
+    and adaptive cards
     """
 
 
@@ -1083,7 +1247,10 @@ class ChannelIdForTeam:
     """Definition: ChannelIdForTeam"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -1098,7 +1265,10 @@ class ChatId:
     """Definition: ChatId"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -1106,7 +1276,10 @@ class BotIdForChat:
     """Definition: BotIdForChat"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -1144,13 +1317,18 @@ class NewMeeting:
     is_all_day: Optional[bool] = None
     """Set to true if the event lasts all day"""
     reminder_minutes_before_start: Optional[int] = None
-    """The number of minutes before the event start time that the reminder alert occurs"""
+    """
+    The number of minutes before the event start time that the reminder alert
+    occurs
+    """
     is_reminder_on: Optional[bool] = None
     """Set to true if an alert is set to remind the user of the event"""
     show_as: Optional[str] = None
     """Status to show during the event"""
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    """
     is_online_meeting: Optional[bool] = None
     """Set to true, if the meeting should have an online meeting provider"""
     online_meeting_provider: Optional[str] = None
@@ -1232,7 +1410,10 @@ class DiscoverySettings:
     """Definition: DiscoverySettings"""
 
     show_in_teams_search_and_suggestions: Optional[bool] = None
-    """If set to true, the team is visible via search and suggestions from the Teams client"""
+    """
+    If set to true, the team is visible via search and suggestions from the
+    Teams client
+    """
 
 
 @dataclass
@@ -1283,8 +1464,10 @@ class TeamsClient(ConnectorClientBase):
         Initialize a TeamsClient.
 
         Args:
-            connection_runtime_url: The connection runtime URL from Azure Portal.
-            token_provider: Optional token provider. Defaults to ManagedIdentityTokenProvider.
+            connection_runtime_url: The connection runtime
+                URL from Azure Portal.
+            token_provider: Optional token provider.
+                Defaults to ManagedIdentityTokenProvider.
             options: Optional connector client options.
         """
         if not connection_runtime_url:
@@ -1308,16 +1491,20 @@ class TeamsClient(ConnectorClientBase):
         """
         Create a Teams meeting
 
-        Create a meeting with a link at the bottom of the invite to join the meeting online on
-        Microsoft Teams.
+        Create a meeting with a link at the bottom of the invite to join the
+        meeting online on Microsoft Teams.
         """
-        path = f"{self._connection_runtime_url}/v1.0/me/calendars/{str(calendarid)}/events"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/me/calendars/{str(calendarid)}/events"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1341,7 +1528,8 @@ class TeamsClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1357,16 +1545,19 @@ class TeamsClient(ConnectorClientBase):
         """
         List associated teams
 
-        Lists all the teams you are a direct member of, or are a member of a shared channel that is
-        hosted inside the team.
+        Lists all the teams you are a direct member of, or are a member of a
+        shared channel that is hosted inside the team.
         """
-        path = f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
+        path = (
+            f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
+        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1383,9 +1574,13 @@ class TeamsClient(ConnectorClientBase):
         """
         When a new chat message is added
 
-        Triggers when a new message is posted in any chat the user is a part of.
+        Triggers when a new message is posted in any chat the user is a part
+        of.
         """
-        path = f"{self._connection_runtime_url}/beta/subscriptions/chatmessagetrigger"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/subscriptions/chatmessagetrigger"
+        )
 
         await self.http_client.send_async("POST", path, body=input)
 
@@ -1396,12 +1591,18 @@ class TeamsClient(ConnectorClientBase):
         """
         Post a choice of options as the Flow bot to a user
 
-        Send a set of options to a Microsoft Teams user, that they must respond to before the flow
-        will continue. This action will pause the flow until the user response to the options
+        Send a set of options to a Microsoft Teams user, that they must respond
+        to before the flow will continue. This action will pause the flow until
+        the user response to the options
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/flowbot/actions/messagewithoptions/recipienttypes/user/$subscriptions"
+            f"/flowbot"
+            f"/actions"
+            f"/messagewithoptions"
+            f"/recipienttypes"
+            f"/user"
+            f"/$subscriptions"
         )
 
         await self.http_client.send_async("POST", path, body=input)
@@ -1413,7 +1614,8 @@ class TeamsClient(ConnectorClientBase):
         """
         Get an @mention token for a user
 
-        Creates a token that can be inserted into a message or adaptive card to @mention a user.
+        Creates a token that can be inserted into a message or adaptive card to
+        @mention a user.
         """
         path = f"{self._connection_runtime_url}/v1.0/users/{str(user_id)}"
 
@@ -1421,7 +1623,8 @@ class TeamsClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1454,7 +1657,8 @@ class TeamsClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1487,7 +1691,8 @@ class TeamsClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1512,7 +1717,8 @@ class TeamsClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1537,7 +1743,8 @@ class TeamsClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1554,9 +1761,10 @@ class TeamsClient(ConnectorClientBase):
         """
         Send a Microsoft Graph HTTP request
 
-        Construct a Microsoft Graph REST API request to invoke against the Microsoft Teams
-        endpoints. These segments are supported: 1st segment: /teams, /me, /users 2nd segment:
-        channels, chats, installedApps, messages, pinnedMessages, onlineMeetings. Learn more:
+        Construct a Microsoft Graph REST API request to invoke against the
+        Microsoft Teams endpoints. These segments are supported: 1st segment:
+        /teams, /me, /users 2nd segment: channels, chats, installedApps,
+        messages, pinnedMessages, onlineMeetings. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api
         """
         path = f"{self._connection_runtime_url}/httprequest"
@@ -1565,7 +1773,8 @@ class TeamsClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )

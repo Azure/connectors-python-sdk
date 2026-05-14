@@ -26,7 +26,10 @@ class Table:
     """Response for Run KQL query"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -34,7 +37,10 @@ class VisualizeResults:
     """Response for Run KQL query and render a chart"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -42,7 +48,10 @@ class AsyncCommandResult:
     """Response for Run async control command"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -50,7 +59,10 @@ class MCPQueryResponse:
     """Response for Kusto Query MCP Server"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -58,7 +70,10 @@ class ObjectEntity:
     """Definition: Object"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -66,7 +81,10 @@ class Row:
     """Definition: Row"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -114,7 +132,10 @@ class ClusterName:
     """Definition: ClusterName"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -122,7 +143,10 @@ class DatabaseName:
     """Definition: DatabaseName"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -130,7 +154,10 @@ class Query:
     """Definition: Query"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -138,7 +165,10 @@ class ChartType:
     """Definition: ChartType"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -169,8 +199,10 @@ class KustoClient(ConnectorClientBase):
         Initialize a KustoClient.
 
         Args:
-            connection_runtime_url: The connection runtime URL from Azure Portal.
-            token_provider: Optional token provider. Defaults to ManagedIdentityTokenProvider.
+            connection_runtime_url: The connection runtime
+                URL from Azure Portal.
+            token_provider: Optional token provider.
+                Defaults to ManagedIdentityTokenProvider.
             options: Optional connector client options.
         """
         if not connection_runtime_url:
@@ -193,8 +225,8 @@ class KustoClient(ConnectorClientBase):
         """
         Run KQL query
 
-        Runs the KQL query and returns the result as a set of rows which can be iterated over in the
-        following connectors e.g TableName | take 10.
+        Runs the KQL query and returns the result as a set of rows which can be
+        iterated over in the following connectors e.g TableName | take 10.
         """
         path = f"{self._connection_runtime_url}/ListKustoResults/false"
 
@@ -202,7 +234,8 @@ class KustoClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -219,8 +252,9 @@ class KustoClient(ConnectorClientBase):
         """
         Run show control command
 
-        Runs the show control command and returns the result as a set of rows which can be iterated
-        over in the following connectors e.g .show table TableName policy caching.
+        Runs the show control command and returns the result as a set of rows
+        which can be iterated over in the following connectors e.g .show table
+        TableName policy caching.
         """
         path = f"{self._connection_runtime_url}/ListKustoShowCommandResults"
 
@@ -228,7 +262,8 @@ class KustoClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -245,16 +280,19 @@ class KustoClient(ConnectorClientBase):
         """
         Run KQL query and render a chart
 
-        Runs the KQL query and returns result as a chart of your choice e.g TableName | where
-        Timestamp > ago(1h) | project timestamp, value.
+        Runs the KQL query and returns result as a chart of your choice e.g
+        TableName | where Timestamp > ago(1h) | project timestamp, value.
         """
-        path = f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/false"
+        path = (
+            f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/false"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -271,16 +309,19 @@ class KustoClient(ConnectorClientBase):
         """
         Run control command and render a chart
 
-        Runs the control command and returns the result as a chart of your choice e.g .clear table
-        TableName data.
+        Runs the control command and returns the result as a chart of your
+        choice e.g .clear table TableName data.
         """
-        path = f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/true"
+        path = (
+            f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/true"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -297,9 +338,9 @@ class KustoClient(ConnectorClientBase):
         """
         Run async control command
 
-        Runs control command in async mode and returns its ID, state and status on completion.
-        Command can run for maximum 1 hour. The 'async' keyword is mandatory e.g .set-or-append
-        async TargetTable <| SourceTable.
+        Runs control command in async mode and returns its ID, state and status
+        on completion. Command can run for maximum 1 hour. The 'async' keyword
+        is mandatory e.g .set-or-append async TargetTable <| SourceTable.
         """
         path = f"{self._connection_runtime_url}/RunAsyncControlCommandAndWait"
 
@@ -307,7 +348,8 @@ class KustoClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -341,7 +383,8 @@ class KustoClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )

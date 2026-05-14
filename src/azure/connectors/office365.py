@@ -26,7 +26,10 @@ class GraphOutlookCategory:
     """Response for Get Outlook category names"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -34,7 +37,10 @@ class OutlookReceiveMessage:
     """Response for Draft an email message"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -42,7 +48,10 @@ class AssignCategoryBulkInput:
     """Assign a category to multiple emails"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -50,7 +59,10 @@ class BatchOperationResult:
     """Response for Assign a category to multiple emails"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -58,7 +70,10 @@ class SubscriptionResponse:
     """Response for Send email with options"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -66,7 +81,10 @@ class UpdateMyContactPhotoInput:
     """Update my contact's photo"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -74,7 +92,10 @@ class HttpRequestInput:
     """Send an HTTP request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -82,7 +103,10 @@ class ObjectWithoutType:
     """Response for Send an HTTP request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -90,7 +114,10 @@ class MCPQueryResponse:
     """Response for Email Management MCP Server (deprecated)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -98,7 +125,10 @@ class GraphCalendarEventClientReceive:
     """Response for Get event (V3)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -106,7 +136,10 @@ class GraphCalendarEventListClientReceive:
     """Response for Get events (V4)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -114,7 +147,10 @@ class GraphCalendarEventListWithActionType:
     """Response for When an event is added, updated or deleted (V3)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -130,7 +166,10 @@ class ContactResponse:
     """Response for Get contact (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -138,7 +177,10 @@ class EntityListResponseContactResponse:
     """Response for Get contacts (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -146,7 +188,10 @@ class EntityListResponseGraphContactFolder:
     """Response for Get contact folders (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -168,7 +213,10 @@ class FindMeetingTimesInput:
     max_candidates: Optional[int] = None
     """The maximum number of meeting suggestions to return in the response"""
     minimum_attendee_percentage: Optional[str] = None
-    """The minimum required confidence for a time slot to be returned in the response"""
+    """
+    The minimum required confidence for a time slot to be returned in the
+    response
+    """
     is_organizer_optional: Optional[bool] = None
     """true if the organizer doesn't have to attend. The default is false"""
     activity_domain: Optional[str] = None
@@ -212,7 +260,10 @@ class GraphClientReceiveMessage:
     """Response for Get email (V2)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -220,7 +271,10 @@ class BatchResponseGraphClientReceiveMessage:
     """Response for Get emails (V3)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -228,7 +282,10 @@ class EntityListResponseGraphCalendarEventClientReceive:
     """Response for Get calendar view of events (V3)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -285,7 +342,10 @@ class TriggerBatchResponseGraphClientReceiveMessage:
     """Response for When an email is flagged (V4)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -339,7 +399,10 @@ class ObjectEntity:
     """Definition: Object"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -397,8 +460,8 @@ class CalendarEventBackend:
     """The categories associated with the event"""
     change_key: Optional[str] = None
     """
-    This property identifies the version of the event object. Every time the event is changed,
-    ChangeKey changes as well.
+    This property identifies the version of the event object. Every time the
+    event is changed, ChangeKey changes as well.
     """
     date_time_created: Optional[str] = None
     """The date and time that the event was created"""
@@ -408,13 +471,16 @@ class CalendarEventBackend:
     """The end time of the event"""
     end_time_zone: Optional[str] = None
     """
-    This property specifies the time zone of the meeting end time. The value must be as defined in
-    Windows (example: 'Pacific Standard Time').
+    This property specifies the time zone of the meeting end time. The value
+    must be as defined in Windows (example: 'Pacific Standard Time').
     """
     has_attachments: Optional[bool] = None
     """Set to true if the event has attachments"""
     i_cal_u_id: Optional[str] = None
-    """A unique identifier that is shared by all instances of an event across different calendars"""
+    """
+    A unique identifier that is shared by all instances of an event across
+    different calendars
+    """
     importance: Optional[str] = None
     """The importance of the event: Low, Normal, or High"""
     is_all_day: Optional[bool] = None
@@ -429,7 +495,10 @@ class CalendarEventBackend:
     reminder: Optional[int] = None
     """Time in minutes before event start to remind"""
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
     response_status: Optional[ResponseStatus] = None
     series_master_id: Optional[str] = None
     """Unique identifier for Series Master event type"""
@@ -439,18 +508,21 @@ class CalendarEventBackend:
     """The start time of the event"""
     start_time_zone: Optional[str] = None
     """
-    This property specifies the time zone of the meeting start time. The value must be as defined in
-    Windows (example: 'Pacific Standard Time').
+    This property specifies the time zone of the meeting start time. The value
+    must be as defined in Windows (example: 'Pacific Standard Time').
     """
     subject: Optional[str] = None
     """Event subject"""
     type_: Optional[str] = None
-    """The event type: Single Instance, Occurrence, Exception, or Series Master"""
+    """
+    The event type: Single Instance, Occurrence, Exception, or Series Master
+    """
     web_link: Optional[str] = None
     """The preview of the message associated with the event"""
     reason: Optional[str] = None
     """
-    The reason property used by O365 sync events protocol, will be 'deleted' if its a deleted event.
+    The reason property used by O365 sync events protocol, will be 'deleted' if
+    its a deleted event.
     """
 
 
@@ -576,22 +648,26 @@ class CalendarEventClientReceive:
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
     show_as: Optional[int] = None
     """
-    Status to show during the event (Unknown - -1, Free - 0, Tentative - 1, Busy - 2, Oof - 3,
-    WorkingElsewhere - 4)
+    Status to show during the event (Unknown - -1, Free - 0, Tentative - 1,
+    Busy - 2, Oof - 3, WorkingElsewhere - 4)
     """
     recurrence: Optional[int] = None
     """
-    The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2, Monthly - 3, Yearly - 4)
+    The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2,
+    Monthly - 3, Yearly - 4)
     """
     response_type: Optional[int] = None
     """
-    The response type of the event (None - 0, Organizer - 1, TentativelyAccepted - 2, Accepted - 3,
-    Declined - 4, NotResponded - 5)
+    The response type of the event (None - 0, Organizer - 1,
+    TentativelyAccepted - 2, Accepted - 3, Declined - 4, NotResponded - 5)
     """
     response_time: Optional[str] = None
     """The response time of the event"""
     i_cal_u_id: Optional[str] = None
-    """A unique identifier that is shared by all instances of an event across different calendars"""
+    """
+    A unique identifier that is shared by all instances of an event across
+    different calendars
+    """
     importance: Optional[int] = None
     """The importance of the event (0 - Low, 1 - Normal, 2 - High)"""
     id: Optional[str] = None
@@ -631,12 +707,17 @@ class CalendarEventClientReceive:
     reminder: Optional[int] = None
     """Time in minutes before event start to remind"""
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
 
 
 @dataclass
 class PaginatedListResponseCalendarEventClientReceiveStringEnums:
-    """Definition: PaginatedListResponse[CalendarEventClientReceiveStringEnums]"""
+    """
+    Definition: PaginatedListResponse[CalendarEventClientReceiveStringEnums]
+    """
 
     values: Optional[List[CalendarEventClientReceiveStringEnums]] = None
     """Values"""
@@ -650,8 +731,8 @@ class CalendarEventClientReceiveStringEnums:
     """The importance of the event: Low, Normal, or High"""
     response_type: Optional[str] = None
     """
-    The response type of the event: None, Organizer, TentativelyAccepted, Accepted, Declined or
-    NotResponded
+    The response type of the event: None, Organizer, TentativelyAccepted,
+    Accepted, Declined or NotResponded
     """
     recurrence: Optional[str] = None
     """The recurrence pattern for the event"""
@@ -666,7 +747,10 @@ class CalendarEventClientReceiveStringEnums:
     response_time: Optional[str] = None
     """The response time of the event"""
     i_cal_u_id: Optional[str] = None
-    """A unique identifier that is shared by all instances of an event across different calendars"""
+    """
+    A unique identifier that is shared by all instances of an event across
+    different calendars
+    """
     id: Optional[str] = None
     """The event's unique identifier"""
     date_time_created: Optional[str] = None
@@ -704,7 +788,10 @@ class CalendarEventClientReceiveStringEnums:
     reminder: Optional[int] = None
     """Time in minutes before event start to remind"""
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
 
 
 @dataclass
@@ -712,7 +799,10 @@ class ClientSubscription:
     """Definition: ClientSubscription"""
 
     notification_url: Optional[str] = None
-    """Callback url to the flow engine. Expected as part of the request and provided by Flow."""
+    """
+    Callback url to the flow engine. Expected as part of the request and
+    provided by Flow.
+    """
 
 
 @dataclass
@@ -743,16 +833,23 @@ class ClientSendMessage:
 
     from_: Optional[str] = None
     """
-    Email address to send mail from (requires \"Send as\" or \"Send on behalf of\" permission for
-    that mailbox). For more info on granting permissions please refer
+    Email address to send mail from (requires \"Send as\" or \"Send on behalf
+    of\" permission for that mailbox). For more info on granting permissions
+    please refer
     https://docs.microsoft.com/office365/admin/manage/send-email-as-distribution-list
     """
     cc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     bcc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     to: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     subject: Optional[str] = None
     """Specify the subject of the mail"""
     body: Optional[str] = None
@@ -846,21 +943,28 @@ class ClientSendHtmlMessage:
     """Definition: ClientSendHtmlMessage"""
 
     to: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     subject: Optional[str] = None
     """Specify the subject of the mail"""
     body: Optional[str] = None
     """Specify the body of the mail"""
     from_: Optional[str] = None
     """
-    Email address to send mail from (requires \"Send as\" or \"Send on behalf of\" permission for
-    that mailbox). For more info on granting permissions please refer
+    Email address to send mail from (requires \"Send as\" or \"Send on behalf
+    of\" permission for that mailbox). For more info on granting permissions
+    please refer
     https://docs.microsoft.com/office365/admin/manage/send-email-as-distribution-list
     """
     cc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     bcc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     attachments: Optional[List[ClientSendAttachment]] = None
     """Attachments"""
     sensitivity: Optional[str] = None
@@ -876,21 +980,28 @@ class ClientDraftHtmlMessage:
     """Definition: ClientDraftHtmlMessage"""
 
     to: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     subject: Optional[str] = None
     """Specify the subject of the mail"""
     body: Optional[str] = None
     """Specify the body of the mail"""
     from_: Optional[str] = None
     """
-    Email address to send mail from (requires \"Send as\" or \"Send on behalf of\" permission for
-    that mailbox). For more info on granting permissions please refer
+    Email address to send mail from (requires \"Send as\" or \"Send on behalf
+    of\" permission for that mailbox). For more info on granting permissions
+    please refer
     https://docs.microsoft.com/office365/admin/manage/send-email-as-distribution-list
     """
     cc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     bcc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     attachments: Optional[List[ClientSendAttachment]] = None
     """Attachments"""
     sensitivity: Optional[str] = None
@@ -1179,7 +1290,9 @@ class OptionsEmailSubscription:
     """Definition: OptionsEmailSubscription"""
 
     notification_url: Optional[str] = None
-    """Gets or sets callback url to flow engine. It is expected as part of request"""
+    """
+    Gets or sets callback url to flow engine. It is expected as part of request
+    """
     message: Optional[MessageWithOptions] = None
 
 
@@ -1188,7 +1301,9 @@ class MessageWithOptions:
     """Definition: MessageWithOptions"""
 
     to: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     subject: Optional[str] = None
     """Subject of the email"""
     options: Optional[str] = None
@@ -1207,12 +1322,15 @@ class MessageWithOptions:
     """Use only HTML message"""
     hide_h_t_m_l_message: Optional[bool] = None
     """
-    If set to Yes, then the email body is hidden and only message card is displayed. Email clients
-    which do not support actionable messages will display HTML message regardless of the parameter
-    value.
+    If set to Yes, then the email body is hidden and only message card is
+    displayed. Email clients which do not support actionable messages will
+    display HTML message regardless of the parameter value.
     """
     show_h_t_m_l_confirmation_dialog: Optional[bool] = None
-    """If set to Yes then a dialog wil be shown to confirm selected option of HTML message"""
+    """
+    If set to Yes then a dialog wil be shown to confirm selected option of HTML
+    message
+    """
     hide_microsoft_footer: Optional[bool] = None
     """If set to Yes, then the Microsoft footer is hidden in the email body."""
 
@@ -1225,18 +1343,19 @@ class ApprovalEmailResponse:
     """User response"""
     user_email_address: Optional[str] = None
     """
-    User email address. The value is the user's email address for individual users and user ID for
-    the members in Distribution Group or Mail Enabled Security Group.
+    User email address. The value is the user's email address for individual
+    users and user ID for the members in Distribution Group or Mail Enabled
+    Security Group.
     """
     user_tenant_id: Optional[str] = None
     """
-    User tenant ID. The value is the tenant id of the user for both individual users and the members
-    in Distribution Group or Mail Enabled Security Group.
+    User tenant ID. The value is the tenant id of the user for both individual
+    users and the members in Distribution Group or Mail Enabled Security Group.
     """
     user_id: Optional[str] = None
     """
-    User ID. The value is the user id for both individual users and the members in Distribution
-    Group or Mail Enabled Security Group.
+    User ID. The value is the user id for both individual users and the members
+    in Distribution Group or Mail Enabled Security Group.
     """
 
 
@@ -1245,7 +1364,9 @@ class ApprovalEmailSubscription:
     """Definition: ApprovalEmailSubscription"""
 
     notification_url: Optional[str] = None
-    """Gets or sets callback url to flow engine. It is expected as part of request"""
+    """
+    Gets or sets callback url to flow engine. It is expected as part of request
+    """
     message: Optional[ApprovalMessage] = None
 
 
@@ -1254,7 +1375,9 @@ class ApprovalMessage:
     """Definition: ApprovalMessage"""
 
     to: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     subject: Optional[str] = None
     """Subject"""
     options: Optional[str] = None
@@ -1273,12 +1396,15 @@ class ApprovalMessage:
     """Use only HTML message"""
     hide_h_t_m_l_message: Optional[bool] = None
     """
-    If set to Yes, then the email body is hidden and only message card is displayed. Email clients
-    which do not support actionable messages will display HTML message regardless of the parameter
-    value.
+    If set to Yes, then the email body is hidden and only message card is
+    displayed. Email clients which do not support actionable messages will
+    display HTML message regardless of the parameter value.
     """
     show_h_t_m_l_confirmation_dialog: Optional[bool] = None
-    """If set to Yes then a dialog wil be shown to confirm selected option of HTML message"""
+    """
+    If set to Yes then a dialog wil be shown to confirm selected option of HTML
+    message
+    """
 
 
 @dataclass
@@ -1288,15 +1414,21 @@ class SharedMailboxClientSendMessage:
     mailbox_address: Optional[str] = None
     """Specify email address of a shared mailbox like someone@contoso.com"""
     to: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     subject: Optional[str] = None
     """Specify the subject of the mail"""
     body: Optional[str] = None
     """Specify the body of the mail"""
     cc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     bcc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     attachments: Optional[List[ClientSendAttachment]] = None
     """Attachments"""
     sensitivity: Optional[str] = None
@@ -1316,15 +1448,21 @@ class SharedMailboxClientSendHtmlMessage:
     mailbox_address: Optional[str] = None
     """Specify email address of a shared mailbox like someone@contoso.com"""
     to: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     subject: Optional[str] = None
     """Specify the subject of the mail"""
     body: Optional[str] = None
     """Specify the body of the mail"""
     cc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     bcc: Optional[str] = None
-    """Specify email addresses separated by semicolons like someone@contoso.com"""
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
     attachments: Optional[List[ClientSendAttachment]] = None
     """Attachments"""
     sensitivity: Optional[str] = None
@@ -1339,13 +1477,15 @@ class SharedMailboxClientSendHtmlMessage:
 class SubscriptionPayloadOutlookReceiveMessage:
     """Definition: SubscriptionPayload[OutlookReceiveMessage]"""
 
-    value: Optional[List[SubscriptionPayloadEntityOutlookReceiveMessage]] = None
+    value: Optional[
+        List[SubscriptionPayloadEntityOutlookReceiveMessage]
+    ] = None
     """List of values"""
 
 
 @dataclass
 class SubscriptionPayloadEntityOutlookReceiveMessage:
-    """Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]"""
+    """Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]."""
 
     sequence_number: Optional[int] = None
     """Sequence number"""
@@ -1504,7 +1644,10 @@ class CalendarEventClient:
     show_as: Optional[str] = None
     """Status to show during the event"""
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
 
 
 @dataclass
@@ -1544,7 +1687,10 @@ class CalendarEventHtmlClient:
     show_as: Optional[str] = None
     """Status to show during the event"""
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
 
 
 @dataclass
@@ -1576,7 +1722,10 @@ class GraphCalendarEventClient:
     is_all_day: Optional[bool] = None
     """Set to true if the event lasts all day"""
     recurrence: Optional[str] = None
-    """The recurrence pattern for the event: none, daily, weekly, monthly or yearly"""
+    """
+    The recurrence pattern for the event: none, daily, weekly, monthly or
+    yearly
+    """
     selected_days_of_week: Optional[List[str]] = None
     """Days of week for weekly recurrence"""
     recurrence_end: Optional[str] = None
@@ -1588,9 +1737,15 @@ class GraphCalendarEventClient:
     is_reminder_on: Optional[bool] = None
     """Set to true if an alert is set to remind the user of the event."""
     show_as: Optional[str] = None
-    """Status to show during the event: free, tentative, busy, oof, workingElsewhere or unknown"""
+    """
+    Status to show during the event: free, tentative, busy, oof,
+    workingElsewhere or unknown
+    """
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
     sensitivity: Optional[str] = None
     """The possible values are: normal, personal, private, confidential"""
 
@@ -1610,9 +1765,15 @@ class CalendarEventClientWithActionType:
     action_type: Optional[str] = None
     """Changed action type of the event - added, updated or deleted."""
     is_added: Optional[bool] = None
-    """Flag that indicates whether the event was added since the last poll of the trigger."""
+    """
+    Flag that indicates whether the event was added since the last poll of the
+    trigger.
+    """
     is_updated: Optional[bool] = None
-    """Flag that indicates whether the event was updated since the last poll of the trigger."""
+    """
+    Flag that indicates whether the event was updated since the last poll of
+    the trigger.
+    """
     subject: Optional[str] = None
     """Event subject"""
     start: Optional[str] = None
@@ -1621,22 +1782,26 @@ class CalendarEventClientWithActionType:
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
     show_as: Optional[int] = None
     """
-    Status to show during the event (Unknown - -1, Free - 0, Tentative - 1, Busy - 2, Oof - 3,
-    WorkingElsewhere - 4)
+    Status to show during the event (Unknown - -1, Free - 0, Tentative - 1,
+    Busy - 2, Oof - 3, WorkingElsewhere - 4)
     """
     recurrence: Optional[int] = None
     """
-    The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2, Monthly - 3, Yearly - 4)
+    The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2,
+    Monthly - 3, Yearly - 4)
     """
     response_type: Optional[int] = None
     """
-    The response type of the event (None - 0, Organizer - 1, TentativelyAccepted - 2, Accepted - 3,
-    Declined - 4, NotResponded - 5)
+    The response type of the event (None - 0, Organizer - 1,
+    TentativelyAccepted - 2, Accepted - 3, Declined - 4, NotResponded - 5)
     """
     response_time: Optional[str] = None
     """The response time of the event"""
     i_cal_u_id: Optional[str] = None
-    """A unique identifier that is shared by all instances of an event across different calendars"""
+    """
+    A unique identifier that is shared by all instances of an event across
+    different calendars
+    """
     importance: Optional[int] = None
     """The importance of the event (0 - Low, 1 - Normal, 2 - High)"""
     id: Optional[str] = None
@@ -1676,7 +1841,10 @@ class CalendarEventClientWithActionType:
     reminder: Optional[int] = None
     """Time in minutes before event start to remind"""
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
 
 
 @dataclass
@@ -1686,9 +1854,15 @@ class GraphCalendarEventClientWithActionType:
     action_type: Optional[str] = None
     """Changed action type of the event - added, updated or deleted."""
     is_added: Optional[bool] = None
-    """Flag that indicates whether the event was added since the last poll of the trigger."""
+    """
+    Flag that indicates whether the event was added since the last poll of the
+    trigger.
+    """
     is_updated: Optional[bool] = None
-    """Flag that indicates whether the event was updated since the last poll of the trigger."""
+    """
+    Flag that indicates whether the event was updated since the last poll of
+    the trigger.
+    """
     subject: Optional[str] = None
     """Event subject"""
     start: Optional[str] = None
@@ -1696,17 +1870,23 @@ class GraphCalendarEventClientWithActionType:
     end: Optional[str] = None
     """End time of the event (example: '2017-08-29T05:00:00.0000000')"""
     start_with_time_zone: Optional[str] = None
-    """Start time of the event with time zone (example: '2017-08-29T04:00:00.0000000+00:00')"""
+    """
+    Start time of the event with time zone (example:
+    '2017-08-29T04:00:00.0000000+00:00')
+    """
     end_with_time_zone: Optional[str] = None
-    """End time of the event with time zone (example: '2017-08-29T05:00:00.0000000+00:00')"""
+    """
+    End time of the event with time zone (example:
+    '2017-08-29T05:00:00.0000000+00:00')
+    """
     body: Optional[str] = None
     """Body of the message associated with the event"""
     is_html: Optional[bool] = None
     """Set to true if the body is Html"""
     response_type: Optional[str] = None
     """
-    The response type of the event (none, organizer, tentativelyAccepted, accepted, declined or
-    notResponded)
+    The response type of the event (none, organizer, tentativelyAccepted,
+    accepted, declined or notResponded)
     """
     response_time: Optional[str] = None
     """The response time of the event"""
@@ -1724,8 +1904,8 @@ class GraphCalendarEventClientWithActionType:
     """Unique identifier for Series Master event type"""
     i_cal_u_id: Optional[str] = None
     """
-    A unique identifier for an event across calendars. This ID is different for each occurrence in a
-    recurring series
+    A unique identifier for an event across calendars. This ID is different for
+    each occurrence in a recurring series
     """
     categories: Optional[List[str]] = None
     """The categories associated with the event"""
@@ -1744,7 +1924,10 @@ class GraphCalendarEventClientWithActionType:
     is_all_day: Optional[bool] = None
     """Set to true if the event lasts all day"""
     recurrence: Optional[str] = None
-    """The recurrence pattern for the event: none, daily, weekly, monthly or yearly"""
+    """
+    The recurrence pattern for the event: none, daily, weekly, monthly or
+    yearly
+    """
     recurrence_end: Optional[str] = None
     """End Date of the recurrence"""
     number_of_occurences: Optional[int] = None
@@ -1754,9 +1937,15 @@ class GraphCalendarEventClientWithActionType:
     is_reminder_on: Optional[bool] = None
     """Set to true if an alert is set to remind the user of the event."""
     show_as: Optional[str] = None
-    """Status to show during the event: free, tentative, busy, oof, workingElsewhere or unknown"""
+    """
+    Status to show during the event: free, tentative, busy, oof,
+    workingElsewhere or unknown
+    """
     response_requested: Optional[bool] = None
-    """Set to true if the sender would like a response when the event is accepted or declined"""
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
     sensitivity: Optional[str] = None
     """The possible values are: normal, personal, private, confidential"""
 
@@ -1962,7 +2151,10 @@ class MeetingTimeSuggestions:
     """Definition: MeetingTimeSuggestions"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -1970,7 +2162,10 @@ class MeetingTimeSuggestionsV2:
     """Definition: MeetingTimeSuggestions_V2"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -2237,8 +2432,10 @@ class Office365Client(ConnectorClientBase):
         Initialize a Office365Client.
 
         Args:
-            connection_runtime_url: The connection runtime URL from Azure Portal.
-            token_provider: Optional token provider. Defaults to ManagedIdentityTokenProvider.
+            connection_runtime_url: The connection runtime
+                URL from Azure Portal.
+            token_provider: Optional token provider.
+                Defaults to ManagedIdentityTokenProvider.
             options: Optional connector client options.
         """
         if not connection_runtime_url:
@@ -2268,7 +2465,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2314,7 +2512,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2396,13 +2595,17 @@ class Office365Client(ConnectorClientBase):
 
         This operation assigns an Outlook category to multiple emails.
         """
-        path = f"{self._connection_runtime_url}/Mail/Category/Bulk/{str(category_name)}"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/Mail/Category/Bulk/{str(category_name)}"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2419,9 +2622,10 @@ class Office365Client(ConnectorClientBase):
         """
         Send email with options
 
-        This operation sends an email with multiple options and waits for the recipient to respond
-        back with one of the options. Please refer to the following link regarding the support of
-        actionable messages in different mail clients:
+        This operation sends an email with multiple options and waits for the
+        recipient to respond back with one of the options. Please refer to the
+        following link regarding the support of actionable messages in
+        different mail clients:
         https://docs.microsoft.com/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages.
         """
         path = f"{self._connection_runtime_url}/mailwithoptions/$subscriptions"
@@ -2430,7 +2634,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2447,9 +2652,9 @@ class Office365Client(ConnectorClientBase):
         """
         Send approval email
 
-        This operation sends an approval email and waits for a response from the recipient. Please
-        refer to the following link regarding the support of actionable messages in different mail
-        clients:
+        This operation sends an approval email and waits for a response from
+        the recipient. Please refer to the following link regarding the support
+        of actionable messages in different mail clients:
         https://docs.microsoft.com/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages.
         """
         path = f"{self._connection_runtime_url}/approvalmail/$subscriptions"
@@ -2458,7 +2663,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2477,12 +2683,20 @@ class Office365Client(ConnectorClientBase):
         """
         Update my contact's photo
 
-        Updates the photo of the specified contact of the current user. The size of the photo must
-        be less than 4 MB.
+        Updates the photo of the specified contact of the current user. The
+        size of the photo must be less than 4 MB.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}/photo/$value"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/contactFolders"
+            f"/{str(folder)}"
+            f"/contacts"
+            f"/{str(id)}"
+            f"/photo"
+            f"/$value"
         )
 
         await self.http_client.send_async("PUT", path, body=input)
@@ -2494,9 +2708,10 @@ class Office365Client(ConnectorClientBase):
         """
         Send an HTTP request
 
-        Construct a Microsoft Graph REST API request to invoke. These segments are supported: 1st
-        segement: /me, /users/<userId> 2nd segment: messages, mailFolders, events, calendar,
-        calendars, outlook, inferenceClassification. Learn more:
+        Construct a Microsoft Graph REST API request to invoke. These segments
+        are supported: 1st segement: /me, /users/<userId> 2nd segment:
+        messages, mailFolders, events, calendar, calendars, outlook,
+        inferenceClassification. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
         """
         path = f"{self._connection_runtime_url}/codeless/httprequest"
@@ -2505,7 +2720,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2539,7 +2755,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2573,7 +2790,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2607,7 +2825,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2642,7 +2861,8 @@ class Office365Client(ConnectorClientBase):
         """
         Get event (V3)
 
-        This operation gets a specific event from a calendar using Graph API. (V3)
+        This operation gets a specific event from a calendar using Graph API.
+        (V3)
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2653,7 +2873,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2676,7 +2897,10 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets events from a calendar using Graph API. (V4)
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{str(table)}/items"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/calendars/v4/tables/{str(table)}/items"
+        )
         query_params = []
         if filter is not None:
             value = str(filter)
@@ -2705,7 +2929,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2724,8 +2949,8 @@ class Office365Client(ConnectorClientBase):
         """
         When an event is added, updated or deleted (V3)
 
-        This operation triggers a flow when an event is added, updated or deleted in a calendar.
-        (V3) This is not available in Mooncake.
+        This operation triggers a flow when an event is added, updated or
+        deleted in a calendar. (V3) This is not available in Mooncake.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2749,7 +2974,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2770,10 +2996,12 @@ class Office365Client(ConnectorClientBase):
         """
         When a new event is created (V3)
 
-        This operation triggers a flow when a new event is created in a calendar. (V3)
+        This operation triggers a flow when a new event is created in a
+        calendar. (V3)
         """
         path = (
-            f"{self._connection_runtime_url}/datasets/calendars/v3/tables/{str(table)}/onnewitems"
+            f"{self._connection_runtime_url}"
+            f"/datasets/calendars/v3/tables/{str(table)}/onnewitems"
         )
         query_params = []
         if filter is not None:
@@ -2803,7 +3031,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2824,7 +3053,8 @@ class Office365Client(ConnectorClientBase):
         """
         When an event is modified (V3)
 
-        This operation triggers a flow when an event is modified in a calendar. (V3)
+        This operation triggers a flow when an event is modified in a calendar.
+        (V3)
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2858,7 +3088,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2903,7 +3134,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2933,7 +3165,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"PATCH {path}",
+                "PATCH",
+                path,
                 response.status,
                 response.text,
             )
@@ -2953,13 +3186,17 @@ class Office365Client(ConnectorClientBase):
 
         This operation creates a new event in a calendar.
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v4/tables/{str(table)}/items"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/calendars/v4/tables/{str(table)}/items"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2981,7 +3218,13 @@ class Office365Client(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/contactFolders"
+            f"/{str(folder)}"
+            f"/contacts"
+            f"/{str(id)}"
         )
 
         await self.http_client.send_async("DELETE", path, body=None)
@@ -2998,14 +3241,21 @@ class Office365Client(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/contactFolders"
+            f"/{str(folder)}"
+            f"/contacts"
+            f"/{str(id)}"
         )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3029,7 +3279,8 @@ class Office365Client(ConnectorClientBase):
         This operation gets contacts from a contacts folder.
         """
         path = (
-            f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
         )
         query_params = []
         if filter is not None:
@@ -3059,7 +3310,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3083,7 +3335,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3106,14 +3359,21 @@ class Office365Client(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts/{str(id)}"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/contactFolders"
+            f"/{str(folder)}"
+            f"/contacts"
+            f"/{str(id)}"
         )
 
         response = await self.http_client.send_async("PATCH", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"PATCH {path}",
+                "PATCH",
+                path,
                 response.status,
                 response.text,
             )
@@ -3134,14 +3394,16 @@ class Office365Client(ConnectorClientBase):
         This operation creates a new contact in a contacts folder.
         """
         path = (
-            f"{self._connection_runtime_url}/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
         )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -3161,7 +3423,10 @@ class Office365Client(ConnectorClientBase):
 
         This operation deletes an email by id.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{str(message_id)}"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/me/messages/{str(message_id)}"
+        )
         query_params = []
         if mailbox_address is not None:
             value = str(mailbox_address)
@@ -3183,7 +3448,10 @@ class Office365Client(ConnectorClientBase):
 
         Export the content of the email in the EML file format.
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/messages/{str(message_id)}/$value"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/beta/me/messages/{str(message_id)}/$value"
+        )
         query_params = []
         if mailbox_address is not None:
             value = str(mailbox_address)
@@ -3197,12 +3465,13 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def find_meeting_times_async(
         self,
@@ -3211,16 +3480,19 @@ class Office365Client(ConnectorClientBase):
         """
         Find meeting times (V2)
 
-        Find meeting time suggestions based on organizer, attendee availability, and time or
-        location constraints
+        Find meeting time suggestions based on organizer, attendee
+        availability, and time or location constraints
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findMeetingTimes"
+        path = (
+            f"{self._connection_runtime_url}/codeless/beta/me/findMeetingTimes"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -3241,7 +3513,10 @@ class Office365Client(ConnectorClientBase):
 
         This operation updates an email flag.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{str(message_id)}/flag"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/me/messages/{str(message_id)}/flag"
+        )
         query_params = []
         if mailbox_address is not None:
             value = str(mailbox_address)
@@ -3264,7 +3539,10 @@ class Office365Client(ConnectorClientBase):
 
         Forward an email.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/messages/{str(message_id)}/forward"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/me/messages/{str(message_id)}/forward"
+        )
         query_params = []
         if mailbox_address is not None:
             value = str(mailbox_address)
@@ -3291,7 +3569,13 @@ class Office365Client(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/messages/{str(message_id)}/attachments/{str(attachment_id)}"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/messages"
+            f"/{str(message_id)}"
+            f"/attachments"
+            f"/{str(attachment_id)}"
         )
         query_params = []
         if mailbox_address is not None:
@@ -3308,7 +3592,8 @@ class Office365Client(ConnectorClientBase):
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(
+                f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3316,7 +3601,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3362,7 +3648,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3392,9 +3679,10 @@ class Office365Client(ConnectorClientBase):
         """
         Get emails (V3)
 
-        This operation gets emails from a folder via graph apis. Please note that filtering related
-        to these fields: To, Cc, To Or Cc, From, Importance, Fetch Only With Attachments, Subject
-        Filter, is performed using first 250 items in a given mail folder. To avoid that limitation
+        This operation gets emails from a folder via graph apis. Please note
+        that filtering related to these fields: To, Cc, To Or Cc, From,
+        Importance, Fetch Only With Attachments, Subject Filter, is performed
+        using first 250 items in a given mail folder. To avoid that limitation
         you can use 'Search Query' field.
         """
         path = f"{self._connection_runtime_url}/v3/Mail"
@@ -3476,7 +3764,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3500,10 +3789,13 @@ class Office365Client(ConnectorClientBase):
         """
         Get calendar view of events (V3)
 
-        This operation gets all events (including instances of recurrences) in a calendar using
-        Graph API. Recurrence property is null in this case.
+        This operation gets all events (including instances of recurrences) in
+        a calendar using Graph API. Recurrence property is null in this case.
         """
-        path = f"{self._connection_runtime_url}/datasets/calendars/v3/tables/items/calendarview"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/calendars/v3/tables/items/calendarview"
+        )
         query_params = []
         if calendar_id is not None:
             value = str(calendar_id)
@@ -3552,7 +3844,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3569,8 +3862,8 @@ class Office365Client(ConnectorClientBase):
         """
         Get mail tips for a mailbox (V2)
 
-        Get mail tips for a mailbox such as automatic replies / OOF message or if the mailbox is
-        full. This is not available in GccHigh and Mooncake.
+        Get mail tips for a mailbox such as automatic replies / OOF message or
+        if the mailbox is full. This is not available in GccHigh and Mooncake.
         """
         path = f"{self._connection_runtime_url}/codeless/v1.0/me/getMailTips"
 
@@ -3578,7 +3871,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -3602,7 +3896,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3626,7 +3921,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3654,7 +3950,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3699,7 +3996,8 @@ class Office365Client(ConnectorClientBase):
         """
         Move email (V2)
 
-        This operation moves an email to the specified folder within the same mailbox.
+        This operation moves an email to the specified folder within the same
+        mailbox.
         """
         path = f"{self._connection_runtime_url}/v2/Mail/Move/{str(message_id)}"
         query_params = []
@@ -3720,7 +4018,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -3801,7 +4100,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3826,9 +4126,10 @@ class Office365Client(ConnectorClientBase):
         """
         When a new email arrives (V3)
 
-        This operation triggers a flow when a new email arrives. It will skip any email that has a
-        total message size greater than the limit put by your Exchange Admin or 50 MB, whichever is
-        less. It may also skip protected emails and emails with invalid body or attachments.
+        This operation triggers a flow when a new email arrives. It will skip
+        any email that has a total message size greater than the limit put by
+        your Exchange Admin or 50 MB, whichever is less. It may also skip
+        protected emails and emails with invalid body or attachments.
         """
         path = f"{self._connection_runtime_url}/v3/Mail/OnNewEmail"
         query_params = []
@@ -3884,7 +4185,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3910,10 +4212,10 @@ class Office365Client(ConnectorClientBase):
         """
         When a new email mentioning me arrives (V3)
 
-        This operation triggers a flow when a new email mentioning me arrives. It will skip any
-        email that has a total message size greater than the limit put by your Exchange Admin or 50
-        MB, whichever is less. It may also skip protected emails and emails with invalid body or
-        attachments.
+        This operation triggers a flow when a new email mentioning me arrives.
+        It will skip any email that has a total message size greater than the
+        limit put by your Exchange Admin or 50 MB, whichever is less. It may
+        also skip protected emails and emails with invalid body or attachments.
         """
         path = f"{self._connection_runtime_url}/v3/Mail/OnNewMentionMeEmail"
         query_params = []
@@ -3921,7 +4223,8 @@ class Office365Client(ConnectorClientBase):
             value = str(message_id_to_fire_on_first_trigger_run)
             if isinstance(message_id_to_fire_on_first_trigger_run, bool):
                 value = value.lower()
-            query_params.append(f"messageIdToFireOnFirstTriggerRun={quote(value)}")
+            query_params.append(
+                f"messageIdToFireOnFirstTriggerRun={quote(value)}")
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
@@ -3974,7 +4277,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3992,7 +4296,8 @@ class Office365Client(ConnectorClientBase):
         """
         When an upcoming event is starting soon (V3)
 
-        This operation triggers a flow when an upcoming calendar event is starting.
+        This operation triggers a flow when an upcoming calendar event is
+        starting.
         """
         path = f"{self._connection_runtime_url}/v3/Events/OnUpcomingEvents"
         query_params = []
@@ -4013,7 +4318,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -4034,7 +4340,9 @@ class Office365Client(ConnectorClientBase):
 
         This operation replies to an email.
         """
-        path = f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{str(message_id)}"
+        path = (
+            f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{str(message_id)}"
+        )
         query_params = []
         if mailbox_address is not None:
             value = str(mailbox_address)
@@ -4086,13 +4394,16 @@ class Office365Client(ConnectorClientBase):
 
         Set the automatic replies setting for your mailbox.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/mailboxSettings"
+        path = (
+            f"{self._connection_runtime_url}/codeless/v1.0/me/mailboxSettings"
+        )
 
         response = await self.http_client.send_async("PATCH", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"PATCH {path}",
+                "PATCH",
+                path,
                 response.status,
                 response.text,
             )
@@ -4118,13 +4429,16 @@ class Office365Client(ConnectorClientBase):
         """
         When a new email arrives in a shared mailbox (V2)
 
-        This operation triggers a flow when a new email arrives in a shared mailbox. Your account
-        should have permission to access the mailbox for this operation to succeed. It will skip any
-        email that has a total message size greater than the limit put by your Exchange Admin or 50
-        MB, whichever is less. It may also skip protected emails and emails with invalid body or
-        attachments.
+        This operation triggers a flow when a new email arrives in a shared
+        mailbox. Your account should have permission to access the mailbox for
+        this operation to succeed. It will skip any email that has a total
+        message size greater than the limit put by your Exchange Admin or 50
+        MB, whichever is less. It may also skip protected emails and emails
+        with invalid body or attachments.
         """
-        path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail/OnNewEmail"
+        path = (
+            f"{self._connection_runtime_url}/v2/SharedMailbox/Mail/OnNewEmail"
+        )
         query_params = []
         if mailbox_address is not None:
             value = str(mailbox_address)
@@ -4183,7 +4497,8 @@ class Office365Client(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -4200,8 +4515,9 @@ class Office365Client(ConnectorClientBase):
         """
         Send an email from a shared mailbox (V2)
 
-        This operation sends an email from a shared mailbox. Your account should have permission to
-        access the mailbox for this operation to succeed.
+        This operation sends an email from a shared mailbox. Your account
+        should have permission to access the mailbox for this operation to
+        succeed.
         """
         path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
 

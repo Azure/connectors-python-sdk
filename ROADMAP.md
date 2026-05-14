@@ -418,11 +418,11 @@ For each new connector, complete these steps:
 1. **Transition to Connector Gateway API** (`Microsoft.Web/connectorGateways`)
    - The Connector Gateway resource exposes connections and triggers as data-plane resources without requiring Logic Apps. Available in First Release / TIP regions (as of 2026-03-05) but not yet GA.
    - **Blocked on:** Connector Gateway reaching GA with stable API surface.
-   - [ ] Monitor Connector Gateway API availability and documentation
+   - [ ] Monitor Connector Namespace API availability and documentation
    - [ ] Evaluate migration path from `Microsoft.Web/connections` direct access
-   - [ ] Update SDK connection setup to support Connector Gateway resource type
-   - [ ] Update POC to validate AI Gateway–based connection flow
-   - [ ] Update `docs/connection-setup.md` with Connector Gateway instructions
+   - [ ] Update SDK connection setup to support Connector Namespace resource type
+   - [ ] Update POC to validate Connector Namespace–based connection flow
+   - [ ] Update `docs/connection-setup.md` with Connector Namespace instructions
 
 1. **Multi-language trigger SDK** (Python, Node.js, Java)
 
