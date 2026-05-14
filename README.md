@@ -158,7 +158,7 @@ The following connectors have been generated and validated with comprehensive te
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | 57% | 44 tests |
 | **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | 73% | 27 tests |
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | 98% | 37 tests |
-| **Microsoft Graph** | `azure.connectors.msgraph` | ✅ Complete | — | 46 tests |
+| **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | — | 46 tests |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | — | 40 tests |
 | **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | — | 52 tests |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | — | 30 tests |
@@ -240,10 +240,39 @@ azure-connectors/
 └── docs/                       # Additional documentation
 ```
 
+## SDK-Type Bindings for Azure Functions
+
+The SDK supports **SDK-type bindings** for Python Function apps, allowing functions to bind to and return rich, strongly-typed objects instead of raw JSON payloads. This enables cleaner code and better IDE support with type hints.
+
+### Example: Parsing Email Messages
+
+Use the `from_json` class method to convert JSON payloads into typed objects:
+
+```python
+from azure.connectors.office365 import ClientReceiveMessage
+
+# Parse JSON payload into a list of typed email message objects
+messages = ClientReceiveMessage.from_json(payload)
+
+for message in messages:
+    print(f"From: {message.from_}")
+    print(f"Subject: {message.subject}")
+    print(f"Importance: {message.importance}")  # 0=Low, 1=Normal, 2=High
+```
+
+The `from_json` method handles:
+- JSON string or dictionary input
+- Nested `body.value` payload structure
+- Field name conversion (camelCase → snake_case)
+- Type conversion (e.g., importance string → int)
+- Attachment parsing
+
+This feature is particularly useful when building Azure Functions that process connector webhook payloads or trigger data.
+
 ## Related Projects
 
 - **[Connectors .NET SDK](https://github.com/Azure/Connectors-NET-SDK)** — .NET implementation of this SDK
-
+- **[Azure Functions Connector Extension](https://github.com/Azure/azure-functions-connector-extension)**  - An Azure Functions trigger extension for receiving webhook callbacks from Connector Namespace managed connectors
 ## Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.

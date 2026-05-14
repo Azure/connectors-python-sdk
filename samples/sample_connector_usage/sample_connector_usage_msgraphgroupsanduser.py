@@ -17,7 +17,7 @@ Usage:
     Set environment variable:
     $env:MSGRAPH_CONNECTION_URL = "https://[region].azure-apihub.net/apim/msgraphgroupsanduser/[connection-id]"
     
-    python sample_connector_usage_msgraph.py
+    python sample_connector_usage_msgraphgroupsanduser.py
 """
 
 import asyncio

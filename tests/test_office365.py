@@ -8,6 +8,8 @@ from unittest.mock import AsyncMock, patch
 from azure.connectors.office365 import (
     Office365Client,
     ClientDraftHtmlMessage,
+    ClientReceiveFileAttachment,
+    ClientReceiveMessage,
     FindMeetingTimesInput,
     MarkAsReadInput,
     MCPQueryRequest,
@@ -780,6 +782,263 @@ class TestDataClasses:
         assert input_data.required_attendees is None
         assert input_data.optional_attendees is None
         assert input_data.meeting_duration is None
+
+
+class TestClientReceiveMessageFromJson:
+    """Tests for ClientReceiveMessage.from_json method for SDK-type bindings."""
+
+    def _make_payload(self, value):
+        """Create a payload object with a .value attribute for testing."""
+        from types import SimpleNamespace
+        return SimpleNamespace(value=value)
+
+    def test_from_json_parses_single_message_from_dict(self):
+        """Test parsing a single message from a dictionary payload."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {
+                        "id": "AAMkADlmOTA3NWNm",
+                        "receivedDateTime": "2026-03-25T10:30:00+00:00",
+                        "hasAttachments": False,
+                        "subject": "Test Subject",
+                        "bodyPreview": "Preview text",
+                        "importance": "normal",
+                        "isRead": True,
+                        "isHtml": True,
+                        "body": "<html><body>Test</body></html>",
+                        "from": "sender@example.com",
+                        "toRecipients": "recipient@example.com",
+                        "ccRecipients": None,
+                        "bccRecipients": None,
+                        "replyTo": None,
+                        "attachments": []
+                    }
+                ]
+            }
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.id == "AAMkADlmOTA3NWNm"
+        assert msg.from_ == "sender@example.com"
+        assert msg.to == "recipient@example.com"
+        assert msg.subject == "Test Subject"
+        assert msg.body == "<html><body>Test</body></html>"
+        assert msg.body_preview == "Preview text"
+        assert msg.importance == 1  # normal -> 1
+        assert msg.is_read is True
+        assert msg.is_html is True
+        assert msg.has_attachment is False
+        assert msg.date_time_received == "2026-03-25T10:30:00+00:00"
+        assert msg.cc is None
+        assert msg.bcc is None
+        assert msg.reply_to is None
+
+    def test_from_json_parses_multiple_messages(self):
+        """Test parsing multiple messages from payload."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "msg1", "subject": "First", "importance": "low"},
+                    {"id": "msg2", "subject": "Second", "importance": "high"},
+                    {"id": "msg3", "subject": "Third", "importance": "normal"},
+                ]
+            }
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 3
+        assert messages[0].id == "msg1"
+        assert messages[0].subject == "First"
+        assert messages[0].importance == 0  # low -> 0
+        assert messages[1].id == "msg2"
+        assert messages[1].subject == "Second"
+        assert messages[1].importance == 2  # high -> 2
+        assert messages[2].id == "msg3"
+        assert messages[2].subject == "Third"
+        assert messages[2].importance == 1  # normal -> 1
+
+    def test_from_json_parses_json_string(self):
+        """Test parsing from a JSON string instead of dict."""
+        payload = self._make_payload(json.dumps({
+            "body": {
+                "value": [
+                    {"id": "test123", "subject": "JSON String Test"}
+                ]
+            }
+        }))
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        assert messages[0].id == "test123"
+        assert messages[0].subject == "JSON String Test"
+
+    def test_from_json_importance_conversion(self):
+        """Test that importance strings are converted to integers."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "1", "importance": "low"},
+                    {"id": "2", "importance": "normal"},
+                    {"id": "3", "importance": "high"},
+                    {"id": "4", "importance": "LOW"},  # Test case insensitivity
+                    {"id": "5", "importance": "HIGH"},
+                ]
+            }
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert messages[0].importance == 0
+        assert messages[1].importance == 1
+        assert messages[2].importance == 2
+        assert messages[3].importance == 0  # LOW -> 0
+        assert messages[4].importance == 2  # HIGH -> 2
+
+    def test_from_json_importance_as_integer(self):
+        """Test that integer importance values are preserved."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "1", "importance": 0},
+                    {"id": "2", "importance": 1},
+                    {"id": "3", "importance": 2},
+                ]
+            }
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert messages[0].importance == 0
+        assert messages[1].importance == 1
+        assert messages[2].importance == 2
+
+    def test_from_json_with_attachments(self):
+        """Test parsing messages with attachments."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {
+                        "id": "msg1",
+                        "hasAttachments": True,
+                        "attachments": [
+                            {
+                                "id": "att1",
+                                "name": "document.pdf",
+                                "contentBytes": "base64content",
+                                "contentType": "application/pdf",
+                                "size": 1024,
+                                "isInline": False,
+                                "lastModifiedDateTime": "2026-03-25T10:00:00Z",
+                                "contentId": "cid123"
+                            },
+                            {
+                                "id": "att2",
+                                "name": "image.png",
+                                "contentType": "image/png",
+                                "size": 2048,
+                                "isInline": True
+                            }
+                        ]
+                    }
+                ]
+            }
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.has_attachment is True
+        assert msg.attachments is not None
+        assert len(msg.attachments) == 2
+
+        att1 = msg.attachments[0]
+        assert isinstance(att1, ClientReceiveFileAttachment)
+        assert att1.id == "att1"
+        assert att1.name == "document.pdf"
+        assert att1.content_bytes == "base64content"
+        assert att1.content_type == "application/pdf"
+        assert att1.size == 1024
+        assert att1.is_inline is False
+        assert att1.last_modified_date_time == "2026-03-25T10:00:00Z"
+        assert att1.content_id == "cid123"
+
+        att2 = msg.attachments[1]
+        assert att2.id == "att2"
+        assert att2.name == "image.png"
+        assert att2.is_inline is True
+
+    def test_from_json_with_missing_fields(self):
+        """Test that missing fields default to None."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "minimal"}
+                ]
+            }
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.id == "minimal"
+        assert msg.from_ is None
+        assert msg.to is None
+        assert msg.subject is None
+        assert msg.body is None
+        assert msg.importance is None
+        assert msg.is_read is None
+        assert msg.attachments is None
+
+    def test_from_json_with_empty_value_list(self):
+        """Test parsing payload with empty value list."""
+        payload = self._make_payload({"body": {"value": []}})
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 0
+
+    def test_from_json_invalid_json_string_raises_error(self):
+        """Test that invalid JSON string raises ValueError."""
+        payload = self._make_payload("not valid json{")
+
+        with pytest.raises(ValueError, match="Invalid JSON payload"):
+            ClientReceiveMessage.from_json(payload)
+
+    def test_from_json_invalid_value_type_raises_error(self):
+        """Test that non-list value raises ValueError."""
+        payload = self._make_payload({"body": {"value": "not a list"}})
+
+        with pytest.raises(ValueError, match="Expected 'body.value' to contain a list"):
+            ClientReceiveMessage.from_json(payload)
+
+    def test_from_json_direct_value_without_body_wrapper(self):
+        """Test parsing when value is directly under root without body wrapper."""
+        payload = self._make_payload({
+            "value": [
+                {"id": "direct", "subject": "Direct Access"}
+            ]
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        assert messages[0].id == "direct"
+        assert messages[0].subject == "Direct Access"
+
+    def test_from_json_missing_value_attribute_raises_error(self):
+        """Test that payload without .value attribute raises ValueError."""
+        payload = {"body": {"value": []}}  # Plain dict without .value attribute
+
+        with pytest.raises(ValueError, match="Payload must have a 'value' attribute"):
+            ClientReceiveMessage.from_json(payload)
 
 
 class TestEdgeCases:

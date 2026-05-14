@@ -1069,6 +1069,108 @@ class ClientReceiveMessage:
     is_html: Optional[bool] = None
     """Is Html?"""
 
+    @classmethod
+    def from_json(cls, payload: str | dict) -> List[ClientReceiveMessage]:
+        """Parse a JSON payload and return a list of ClientReceiveMessage objects.
+
+        This method supports SDK-type bindings for Python Function apps, allowing
+        functions to bind to and return rich ClientReceiveMessage objects instead
+        of raw JSON payloads.
+
+        Args:
+            payload: A JSON string or dictionary containing the email messages.
+                Expected structure: {"body": {"value": [...messages...]}}
+
+        Returns:
+            A list of ClientReceiveMessage objects parsed from the payload.
+
+        Raises:
+            ValueError: If the payload structure is invalid or cannot be parsed.
+        """
+        importance_map = {"low": 0, "normal": 1, "high": 2}
+        if not hasattr(payload, "value"):
+            raise ValueError("Payload must have a 'value' attribute.")
+
+        if isinstance(payload.value, str):
+            try:
+                data = json.loads(payload.value)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON payload: {e}.") from e
+        else:
+            data = payload.value
+
+        # NOTE(SDK): Navigate to body.value to extract the list of messages.
+        if isinstance(data, dict):
+            body = data.get("body", data)
+            if isinstance(body, dict):
+                messages_data = body.get("value", [])
+            else:
+                messages_data = []
+        else:
+            messages_data = []
+
+        if not isinstance(messages_data, list):
+            raise ValueError("Expected 'body.value' to contain a list of messages.")
+
+        messages: List[ClientReceiveMessage] = []
+        for item in messages_data:
+            if not isinstance(item, dict):
+                continue
+
+            # NOTE(SDK): Parse attachments if present.
+            attachments_data = item.get("attachments")
+            attachments_list: Optional[List[ClientReceiveFileAttachment]] = None
+            if attachments_data and isinstance(attachments_data, list):
+                attachments_list = []
+                for attachment in attachments_data:
+                    if isinstance(attachment, dict):
+                        attachments_list.append(
+                            ClientReceiveFileAttachment(
+                                id=attachment.get("id"),
+                                name=attachment.get("name"),
+                                content_bytes=attachment.get("contentBytes"),
+                                content_type=attachment.get("contentType"),
+                                size=attachment.get("size"),
+                                is_inline=attachment.get("isInline"),
+                                last_modified_date_time=attachment.get(
+                                    "lastModifiedDateTime"
+                                ),
+                                content_id=attachment.get("contentId"),
+                            )
+                        )
+
+            # NOTE(SDK): Convert importance from string to int.
+            importance_value = item.get("importance")
+            importance_int: Optional[int] = None
+            if importance_value is not None:
+                if isinstance(importance_value, int):
+                    importance_int = importance_value
+                elif isinstance(importance_value, str):
+                    importance_int = importance_map.get(importance_value.lower())
+
+            message = cls(
+                id=item.get("id"),
+                from_=item.get("from"),
+                to=item.get("toRecipients"),
+                cc=item.get("ccRecipients"),
+                bcc=item.get("bccRecipients"),
+                reply_to=item.get("replyTo"),
+                subject=item.get("subject"),
+                body=item.get("body"),
+                importance=importance_int,
+                body_preview=item.get("bodyPreview"),
+                has_attachment=item.get("hasAttachments"),
+                internet_message_id=item.get("internetMessageId"),
+                conversation_id=item.get("conversationId"),
+                date_time_received=item.get("receivedDateTime"),
+                is_read=item.get("isRead"),
+                attachments=attachments_list,
+                is_html=item.get("isHtml"),
+            )
+            messages.append(message)
+
+        return messages
+
 
 @dataclass
 class GraphClientReceiveFileAttachment:
