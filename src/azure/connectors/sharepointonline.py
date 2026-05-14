@@ -26,7 +26,10 @@ class TablesList:
     """Response for Get all lists and libraries"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -34,7 +37,10 @@ class ApproveHubSiteJoinResponse:
     """Response for Approve hub site join request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -42,7 +48,10 @@ class SharingLinkPermission:
     """Response for Create sharing link for a file or folder"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -50,7 +59,10 @@ class BlobMetadata:
     """Response for Copy file (deprecated)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -58,7 +70,10 @@ class SPBlobMetadataResponse:
     """Response for Copy file"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -66,7 +81,10 @@ class CreateFileInput:
     """Create file"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -74,7 +92,10 @@ class UpdateFileInput:
     """Update file"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -82,7 +103,10 @@ class BlobMetadataResponse:
     """Response for Update file"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -90,7 +114,10 @@ class CreateNewDocumentSetResponse:
     """Response for Create new document set"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -98,7 +125,10 @@ class CreateNewFolderResponse:
     """Response for Create new folder"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -106,7 +136,10 @@ class SPListExpandedUser:
     """Response for Resolve person"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -114,7 +147,10 @@ class ItemsList:
     """Response for Get files (properties only)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -122,7 +158,10 @@ class PostItemInput:
     """Create item"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -130,7 +169,10 @@ class PostItemResponse:
     """Response for Create item"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -138,7 +180,10 @@ class GetItemResponse:
     """Response for Get item"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -146,7 +191,10 @@ class PatchItemInput:
     """Update item"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -154,7 +202,10 @@ class PatchItemResponse:
     """Response for Update item"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -162,7 +213,10 @@ class CreateApprovalRequestInput:
     """Create an approval request for an item or file"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -170,7 +224,10 @@ class ApprovalData:
     """Response for Create an approval request for an item or file"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -178,7 +235,10 @@ class GetItemChangesResponse:
     """Response for Get changes for an item or a file (properties only)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -186,7 +246,10 @@ class Item:
     """Response for Get file properties"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -194,7 +257,10 @@ class PatchFileItemInput:
     """Update file properties"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -202,7 +268,10 @@ class PatchFileItemResponse:
     """Response for Update file properties"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -210,7 +279,10 @@ class SetApprovalStatusOutput:
     """Response for Set content approval status"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -218,7 +290,10 @@ class SPListItemAttachment:
     """Response for Get attachments"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -226,7 +301,10 @@ class CreateAttachmentInput:
     """Add attachment"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -234,7 +312,10 @@ class DeletedItemList:
     """Response for When a file is deleted"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -242,7 +323,10 @@ class CreateContentAssemblyDocumentInput:
     """Generate document using Microsoft Syntex (preview)"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -250,15 +334,24 @@ class Table:
     """Response for Get list views"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
 class CreateAgreementsSolutionDocumentInput:
-    """Agreements Solution - Generate document within Agreements Solution workspace"""
+    """
+    Agreements Solution - Generate document within Agreements Solution
+    workspace
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -371,10 +464,14 @@ class DeletedItem:
     i_d: Optional[int] = None
     """List item id"""
     name: Optional[str] = None
-    """File name of the item in document libraries, display name of the item in lists"""
+    """
+    File name of the item in document libraries, display name of the item in
+    lists
+    """
     file_name_with_extension: Optional[str] = None
     """
-    File name with extension of the item in document libraries, same as Name of the item in lists
+    File name with extension of the item in document libraries, same as Name of
+    the item in lists
     """
     deleted_by_user_name: Optional[str] = None
     """The name of the user who deleted this item"""
@@ -432,9 +529,13 @@ class ItemGrantAccessBody:
     role_value: Optional[str] = None
     """Specify a role that is to be granted to the recipients"""
     email_body: Optional[str] = None
-    """A plain text formatted message that is included in the sharing invitation"""
+    """
+    A plain text formatted message that is included in the sharing invitation
+    """
     send_email: Optional[bool] = None
-    """Specify whether recipients should receive an email notification message"""
+    """
+    Specify whether recipients should receive an email notification message
+    """
 
 
 @dataclass
@@ -442,21 +543,29 @@ class ItemPermissionAddBody:
     """Definition: ItemPermissionAddBody"""
 
     recipients: Optional[List[ItemPermissionRecipient]] = None
-    """A collection of recipients who will receive access and the sharing invitation."""
+    """
+    A collection of recipients who will receive access and the sharing
+    invitation.
+    """
     roles: Optional[List[str]] = None
-    """Specify the roles that are be granted to the recipients of the sharing invitation."""
+    """
+    Specify the roles that are be granted to the recipients of the sharing
+    invitation.
+    """
     require_sign_in: Optional[bool] = None
     """
-    Specifies where the recipient of the invitation is required to sign-in to view the shared item.
+    Specifies where the recipient of the invitation is required to sign-in to
+    view the shared item.
     """
     send_invitation: Optional[bool] = None
     """
-    Specifies if an email or post is generated (true) or if the permission is just created (false).
+    Specifies if an email or post is generated (true) or if the permission is
+    just created (false).
     """
     message: Optional[str] = None
     """
-    A plain text formatted message that is included in the sharing invitation. Maximum length 2000
-    characters.
+    A plain text formatted message that is included in the sharing invitation.
+    Maximum length 2000 characters.
     """
 
 
@@ -468,13 +577,13 @@ class ItemPermissionCreateLinkBody:
     """The type of sharing link to create"""
     scope: Optional[str] = None
     """
-    Choose who your sharing link gives access to. \"Anyone\" option will only work if your
-    administrator has enabled it.
+    Choose who your sharing link gives access to. \"Anyone\" option will only
+    work if your administrator has enabled it.
     """
     expiration_date_time: Optional[str] = None
     """
-    The date after which the link will expire in yyyy-MM-dd format. Only applicable for anonymous
-    links.
+    The date after which the link will expire in yyyy-MM-dd format. Only
+    applicable for anonymous links.
     """
 
 
@@ -483,7 +592,10 @@ class ItemPermissionRecipient:
     """Definition: ItemPermissionRecipient"""
 
     email: Optional[str] = None
-    """The email address for the recipient, if the recipient has an associated email address."""
+    """
+    The email address for the recipient, if the recipient has an associated
+    email address.
+    """
 
 
 @dataclass
@@ -538,7 +650,10 @@ class ObjectEntity:
     """Definition: Object"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """Dynamic properties determined at runtime (similar to .NET [JsonExtensionData])"""
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -566,8 +681,13 @@ class Permission:
     id: Optional[str] = None
     """Permission id"""
     granted_to: Optional[PermissionIdentitySet] = None
-    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = None
-    """For link type permissions, the details of the users to whom permission was granted"""
+    granted_to_identities: Optional[
+        List[SharingLinkPermissionIdentitySet]
+    ] = None
+    """
+    For link type permissions, the details of the users to whom permission was
+    granted
+    """
     invitation: Optional[SharingInvitation] = None
     inherited_from: Optional[ItemReference] = None
     link: Optional[SharingLink] = None
@@ -608,8 +728,8 @@ class PublishedResult:
 
     is_file_published: Optional[bool] = None
     """
-    A boolean value (true, false) to indicate whether the scheduled version of the file has been
-    published
+    A boolean value (true, false) to indicate whether the scheduled version of
+    the file has been published
     """
 
 
@@ -637,7 +757,8 @@ class SharePointIds:
     """An integer identifier for the item within the containing list"""
     list_item_unique_id: Optional[str] = None
     """
-    The unique identifier (guid) for the item within OneDrive for Business or a SharePoint site
+    The unique identifier (guid) for the item within OneDrive for Business or a
+    SharePoint site
     """
     site_id: Optional[str] = None
     """The unique identifier (guid) for the item's site collection (SPSite)"""
@@ -654,10 +775,13 @@ class SharingInvitation:
     """Definition: SharingInvitation"""
 
     email: Optional[str] = None
-    """The email address provided for the recipient of the sharing invitation"""
+    """
+    The email address provided for the recipient of the sharing invitation
+    """
     sign_in_required: Optional[bool] = None
     """
-    If true the recipient of the invitation needs to sign in in order to access the shared item
+    If true the recipient of the invitation needs to sign in in order to access
+    the shared item
     """
 
 
@@ -823,8 +947,10 @@ class SharepointonlineClient(ConnectorClientBase):
         Initialize a SharepointonlineClient.
 
         Args:
-            connection_runtime_url: The connection runtime URL from Azure Portal.
-            token_provider: Optional token provider. Defaults to ManagedIdentityTokenProvider.
+            connection_runtime_url: The connection runtime
+                URL from Azure Portal.
+            token_provider: Optional token provider.
+                Defaults to ManagedIdentityTokenProvider.
             options: Optional connector client options.
         """
         if not connection_runtime_url:
@@ -849,13 +975,17 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Get all lists and libraries.
         """
-        path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/alltables"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/alltables"
+        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -873,8 +1003,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Approve hub site join request
 
-        Approve hub site join request. This will return an approval token that can be used to
-        complete the join request using the join hub site action.
+        Approve hub site join request. This will return an approval token that
+        can be used to complete the join request using the join hub site
+        action.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -893,7 +1024,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -911,12 +1043,15 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Cancel hub site join request
 
-        Cancel hub join request. If applicable, you should specify the same Approval Correlation Id
-        as used in the \"Set hub site join status to pending\" action.
+        Cancel hub join request. If applicable, you should specify the same
+        Approval Correlation Id as used in the \"Set hub site join status to
+        pending\" action.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/cancelhubsitejoinapproval"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/cancelhubsitejoinapproval"
         )
         query_params = []
         if approval_correlation_id is not None:
@@ -962,7 +1097,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -980,18 +1116,21 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Copy file
 
-        Copies a file. Works in a similar way to the \"Copy to\" command in SharePoint libraries.
-        Returns information about the new file after copy.
+        Copies a file. Works in a similar way to the \"Copy to\" command in
+        SharePoint libraries. Returns information about the new file after
+        copy.
         """
         path = (
-            f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/copyFileAsync"
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/copyFileAsync"
         )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1009,8 +1148,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Copy folder
 
-        Copies a folder. Works in a similar way to the \"Copy to\" command in SharePoint libraries.
-        Returns information about the new folder after copy.
+        Copies a folder. Works in a similar way to the \"Copy to\" command in
+        SharePoint libraries. Returns information about the new folder after
+        copy.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -1021,7 +1161,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1042,9 +1183,13 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Create file
 
-        Uploads a file to a SharePoint site. Make sure to pick an existing library.
+        Uploads a file to a SharePoint site. Make sure to pick an existing
+        library.
         """
-        path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/files"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/files"
+        )
         query_params = []
         if folder_path is not None:
             value = str(folder_path)
@@ -1068,7 +1213,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1086,9 +1232,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get file metadata
 
-        Gets information about the file such as size, etag, created date, etc. Uses a file
-        identifier to pick the file. Use \"Get file properties\" action to get to the values stored
-        in the columns in the library.
+        Gets information about the file such as size, etag, created date, etc.
+        Uses a file identifier to pick the file. Use \"Get file properties\"
+        action to get to the values stored in the columns in the library.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -1099,7 +1245,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1129,7 +1276,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"PUT {path}",
+                "PUT",
+                path,
                 response.status,
                 response.text,
             )
@@ -1165,8 +1313,8 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get file content
 
-        Gets file contents using the file identifier. The contents can be copied somewhere else, or
-        be used as an attachment.
+        Gets file contents using the file identifier. The contents can be
+        copied somewhere else, or be used as an attachment.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -1185,66 +1333,13 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
 
         return response.content
-
-    async def list_root_folder_async(
-        self,
-        dataset: str,
-    ):
-        """
-        List root folder
-
-        Returns files in the root SharePoint folder.
-        """
-        path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/folders"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_folder_async(
-        self,
-        dataset: str,
-        id: str,
-    ):
-        """
-        List folder
-
-        Returns files contained in a SharePoint folder.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/folders/{str(id)}"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                f"GET {path}",
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def get_file_metadata_by_path_async(
         self,
@@ -1255,12 +1350,13 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get file metadata using path
 
-        Gets information about the file such as size, etag, created date, etc. Uses a file path to
-        pick the file. Use \"Get file properties\" action to get to the values stored in the columns
-        in the library.
+        Gets information about the file such as size, etag, created date, etc.
+        Uses a file path to pick the file. Use \"Get file properties\" action
+        to get to the values stored in the columns in the library.
         """
         path = (
-            f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/GetFileByPath"
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/GetFileByPath"
         )
         query_params = []
         if path is not None:
@@ -1280,7 +1376,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1329,7 +1426,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1344,9 +1442,13 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get folder metadata
 
-        Gets information about the folder. Uses a file identifier to pick the folder.
+        Gets information about the folder. Uses a file identifier to pick the
+        folder.
         """
-        path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/GetFolder"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/GetFolder"
+        )
         query_params = []
         if id is not None:
             value = str(id)
@@ -1360,7 +1462,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1379,7 +1482,8 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get folder metadata using path
 
-        Gets information about the folder. Uses a folder path to pick the folder.
+        Gets information about the folder. Uses a folder path to pick the
+        folder.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -1403,7 +1507,67 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_root_folder_async(
+        self,
+        dataset: str,
+    ):
+        """
+        List files in root folder
+
+        Lists files in the root folder of a SharePoint site.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/folders"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_folder_async(
+        self,
+        dataset: str,
+        id: str,
+    ):
+        """
+        List files in folder
+
+        Lists files in a SharePoint folder.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/folders/{str(id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1421,10 +1585,14 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Send an HTTP request to SharePoint
 
-        Construct a SharePoint REST API to invoke. Note - This action may execute any SharePoint
-        REST API you have access to. Please proceed with caution.
+        Construct a SharePoint REST API to invoke. Note - This action may
+        execute any SharePoint REST API you have access to. Please proceed with
+        caution.
         """
-        path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/httprequest"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/httprequest"
+        )
 
         await self.http_client.send_async("POST", path, body=input)
 
@@ -1438,11 +1606,15 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Join hub site
 
-        Join the requested site to the hub site. An Approval Token is required to complete the join
-        successfully if that hub requires approval. If applicable, you should specify the same
-        Approval Correlation Id as used in the \"Set hub site join status to pending\" action.
+        Join the requested site to the hub site. An Approval Token is required
+        to complete the join successfully if that hub requires approval. If
+        applicable, you should specify the same Approval Correlation Id as used
+        in the \"Set hub site join status to pending\" action.
         """
-        path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/joinhubsite"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/joinhubsite"
+        )
         query_params = []
         if hub_site_id is not None:
             value = str(hub_site_id)
@@ -1472,18 +1644,21 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Move file
 
-        Moves a file. Works in a similar way to the \"Move to\" command in SharePoint libraries.
-        Returns information about the new file after move.
+        Moves a file. Works in a similar way to the \"Move to\" command in
+        SharePoint libraries. Returns information about the new file after
+        move.
         """
         path = (
-            f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/moveFileAsync"
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/moveFileAsync"
         )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1501,8 +1676,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Move folder
 
-        Moves a folder. Works in a similar way to the \"Move to\" command in SharePoint libraries.
-        Returns information about the new folder after move.
+        Moves a folder. Works in a similar way to the \"Move to\" command in
+        SharePoint libraries. Returns information about the new folder after
+        move.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -1513,7 +1689,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1531,13 +1708,16 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Set hub site join status to pending
 
-        Set the requested site's hub join request status to pending. The Approval Correlation Id is
-        an optional parameter that helps SharePoint identify a particular hub join request. The
-        requesting site can only have one pending request at a given time.
+        Set the requested site's hub join request status to pending. The
+        Approval Correlation Id is an optional parameter that helps SharePoint
+        identify a particular hub join request. The requesting site can only
+        have one pending request at a given time.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/notifyhubsitejoinapprovalstarted"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/notifyhubsitejoinapprovalstarted"
         )
         query_params = []
         if approval_correlation_id is not None:
@@ -1559,13 +1739,17 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets SharePoint lists from a site.
         """
-        path = f"{self._connection_runtime_url}/datasets/{quote(str(dataset), safe='')}/tables"
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(str(dataset), safe='')}/tables"
+        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1588,14 +1772,19 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/createnewdocumentset"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/createnewdocumentset"
         )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1619,7 +1808,11 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/createnewfolder"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/createnewfolder"
         )
         query_params = []
         if view is not None:
@@ -1634,7 +1827,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1655,8 +1849,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Resolve person
 
-        Returns a single matching user value so it can be assigned to a column of type person. If
-        there are no matches, or multiple matches, this action will error out.
+        Returns a single matching user value so it can be assigned to a column
+        of type person. If there are no matches, or multiple matches, this
+        action will error out.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -1686,7 +1881,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1710,15 +1906,20 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get files (properties only)
 
-        Gets the properties saved in the columns in the library for all folders and files stored in
-        the library. You can also filter down to the items that match a condition. An \"Apply to
-        each\" section is usually used to work with the output from this action. When using this
-        with the On-Premises Data Gateway, the name of the library to connect to may need to be
-        entered manually.
+        Gets the properties saved in the columns in the library for all folders
+        and files stored in the library. You can also filter down to the items
+        that match a condition. An \"Apply to each\" section is usually used to
+        work with the output from this action. When using this with the
+        On-Premises Data Gateway, the name of the library to connect to may
+        need to be entered manually.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/getfileitems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/getfileitems"
         )
         query_params = []
         if filter is not None:
@@ -1758,7 +1959,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1786,7 +1988,11 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
         )
         query_params = []
         if filter is not None:
@@ -1826,7 +2032,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1850,7 +2057,11 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
         )
         query_params = []
         if view is not None:
@@ -1865,7 +2076,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -1889,7 +2101,12 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
+            f"/{str(id)}"
         )
         query_params = []
         if view is not None:
@@ -1904,7 +2121,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -1927,7 +2145,12 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
+            f"/{str(id)}"
         )
 
         await self.http_client.send_async("DELETE", path, body=None)
@@ -1947,7 +2170,12 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
+            f"/{str(id)}"
         )
         query_params = []
         if view is not None:
@@ -1962,7 +2190,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"PATCH {path}",
+                "PATCH",
+                path,
                 response.status,
                 response.text,
             )
@@ -1987,7 +2216,13 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/approval"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
+            f"/{str(id)}"
+            f"/approval"
         )
         query_params = []
         if approval_type is not None:
@@ -2002,7 +2237,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2025,12 +2261,18 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get changes for an item or a file (properties only)
 
-        Returns information about columns that have changed within a given time window. Note: The
-        list must have Versioning turned on.
+        Returns information about columns that have changed within a given time
+        window. Note: The list must have Versioning turned on.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/changes"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
+            f"/{str(id)}"
+            f"/changes"
         )
         query_params = []
         if since is not None:
@@ -2060,7 +2302,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2080,8 +2323,8 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Check in file
 
-        Check in a checked out file in a document library, which makes the version of the document
-        available to others.
+        Check in a checked out file in a document library, which makes the
+        version of the document available to others.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2105,8 +2348,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Check out file
 
-        Check out a file in a document library to prevent others from editing the document, and your
-        changes from being visible until the documented is checked in.
+        Check out a file in a document library to prevent others from editing
+        the document, and your changes from being visible until the documented
+        is checked in.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2130,11 +2374,12 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Discard check out
 
-        If you check out a file and don't make changes to it, or you make changes that you don't
-        want to keep, you can simply discard the checkout, rather than saving the file. If your
-        organization tracks versions, a new version is created each time you check a file back into
-        the library. By discarding the checkout, you can avoid making new versions when you haven't
-        made any changes to the file.
+        If you check out a file and don't make changes to it, or you make
+        changes that you don't want to keep, you can simply discard the
+        checkout, rather than saving the file. If your organization tracks
+        versions, a new version is created each time you check a file back into
+        the library. By discarding the checkout, you can avoid making new
+        versions when you haven't made any changes to the file.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2159,10 +2404,11 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get file properties
 
-        Gets the properties saved in the columns in the library for the item specified by the item
-        id. You can add a \"Get file content\" step and use the \"File identifier\" property
-        returned by this action to get to the contents of the file. When using this with the
-        On-Premises Data Gateway, the name of the library to connect to may need to be entered
+        Gets the properties saved in the columns in the library for the item
+        specified by the item id. You can add a \"Get file content\" step and
+        use the \"File identifier\" property returned by this action to get to
+        the contents of the file. When using this with the On-Premises Data
+        Gateway, the name of the library to connect to may need to be entered
         manually.
         """
         path = (
@@ -2188,7 +2434,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2234,9 +2481,10 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Update file properties
 
-        Updates the properties stored in columns in a library for the item specified by the item id.
-        Use \"Update file\" action to update file contents. When using this with the On-Premises
-        Data Gateway, the name of the library to connect to may need to be entered manually.
+        Updates the properties stored in columns in a library for the item
+        specified by the item id. Use \"Update file\" action to update file
+        contents. When using this with the On-Premises Data Gateway, the name
+        of the library to connect to may need to be entered manually.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2261,7 +2509,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"PATCH {path}",
+                "PATCH",
+                path,
                 response.status,
                 response.text,
             )
@@ -2281,8 +2530,8 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Update file properties using AI Builder model results
 
-        Updates the values stored in library columns for a file analyzed by the model specified by
-        the ModelId.
+        Updates the values stored in library columns for a file analyzed by the
+        model specified by the ModelId.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2299,7 +2548,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2321,10 +2571,10 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Set content approval status
 
-        Sets the content approval status for an item in a list or library that has content approval
-        turned on. You must provide an ETag for pages and files. You can get the ETag using the Get
-        File Metadata action. This action is only available for SharePoint Online and SharePoint
-        2019.
+        Sets the content approval status for an item in a list or library that
+        has content approval turned on. You must provide an ETag for pages and
+        files. You can get the ETag using the Get File Metadata action. This
+        action is only available for SharePoint Online and SharePoint 2019.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2359,7 +2609,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2378,12 +2629,18 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Stop sharing an item or a file
 
-        Delete all links giving access to an item or a file and remove all people with direct access
-        except for owners.
+        Delete all links giving access to an item or a file and remove all
+        people with direct access except for owners.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/items/{str(id)}/unshare"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/items"
+            f"/{str(id)}"
+            f"/unshare"
         )
 
         await self.http_client.send_async("POST", path, body=None)
@@ -2397,9 +2654,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get attachments
 
-        Returns the list of attachments for the specified list item. You can add a \"Get attachment
-        content\" step and use the \"File identifier\" property returned by this action to get to
-        the contents of the file.
+        Returns the list of attachments for the specified list item. You can
+        add a \"Get attachment content\" step and use the \"File identifier\"
+        property returned by this action to get to the contents of the file.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2416,7 +2673,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2462,7 +2720,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2508,8 +2767,8 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Get attachment content
 
-        Returns file contents using the file identifier. The contents can be copied somewhere else,
-        or be used as an attachment.
+        Returns file contents using the file identifier. The contents can be
+        copied somewhere else, or be used as an attachment.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2528,7 +2787,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2549,7 +2809,11 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onchangeditems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/onchangeditems"
         )
         query_params = []
         if folder_path is not None:
@@ -2569,7 +2833,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2588,13 +2853,18 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         When a file is deleted
 
-        Triggers when a file is deleted in a library. You can optionally specify a folder to watch
-        as well. When a folder is deleted, the trigger will fire only once for the deleted folder.
-        This can only be used by site collection admins of the site where the list is located.
+        Triggers when a file is deleted in a library. You can optionally
+        specify a folder to watch as well. When a folder is deleted, the
+        trigger will fire only once for the deleted folder. This can only be
+        used by site collection admins of the site where the list is located.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/ondeletedfileitems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/ondeletedfileitems"
         )
         query_params = []
         if folder_path is not None:
@@ -2609,7 +2879,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2627,19 +2898,24 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         When an item is deleted
 
-        Triggers when an item is deleted in a list. This can only be used by site collection admins
-        of the site where the list is located.
+        Triggers when an item is deleted in a list. This can only be used by
+        site collection admins of the site where the list is located.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/ondeleteditems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/ondeleteditems"
         )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2659,15 +2935,20 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         When a file is created (properties only)
 
-        Triggers when an item is created in a library. Returns only the properties stored in the
-        library columns. You can add a \"Get file content\" step and use the \"File identifier\"
-        property returned by this action to get to the contents of the file. When using this with
-        the On-Premises Data Gateway, the name of the library to connect to may need to be entered
-        manually.
+        Triggers when an item is created in a library. Returns only the
+        properties stored in the library columns. You can add a \"Get file
+        content\" step and use the \"File identifier\" property returned by
+        this action to get to the contents of the file. When using this with
+        the On-Premises Data Gateway, the name of the library to connect to may
+        need to be entered manually.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onnewfileitems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/onnewfileitems"
         )
         query_params = []
         if folder_path is not None:
@@ -2687,7 +2968,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2710,7 +2992,11 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onnewitems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/onnewitems"
         )
         query_params = []
         if view is not None:
@@ -2725,7 +3011,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2745,9 +3032,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         When a file is classified by a Microsoft Syntex model
 
-        Triggers a flow when Microsoft Syntex changes the classification date of any file in the
-        library. The date changes when a document processing model classifies or extracts
-        information.
+        Triggers a flow when Microsoft Syntex changes the classification date
+        of any file in the library. The date changes when a document processing
+        model classifies or extracts information.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -2775,7 +3062,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2795,15 +3083,20 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         When a file is created or modified (properties only)
 
-        Triggers when an item is created, or modified in a library. Returns only the properties
-        stored in the library columns. You can add a \"Get file content\" step and use the \"File
-        identifier\" property returned by this action to get to the contents of the file. When using
-        this with the On-Premises Data Gateway, the name of the library to connect to may need to be
-        entered manually.
+        Triggers when an item is created, or modified in a library. Returns
+        only the properties stored in the library columns. You can add a \"Get
+        file content\" step and use the \"File identifier\" property returned
+        by this action to get to the contents of the file. When using this with
+        the On-Premises Data Gateway, the name of the library to connect to may
+        need to be entered manually.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onupdatedfileitems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/onupdatedfileitems"
         )
         query_params = []
         if folder_path is not None:
@@ -2823,7 +3116,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2846,7 +3140,11 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/onupdateditems"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/onupdateditems"
         )
         query_params = []
         if view is not None:
@@ -2861,7 +3159,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2884,8 +3183,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         Generate document using Microsoft Syntex (preview)
 
-        Use this action to create documents based on modern templates from Microsoft Syntex. This
-        preview requires a Syntex license. Pricing is subject to change. For more info see:
+        Use this action to create documents based on modern templates from
+        Microsoft Syntex. This preview requires a Syntex license. Pricing is
+        subject to change. For more info see:
         https://docs.microsoft.com/en-us/microsoft-365/contentunderstanding/content-assembly.
         """
         path = (
@@ -2921,7 +3221,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -2943,14 +3244,19 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables/{str(table)}/views"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/views"
         )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -2970,10 +3276,12 @@ class SharepointonlineClient(ConnectorClientBase):
         view: Optional[str] = None,
     ):
         """
-        Agreements Solution - Generate document within Agreements Solution workspace
+        Agreements Solution - Generate document within Agreements Solution
+        workspace
 
-        Use this action to create documents based on modern templates in a Agreements Solution
-        workspace. This is behind a payment wall currently in planning (either license or PayG).
+        Use this action to create documents based on modern templates in a
+        Agreements Solution workspace. This is behind a payment wall currently
+        in planning (either license or PayG).
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -3007,7 +3315,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )
@@ -3027,9 +3336,9 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         When a file is created in a folder (deprecated)
 
-        Triggers when a file is created in a SharePoint folder. The trigger does not fire if a file
-        is added/updated in a subfolder. If it is required to trigger on subfolders, multiple
-        triggers should be created.
+        Triggers when a file is created in a SharePoint folder. The trigger
+        does not fire if a file is added/updated in a subfolder. If it is
+        required to trigger on subfolders, multiple triggers should be created.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -3058,7 +3367,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3076,9 +3386,10 @@ class SharepointonlineClient(ConnectorClientBase):
         """
         When a file is created or modified in a folder (deprecated)
 
-        Triggers when a file is created, and also each time it is modified in a SharePoint folder.
-        The trigger does not fire if a file is added/updated in a subfolder. If it is required to
-        trigger on subfolders, multiple triggers should be created.
+        Triggers when a file is created, and also each time it is modified in a
+        SharePoint folder. The trigger does not fire if a file is added/updated
+        in a subfolder. If it is required to trigger on subfolders, multiple
+        triggers should be created.
         """
         path = (
             f"{self._connection_runtime_url}"
@@ -3112,7 +3423,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"GET {path}",
+                "GET",
+                path,
                 response.status,
                 response.text,
             )
@@ -3164,7 +3476,8 @@ class SharepointonlineClient(ConnectorClientBase):
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                f"POST {path}",
+                "POST",
+                path,
                 response.status,
                 response.text,
             )

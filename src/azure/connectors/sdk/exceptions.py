@@ -8,20 +8,29 @@ class ConnectorException(Exception):
 
     MAX_RESPONSE_BODY_LENGTH = 2000
 
-    def __init__(self, operation: str, status_code: int, response_body: str):
+    def __init__(
+        self,
+        method: str,
+        path: str,
+        status_code: int,
+        response_body: str,
+    ):
         """
         Initialize a ConnectorException.
 
         Args:
-            operation: The operation that failed (e.g., "GET /v2/Mail").
+            method: The HTTP method that failed (e.g., "GET", "POST").
+            path: The API path that was called (e.g., "/v2/Mail").
             status_code: The HTTP status code.
             response_body: The response body from the failed request.
         """
-        self.operation = operation
+        self.method = method
+        self.path = path
+        self.operation = f"{method} {path}"
         self.status_code = status_code
         self.response_body = response_body
         truncated_body = self._truncate_body(response_body)
-        message = f"{operation} failed with status {status_code}: "
+        message = f"{self.operation} failed with status {status_code}: "
         message += truncated_body
         super().__init__(message)
 

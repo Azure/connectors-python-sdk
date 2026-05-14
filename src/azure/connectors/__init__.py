@@ -4,8 +4,8 @@
 Azure Logic Apps Connector SDK for Python.
 
 This package provides infrastructure for calling Azure Logic Apps connectors
-from Python applications, including authentication, HTTP clients, and strongly-typed
-generated connector clients.
+from Python applications, including authentication, HTTP clients, and
+strongly-typed generated connector clients.
 """
 
 from .sdk.client_base import ConnectorClientBase
@@ -40,9 +40,21 @@ try:
 except (ImportError, NameError):
     TeamsClient = None  # type: ignore[assignment,misc]
 try:
-    from .msgraph import MsgraphgroupsanduserClient
+    from .msgraphgroupsanduser import MsgraphgroupsanduserClient
 except (ImportError, NameError):
     MsgraphgroupsanduserClient = None  # type: ignore[assignment,misc]
+try:
+    from .office365users import Office365usersClient
+except (ImportError, NameError):
+    Office365usersClient = None  # type: ignore[assignment,misc]
+try:
+    from .azureblob import AzureblobClient
+except (ImportError, NameError):
+    AzureblobClient = None  # type: ignore[assignment,misc]
+try:
+    from .mq import MqClient
+except (ImportError, NameError):
+    MqClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.1.0'
 
@@ -61,4 +73,7 @@ __all__ = [
     'SharepointonlineClient',
     'TeamsClient',
     'MsgraphgroupsanduserClient',
+    'Office365usersClient',
+    'AzureblobClient',
+    'MqClient',
 ]
