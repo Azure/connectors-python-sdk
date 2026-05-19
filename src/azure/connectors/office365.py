@@ -1077,9 +1077,12 @@ class ClientReceiveMessage:
         functions to bind to and return rich ClientReceiveMessage objects instead
         of raw JSON payloads.
 
+        Handles both batch and single-item shapes from the Connector Namespace:
+        - Batch (splitOn disabled): ``{"body": {"value": [...messages...]}}``
+        - Single-item (splitOn enabled): ``{"body": {...message...}}``
+
         Args:
             payload: A JSON string or dictionary containing the email messages.
-                Expected structure: {"body": {"value": [...messages...]}}
 
         Returns:
             A list of ClientReceiveMessage objects parsed from the payload.
@@ -1099,11 +1102,23 @@ class ClientReceiveMessage:
         else:
             data = payload.value
 
-        # NOTE(SDK): Navigate to body.value to extract the list of messages.
+        # Navigate to body and handle both batch and single-item shapes.
         if isinstance(data, dict):
             body = data.get("body", data)
             if isinstance(body, dict):
-                messages_data = body.get("value", [])
+                # Determine shape: batch has sole "value" key with a list,
+                # single-item has item properties directly.
+                value_element = body.get("value")
+                is_batch_shape = (
+                    "value" in body
+                    and len(body) == 1
+                    and (isinstance(value_element, list) or value_element is None)
+                )
+                if is_batch_shape:
+                    messages_data = value_element if value_element is not None else []
+                else:
+                    # Single-item shape: wrap the body dict as a one-element list
+                    messages_data = [body]
             else:
                 messages_data = []
         else:

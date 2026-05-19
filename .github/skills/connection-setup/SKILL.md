@@ -1,11 +1,11 @@
 ---
 name: connection-setup
-description: 'Create and configure Connector Gateway connections for SDK-supported connectors. USE WHEN: setting up a new connector connection, creating an Connector Gateway, authorizing OAuth consent, adding access policies, or configuring local.settings.json / app settings. Covers Office365, SharePoint, Teams, and any Microsoft.Web/connections connector. NOT FOR: general SDK usage, trigger registration, or code generation.'
+description: 'Create and configure Connector Namespace connections for the Azure Connectors Python SDK. USE WHEN: setting up a new connector connection, creating a Connector Namespace, authorizing OAuth consent, adding access policies, or configuring local.settings.json / app settings. Covers Office365, SharePoint, Teams, and any Microsoft.Web/connections connector. Works with Azure Functions, Flask, FastAPI, Django, or any Python app using the SDK. NOT FOR: trigger registration (use trigger-registration skill), or code generation.'
 ---
 
-# Connector Gateway Connection Setup
+# Connector Namespace Connection Setup
 
-Automates the end-to-end connection lifecycle for SDK-supported connectors, keeping the developer in VS Code.
+Automates the end-to-end connection lifecycle for SDK-supported connectors. Connections created here can be used by any Python app via the `azure-connectors` package — Azure Functions, Flask, FastAPI, Django, scripts, etc.
 
 ## When to Use
 
@@ -23,7 +23,7 @@ Automates the end-to-end connection lifecycle for SDK-supported connectors, keep
 
 ## Procedure
 
-### Step 1: Create or Select Connector Gateway
+### Step 1: Create or Select Connector Namespace
 
 Check for an existing Connector Namespace in the resource group:
 
@@ -175,3 +175,16 @@ az rest --method GET --uri "$runtimeUrl/beta/me/joinedTeams" --resource "https:/
 # Azure Blob — list datasets
 az rest --method GET --uri "$runtimeUrl/v2/datasets" --resource "https://apihub.azure.com" -o json
 ```
+
+## Next Steps
+
+- **Triggers:** To register triggers (e.g., OnNewEmail, OnNewFile), use the [trigger-registration skill](../trigger-registration/SKILL.md).
+- **SDK usage:** Use the connection runtime URL with the SDK's typed async clients:
+  ```python
+  from azure.connectors.office365 import Office365Client
+  from azure.connectors.sdk import ManagedIdentityTokenProvider
+
+  async with Office365Client(runtime_url, ManagedIdentityTokenProvider()) as client:
+      await client.send_email_v2_async(to="...", subject="...", body="...")
+  ```
+- **Azure Functions signatures:** For a complete mapping of trigger operations to Azure Functions signatures, see [Operations to Functions Signature Match](https://github.com/Azure/azure-functions-connector-extension/blob/main/docs/operations-functions-match.md).

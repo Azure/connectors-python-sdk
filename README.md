@@ -221,7 +221,7 @@ client = Office365Client(connection_url, token_provider, options)
 
 ## Project Structure
 
-```
+```text
 azure-connectors/
 ├── src/azure/connectors/
 │   ├── sdk/                    # Core SDK infrastructure
@@ -261,6 +261,7 @@ for message in messages:
 ```
 
 The `from_json` method handles:
+
 - JSON string or dictionary input
 - Nested `body.value` payload structure
 - Field name conversion (camelCase → snake_case)
@@ -271,8 +272,10 @@ This feature is particularly useful when building Azure Functions that process c
 
 ## Related Projects
 
-- **[Connectors .NET SDK](https://github.com/Azure/Connectors-NET-SDK)** — .NET implementation of this SDK
 - **[Azure Functions Connector Extension](https://github.com/Azure/azure-functions-connector-extension)**  - An Azure Functions trigger extension for receiving webhook callbacks from Connector Namespace managed connectors
+- **[Connectors .NET SDK](https://github.com/Azure/Connectors-NET-SDK)** — .NET implementation of this SDK
+- **[Connectors Node.js SDK](https://github.com/Azure/connectors-nodejs-sdk)** — Node.js implementation of this SDK
+
 ## Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
