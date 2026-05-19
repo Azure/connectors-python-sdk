@@ -7,7 +7,7 @@ This sample demonstrates how to use the IBM MQ connector SDK.
 
 Prerequisites:
 1. Azure subscription with IBM MQ connection
-2. IBM MQ connection in Azure Logic Apps
+2. IBM MQ connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Note: IBM MQ uses parameter-based auth (server, queue manager, channel, credentials).

@@ -8,9 +8,8 @@ For help and questions about using this project, please use the following resour
 
 - **Browse the [documentation](docs/)** - Start with [README.md](README.md) for quick start and overview
 - **Check [GitHub Issues](https://github.com/Azure/Connectors-Python-SDK/issues)** - Search for existing solutions or similar questions
-- **Ask in [GitHub Discussions](https://github.com/Azure/LogicApps/discussions)** - Community Q&A for Logic Apps and Connectors
 - **Review the [samples](samples/)** - See working examples for Office 365, SharePoint, Teams, and Kusto
-- **Stack Overflow** - Tag questions with `azure-connectors` or `azure-logic-apps` for Python SDK questions
+- **Stack Overflow** - Tag questions with `azure-connectors` for Python SDK questions
 
 ## Microsoft Support Policy
 
@@ -18,13 +17,11 @@ Support for this project is limited to the resources listed above. The product s
 
 If you encounter issues with the underlying Azure connector infrastructure (not the Python SDK):
 
-- **Azure Logic Apps** - Use Azure Portal support for Logic Apps Standard
 - **API Management** - Use Azure Portal support for API Management
 - **Azure Functions** - Use Azure Portal support for Functions runtime
 
 ## Community Resources
 
-- **[Azure Logic Apps Documentation](https://learn.microsoft.com/azure/logic-apps/)** - Official Logic Apps docs
 - **[Connector Reference](https://learn.microsoft.com/connectors/connector-reference/)** - Browse 1,000+ connectors
 - **[Azure Functions Python Guide](https://learn.microsoft.com/azure/azure-functions/functions-reference-python)** - Python Functions development
 
@@ -39,5 +36,3 @@ See [SECURITY.md](SECURITY.md) for more information.
 ## Related Projects
 
 - **[Connectors .NET SDK](https://github.com/Azure/Connectors-NET-SDK)** - .NET implementation of this SDK
-- **[Azure Logic Apps](https://github.com/Azure/LogicApps)** - Workflow engine that powers connectors
-

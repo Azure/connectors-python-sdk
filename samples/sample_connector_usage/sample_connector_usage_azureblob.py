@@ -7,7 +7,7 @@ This sample demonstrates how to use the Azure Blob Storage connector SDK.
 
 Prerequisites:
 1. Azure subscription with Azure Blob Storage connection
-2. Azure Blob Storage connection in Azure Logic Apps
+2. Azure Blob Storage connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Note: Azure Blob Storage uses key-based auth (accountName + accessKey), not OAuth.

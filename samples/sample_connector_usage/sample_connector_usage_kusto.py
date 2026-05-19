@@ -7,7 +7,7 @@ This sample demonstrates how to use the Kusto connector SDK.
 
 Prerequisites:
 1. Azure subscription with Kusto (Azure Data Explorer) cluster
-2. Kusto connection in Azure Logic Apps
+2. Kusto connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 4. Kusto cluster URL and database name
 

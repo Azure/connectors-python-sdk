@@ -7,7 +7,7 @@ This sample demonstrates how to use the MS Graph Groups & Users connector SDK.
 
 Prerequisites:
 1. Azure subscription with MS Graph Groups & Users connection
-2. MS Graph connection in Azure Logic Apps
+2. MS Graph connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Installation:

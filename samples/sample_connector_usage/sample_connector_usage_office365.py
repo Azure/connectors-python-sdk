@@ -7,7 +7,7 @@ This sample demonstrates how to use the Office365 connector SDK.
 
 Prerequisites:
 1. Azure subscription with Office365 connection
-2. Office365 connection in Azure Logic Apps
+2. Office365 connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Installation:
