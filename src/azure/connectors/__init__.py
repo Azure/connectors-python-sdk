@@ -56,7 +56,7 @@ try:
 except (ImportError, NameError):
     MqClient = None  # type: ignore[assignment,misc]
 
-__version__ = '0.1.0'
+__version__ = '0.2.0b1'
 
 __all__ = [
     'ConnectorClientBase',
