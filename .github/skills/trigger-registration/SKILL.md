@@ -27,13 +27,20 @@ Registers polling trigger configs on a Connector Namespace so that connector eve
 
 ### ConnectorTrigger Extension Binding
 
-| Approach | Binding | Payload | Required Packages |
-|----------|---------|---------|-------------------|
-| ConnectorTrigger (typed) | `@app.connector_trigger` | SDK typed model (e.g., `office365.ClientReceiveMessage`) | `azure-functions>=2.2.0b4` + `azurefunctions-extensions-connectors` for Python 3.13+ |
-| Generic trigger (typed class) | `@app.generic_trigger(type="connectorTrigger")` | SDK typed model | `azure-functions` + `azure-connectors` |
-| Generic trigger (raw JSON) | `@app.generic_trigger(type="connectorTrigger")` | `str` (raw JSON) | `azure-functions` |
+### Python Decorator and Package Rules
 
-> **Note:** The typed `@app.connector_trigger` decorator currently only supports Python 3.13+. For lower python versions, use `@app.generic_trigger` with the typed class from `azure-connectors`. For all other connectors, use `@app.generic_trigger` with `str` — only `azure-functions` is needed.
+Use this decision logic when scaffolding a Python connector trigger function:
+
+1. **Choose decorator by Python version:**
+   - Python 3.13 → `@app.connector_trigger`
+   - Python < 3.13 → `@app.generic_trigger(type="connectorTrigger")`
+
+2. **Choose packages by trigger operation:**
+   - Office 365 `OnNewEmail` → add `azurefunctions-extensions-connectors` (imports `azure-connectors` automatically)
+   - Any other connector with a typed SDK model → add `azure-connectors`, use typed class as parameter type
+   - No typed model available → use `str` as parameter type, no extra package needed beyond `azure-functions`
+
+3. **Base package:** `azure-functions` (use `>=2.2.0b4` only when using `@app.connector_trigger` decorator)
 
 ### Extension Webhook Endpoint
 
