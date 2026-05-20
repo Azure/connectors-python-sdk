@@ -77,7 +77,7 @@ class TriggerCallbackBody(Generic[T]):
             return cls(value=items)
 
         # Single-item shape: {...item properties...} — wrap in a one-element list.
-        single_item = item_factory(data) if item_factory else data
+        single_item: T = item_factory(data) if item_factory else data  # type: ignore[assignment]
         return cls(value=[single_item])
 
 
@@ -126,6 +126,10 @@ class TriggerCallbackPayload(Generic[T]):
         Raises:
             ValueError: If the payload is a string that cannot be parsed as JSON.
         """
+        if hasattr(payload, "value"):
+            # Datum-like wrapper from the worker extension converter layer
+            payload = payload.value
+
         if isinstance(payload, str):
             try:
                 data = json.loads(payload)

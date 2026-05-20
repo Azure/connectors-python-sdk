@@ -1012,12 +1012,15 @@ class TestClientReceiveMessageFromJson:
         with pytest.raises(ValueError, match="Invalid JSON payload"):
             ClientReceiveMessage.from_json(payload)
 
-    def test_from_json_invalid_value_type_raises_error(self):
-        """Test that non-list value raises ValueError."""
+    def test_from_json_invalid_value_type_treated_as_single_item(self):
+        """Test that non-list value in body is treated as single-item shape."""
         payload = self._make_payload({"body": {"value": "not a list"}})
 
-        with pytest.raises(ValueError, match="Expected 'body.value' to contain a list"):
-            ClientReceiveMessage.from_json(payload)
+        # With single-item shape detection, {"value": "not a list"} doesn't
+        # match batch shape (value isn't a list/None), so it's treated as a
+        # single-item dict and parsed as one message (with no matching fields).
+        messages = ClientReceiveMessage.from_json(payload)
+        assert len(messages) == 1
 
     def test_from_json_direct_value_without_body_wrapper(self):
         """Test parsing when value is directly under root without body wrapper."""
