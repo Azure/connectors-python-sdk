@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- **Office 365** (`office365.py`): `ClientReceiveMessage.from_json` now handles both batch (`{"body": {"value": [...]}}`) and single-item (`{"body": {...}}`) trigger callback shapes from the Connector Namespace, fixing `IndexError` when splitOn is enabled
-
-### Added
-
-- `TriggerCallbackBody.from_dict` class method — normalizes batch and single-item payload shapes into a consistent list
-- `TriggerCallbackPayload.from_json` / `from_dict` class methods — parse JSON or dict trigger payloads with automatic shape detection
-
 ## [0.2.0b1] - 2026-05-13
 
 ### Added
@@ -93,3 +84,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.0b1]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev2...v0.2.0b1
 [0.1.0dev2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev1...v0.1.0dev2
 [0.1.0dev1]: https://github.com/Azure/Connectors-Python-SDK/releases/tag/v0.1.0dev1
+
