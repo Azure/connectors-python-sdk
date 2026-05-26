@@ -1,6 +1,6 @@
 ---
 name: trigger-registration
-description: 'Register Connector Namespace trigger configs for Azure connectors and scaffold Python apps to receive trigger callbacks. USE WHEN: setting up polling triggers (e.g., OnNewEmail, OnNewFile, OnUpdatedFile) that call back to an Azure Function or any Python app, scaffolding a Function App project with ConnectorTrigger binding, wiring callback URLs, or troubleshooting trigger configs. Covers both typed SDK payloads and raw JSON generic triggers. NOT FOR: connection setup (use connection-setup skill).'
+description: 'Register Connector Namespace trigger configs for Azure connectors and scaffold Azure Functions to receive trigger callbacks. USE WHEN: setting up polling triggers (e.g., OnNewEmail, OnNewFile, OnUpdatedFile) that call back to an Azure Function, scaffolding a Function App project with ConnectorTrigger binding, wiring callback URLs, or troubleshooting trigger configs. Covers both typed SDK payloads and raw JSON generic triggers. NOT FOR: connection setup (use connection-setup skill).'
 ---
 
 # Connector Namespace Trigger Registration
@@ -21,7 +21,7 @@ Registers polling trigger configs on a Connector Namespace so that connector eve
 - Connector Namespace with a connected connector (see `connection-setup` skill)
 - The Connector Namespace must have a **system-assigned managed identity** enabled
 - **Supported regions** for Connector Namespace: `westcentralus`
-- Python 3.9+ with the `azure-connectors` package installed
+- A [supported Python version for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/supported-languages?tabs=isolated-process%2Cv4&pivots=programming-language-python#languages-by-runtime-version) with the `azure-connectors` package installed
 
 ## Key Concepts
 
@@ -72,14 +72,14 @@ Connector Namespace
 azd init -t functions-quickstart-python-http-azd
 ```
 
-### 2. Update host.json for experimental extension bundle
+### 2. Update host.json for preview extension bundle
 
 ```json
 {
     "version": "2.0",
     "extensionBundle": {
-        "id": "Microsoft.Azure.Functions.ExtensionBundle.Experimental",
-        "version": "[4.6.0, 5.0.0)"
+        "id": "Microsoft.Azure.Functions.ExtensionBundle.Preview",
+        "version": "[4.*, 5.0.0)"
     }
 }
 ```
@@ -122,7 +122,7 @@ def on_new_email(emails: List[office365.ClientReceiveMessage]) -> None:
         logging.info(f"From: {email.from_}")
 ```
 
-#### With generic trigger (raw JSON — when no typed SDK model exists)
+#### With connector trigger and raw JSON (when no typed SDK model exists)
 
 ```python
 import azure.functions as func
@@ -133,7 +133,7 @@ app = func.FunctionApp()
 
 
 @app.function_name(name="OnNewFile")
-@app.generic_trigger(arg_name="payload", type="connectorTrigger")
+@app.connector_trigger(arg_name="payload")
 def on_new_file(payload: str) -> None:
     logging.info("OnNewFile trigger received")
 
@@ -296,7 +296,7 @@ async def main():
     token_provider = ManagedIdentityTokenProvider()
 
     async with Office365Client(connection_url, token_provider) as client:
-        await client.send_email_v2_async(
+        await client.send_email_async(
             to="recipient@example.com",
             subject="Hello from Python SDK",
             body="<p>Sent from any Python app!</p>",
@@ -320,19 +320,16 @@ async def list_items():
             print(f"Item: {item.get('Title')}")
 ```
 
-### Example: Post a Teams message
+### Example: List Teams
 
 ```python
 from azure.connectors.teams import TeamsClient
 
-async def post_message():
+async def list_teams():
     async with TeamsClient(connection_url, token_provider) as client:
-        await client.post_message_to_conversation_async(
-            group_id="team-group-id",
-            channel_id="19:channel-id",
-            body_content="Hello from Python!",
-            body_content_type="text"
-        )
+        teams = await client.get_all_teams_async()
+        for team in teams.get("value", []):
+            print(f"Team: {team.get('displayName')}")
 ```
 
 ### Authentication Options
