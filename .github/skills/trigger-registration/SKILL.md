@@ -151,6 +151,22 @@ def on_new_file(payload: str) -> None:
         logging.info(f"Received file content: {len(content)} bytes")
 ```
 
+#### With generic trigger (when using Python <= 3.12>)
+
+```python
+import azure.functions as func
+import json
+import logging
+
+app = func.FunctionApp()
+
+
+@app.function_name(name="OnNewFile")
+@app.generic_trigger(arg_name="payload", type="connectorTrigger")
+def on_new_file(payload: str) -> None:
+...
+```
+
 ### 5. Run locally
 
 Start Azurite (required for `AzureWebJobsStorage`):
