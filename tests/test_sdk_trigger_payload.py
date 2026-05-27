@@ -1,8 +1,13 @@
 """Unit tests for SDK trigger_payload module."""
 
+import json
 from dataclasses import dataclass
 
-from azure.connectors.sdk.trigger_payload import TriggerCallbackBody, TriggerCallbackPayload
+from azure.connectors.sdk.trigger_payload import (
+    TriggerCallbackBody,
+    TriggerCallbackPayload,
+    _is_batch_shape,
+)
 
 
 @dataclass
@@ -190,3 +195,286 @@ class TestTriggerCallbackPayload:
         assert hasattr(payload, 'body')
         assert hasattr(payload.body, 'value')
         assert isinstance(payload.body.value, list)
+
+
+class TestIsBatchShape:
+    """Tests for the _is_batch_shape discriminator function."""
+
+    def test_batch_shape_with_list(self):
+        """Test batch shape with value as list."""
+        data = {"value": [{"id": "1"}, {"id": "2"}]}
+        assert _is_batch_shape(data) is True
+
+    def test_batch_shape_with_empty_list(self):
+        """Test batch shape with empty list."""
+        data = {"value": []}
+        assert _is_batch_shape(data) is True
+
+    def test_batch_shape_with_null(self):
+        """Test batch shape with null value."""
+        data = {"value": None}
+        assert _is_batch_shape(data) is True
+
+    def test_single_item_with_multiple_properties(self):
+        """Test single-item shape with multiple properties."""
+        data = {"id": "1", "subject": "Test", "value": ["extra"]}
+        assert _is_batch_shape(data) is False
+
+    def test_single_item_with_scalar_value(self):
+        """Test single-item shape where value is a scalar."""
+        data = {"value": "not-a-list"}
+        assert _is_batch_shape(data) is False
+
+    def test_single_item_without_value_property(self):
+        """Test single-item shape without value property."""
+        data = {"id": "1", "subject": "Test"}
+        assert _is_batch_shape(data) is False
+
+    def test_empty_dict_is_not_batch(self):
+        """Test empty dict is not batch shape."""
+        data = {}
+        assert _is_batch_shape(data) is False
+
+
+class TestTriggerCallbackBodyFromDict:
+    """Tests for TriggerCallbackBody.from_dict factory method."""
+
+    def test_from_dict_none(self):
+        """Test from_dict with None returns None."""
+        result = TriggerCallbackBody.from_dict(None)
+        assert result is None
+
+    def test_from_dict_batch_shape(self):
+        """Test from_dict with batch shape."""
+        data = {"value": [{"id": "1"}, {"id": "2"}]}
+        result = TriggerCallbackBody.from_dict(data)
+
+        assert result is not None
+        assert len(result.value) == 2
+        assert result.value[0]["id"] == "1"
+        assert result.value[1]["id"] == "2"
+
+    def test_from_dict_batch_shape_empty_list(self):
+        """Test from_dict with batch shape containing empty list."""
+        data = {"value": []}
+        result = TriggerCallbackBody.from_dict(data)
+
+        assert result is not None
+        assert result.value == []
+
+    def test_from_dict_batch_shape_null_value(self):
+        """Test from_dict with batch shape containing null value."""
+        data = {"value": None}
+        result = TriggerCallbackBody.from_dict(data)
+
+        assert result is not None
+        assert result.value is None
+
+    def test_from_dict_single_item_shape(self):
+        """Test from_dict with single-item shape."""
+        data = {"id": "1", "subject": "Test email", "from": "sender@test.com"}
+        result = TriggerCallbackBody.from_dict(data)
+
+        assert result is not None
+        assert len(result.value) == 1
+        assert result.value[0]["id"] == "1"
+        assert result.value[0]["subject"] == "Test email"
+
+    def test_from_dict_single_item_with_item_parser(self):
+        """Test from_dict with single-item shape and item parser."""
+        data = {"id": "1", "value": "test"}
+
+        def parser(d: dict) -> TestTriggerItem:
+            return TestTriggerItem(id=d["id"], value=d["value"])
+
+        result = TriggerCallbackBody.from_dict(data, item_parser=parser)
+
+        assert result is not None
+        assert len(result.value) == 1
+        assert isinstance(result.value[0], TestTriggerItem)
+        assert result.value[0].id == "1"
+
+    def test_from_dict_batch_shape_with_item_parser(self):
+        """Test from_dict with batch shape and item parser."""
+        data = {"value": [{"id": "1", "value": "first"}, {"id": "2", "value": "second"}]}
+
+        def parser(d: dict) -> TestTriggerItem:
+            return TestTriggerItem(id=d["id"], value=d["value"])
+
+        result = TriggerCallbackBody.from_dict(data, item_parser=parser)
+
+        assert result is not None
+        assert len(result.value) == 2
+        assert isinstance(result.value[0], TestTriggerItem)
+        assert result.value[0].id == "1"
+        assert result.value[1].id == "2"
+
+    def test_from_dict_single_item_with_value_array_property(self):
+        """Test that single-item T with a value array plus other fields is not batch."""
+        # This mirrors the .NET test: a single-item that has a "value" array field
+        # plus other fields should NOT be misclassified as batch.
+        data = {
+            "subject": "Item with value field",
+            "from": "sender@test.com",
+            "value": ["extra", "data"],
+        }
+        result = TriggerCallbackBody.from_dict(data)
+
+        assert result is not None
+        assert len(result.value) == 1
+        assert result.value[0]["subject"] == "Item with value field"
+        assert result.value[0]["value"] == ["extra", "data"]
+
+
+class TestTriggerCallbackPayloadFromDict:
+    """Tests for TriggerCallbackPayload.from_dict factory method."""
+
+    def test_from_dict_none(self):
+        """Test from_dict with None returns None."""
+        result = TriggerCallbackPayload.from_dict(None)
+        assert result is None
+
+    def test_from_dict_batch_shape(self):
+        """Test from_dict with batch shape payload."""
+        data = {"body": {"value": [{"id": "1"}, {"id": "2"}]}}
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert result.body is not None
+        assert len(result.body.value) == 2
+
+    def test_from_dict_single_item_shape(self):
+        """Test from_dict with single-item shape payload."""
+        data = {"body": {"id": "1", "subject": "Test email"}}
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert result.body is not None
+        assert len(result.body.value) == 1
+        assert result.body.value[0]["id"] == "1"
+
+    def test_from_dict_no_body(self):
+        """Test from_dict with no body field."""
+        data = {}
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert result.body is None
+
+    def test_from_dict_null_body(self):
+        """Test from_dict with null body."""
+        data = {"body": None}
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert result.body is None
+
+    def test_from_dict_with_item_parser(self):
+        """Test from_dict with item parser."""
+        data = {"body": {"id": "1", "value": "test"}}
+
+        def parser(d: dict) -> TestTriggerItem:
+            return TestTriggerItem(id=d["id"], value=d["value"])
+
+        result = TriggerCallbackPayload.from_dict(data, item_parser=parser)
+
+        assert result is not None
+        assert len(result.body.value) == 1
+        assert isinstance(result.body.value[0], TestTriggerItem)
+
+    def test_from_dict_json_roundtrip_batch(self):
+        """Test JSON parsing with batch shape."""
+        json_str = '{"body": {"value": [{"id": "1", "subject": "Test"}]}}'
+        data = json.loads(json_str)
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert len(result.body.value) == 1
+        assert result.body.value[0]["id"] == "1"
+
+    def test_from_dict_json_roundtrip_single_item(self):
+        """Test JSON parsing with single-item shape."""
+        json_str = '{"body": {"id": "1", "subject": "Test email"}}'
+        data = json.loads(json_str)
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert len(result.body.value) == 1
+        assert result.body.value[0]["subject"] == "Test email"
+
+    def test_from_dict_both_shapes_produce_identical_count(self):
+        """Test that both shapes produce identical item counts."""
+        batch_data = {"body": {"value": [{"subject": "Test", "from": "sender@test.com"}]}}
+        single_data = {"body": {"subject": "Test", "from": "sender@test.com"}}
+
+        batch_result = TriggerCallbackPayload.from_dict(batch_data)
+        single_result = TriggerCallbackPayload.from_dict(single_data)
+
+        assert batch_result.body.value is not None
+        assert single_result.body.value is not None
+        assert len(batch_result.body.value) == len(single_result.body.value)
+        assert batch_result.body.value[0]["subject"] == single_result.body.value[0]["subject"]
+
+
+class TestSingleItemShapeIntegration:
+    """Integration tests for single-item shape (splitOn enabled) scenarios."""
+
+    # Captured single-item callback similar to production when splitOn is enabled.
+    SINGLE_ITEM_PAYLOAD = {
+        "body": {
+            "id": "AAMkADlmOTA3NWNm",
+            "receivedDateTime": "2026-05-14T16:06:00+00:00",
+            "hasAttachments": False,
+            "subject": "Single-item callback test",
+            "bodyPreview": "This is a single-item callback.",
+            "importance": "normal",
+            "isRead": False,
+            "isHtml": True,
+            "body": "<html><body>Single item</body></html>",
+            "from": "sender@microsoft.com",
+            "toRecipients": "recipient@microsoft.com",
+            "ccRecipients": None,
+            "bccRecipients": None,
+            "replyTo": None,
+            "attachments": [],
+        }
+    }
+
+    def test_single_item_wraps_in_list(self):
+        """Test single-item shape is wrapped in a one-element list."""
+        result = TriggerCallbackPayload.from_dict(self.SINGLE_ITEM_PAYLOAD)
+
+        assert result is not None
+        assert result.body is not None
+        assert result.body.value is not None
+        assert len(result.body.value) == 1
+
+    def test_single_item_parses_fields(self):
+        """Test single-item shape fields are parsed correctly."""
+        result = TriggerCallbackPayload.from_dict(self.SINGLE_ITEM_PAYLOAD)
+        email = result.body.value[0]
+
+        assert email["id"] == "AAMkADlmOTA3NWNm"
+        assert email["subject"] == "Single-item callback test"
+        assert email["from"] == "sender@microsoft.com"
+        assert email["toRecipients"] == "recipient@microsoft.com"
+        assert email["importance"] == "normal"
+        assert email["hasAttachments"] is False
+
+    def test_null_value_roundtrip_preserves_null(self):
+        """Test that {"value": null} is recognized as batch with null list."""
+        data = {"body": {"value": None}}
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert result.body is not None
+        assert result.body.value is None
+
+    def test_sole_value_scalar_treated_as_single_item(self):
+        """Test single-item T whose only property is 'value' with a scalar."""
+        data = {"body": {"value": "not-a-list"}}
+        result = TriggerCallbackPayload.from_dict(data)
+
+        assert result is not None
+        assert len(result.body.value) == 1
+        assert result.body.value[0]["value"] == "not-a-list"
