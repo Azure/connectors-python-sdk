@@ -2,14 +2,13 @@
 name = "azure-connectors"
 dynamic = ["version"]
 requires-python = ">=3.10"
-description = "Azure Logic Apps Connector SDK for Python"
+description = "Azure Connectors SDK for Python"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
-    { name = "Azure Logic Apps team at Microsoft Corp.", email = "azurelogicapps@microsoft.com" }
+    { name = "Azure Connector Namespaces team at Microsoft Corp.", email = "azurelogicapps@microsoft.com" }
 ]
-keywords = ["azure", "connectors", "logic-apps",
-            "python", "serverless"]
+keywords = ["azure", "connectors", "python", "serverless"]
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",

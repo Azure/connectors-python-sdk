@@ -5,7 +5,7 @@ This sample demonstrates how to use the Teams connector SDK.
 
 Prerequisites:
 1. Azure subscription with Teams connection
-2. Teams connection in Azure Logic Apps
+2. Teams connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Installation:

@@ -1,196 +1,240 @@
 ---
 name: trigger-registration
-description: 'Register Connector Gateway trigger configs for SDK-supported connectors. USE WHEN: setting up polling triggers (e.g., OnNewEmail, OnNewFile, OnUpdatedFile) that call back to an Azure Function when events occur, creating a Python Function App to receive trigger callbacks, or wiring post-deploy trigger config scripts. Covers function app scaffolding, trigger config creation, callback URL wiring, parameter discovery, and binary vs metadata payload handling. NOT FOR: connection setup (use connection-setup skill).'
+description: 'Register Connector Namespace trigger configs for Azure connectors and scaffold Azure Functions to receive trigger callbacks. USE WHEN: setting up polling triggers (e.g., OnNewEmail, OnNewFile, OnUpdatedFile) that call back to an Azure Function, scaffolding a Function App project with ConnectorTrigger binding, wiring callback URLs, or troubleshooting trigger configs. Covers both typed SDK payloads and raw JSON generic triggers. NOT FOR: connection setup (use connection-setup skill).'
 ---
 
-# Connector Gateway Trigger Registration
+# Connector Namespace Trigger Registration
 
-Registers polling trigger configs on a Connector Gateway so that connector events (new email, new file, etc.) call back to your Azure Function endpoint. Also covers scaffolding a Python Function App to receive trigger callbacks.
+Registers polling trigger configs on a Connector Namespace so that connector events (new email, new file, etc.) call back to your application endpoint. Covers scaffolding a Python Function App with the ConnectorTrigger extension binding.
 
 ## When to Use
 
-- Developer needs a connector trigger (e.g., "when a new file is created in OneDrive")
-- Developer has an existing Connector Gateway connection (use the `connection-setup` skill first if not)
-- Developer needs to wire up the callback URL from a deployed Azure Function
-- Developer needs to understand binary vs metadata trigger payload shapes
+- Developer needs a connector trigger (e.g., "when a new email arrives in Office365")
+- Developer has an existing Connector Namespace connection (use the `connection-setup` skill first if not)
+- Developer needs to scaffold a Python Function App with ConnectorTrigger in Azure Functions
+- Developer needs to wire the callback URL from a deployed or local Function App
+- Developer needs to understand which typed payload to use for a given trigger operation
 
 ## Prerequisites
 
 - Azure CLI installed and authenticated (`az login`)
-- Connector Gateway with a connected connector (see `connection-setup` skill)
-- The Connector Gateway must have a **system-assigned managed identity** enabled (required for trigger callback authentication)
-- Deployed Azure Function App with an HTTP trigger function to receive callbacks
-- **Supported regions** for Connector Gateway: `brazilsouth`, `centraluseuap`, `eastus2euap`, `centralusstage`, `eastusstage`. Only the Connector Gateway `location` must be in a supported region; the Function App can be in any region.
-- Python 3.10+ with the `azure-connectors` package installed
+- Connector Namespace with a connected connector (see `connection-setup` skill)
+- The Connector Namespace must have a **system-assigned managed identity** enabled
+- **Supported regions** for Connector Namespace: `westcentralus`
+- A [supported Python version for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/supported-languages?tabs=isolated-process%2Cv4&pivots=programming-language-python#languages-by-runtime-version) with the `azure-connectors` package installed
 
 ## Key Concepts
 
-### Trigger Config vs Connection
+### ConnectorTrigger Extension Binding
 
-Connections (managed by the `connection-setup` skill) authenticate your app to the connector API. Trigger configs tell the Connector Gateway to **poll** the connector for events and **POST callbacks** to your function when events occur.
+### Python Decorator and Package Rules
+
+Use this decision logic when scaffolding a Python connector trigger function:
+
+1. **Choose decorator by Python version:**
+   - Python 3.13 → `@app.connector_trigger`
+   - Python < 3.13 → `@app.generic_trigger(type="connectorTrigger")`
+
+2. **Choose packages by trigger operation:**
+   - Office 365 `OnNewEmail` → add `azurefunctions-extensions-connectors` (imports `azure-connectors` automatically)
+   - Any other connector with a typed SDK model → add `azure-connectors`, use typed class as parameter type
+   - No typed model available → use `str` as parameter type, no extra package needed beyond `azure-functions`
+
+3. **Base package:** `azure-functions` (use `>=2.2.0b4` only when using `@app.connector_trigger` decorator)
+
+### Extension Webhook Endpoint
+
+The ConnectorTrigger extension registers a webhook route on the Function App:
 
 ```text
-Connector Gateway
-├── connections/
-│   └── onedrive-test          ← auth + runtime URL (connection-setup skill)
-└── triggerConfigs/
-    └── onedrive-newfile       ← poll + callback config (THIS skill)
+POST /runtime/webhooks/connector?functionName={FunctionName}&code={connector_extension_key}
 ```
 
-### Binary vs Metadata Triggers
+- `functionName` must exactly match the `@app.function_name(name="...")` value
+- `connector_extension` is a system key auto-generated when the extension loads
+- Locally (`func start`), the system key is not enforced
 
-Some connectors offer two variants of the same trigger:
+### Trigger Config vs Connection
 
-| Variant | Example | Payload Shape | Body Field |
-|---------|---------|---------------|------------|
-| **File content (binary)** | `OnNewFileV2` | `{"body":"<base64-string>"}` | String — base64-encoded file bytes |
-| **Properties only (metadata)** | `OnNewFilesV2` | `{"body":{"value":[{...}]}}` | Object — array of typed metadata items |
+```text
+Connector Namespace
+├── connections/
+│   └── office365-conn         ← auth + runtime URL (connection-setup skill)
+└── triggerConfigs/
+    └── onnewemail-trigger     ← poll + callback config (THIS skill)
+```
 
-**Critical:** Both variants arrive with `Content-Type: application/json`. You cannot use content-type to distinguish them. Instead, parse the JSON and inspect whether `body` is a string or an object.
+## Scaffolding a Python Function App
 
-#### Identifying binary triggers
+### 1. Initialize with azd
 
-Binary triggers deliver raw file content as a base64-encoded string in the `body` field. Metadata triggers deliver structured data with a `body.value` array containing typed items.
+```shell
+azd init -t functions-quickstart-python-http-azd
+```
 
-Check the trigger operation name — triggers ending in a singular noun (e.g., `OnNewFile`, `OnUpdatedFile`) typically return binary content, while plural variants (e.g., `OnNewFiles`, `OnUpdatedFiles`) return metadata objects.
+### 2. Update host.json for preview extension bundle
 
-## Python Function App for Trigger Callbacks
+```json
+{
+    "version": "2.0",
+    "extensionBundle": {
+        "id": "Microsoft.Azure.Functions.ExtensionBundle.Preview",
+        "version": "[4.*, 5.0.0)"
+    }
+}
+```
 
-### Scaffolding a New Project
+### 3. Install packages
 
-Use `azd` with an HTTP trigger template to create a Python Function App that receives trigger callbacks:
+Add to `requirements.txt` (include packages based on your approach):
 
-1. **Initialize** with the Azure Functions Python quickstart:
+```text
+# >=2.2.0b4 required for @app.connector_trigger decorator (Python 3.13+ only), no pinning required for generic trigger approaches
+azure-functions>=2.2.0b4
 
-   ```shell
-   azd init -t functions-quickstart-python-http-azd
-   ```
+# Currently only supports Office 365 OnNewEmail operation
+azurefunctions-extensions-connectors
 
-2. **Create an HTTP trigger function** to receive callbacks. The Connector Gateway POSTs trigger payloads to your function's HTTP endpoint.
+# Required for @app.generic_trigger with typed SDK models or str payloads, don't include if using azurefunctions-extensions-connectors 
+azure-connectors
+```
 
-3. **Install the SDK**:
+### 4. Create a ConnectorTrigger function
 
-   ```shell
-   pip install azure-connectors
-   ```
+#### With typed SDK payload (Office 365 email example)
 
-   Add to `requirements.txt`:
+```python
+import azure.functions as func
+import azurefunctions.extensions.connectors.office365 as office365
+import logging
+from typing import List
 
-   ```text
-   azure-connectors
-   ```
+app = func.FunctionApp()
 
-4. **Build and deploy**:
 
-   ```shell
-   azd up
-   ```
+@app.function_name(name="OnNewEmail")
+@app.connector_trigger(arg_name="emails")
+def on_new_email(emails: List[office365.ClientReceiveMessage]) -> None:
+    logging.info("OnNewEmail trigger received")
 
-### Example: HTTP Trigger Function for Email Callbacks
+    for email in emails:
+        logging.info(f"Subject: {email.subject}")
+        logging.info(f"From: {email.from_}")
+```
 
-Create an HTTP trigger function that receives Office 365 email trigger callbacks:
+#### With connector trigger and raw JSON (when no typed SDK model exists)
 
 ```python
 import azure.functions as func
 import json
 import logging
-from typing import Any
-
-from azure.connectors.office365 import TriggerBatchResponseGraphClientReceiveMessage
 
 app = func.FunctionApp()
 
 
-@app.function_name(name="OnNewEmailReceived")
-@app.route(route="triggers/email", methods=["POST"], auth_level=func.AuthLevel.FUNCTION)
-async def on_new_email_received(req: func.HttpRequest) -> func.HttpResponse:
-    """Handle Office 365 email trigger callbacks from Connector Gateway."""
-    logging.info("Received email trigger callback")
+@app.function_name(name="OnNewFile")
+@app.connector_trigger(arg_name="payload")
+def on_new_file(payload: str) -> None:
+    logging.info("OnNewFile trigger received")
 
-    try:
-        body = req.get_json()
+    data = json.loads(payload)
+    body = data.get("body", {})
 
-        # Parse the trigger payload using the SDK's typed class
-        payload = parse_trigger_payload(body, TriggerBatchResponseGraphClientReceiveMessage)
-
-        if payload and payload.value:
-            for email in payload.value:
-                logging.info(f"Subject: {email.subject}, From: {email.from_}")
-
-        return func.HttpResponse("OK", status_code=200)
-    except Exception as e:
-        logging.error(f"Error processing trigger callback: {e}")
-        return func.HttpResponse(f"Error: {e}", status_code=500)
-
-
-def parse_trigger_payload(body: dict[str, Any], payload_type: type) -> Any:
-    """Parse trigger callback body into typed payload."""
-    if "body" in body and isinstance(body["body"], dict):
-        # Metadata trigger - body contains structured data
-        return payload_type(**body["body"]) if body["body"] else None
-    return None
+    if isinstance(body, dict) and "value" in body:
+        # Metadata trigger — batch of items
+        for item in body["value"]:
+            logging.info(f"File: {item.get('name')}")
+    elif isinstance(body, str):
+        # Binary trigger — base64-encoded file content
+        import base64
+        content = base64.b64decode(body)
+        logging.info(f"Received file content: {len(content)} bytes")
 ```
 
-The callback URL for this function would be:
+#### With generic trigger (when using Python <= 3.12)
 
-```text
-POST https://<function-app-name>.azurewebsites.net/api/triggers/email?code=<function-key>
+```python
+import azure.functions as func
+import json
+import logging
+
+app = func.FunctionApp()
+
+
+@app.function_name(name="OnNewFile")
+@app.generic_trigger(arg_name="payload", type="connectorTrigger")
+def on_new_file(payload: str) -> None:
+...
 ```
 
-## Procedure
+### 5. Run locally
+
+Start Azurite (required for `AzureWebJobsStorage`):
+
+```bash
+npx azurite
+```
+
+Verify `local.settings.json`:
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python"
+  }
+}
+```
+
+Start the Function App:
+
+```shell
+func start
+```
+
+The extension logs the webhook endpoint at startup:
+
+```
+Connector endpoint: http://localhost:7071/runtime/webhooks/connector
+```
+
+## Registering a Trigger Config
 
 ### Step 1: Get the Callback URL
 
-Build the callback URL using your function's HTTP endpoint and function key:
+#### Deployed Function App
 
 ```powershell
 $resourceGroup = "<resource-group>"
 $functionAppName = "<function-app-name>"
-$functionRoute = "triggers/email"  # Your function's route
+$functionName = "<function-name>"  # must match @app.function_name(name="...")
 
-$functionKey = az functionapp keys list -g $resourceGroup -n $functionAppName --query "functionKeys.default" -o tsv
-$callbackUrl = "https://$functionAppName.azurewebsites.net/api/$functionRoute?code=$functionKey"
+$connectorExtensionKey = az functionapp keys list -g $resourceGroup -n $functionAppName --query "systemKeys.connector_extension" -o tsv
+$callbackUrl = "https://$functionAppName.azurewebsites.net/runtime/webhooks/connector?functionName=$functionName&code=$connectorExtensionKey"
 ```
 
-> **Important:** The route must exactly match the `route` parameter in your `@app.route()` decorator.
-
-### Step 2: Get Trigger Parameters
-
-Each trigger operation requires specific parameters. Use the connector's list operations to discover folder IDs and other required values:
-
-> **Note:** Listing folders requires a data-plane call to the connection runtime URL. If you skipped access policies in the `connection-setup` skill (trigger-only flow), you must first add a local-dev access policy (`connection-setup` Step 5) to avoid 403 errors.
+#### Local development (with dev tunnel)
 
 ```powershell
-$runtimeUrl = "<connection-runtime-url>"  # from connection-setup skill Step 4
-
-# OneDrive - list folders
-az rest --method GET `
-    --uri "$runtimeUrl/datasets/default/folders" `
-    --resource "https://apihub.azure.com" -o json
-
-# Office 365 - list mail folders
-az rest --method GET `
-    --uri "$runtimeUrl/Mail/Folders" `
-    --resource "https://apihub.azure.com" -o json
+$tunnelUrl = "<your-tunnel-url>"  # e.g., https://<id>-7071.uks1.devtunnels.ms
+$functionName = "<function-name>"
+$callbackUrl = "$tunnelUrl/runtime/webhooks/connector?functionName=$functionName"
 ```
 
-### Step 3: Create Trigger Config
+### Step 2: Create Trigger Config
 
 ```powershell
 $subscriptionId = "<subscription-id>"
 $resourceGroup = "<resource-group>"
-$gatewayName = "<gateway-name>"
-$gwId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$gatewayName"
+$namespaceName = "<namespace-name>"
+$nsId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Web/connectorGateways/$namespaceName"
 
-$triggerName = "<trigger-config-name>"   # e.g., "office365-newemail"
-$connectionName = "<connection-name>"    # e.g., "office365-test"
+$triggerName = "<trigger-config-name>"   # e.g., "onnewemail-trigger"
+$connectionName = "<connection-name>"    # e.g., "office365-conn"
 $connectorName = "<connector-name>"      # e.g., "office365"
 $operationName = "<operation-name>"      # e.g., "OnNewEmailV3"
-```
 
-Build and send the PUT request. **Use `Invoke-WebRequest`** (not `az rest`) because `az rest` silently swallows error responses from this API:
-
-```powershell
 $token = az account get-access-token `
     --resource "https://management.core.windows.net/" `
     --query "accessToken" -o tsv
@@ -207,210 +251,164 @@ $body = @{
             httpMethod = "Post"
         }
         parameters = @(
-            @{ name = "folderId"; value = "Inbox" }
+            # Office 365 OnNewEmailV3:
+            # @{ name = "folderPath"; value = "Inbox" }
+
+            # OneDrive for Business OnNewFile:
+            # @{ name = "folderId"; value = "root" }
         )
     }
 } | ConvertTo-Json -Depth 4
 
-$uri = "https://management.azure.com${gwId}/triggerConfigs/${triggerName}?api-version=2026-05-01-preview"
+$uri = "https://management.azure.com${nsId}/triggerConfigs/${triggerName}?api-version=2026-05-01-preview"
 try {
     $response = Invoke-WebRequest -Uri $uri -Method PUT -Body $body `
         -ContentType "application/json" `
         -Headers @{ Authorization = "Bearer $token" }
     Write-Output "Status: $($response.StatusCode)"
 } catch {
-    Write-Output "Error: $($_.Exception.Response.StatusCode) $($_.Exception.Response.ReasonPhrase)"
+    Write-Output "Error: $($_.Exception.Response.StatusCode)"
     $_.ErrorDetails.Message
 }
 ```
 
-#### Alternative: Using az rest
-
-```powershell
-$bodyFile = [System.IO.Path]::GetTempFileName()
-$body | Out-File -FilePath $bodyFile -Encoding utf8
-
-az rest --method PUT --url $uri --body "@$bodyFile" --headers "Content-Type=application/json"
-Remove-Item $bodyFile -ErrorAction SilentlyContinue
-```
-
-Expected: HTTP 201 Created.
-
-### Step 4: Verify Trigger Config
+### Step 3: Verify Trigger Config
 
 ```powershell
 az rest --method GET `
-    --uri "https://management.azure.com${gwId}/triggerConfigs/${triggerName}?api-version=2026-05-01-preview" `
-    --query "properties.{operation:operationName, state:state, hasCallback:notificationDetails.callbackUrl!=null}" `
+    --uri "https://management.azure.com${nsId}/triggerConfigs/${triggerName}?api-version=2026-05-01-preview" `
+    --query "properties.{operation:operationName, state:state, callback:notificationDetails.callbackUrl}" `
     -o table
 ```
 
-Expected: `state = Enabled`, `hasCallback = True`.
+Expected: `state = Enabled`.
 
-### Step 5: List All Trigger Configs
+### Step 4: Test the Trigger
 
-```powershell
-az rest --method GET `
-    --uri "https://management.azure.com${gwId}/triggerConfigs?api-version=2026-05-01-preview" `
-    --query "value[].{name:name, operation:properties.operationName, state:properties.state}" `
-    -o table
-```
+Trigger the connector event (e.g., send an email, upload a file). The Connector Namespace polls every 1-5 minutes.
 
-### Step 6: Fire the Trigger
-
-Create content in the watched location to trigger the callback:
+Watch Function App logs:
 
 ```powershell
-# Example: send yourself an email to fire OnNewEmailV3
-# Or upload a file to OneDrive to fire OnNewFileV2
+func start  # local
+# or for deployed:
+az functionapp log tail -g $resourceGroup -n $functionAppName
 ```
 
-The Connector Gateway polls the connector every 1-5 minutes. After polling detects the new content, it POSTs the trigger payload to your callback URL.
+## Using the SDK for Actions (Beyond Triggers)
 
-### Step 7: Verify Callback Received
+The `azure-connectors` package provides typed async clients for calling connector actions directly from any Python application — Azure Functions, Flask, FastAPI, Django, scripts, etc.
 
-Check function app logs:
+### Example: Send an email
 
-```powershell
-az webapp log download -g $resourceGroup -n $functionAppName --log-file "$env:TEMP/func-logs.zip"
-Expand-Archive -Path "$env:TEMP/func-logs.zip" -DestinationPath "$env:TEMP/func-logs" -Force
-Get-ChildItem "$env:TEMP/func-logs" -Recurse -Filter "*.log" |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 3 |
-    ForEach-Object { Select-String -Path $_.FullName -Pattern "trigger callback" }
+```python
+import asyncio
+from azure.connectors.office365 import Office365Client
+from azure.connectors.sdk import ManagedIdentityTokenProvider
+
+async def main():
+    # Connection runtime URL from Connector Namespace
+    connection_url = "https://..."
+    token_provider = ManagedIdentityTokenProvider()
+
+    async with Office365Client(connection_url, token_provider) as client:
+        await client.send_email_async(
+            to="recipient@example.com",
+            subject="Hello from Python SDK",
+            body="<p>Sent from any Python app!</p>",
+        )
+
+asyncio.run(main())
 ```
 
-## API Schema Reference
+### Example: List SharePoint items
 
-### TriggerConfig PUT Body
+```python
+from azure.connectors.sharepointonline import SharepointonlineClient
 
-```json
-{
-  "properties": {
-    "operationName": "OnNewEmailV3",
-    "connectionDetails": {
-      "connectorName": "office365",
-      "connectionName": "office365-test"
-    },
-    "notificationDetails": {
-      "callbackUrl": "https://my-func.azurewebsites.net/api/triggers/email?code=<function-key>",
-      "httpMethod": "Post"
-    },
-    "parameters": [
-      { "name": "folderId", "value": "Inbox" }
-    ]
-  }
-}
+async def list_items():
+    async with SharepointonlineClient(connection_url, token_provider) as client:
+        items = await client.get_items_async(
+            dataset="https://contoso.sharepoint.com/sites/MySite",
+            table="MyList"
+        )
+        for item in items.get("value", []):
+            print(f"Item: {item.get('Title')}")
 ```
 
-### Property Names (Validated)
+### Example: List Teams
 
-| Property | Notes |
-|----------|-------|
-| `properties.connectionDetails` | **Not** `connectionName` at top level |
-| `properties.connectionDetails.connectorName` | Required — the API connector name |
-| `properties.connectionDetails.connectionName` | Required — the connection resource name |
-| `properties.notificationDetails.callbackUrl` | **Missing = trigger has no target** — trigger provisions but never calls back |
-| `properties.notificationDetails.httpMethod` | `"Post"` |
-| `parameters[].name` | **Not** `parameterName` |
-| `parameters[].value` | String value |
+```python
+from azure.connectors.teams import TeamsClient
 
-### Common Errors
+async def list_teams():
+    async with TeamsClient(connection_url, token_provider) as client:
+        teams = await client.get_all_teams_async()
+        for team in teams.get("value", []):
+            print(f"Team: {team.get('displayName')}")
+```
+
+### Authentication Options
+
+```python
+from azure.connectors.sdk import ManagedIdentityTokenProvider, ConnectionStringTokenProvider
+
+# System-assigned managed identity (recommended for Azure)
+token_provider = ManagedIdentityTokenProvider()
+
+# User-assigned managed identity
+token_provider = ManagedIdentityTokenProvider(client_id="your-client-id")
+
+# Azure Identity credentials (DefaultAzureCredential, AzureCliCredential, etc.)
+from azure.identity.aio import DefaultAzureCredential
+credential = DefaultAzureCredential()
+client = Office365Client(connection_url, credential)
+```
+
+### Validated Connectors
+
+| Connector | Package | Status |
+|-----------|---------|--------|
+| Office 365 Outlook | `azure.connectors.office365` | ✅ Complete |
+| SharePoint Online | `azure.connectors.sharepointonline` | ✅ Complete |
+| Microsoft Teams | `azure.connectors.teams` | ✅ Complete |
+| Azure Data Explorer | `azure.connectors.kusto` | ✅ Complete |
+| MS Graph Groups & Users | `azure.connectors.msgraphgroupsanduser` | ✅ Complete |
+| Office 365 Users | `azure.connectors.office365users` | ✅ Complete |
+| Azure Blob Storage | `azure.connectors.azureblob` | ✅ Complete |
+| IBM MQ | `azure.connectors.mq` | ✅ Complete |
+
+> All SDKs support generating clients for any of the 1,000+ Azure managed connectors.
+
+## Trigger Payload Shapes
+
+The Connector Namespace delivers callbacks in two shapes depending on the connector's `splitOn` setting:
+
+| Shape | JSON Structure | When |
+|-------|---------------|------|
+| Batch | `{"body": {"value": [...items...]}}` | splitOn disabled (default) |
+| Single-item | `{"body": {...item properties...}}` | splitOn enabled |
+
+The SDK's `TriggerCallbackPayload.from_json()` and `TriggerCallbackBody.from_dict()` methods normalize both shapes into a list, so consumers always iterate:
+
+```python
+from azure.connectors.sdk import TriggerCallbackPayload
+
+payload = TriggerCallbackPayload.from_json(raw_json)
+for item in payload.body.value:
+    print(item)
+```
+
+## Common Errors
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `Could not find member 'connectionName'` | Used `connectionName` instead of `connectionDetails` | Use `connectionDetails` with nested `connectorName` + `connectionName` |
-| `Could not find member 'callbackUrl'` | Put `callbackUrl` at properties level | Wrap in `notificationDetails` |
-| `Could not find member 'parameterName'` | Used `parameterName` in parameter array | Use `name` |
-| `Cannot deserialize... into ConnectorGatewayOperationsParameter[]` | Parameters as object, not array | Use `[{"name":"...","value":"..."}]` array |
-| `missing required property 'folderId'` | Required trigger parameter not provided | Add to parameters array |
-| Trigger provisions but never fires callback | Missing `notificationDetails` or empty `notificationDetails.callbackUrl` | Add `notificationDetails` with a non-empty `callbackUrl` and `httpMethod` |
-| `az rest` PUT returns no output/error | `az rest` swallows non-2xx responses silently | Use `Invoke-WebRequest` instead for PUT operations |
+| `Could not find member 'connectionName'` | Used `connectionName` at top level | Wrap in `connectionDetails` object |
+| `Could not find member 'callbackUrl'` | Put `callbackUrl` at properties level | Wrap in `notificationDetails` object |
+| `Could not find member 'parameterName'` | Used `parameterName` in params array | Use `name` field instead |
+| Trigger provisions but never fires | Missing `notificationDetails` or empty `callbackUrl` | Ensure `notificationDetails.callbackUrl` is set |
+| `az rest` PUT returns no output | `az rest` swallows non-2xx responses | Use `Invoke-WebRequest` for PUT operations |
 
-## Handling Trigger Payloads in Python
+## Reference
 
-### Binary Content Triggers (e.g., OnNewFileV2)
-
-```python
-import base64
-import json
-from typing import Any
-
-
-def handle_binary_trigger(body: dict[str, Any]) -> bytes | None:
-    """Handle binary trigger payload (e.g., OnNewFileV2)."""
-    if "body" not in body:
-        return None
-
-    body_value = body["body"]
-
-    if isinstance(body_value, str):
-        # Binary trigger — body is base64-encoded file content.
-        # NOTE: The base64 string may be wrapped in extra quotes
-        # from the Logic Apps expression engine. Strip them.
-        base64_content = body_value.strip('"')
-
-        if base64_content:
-            try:
-                return base64.b64decode(base64_content)
-            except Exception:
-                # Invalid base64 payload
-                return None
-
-    return None
-```
-
-### Metadata Triggers (e.g., OnNewFilesV2, OnNewEmailV3)
-
-```python
-from dataclasses import dataclass
-from typing import Any
-
-from azure.connectors.office365 import TriggerBatchResponseGraphClientReceiveMessage
-
-
-def handle_metadata_trigger(body: dict[str, Any]) -> list[Any]:
-    """Handle metadata trigger payload (e.g., OnNewEmailV3)."""
-    # Callback JSON shape: {"body":{"value":[{...item...}]}}
-    if "body" not in body:
-        return []
-
-    body_value = body["body"]
-
-    if isinstance(body_value, dict) and "value" in body_value:
-        return body_value["value"]
-
-    return []
-
-
-# Using SDK typed payload classes
-def handle_email_trigger(body: dict[str, Any]) -> TriggerBatchResponseGraphClientReceiveMessage | None:
-    """Handle Office 365 email trigger with typed payload."""
-    if "body" in body and isinstance(body["body"], dict):
-        return TriggerBatchResponseGraphClientReceiveMessage(**body["body"])
-    return None
-```
-
-### Detecting the Variant at Runtime
-
-```python
-from typing import Any
-
-
-def detect_trigger_variant(body: dict[str, Any]) -> str:
-    """Detect whether this is a binary or metadata trigger payload."""
-    if "body" not in body:
-        return "unknown"
-
-    body_value = body["body"]
-
-    if isinstance(body_value, str):
-        # Binary content trigger (OnNewFileV2, OnUpdatedFileV2)
-        return "binary"
-    elif isinstance(body_value, dict):
-        # Metadata trigger (OnNewFilesV2, OnUpdatedFilesV2, OnNewEmailV3)
-        return "metadata"
-
-    return "unknown"
-```
-```
+For a complete mapping of trigger operations to function signatures across .NET, Python, and TypeScript, see [Operations to Functions Signature Match](https://github.com/Azure/azure-functions-connector-extension/blob/main/docs/operations-functions-match.md).
