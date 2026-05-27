@@ -7,7 +7,7 @@ This sample demonstrates how to use the SharePoint Online connector SDK.
 
 Prerequisites:
 1. Azure subscription with SharePoint Online connection
-2. SharePoint Online connection in Azure Logic Apps
+2. SharePoint Online connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 4. SharePoint site URL
 

@@ -1,6 +1,6 @@
 # Unit Tests
 
-This directory contains comprehensive unit tests for the Azure Logic Apps Connectors Python SDK.
+This directory contains comprehensive unit tests for the Azure Connectors Python SDK.
 
 ## Test Structure
 
