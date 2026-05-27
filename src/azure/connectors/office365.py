@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List, Union
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
@@ -1133,10 +1133,8 @@ class ClientReceiveMessage:
         )
 
     @classmethod
-    def from_json(
-        cls, payload: Any
-    ) -> Union[ClientReceiveMessage, List[ClientReceiveMessage]]:
-        """Parse a JSON payload and return ClientReceiveMessage object(s).
+    def from_json(cls, payload: Any) -> List[ClientReceiveMessage]:
+        """Parse a JSON payload and return a list of ClientReceiveMessage objects.
 
         This method supports SDK-type bindings for Python Function apps, allowing
         functions to bind to and return rich ClientReceiveMessage objects instead
@@ -1144,33 +1142,34 @@ class ClientReceiveMessage:
 
         Handles both batch and single-item trigger callback shapes:
         - Batch (splitOn disabled): ``{"body": {"value": [...messages...]}}``
-          Returns a list of ClientReceiveMessage objects.
         - Single-item (splitOn enabled): ``{"body": {...message...}}``
-          Returns a single ClientReceiveMessage object.
+
+        Both shapes are normalized to return a list, making it easier for callers
+        to process messages uniformly without checking the return type.
 
         Args:
             payload: A JSON string, dictionary, or object with a ``value``
                 attribute containing the email message(s).
 
         Returns:
-            A single ClientReceiveMessage for single-item payloads, or a list
-            of ClientReceiveMessage objects for batch payloads.
+            A list of ClientReceiveMessage objects. Single-item payloads return
+            a list with one element.
 
         Raises:
             ValueError: If the payload structure is invalid or cannot be parsed.
 
         Example:
-            >>> # Single-item payload (OnNewEmailV3 trigger)
+            >>> # Single-item payload (OnNewEmailV3 trigger) - returns list of 1
             >>> payload = {"body": {"id": "AAMk...", "subject": "Test"}}
-            >>> message = ClientReceiveMessage.from_json(payload)
-            >>> isinstance(message, ClientReceiveMessage)
-            True
+            >>> messages = ClientReceiveMessage.from_json(payload)
+            >>> len(messages)
+            1
 
-            >>> # Batch payload
+            >>> # Batch payload - returns list of N
             >>> payload = {"body": {"value": [{"id": "1"}, {"id": "2"}]}}
             >>> messages = ClientReceiveMessage.from_json(payload)
-            >>> isinstance(messages, list)
-            True
+            >>> len(messages)
+            2
         """
         from azure.connectors.sdk.trigger_payload import _is_batch_shape
 
@@ -1204,17 +1203,17 @@ class ClientReceiveMessage:
         if body_data is None:
             return []
 
-        # NOTE(SDK): Detect shape and return appropriately:
+        # NOTE(SDK): Detect shape and normalize to list:
         # - Batch shape: {"value": [...]} -> returns List[ClientReceiveMessage]
-        # - Single-item shape: {...item...} -> returns ClientReceiveMessage
+        # - Single-item shape: {...item...} -> returns [ClientReceiveMessage]
         if _is_batch_shape(body_data):
             raw_items = body_data.get("value")
             if raw_items is None:
                 return []
             return [cls._parse_item(item) for item in raw_items]
 
-        # NOTE(SDK): Single-item shape - return single object, not a list.
-        return cls._parse_item(body_data)
+        # NOTE(SDK): Single-item shape - wrap in list for uniform return type.
+        return [cls._parse_item(body_data)]
 
 
 @dataclass
