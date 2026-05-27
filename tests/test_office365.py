@@ -1012,12 +1012,18 @@ class TestClientReceiveMessageFromJson:
         with pytest.raises(ValueError, match="Invalid JSON payload"):
             ClientReceiveMessage.from_json(payload)
 
-    def test_from_json_invalid_value_type_raises_error(self):
-        """Test that non-list value raises ValueError."""
+    def test_from_json_invalid_value_type_treated_as_single_item(self):
+        """Test that non-list value is treated as single-item shape."""
+        # NOTE(SDK): With _is_batch_shape, a non-list value is treated as
+        # a single-item shape. This returns a single message parsed from the body dict.
         payload = self._make_payload({"body": {"value": "not a list"}})
 
-        with pytest.raises(ValueError, match="Expected 'body.value' to contain a list"):
-            ClientReceiveMessage.from_json(payload)
+        message = ClientReceiveMessage.from_json(payload)
+
+        # The dict {"value": "not a list"} is parsed as a single message
+        assert isinstance(message, ClientReceiveMessage)
+        # All fields are None since the dict has no recognized message fields
+        assert message.id is None
 
     def test_from_json_direct_value_without_body_wrapper(self):
         """Test parsing when value is directly under root without body wrapper."""
@@ -1033,12 +1039,86 @@ class TestClientReceiveMessageFromJson:
         assert messages[0].id == "direct"
         assert messages[0].subject == "Direct Access"
 
-    def test_from_json_missing_value_attribute_raises_error(self):
-        """Test that payload without .value attribute raises ValueError."""
-        payload = {"body": {"value": []}}  # Plain dict without .value attribute
+    def test_from_json_single_item_shape(self):
+        """Test parsing single-item shape (splitOn enabled) from trigger callback."""
+        # Single-item shape: {"body": {...message properties...}}
+        # Returns a single ClientReceiveMessage, not a list.
+        payload = self._make_payload({
+            "body": {
+                "id": "single-item-id",
+                "subject": "Single Item Test",
+                "from": "sender@example.com",
+                "toRecipients": "recipient@example.com",
+                "importance": "high",
+                "receivedDateTime": "2026-05-26T21:20:32+00:00",
+                "isRead": False
+            }
+        })
 
-        with pytest.raises(ValueError, match="Payload must have a 'value' attribute"):
-            ClientReceiveMessage.from_json(payload)
+        message = ClientReceiveMessage.from_json(payload)
+
+        # Single-item shape returns a single object, not a list
+        assert isinstance(message, ClientReceiveMessage)
+        assert not isinstance(message, list)
+        assert message.id == "single-item-id"
+        assert message.subject == "Single Item Test"
+        assert message.from_ == "sender@example.com"
+        assert message.to == "recipient@example.com"
+        assert message.importance == 2  # high = 2
+        assert message.is_read is False
+
+    def test_from_json_on_new_email_v3_payload(self):
+        """Test parsing real OnNewEmailV3 trigger payload (single-item shape)."""
+        # This is the actual shape sent by OnNewEmailV3 triggers.
+        # The email object is directly in body, not wrapped in {"value": [...]}.
+        payload = {
+            "body": {
+                "id": "AAMkADU4NTdhMzcyLTJmNmUtNDRhNS1iNGNkLWE2NDQyMTA1NGE2MA==",
+                "receivedDateTime": "2026-05-26T21:20:32+00:00",
+                "hasAttachments": False,
+                "internetMessageId": "<SA6PR21MB4367A646@namprd21.prod.outlook.com>",
+                "subject": "Test Email",
+                "bodyPreview": "test",
+                "importance": "normal",
+                "conversationId": "AAQkADU4NTdhMzcyLTJmNm==",
+                "isRead": False,
+                "isHtml": True,
+                "body": "<html><body>test</body></html>",
+                "from": "sender@microsoft.com",
+                "toRecipients": "recipient@microsoft.com",
+                "ccRecipients": None,
+                "bccRecipients": None,
+                "replyTo": None,
+                "attachments": []
+            }
+        }
+
+        message = ClientReceiveMessage.from_json(payload)
+
+        # OnNewEmailV3 sends single-item shape, returns single object
+        assert isinstance(message, ClientReceiveMessage)
+        assert not isinstance(message, list)
+        assert message.id == "AAMkADU4NTdhMzcyLTJmNmUtNDRhNS1iNGNkLWE2NDQyMTA1NGE2MA=="
+        assert message.subject == "Test Email"
+        assert message.from_ == "sender@microsoft.com"
+        assert message.to == "recipient@microsoft.com"
+        assert message.importance == 1  # normal = 1
+        assert message.is_read is False
+        assert message.is_html is True
+        assert message.has_attachment is False
+        assert message.body_preview == "test"
+        assert message.internet_message_id == "<SA6PR21MB4367A646@namprd21.prod.outlook.com>"
+        assert message.conversation_id == "AAQkADU4NTdhMzcyLTJmNm=="
+        assert message.date_time_received == "2026-05-26T21:20:32+00:00"
+
+    def test_from_json_accepts_plain_dict(self):
+        """Test that plain dict is now accepted (no .value attribute required)."""
+        payload = {"body": {"value": [{"id": "plain-dict", "subject": "Test"}]}}
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        assert messages[0].id == "plain-dict"
 
 
 class TestEdgeCases:

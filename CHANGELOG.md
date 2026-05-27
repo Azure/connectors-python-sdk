@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-
+- **Rename Package Metadata**: renamed package metadata from Logic Apps to Azure Connectors branding, removed logic-apps keyword.
 - **`TriggerCallbackBody[T]` now handles both batch and single-item callback shapes** — Connector Namespace delivers trigger callbacks in two shapes depending on the trigger configuration's splitOn setting: batch `{"body":{"value":[...]}}` and single-item `{"body":{...item...}}`. The new `from_dict()` factory methods on `TriggerCallbackPayload` and `TriggerCallbackBody` transparently normalize both shapes into `body.value` as a list, preventing silent zero-item processing when splitOn is enabled. Use `TriggerCallbackPayload.from_dict(data)` to parse callback payloads that may arrive in either shape.
 
 ## [0.2.0b1] - 2026-05-13
