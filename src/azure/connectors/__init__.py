@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Logic Apps Connector SDK for Python.
+Azure Connectors SDK for Python.
 
-This package provides infrastructure for calling Azure Logic Apps connectors
+This package provides infrastructure for calling Azure Connectors
 from Python applications, including authentication, HTTP clients, and
 strongly-typed generated connector clients.
 """

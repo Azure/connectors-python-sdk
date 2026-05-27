@@ -7,7 +7,7 @@ This sample demonstrates how to use the Office 365 Users connector SDK.
 
 Prerequisites:
 1. Azure subscription with Office 365 Users connection
-2. Office 365 Users connection in Azure Logic Apps
+2. Office 365 Users connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Installation:

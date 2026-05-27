@@ -150,7 +150,7 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 - [ ] **Trigger support**
   - [ ] Polling triggers (webhooks where supported)
-  - [ ] Connector Gateway integration
+  - [ ] Connector Namespace integration
   - [ ] Event Grid integration
 - [ ] **Batch operations**
   - [ ] Bulk send for email
@@ -411,13 +411,13 @@ For each new connector, complete these steps:
 - **[M365 Agent POC](https://github.com/coreai-microsoft/m365-agent-poc)** — Working POC using today's GA connectors with Functions (LA Connector as trigger layer, Functions as code runner). Found v1/v2/v3 connector version surprises and webhook subscribe 404 issues. Analyzed internally.
 - **[Codeful Workflows SDK](https://github.com/AzureAD/logicapps-sdk)** (`logicapps-sdk`) — C# code-to-workflow compiler. Generates typed trigger classes for all 1000+ managed connectors. Compiles to workflow.json and delegates trigger lifecycle to Logic Apps runtime. Different approach from our direct-invocation SDK but shares swagger-to-trigger-model generation. Analyzed internally.
 - **BPM Runtime Trigger Architecture** — Analyzed the Logic Apps runtime trigger implementation: three trigger strategies (polling, pure webhook, notification hybrid), dual-job provisioning, class hierarchy, coordination protocol. Extraction plan and trigger taxonomy documentation available internally.
-- **Connector Gateway API Design** — Control plane API design for `Microsoft.Web/connectorGateways` (internal document).
+- **Connector Namespace API Design** — Control plane API design for `Microsoft.Web/connectorGateways` (internal document).
 
 ### Backlog
 
-1. **Transition to Connector Gateway API** (`Microsoft.Web/connectorGateways`)
-   - The Connector Gateway resource exposes connections and triggers as data-plane resources without requiring Logic Apps. Available in First Release / TIP regions (as of 2026-03-05) but not yet GA.
-   - **Blocked on:** Connector Gateway reaching GA with stable API surface.
+1. **Transition to Connector Namespace API** (`Microsoft.Web/connectorGateways`)
+   - The Connector Namespace resource exposes connections and triggers as data-plane resources without requiring Logic Apps. Available in First Release / TIP regions (as of 2026-03-05) but not yet GA.
+   - **Blocked on:** Connector Namespace reaching GA with stable API surface.
    - [ ] Monitor Connector Namespace API availability and documentation
    - [ ] Evaluate migration path from `Microsoft.Web/connections` direct access
    - [ ] Update SDK connection setup to support Connector Namespace resource type
@@ -427,7 +427,7 @@ For each new connector, complete these steps:
 1. **Multi-language trigger SDK** (Python, Node.js, Java)
 
 1. **Connection setup automation** (VS Code extension / LSP)
-   - AI agents can already automate the full connection lifecycle via the `connection-setup` skill (`.github/skills/connection-setup/SKILL.md`): Connector Gateway creation, connection creation, OAuth consent link, access policies, and settings injection.
+   - AI agents can already automate the full connection lifecycle via the `connection-setup` skill (`.github/skills/connection-setup/SKILL.md`): Connector Namespace creation, connection creation, OAuth consent link, access policies, and settings injection.
    - **Next:** Build native VS Code extension support (or LSP ConnectionsService) for in-editor connection creation with UI, following the building blocks documented in the skill file.
    - [ ] LSP ConnectionsService: detect existing connections, guided creation flow
    - [ ] VS Code command palette: "Add Connector Connection" with connector picker
@@ -446,7 +446,7 @@ For each new connector, complete these steps:
 |------------|--------|--------|
 | BPM generator PR merged to master | ⏳ Awaiting review | Can work from feature branch, but need master for stability |
 | OAuth connections for testing | ✅ Office365 works | Need connection setup for each new connector |
-| Connector Gateway GA | ⬜ Not yet GA | Using `Microsoft.Web/connections` direct access until then |
+| Connector Namespace GA | ⬜ Not yet GA | Using `Microsoft.Web/connections` direct access until then |
 | Functions extension for triggers | ⬜ Functions team owns | We provide SDK + connector-side delivery; they build the extension |
 | MWF sync cadence | ✅ Established 2026-03-13 | Cross-team alignment on Connectors for Functions |
 
