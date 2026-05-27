@@ -151,7 +151,7 @@ def on_new_file(payload: str) -> None:
         logging.info(f"Received file content: {len(content)} bytes")
 ```
 
-#### With generic trigger (when using Python <= 3.12>)
+#### With generic trigger (when using Python <= 3.12)
 
 ```python
 import azure.functions as func
