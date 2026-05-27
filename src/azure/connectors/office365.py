@@ -146,11 +146,103 @@ class GraphCalendarEventListClientReceive:
 class GraphCalendarEventListWithActionType:
     """Response for When an event is added, updated or deleted (V3)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[GraphCalendarEventClientWithActionType]] = None
+    """List of calendar items"""
+
+    @classmethod
+    def from_json(cls, payload) -> List[GraphCalendarEventListWithActionType]:
+        """Parse a JSON payload and return a GraphCalendarEventListWithActionType object.
+
+        This method supports SDK-type bindings for Python Function apps, allowing
+        functions to bind to and return rich GraphCalendarEventListWithActionType
+        objects instead of raw JSON payloads.
+
+        Args:
+            payload: An object with a .value attribute containing a JSON string or
+                dictionary with the calendar events.
+                Expected structure for batches: {"body": {"value": [...events...]}}
+                Expected structure for single items: {"body": {...event...}}
+
+        Returns:
+            A GraphCalendarEventListWithActionType object containing the parsed events.
+
+        Raises:
+            ValueError: If the payload structure is invalid or cannot be parsed.
+        """
+        if not hasattr(payload, "value"):
+            raise ValueError("Payload must have a 'value' attribute.")
+
+        if isinstance(payload.value, str):
+            try:
+                data = json.loads(payload.value)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON payload: {e}.") from e
+        else:
+            data = payload.value
+
+        # NOTE(SDK): Navigate to body to extract event(s).
+        if isinstance(data, dict):
+            body = data.get("body", data)
+            if isinstance(body, dict):
+                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
+                if "value" in body and isinstance(body.get("value"), list):
+                    events_data = body.get("value")
+                else:
+                    # NOTE(SDK): Single item - wrap in list for uniform processing.
+                    events_data = [body]
+            else:
+                events_data = []
+        else:
+            events_data = []
+
+        if not isinstance(events_data, list):
+            raise ValueError("Expected 'body.value' to contain a list of events.")
+
+        events: List[GraphCalendarEventClientWithActionType] = []
+        for item in events_data:
+            if not isinstance(item, dict):
+                continue
+
+            event = GraphCalendarEventClientWithActionType(
+                id=item.get("id"),
+                action_type=item.get("actionType"),
+                is_added=item.get("isAdded"),
+                is_updated=item.get("isUpdated"),
+                subject=item.get("subject"),
+                start=item.get("start"),
+                end=item.get("end"),
+                start_with_time_zone=item.get("startWithTimeZone"),
+                end_with_time_zone=item.get("endWithTimeZone"),
+                body=item.get("body"),
+                is_html=item.get("isHtml"),
+                response_type=item.get("responseType"),
+                response_time=item.get("responseTime"),
+                created_date_time=item.get("createdDateTime"),
+                last_modified_date_time=item.get("lastModifiedDateTime"),
+                organizer=item.get("organizer"),
+                time_zone=item.get("timeZone"),
+                series_master_id=item.get("seriesMasterId"),
+                i_cal_u_id=item.get("iCalUId"),
+                categories=item.get("categories"),
+                web_link=item.get("webLink"),
+                required_attendees=item.get("requiredAttendees"),
+                optional_attendees=item.get("optionalAttendees"),
+                resource_attendees=item.get("resourceAttendees"),
+                location=item.get("location"),
+                importance=item.get("importance"),
+                is_all_day=item.get("isAllDay"),
+                recurrence=item.get("recurrence"),
+                recurrence_end=item.get("recurrenceEnd"),
+                number_of_occurences=item.get("numberOfOccurences"),
+                reminder_minutes_before_start=item.get("reminderMinutesBeforeStart"),
+                is_reminder_on=item.get("isReminderOn"),
+                show_as=item.get("showAs"),
+                response_requested=item.get("responseRequested"),
+                sensitivity=item.get("sensitivity"),
+            )
+            events.append(event)
+
+        return cls(value=events)
 
 
 @dataclass
@@ -259,11 +351,165 @@ class GetAttachmentResponse:
 class GraphClientReceiveMessage:
     """Response for Get email (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    attachments: Optional[List[GraphClientReceiveFileAttachment]] = None
+    """The file attachments for the message"""
+    bcc_recipients: Optional[str] = None
+    """The Bcc recipients for the message"""
+    body: Optional[str] = None
+    """The body of the message"""
+    body_preview: Optional[str] = None
+    """The preview of the message"""
+    cc_recipients: Optional[str] = None
+    """The Cc recipients for the message"""
+    conversation_id: Optional[str] = None
+    """The Id of the conversation the email belongs to"""
+    from_: Optional[str] = None
+    """The mailbox owner and sender of the message"""
+    has_attachments: Optional[bool] = None
+    """Indicates whether the message has attachments"""
+    id: Optional[str] = None
+    """The unique identifier of the message"""
+    importance: Optional[str] = None
+    """The importance of the message (low, normal, high)"""
+    internet_message_id: Optional[str] = None
+    """The message ID in the format specified by RFC2822"""
+    is_html: Optional[bool] = None
+    """Is Html?"""
+    is_read: Optional[bool] = None
+    """Indicates whether the message has been read"""
+    received_date_time: Optional[str] = None
+    """The date and time the message was received"""
+    reply_to: Optional[str] = None
+    """The email addresses to use when replying"""
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    subject: Optional[str] = None
+    """The subject of the message"""
+    to_recipients: Optional[str] = None
+    """The recipients for the message"""
+
+    @classmethod
+    def from_json(cls, payload) -> List[GraphClientReceiveMessage]:
+        """Parse a JSON payload and return a list of GraphClientReceiveMessage objects.
+
+        This method supports SDK-type bindings for Python Function apps, allowing
+        functions to bind to and return rich GraphClientReceiveMessage objects instead
+        of raw JSON payloads.
+
+        Args:
+            payload: An object with a .value attribute containing a JSON string or
+                dictionary with the email messages.
+                Expected structure for batches: {"body": {"value": [...messages...]}}
+                Expected structure for single items: {"body": {...message...}}
+
+        Returns:
+            A list of GraphClientReceiveMessage objects parsed from the payload.
+
+        Raises:
+            ValueError: If the payload structure is invalid or cannot be parsed.
+        """
+        if not hasattr(payload, "value"):
+            raise ValueError("Payload must have a 'value' attribute.")
+
+        if isinstance(payload.value, str):
+            try:
+                data = json.loads(payload.value)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON payload: {e}.") from e
+        else:
+            data = payload.value
+
+        # NOTE(SDK): Navigate to body to extract message(s).
+        if isinstance(data, dict):
+            body = data.get("body", data)
+            if isinstance(body, dict):
+                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
+                if "value" in body and isinstance(body.get("value"), list):
+                    messages_data = body.get("value")
+                else:
+                    # NOTE(SDK): Single item - wrap in list for uniform processing.
+                    messages_data = [body]
+            else:
+                messages_data = []
+        else:
+            messages_data = []
+
+        if not isinstance(messages_data, list):
+            raise ValueError("Expected 'body.value' to contain a list of messages.")
+
+        messages: List[GraphClientReceiveMessage] = []
+        for item in messages_data:
+            if not isinstance(item, dict):
+                continue
+
+            # NOTE(SDK): Parse attachments if present.
+            attachments_data = item.get("attachments")
+            attachments_list: Optional[List[GraphClientReceiveFileAttachment]] = None
+            if attachments_data and isinstance(attachments_data, list):
+                attachments_list = []
+                for attachment in attachments_data:
+                    if isinstance(attachment, dict):
+                        attachments_list.append(
+                            GraphClientReceiveFileAttachment(
+                                id=attachment.get("id"),
+                                name=attachment.get("name"),
+                                content_bytes=attachment.get("contentBytes"),
+                                content_type=attachment.get("contentType"),
+                                size=attachment.get("size"),
+                                is_inline=attachment.get("isInline"),
+                                last_modified_date_time=attachment.get(
+                                    "lastModifiedDateTime"
+                                ),
+                                content_id=attachment.get("contentId"),
+                            )
+                        )
+
+            # NOTE(SDK): Parse sensitivity label info if present.
+            sensitivity_data = item.get("sensitivityLabelInfo")
+            sensitivity_list: Optional[List[SensitivityLabelMetadata]] = None
+            if sensitivity_data and isinstance(sensitivity_data, list):
+                sensitivity_list = []
+                for label in sensitivity_data:
+                    if isinstance(label, dict):
+                        sensitivity_list.append(
+                            SensitivityLabelMetadata(
+                                sensitivity_label_id=label.get("sensitivityLabelId"),
+                                name=label.get("name"),
+                                display_name=label.get("displayName"),
+                                tooltip=label.get("tooltip"),
+                                priority=label.get("priority"),
+                                color=label.get("color"),
+                                is_encrypted=label.get("isEncrypted"),
+                                is_enabled=label.get("isEnabled"),
+                                is_parent=label.get("isParent"),
+                                parent_sensitivity_label_id=label.get(
+                                    "parentSensitivityLabelId"
+                                ),
+                            )
+                        )
+
+            message = cls(
+                id=item.get("id"),
+                from_=item.get("from"),
+                to_recipients=item.get("toRecipients"),
+                cc_recipients=item.get("ccRecipients"),
+                bcc_recipients=item.get("bccRecipients"),
+                reply_to=item.get("replyTo"),
+                subject=item.get("subject"),
+                body=item.get("body"),
+                importance=item.get("importance"),
+                body_preview=item.get("bodyPreview"),
+                has_attachments=item.get("hasAttachments"),
+                internet_message_id=item.get("internetMessageId"),
+                conversation_id=item.get("conversationId"),
+                received_date_time=item.get("receivedDateTime"),
+                is_read=item.get("isRead"),
+                attachments=attachments_list,
+                is_html=item.get("isHtml"),
+                sensitivity_label_info=sensitivity_list,
+            )
+            messages.append(message)
+
+        return messages
 
 
 @dataclass
