@@ -1041,6 +1041,19 @@ class TestClientReceiveMessageFromJson:
         assert messages[0].importance == 2  # "high" -> 2
         assert messages[0].body_preview == "This is a single item"
         assert messages[0].is_read is False
+    def test_from_json_invalid_value_type_treated_as_single_item(self):
+        """Test that non-list value is treated as single-item shape."""
+        # NOTE(SDK): With _is_batch_shape, a non-list value is treated as
+        # a single-item shape. This returns a list with one message.
+        payload = self._make_payload({"body": {"value": "not a list"}})
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        # The dict {"value": "not a list"} is parsed as a single message in a list
+        assert isinstance(messages, list)
+        assert len(messages) == 1
+        # All fields are None since the dict has no recognized message fields
+        assert messages[0].id is None
 
     def test_from_json_direct_value_without_body_wrapper(self):
         """Test parsing when value is directly under root without body wrapper."""
@@ -1056,12 +1069,615 @@ class TestClientReceiveMessageFromJson:
         assert messages[0].id == "direct"
         assert messages[0].subject == "Direct Access"
 
+    def test_from_json_single_item_shape(self):
+        """Test parsing single-item shape (splitOn enabled) from trigger callback."""
+        # Single-item shape: {"body": {...message properties...}}
+        # Returns a list with one ClientReceiveMessage for uniform handling.
+        payload = self._make_payload({
+            "body": {
+                "id": "single-item-id",
+                "subject": "Single Item Test",
+                "from": "sender@example.com",
+                "toRecipients": "recipient@example.com",
+                "importance": "high",
+                "receivedDateTime": "2026-05-26T21:20:32+00:00",
+                "isRead": False
+            }
+        })
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        # Single-item shape returns a list with one element
+        assert isinstance(messages, list)
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.id == "single-item-id"
+        assert msg.subject == "Single Item Test"
+        assert msg.from_ == "sender@example.com"
+        assert msg.to == "recipient@example.com"
+        assert msg.importance == 2  # high = 2
+        assert msg.is_read is False
+
+    def test_from_json_on_new_email_v3_payload(self):
+        """Test parsing real OnNewEmailV3 trigger payload (single-item shape)."""
+        # This is the actual shape sent by OnNewEmailV3 triggers.
+        # The email object is directly in body, not wrapped in {"value": [...]}.
+        payload = {
+            "body": {
+                "id": "AAMkADU4NTdhMzcyLTJmNmUtNDRhNS1iNGNkLWE2NDQyMTA1NGE2MA==",
+                "receivedDateTime": "2026-05-26T21:20:32+00:00",
+                "hasAttachments": False,
+                "internetMessageId": "<SA6PR21MB4367A646@namprd21.prod.outlook.com>",
+                "subject": "Test Email",
+                "bodyPreview": "test",
+                "importance": "normal",
+                "conversationId": "AAQkADU4NTdhMzcyLTJmNm==",
+                "isRead": False,
+                "isHtml": True,
+                "body": "<html><body>test</body></html>",
+                "from": "sender@microsoft.com",
+                "toRecipients": "recipient@microsoft.com",
+                "ccRecipients": None,
+                "bccRecipients": None,
+                "replyTo": None,
+                "attachments": []
+            }
+        }
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        # OnNewEmailV3 sends single-item shape, returns list with one element
+        assert isinstance(messages, list)
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.id == "AAMkADU4NTdhMzcyLTJmNmUtNDRhNS1iNGNkLWE2NDQyMTA1NGE2MA=="
+        assert msg.subject == "Test Email"
+        assert msg.from_ == "sender@microsoft.com"
+        assert msg.to == "recipient@microsoft.com"
+        assert msg.importance == 1  # normal = 1
+        assert msg.is_read is False
+        assert msg.is_html is True
+        assert msg.has_attachment is False
+        assert msg.body_preview == "test"
+        assert msg.internet_message_id == "<SA6PR21MB4367A646@namprd21.prod.outlook.com>"
+        assert msg.conversation_id == "AAQkADU4NTdhMzcyLTJmNm=="
+        assert msg.date_time_received == "2026-05-26T21:20:32+00:00"
+
+    def test_from_json_accepts_plain_dict(self):
+        """Test that plain dict is now accepted (no .value attribute required)."""
+        payload = {"body": {"value": [{"id": "plain-dict", "subject": "Test"}]}}
+
+        messages = ClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        assert messages[0].id == "plain-dict"
+
+
+class TestGraphClientReceiveMessageFromJson:
+    """Tests for GraphClientReceiveMessage.from_json method for SDK-type bindings."""
+
+    def _make_payload(self, value):
+        """Create a payload object with a .value attribute for testing."""
+        from types import SimpleNamespace
+        return SimpleNamespace(value=value)
+
+    def test_from_json_parses_batch_messages(self):
+        """Test parsing batch messages from payload with body.value array."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {
+                        "id": "AAMkADlmOTA3NWNm",
+                        "receivedDateTime": "2026-03-25T10:30:00+00:00",
+                        "hasAttachments": False,
+                        "subject": "Test Subject",
+                        "bodyPreview": "Preview text",
+                        "importance": "normal",
+                        "isRead": True,
+                        "isHtml": True,
+                        "body": "<html><body>Test</body></html>",
+                        "from": "sender@example.com",
+                        "toRecipients": "recipient@example.com",
+                        "ccRecipients": None,
+                        "bccRecipients": None,
+                        "replyTo": None,
+                        "attachments": []
+                    }
+                ]
+            }
+        })
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.id == "AAMkADlmOTA3NWNm"
+        assert msg.from_ == "sender@example.com"
+        assert msg.to_recipients == "recipient@example.com"
+        assert msg.subject == "Test Subject"
+        assert msg.body == "<html><body>Test</body></html>"
+        assert msg.body_preview == "Preview text"
+        assert msg.importance == "normal"
+        assert msg.is_read is True
+        assert msg.is_html is True
+        assert msg.has_attachments is False
+        assert msg.received_date_time == "2026-03-25T10:30:00+00:00"
+        assert msg.cc_recipients is None
+        assert msg.bcc_recipients is None
+        assert msg.reply_to is None
+
+    def test_from_json_parses_single_message(self):
+        """Test parsing a single message from payload with body as object."""
+        payload = self._make_payload({
+            "body": {
+                "id": "AAMkSingleMessage",
+                "receivedDateTime": "2026-03-25T11:00:00+00:00",
+                "hasAttachments": True,
+                "subject": "Single Message Test",
+                "importance": "high",
+                "isRead": False,
+                "from": "single@example.com",
+                "toRecipients": "me@example.com"
+            }
+        })
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.id == "AAMkSingleMessage"
+        assert msg.subject == "Single Message Test"
+        assert msg.importance == "high"
+        assert msg.has_attachments is True
+        assert msg.is_read is False
+        assert msg.from_ == "single@example.com"
+        assert msg.to_recipients == "me@example.com"
+
+    def test_from_json_parses_multiple_messages(self):
+        """Test parsing multiple messages from payload."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "msg1", "subject": "First", "importance": "low"},
+                    {"id": "msg2", "subject": "Second", "importance": "high"},
+                    {"id": "msg3", "subject": "Third", "importance": "normal"},
+                ]
+            }
+        })
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 3
+        assert messages[0].id == "msg1"
+        assert messages[0].subject == "First"
+        assert messages[0].importance == "low"
+        assert messages[1].id == "msg2"
+        assert messages[1].subject == "Second"
+        assert messages[1].importance == "high"
+        assert messages[2].id == "msg3"
+        assert messages[2].subject == "Third"
+        assert messages[2].importance == "normal"
+
+    def test_from_json_parses_json_string(self):
+        """Test parsing from a JSON string instead of dict."""
+        payload = self._make_payload(json.dumps({
+            "body": {
+                "value": [
+                    {"id": "test123", "subject": "JSON String Test"}
+                ]
+            }
+        }))
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        assert messages[0].id == "test123"
+        assert messages[0].subject == "JSON String Test"
+
+    def test_from_json_with_attachments(self):
+        """Test parsing messages with attachments."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {
+                        "id": "msg1",
+                        "hasAttachments": True,
+                        "attachments": [
+                            {
+                                "id": "att1",
+                                "name": "document.pdf",
+                                "contentBytes": "base64content",
+                                "contentType": "application/pdf",
+                                "size": 1024,
+                                "isInline": False,
+                                "lastModifiedDateTime": "2026-03-25T10:00:00Z",
+                                "contentId": "cid123"
+                            }
+                        ]
+                    }
+                ]
+            }
+        })
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.has_attachments is True
+        assert msg.attachments is not None
+        assert len(msg.attachments) == 1
+
+        att = msg.attachments[0]
+        assert isinstance(att, GraphClientReceiveFileAttachment)
+        assert att.id == "att1"
+        assert att.name == "document.pdf"
+        assert att.content_bytes == "base64content"
+        assert att.content_type == "application/pdf"
+        assert att.size == 1024
+        assert att.is_inline is False
+        assert att.last_modified_date_time == "2026-03-25T10:00:00Z"
+        assert att.content_id == "cid123"
+
+    def test_from_json_with_sensitivity_labels(self):
+        """Test parsing messages with sensitivity label info."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {
+                        "id": "msg1",
+                        "subject": "Confidential Message",
+                        "sensitivityLabelInfo": [
+                            {
+                                "sensitivityLabelId": "label-123",
+                                "name": "Confidential",
+                                "displayName": "Confidential - Internal",
+                                "tooltip": "For internal use only",
+                                "priority": 2,
+                                "color": "#FF0000",
+                                "isEncrypted": True,
+                                "isEnabled": True,
+                                "isParent": False,
+                                "parentSensitivityLabelId": "parent-456"
+                            }
+                        ]
+                    }
+                ]
+            }
+        })
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.sensitivity_label_info is not None
+        assert len(msg.sensitivity_label_info) == 1
+
+        label = msg.sensitivity_label_info[0]
+        assert isinstance(label, SensitivityLabelMetadata)
+        assert label.sensitivity_label_id == "label-123"
+        assert label.name == "Confidential"
+        assert label.display_name == "Confidential - Internal"
+        assert label.tooltip == "For internal use only"
+        assert label.priority == 2
+        assert label.color == "#FF0000"
+        assert label.is_encrypted is True
+        assert label.is_enabled is True
+        assert label.is_parent is False
+        assert label.parent_sensitivity_label_id == "parent-456"
+
+    def test_from_json_with_missing_fields(self):
+        """Test that missing fields default to None."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "minimal"}
+                ]
+            }
+        })
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 1
+        msg = messages[0]
+        assert msg.id == "minimal"
+        assert msg.from_ is None
+        assert msg.to_recipients is None
+        assert msg.subject is None
+        assert msg.body is None
+        assert msg.importance is None
+        assert msg.is_read is None
+        assert msg.attachments is None
+        assert msg.sensitivity_label_info is None
+
+    def test_from_json_with_empty_value_list(self):
+        """Test parsing payload with empty value list."""
+        payload = self._make_payload({"body": {"value": []}})
+
+        messages = GraphClientReceiveMessage.from_json(payload)
+
+        assert len(messages) == 0
+
+    def test_from_json_invalid_json_string_raises_error(self):
+        """Test that invalid JSON string raises ValueError."""
+        payload = self._make_payload("not valid json{")
+
+        with pytest.raises(ValueError, match="Invalid JSON payload"):
+            GraphClientReceiveMessage.from_json(payload)
+
     def test_from_json_missing_value_attribute_raises_error(self):
         """Test that payload without .value attribute raises ValueError."""
         payload = {"body": {"value": []}}  # Plain dict without .value attribute
 
         with pytest.raises(ValueError, match="Payload must have a 'value' attribute"):
-            ClientReceiveMessage.from_json(payload)
+            GraphClientReceiveMessage.from_json(payload)
+
+
+class TestGraphCalendarEventListWithActionTypeFromJson:
+    """Tests for GraphCalendarEventListWithActionType.from_json for SDK-type bindings."""
+
+    def _make_payload(self, value):
+        """Create a payload object with a .value attribute for testing."""
+        from types import SimpleNamespace
+        return SimpleNamespace(value=value)
+
+    def test_from_json_parses_batch_events(self):
+        """Test parsing batch calendar events from payload with body.value array."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {
+                        "id": "AAMkADlmEvent1",
+                        "actionType": "added",
+                        "isAdded": True,
+                        "isUpdated": False,
+                        "subject": "Team Meeting",
+                        "start": "2026-03-25T10:00:00.0000000",
+                        "end": "2026-03-25T11:00:00.0000000",
+                        "startWithTimeZone": "2026-03-25T10:00:00.0000000+00:00",
+                        "endWithTimeZone": "2026-03-25T11:00:00.0000000+00:00",
+                        "body": "Discuss project updates",
+                        "isHtml": False,
+                        "responseType": "organizer",
+                        "importance": "normal",
+                        "location": "Conference Room A",
+                        "isAllDay": False,
+                        "categories": ["Work", "Meetings"],
+                    }
+                ]
+            }
+        })
+
+        result = GraphCalendarEventListWithActionType.from_json(payload)
+
+        assert result.value is not None
+        assert len(result.value) == 1
+        event = result.value[0]
+        assert event.id == "AAMkADlmEvent1"
+        assert event.action_type == "added"
+        assert event.is_added is True
+        assert event.is_updated is False
+        assert event.subject == "Team Meeting"
+        assert event.start == "2026-03-25T10:00:00.0000000"
+        assert event.end == "2026-03-25T11:00:00.0000000"
+        assert event.start_with_time_zone == "2026-03-25T10:00:00.0000000+00:00"
+        assert event.end_with_time_zone == "2026-03-25T11:00:00.0000000+00:00"
+        assert event.body == "Discuss project updates"
+        assert event.is_html is False
+        assert event.response_type == "organizer"
+        assert event.importance == "normal"
+        assert event.location == "Conference Room A"
+        assert event.is_all_day is False
+        assert event.categories == ["Work", "Meetings"]
+
+    def test_from_json_parses_single_event(self):
+        """Test parsing a single calendar event from payload with body as object."""
+        payload = self._make_payload({
+            "body": {
+                "id": "AAMkSingleEvent",
+                "actionType": "updated",
+                "isAdded": False,
+                "isUpdated": True,
+                "subject": "One-on-One",
+                "start": "2026-03-26T14:00:00.0000000",
+                "end": "2026-03-26T14:30:00.0000000",
+                "organizer": "manager@example.com",
+                "requiredAttendees": "employee@example.com",
+                "optionalAttendees": None,
+            }
+        })
+
+        result = GraphCalendarEventListWithActionType.from_json(payload)
+
+        assert result.value is not None
+        assert len(result.value) == 1
+        event = result.value[0]
+        assert event.id == "AAMkSingleEvent"
+        assert event.action_type == "updated"
+        assert event.is_added is False
+        assert event.is_updated is True
+        assert event.subject == "One-on-One"
+        assert event.organizer == "manager@example.com"
+        assert event.required_attendees == "employee@example.com"
+        assert event.optional_attendees is None
+
+    def test_from_json_parses_multiple_events(self):
+        """Test parsing multiple events from payload."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "event1", "subject": "Morning Sync", "actionType": "added"},
+                    {"id": "event2", "subject": "Lunch Break", "actionType": "updated"},
+                    {"id": "event3", "subject": "Sprint Review", "actionType": "deleted"},
+                ]
+            }
+        })
+
+        result = GraphCalendarEventListWithActionType.from_json(payload)
+
+        assert result.value is not None
+        assert len(result.value) == 3
+        assert result.value[0].id == "event1"
+        assert result.value[0].subject == "Morning Sync"
+        assert result.value[0].action_type == "added"
+        assert result.value[1].id == "event2"
+        assert result.value[1].subject == "Lunch Break"
+        assert result.value[1].action_type == "updated"
+        assert result.value[2].id == "event3"
+        assert result.value[2].subject == "Sprint Review"
+        assert result.value[2].action_type == "deleted"
+
+    def test_from_json_parses_json_string(self):
+        """Test parsing from a JSON string instead of dict."""
+        payload = self._make_payload(json.dumps({
+            "body": {
+                "value": [
+                    {"id": "test123", "subject": "JSON String Test", "importance": "high"}
+                ]
+            }
+        }))
+
+        result = GraphCalendarEventListWithActionType.from_json(payload)
+
+        assert result.value is not None
+        assert len(result.value) == 1
+        assert result.value[0].id == "test123"
+        assert result.value[0].subject == "JSON String Test"
+        assert result.value[0].importance == "high"
+
+    def test_from_json_parses_all_fields(self):
+        """Test parsing event with all fields populated."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {
+                        "id": "fullEvent",
+                        "actionType": "added",
+                        "isAdded": True,
+                        "isUpdated": False,
+                        "subject": "Full Event Test",
+                        "start": "2026-04-01T09:00:00.0000000",
+                        "end": "2026-04-01T10:00:00.0000000",
+                        "startWithTimeZone": "2026-04-01T09:00:00.0000000-07:00",
+                        "endWithTimeZone": "2026-04-01T10:00:00.0000000-07:00",
+                        "body": "<html><body>Meeting details</body></html>",
+                        "isHtml": True,
+                        "responseType": "accepted",
+                        "responseTime": "2026-03-28T12:00:00Z",
+                        "createdDateTime": "2026-03-25T08:00:00Z",
+                        "lastModifiedDateTime": "2026-03-28T12:00:00Z",
+                        "organizer": "organizer@example.com",
+                        "timeZone": "Pacific Standard Time",
+                        "seriesMasterId": "series123",
+                        "iCalUId": "ical-uid-456",
+                        "categories": ["Important", "Work"],
+                        "webLink": "https://outlook.office.com/calendar/item/123",
+                        "requiredAttendees": "required@example.com",
+                        "optionalAttendees": "optional@example.com",
+                        "resourceAttendees": "room@example.com",
+                        "location": "Building 1, Room 101",
+                        "importance": "high",
+                        "isAllDay": False,
+                        "recurrence": "weekly",
+                        "recurrenceEnd": "2026-12-31T00:00:00Z",
+                        "numberOfOccurences": 52,
+                        "reminderMinutesBeforeStart": 15,
+                        "isReminderOn": True,
+                        "showAs": "busy",
+                        "responseRequested": True,
+                        "sensitivity": "private",
+                    }
+                ]
+            }
+        })
+
+        result = GraphCalendarEventListWithActionType.from_json(payload)
+
+        assert result.value is not None
+        assert len(result.value) == 1
+        event = result.value[0]
+        assert event.id == "fullEvent"
+        assert event.action_type == "added"
+        assert event.is_added is True
+        assert event.is_updated is False
+        assert event.subject == "Full Event Test"
+        assert event.start == "2026-04-01T09:00:00.0000000"
+        assert event.end == "2026-04-01T10:00:00.0000000"
+        assert event.start_with_time_zone == "2026-04-01T09:00:00.0000000-07:00"
+        assert event.end_with_time_zone == "2026-04-01T10:00:00.0000000-07:00"
+        assert event.body == "<html><body>Meeting details</body></html>"
+        assert event.is_html is True
+        assert event.response_type == "accepted"
+        assert event.response_time == "2026-03-28T12:00:00Z"
+        assert event.created_date_time == "2026-03-25T08:00:00Z"
+        assert event.last_modified_date_time == "2026-03-28T12:00:00Z"
+        assert event.organizer == "organizer@example.com"
+        assert event.time_zone == "Pacific Standard Time"
+        assert event.series_master_id == "series123"
+        assert event.i_cal_u_id == "ical-uid-456"
+        assert event.categories == ["Important", "Work"]
+        assert event.web_link == "https://outlook.office.com/calendar/item/123"
+        assert event.required_attendees == "required@example.com"
+        assert event.optional_attendees == "optional@example.com"
+        assert event.resource_attendees == "room@example.com"
+        assert event.location == "Building 1, Room 101"
+        assert event.importance == "high"
+        assert event.is_all_day is False
+        assert event.recurrence == "weekly"
+        assert event.recurrence_end == "2026-12-31T00:00:00Z"
+        assert event.number_of_occurences == 52
+        assert event.reminder_minutes_before_start == 15
+        assert event.is_reminder_on is True
+        assert event.show_as == "busy"
+        assert event.response_requested is True
+        assert event.sensitivity == "private"
+
+    def test_from_json_with_missing_fields(self):
+        """Test that missing fields default to None."""
+        payload = self._make_payload({
+            "body": {
+                "value": [
+                    {"id": "minimal"}
+                ]
+            }
+        })
+
+        result = GraphCalendarEventListWithActionType.from_json(payload)
+
+        assert result.value is not None
+        assert len(result.value) == 1
+        event = result.value[0]
+        assert event.id == "minimal"
+        assert event.action_type is None
+        assert event.subject is None
+        assert event.start is None
+        assert event.end is None
+        assert event.body is None
+        assert event.importance is None
+        assert event.location is None
+        assert event.categories is None
+
+    def test_from_json_with_empty_value_list(self):
+        """Test parsing payload with empty value list."""
+        payload = self._make_payload({"body": {"value": []}})
+
+        result = GraphCalendarEventListWithActionType.from_json(payload)
+
+        assert result.value is not None
+        assert len(result.value) == 0
+
+    def test_from_json_invalid_json_string_raises_error(self):
+        """Test that invalid JSON string raises ValueError."""
+        payload = self._make_payload("not valid json{")
+
+        with pytest.raises(ValueError, match="Invalid JSON payload"):
+            GraphCalendarEventListWithActionType.from_json(payload)
+
+    def test_from_json_missing_value_attribute_raises_error(self):
+        """Test that payload without .value attribute raises ValueError."""
+        payload = {"body": {"value": []}}  # Plain dict without .value attribute
+
+        with pytest.raises(ValueError, match="Payload must have a 'value' attribute"):
+            GraphCalendarEventListWithActionType.from_json(payload)
 
 
 class TestGraphClientReceiveMessageFromJson:
