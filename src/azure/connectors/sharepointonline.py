@@ -25,55 +25,85 @@ from azure.connectors.sdk import (
 class TablesList:
     """Response for Get all lists and libraries"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Table]] = None
+    """List of Tables"""
 
 
 @dataclass
 class ApproveHubSiteJoinResponse:
     """Response for Approve hub site join request"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    approval_token: Optional[str] = None
+    """Approval Token"""
 
 
 @dataclass
 class SharingLinkPermission:
     """Response for Create sharing link for a file or folder"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    link: Optional[SharingLink] = None
 
 
 @dataclass
 class BlobMetadata:
     """Response for Copy file (deprecated)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    id: Optional[str] = None
+    """The unique id of the file or folder."""
+    name: Optional[str] = None
+    """The name of the file or folder."""
+    display_name: Optional[str] = None
+    """The display name of the file or folder."""
+    path: Optional[str] = None
+    """The path of the file or folder."""
+    last_modified: Optional[str] = None
+    """The date and time the file or folder was last modified."""
+    size: Optional[int] = None
+    """The size of the file or folder."""
+    media_type: Optional[str] = None
+    """The media type of the file or folder."""
+    is_folder: Optional[bool] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    A boolean value (true, false) to indicate whether or not the blob is a
+    folder.
     """
+    e_tag: Optional[str] = None
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = None
+    """The filelocator of the file or folder."""
 
 
 @dataclass
 class SPBlobMetadataResponse:
     """Response for Copy file"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    item_id: Optional[int] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    The value that can be used to Get or Update file properties in libraries.
     """
+    id: Optional[str] = None
+    """The unique id of the file or folder."""
+    name: Optional[str] = None
+    """The name of the file or folder."""
+    display_name: Optional[str] = None
+    """The display name of the file or folder."""
+    path: Optional[str] = None
+    """The path of the file or folder."""
+    last_modified: Optional[str] = None
+    """The date and time the file or folder was last modified."""
+    size: Optional[int] = None
+    """The size of the file or folder."""
+    media_type: Optional[str] = None
+    """The media type of the file or folder."""
+    is_folder: Optional[bool] = None
+    """
+    A boolean value (true, false) to indicate whether or not the blob is a
+    folder.
+    """
+    e_tag: Optional[str] = None
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = None
+    """The filelocator of the file or folder."""
 
 
 @dataclass
@@ -102,11 +132,29 @@ class UpdateFileInput:
 class BlobMetadataResponse:
     """Response for Update file"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    id: Optional[str] = None
+    """The unique id of the file or folder."""
+    name: Optional[str] = None
+    """The name of the file or folder."""
+    display_name: Optional[str] = None
+    """The display name of the file or folder."""
+    path: Optional[str] = None
+    """The path of the file or folder."""
+    last_modified: Optional[str] = None
+    """The date and time the file or folder was last modified."""
+    size: Optional[int] = None
+    """The size of the file or folder."""
+    media_type: Optional[str] = None
+    """The media type of the file or folder."""
+    is_folder: Optional[bool] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    A boolean value (true, false) to indicate whether or not the blob is a
+    folder.
     """
+    e_tag: Optional[str] = None
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = None
+    """The filelocator of the file or folder."""
 
 
 @dataclass
@@ -135,22 +183,27 @@ class CreateNewFolderResponse:
 class SPListExpandedUser:
     """Response for Resolve person"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    claims: Optional[str] = None
+    """user claims"""
+    display_name: Optional[str] = None
+    """user title"""
+    email: Optional[str] = None
+    """user email"""
+    picture: Optional[str] = None
+    """user picture"""
+    department: Optional[str] = None
+    """user department"""
+    job_title: Optional[str] = None
+    """user job title"""
+    type_: Optional[str] = None
 
 
 @dataclass
 class ItemsList:
     """Response for Get files (properties only)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Item]] = None
+    """List of Items"""
 
 
 @dataclass
@@ -223,11 +276,8 @@ class CreateApprovalRequestInput:
 class ApprovalData:
     """Response for Create an approval request for an item or file"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    approval_id: Optional[str] = None
+    """The ID of the approval request created"""
 
 
 @dataclass
@@ -245,11 +295,7 @@ class GetItemChangesResponse:
 class Item:
     """Response for Get file properties"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    dynamic_properties: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -278,22 +324,28 @@ class PatchFileItemResponse:
 class SetApprovalStatusOutput:
     """Response for Set content approval status"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    e_tag: Optional[str] = None
+    """ETag of the item after the approval status was set"""
+    approval_link: Optional[str] = None
+    """A link to the item that needs approval"""
+    publish_start_date: Optional[str] = None
+    """Date time at which the item will be Published"""
+    content_approval_status: Optional[str] = None
+    """The content approval status of the list item"""
+    scheduled_version: Optional[str] = None
+    """The version of the item that has been scheduled"""
 
 
 @dataclass
 class SPListItemAttachment:
     """Response for Get attachments"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """File identifier"""
+    absolute_uri: Optional[str] = None
+    """Link to attachment"""
+    display_name: Optional[str] = None
+    """Name"""
 
 
 @dataclass
@@ -311,11 +363,8 @@ class CreateAttachmentInput:
 class DeletedItemList:
     """Response for When a file is deleted"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[DeletedItem]] = None
+    """List of Deleted Items"""
 
 
 @dataclass
@@ -333,11 +382,12 @@ class CreateContentAssemblyDocumentInput:
 class Table:
     """Response for Get list views"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    name: Optional[str] = None
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = None
+    """The display name of the table."""
+    dynamic_properties: Optional[Dict[str, Any]] = None
+    """Additional table properties provided by the connector to the clients."""
 
 
 @dataclass
@@ -461,7 +511,7 @@ class DataSetsMetadata:
 class DeletedItem:
     """Definition: DeletedItem"""
 
-    i_d: Optional[int] = None
+    id: Optional[int] = None
     """List item id"""
     name: Optional[str] = None
     """
@@ -681,9 +731,7 @@ class Permission:
     id: Optional[str] = None
     """Permission id"""
     granted_to: Optional[PermissionIdentitySet] = None
-    granted_to_identities: Optional[
-        List[SharingLinkPermissionIdentitySet]
-    ] = None
+    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = None
     """
     For link type permissions, the details of the users to whom permission was
     granted
@@ -824,7 +872,7 @@ class SPContentType:
 class SPForASelectedFileResponse:
     """Definition: SPForASelectedFileResponse"""
 
-    i_d: Optional[int] = None
+    id: Optional[int] = None
     """File Identifier"""
     item_url: Optional[str] = None
     """File Url"""
@@ -1110,22 +1158,46 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def copy_file_async(
         self,
-        input: CopyFileParameters,
         dataset: str,
+        source: Optional[str],
+        destination: Optional[str],
+        overwrite: Optional[str] = None,
+        query_parameters_single_encoded: Optional[str] = None,
     ):
         """
-        Copy file
+        Copy file (deprecated)
 
-        Copies a file. Works in a similar way to the \"Copy to\" command in
-        SharePoint libraries. Returns information about the new file after
-        copy.
+        Copies a file to a SharePoint site.
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/copyFileAsync"
+            f"/datasets/{quote(str(dataset), safe='')}/copyFile"
         )
+        query_params = []
+        if source is not None:
+            value = str(source)
+            if isinstance(source, bool):
+                value = value.lower()
+            query_params.append(f"source={quote(value)}")
+        if destination is not None:
+            value = str(destination)
+            if isinstance(destination, bool):
+                value = value.lower()
+            query_params.append(f"destination={quote(value)}")
+        if overwrite is not None:
+            value = str(overwrite)
+            if isinstance(overwrite, bool):
+                value = value.lower()
+            query_params.append(f"overwrite={quote(value)}")
+        if query_parameters_single_encoded is not None:
+            value = str(query_parameters_single_encoded)
+            if isinstance(query_parameters_single_encoded, bool):
+                value = value.lower()
+            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1339,7 +1411,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def get_file_metadata_by_path_async(
         self,
@@ -1432,7 +1504,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def get_folder_metadata_async(
         self,
@@ -1502,65 +1574,6 @@ class SharepointonlineClient(ConnectorClientBase):
             query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_root_folder_async(
-        self,
-        dataset: str,
-    ):
-        """
-        List files in root folder
-
-        Lists files in the root folder of a SharePoint site.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/folders"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_folder_async(
-        self,
-        dataset: str,
-        id: str,
-    ):
-        """
-        List files in folder
-
-        Lists files in a SharePoint folder.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/folders/{str(id)}"
-        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -2793,7 +2806,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def get_on_changed_items_async(
         self,
@@ -3373,7 +3386,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def on_updated_file_async(
         self,
@@ -3429,7 +3442,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def extract_folder_async(
         self,

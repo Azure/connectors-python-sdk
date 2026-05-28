@@ -868,7 +868,8 @@ class TestUserPhoto:
         )
 
         binary_content = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR'
-        mock_response = MockResponse(status=200, text="", content=binary_content)
+        # NOTE(sdk): Method uses response.text.encode('latin-1') so we provide text as string.
+        mock_response = MockResponse(status=200, text=binary_content.decode('latin-1'))
 
         with patch.object(
             client._http_client,

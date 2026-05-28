@@ -55,6 +55,10 @@ try:
     from .mq import MqClient
 except (ImportError, NameError):
     MqClient = None  # type: ignore[assignment,misc]
+try:
+    from .onedrive import OnedriveClient
+except (ImportError, NameError):
+    OnedriveClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.2.0b1'
 
@@ -76,4 +80,5 @@ __all__ = [
     'Office365usersClient',
     'AzureblobClient',
     'MqClient',
+    'OnedriveClient',
 ]

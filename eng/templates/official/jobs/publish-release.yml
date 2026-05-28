@@ -18,7 +18,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '^\d+\.\d+\.\d+$') {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+(dev|a|b|rc)?\d*$') {
             # Create GitHub credential
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
@@ -66,7 +66,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '^\d+\.\d+\.\d+$') {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+(dev|a|b|rc)?\d*$') {
             # Create GitHub credential
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
@@ -93,7 +93,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '^\d+\.\d+\.\d+$') {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+(dev|a|b|rc)?\d*$') {
             # Create GitHub credential
             $credential = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("${githubUser}:${githubToken}"))
         

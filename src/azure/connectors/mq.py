@@ -24,22 +24,33 @@ from azure.connectors.sdk import (
 class Item:
     """Response for Delete message (v2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    item_internal_id: Optional[str] = None
+    message_data: Optional[str] = None
+    message_id: Optional[str] = None
+    correlation_id: Optional[str] = None
+    put_date_time: Optional[str] = None
+    user_identifier: Optional[str] = None
+    put_application_name: Optional[str] = None
+    put_application_type: Optional[str] = None
+    format: Optional[str] = None
+    accounting_token: Optional[str] = None
+    ccsid: Optional[int] = None
+    group_id: Optional[str] = None
+    logical_sequence_number: Optional[int] = None
+    message_type: Optional[str] = None
+    offset: Optional[int] = None
+    original_length: Optional[int] = None
+    persistence: Optional[str] = None
+    priority: Optional[int] = None
+    reply_to_queue: Optional[str] = None
+    reply_to_queue_manager: Optional[str] = None
 
 
 @dataclass
 class ItemsList:
     """Response for Delete messages (v2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Item]] = None
 
 
 @dataclass

@@ -341,10 +341,10 @@ class TestFileOperations:
             token_provider=mock_token_provider
         )
         file_content = b"file binary content"
+        # NOTE(sdk): Method uses response.text.encode('latin-1') so we provide text as string.
         mock_response = MockResponse(
             status=200,
-            text="",
-            content=file_content
+            text=file_content.decode('latin-1')
         )
 
         with patch.object(
@@ -363,61 +363,6 @@ class TestFileOperations:
 
 class TestFolderOperations:
     """Tests for folder operation methods."""
-
-    @pytest.mark.asyncio
-    async def test_list_root_folder(self, mock_token_provider):
-        """Test listing root folder contents."""
-        client = SharepointonlineClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text=(
-                '{"value": [{"Name": "Folder1", "IsFolder": true}, '
-                '{"Name": "File1.txt", "IsFolder": false}]}'
-            )
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            result = await client.list_root_folder_async(
-                "https://contoso.sharepoint.com/sites/site1"
-            )
-
-            assert "value" in result
-            assert len(result["value"]) == 2
-
-    @pytest.mark.asyncio
-    async def test_list_folder(self, mock_token_provider):
-        """Test listing specific folder contents."""
-        client = SharepointonlineClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"Name": "SubFolder", "IsFolder": true}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            result = await client.list_folder_async(
-                "https://contoso.sharepoint.com/sites/site1",
-                "folder123"
-            )
-
-            assert "value" in result
 
     @pytest.mark.asyncio
     async def test_create_new_folder(self, mock_token_provider):
@@ -703,14 +648,18 @@ class TestCopyMoveOperations:
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
-        ):
-            from azure.connectors.sharepointonline import CopyFileParameters
-            input_data = CopyFileParameters()
+        ) as mock_send:
             result = await client.copy_file_async(
-                input_data,
-                "https://contoso.sharepoint.com/sites/site1"
+                dataset="https://contoso.sharepoint.com/sites/site1",
+                source="/Shared Documents/document.docx",
+                destination="/Shared Documents/Backup/document_copy.docx"
             )
 
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert "copyFile" in call_args[0][1]
+            assert "source=" in call_args[0][1]
+            assert "destination=" in call_args[0][1]
             assert result["Name"] == "document_copy.docx"
 
     @pytest.mark.asyncio

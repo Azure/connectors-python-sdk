@@ -85,8 +85,8 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 | Priority | Connector | Use Cases | Status |
 |----------|-----------|-----------|--------|
-| 3.1 | **OneDrive for Business** | File operations, knowledge base | 📋 Planned |
-| 3.2 | **Office 365 Users** | User directory, profile data | 📋 Planned |
+| 3.1 | **OneDrive for Business** | File operations, knowledge base | ✅ Complete |
+| 3.2 | **Office 365 Users** | User directory, profile data | ✅ Complete |
 | 3.3 | **Office 365 Groups** | Group management | 📋 Planned |
 | 3.4 | **Planner** | Task management | 📋 Planned |
 
