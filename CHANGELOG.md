@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **OneDrive for Business** (`onedrive.py`) connector client with 30+ methods for file operations, sharing, tags, and triggers
+  - File operations: get, create, update, copy, move, delete, convert
+  - Folder operations: list, list root, extract archive
+  - Sharing: create share links
+  - Tags: get, add, remove file tags
+  - Thumbnails: get file thumbnails
+  - 41 unit tests with full coverage
+  - Sample code (`sample_connector_usage_onedrive.py`)
+- **Office 365 SDK type bindings**: Added 3 new typed response classes for improved deserialization
+  - `ClientReceiveMessage.from_json()` — Parse email messages from trigger callbacks
+  - `GraphClientReceiveMessage.from_json()` — Parse Graph API email responses
+  - `GraphCalendarEventListWithActionType.from_json()` — Parse calendar event responses
+
+### Changed
+
+- **Regenerated connector clients** based on latest contract changes
+  - Updated binary content methods to use `response.text.encode('latin-1')` pattern
+  - Removed deprecated SharePoint methods no longer in contract
+
 ### Fixed
 - **Rename Package Metadata**: renamed package metadata from Logic Apps to Azure Connectors branding, removed logic-apps keyword.
 - **`TriggerCallbackBody[T]` now handles both batch and single-item callback shapes** — Connector Namespace delivers trigger callbacks in two shapes depending on the trigger configuration's splitOn setting: batch `{"body":{"value":[...]}}` and single-item `{"body":{...item...}}`. The new `from_dict()` factory methods on `TriggerCallbackPayload` and `TriggerCallbackBody` transparently normalize both shapes into `body.value` as a list, preventing silent zero-item processing when splitOn is enabled. Use `TriggerCallbackPayload.from_dict(data)` to parse callback payloads that may arrive in either shape.
