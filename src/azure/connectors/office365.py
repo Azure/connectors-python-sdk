@@ -1575,39 +1575,6 @@ class ClientReceiveMessage:
             A ClientReceiveMessage object.
         """
         importance_map = {"low": 0, "normal": 1, "high": 2}
-        if not hasattr(payload, "value"):
-            raise ValueError("Payload must have a 'value' attribute.")
-
-        if isinstance(payload.value, str):
-            try:
-                data = json.loads(payload.value)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON payload: {e}.") from e
-        else:
-            data = payload.value
-
-        # NOTE(SDK): Navigate to body to extract message(s).
-        if isinstance(data, dict):
-            body = data.get("body", data)
-            if isinstance(body, dict):
-                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
-                if "value" in body and isinstance(body.get("value"), list):
-                    messages_data = body.get("value")
-                else:
-                    # NOTE(SDK): Single item - wrap in list for uniform processing.
-                    messages_data = [body]
-            else:
-                messages_data = []
-        else:
-            messages_data = []
-
-        if not isinstance(messages_data, list):
-            raise ValueError("Expected 'body.value' to contain a list of messages.")
-
-        messages: List[ClientReceiveMessage] = []
-        for item in messages_data:
-            if not isinstance(item, dict):
-                continue
 
         # NOTE(SDK): Parse attachments if present.
         attachments_data = item.get("attachments")
