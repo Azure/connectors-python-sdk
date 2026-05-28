@@ -44,22 +44,24 @@ class MyTrendingDocumentsResponse:
 class LinklessEntityListResponseListPerson:
     """Response for Get relevant people"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Person]] = None
+    """Value"""
 
 
 @dataclass
 class ClientPhotoMetadata:
     """Response for Get user photo metadata"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    has_photo: Optional[bool] = None
+    """Has photo"""
+    height: Optional[int] = None
+    """Height of photo"""
+    width: Optional[int] = None
+    """Width of photo"""
+    content_type: Optional[str] = None
+    """Content Type of photo"""
+    image_file_extension: Optional[str] = None
+    """File extension for the photo (ex: \".jpg\")"""
 
 
 @dataclass
@@ -104,22 +106,91 @@ class DirectReportsResponse:
 class GraphUser:
     """Response for Get manager (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    about_me: Optional[str] = None
+    """About Me"""
+    account_enabled: Optional[bool] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    true if the account is enabled; otherwise, false. This property is required
+    when a user is created.
     """
+    birthday: Optional[str] = None
+    """Birthday"""
+    business_phones: Optional[List[str]] = None
+    """Business Phones"""
+    city: Optional[str] = None
+    """The city in which the user is located."""
+    company_name: Optional[str] = None
+    """The name of the company in which the user works."""
+    country: Optional[str] = None
+    """
+    The country/region in which the user is located; for example, \"US\" or
+    \"UK\".
+    """
+    department: Optional[str] = None
+    """The name of the department in which the user works."""
+    display_name: Optional[str] = None
+    """Display Name"""
+    given_name: Optional[str] = None
+    """Given Name"""
+    hire_date: Optional[str] = None
+    """Hire Date"""
+    id: Optional[str] = None
+    """Id"""
+    interests: Optional[List[str]] = None
+    """Interests"""
+    job_title: Optional[str] = None
+    """Job Title"""
+    mail: Optional[str] = None
+    """Mail"""
+    mail_nickname: Optional[str] = None
+    """
+    The mail alias for the user. This property must be specified when a user is
+    created.
+    """
+    mobile_phone: Optional[str] = None
+    """Mobile Phone"""
+    my_site: Optional[str] = None
+    """My Site"""
+    office_location: Optional[str] = None
+    """Office Location"""
+    past_projects: Optional[List[str]] = None
+    """Past Projects"""
+    postal_code: Optional[str] = None
+    """
+    The postal code for the user's postal address. The postal code is specific
+    to the user's country/region. In the United States of America, this
+    attribute contains the ZIP code.
+    """
+    preferred_language: Optional[str] = None
+    """Preferred Language"""
+    preferred_name: Optional[str] = None
+    """Preferred Name"""
+    responsibilities: Optional[List[str]] = None
+    """Responsibilities"""
+    schools: Optional[List[str]] = None
+    """Schools"""
+    skills: Optional[List[str]] = None
+    """Skills"""
+    state: Optional[str] = None
+    """State"""
+    street_address: Optional[str] = None
+    """Street Address"""
+    surname: Optional[str] = None
+    """Surname"""
+    user_principal_name: Optional[str] = None
+    """User Principal Name"""
+    user_type: Optional[str] = None
+    """User Type"""
 
 
 @dataclass
 class EntityListResponseIReadOnlyListUser:
     """Response for Search for users (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[User]] = None
+    """Value"""
+    next_link: Optional[str] = None
+    """Next page link"""
 
 
 @dataclass
@@ -552,8 +623,7 @@ class Office365usersClient(ConnectorClientBase):
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(
-                f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -901,7 +971,7 @@ class Office365usersClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def user_profile_async(
         self,

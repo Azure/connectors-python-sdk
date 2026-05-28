@@ -25,22 +25,52 @@ from azure.connectors.sdk import (
 class GraphOutlookCategory:
     """Response for Get Outlook category names"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """The ID of the Outlook Category."""
+    display_name: Optional[str] = None
+    """The display name of the Outlook Category."""
 
 
 @dataclass
 class OutlookReceiveMessage:
     """Response for Draft an email message"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    internet_message_id: Optional[str] = None
+    """Internet Message Id"""
+    body_preview: Optional[str] = None
+    """Body preview"""
+    id: Optional[str] = None
+    """Id"""
+    conversation_id: Optional[str] = None
+    """Conversation Id"""
+    has_attachments: Optional[bool] = None
+    """Has attachments"""
+    is_read: Optional[bool] = None
+    """Is read"""
+    created_date_time: Optional[str] = None
+    """Created date and time"""
+    received_date_time: Optional[str] = None
+    """Received date and time"""
+    last_modified_date_time: Optional[str] = None
+    """Last modified date and time"""
+    attachments: Optional[List[OutlookReceiveAttachment]] = None
+    """Attachments"""
+    to_recipients: Optional[List[Recipient]] = None
+    """To Recipient"""
+    cc_recipients: Optional[List[Recipient]] = None
+    """Cc Recipients"""
+    bcc_recipients: Optional[List[Recipient]] = None
+    """Bcc Recipients"""
+    reply_to: Optional[List[Recipient]] = None
+    """The email addresses to use when replying"""
+    subject: Optional[str] = None
+    """Subject"""
+    body: Optional[ItemBody] = None
+    from_: Optional[Recipient] = None
+    importance: Optional[str] = None
+    """Importance"""
+    internet_message_headers: Optional[List[InternetMessageHeader]] = None
+    """Internet message headers"""
 
 
 @dataclass
@@ -58,22 +88,24 @@ class AssignCategoryBulkInput:
 class BatchOperationResult:
     """Response for Assign a category to multiple emails"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    success_count: Optional[int] = None
+    """The count of messages processed successfully."""
+    failures: Optional[List[BatchItemFailureResult]] = None
+    """The list of failed messages with errors."""
 
 
 @dataclass
 class SubscriptionResponse:
     """Response for Send email with options"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """Id of the subscription"""
+    resource: Optional[str] = None
+    """Resource of the subscription request"""
+    notification_type: Optional[str] = None
+    """Notification Type"""
+    notification_url: Optional[str] = None
+    """Notification Url"""
 
 
 @dataclass
@@ -113,33 +145,203 @@ class ObjectWithoutType:
 class MCPQueryResponse:
     """Response for Email Management MCP Server (deprecated)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    jsonrpc: Optional[str] = None
+    id: Optional[str] = None
+    method: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+    result: Optional[Dict[str, Any]] = None
+    error: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class GraphCalendarEventClientReceive:
     """Response for Get event (V3)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    subject: Optional[str] = None
+    """Event subject"""
+    start: Optional[str] = None
+    """Start time of the event (example: '2017-08-29T04:00:00.0000000')"""
+    end: Optional[str] = None
+    """End time of the event (example: '2017-08-29T05:00:00.0000000')"""
+    start_with_time_zone: Optional[str] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    Start time of the event with time zone (example:
+    '2017-08-29T04:00:00.0000000+00:00')
     """
+    end_with_time_zone: Optional[str] = None
+    """
+    End time of the event with time zone (example:
+    '2017-08-29T05:00:00.0000000+00:00')
+    """
+    body: Optional[str] = None
+    """Body of the message associated with the event"""
+    is_html: Optional[bool] = None
+    """Set to true if the body is Html"""
+    response_type: Optional[str] = None
+    """
+    The response type of the event (none, organizer, tentativelyAccepted,
+    accepted, declined or notResponded)
+    """
+    response_time: Optional[str] = None
+    """The response time of the event"""
+    id: Optional[str] = None
+    """The event's unique identifier"""
+    created_date_time: Optional[str] = None
+    """The date and time that the event was created"""
+    last_modified_date_time: Optional[str] = None
+    """The date and time that the event was last modified"""
+    organizer: Optional[str] = None
+    """The organizer of the event"""
+    time_zone: Optional[str] = None
+    """Time zone of the event"""
+    series_master_id: Optional[str] = None
+    """Unique identifier for Series Master event type"""
+    i_cal_u_id: Optional[str] = None
+    """
+    A unique identifier for an event across calendars. This ID is different for
+    each occurrence in a recurring series
+    """
+    categories: Optional[List[str]] = None
+    """The categories associated with the event"""
+    web_link: Optional[str] = None
+    """The URL to open the event in Outlook Web App"""
+    required_attendees: Optional[str] = None
+    """Required attendees for the event separated by semicolons"""
+    optional_attendees: Optional[str] = None
+    """Optional attendees for the event separated by semicolons"""
+    resource_attendees: Optional[str] = None
+    """Resource attendees for the event separated by semicolons"""
+    location: Optional[str] = None
+    """Location of the event"""
+    importance: Optional[str] = None
+    """The importance of the event: low, normal, or high"""
+    is_all_day: Optional[bool] = None
+    """Set to true if the event lasts all day"""
+    recurrence: Optional[str] = None
+    """
+    The recurrence pattern for the event: none, daily, weekly, monthly or
+    yearly
+    """
+    recurrence_end: Optional[str] = None
+    """End Date of the recurrence"""
+    number_of_occurences: Optional[int] = None
+    """How many times to repeat the event"""
+    reminder_minutes_before_start: Optional[int] = None
+    """Time in minutes before event start to remind"""
+    is_reminder_on: Optional[bool] = None
+    """Set to true if an alert is set to remind the user of the event."""
+    show_as: Optional[str] = None
+    """
+    Status to show during the event: free, tentative, busy, oof,
+    workingElsewhere or unknown
+    """
+    response_requested: Optional[bool] = None
+    """
+    Set to true if the sender would like a response when the event is accepted
+    or declined
+    """
+    sensitivity: Optional[str] = None
+    """The possible values are: normal, personal, private, confidential"""
+
+    @classmethod
+    def from_json(cls, payload) -> List[GraphCalendarEventClientReceive]:
+        """Parse a JSON payload and return a list of GraphCalendarEventClientReceive objects.
+
+        This method supports SDK-type bindings for Python Function apps, allowing
+        functions to bind to and return rich GraphCalendarEventClientReceive objects
+        instead of raw JSON payloads.
+
+        Args:
+            payload: An object with a .value attribute containing a JSON string or
+                dictionary with the calendar events.
+                Expected structure for batches: {"body": {"value": [...events...]}}
+                Expected structure for single items: {"body": {...event...}}
+
+        Returns:
+            A list of GraphCalendarEventClientReceive objects parsed from the payload.
+
+        Raises:
+            ValueError: If the payload structure is invalid or cannot be parsed.
+        """
+        if not hasattr(payload, "value"):
+            raise ValueError("Payload must have a 'value' attribute.")
+
+        if isinstance(payload.value, str):
+            try:
+                data = json.loads(payload.value)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON payload: {e}.") from e
+        else:
+            data = payload.value
+
+        # NOTE(SDK): Navigate to body to extract event(s).
+        if isinstance(data, dict):
+            body = data.get("body", data)
+            if isinstance(body, dict):
+                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
+                if "value" in body and isinstance(body.get("value"), list):
+                    events_data = body.get("value")
+                else:
+                    # NOTE(SDK): Single item - wrap in list for uniform processing.
+                    events_data = [body]
+            else:
+                events_data = []
+        else:
+            events_data = []
+
+        if not isinstance(events_data, list):
+            raise ValueError("Expected 'body.value' to contain a list of events.")
+
+        events: List[GraphCalendarEventClientReceive] = []
+        for item in events_data:
+            if not isinstance(item, dict):
+                continue
+
+            event = cls(
+                id=item.get("id"),
+                subject=item.get("subject"),
+                start=item.get("start"),
+                end=item.get("end"),
+                start_with_time_zone=item.get("startWithTimeZone"),
+                end_with_time_zone=item.get("endWithTimeZone"),
+                body=item.get("body"),
+                is_html=item.get("isHtml"),
+                response_type=item.get("responseType"),
+                response_time=item.get("responseTime"),
+                created_date_time=item.get("createdDateTime"),
+                last_modified_date_time=item.get("lastModifiedDateTime"),
+                organizer=item.get("organizer"),
+                time_zone=item.get("timeZone"),
+                series_master_id=item.get("seriesMasterId"),
+                i_cal_u_id=item.get("iCalUId"),
+                categories=item.get("categories"),
+                web_link=item.get("webLink"),
+                required_attendees=item.get("requiredAttendees"),
+                optional_attendees=item.get("optionalAttendees"),
+                resource_attendees=item.get("resourceAttendees"),
+                location=item.get("location"),
+                importance=item.get("importance"),
+                is_all_day=item.get("isAllDay"),
+                recurrence=item.get("recurrence"),
+                recurrence_end=item.get("recurrenceEnd"),
+                number_of_occurences=item.get("numberOfOccurences"),
+                reminder_minutes_before_start=item.get("reminderMinutesBeforeStart"),
+                is_reminder_on=item.get("isReminderOn"),
+                show_as=item.get("showAs"),
+                response_requested=item.get("responseRequested"),
+                sensitivity=item.get("sensitivity"),
+            )
+            events.append(event)
+
+        return events
 
 
 @dataclass
 class GraphCalendarEventListClientReceive:
     """Response for Get events (V4)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[GraphCalendarEventClientReceive]] = None
+    """List of calendar items"""
 
 
 @dataclass
@@ -257,33 +459,89 @@ class CalendarGetTablesResponse:
 class ContactResponse:
     """Response for Get contact (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """The contact's unique identifier."""
+    parent_folder_id: Optional[str] = None
+    """The ID of the contact's parent folder"""
+    birthday: Optional[str] = None
+    """The contact's birthday"""
+    file_as: Optional[str] = None
+    """The name the contact is filed under"""
+    display_name: Optional[str] = None
+    """The contact's display name"""
+    given_name: Optional[str] = None
+    """The contact's given name"""
+    initials: Optional[str] = None
+    """The contact's initials"""
+    middle_name: Optional[str] = None
+    """The contact's middle name"""
+    nick_name: Optional[str] = None
+    """The contact's nickname"""
+    surname: Optional[str] = None
+    """The contact's surname"""
+    title: Optional[str] = None
+    """The contact's title"""
+    generation: Optional[str] = None
+    """The contact's generation"""
+    email_addresses: Optional[List[EmailAddressV2]] = None
+    """The contact's email addresses"""
+    im_addresses: Optional[List[str]] = None
+    """The contact's instant messaging (IM) addresses"""
+    job_title: Optional[str] = None
+    """The contact's job title"""
+    company_name: Optional[str] = None
+    """The name of the contact's company"""
+    department: Optional[str] = None
+    """The contact's department"""
+    office_location: Optional[str] = None
+    """The location of the contact's office"""
+    profession: Optional[str] = None
+    """The contact's profession"""
+    business_home_page: Optional[str] = None
+    """The business home page of the contact"""
+    assistant_name: Optional[str] = None
+    """The name of the contact's assistant"""
+    manager: Optional[str] = None
+    """The name of the contact's manager"""
+    home_phones: Optional[List[str]] = None
+    """The contact's home phone numbers"""
+    business_phones: Optional[List[str]] = None
+    """The contact's business phone numbers"""
+    mobile_phone: Optional[str] = None
+    """The contact's mobile phone number"""
+    home_address: Optional[PhysicalAddressV2] = None
+    business_address: Optional[PhysicalAddressV2] = None
+    other_address: Optional[PhysicalAddressV2] = None
+    yomi_company_name: Optional[str] = None
+    """The phonetic Japanese company name of the contact"""
+    yomi_given_name: Optional[str] = None
+    """The phonetic Japanese given name (first name) of the contact"""
+    yomi_surname: Optional[str] = None
+    """The phonetic Japanese surname (last name) of the contact"""
+    categories: Optional[List[str]] = None
+    """The categories associated with the contact"""
+    change_key: Optional[str] = None
+    """Identifies the version of the event object"""
+    created_date_time: Optional[str] = None
+    """The time the contact was created"""
+    last_modified_date_time: Optional[str] = None
+    """The time the contact was modified"""
 
 
 @dataclass
 class EntityListResponseContactResponse:
     """Response for Get contacts (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[ContactResponseV2]] = None
+    """List of values"""
 
 
 @dataclass
 class EntityListResponseGraphContactFolder:
     """Response for Get contact folders (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[GraphContactFolder]] = None
+    """List of values"""
 
 
 @dataclass
@@ -351,41 +609,41 @@ class GetAttachmentResponse:
 class GraphClientReceiveMessage:
     """Response for Get email (V2)"""
 
-    attachments: Optional[List[GraphClientReceiveFileAttachment]] = None
-    """The file attachments for the message"""
-    bcc_recipients: Optional[str] = None
-    """The Bcc recipients for the message"""
-    body: Optional[str] = None
-    """The body of the message"""
-    body_preview: Optional[str] = None
-    """The preview of the message"""
-    cc_recipients: Optional[str] = None
-    """The Cc recipients for the message"""
-    conversation_id: Optional[str] = None
-    """The Id of the conversation the email belongs to"""
     from_: Optional[str] = None
     """The mailbox owner and sender of the message"""
+    to_recipients: Optional[str] = None
+    """The recipients for the message"""
+    cc_recipients: Optional[str] = None
+    """The Cc recipients for the message"""
+    bcc_recipients: Optional[str] = None
+    """The Bcc recipients for the message"""
+    reply_to: Optional[str] = None
+    """The email addresses to use when replying"""
+    subject: Optional[str] = None
+    """The subject of the message"""
+    body: Optional[str] = None
+    """The body of the message"""
+    importance: Optional[str] = None
+    """The importance of the message (low, normal, high)"""
+    body_preview: Optional[str] = None
+    """The preview of the message"""
     has_attachments: Optional[bool] = None
     """Indicates whether the message has attachments"""
     id: Optional[str] = None
     """The unique identifier of the message"""
-    importance: Optional[str] = None
-    """The importance of the message (low, normal, high)"""
     internet_message_id: Optional[str] = None
     """The message ID in the format specified by RFC2822"""
-    is_html: Optional[bool] = None
-    """Is Html?"""
-    is_read: Optional[bool] = None
-    """Indicates whether the message has been read"""
+    conversation_id: Optional[str] = None
+    """The Id of the conversation the email belongs to"""
     received_date_time: Optional[str] = None
     """The date and time the message was received"""
-    reply_to: Optional[str] = None
-    """The email addresses to use when replying"""
+    is_read: Optional[bool] = None
+    """Indicates whether the message has been read"""
+    attachments: Optional[List[GraphClientReceiveFileAttachment]] = None
+    """The file attachments for the message"""
+    is_html: Optional[bool] = None
+    """Is Html?"""
     sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
-    subject: Optional[str] = None
-    """The subject of the message"""
-    to_recipients: Optional[str] = None
-    """The recipients for the message"""
 
     @classmethod
     def from_json(cls, payload) -> List[GraphClientReceiveMessage]:
@@ -516,22 +774,16 @@ class GraphClientReceiveMessage:
 class BatchResponseGraphClientReceiveMessage:
     """Response for Get emails (V3)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[GraphClientReceiveMessage]] = None
+    """A list of the response objects"""
 
 
 @dataclass
 class EntityListResponseGraphCalendarEventClientReceive:
     """Response for Get calendar view of events (V3)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[GraphCalendarEventClientReceive]] = None
+    """List of values"""
 
 
 @dataclass
@@ -587,11 +839,8 @@ class MarkAsReadInput:
 class TriggerBatchResponseGraphClientReceiveMessage:
     """Response for When an email is flagged (V4)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[GraphClientReceiveMessage]] = None
+    """A list of the response objects"""
 
 
 @dataclass
@@ -1324,8 +1573,10 @@ class ClientReceiveMessage:
         of raw JSON payloads.
 
         Args:
-            payload: A JSON string or dictionary containing the email messages.
-                Expected structure: {"body": {"value": [...messages...]}}
+            payload: An object with a .value attribute containing a JSON string or
+                dictionary with the email messages.
+                Expected structure for batches: {"body": {"value": [...messages...]}}
+                Expected structure for single items: {"body": {...message...}}
 
         Returns:
             A list of ClientReceiveMessage objects parsed from the payload.
@@ -1345,11 +1596,16 @@ class ClientReceiveMessage:
         else:
             data = payload.value
 
-        # NOTE(SDK): Navigate to body.value to extract the list of messages.
+        # NOTE(SDK): Navigate to body to extract message(s).
         if isinstance(data, dict):
             body = data.get("body", data)
             if isinstance(body, dict):
-                messages_data = body.get("value", [])
+                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
+                if "value" in body and isinstance(body.get("value"), list):
+                    messages_data = body.get("value")
+                else:
+                    # NOTE(SDK): Single item - wrap in list for uniform processing.
+                    messages_data = [body]
             else:
                 messages_data = []
         else:
@@ -1825,15 +2081,13 @@ class SharedMailboxClientSendHtmlMessage:
 class SubscriptionPayloadOutlookReceiveMessage:
     """Definition: SubscriptionPayload[OutlookReceiveMessage]"""
 
-    value: Optional[
-        List[SubscriptionPayloadEntityOutlookReceiveMessage]
-    ] = None
+    value: Optional[List[SubscriptionPayloadEntityOutlookReceiveMessage]] = None
     """List of values"""
 
 
 @dataclass
 class SubscriptionPayloadEntityOutlookReceiveMessage:
-    """Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]."""
+    """Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]"""
 
     sequence_number: Optional[int] = None
     """Sequence number"""
@@ -3940,8 +4194,7 @@ class Office365Client(ConnectorClientBase):
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(
-                f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -4571,8 +4824,7 @@ class Office365Client(ConnectorClientBase):
             value = str(message_id_to_fire_on_first_trigger_run)
             if isinstance(message_id_to_fire_on_first_trigger_run, bool):
                 value = value.lower()
-            query_params.append(
-                f"messageIdToFireOnFirstTriggerRun={quote(value)}")
+            query_params.append(f"messageIdToFireOnFirstTriggerRun={quote(value)}")
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):

@@ -25,11 +25,80 @@ from azure.connectors.sdk import (
 class NewMeetingResponse:
     """Response for Create a Teams meeting"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    id: Optional[str] = None
+    """Unique identifier for the event"""
+    created_date_time: Optional[str] = None
+    """Timestamp the event was created"""
+    last_modified_date_time: Optional[str] = None
+    """Timestamp the event was last modified"""
+    categories: Optional[List[Any]] = None
+    """The categories associated with the event"""
+    time_zone: Optional[str] = None
+    """Time zone of the event"""
+    reminder_minutes_before_start: Optional[int] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    The number of minutes before the event start time that the reminder alert
+    occurs
     """
+    is_reminder_on: Optional[bool] = None
+    """Set to true if an alert is set to remind the user of the event"""
+    has_attachments: Optional[bool] = None
+    """Set to true if the event has attachments"""
+    subject: Optional[str] = None
+    """The text of the event's subject line"""
+    body_preview: Optional[str] = None
+    """The preview of the message associated with the event"""
+    importance: Optional[str] = None
+    """
+    The importance of the event. The possible values are: low, normal, high
+    """
+    sensitivity: Optional[str] = None
+    """Sensitivity of the event"""
+    is_all_day: Optional[bool] = None
+    """Set to true if the event lasts all day"""
+    is_cancelled: Optional[bool] = None
+    """Set to true if the event has been canceled"""
+    is_organizer: Optional[bool] = None
+    """Set to true if the calendar owner is the organizer of the event"""
+    response_requested: Optional[bool] = None
+    """The organizer would like an invitee to send a response to the event"""
+    show_as: Optional[str] = None
+    """
+    The status to show. Possible values are: free, tentative, busy, oof,
+    workingElsewhere, unknown.
+    """
+    type_: Optional[str] = None
+    """
+    The event type. Possible values are: singleInstance, occurrence, exception,
+    seriesMaster
+    """
+    web_link: Optional[str] = None
+    """The URL to open the event in Outlook on the web."""
+    online_meeting_url: Optional[str] = None
+    """A URL for an online meeting"""
+    allow_new_time_proposals: Optional[bool] = None
+    """
+    True if the meeting organizer allows invitees to propose a new time when
+    responding
+    """
+    recurrence: Optional[Dict[str, Any]] = None
+    """The recurrence pattern for the event"""
+    response_status: Optional[Dict[str, Any]] = None
+    """Indicates the type of response sent in response to an event message"""
+    body: Optional[Dict[str, Any]] = None
+    """The body of the message associated with the event"""
+    start: Optional[Dict[str, Any]] = None
+    """The start date, time, and time zone of the event"""
+    end: Optional[Dict[str, Any]] = None
+    """The date, time, and time zone that the event ends"""
+    location: Optional[Dict[str, Any]] = None
+    """The location of the event"""
+    attendees: Optional[List[Dict[str, Any]]] = None
+    """The collection of attendees for the event"""
+    organizer: Optional[Dict[str, Any]] = None
+    """Organizer"""
+    online_meeting: Optional[Dict[str, Any]] = None
+    """Details for an attendee to join the meeting online."""
 
 
 @dataclass
@@ -85,11 +154,24 @@ class CreateChannelResponse:
 class GetChannelResponse:
     """Response for Get details for a specific channel in a team"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """The unique identifier of the channel"""
+    display_name: Optional[str] = None
+    """The name of the channel"""
+    description: Optional[str] = None
+    """The description of the channel, optional"""
+    email: Optional[str] = None
+    """The email address for sending messages to the channel"""
+    tenant_id: Optional[str] = None
+    """The ID of the Microsoft Entra tenant."""
+    web_url: Optional[str] = None
+    """A hyperlink for the channel in Microsoft Teams"""
+    files_folder_web_url: Optional[str] = None
+    """The SharePoint folder URL of the channel"""
+    created_date_time: Optional[str] = None
+    """Timestamp at which the channel was created. Read only"""
+    membership_type: Optional[str] = None
+    """The channel membership type"""
 
 
 @dataclass
@@ -114,11 +196,8 @@ class GetChatsResponse:
 class GetTagsResponseSchema:
     """Response for List all tags for a team"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    context: Optional[str] = None
+    value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
@@ -138,11 +217,15 @@ class CreateTagInput:
 class CreateTagResponseSchema:
     """Response for Create a tag for a team"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    type_: Optional[str] = None
+    id: Optional[str] = None
+    """Unique identifier of the tag"""
+    team_id: Optional[str] = None
+    """ID of the team in which the tag is defined"""
+    display_name: Optional[str] = None
+    """The name of the tag as it appears to the user in Microsoft Teams."""
+    member_count: Optional[int] = None
+    """The number of users assigned to the tag"""
 
 
 @dataclass
@@ -160,32 +243,25 @@ class AddMemberToTagInput:
 class AddMemberToTagResponseSchema:
     """Response for Add a member to a team tag"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    user_id: Optional[str] = None
+    """User ID of the member added to the tag"""
 
 
 @dataclass
 class GetTagMembersResponseSchema:
     """Response for List the members of a team tag"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class AtMentionTagResponse:
     """Response for Get an @mention token for a team tag"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    at_mention: Optional[str] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    A token for the tag to @mention. It can be inserted into messages and
+    adaptive cards sent from a person
     """
 
 
@@ -193,11 +269,13 @@ class AtMentionTagResponse:
 class GetMessagesFromConversationResponse:
     """Response for Get messages in a channel"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    context: Optional[str] = None
+    """@odata.context"""
+    count: Optional[int] = None
+    """@odata.count"""
+    next_link: Optional[str] = None
+    """@odata.nextLink"""
+    value: Optional[ChatMessageList] = None
 
 
 @dataclass
@@ -215,22 +293,16 @@ class DynamicGetMessageDetailsResponseSchema:
 class ListRepliesResponseSchema:
     """Response for List replies of a channel message"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Dict[str, Any]]] = None
+    """List replies response"""
 
 
 @dataclass
 class ListMembersResponseSchema:
     """Response for List members"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Dict[str, Any]]] = None
+    """List members response"""
 
 
 @dataclass
@@ -255,21 +327,32 @@ class WebhookChatMessageTriggerInput:
 class GetTeamResponse:
     """Response for Get a team"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """The unique identifier of the team"""
+    display_name: Optional[str] = None
+    """The name of the team"""
+    description: Optional[str] = None
+    """The description of the team, optional"""
+    internal_id: Optional[str] = None
+    """The internal ID of the team"""
+    web_url: Optional[str] = None
+    """A hyperlink that will go to the team in the Microsoft Teams client"""
+    is_archived: Optional[bool] = None
+    """Whether this team is in read-only mode"""
+    member_settings: Optional[MemberSettings] = None
+    guest_settings: Optional[GuestSettings] = None
+    messaging_settings: Optional[MessagingSettings] = None
+    fun_settings: Optional[FunSettings] = None
+    discovery_settings: Optional[DiscoverySettings] = None
 
 
 @dataclass
 class AtMentionUser:
     """Response for Get an @mention token for a user"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    at_mention: Optional[str] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    An @mention token for the user. This property can be inserted into messages
     """
 
 
@@ -288,11 +371,8 @@ class OnGroupMemberChangeResponse:
 class NewChatResponse:
     """Response for Create a chat"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """The chat's unique identifier"""
 
 
 @dataclass
@@ -311,11 +391,8 @@ class CreateATeamInput:
 class CreateATeamResponse:
     """Response for Create a team"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    new_team_id: Optional[str] = None
+    """Team ID of the team that was just created"""
 
 
 @dataclass
@@ -342,11 +419,12 @@ class AddMemberToChannelInput:
 class PostToConversationResponse:
     """Response for Post message in a chat or channel"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """Unique message ID"""
+    message_link: Optional[str] = None
+    """Link to the message in Microsoft Teams"""
+    conversation_id: Optional[str] = None
+    """The chat's unique identifier"""
 
 
 @dataclass

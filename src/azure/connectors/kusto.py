@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
@@ -25,44 +25,47 @@ from azure.connectors.sdk import (
 class Table:
     """Response for Run KQL query"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Row]] = None
 
 
 @dataclass
 class VisualizeResults:
     """Response for Run KQL query and render a chart"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    body: Optional[str] = None
+    """The body of the result in base64 encoding."""
+    body_html: Optional[str] = None
+    """The body of the result in html encoding."""
+    attachment_content: Optional[str] = None
+    """The content of the attachment."""
+    attachment_name: Optional[str] = None
+    """The name of the attachment file."""
+    kusto_deep_link: Optional[str] = None
+    """Links to run the query in Kusto tools, for instance in KustoExplorer."""
 
 
 @dataclass
 class AsyncCommandResult:
     """Response for Run async control command"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    state: Optional[str] = None
+    """The state of the command."""
+    status: Optional[str] = None
+    """The status of the command."""
+    operation_id: Optional[str] = None
+    """The operation ID of the control command"""
 
 
 @dataclass
 class MCPQueryResponse:
     """Response for Kusto Query MCP Server"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    jsonrpc: Optional[str] = None
+    id: Optional[str] = None
+    method: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+    result: Optional[Dict[str, Any]] = None
+    error: Optional[Dict[str, Any]] = None
 
 
 @dataclass

@@ -25,11 +25,29 @@ from azure.connectors.sdk import (
 class BlobMetadata:
     """Response for Copy blob (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    id: Optional[str] = None
+    """The unique id of the file or folder."""
+    name: Optional[str] = None
+    """The name of the file or folder."""
+    display_name: Optional[str] = None
+    """The display name of the file or folder."""
+    path: Optional[str] = None
+    """The path of the file or folder."""
+    last_modified: Optional[str] = None
+    """The date and time the file or folder was last modified."""
+    size: Optional[int] = None
+    """The size of the file or folder."""
+    media_type: Optional[str] = None
+    """The media type of the file or folder."""
+    is_folder: Optional[bool] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    A boolean value (true, false) to indicate whether or not the blob is a
+    folder.
     """
+    e_tag: Optional[str] = None
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = None
+    """The filelocator of the file or folder."""
 
 
 @dataclass
@@ -58,21 +76,41 @@ class CreateFileInput:
 class SharedAccessSignature:
     """Response for Create SAS URI by path (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    web_url: Optional[str] = None
+    """A URL to an object with access token."""
 
 
 @dataclass
 class SharedAccessSignatureBlobPolicy:
     """Response for Get available access policies (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    group_policy_identifier: Optional[str] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    The string identifying a stored access policy. The Group policy parameters
+    (e.g. Start time and End time) have precedence over input parameters
+    mentioned in actions.
+    """
+    permissions: Optional[str] = None
+    """The permissions specified on the SAS (Values separated by comma)."""
+    start_time: Optional[str] = None
+    """
+    The date and time at which the SAS becomes valid (example:
+    '2017-11-01T15:30:00+00:00'). Default = now().
+    """
+    expiry_time: Optional[str] = None
+    """
+    The date and time after which the SAS is no longer valid (example:
+    '2017-12-01T15:30:00+00:00'). Default = now() + 24h.
+    """
+    access_protocol: Optional[str] = None
+    """
+    The allowed protocols (https only, or http and https). Null if you don't
+    want to restrict protocol.
+    """
+    ip_address_or_range: Optional[str] = None
+    """
+    The allowed IP address or IP address range. Null if you don't want to
+    restrict based on IP address.
     """
 
 
@@ -80,33 +118,51 @@ class SharedAccessSignatureBlobPolicy:
 class DataWithSensitivityLabelInfo:
     """Response for Get Blob Metadata (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    id: Optional[str] = None
+    """The unique id of the file or folder."""
+    name: Optional[str] = None
+    """The name of the file or folder."""
+    display_name: Optional[str] = None
+    """The display name of the file or folder."""
+    path: Optional[str] = None
+    """The path of the file or folder."""
+    last_modified: Optional[str] = None
+    """The date and time the file or folder was last modified."""
+    size: Optional[int] = None
+    """The size of the file or folder."""
+    media_type: Optional[str] = None
+    """The media type of the file or folder."""
+    is_folder: Optional[bool] = None
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    A boolean value (true, false) to indicate whether or not the blob is a
+    folder.
     """
+    e_tag: Optional[str] = None
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = None
+    """The filelocator of the file or folder."""
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    """Sensitivity label metadata info list"""
 
 
 @dataclass
 class ListOfBlobsWithSensitivityLabels:
     """Response for Lists blobs (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[DataWithSensitivityLabelInfo]] = None
+    """List of Blobs"""
 
 
 @dataclass
 class BlobMetadataPage:
     """Response for Lists blobs in the root folder  (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[BlobMetadata]] = None
+    """Blob metadata collection."""
+    next_link: Optional[str] = None
+    """An Url which can be used to retrieve the next page."""
+    next_page_marker: Optional[str] = None
+    """A marker which can be used to retrieve the next page."""
 
 
 @dataclass
@@ -633,7 +689,7 @@ class AzureblobClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def get_file_content_by_path_async(
         self,
@@ -680,7 +736,7 @@ class AzureblobClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return response.text.encode('latin-1') if response.text else b''
 
     async def get_file_metadata_async(
         self,

@@ -268,6 +268,8 @@ The `from_json` method handles:
 - Type conversion (e.g., importance string → int)
 - Attachment parsing
 
+> **Note:** The `from_json` method is **not auto-generated** by the SDK code generator. See [docs/sdk-type-bindings.md](docs/sdk-type-bindings.md) for implementation details and how to add support for new types.
+
 This feature is particularly useful when building Azure Functions that process connector webhook payloads or trigger data.
 
 ## Related Projects
