@@ -352,8 +352,8 @@ class GraphCalendarEventListWithActionType:
     """List of calendar items"""
 
     @classmethod
-    def from_json(cls, payload) -> List[GraphCalendarEventListWithActionType]:
-        """Parse a JSON payload and return a GraphCalendarEventListWithActionType object.
+    def from_json(cls, payload) -> GraphCalendarEventListWithActionType:
+        """Parse a JSON payload and return a list with a single event wrapper.
 
         This method supports SDK-type bindings for Python Function apps, allowing
         functions to bind to and return rich GraphCalendarEventListWithActionType
@@ -366,7 +366,8 @@ class GraphCalendarEventListWithActionType:
                 Expected structure for single items: {"body": {...event...}}
 
         Returns:
-            A GraphCalendarEventListWithActionType object containing the parsed events.
+            A GraphCalendarEventListWithActionType object with the parsed events
+            in its value property.
 
         Raises:
             ValueError: If the payload structure is invalid or cannot be parsed.

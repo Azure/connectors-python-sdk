@@ -584,7 +584,8 @@ class TestGetFileContent:
         )
 
         binary_content = b'Hello, World! This is blob content.'
-        mock_response = MockResponse(status=200, text="", content=binary_content)
+        # NOTE(sdk): Method uses response.text.encode('latin-1') so we provide text as string.
+        mock_response = MockResponse(status=200, text=binary_content.decode('latin-1'))
 
         with patch.object(
             client._http_client,
@@ -611,7 +612,8 @@ class TestGetFileContent:
             token_provider=mock_token_provider
         )
 
-        mock_response = MockResponse(status=200, text="", content=b"content")
+        # NOTE(sdk): Method uses response.text.encode('latin-1') so we provide text as string.
+        mock_response = MockResponse(status=200, text="content")
 
         with patch.object(
             client._http_client,
@@ -665,7 +667,8 @@ class TestGetFileContentByPath:
         )
 
         binary_content = b'File content retrieved by path.'
-        mock_response = MockResponse(status=200, text="", content=binary_content)
+        # NOTE(sdk): Method uses response.text.encode('latin-1') so we provide text as string.
+        mock_response = MockResponse(status=200, text=binary_content.decode('latin-1'))
 
         with patch.object(
             client._http_client,
