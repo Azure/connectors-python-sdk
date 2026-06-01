@@ -92,7 +92,7 @@ try:
 except (ImportError, NameError):
     DocumentdbClient = None  # type: ignore[assignment,misc]
 
-__version__ = '0.2.0b1'
+__version__ = '0.2.0b2'
 
 __all__ = [
     'ConnectorClientBase',
