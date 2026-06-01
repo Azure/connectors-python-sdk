@@ -1,3 +1,9 @@
+parameters:
+  - name: libraryVersion
+    type: string
+    default: ''
+    displayName: 'Library version to build (e.g., 0.2.0). When provided, checks out the release/x.y.z branch.'
+
 jobs:
   - job: "Build"
     displayName: 'Build Connectors SDK'
@@ -15,6 +21,13 @@ jobs:
           artifactName: "azure-connectors"
 
     steps:
+      - ${{ if ne(parameters.libraryVersion, '') }}:
+        - checkout: self
+          persistCredentials: true
+        - bash: |
+            git fetch origin "release/${{ parameters.libraryVersion }}"
+            git checkout "origin/release/${{ parameters.libraryVersion }}"
+          displayName: 'Checkout release/${{ parameters.libraryVersion }} branch'
       - task: UsePythonVersion@0
         inputs:
           versionSpec: "3.13"

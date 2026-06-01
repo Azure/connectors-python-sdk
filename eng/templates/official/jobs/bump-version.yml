@@ -1,0 +1,66 @@
+parameters:
+  - name: libraryVersion
+    type: string
+    displayName: 'Library version to release (e.g., 0.2.0)'
+  - name: githubOrg
+    type: string
+    default: 'Azure'
+    displayName: 'GitHub organization'
+  - name: githubRepo
+    type: string
+    default: 'connectors-python-sdk'
+    displayName: 'GitHub repository name'
+
+jobs:
+  - job: "CreateReleaseBranch"
+    displayName: 'Create Release Branch'
+    pool:
+      name: 1es-pool-azfunc
+      image: 1es-ubuntu-22.04
+      os: linux
+    steps:
+    - powershell: |
+        $githubUser = "$(GithubUser)"
+        $githubToken = "$(GithubPat)"
+        $newLibraryVersion = "${{ parameters.libraryVersion }}"
+        
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+(dev|a|b|rc)?\d*$') {
+            # Create GitHub credential
+            git config --global user.name "AzureConnectors"
+            git config --global user.email "azurelogicapps@microsoft.com"
+            git remote set-url origin "https://${githubUser}:${githubToken}@github.com/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}.git"
+        
+            # Heading to Artifact Repository
+            Write-Host "Operating based on ${{ parameters.githubRepo }}"
+            git checkout -b "release/$newLibraryVersion"
+        
+            # Change __init__.py version
+            Write-Host "Change version number in src/azure/connectors/__init__.py to $newLibraryVersion"
+            ((Get-Content src/azure/connectors/__init__.py) -replace "__version__ = '(\d)+.(\d)+.*'", "__version__ = '$newLibraryVersion'" -join "`n") + "`n" | Set-Content -NoNewline src/azure/connectors/__init__.py
+            git add src/azure/connectors/__init__.py
+            
+            git commit -m "build: update Python Connectors SDK Version to $newLibraryVersion"
+        
+            # Create release branch release/X.Y.Z
+            Write-Host "Creating release branch release/$newLibraryVersion"
+            git push origin "release/$newLibraryVersion"
+
+        } else {
+            Write-Host "NewLibraryVersion $newLibraryVersion is malformed (example: 1.5.0)"
+            exit -1
+        }
+      displayName: 'Push release/x.y.z'
+
+  - job: "CheckReleaseBranch"
+    dependsOn: ['CreateReleaseBranch']
+    displayName: '(Manual) Check Release Branch'
+    pool: server
+    steps:
+    - task: ManualValidation@1
+      displayName: '(Optional) Modify release/x.y.z branch'
+      inputs:
+        notifyUsers: ''  # No email notifications sent
+        instructions: |
+          1. Check if the https://github.com/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}/tree/release/${{ parameters.libraryVersion }} build succeeds and passes all unit tests.
+          2. If not, modify the release/${{ parameters.libraryVersion }} branch.
+          3. Ensure release/${{ parameters.libraryVersion }} branch contains all necessary changes.

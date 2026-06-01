@@ -154,16 +154,24 @@ The following connectors have been generated and validated with comprehensive te
 
 | Connector | Package | Status | Coverage | Tests |
 |-----------|---------|--------|----------|-------|
-| **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | 79% | 41 tests |
-| **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | 57% | 44 tests |
-| **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | 73% | 27 tests |
-| **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | 98% | 37 tests |
-| **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | — | 46 tests |
-| **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | — | 40 tests |
-| **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | — | 52 tests |
-| **IBM MQ** | `azure.connectors.mq` | ✅ Complete | — | 30 tests |
+| **Azure AD** | `azure.connectors.azuread` | ✅ Complete | 🔄 SDK Generated | 35 tests |
+| **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | ✅ E2E Validated | 52 tests |
+| **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated | 46 tests |
+| **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated | 37 tests |
+| **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated | 25 tests |
+| **Azure Queues** | `azure.connectors.azurequeues` | ✅ Complete | 🔄 SDK Generated | 34 tests |
+| **Azure Tables** | `azure.connectors.azuretables` | ✅ Complete | 🔄 SDK Generated | 43 tests |
+| **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 37 tests |
+| **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated | 30 tests |
+| **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated | 46 tests |
+| **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | ✅ E2E Validated | 27 tests |
+| **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated | 41 tests |
+| **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated | 40 tests |
+| **OneDrive for Business** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 41 tests |
+| **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 44 tests |
+| **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 27 tests |
 
-**Total:** 317 connector tests (299 passing, 18 skipped) + 110 SDK component tests
+**Total:** 529 connector tests + 110 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 
