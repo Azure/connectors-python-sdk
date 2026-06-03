@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **12 new connector clients** with unit tests and samples:
+  - ARM (Azure Resource Manager), Azure AD, Azure Cosmos DB, Azure Event Hubs, Azure Queues, Azure Tables, Excel Online (Business), Microsoft Defender ATP, Outlook, Service Bus, SMTP, Word Online (Business)
+
+## [0.2.0b2] - 2026-05-13
+
+### Added
+
 - **OneDrive for Business** (`onedrive.py`) connector client with 30+ methods for file operations, sharing, tags, and triggers
-  - File operations: get, create, update, copy, move, delete, convert
-  - Folder operations: list, list root, extract archive
-  - Sharing: create share links
-  - Tags: get, add, remove file tags
-  - Thumbnails: get file thumbnails
-  - 41 unit tests with full coverage
-  - Sample code (`sample_connector_usage_onedrive.py`)
 - **Office 365 SDK type bindings**: Added 3 new typed response classes for improved deserialization
   - `ClientReceiveMessage.from_json()` — Parse email messages from trigger callbacks
   - `GraphClientReceiveMessage.from_json()` — Parse Graph API email responses
@@ -105,7 +105,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EditorConfig and VSCode settings
 - Pyproject.toml packaging configuration
 
-[Unreleased]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.2.0b1...HEAD
+[Unreleased]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.2.0b2...HEAD
+[0.2.0b2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0db1...v0.2.0b2
 [0.2.0b1]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev2...v0.2.0b1
 [0.1.0dev2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev1...v0.1.0dev2
 [0.1.0dev1]: https://github.com/Azure/Connectors-Python-SDK/releases/tag/v0.1.0dev1

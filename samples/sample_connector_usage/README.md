@@ -25,15 +25,20 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azuretables.py` | Azure Storage Tables | `AZURETABLES_CONNECTION_URL` |
 | `sample_connector_usage_documentdb.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
 | `sample_connector_usage_kusto.py` | Azure Data Explorer | `KUSTO_CONNECTION_URL` |
+| `sample_connector_usage_eventhubs.py` | Azure Event Hubs | `EVENTHUBS_CONNECTION_URL` |
 | `sample_connector_usage_excelonlinebusiness.py` | Excel Online (Business) | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_mq.py` | IBM MQ | `MQ_CONNECTION_URL` |
 | `sample_connector_usage_msgraph.py` | MS Graph Groups & Users | `MSGRAPH_CONNECTION_URL` |
 | `sample_connector_usage_office365.py` | Office 365 Outlook | `OFFICE365_CONNECTION_URL` |
 | `sample_connector_usage_office365users.py` | Office 365 Users | `OFFICE365USERS_CONNECTION_URL` |
+| `sample_connector_usage_outlook.py` | Outlook.com | `OUTLOOK_CONNECTION_URL` |
 | `sample_connector_usage_onedrive.py` | OneDrive for Business | `ONEDRIVE_CONNECTION_URL` |
+| `sample_connector_usage_servicebus.py` | Azure Service Bus | `SERVICEBUS_CONNECTION_URL` |
 | `sample_connector_usage_sharepoint.py` | SharePoint Online | `SHAREPOINT_CONNECTION_URL` |
 | `sample_connector_usage_smtp.py` | SMTP | `SMTP_CONNECTION_URL` |
 | `sample_connector_usage_teams.py` | Microsoft Teams | `TEAMS_CONNECTION_URL` |
+| `sample_connector_usage_wdatp.py` | Windows Defender ATP | `WDATP_CONNECTION_URL` |
+| `sample_connector_usage_wordonlinebusiness.py` | Word Online (Business) | `WORDONLINEBUSINESS_CONNECTION_URL` |
 
 Set the appropriate environment variable to your connection runtime URL before running:
 

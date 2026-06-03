@@ -91,6 +91,26 @@ try:
     from .documentdb import DocumentdbClient
 except (ImportError, NameError):
     DocumentdbClient = None  # type: ignore[assignment,misc]
+try:
+    from .eventhubs import EventhubsClient
+except (ImportError, NameError):
+    EventhubsClient = None  # type: ignore[assignment,misc]
+try:
+    from .outlook import OutlookClient
+except (ImportError, NameError):
+    OutlookClient = None  # type: ignore[assignment,misc]
+try:
+    from .servicebus import ServicebusClient
+except (ImportError, NameError):
+    ServicebusClient = None  # type: ignore[assignment,misc]
+try:
+    from .wdatp import WdatpClient
+except (ImportError, NameError):
+    WdatpClient = None  # type: ignore[assignment,misc]
+try:
+    from .wordonlinebusiness import WordonlinebusinessClient
+except (ImportError, NameError):
+    WordonlinebusinessClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.2.0b2'
 
@@ -120,4 +140,9 @@ __all__ = [
     'AzurequeuesClient',
     'AzuretablesClient',
     'DocumentdbClient',
+    'EventhubsClient',
+    'OutlookClient',
+    'ServicebusClient',
+    'WdatpClient',
+    'WordonlinebusinessClient',
 ]

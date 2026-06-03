@@ -159,6 +159,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated | 46 tests |
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated | 37 tests |
 | **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated | 25 tests |
+| **Azure Event Hubs** | `azure.connectors.eventhubs` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Azure Queues** | `azure.connectors.azurequeues` | ✅ Complete | 🔄 SDK Generated | 34 tests |
 | **Azure Tables** | `azure.connectors.azuretables` | ✅ Complete | 🔄 SDK Generated | 43 tests |
 | **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 37 tests |
@@ -168,10 +169,14 @@ The following connectors have been generated and validated with comprehensive te
 | **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated | 41 tests |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated | 40 tests |
 | **OneDrive for Business** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 41 tests |
+| **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 42 tests |
+| **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated | 45 tests |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 44 tests |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 27 tests |
+| **Windows Defender ATP** | `azure.connectors.wdatp` | ✅ Complete | 🔄 SDK Generated | 40 tests |
+| **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 
-**Total:** 529 connector tests + 110 SDK component tests
+**Total:** 716 connector tests + 110 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 
