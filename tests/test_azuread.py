@@ -286,7 +286,10 @@ class TestCreateUser:
 
         mock_response = MockResponse(
             status=201,
-            text='{"id": "user789", "displayName": "John Doe", "userPrincipalName": "john.doe@contoso.com"}'
+            text=(
+                '{"id": "user789", "displayName": "John Doe", '
+                '"userPrincipalName": "john.doe@contoso.com"}'
+            )
         )
         user_input = CreateUserRequest(
             account_enabled=True,

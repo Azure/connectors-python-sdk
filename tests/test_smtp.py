@@ -167,7 +167,8 @@ class TestSendEmail:
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             # Verify body argument was passed
-            assert call_args.kwargs.get('body') is email_input or call_args[1].get('body') is email_input
+            body = call_args.kwargs.get('body') or call_args[1].get('body')
+            assert body is email_input
 
     @pytest.mark.asyncio
     async def test_success_with_all_fields(self, mock_token_provider):

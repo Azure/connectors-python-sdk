@@ -290,7 +290,10 @@ class TestGetEntities:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"PartitionKey": "pk1", "RowKey": "rk1"}, {"PartitionKey": "pk1", "RowKey": "rk2"}]}'
+            text=(
+                '{"value": [{"PartitionKey": "pk1", "RowKey": "rk1"}, '
+                '{"PartitionKey": "pk1", "RowKey": "rk2"}]}'
+            )
         )
 
         with patch.object(

@@ -139,7 +139,8 @@ class TestDeleteMessage:
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
-            assert "/storageAccounts/mystorageaccount/queues/myqueue/messages/msg-123" in call_args[0][1]
+            expected_path = "/storageAccounts/mystorageaccount/queues/myqueue/messages/msg-123"
+            assert expected_path in call_args[0][1]
             assert "popreceipt=receipt-abc" in call_args[0][1]
 
     @pytest.mark.asyncio
@@ -462,9 +463,11 @@ class TestPutMessage:
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
-            assert "/storageAccounts/mystorageaccount/queues/myqueue/messages" in call_args[0][1]
+            expected_path = "/storageAccounts/mystorageaccount/queues/myqueue/messages"
+            assert expected_path in call_args[0][1]
             # Verify body is passed
-            assert call_args.kwargs.get('body') is message_input or call_args[1].get('body') is message_input
+            body = call_args.kwargs.get('body') or call_args[1].get('body')
+            assert body is message_input
 
 
 class TestPutQueue:
