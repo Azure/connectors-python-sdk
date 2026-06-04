@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **12 new connector clients** with unit tests and samples:
-  - ARM (Azure Resource Manager), Azure AD, Azure Cosmos DB, Azure Event Hubs, Azure Queues, Azure Tables, Excel Online (Business), Microsoft Defender ATP, Outlook, Service Bus, SMTP, Word Online (Business)
+- **13 new connector clients** with unit tests and samples:
+  - ARM (Azure Resource Manager), Azure AD, Azure Cosmos DB, Azure Event Hubs, Azure Queues, Azure Tables, Excel Online (Business), Microsoft Dataverse, Microsoft Defender ATP, Outlook, Service Bus, SMTP, Word Online (Business)
 
 ## [0.2.0b2] - 2026-05-13
 
