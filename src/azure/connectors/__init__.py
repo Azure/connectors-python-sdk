@@ -100,17 +100,9 @@ try:
 except (ImportError, NameError):
     OutlookClient = None  # type: ignore[assignment,misc]
 try:
-    from .servicebus import ServicebusClient
+    from .commondataservice import CommondataserviceClient
 except (ImportError, NameError):
-    ServicebusClient = None  # type: ignore[assignment,misc]
-try:
-    from .wdatp import WdatpClient
-except (ImportError, NameError):
-    WdatpClient = None  # type: ignore[assignment,misc]
-try:
-    from .wordonlinebusiness import WordonlinebusinessClient
-except (ImportError, NameError):
-    WordonlinebusinessClient = None  # type: ignore[assignment,misc]
+    CommondataserviceClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.2.0b2'
 
@@ -142,7 +134,5 @@ __all__ = [
     'DocumentdbClient',
     'EventhubsClient',
     'OutlookClient',
-    'ServicebusClient',
-    'WdatpClient',
-    'WordonlinebusinessClient',
+    'CommondataserviceClient',
 ]

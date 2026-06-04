@@ -165,18 +165,16 @@ The following connectors have been generated and validated with comprehensive te
 | **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 37 tests |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated | 30 tests |
 | **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated | 46 tests |
+| **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated | 46 tests |
 | **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | ✅ E2E Validated | 27 tests |
 | **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated | 41 tests |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated | 40 tests |
 | **OneDrive for Business** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 41 tests |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 42 tests |
-| **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated | 45 tests |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 44 tests |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 27 tests |
-| **Windows Defender ATP** | `azure.connectors.wdatp` | ✅ Complete | 🔄 SDK Generated | 40 tests |
-| **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 
-**Total:** 716 connector tests + 110 SDK component tests
+**Total:** 647 connector tests + 110 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

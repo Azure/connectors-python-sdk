@@ -4,19 +4,19 @@
 
 This document tracks the development roadmap for the Azure Connectors Python SDK, including connector support, PyPI publication, samples, and planned features.
 
-## Current Status (v0.1.0dev2)
+> **📋 Current Connector Status:** See the [Validated Connectors table in README.md](README.md#validated-connectors) for the latest list of supported connectors, test coverage, and validation status.
+>
+> **📝 Release History:** See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Core SDK | ✅ Complete | Token providers, HTTP client, retry logic, async/await |
-| Office 365 | ✅ Complete | 53 methods, 41 tests, 79% coverage |
-| SharePoint | ✅ Complete | 45 methods, 44 tests, 57% coverage |
-| Teams | ✅ Complete | 49 methods, 27 tests passing, 73% coverage (18 skipped) |
-| Kusto | ✅ Complete | 6 methods, 37 tests, 98% coverage |
-| MS Graph | ✅ Complete | 7 methods, 46 tests |
-| CI/CD | ✅ Complete | GitHub Actions for pytest, flake8, build |
-| PyPI Publishing | ✅ Complete | Release workflow ready |
-| Documentation | ✅ Complete | README, samples, test docs |
+## Current Status
+
+| Component | Status |
+|-----------|--------|
+| Core SDK | ✅ Complete — Token providers, HTTP client, retry logic, async/await |
+| Connectors | ✅ 19+ connectors — See [README.md](README.md#validated-connectors) |
+| CI/CD | ✅ Complete — GitHub Actions for pytest, flake8, build |
+| PyPI Publishing | ✅ Complete — Release workflow ready |
+| Documentation | ✅ Complete — README, samples, test docs |
 
 ---
 
@@ -55,56 +55,76 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
   - [x] Package metadata and classifiers
   - [x] Version management workflow
   - [x] PyPI authentication setup
-  - [ ] First stable release (v0.1.0)
-- [ ] Package distribution
+  - [ ] First stable release (v1..0)
+- [x] Package distribution
   - [x] Wheel and source distribution builds
   - [x] GitHub Releases with artifacts
-  - [ ] TestPyPI validation
-  - [ ] PyPI publication
+  - [x] PyPI publication
 - [ ] Documentation enhancements
   - [ ] Sphinx documentation site
   - [ ] API reference auto-generation
   - [ ] Tutorial series
-  - [ ] Migration guide from Logic Apps
 
 ### Milestones
 
 | Milestone | Target Date | Status |
 |-----------|-------------|--------|
-| v0.1.0dev2 published to TestPyPI | April 2026 | ⏳ In Progress |
-| Documentation site launched | May 2026 | 📋 Planned |
-| v0.1.0 stable release to PyPI | May 2026 | 📋 Planned |
+| Documentation site launched | July 2026 | 📋 Planned |
+| v1.0.0 stable release to PyPI | August 2026 | 📋 Planned |
 
 ---
 
 ## Phase 3: Additional High-Priority Connectors
 
-**Target:** Q3 2026
+**Status:** In Progress (Q2-Q3 2026)
+
+> See [README.md](README.md#validated-connectors) for the complete list of implemented connectors.
 
 ### M365 Expansion
 
-| Priority | Connector | Use Cases | Status |
-|----------|-----------|-----------|--------|
-| 3.1 | **OneDrive for Business** | File operations, knowledge base | ✅ Complete |
-| 3.2 | **Office 365 Users** | User directory, profile data | ✅ Complete |
-| 3.3 | **Office 365 Groups** | Group management | 📋 Planned |
-| 3.4 | **Planner** | Task management | 📋 Planned |
-
-### Data & Integration
-
-| Priority | Connector | Use Cases | Status |
-|----------|-----------|-----------|--------|
-| 3.5 | **Excel Online** | Spreadsheet operations | 📋 Planned |
-| 3.6 | **Dataverse** | Power Platform integration | 📋 Planned |
-| 3.7 | **SQL Server** | Database operations | 📋 Planned |
+| Connector | Status |
+|-----------|--------|
+| OneDrive for Business | ✅ Complete |
+| Office 365 Users | ✅ Complete |
+| Excel Online (Business) | ✅ Complete |
+| Outlook.com | ✅ Complete |
+| Word Online (Business) | ✅ Complete |
+| Office 365 Groups | 📋 Planned |
+| Planner | 📋 Planned |
 
 ### Azure Services
 
-| Priority | Connector | Use Cases | Status |
-|----------|-----------|-----------|--------|
-| 3.8 | **Azure Blob Storage** | File storage (if not using Functions binding) | 📋 Planned |
-| 3.9 | **Azure Log Analytics** | Query/ingest operations | 📋 Planned |
-| 3.10 | **Event Hubs** | Event streaming (if not using Functions binding) | 📋 Planned |
+| Connector | Status |
+|-----------|--------|
+| Azure Blob Storage | ✅ Complete |
+| Azure Cosmos DB | ✅ Complete |
+| Azure Event Hubs | ✅ Complete |
+| Azure Queues | ✅ Complete |
+| Azure Tables | ✅ Complete |
+| Azure Event Grid | ✅ Complete |
+| Service Bus | ✅ Complete |
+| ARM (Resource Manager) | ✅ Complete |
+| Azure Log Analytics | 📋 Planned |
+
+### Data & Integration
+
+| Connector | Status |
+|-----------|--------|
+| Microsoft Dataverse | ✅ Complete |
+| SQL Server | 📋 Planned |
+
+### Security & Identity
+
+| Connector | Status |
+|-----------|--------|
+| Azure AD | ✅ Complete |
+| Microsoft Defender ATP | ✅ Complete |
+
+### Communication
+
+| Connector | Status |
+|-----------|--------|
+| SMTP | ✅ Complete |
 
 ---
 
@@ -218,12 +238,13 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 Based on usage data, agentic solution value, and community requests:
 
-| Tier | Connectors | Priority |
-|------|------------|----------|
-| **Tier 1** (Complete) | Office 365, SharePoint, Teams, Kusto, MS Graph | ✅ |
-| **Tier 2** (Next) | OneDrive, Excel, Dataverse, SQL | 📋 Q3 2026 |
-| **Tier 3** (Future) | Dynamics 365, Salesforce, Blob Storage, Log Analytics | 📋 Q4 2026 |
-| **Tier 4** (Backlog) | SMTP, SFTP, ServiceNow, Snowflake | 📋 2027 |
+| Tier | Connectors | Status |
+|------|------------|--------|
+| **Tier 1** | Office 365, SharePoint, Teams, Kusto, MS Graph | ✅ Complete |
+| **Tier 2** | OneDrive, Excel, Dataverse, Outlook, Word Online | ✅ Complete |
+| **Tier 3** | Azure Storage (Blob, Queues, Tables), Cosmos DB, Event Hubs, Service Bus | ✅ Complete |
+| **Tier 4** | Azure AD, Defender ATP, SMTP, ARM | ✅ Complete |
+| **Backlog** | SQL Server, Dynamics 365, Salesforce, SFTP, ServiceNow, Snowflake | 📋 Planned |
 
 ---
 
@@ -245,7 +266,7 @@ See [GENERATION.md](GENERATION.md) for code generation documentation.
 
 We track community requests in [GitHub Issues](https://github.com/Azure/Connectors-Python-SDK/issues). Top requests:
 
-1. **More connectors** — OneDrive, Excel, Dataverse
+1. ~~**More connectors** — OneDrive, Excel, Dataverse~~ ✅ Completed
 2. **Trigger support** — Polling triggers for Office 365, SharePoint
 3. **Code generation CLI** — Standalone tool for custom connectors
 4. **Better documentation** — More examples, tutorials
