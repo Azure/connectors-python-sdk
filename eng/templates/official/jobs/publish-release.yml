@@ -73,7 +73,8 @@ jobs:
         }
 
         # ---- Locate and validate assets BEFORE creating the release ----
-        $distFolder = Join-Path '$(Pipeline.Workspace)' (Join-Path '${{ parameters.artifactName }}' 'src/dist')
+        # Artifact contains dist files directly (targetPath in build-artifacts.yml is src/dist)
+        $distFolder = Join-Path '$(Pipeline.Workspace)' '${{ parameters.artifactName }}'
         if (-not (Test-Path -LiteralPath $distFolder)) {
             throw "Distribution folder not found: $distFolder"
         }
@@ -188,7 +189,8 @@ jobs:
           Inline: |
             $version = '${{ parameters.libraryVersion }}'
             $blobPath = '${{ parameters.blobPath }}'
-            $distFolder = '$(Pipeline.Workspace)/${{ parameters.artifactName }}/src/dist'
+            # Artifact contains dist files directly (targetPath in build-artifacts.yml is src/dist)
+            $distFolder = '$(Pipeline.Workspace)/${{ parameters.artifactName }}'
 
             Write-Host "Uploading Python artifacts for version: $version"
             Write-Host "Source folder: $distFolder"
