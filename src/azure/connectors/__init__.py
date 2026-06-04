@@ -72,10 +72,6 @@ try:
 except (ImportError, NameError):
     SmtpClient = None  # type: ignore[assignment,misc]
 try:
-    from .azureeventgrid import AzureeventgridClient
-except (ImportError, NameError):
-    AzureeventgridClient = None  # type: ignore[assignment,misc]
-try:
     from .excelonlinebusiness import ExcelonlinebusinessClient
 except (ImportError, NameError):
     ExcelonlinebusinessClient = None  # type: ignore[assignment,misc]
@@ -103,6 +99,18 @@ try:
     from .commondataservice import CommondataserviceClient
 except (ImportError, NameError):
     CommondataserviceClient = None  # type: ignore[assignment,misc]
+try:
+    from .servicebus import ServicebusClient
+except (ImportError, NameError):
+    ServicebusClient = None  # type: ignore[assignment,misc]
+try:
+    from .wdatp import WdatpClient
+except (ImportError, NameError):
+    WdatpClient = None  # type: ignore[assignment,misc]
+try:
+    from .wordonlinebusiness import WordonlinebusinessClient
+except (ImportError, NameError):
+    WordonlinebusinessClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.2.0b2'
 
@@ -116,6 +124,7 @@ __all__ = [
     'ConnectorException',
     'TriggerCallbackPayload',
     'TriggerCallbackBody',
+    'ArmClient',
     'KustoClient',
     'Office365Client',
     'SharepointonlineClient',
@@ -127,7 +136,6 @@ __all__ = [
     'OnedriveClient',
     'AzureadClient',
     'SmtpClient',
-    'AzureeventgridClient',
     'ExcelonlinebusinessClient',
     'AzurequeuesClient',
     'AzuretablesClient',
@@ -135,4 +143,7 @@ __all__ = [
     'EventhubsClient',
     'OutlookClient',
     'CommondataserviceClient',
+    'ServicebusClient',
+    'WdatpClient',
+    'WordonlinebusinessClient',
 ]

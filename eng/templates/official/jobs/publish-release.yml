@@ -26,6 +26,8 @@ jobs:
   - job: "CreateReleaseTag"
     displayName: 'Create Release Tag'
     steps:
+    - checkout: none
+
     - powershell: |
         $githubUser = "$(GithubUser)"
         $githubToken = "$(GithubPat)"
