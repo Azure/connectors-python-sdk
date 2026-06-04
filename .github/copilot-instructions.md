@@ -373,7 +373,7 @@ git push origin v1.2.3             # push to trigger release
 
 ## Adding a New Connector
 
-When adding a new connector client to the SDK:
+When adding a new connector client to the SDK, use the **add-connector** skill (`.github/skills/add-connector/SKILL.md`) for detailed templates and step-by-step guidance.
 
 ### Steps
 
@@ -393,19 +393,23 @@ When adding a new connector client to the SDK:
 
 3. **Export from `__init__.py`** — add the new client to `src/azure/connectors/__init__.py`
 
-4. **Add unit tests** — create `test_<connector>.py` in `tests/` following the pattern of existing tests:
+4. **Update `README.md`** — add the connector to the "Validated Connectors" table with status (`✅ E2E Validated` or `🔄 SDK Generated`) and test count
+
+5. **Add unit tests** — create `test_<connector>.py` in `tests/` following the pattern of existing tests:
    - Constructor tests
    - Method tests with mocked responses
    - Error handling tests
    - Type serialization round-trips
 
-5. **Update `ROADMAP.md`** — mark the connector as complete in the appropriate phase
+6. **Create sample usage file** — create `sample_connector_usage_<connector>.py` in `samples/sample_connector_usage/` following the pattern of existing samples (port from .NET if available)
 
-6. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
+7. **Update `samples/sample_connector_usage/README.md`** — add the new sample to the samples table
 
-7. **Run all tests** — `pytest` must pass with zero failures before committing
+8. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
 
-8. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
+9. **Run all tests** — `pytest` must pass with zero failures before committing
+
+10. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
 
 ### Validation checklist
 
@@ -415,3 +419,6 @@ When adding a new connector client to the SDK:
 - [ ] Existing connector tests still pass (no regressions)
 - [ ] New connector tests cover: constructor, mocked success, mocked error, exception handling
 - [ ] Module exported in `__init__.py`
+- [ ] README.md connector table updated
+- [ ] Sample file created and compiles without errors
+- [ ] Samples README updated

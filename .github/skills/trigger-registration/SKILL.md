@@ -31,16 +31,17 @@ Registers polling trigger configs on a Connector Namespace so that connector eve
 
 Use this decision logic when scaffolding a Python connector trigger function:
 
-1. **Choose decorator by Python version:**
-   - Python 3.13 → `@app.connector_trigger`
-   - Python < 3.13 → `@app.generic_trigger(type="connectorTrigger")`
+1. **Add connector_trigger decorator:**
+   - `@app.connector_trigger`
 
 2. **Choose packages by trigger operation:**
    - Office 365 `OnNewEmail` → add `azurefunctions-extensions-connectors` (imports `azure-connectors` automatically)
    - Any other connector with a typed SDK model → add `azure-connectors`, use typed class as parameter type
    - No typed model available → use `str` as parameter type, no extra package needed beyond `azure-functions`
 
-3. **Base package:** `azure-functions` (use `>=2.2.0b4` only when using `@app.connector_trigger` decorator)
+3. **Base package:** `azure-functions`
+   - Python 3.13 → `>=2.2.0b4`
+   - Python < 3.13 → `>=1.26.0b3`
 
 ### Extension Webhook Endpoint
 
@@ -89,13 +90,13 @@ azd init -t functions-quickstart-python-http-azd
 Add to `requirements.txt` (include packages based on your approach):
 
 ```text
-# >=2.2.0b4 required for @app.connector_trigger decorator (Python 3.13+ only), no pinning required for generic trigger approaches
+# >=2.2.0b4 required for Python 3.13+, >=1.26.0b3 for Python < 3.13
 azure-functions>=2.2.0b4
 
 # Currently only supports Office 365 OnNewEmail operation
 azurefunctions-extensions-connectors
 
-# Required for @app.generic_trigger with typed SDK models or str payloads, don't include if using azurefunctions-extensions-connectors 
+# Required for str payloads, don't include if using azurefunctions-extensions-connectors 
 azure-connectors
 ```
 
@@ -151,22 +152,6 @@ def on_new_file(payload: str) -> None:
         logging.info(f"Received file content: {len(content)} bytes")
 ```
 
-#### With generic trigger (when using Python <= 3.12)
-
-```python
-import azure.functions as func
-import json
-import logging
-
-app = func.FunctionApp()
-
-
-@app.function_name(name="OnNewFile")
-@app.generic_trigger(arg_name="payload", type="connectorTrigger")
-def on_new_file(payload: str) -> None:
-...
-```
-
 ### 5. Run locally
 
 Start Azurite (required for `AzureWebJobsStorage`):
@@ -176,7 +161,7 @@ npx azurite
 ```
 
 Verify `local.settings.json`:
-
+- Python 3.13+ example:
 ```json
 {
   "IsEncrypted": false,
@@ -186,6 +171,19 @@ Verify `local.settings.json`:
   }
 }
 ```
+
+- Python < 3.13 example - `PYTHON_ISOLATE_WORKER_DEPENDENCIES` enabled:
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "PYTHON_ISOLATE_WORKER_DEPENDENCIES": "1"
+  }
+}
+```
+
 
 Start the Function App:
 
@@ -365,7 +363,7 @@ credential = DefaultAzureCredential()
 client = Office365Client(connection_url, credential)
 ```
 
-### Validated Connectors
+### E2E Validated Connectors
 
 | Connector | Package | Status |
 |-----------|---------|--------|

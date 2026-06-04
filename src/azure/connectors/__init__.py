@@ -24,6 +24,10 @@ from .sdk.trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 # a single broken connector doesn't prevent the SDK core from loading.
 # See: https://github.com/Azure/connectors-python-sdk/issues/13
 try:
+    from .arm import ArmClient
+except (ImportError, NameError):
+    ArmClient = None  # type: ignore[assignment,misc]
+try:
     from .kusto import KustoClient
 except (ImportError, NameError):
     KustoClient = None  # type: ignore[assignment,misc]
@@ -59,6 +63,54 @@ try:
     from .onedrive import OnedriveClient
 except (ImportError, NameError):
     OnedriveClient = None  # type: ignore[assignment,misc]
+try:
+    from .azuread import AzureadClient
+except (ImportError, NameError):
+    AzureadClient = None  # type: ignore[assignment,misc]
+try:
+    from .smtp import SmtpClient
+except (ImportError, NameError):
+    SmtpClient = None  # type: ignore[assignment,misc]
+try:
+    from .excelonlinebusiness import ExcelonlinebusinessClient
+except (ImportError, NameError):
+    ExcelonlinebusinessClient = None  # type: ignore[assignment,misc]
+try:
+    from .azurequeues import AzurequeuesClient
+except (ImportError, NameError):
+    AzurequeuesClient = None  # type: ignore[assignment,misc]
+try:
+    from .azuretables import AzuretablesClient
+except (ImportError, NameError):
+    AzuretablesClient = None  # type: ignore[assignment,misc]
+try:
+    from .documentdb import DocumentdbClient
+except (ImportError, NameError):
+    DocumentdbClient = None  # type: ignore[assignment,misc]
+try:
+    from .eventhubs import EventhubsClient
+except (ImportError, NameError):
+    EventhubsClient = None  # type: ignore[assignment,misc]
+try:
+    from .outlook import OutlookClient
+except (ImportError, NameError):
+    OutlookClient = None  # type: ignore[assignment,misc]
+try:
+    from .commondataservice import CommondataserviceClient
+except (ImportError, NameError):
+    CommondataserviceClient = None  # type: ignore[assignment,misc]
+try:
+    from .servicebus import ServicebusClient
+except (ImportError, NameError):
+    ServicebusClient = None  # type: ignore[assignment,misc]
+try:
+    from .wdatp import WdatpClient
+except (ImportError, NameError):
+    WdatpClient = None  # type: ignore[assignment,misc]
+try:
+    from .wordonlinebusiness import WordonlinebusinessClient
+except (ImportError, NameError):
+    WordonlinebusinessClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.2.0b2'
 
@@ -72,6 +124,7 @@ __all__ = [
     'ConnectorException',
     'TriggerCallbackPayload',
     'TriggerCallbackBody',
+    'ArmClient',
     'KustoClient',
     'Office365Client',
     'SharepointonlineClient',
@@ -81,4 +134,16 @@ __all__ = [
     'AzureblobClient',
     'MqClient',
     'OnedriveClient',
+    'AzureadClient',
+    'SmtpClient',
+    'ExcelonlinebusinessClient',
+    'AzurequeuesClient',
+    'AzuretablesClient',
+    'DocumentdbClient',
+    'EventhubsClient',
+    'OutlookClient',
+    'CommondataserviceClient',
+    'ServicebusClient',
+    'WdatpClient',
+    'WordonlinebusinessClient',
 ]

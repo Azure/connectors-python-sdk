@@ -6,6 +6,14 @@ parameters:
     type: string
     default: 'azure-connectors/python/connector-sdk'
     displayName: 'Blob path prefix under drops container'
+  - name: githubOrg
+    type: string
+    default: 'Azure'
+    displayName: 'GitHub organization'
+  - name: githubRepo
+    type: string
+    default: 'connectors-python-sdk'
+    displayName: 'GitHub repository name'
 
 resources:
   repositories:
@@ -23,10 +31,22 @@ extends:
       os: windows
 
     stages:
+      - stage: BumpVersion
+        displayName: 'Bump Version'
+        jobs:
+          - template: /eng/templates/official/jobs/bump-version.yml@self
+            parameters:
+              libraryVersion: ${{ parameters.libraryVersion }}
+              githubOrg: ${{ parameters.githubOrg }}
+              githubRepo: ${{ parameters.githubRepo }}
+
       - stage: Build
         displayName: 'Build Connectors SDK'
+        dependsOn: BumpVersion
         jobs:
           - template: /eng/templates/official/jobs/build-artifacts.yml@self
+            parameters:
+              libraryVersion: ${{ parameters.libraryVersion }}
 
       - stage: Release
         displayName: 'Release Connectors SDK'
@@ -36,3 +56,5 @@ extends:
             parameters:
               libraryVersion: ${{ parameters.libraryVersion }}
               blobPath: ${{ parameters.blobPath }}
+              githubOrg: ${{ parameters.githubOrg }}
+              githubRepo: ${{ parameters.githubRepo }}
