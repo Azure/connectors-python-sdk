@@ -112,7 +112,7 @@ try:
 except (ImportError, NameError):
     WordonlinebusinessClient = None  # type: ignore[assignment,misc]
 
-__version__ = '0.2.0b2'
+__version__ = '0.3.0b1'
 
 __all__ = [
     'ConnectorClientBase',
