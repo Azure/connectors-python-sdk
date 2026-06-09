@@ -65,7 +65,7 @@ Remove-Item $tempFile -ErrorAction SilentlyContinue
 
 ### Step 2: Create Connection
 
-Supported SDK connector names: `arm`, `azuread`, `azureblob`, `azurequeues`, `azuretables`, `commondataservice`, `documentdb`, `eventhubs`, `excelonlinebusiness`, `kusto`, `mq`, `msgraphgroupsanduser`, `office365`, `office365users`, `onedrive`, `outlook`, `servicebus`, `sharepointonline`, `smtp`, `teams`, `wdatp`, `wordonlinebusiness` (and any `Microsoft.Web/connections` connector name).
+Supported SDK connector names: `arm`, `azureautomation`, `azuredatafactory`, `azuredigitaltwins`, `azuread`, `azureblob`, `azurequeues`, `azuretables`, `azurevm`, `commondataservice`, `documentdb`, `eventhubs`, `excelonlinebusiness`, `keyvault`, `kusto`, `microsoftbookings`, `mq`, `msgraphgroupsanduser`, `office365`, `office365groups`, `office365users`, `onedrive`, `onenote`, `outlook`, `planner`, `servicebus`, `sharepointonline`, `smtp`, `teams`, `wdatp`, `wordonlinebusiness`, `yammer` (and any `Microsoft.Web/connections` connector name).
 
 ```powershell
 $connectorName = "<connector-name>"      # e.g., "azureblob", "kusto", "mq", "msgraphgroupsanduser", "office365", "office365users", "sharepointonline", "teams"

@@ -405,11 +405,13 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 
 7. **Update `samples/sample_connector_usage/README.md`** — add the new sample to the samples table
 
-8. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
+8. **Update `CHANGELOG.md`** — add the new connector to the `[Unreleased]` section under `### Added`
 
-9. **Run all tests** — `pytest` must pass with zero failures before committing
+9. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
 
-10. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
+10. **Run all tests** — `pytest` must pass with zero failures before committing
+
+11. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
 
 ### Validation checklist
 
@@ -422,3 +424,5 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 - [ ] README.md connector table updated
 - [ ] Sample file created and compiles without errors
 - [ ] Samples README updated
+- [ ] CHANGELOG.md updated
+- [ ] Connection setup skill updated

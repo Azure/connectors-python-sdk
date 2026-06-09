@@ -354,7 +354,36 @@ Add a row to `samples/sample_connector_usage/README.md`:
 
 Insert alphabetically by connector name.
 
-### Step 8: Run Tests
+### Step 8: Update CHANGELOG
+
+Add the new connector to the `[Unreleased]` section in `CHANGELOG.md` under `### Added`:
+
+```markdown
+## [Unreleased]
+
+### Added
+
+- **{DisplayName}** (`{connector_name}.py`) connector client with unit tests and samples
+```
+
+If there are multiple new connectors being added together, combine them in a single bullet point:
+
+```markdown
+- **3 new connector clients** with unit tests and samples:
+  - {DisplayName}, Other Connector, Another Connector
+```
+
+### Step 9: Update Connection Setup Skill
+
+Add the connector's API name to the supported SDK connector names list in `.github/skills/connection-setup/SKILL.md` (Step 2).
+
+Find the line that starts with `Supported SDK connector names:` and add `{connector_name}` alphabetically to the list:
+
+```markdown
+Supported SDK connector names: `arm`, `azuread`, ..., `{connector_name}`, ... (and any `Microsoft.Web/connections` connector name).
+```
+
+### Step 10: Run Tests
 
 Execute the full test suite to validate:
 
@@ -367,7 +396,7 @@ Execute the full test suite to validate:
 - [ ] No import errors
 - [ ] Code quality tests pass (imports, structure)
 
-### Step 9: Validate Sample Syntax
+### Step 11: Validate Sample Syntax
 
 ```powershell
 python -m py_compile samples/sample_connector_usage/sample_connector_usage_{connector_name}.py
@@ -384,6 +413,8 @@ Before completing, verify:
 - [ ] `tests/test_{connector_name}.py` created with comprehensive tests
 - [ ] `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py` created
 - [ ] `samples/sample_connector_usage/README.md` updated
+- [ ] `CHANGELOG.md` updated with new connector in `[Unreleased]` section
+- [ ] `.github/skills/connection-setup/SKILL.md` Step 2 updated with connector API name
 - [ ] All tests pass
 - [ ] Sample file compiles without errors
 
@@ -397,6 +428,8 @@ Before completing, verify:
 | `tests/test_{connector_name}.py` | New test file |
 | `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py` | New sample |
 | `samples/sample_connector_usage/README.md` | Add to samples table |
+| `CHANGELOG.md` | Add to `[Unreleased]` section |
+| `.github/skills/connection-setup/SKILL.md` | Add connector name to Step 2 |
 
 ## Common Issues
 

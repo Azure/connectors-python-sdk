@@ -136,6 +136,12 @@ class CreateChannelInput:
     """Optional textual description for the channel"""
     display_name: Optional[str] = None
     """Channel name as it appears in Microsoft Teams"""
+    membership_type: Optional[str] = None
+    """
+    The type of channel. Private channels are accessible only to specific
+    members. Shared channels can be shared with users outside the team.
+    Defaults to standard.
+    """
 
 
 @dataclass
@@ -148,6 +154,8 @@ class CreateChannelResponse:
     """Channel name as it appears in Microsoft Teams"""
     id: Optional[str] = None
     """The channel's unique identifier"""
+    membership_type: Optional[str] = None
+    """The type of channel membership"""
 
 
 @dataclass
@@ -190,68 +198,6 @@ class GetChatsResponse:
     context: Optional[str] = None
     value: Optional[List[Dict[str, Any]]] = None
     """List of one or more chats you are a part of"""
-
-
-@dataclass
-class GetTagsResponseSchema:
-    """Response for List all tags for a team"""
-
-    context: Optional[str] = None
-    value: Optional[List[Dict[str, Any]]] = None
-
-
-@dataclass
-class CreateTagInput:
-    """Create a tag for a team"""
-
-    display_name: Optional[str] = None
-    """The name of the tag as it appears to the user in Microsoft Teams."""
-    members: Optional[str] = None
-    """
-    List of users' IDs separated by semi-colons, identifier must be in a format
-    like '550e8400-e29b-41d4-a716-446655440000'.
-    """
-
-
-@dataclass
-class CreateTagResponseSchema:
-    """Response for Create a tag for a team"""
-
-    type_: Optional[str] = None
-    id: Optional[str] = None
-    """Unique identifier of the tag"""
-    team_id: Optional[str] = None
-    """ID of the team in which the tag is defined"""
-    display_name: Optional[str] = None
-    """The name of the tag as it appears to the user in Microsoft Teams."""
-    member_count: Optional[int] = None
-    """The number of users assigned to the tag"""
-
-
-@dataclass
-class AddMemberToTagInput:
-    """Add a member to a team tag"""
-
-    user_id: Optional[str] = None
-    """
-    The user's ID of the member to add to the tag, must be in a format like
-    '550e8400-e29b-41d4-a716-446655440000'.
-    """
-
-
-@dataclass
-class AddMemberToTagResponseSchema:
-    """Response for Add a member to a team tag"""
-
-    user_id: Optional[str] = None
-    """User ID of the member added to the tag"""
-
-
-@dataclass
-class GetTagMembersResponseSchema:
-    """Response for List the members of a team tag"""
-
-    value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
@@ -299,7 +245,7 @@ class ListRepliesResponseSchema:
 
 @dataclass
 class ListMembersResponseSchema:
-    """Response for List members"""
+    """Response for List chat or channel members"""
 
     value: Optional[List[Dict[str, Any]]] = None
     """List members response"""
@@ -373,6 +319,56 @@ class NewChatResponse:
 
     id: Optional[str] = None
     """The chat's unique identifier"""
+
+
+@dataclass
+class ChatMessage:
+    """Response for Post a message to myself"""
+
+    attachments: Optional[List[Dict[str, Any]]] = None
+    """attachments"""
+    body: Optional[Dict[str, Any]] = None
+    """Plaintext representation of the content of the message"""
+    created_date_time: Optional[str] = None
+    """Timestamp of when the chat message was created"""
+    deleted: Optional[bool] = None
+    """deleted"""
+    etag: Optional[str] = None
+    """Version number of the chat message."""
+    from_: Optional[Dict[str, Any]] = None
+    """The message sender"""
+    id: Optional[str] = None
+    """Unique ID of the message"""
+    importance: Optional[str] = None
+    """
+    The importance of the message. The possible values are: normal, high,
+    urgent.
+    """
+    last_modified_date_time: Optional[str] = None
+    """
+    Timestamp when the chat message is created (initial setting) or modified,
+    including when a reaction is added or removed
+    """
+    locale: Optional[str] = None
+    """Locale of the chat message set by the client."""
+    mentions: Optional[List[Dict[str, Any]]] = None
+    """
+    List of entities mentioned in the chat message. Supported entities are:
+    user, bot, team, and channel.
+    """
+    message_type: Optional[str] = None
+    """The type of chat message"""
+    reactions: Optional[List[Dict[str, Any]]] = None
+    """Reactions for this chat message (for example, Like)"""
+    reply_to_id: Optional[str] = None
+    """ID of the parent message of the thread"""
+    subject: Optional[str] = None
+    """The subject of the chat message, optional"""
+    summary: Optional[str] = None
+    """
+    Summary text of the message that could be used for push notifications and
+    summary views or fall back views
+    """
 
 
 @dataclass
@@ -466,6 +462,335 @@ class ObjectWithoutType:
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
+
+
+@dataclass
+class AddMemberToChatInput:
+    """Add a user to a chat"""
+
+    user_id: Optional[str] = None
+    """User principal name or Microsoft Entra ID to add"""
+    owner: Optional[bool] = None
+    """True, if the user should be a chat owner"""
+    visible_history_start_date_time: Optional[str] = None
+    """
+    Timestamp that represents how far back in the chat history the new member
+    can see. If not specified, no history is shared.
+    """
+
+
+@dataclass
+class GetOnlineMeetingResponse:
+    """Response for Get an online meeting"""
+
+    id: Optional[str] = None
+    """The unique identifier of the online meeting"""
+    subject: Optional[str] = None
+    """The subject of the online meeting"""
+    start_date_time: Optional[str] = None
+    """The start time of the meeting in UTC"""
+    end_date_time: Optional[str] = None
+    """The end time of the meeting in UTC"""
+    creation_date_time: Optional[str] = None
+    """The creation time of the meeting in UTC"""
+    join_web_url: Optional[str] = None
+    """The URL used to join the meeting online"""
+    join_meeting_id_settings: Optional[Dict[str, Any]] = None
+    """Settings related to the join meeting ID"""
+    participants: Optional[Dict[str, Any]] = None
+    """The participants of the meeting"""
+    audio_conferencing: Optional[Dict[str, Any]] = None
+    """Phone call-in information for the meeting"""
+    is_entry_exit_announced: Optional[bool] = None
+    """
+    Whether announce notifications are enabled for callers joining or leaving
+    the meeting
+    """
+    allowed_presenters: Optional[str] = None
+    """Specifies who can be a presenter in the meeting"""
+    lobby_bypass_settings: Optional[Dict[str, Any]] = None
+    """Specifies which participants can bypass the meeting lobby"""
+    record_automatically: Optional[bool] = None
+    """Indicates whether to record the meeting automatically"""
+    allow_meeting_chat: Optional[str] = None
+    """Specifies the mode of meeting chat"""
+    meeting_options_web_url: Optional[str] = None
+    """A URL for the organizer to change settings for the meeting"""
+
+
+@dataclass
+class CallTranscriptCollectionResponse:
+    """Response for List meeting transcripts"""
+
+    context: Optional[str] = None
+    value: Optional[List[CallTranscriptResponse]] = None
+    """List of transcripts"""
+
+
+@dataclass
+class CallTranscriptResponse:
+    """Response for Get meeting transcript"""
+
+    id: Optional[str] = None
+    """The transcript ID"""
+    created_date_time: Optional[str] = None
+    """The date and time when the transcript was created"""
+    transcript_content_url: Optional[str] = None
+    """The URL to access the transcript content"""
+    meeting_id: Optional[str] = None
+    """The meeting ID"""
+    meeting_organizer_id: Optional[str] = None
+    """The meeting organizer's user ID"""
+    call_id: Optional[str] = None
+    """The call ID"""
+
+
+@dataclass
+class CallRecordingCollectionResponse:
+    """Response for List meeting recordings"""
+
+    context: Optional[str] = None
+    value: Optional[List[CallRecordingResponse]] = None
+    """List of recordings"""
+
+
+@dataclass
+class CallRecordingResponse:
+    """Response for Get meeting recording"""
+
+    id: Optional[str] = None
+    """The recording ID"""
+    created_date_time: Optional[str] = None
+    """The date and time when the recording was created"""
+    recording_content_url: Optional[str] = None
+    """The URL to access the recording content"""
+    meeting_id: Optional[str] = None
+    """The meeting ID"""
+    meeting_organizer_id: Optional[str] = None
+    """The meeting organizer's user ID"""
+    call_id: Optional[str] = None
+    """The call ID"""
+
+
+@dataclass
+class ListSectionsResponse:
+    """Response for List sections"""
+
+    context: Optional[str] = None
+    microsoft_graph_sections_version: Optional[str] = None
+    """
+    Version identifier for the sections hierarchy. Pass as If-Match on Create,
+    Update, Delete, Add Item, Remove Item, and Move Item operations.
+    """
+    value: Optional[List[SectionResponse]] = None
+    """List of sections"""
+
+
+@dataclass
+class CreateSectionInput:
+    """Create a section"""
+
+    display_name: Optional[str] = None
+    """The display name of the section"""
+    display_icon: Optional[Dict[str, Any]] = None
+    """
+    The display icon for the section. Only iconType is writable; other fields
+    are populated by the service.
+    """
+    is_expanded: Optional[bool] = None
+    """Whether the section is expanded"""
+    sort_type: Optional[str] = None
+    """The sort type for the section"""
+
+
+@dataclass
+class SectionResponse:
+    """Response for Create a section"""
+
+    etag: Optional[str] = None
+    """
+    ETag for the sections collection. Pass as If-Match on Create, Update, and
+    Delete.
+    """
+    id: Optional[str] = None
+    """The section ID"""
+    display_name: Optional[str] = None
+    """The display name of the section"""
+    display_icon: Optional[Dict[str, Any]] = None
+    """The display icon for the section"""
+    is_expanded: Optional[bool] = None
+    """Whether the section is expanded"""
+    sort_type: Optional[str] = None
+    """The sort type for the section"""
+    section_type: Optional[str] = None
+    """The type of section"""
+    created_date_time: Optional[str] = None
+    """The date and time when the section was created"""
+    last_modified_date_time: Optional[str] = None
+    """The date and time when the section was last modified"""
+
+
+@dataclass
+class UpdateSectionInput:
+    """Update a section"""
+
+    display_name: Optional[str] = None
+    """The display name of the section"""
+    display_icon: Optional[Dict[str, Any]] = None
+    """
+    The display icon for the section. Only iconType is writable; other fields
+    are populated by the service.
+    """
+    is_expanded: Optional[bool] = None
+    """Whether the section is expanded"""
+    sort_type: Optional[str] = None
+    """The sort type for the section"""
+
+
+@dataclass
+class ListSectionItemsResponse:
+    """Response for List section items"""
+
+    context: Optional[str] = None
+    value: Optional[List[SectionItemResponse]] = None
+    """List of section items"""
+
+
+@dataclass
+class AddSectionItemInput:
+    """Add an item to a section"""
+
+    id: Optional[str] = None
+    """
+    The conversation ID of the chat, channel, meeting, or community to add to
+    the section. For community items, the service automatically normalizes the
+    ID to the 19:{id}@EngageCommunity format.
+    """
+
+
+@dataclass
+class SectionItemResponse:
+    """Response for Add an item to a section"""
+
+    etag: Optional[str] = None
+    """
+    ETag for the section items collection. Pass as If-Match on Add, Remove, and
+    Move.
+    """
+    id: Optional[str] = None
+    """
+    The unique identifier of the item. Corresponds to the conversation ID of
+    the underlying chat, channel, meeting, or community.
+    """
+    item_type: Optional[str] = None
+    """The type of the item"""
+    created_date_time: Optional[str] = None
+    """The date and time when the item was added to the section"""
+    last_modified_date_time: Optional[str] = None
+    """The date and time when the item was last modified"""
+
+
+@dataclass
+class MoveSectionItemInput:
+    """Move a section item"""
+
+    target_section_id: Optional[str] = None
+    """The ID of the section to move the item to"""
+
+
+@dataclass
+class GetTagsResponseSchema:
+    """Response for List all tags for a team"""
+
+    context: Optional[str] = None
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class CreateTagInput:
+    """Create a tag for a team"""
+
+    display_name: Optional[str] = None
+    """The name of the tag as it appears to the user in Microsoft Teams."""
+    members: Optional[str] = None
+    """
+    List of users' IDs separated by semi-colons, identifier must be in a format
+    like '550e8400-e29b-41d4-a716-446655440000'.
+    """
+
+
+@dataclass
+class CreateTagResponseSchema:
+    """Response for Create a tag for a team"""
+
+    type_: Optional[str] = None
+    id: Optional[str] = None
+    """Unique identifier of the tag"""
+    team_id: Optional[str] = None
+    """ID of the team in which the tag is defined"""
+    display_name: Optional[str] = None
+    """The name of the tag as it appears to the user in Microsoft Teams."""
+    member_count: Optional[int] = None
+    """The number of users assigned to the tag"""
+
+
+@dataclass
+class UpdateTagInput:
+    """Update a team tag"""
+
+    display_name: Optional[str] = None
+    """The new name of the tag as it appears to the user in Microsoft Teams."""
+
+
+@dataclass
+class AddMemberToTagInput:
+    """Add a member to a team tag"""
+
+    user_id: Optional[str] = None
+    """
+    The user's ID of the member to add to the tag, must be in a format like
+    '550e8400-e29b-41d4-a716-446655440000'.
+    """
+
+
+@dataclass
+class AddMemberToTagResponseSchema:
+    """Response for Add a member to a team tag"""
+
+    user_id: Optional[str] = None
+    """User ID of the member added to the tag"""
+
+
+@dataclass
+class GetTagMembersResponseSchema:
+    """Response for List the members of a team tag"""
+
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class AiInsightCollectionResponse:
+    """Response for List AI insights"""
+
+    context: Optional[str] = None
+    value: Optional[List[AiInsightResponse]] = None
+    """List of AI insights"""
+
+
+@dataclass
+class AiInsightResponse:
+    """Response for Get AI insight"""
+
+    id: Optional[str] = None
+    """The AI insight ID"""
+    call_id: Optional[str] = None
+    """The call ID"""
+    content_correlation_id: Optional[str] = None
+    """The content correlation ID"""
+    created_date_time: Optional[str] = None
+    """The date and time when the AI insight was created"""
+    end_date_time: Optional[str] = None
+    """The date and time when the AI insight ended"""
 
 
 @dataclass
@@ -777,6 +1102,107 @@ class MessageReactionWebhookResponseSchema:
 
 
 @dataclass
+class TeamsIdentitySet:
+    """Definition: TeamsIdentitySet"""
+
+    application: Optional[Dict[str, Any]] = None
+    """Application identity (bot or service)"""
+    device: Optional[Dict[str, Any]] = None
+    """Device identity"""
+    user: Optional[Dict[str, Any]] = None
+    """User identity"""
+
+
+@dataclass
+class CallEventWebhookResponseSchema:
+    """Definition: CallEventWebhookResponseSchema"""
+
+    id: Optional[str] = None
+    """Event identifier"""
+    id: Optional[str] = None
+    """OData identifier"""
+    type_: Optional[str] = None
+    """
+    OData type discriminator (always #microsoft.graph.callEvent;
+    meeting-specific fields are flattened onto the base type by notification
+    delivery).
+    """
+    call_event_type: Optional[str] = None
+    """Type of call event"""
+    event_date_time: Optional[str] = None
+    """When the event occurred"""
+    call_conversation_id: Optional[str] = None
+    """Call conversation identifier"""
+    join_web_url: Optional[str] = None
+    """
+    Meeting join URL (populated when the call is associated with an online
+    meeting)
+    """
+    chat_info: Optional[Dict[str, Any]] = None
+    """
+    Chat information for the meeting (populated when the call is associated
+    with an online meeting)
+    """
+    organizer_meeting_info: Optional[Dict[str, Any]] = None
+    """
+    Organizer info (populated when the call is associated with an online
+    meeting)
+    """
+    transcription_state: Optional[Dict[str, Any]] = None
+    """Transcription state (set on transcriptionStateUpdated events)"""
+    recording_state: Optional[Dict[str, Any]] = None
+    """Recording state (set on recordingStateUpdated events)"""
+    participants: Optional[List[Dict[str, Any]]] = None
+    """Participants (set on rosterUpdated events)"""
+
+
+@dataclass
+class TranscriptWebhookResponseSchema:
+    """Definition: TranscriptWebhookResponseSchema"""
+
+    id: Optional[str] = None
+    """Transcript identifier"""
+    id: Optional[str] = None
+    """OData identifier"""
+    meeting_id: Optional[str] = None
+    """Online meeting identifier (empty for ad-hoc call transcripts)"""
+    call_id: Optional[str] = None
+    """Call identifier (set for ad-hoc call transcripts)"""
+    content_correlation_id: Optional[str] = None
+    """Content correlation identifier"""
+    meeting_organizer: Optional[TeamsIdentitySet] = None
+    transcript_content_url: Optional[str] = None
+    """URL to download the transcript content"""
+    created_date_time: Optional[str] = None
+    """When the transcript was created (UTC)"""
+    end_date_time: Optional[str] = None
+    """When the transcript ended (UTC)"""
+
+
+@dataclass
+class RecordingWebhookResponseSchema:
+    """Definition: RecordingWebhookResponseSchema"""
+
+    id: Optional[str] = None
+    """Recording identifier"""
+    id: Optional[str] = None
+    """OData identifier"""
+    meeting_id: Optional[str] = None
+    """Online meeting identifier (empty for ad-hoc call recordings)"""
+    call_id: Optional[str] = None
+    """Call identifier (set for ad-hoc call recordings)"""
+    content_correlation_id: Optional[str] = None
+    """Content correlation identifier"""
+    meeting_organizer: Optional[TeamsIdentitySet] = None
+    recording_content_url: Optional[str] = None
+    """URL to download the recording content"""
+    created_date_time: Optional[str] = None
+    """When the recording was created (UTC)"""
+    end_date_time: Optional[str] = None
+    """When the recording ended (UTC)"""
+
+
+@dataclass
 class ChatMessageWebhookResponseSchema:
     """Definition: ChatMessageWebhookResponseSchema"""
 
@@ -884,56 +1310,6 @@ class DynamicGatherInputSubscriptionResult:
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class ChatMessage:
-    """Definition: ChatMessage"""
-
-    attachments: Optional[List[Dict[str, Any]]] = None
-    """attachments"""
-    body: Optional[Dict[str, Any]] = None
-    """Plaintext representation of the content of the message"""
-    created_date_time: Optional[str] = None
-    """Timestamp of when the chat message was created"""
-    deleted: Optional[bool] = None
-    """deleted"""
-    etag: Optional[str] = None
-    """Version number of the chat message."""
-    from_: Optional[Dict[str, Any]] = None
-    """The message sender"""
-    id: Optional[str] = None
-    """Unique ID of the message"""
-    importance: Optional[str] = None
-    """
-    The importance of the message. The possible values are: normal, high,
-    urgent.
-    """
-    last_modified_date_time: Optional[str] = None
-    """
-    Timestamp when the chat message is created (initial setting) or modified,
-    including when a reaction is added or removed
-    """
-    locale: Optional[str] = None
-    """Locale of the chat message set by the client."""
-    mentions: Optional[List[Dict[str, Any]]] = None
-    """
-    List of entities mentioned in the chat message. Supported entities are:
-    user, bot, team, and channel.
-    """
-    message_type: Optional[str] = None
-    """The type of chat message"""
-    reactions: Optional[List[Dict[str, Any]]] = None
-    """Reactions for this chat message (for example, Like)"""
-    reply_to_id: Optional[str] = None
-    """ID of the parent message of the thread"""
-    subject: Optional[str] = None
-    """The subject of the chat message, optional"""
-    summary: Optional[str] = None
-    """
-    Summary text of the message that could be used for push notifications and
-    summary views or fall back views
     """
 
 
@@ -1249,6 +1625,13 @@ class ScheduleResponse:
 
 
 @dataclass
+class PostMessageToSelfRequest:
+    """Definition: PostMessageToSelfRequest"""
+
+    body: Optional[Dict[str, Any]] = None
+
+
+@dataclass
 class ThemeEditor:
     """Definition: ThemeEditor"""
 
@@ -1527,6 +1910,37 @@ class VirtualAgentBots:
     """List of the Microsoft Copilot Studio agents"""
 
 
+@dataclass
+class SectionItemConflictError:
+    """Definition: SectionItemConflictError"""
+
+    error: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class DynamicCallEventTriggerRequest:
+    """Definition: DynamicCallEventTriggerRequest"""
+
+    callback_url: Optional[str] = None
+    """Webhook callback URL"""
+
+
+@dataclass
+class DynamicTranscriptTriggerRequest:
+    """Definition: DynamicTranscriptTriggerRequest"""
+
+    callback_url: Optional[str] = None
+    """Webhook callback URL"""
+
+
+@dataclass
+class DynamicRecordingTriggerRequest:
+    """Definition: DynamicRecordingTriggerRequest"""
+
+    callback_url: Optional[str] = None
+    """Webhook callback URL"""
+
+
 # Client Class
 
 class TeamsClient(ConnectorClientBase):
@@ -1645,6 +2059,147 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def get_channels_for_group_async(
+        self,
+        group_id: str,
+    ):
+        """
+        List channels
+
+        Lists all the channels for a specific team
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/groups/{str(group_id)}/channels"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def create_channel_async(
+        self,
+        input: CreateChannelInput,
+        group_id: str,
+    ):
+        """
+        Create a channel
+
+        Create a new channel within a specified team
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/groups/{str(group_id)}/channels"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_all_channels_for_team_async(
+        self,
+        group_id: str,
+    ):
+        """
+        List all channels
+
+        Lists all the channels for a specific team, including channels that are
+        shared with the team
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/teams/{str(group_id)}/allChannels"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def transcript_trigger_async(
+        self,
+        input: DynamicTranscriptTriggerRequest,
+        scope_type: Optional[str],
+    ):
+        """
+        When a transcript is available
+
+        Triggers when a transcript becomes available for a meeting or ad-hoc
+        call.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/subscriptions/transcripttrigger"
+        )
+        query_params = []
+        if scope_type is not None:
+            value = str(scope_type)
+            if isinstance(scope_type, bool):
+                value = value.lower()
+            query_params.append(f"scopeType={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        await self.http_client.send_async("POST", path, body=input)
+
+    async def recording_trigger_async(
+        self,
+        input: DynamicRecordingTriggerRequest,
+        scope_type: Optional[str],
+    ):
+        """
+        When a recording is available
+
+        Triggers when a recording becomes available for a meeting or ad-hoc
+        call.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/subscriptions/recordingtrigger"
+        )
+        query_params = []
+        if scope_type is not None:
+            value = str(scope_type)
+            if isinstance(scope_type, bool):
+                value = value.lower()
+            query_params.append(f"scopeType={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        await self.http_client.send_async("POST", path, body=input)
+
     async def webhook_chat_message_trigger_async(
         self,
         input: WebhookChatMessageTriggerInput,
@@ -1684,6 +2239,32 @@ class TeamsClient(ConnectorClientBase):
         )
 
         await self.http_client.send_async("POST", path, body=input)
+
+    async def get_team_async(
+        self,
+        team_id: str,
+    ):
+        """
+        Get a team
+
+        Gets the details for a team in Microsoft Teams.
+        """
+        path = f"{self._connection_runtime_url}/beta/teams/{str(team_id)}"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def at_mention_user_async(
         self,
@@ -1806,6 +2387,33 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def post_message_to_self_async(
+        self,
+        input: PostMessageToSelfRequest,
+    ):
+        """
+        Post a message to myself
+
+        Sends a message to the signed-in user's own Notes chat in Microsoft
+        Teams.
+        """
+        path = f"{self._connection_runtime_url}/v1.0/chats/48:notes/messages"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def create_a_team_async(
         self,
         input: CreateATeamInput,
@@ -1832,6 +2440,67 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def list_team_members_async(
+        self,
+        team_id: str,
+    ):
+        """
+        List team members
+
+        Lists the members of a team in Microsoft Teams
+        """
+        path = (
+            f"{self._connection_runtime_url}/v1.0/teams/{str(team_id)}/members"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def add_member_to_team_async(
+        self,
+        input: AddMemberToTeamInput,
+        team_id: str,
+    ):
+        """
+        Add a member to a team
+
+        Adds a member to a team in Microsoft Teams
+        """
+        path = (
+            f"{self._connection_runtime_url}/v1.0/teams/{str(team_id)}/members"
+        )
+
+        await self.http_client.send_async("POST", path, body=input)
+
+    async def remove_member_from_team_async(
+        self,
+        membership_id: str,
+        team_id: str,
+    ):
+        """
+        Remove a member from a team
+
+        Removes a member from a team in Microsoft Teams
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{str(team_id)}/members/{str(membership_id)}"
+        )
+
+        await self.http_client.send_async("DELETE", path, body=None)
+
     async def http_request_async(
         self,
         input: HttpRequestInput,
@@ -1852,6 +2521,277 @@ class TeamsClient(ConnectorClientBase):
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_online_meeting_async(
+        self,
+        lookup_type: Optional[str],
+        lookup_value: Optional[str],
+    ):
+        """
+        Get an online meeting
+
+        Retrieves the properties and relationships of an online meeting. You
+        can look up a meeting by meeting ID, join web URL, or join meeting ID.
+        """
+        path = f"{self._connection_runtime_url}/v1.0/me/onlineMeetings/lookup"
+        query_params = []
+        if lookup_type is not None:
+            value = str(lookup_type)
+            if isinstance(lookup_type, bool):
+                value = value.lower()
+            query_params.append(f"lookupType={quote(value)}")
+        if lookup_value is not None:
+            value = str(lookup_value)
+            if isinstance(lookup_value, bool):
+                value = value.lower()
+            query_params.append(f"lookupValue={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_sections_async(
+        self,
+    ):
+        """
+        List sections
+
+        Lists the current user's teamwork sections
+        """
+        path = f"{self._connection_runtime_url}/beta/me/teamwork/sections"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def create_section_async(
+        self,
+        input: CreateSectionInput,
+    ):
+        """
+        Create a section
+
+        Creates a new teamwork section for the current user
+        """
+        path = f"{self._connection_runtime_url}/beta/me/teamwork/sections"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tags_async(
+        self,
+        group_id: str,
+    ):
+        """
+        List all tags for a team
+
+        Lists the team's tags
+        """
+        path = (
+            f"{self._connection_runtime_url}/v1.0/teams/{str(group_id)}/tags"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def create_tag_async(
+        self,
+        input: CreateTagInput,
+        group_id: str,
+    ):
+        """
+        Create a tag for a team
+
+        Creates a tag in a team
+        """
+        path = (
+            f"{self._connection_runtime_url}/v1.0/teams/{str(group_id)}/tags"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_all_adhoc_call_recordings_async(
+        self,
+        start_date_time: Optional[str] = None,
+        end_date_time: Optional[str] = None,
+        top: Optional[str] = None,
+        skiptoken: Optional[str] = None,
+        deltatoken: Optional[str] = None,
+    ):
+        """
+        Get all ad-hoc call recordings
+
+        Gets all recordings from ad-hoc calls for the signed-in user
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/me/adhocCalls/getAllRecordings"
+        )
+        query_params = []
+        if start_date_time is not None:
+            value = str(start_date_time)
+            if isinstance(start_date_time, bool):
+                value = value.lower()
+            query_params.append(f"startDateTime={quote(value)}")
+        if end_date_time is not None:
+            value = str(end_date_time)
+            if isinstance(end_date_time, bool):
+                value = value.lower()
+            query_params.append(f"endDateTime={quote(value)}")
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if skiptoken is not None:
+            value = str(skiptoken)
+            if isinstance(skiptoken, bool):
+                value = value.lower()
+            query_params.append(f"$skiptoken={quote(value)}")
+        if deltatoken is not None:
+            value = str(deltatoken)
+            if isinstance(deltatoken, bool):
+                value = value.lower()
+            query_params.append(f"$deltatoken={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_all_adhoc_call_transcripts_async(
+        self,
+        start_date_time: Optional[str] = None,
+        end_date_time: Optional[str] = None,
+        top: Optional[str] = None,
+        skiptoken: Optional[str] = None,
+        deltatoken: Optional[str] = None,
+    ):
+        """
+        Get all ad-hoc call transcripts
+
+        Gets all transcripts from ad-hoc calls for the signed-in user
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/me/adhocCalls/getAllTranscripts"
+        )
+        query_params = []
+        if start_date_time is not None:
+            value = str(start_date_time)
+            if isinstance(start_date_time, bool):
+                value = value.lower()
+            query_params.append(f"startDateTime={quote(value)}")
+        if end_date_time is not None:
+            value = str(end_date_time)
+            if isinstance(end_date_time, bool):
+                value = value.lower()
+            query_params.append(f"endDateTime={quote(value)}")
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if skiptoken is not None:
+            value = str(skiptoken)
+            if isinstance(skiptoken, bool):
+                value = value.lower()
+            query_params.append(f"$skiptoken={quote(value)}")
+        if deltatoken is not None:
+            value = str(deltatoken)
+            if isinstance(deltatoken, bool):
+                value = value.lower()
+            query_params.append(f"$deltatoken={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
                 path,
                 response.status,
                 response.text,
