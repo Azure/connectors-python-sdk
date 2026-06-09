@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Any, Dict, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -509,7 +510,15 @@ class PlannerClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/v1.0/planner/tasks/{str(id)}"
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def unassign_users_async(
         self,
@@ -736,6 +745,44 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def list_buckets_async(
+        self,
+        id: str,
+        group_id: Optional[str],
+    ):
+        """
+        List buckets
+
+        List the buckets in a plan.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/v1.0/planner/plans/{str(id)}/buckets"
+        )
+        query_params = []
+        if group_id is not None:
+            value = str(group_id)
+            if isinstance(group_id, bool):
+                value = value.lower()
+            query_params.append(f"groupId={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def list_my_tasks_async(
         self,
     ):
@@ -745,6 +792,120 @@ class PlannerClient(ConnectorClientBase):
         List the tasks assigned to me.
         """
         path = f"{self._connection_runtime_url}/v1.0/me/planner/tasks"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_tasks_async(
+        self,
+        id: str,
+        group_id: Optional[str],
+    ):
+        """
+        List tasks
+
+        List the tasks in a plan.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/v1.0/planner/plans/{str(id)}/tasks"
+        )
+        query_params = []
+        if group_id is not None:
+            value = str(group_id)
+            if isinstance(group_id, bool):
+                value = value.lower()
+            query_params.append(f"groupId={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def on_complete_task_async(
+        self,
+        id: str,
+        group_id: Optional[str],
+    ):
+        """
+        When a task is completed
+
+        This operation triggers when a task is completed.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/v1.0/planner/oncompletetask_trigger/plans/{str(id)}/tasks"
+        )
+        query_params = []
+        if group_id is not None:
+            value = str(group_id)
+            if isinstance(group_id, bool):
+                value = value.lower()
+            query_params.append(f"groupId={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def on_new_task_async(
+        self,
+        id: str,
+        group_id: Optional[str],
+    ):
+        """
+        When a new task is created
+
+        This operation triggers when a new task is created.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/v1.0/planner/onnewtask_trigger/plans/{str(id)}/tasks"
+        )
+        query_params = []
+        if group_id is not None:
+            value = str(group_id)
+            if isinstance(group_id, bool):
+                value = value.lower()
+            query_params.append(f"groupId={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("GET", path, body=None)
 

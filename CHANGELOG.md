@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Yammer** (`yammer.py`) connector client with unit tests and samples
 - **Planner** (`planner.py`) connector client with unit tests and samples
 - **OneNote** (`onenote.py`) connector client with unit tests and samples
 - **Office 365 Groups** (`office365groups.py`) connector client with unit tests and samples
@@ -19,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Azure Data Factory** (`azuredatafactory.py`) connector client with unit tests and samples
 - **Azure Automation** (`azureautomation.py`) connector client with unit tests and samples
 
-## [0.3.b2]
+## [0.3.0b2]
 
 ### Added
 

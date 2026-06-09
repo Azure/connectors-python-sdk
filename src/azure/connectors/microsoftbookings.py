@@ -282,7 +282,15 @@ class MicrosoftbookingsClient(ConnectorClientBase):
             f"/AppointmentUpdated"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def cancel_appointment_async(
         self,
@@ -307,7 +315,15 @@ class MicrosoftbookingsClient(ConnectorClientBase):
             f"/AppointmentDeleted"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def list_bookings_business_user_as_admin_async(
         self,

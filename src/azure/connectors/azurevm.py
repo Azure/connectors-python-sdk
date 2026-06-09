@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -203,6 +204,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
+        x_ms_api_version: Optional[str],
     ):
         """
         Get virtual machine in a VM scale set
@@ -222,6 +224,14 @@ class AzurevmClient(ConnectorClientBase):
             f"/virtualMachines"
             f"/{str(virtual_machine_in_scale_set_instance_id)}"
         )
+        query_params = []
+        if x_ms_api_version is not None:
+            value = str(x_ms_api_version)
+            if isinstance(x_ms_api_version, bool):
+                value = value.lower()
+            query_params.append(f"x-ms-api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -244,6 +254,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
+        x_ms_api_version: Optional[str],
     ):
         """
         Deallocate virtual machine in a VM scale set
@@ -267,8 +278,24 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_in_scale_set_instance_id)}"
             f"/deallocate"
         )
+        query_params = []
+        if x_ms_api_version is not None:
+            value = str(x_ms_api_version)
+            if isinstance(x_ms_api_version, bool):
+                value = value.lower()
+            query_params.append(f"x-ms-api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_in_scale_set_power_off_async(
         self,
@@ -276,6 +303,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
+        x_ms_api_version: Optional[str],
     ):
         """
         Power off virtual machine in a VM scale set
@@ -298,8 +326,24 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_in_scale_set_instance_id)}"
             f"/poweroff"
         )
+        query_params = []
+        if x_ms_api_version is not None:
+            value = str(x_ms_api_version)
+            if isinstance(x_ms_api_version, bool):
+                value = value.lower()
+            query_params.append(f"x-ms-api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_in_scale_set_redeploy_async(
         self,
@@ -307,6 +351,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
+        x_ms_api_version: Optional[str],
     ):
         """
         Redeploy virtual machine in a VM scale set
@@ -328,8 +373,24 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_in_scale_set_instance_id)}"
             f"/redeploy"
         )
+        query_params = []
+        if x_ms_api_version is not None:
+            value = str(x_ms_api_version)
+            if isinstance(x_ms_api_version, bool):
+                value = value.lower()
+            query_params.append(f"x-ms-api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_in_scale_set_reimage_async(
         self,
@@ -337,6 +398,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
+        x_ms_api_version: Optional[str],
     ):
         """
         Reimage virtual machine in a VM scale set
@@ -358,8 +420,24 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_in_scale_set_instance_id)}"
             f"/reimage"
         )
+        query_params = []
+        if x_ms_api_version is not None:
+            value = str(x_ms_api_version)
+            if isinstance(x_ms_api_version, bool):
+                value = value.lower()
+            query_params.append(f"x-ms-api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_in_scale_set_restart_async(
         self,
@@ -367,6 +445,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
+        x_ms_api_version: Optional[str],
     ):
         """
         Restart virtual machine in a VM scale set
@@ -387,8 +466,24 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_in_scale_set_instance_id)}"
             f"/restart"
         )
+        query_params = []
+        if x_ms_api_version is not None:
+            value = str(x_ms_api_version)
+            if isinstance(x_ms_api_version, bool):
+                value = value.lower()
+            query_params.append(f"x-ms-api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_in_scale_set_start_async(
         self,
@@ -396,6 +491,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
+        x_ms_api_version: Optional[str],
     ):
         """
         Start virtual machine in a VM scale set
@@ -416,14 +512,31 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_in_scale_set_instance_id)}"
             f"/start"
         )
+        query_params = []
+        if x_ms_api_version is not None:
+            value = str(x_ms_api_version)
+            if isinstance(x_ms_api_version, bool):
+                value = value.lower()
+            query_params.append(f"x-ms-api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_get_async(
         self,
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
+        api_version: Optional[str],
     ):
         """
         Get virtual machine
@@ -441,6 +554,14 @@ class AzurevmClient(ConnectorClientBase):
             f"/virtualMachines"
             f"/{str(virtual_machine_name)}"
         )
+        query_params = []
+        if api_version is not None:
+            value = str(api_version)
+            if isinstance(api_version, bool):
+                value = value.lower()
+            query_params.append(f"api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -462,6 +583,7 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
+        api_version: Optional[str],
     ):
         """
         Start virtual machine
@@ -480,14 +602,31 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_name)}"
             f"/start"
         )
+        query_params = []
+        if api_version is not None:
+            value = str(api_version)
+            if isinstance(api_version, bool):
+                value = value.lower()
+            query_params.append(f"api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_deallocate_async(
         self,
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
+        api_version: Optional[str],
     ):
         """
         Deallocate virtual machine
@@ -508,14 +647,31 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_name)}"
             f"/deallocate"
         )
+        query_params = []
+        if api_version is not None:
+            value = str(api_version)
+            if isinstance(api_version, bool):
+                value = value.lower()
+            query_params.append(f"api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_poweroff_async(
         self,
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
+        api_version: Optional[str],
     ):
         """
         Power off virtual machine
@@ -536,14 +692,31 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_name)}"
             f"/powerOff"
         )
+        query_params = []
+        if api_version is not None:
+            value = str(api_version)
+            if isinstance(api_version, bool):
+                value = value.lower()
+            query_params.append(f"api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_reapply_async(
         self,
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
+        api_version: Optional[str],
     ):
         """
         Reapply virtual machine
@@ -562,14 +735,31 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_name)}"
             f"/reapply"
         )
+        query_params = []
+        if api_version is not None:
+            value = str(api_version)
+            if isinstance(api_version, bool):
+                value = value.lower()
+            query_params.append(f"api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_redeploy_async(
         self,
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
+        api_version: Optional[str],
     ):
         """
         Redeploy virtual machine
@@ -589,14 +779,31 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_name)}"
             f"/redeploy"
         )
+        query_params = []
+        if api_version is not None:
+            value = str(api_version)
+            if isinstance(api_version, bool):
+                value = value.lower()
+            query_params.append(f"api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def virtual_machine_restart_async(
         self,
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
+        api_version: Optional[str],
     ):
         """
         Restart virtual machine
@@ -615,5 +822,21 @@ class AzurevmClient(ConnectorClientBase):
             f"/{str(virtual_machine_name)}"
             f"/restart"
         )
+        query_params = []
+        if api_version is not None:
+            value = str(api_version)
+            if isinstance(api_version, bool):
+                value = value.lower()
+            query_params.append(f"api-version={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )

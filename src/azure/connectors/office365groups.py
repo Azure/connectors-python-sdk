@@ -303,6 +303,7 @@ class Office365groupsClient(ConnectorClientBase):
 
     async def on_group_membership_change_async(
         self,
+        group_id: Optional[str],
         select: Optional[str] = None,
     ):
         """
@@ -313,6 +314,11 @@ class Office365groupsClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/trigger/v1.0/groups/delta"
         query_params = []
+        if group_id is not None:
+            value = str(group_id)
+            if isinstance(group_id, bool):
+                value = value.lower()
+            query_params.append(f"groupId={quote(value)}")
         if select is not None:
             value = str(select)
             if isinstance(select, bool):
@@ -359,10 +365,20 @@ class Office365groupsClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def list_groups_async(
         self,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
         filter: Optional[str] = None,
         top: Optional[str] = None,
         skiptoken: Optional[str] = None,
@@ -374,6 +390,16 @@ class Office365groupsClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -410,8 +436,8 @@ class Office365groupsClient(ConnectorClientBase):
     async def update_calendar_event_async(
         self,
         input: UpdateCalendarEventHTMLRequest,
-        event: str,
         group_id: str,
+        event: str,
     ):
         """
         Update a group event
@@ -462,7 +488,15 @@ class Office365groupsClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def on_new_event_async(
         self,
@@ -535,7 +569,15 @@ class Office365groupsClient(ConnectorClientBase):
             f"/v1.0/directory/deletedItems/{str(group_id)}/restore"
         )
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def list_deleted_groups_by_owner_async(
         self,
@@ -567,8 +609,8 @@ class Office365groupsClient(ConnectorClientBase):
 
     async def calendar_delete_item_async(
         self,
-        event: str,
         group_id: str,
+        event: str,
     ):
         """
         Delete event (V2)
@@ -580,7 +622,15 @@ class Office365groupsClient(ConnectorClientBase):
             f"/v1.0/groups/{str(group_id)}/events/{str(event)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def create_calendar_event_async(
         self,
@@ -642,6 +692,8 @@ class Office365groupsClient(ConnectorClientBase):
 
     async def list_owned_groups_async(
         self,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
     ):
         """
         List groups that I own and belong to
@@ -652,6 +704,19 @@ class Office365groupsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/me/memberOf/$/microsoft.graph.group"
         )
+        query_params = []
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("GET", path, body=None)
 

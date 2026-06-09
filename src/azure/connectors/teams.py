@@ -2062,6 +2062,8 @@ class TeamsClient(ConnectorClientBase):
     async def get_channels_for_group_async(
         self,
         group_id: str,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
     ):
         """
         List channels
@@ -2072,6 +2074,19 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/beta/groups/{str(group_id)}/channels"
         )
+        query_params = []
+        if filter is not None:
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
+        if orderby is not None:
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -2118,19 +2133,19 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_channels_for_team_async(
+    async def get_channel_async(
         self,
         group_id: str,
+        channel_id: str,
     ):
         """
-        List all channels
+        Get details for a specific channel in a team
 
-        Lists all the channels for a specific team, including channels that are
-        shared with the team
+        Get the channel details
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/beta/teams/{str(group_id)}/allChannels"
+            f"/beta/teams/{str(group_id)}/channels/{str(channel_id)}"
         )
 
         response = await self.http_client.send_async("GET", path, body=None)
@@ -2147,6 +2162,485 @@ class TeamsClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def get_all_channels_for_team_async(
+        self,
+        group_id: str,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+    ):
+        """
+        List all channels
+
+        Lists all the channels for a specific team, including channels that are
+        shared with the team
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/teams/{str(group_id)}/allChannels"
+        )
+        query_params = []
+        if filter is not None:
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
+        if orderby is not None:
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_chats_async(
+        self,
+        chat_type: str,
+        topic: str,
+    ):
+        """
+        List chats
+
+        Lists recent chats you are a part of
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/actions"
+            f"/listchats"
+            f"/chattypes"
+            f"/{str(chat_type)}"
+            f"/topic"
+            f"/{str(topic)}"
+            f"/expandmembers"
+            f"/false"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def post_feed_notification_async(
+        self,
+        input: DynamicPostFeedNotificationRequest,
+        poster: str,
+        notification_type: str,
+    ):
+        """
+        Post a feed notification
+
+        Posts a notification to a user's activity feed linking to a chat or
+        team.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/feednotification"
+            f"/poster"
+            f"/{str(poster)}"
+            f"/notificationType"
+            f"/{str(notification_type)}"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def at_mention_tag_async(
+        self,
+        group_id: str,
+        tag_id: str,
+    ):
+        """
+        Get an @mention token for a team tag
+
+        Creates a token that can be inserted into a message or adaptive card
+        sent as a user in a channel to @mention a team tag.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/teams/{str(group_id)}/tags/{str(tag_id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_messages_from_channel_async(
+        self,
+        group_id: str,
+        channel_id: str,
+    ):
+        """
+        Get messages in a channel
+
+        Gets messages from a channel in a specific team. For shared channels,
+        the team ID must refer to the host team, which is the team that owns
+        the shared channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/teams/{str(group_id)}/channels/{str(channel_id)}/messages"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_message_details_async(
+        self,
+        input: DynamicGetMessageDetailsSchema,
+        message_id: str,
+        thread_type: str,
+    ):
+        """
+        Get message details
+
+        Gets the details of a message in a chat or a channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/teams"
+            f"/messages"
+            f"/{str(message_id)}"
+            f"/messageType"
+            f"/{str(thread_type)}"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_replies_to_message_async(
+        self,
+        group_id: str,
+        channel_id: str,
+        message_id: str,
+        top: Optional[str] = None,
+    ):
+        """
+        List replies of a channel message
+
+        List replies to a message in a channel in a specific team. For shared
+        channels, the team ID must refer to the host team, which is the team
+        that owns the shared channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/{str(group_id)}"
+            f"/channels"
+            f"/{str(channel_id)}"
+            f"/messages"
+            f"/{str(message_id)}"
+            f"/replies"
+        )
+        query_params = []
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_members_async(
+        self,
+        input: DynamicListMembersSchema,
+        thread_type: str,
+        filter: Optional[str] = None,
+    ):
+        """
+        List chat or channel members
+
+        List direct members of a group chat or a channel
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/listmembers/threadType/{str(thread_type)}"
+        )
+        query_params = []
+        if filter is not None:
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def on_new_channel_message_async(
+        self,
+        group_id: str,
+        channel_id: str,
+        top: Optional[str] = None,
+    ):
+        """
+        When a new channel message is added
+
+        Triggers when a new message is posted to a channel in a team. Note that
+        this trigger only fires when a root messages is added in the channel.
+        Replies to an existing channel message will not result in the trigger
+        event firing. For shared channels, the team ID must refer to the host
+        team, which is the team that owns the shared channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/trigger"
+            f"/beta"
+            f"/teams"
+            f"/{str(group_id)}"
+            f"/channels"
+            f"/{str(channel_id)}"
+            f"/messages"
+        )
+        query_params = []
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def on_new_channel_message_mentioning_me_async(
+        self,
+        group_id: str,
+        channel_id: str,
+        top: Optional[str] = None,
+    ):
+        """
+        When I am mentioned in a channel message
+
+        Triggers when a new message that @mentions the current user is added to
+        a channel in a team. For shared channels, the team ID must refer to the
+        host team, which is the team that owns the shared channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/trigger"
+            f"/beta"
+            f"/teams"
+            f"/{str(group_id)}"
+            f"/channels"
+            f"/{str(channel_id)}"
+            f"/messages_mentioningme"
+        )
+        query_params = []
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def webhook_at_mention_trigger_async(
+        self,
+        input: DynamicWebhookTriggerRequestSchema,
+        thread_type: str,
+    ):
+        """
+        When I'm @mentioned
+
+        Triggers when a new message that @mentions the current user is added to
+        a specified chat or channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/subscriptions"
+            f"/atmentiontrigger"
+            f"/threadType"
+            f"/{str(thread_type)}"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def webhook_message_reaction_trigger_async(
+        self,
+        input: DynamicWebhookTriggerRequestSchema,
+        thread_type: str,
+        reaction_key: Optional[str],
+        frequency: Optional[str],
+        running_policy: Optional[str],
+    ):
+        """
+        When someone reacted to a message in chat
+
+        Triggers when someone reacts to a message in a specified chat or
+        channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/subscriptions"
+            f"/messagereactiontrigger"
+            f"/threadType"
+            f"/{str(thread_type)}"
+        )
+        query_params = []
+        if reaction_key is not None:
+            value = str(reaction_key)
+            if isinstance(reaction_key, bool):
+                value = value.lower()
+            query_params.append(f"reactionKey={quote(value)}")
+        if frequency is not None:
+            value = str(frequency)
+            if isinstance(frequency, bool):
+                value = value.lower()
+            query_params.append(f"frequency={quote(value)}")
+        if running_policy is not None:
+            value = str(running_policy)
+            if isinstance(running_policy, bool):
+                value = value.lower()
+            query_params.append(f"runningPolicy={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def transcript_trigger_async(
         self,
@@ -2172,7 +2666,15 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def recording_trigger_async(
         self,
@@ -2198,7 +2700,15 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def webhook_chat_message_trigger_async(
         self,
@@ -2215,7 +2725,80 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/subscriptions/chatmessagetrigger"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def webhook_keyword_trigger_async(
+        self,
+        input: DynamicWebhookTriggerRequestSchema,
+        thread_type: str,
+        search: Optional[str],
+    ):
+        """
+        When keywords are mentioned
+
+        Triggers when a keyword is mentioned in a specified chat or channel.
+        Does not trigger if a message is edited.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/subscriptions/keywordtrigger/threadType/{str(thread_type)}"
+        )
+        query_params = []
+        if search is not None:
+            value = str(search)
+            if isinstance(search, bool):
+                value = value.lower()
+            query_params.append(f"$search={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def webhook_new_message_trigger_async(
+        self,
+        input: DynamicWebhookTriggerRequestSchema,
+        thread_type: str,
+    ):
+        """
+        When a new message is added to a chat or channel
+
+        Triggers when a new message is posted in a specified chat or channel.
+        Does not trigger if a message is edited.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/subscriptions"
+            f"/newmessagetrigger"
+            f"/threadType"
+            f"/{str(thread_type)}"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def subscribe_user_message_with_options_async(
         self,
@@ -2238,7 +2821,15 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_team_async(
         self,
@@ -2295,6 +2886,7 @@ class TeamsClient(ConnectorClientBase):
 
     async def on_group_membership_removal_async(
         self,
+        group_id: Optional[str],
         select: Optional[str] = None,
     ):
         """
@@ -2304,6 +2896,11 @@ class TeamsClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/trigger/v1.0/groups/removal"
         query_params = []
+        if group_id is not None:
+            value = str(group_id)
+            if isinstance(group_id, bool):
+                value = value.lower()
+            query_params.append(f"groupId={quote(value)}")
         if select is not None:
             value = str(select)
             if isinstance(select, bool):
@@ -2329,6 +2926,7 @@ class TeamsClient(ConnectorClientBase):
 
     async def on_group_membership_add_async(
         self,
+        group_id: Optional[str],
         select: Optional[str] = None,
     ):
         """
@@ -2338,6 +2936,11 @@ class TeamsClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/trigger/v1.0/groups/delta"
         query_params = []
+        if group_id is not None:
+            value = str(group_id)
+            if isinstance(group_id, bool):
+                value = value.lower()
+            query_params.append(f"groupId={quote(value)}")
         if select is not None:
             value = str(select)
             if isinstance(select, bool):
@@ -2377,6 +2980,56 @@ class TeamsClient(ConnectorClientBase):
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_messages_from_chat_async(
+        self,
+        chat_id: str,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+        top: Optional[str] = None,
+    ):
+        """
+        Get messages in a chat
+
+        Retrieves messages from a one on one or group chat
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/chats/{str(chat_id)}/messages"
+        )
+        query_params = []
+        if filter is not None:
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
+        if orderby is not None:
+            value = str(orderby)
+            if isinstance(orderby, bool):
+                value = value.lower()
+            query_params.append(f"$orderby={quote(value)}")
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
                 path,
                 response.status,
                 response.text,
@@ -2443,6 +3096,8 @@ class TeamsClient(ConnectorClientBase):
     async def list_team_members_async(
         self,
         team_id: str,
+        filter: Optional[str] = None,
+        top: Optional[str] = None,
     ):
         """
         List team members
@@ -2452,6 +3107,19 @@ class TeamsClient(ConnectorClientBase):
         path = (
             f"{self._connection_runtime_url}/v1.0/teams/{str(team_id)}/members"
         )
+        query_params = []
+        if filter is not None:
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("GET", path, body=None)
 
@@ -2482,12 +3150,20 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1.0/teams/{str(team_id)}/members"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def remove_member_from_team_async(
         self,
-        membership_id: str,
         team_id: str,
+        membership_id: str,
     ):
         """
         Remove a member from a team
@@ -2499,7 +3175,359 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/teams/{str(team_id)}/members/{str(membership_id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def add_member_to_channel_async(
+        self,
+        input: AddMemberToChannelInput,
+        group_id: str,
+        channel_id: str,
+    ):
+        """
+        Add a member to a channel
+
+        Adds a member to a channel in Microsoft Teams. The channel must be a
+        private or shared channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{str(group_id)}/channels/{str(channel_id)}/members"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def remove_member_from_channel_async(
+        self,
+        group_id: str,
+        channel_id: str,
+        membership_id: str,
+    ):
+        """
+        Remove a direct member from a channel
+
+        Removes a direct member from a channel in Microsoft Teams. The channel
+        must be a private or shared channel.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/{str(group_id)}"
+            f"/channels"
+            f"/{str(channel_id)}"
+            f"/members"
+            f"/{str(membership_id)}"
+        )
+
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def post_message_to_conversation_async(
+        self,
+        input: DynamicPostMessageRequest,
+        poster: str,
+        location: str,
+        customization_modified_time: Optional[str] = None,
+    ):
+        """
+        Post message in a chat or channel
+
+        Posts a message to a chat or a channel
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/teams"
+            f"/conversation"
+            f"/message"
+            f"/poster"
+            f"/{str(poster)}"
+            f"/location"
+            f"/{str(location)}"
+        )
+        query_params = []
+        if customization_modified_time is not None:
+            value = str(customization_modified_time)
+            if isinstance(customization_modified_time, bool):
+                value = value.lower()
+            query_params.append(f"customizationModifiedTime={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def reply_with_message_to_conversation_async(
+        self,
+        input: DynamicReplyMessageRequest,
+        poster: str,
+        location: str,
+        customization_modified_time: Optional[str] = None,
+    ):
+        """
+        Reply with a message in a channel
+
+        Replies with a message to a channel's message
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/conversation"
+            f"/replyWithMessage"
+            f"/poster"
+            f"/{str(poster)}"
+            f"/location"
+            f"/{str(location)}"
+        )
+        query_params = []
+        if customization_modified_time is not None:
+            value = str(customization_modified_time)
+            if isinstance(customization_modified_time, bool):
+                value = value.lower()
+            query_params.append(f"customizationModifiedTime={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def post_card_to_conversation_async(
+        self,
+        input: DynamicPostCardRequest,
+        poster: str,
+        location: str,
+        customization_modified_time: Optional[str] = None,
+    ):
+        """
+        Post card in a chat or channel
+
+        Posts a card to a chat or a channel
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/conversation"
+            f"/adaptivecard"
+            f"/poster"
+            f"/{str(poster)}"
+            f"/location"
+            f"/{str(location)}"
+        )
+        query_params = []
+        if customization_modified_time is not None:
+            value = str(customization_modified_time)
+            if isinstance(customization_modified_time, bool):
+                value = value.lower()
+            query_params.append(f"customizationModifiedTime={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def post_card_and_wait_for_response_async(
+        self,
+        input: PostCardAndWaitForResponseInput,
+        poster: str,
+        location: str,
+        customization_modified_time: Optional[str] = None,
+    ):
+        """
+        Post adaptive card and wait for a response
+
+        Posts an adaptive card to a chat or a channel and waits for a response
+        from any user. This will pause the flow until any user responds.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/conversation"
+            f"/gatherinput"
+            f"/poster"
+            f"/{str(poster)}"
+            f"/location"
+            f"/{str(location)}"
+            f"/$subscriptions"
+        )
+        query_params = []
+        if customization_modified_time is not None:
+            value = str(customization_modified_time)
+            if isinstance(customization_modified_time, bool):
+                value = value.lower()
+            query_params.append(f"customizationModifiedTime={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def reply_with_card_to_conversation_async(
+        self,
+        input: DynamicReplyCardRequest,
+        poster: str,
+        location: str,
+        customization_modified_time: Optional[str] = None,
+    ):
+        """
+        Reply with an adaptive card in a channel
+
+        Replies with an adaptive card to a channel's message
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/conversation"
+            f"/replyWithAdaptivecard"
+            f"/poster"
+            f"/{str(poster)}"
+            f"/location"
+            f"/{str(location)}"
+        )
+        query_params = []
+        if customization_modified_time is not None:
+            value = str(customization_modified_time)
+            if isinstance(customization_modified_time, bool):
+                value = value.lower()
+            query_params.append(f"customizationModifiedTime={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def update_card_in_conversation_async(
+        self,
+        input: DynamicUpdateCardRequest,
+        poster: str,
+        location: str,
+        customization_modified_time: Optional[str] = None,
+    ):
+        """
+        Update an adaptive card in a chat or channel
+
+        Updates an existing adaptive card
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/conversation"
+            f"/updateAdaptivecard"
+            f"/poster"
+            f"/{str(poster)}"
+            f"/location"
+            f"/{str(location)}"
+        )
+        query_params = []
+        if customization_modified_time is not None:
+            value = str(customization_modified_time)
+            if isinstance(customization_modified_time, bool):
+                value = value.lower()
+            query_params.append(f"customizationModifiedTime={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def http_request_async(
         self,
@@ -2530,6 +3558,30 @@ class TeamsClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def add_member_to_chat_async(
+        self,
+        input: AddMemberToChatInput,
+        chat_id: str,
+    ):
+        """
+        Add a user to a chat
+
+        Adds a user to a chat in Microsoft Teams.
+        """
+        path = (
+            f"{self._connection_runtime_url}/v1.0/chats/{str(chat_id)}/members"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_online_meeting_async(
         self,
@@ -2572,6 +3624,203 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def list_meeting_transcripts_async(
+        self,
+        meeting_id: str,
+    ):
+        """
+        List meeting transcripts
+
+        Lists all transcripts for an online meeting
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/me/onlineMeetings/{str(meeting_id)}/transcripts"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_meeting_transcript_async(
+        self,
+        meeting_id: str,
+        transcript_id: str,
+    ):
+        """
+        Get meeting transcript
+
+        Gets a specific transcript for an online meeting
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{str(meeting_id)}"
+            f"/transcripts"
+            f"/{str(transcript_id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_meeting_transcript_content_async(
+        self,
+        meeting_id: str,
+        transcript_id: str,
+    ):
+        """
+        Get meeting transcript content
+
+        Gets the content of a meeting transcript
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{str(meeting_id)}"
+            f"/transcripts"
+            f"/{str(transcript_id)}"
+            f"/content"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_meeting_recordings_async(
+        self,
+        meeting_id: str,
+    ):
+        """
+        List meeting recordings
+
+        Lists all recordings for an online meeting
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/me/onlineMeetings/{str(meeting_id)}/recordings"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_meeting_recording_async(
+        self,
+        meeting_id: str,
+        recording_id: str,
+    ):
+        """
+        Get meeting recording
+
+        Gets a specific recording for an online meeting
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{str(meeting_id)}"
+            f"/recordings"
+            f"/{str(recording_id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_meeting_recording_content_async(
+        self,
+        meeting_id: str,
+        recording_id: str,
+    ):
+        """
+        Get meeting recording content
+
+        Gets the content stream of a meeting recording
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{str(meeting_id)}"
+            f"/recordings"
+            f"/{str(recording_id)}"
+            f"/content"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        return response.content
+
     async def list_sections_async(
         self,
     ):
@@ -2607,6 +3856,225 @@ class TeamsClient(ConnectorClientBase):
         Creates a new teamwork section for the current user
         """
         path = f"{self._connection_runtime_url}/beta/me/teamwork/sections"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_section_async(
+        self,
+        section_id: str,
+    ):
+        """
+        Get a section
+
+        Gets a specific teamwork section by ID
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/me/teamwork/sections/{str(section_id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def update_section_async(
+        self,
+        input: UpdateSectionInput,
+        section_id: str,
+    ):
+        """
+        Update a section
+
+        Updates a teamwork section for the current user
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/me/teamwork/sections/{str(section_id)}"
+        )
+
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def delete_section_async(
+        self,
+        section_id: str,
+    ):
+        """
+        Delete a section
+
+        Deletes a teamwork section for the current user
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/me/teamwork/sections/{str(section_id)}"
+        )
+
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def list_section_items_async(
+        self,
+        section_id: str,
+    ):
+        """
+        List section items
+
+        Lists the items (chats, channels, meetings, communities) in a teamwork
+        section. Each item belongs to exactly one section at a time.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/me/teamwork/sections/{str(section_id)}/items"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def add_section_item_async(
+        self,
+        input: AddSectionItemInput,
+        section_id: str,
+    ):
+        """
+        Add an item to a section
+
+        Adds an item (chat, channel, meeting, or community) currently in a
+        system-defined section to a user-defined teamwork section. Use Move
+        Section Item to relocate items already in another user-defined section.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta/me/teamwork/sections/{str(section_id)}/items"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def remove_section_item_async(
+        self,
+        section_id: str,
+        section_item_id: str,
+    ):
+        """
+        Remove an item from a section
+
+        Removes an item from a user-defined teamwork section. The underlying
+        chat, channel, meeting, or community is not deleted; the item returns
+        to its default system-defined section.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/me"
+            f"/teamwork"
+            f"/sections"
+            f"/{str(section_id)}"
+            f"/items"
+            f"/{str(section_item_id)}"
+        )
+
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def move_section_item_async(
+        self,
+        input: MoveSectionItemInput,
+        section_id: str,
+        section_item_id: str,
+    ):
+        """
+        Move a section item
+
+        Atomically moves an item from one user-defined teamwork section to
+        another user-defined section. Each item can belong to only one section
+        at a time. This action removes the item from its current section and
+        adds it to the target section.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/me"
+            f"/teamwork"
+            f"/sections"
+            f"/{str(section_id)}"
+            f"/items"
+            f"/{str(section_item_id)}"
+            f"/move"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 
@@ -2670,6 +4138,382 @@ class TeamsClient(ConnectorClientBase):
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tag_async(
+        self,
+        group_id: str,
+        tag_id: str,
+    ):
+        """
+        Get a team tag
+
+        Gets a specific tag by ID from a team
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def update_tag_async(
+        self,
+        input: UpdateTagInput,
+        group_id: str,
+        tag_id: str,
+    ):
+        """
+        Update a team tag
+
+        Updates the display name of a tag in a team
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}"
+        )
+
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def delete_tag_async(
+        self,
+        group_id: str,
+        tag_id: str,
+    ):
+        """
+        Delete a team tag
+
+        Deletes a tag from a team
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}"
+        )
+
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def add_member_to_tag_async(
+        self,
+        input: AddMemberToTagInput,
+        group_id: str,
+        tag_id: str,
+    ):
+        """
+        Add a member to a team tag
+
+        Adds a user to a team tag
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}/members"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tag_members_async(
+        self,
+        group_id: str,
+        tag_id: str,
+    ):
+        """
+        List the members of a team tag
+
+        Lists the members of a team tag
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}/members"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def delete_tag_member_async(
+        self,
+        group_id: str,
+        tag_id: str,
+        tag_member_id: str,
+    ):
+        """
+        Delete a member from a team tag
+
+        Deletes a member from a team tag
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/{str(group_id)}"
+            f"/tags"
+            f"/{str(tag_id)}"
+            f"/members"
+            f"/{str(tag_member_id)}"
+        )
+
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def list_call_recordings_async(
+        self,
+        call_id: str,
+    ):
+        """
+        List call recordings
+
+        Lists all recordings for an ad-hoc call
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/me/adhocCalls/{str(call_id)}/recordings"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_call_recording_async(
+        self,
+        call_id: str,
+        recording_id: str,
+    ):
+        """
+        Get call recording
+
+        Gets a specific recording for an ad-hoc call
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/adhocCalls"
+            f"/{str(call_id)}"
+            f"/recordings"
+            f"/{str(recording_id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_call_recording_content_async(
+        self,
+        call_id: str,
+        recording_id: str,
+    ):
+        """
+        Get call recording content
+
+        Gets the content of a call recording
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/adhocCalls"
+            f"/{str(call_id)}"
+            f"/recordings"
+            f"/{str(recording_id)}"
+            f"/content"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        return response.content
+
+    async def list_call_transcripts_async(
+        self,
+        call_id: str,
+    ):
+        """
+        List call transcripts
+
+        Lists all transcripts for an ad-hoc call
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/me/adhocCalls/{str(call_id)}/transcripts"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_call_transcript_async(
+        self,
+        call_id: str,
+        transcript_id: str,
+    ):
+        """
+        Get call transcript
+
+        Gets a specific transcript for an ad-hoc call
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/adhocCalls"
+            f"/{str(call_id)}"
+            f"/transcripts"
+            f"/{str(transcript_id)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_call_transcript_content_async(
+        self,
+        call_id: str,
+        transcript_id: str,
+    ):
+        """
+        Get call transcript content
+
+        Gets the content of a call transcript
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/me"
+            f"/adhocCalls"
+            f"/{str(call_id)}"
+            f"/transcripts"
+            f"/{str(transcript_id)}"
+            f"/content"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
                 path,
                 response.status,
                 response.text,
@@ -2786,6 +4630,73 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$deltatoken={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_ai_insights_async(
+        self,
+        meeting_id: str,
+    ):
+        """
+        List AI insights
+
+        Lists AI-generated insights for an online meeting. Requires Microsoft
+        365 Copilot license.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/copilot/me/onlineMeetings/{str(meeting_id)}/aiInsights"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_ai_insight_async(
+        self,
+        meeting_id: str,
+        ai_insight_id: str,
+    ):
+        """
+        Get AI insight
+
+        Gets a specific AI-generated insight for an online meeting. Requires
+        Microsoft 365 Copilot license.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/copilot"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{str(meeting_id)}"
+            f"/aiInsights"
+            f"/{str(ai_insight_id)}"
+        )
 
         response = await self.http_client.send_async("GET", path, body=None)
 
