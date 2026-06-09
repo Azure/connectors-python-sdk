@@ -162,7 +162,8 @@ class TestVirtualMachineGetAsync:
             result = await client.virtual_machine_get_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -193,7 +194,8 @@ class TestVirtualMachineGetAsync:
             result = await client.virtual_machine_get_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             assert result is None
@@ -221,7 +223,8 @@ class TestVirtualMachineGetAsync:
                 await client.virtual_machine_get_async(
                     subscription_id="sub1",
                     resource_group_name="rg1",
-                    virtual_machine_name="vm1"
+                    virtual_machine_name="vm1",
+                    api_version="2023-03-01"
                 )
 
             assert exc_info.value.status_code == 404
@@ -249,7 +252,8 @@ class TestVirtualMachineStartAsync:
             await client.virtual_machine_start_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -280,7 +284,8 @@ class TestVirtualMachineDeallocateAsync:
             await client.virtual_machine_deallocate_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -311,7 +316,8 @@ class TestVirtualMachinePowerOffAsync:
             await client.virtual_machine_poweroff_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -342,7 +348,8 @@ class TestVirtualMachineReapplyAsync:
             await client.virtual_machine_reapply_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -373,7 +380,8 @@ class TestVirtualMachineRedeployAsync:
             await client.virtual_machine_redeploy_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -404,7 +412,8 @@ class TestVirtualMachineRestartAsync:
             await client.virtual_machine_restart_async(
                 subscription_id="sub1",
                 resource_group_name="rg1",
-                virtual_machine_name="vm1"
+                virtual_machine_name="vm1",
+                api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -442,7 +451,8 @@ class TestVirtualMachineInScaleSetGetAsync:
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
-                virtual_machine_in_scale_set_instance_id="0"
+                virtual_machine_in_scale_set_instance_id="0",
+                x_ms_api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -476,7 +486,8 @@ class TestVirtualMachineInScaleSetGetAsync:
                     subscription_id="sub1",
                     resource_group_name="rg1",
                     virtual_machine_scale_set_name="vmss1",
-                    virtual_machine_in_scale_set_instance_id="0"
+                    virtual_machine_in_scale_set_instance_id="0",
+                    x_ms_api_version="2023-03-01"
                 )
 
             assert exc_info.value.status_code == 404
@@ -505,7 +516,8 @@ class TestVirtualMachineInScaleSetDeallocateAsync:
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
-                virtual_machine_in_scale_set_instance_id="0"
+                virtual_machine_in_scale_set_instance_id="0",
+                x_ms_api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -537,7 +549,8 @@ class TestVirtualMachineInScaleSetPowerOffAsync:
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
-                virtual_machine_in_scale_set_instance_id="0"
+                virtual_machine_in_scale_set_instance_id="0",
+                x_ms_api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -569,7 +582,8 @@ class TestVirtualMachineInScaleSetRedeployAsync:
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
-                virtual_machine_in_scale_set_instance_id="0"
+                virtual_machine_in_scale_set_instance_id="0",
+                x_ms_api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -601,7 +615,8 @@ class TestVirtualMachineInScaleSetReimageAsync:
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
-                virtual_machine_in_scale_set_instance_id="0"
+                virtual_machine_in_scale_set_instance_id="0",
+                x_ms_api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -633,7 +648,8 @@ class TestVirtualMachineInScaleSetRestartAsync:
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
-                virtual_machine_in_scale_set_instance_id="0"
+                virtual_machine_in_scale_set_instance_id="0",
+                x_ms_api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()
@@ -665,7 +681,8 @@ class TestVirtualMachineInScaleSetStartAsync:
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
-                virtual_machine_in_scale_set_instance_id="0"
+                virtual_machine_in_scale_set_instance_id="0",
+                x_ms_api_version="2023-03-01"
             )
 
             mock_send.assert_called_once()

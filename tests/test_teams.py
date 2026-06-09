@@ -574,7 +574,7 @@ class TestMemberOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.remove_member_from_team_async("membership123", "team123")
+            await client.remove_member_from_team_async("team123", "membership123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"

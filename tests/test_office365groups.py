@@ -629,7 +629,9 @@ class TestOnGroupMembershipChangeAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.on_group_membership_change_async()
+            result = await client.on_group_membership_change_async(
+                group_id="group123"
+            )
 
             mock_send.assert_called_once()
             assert result is not None
@@ -650,7 +652,10 @@ class TestOnGroupMembershipChangeAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.on_group_membership_change_async(select="id,displayName")
+            await client.on_group_membership_change_async(
+                group_id="group123",
+                select="id,displayName"
+            )
 
             call_args = mock_send.call_args
             assert "$select=" in call_args[0][1]
