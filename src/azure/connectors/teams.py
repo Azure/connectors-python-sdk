@@ -1119,7 +1119,7 @@ class CallEventWebhookResponseSchema:
 
     id: Optional[str] = None
     """Event identifier"""
-    id: Optional[str] = None
+    odata_id: Optional[str] = None
     """OData identifier"""
     type_: Optional[str] = None
     """
@@ -1162,7 +1162,7 @@ class TranscriptWebhookResponseSchema:
 
     id: Optional[str] = None
     """Transcript identifier"""
-    id: Optional[str] = None
+    odata_id: Optional[str] = None
     """OData identifier"""
     meeting_id: Optional[str] = None
     """Online meeting identifier (empty for ad-hoc call transcripts)"""
@@ -1185,7 +1185,7 @@ class RecordingWebhookResponseSchema:
 
     id: Optional[str] = None
     """Recording identifier"""
-    id: Optional[str] = None
+    odata_id: Optional[str] = None
     """OData identifier"""
     meeting_id: Optional[str] = None
     """Online meeting identifier (empty for ad-hoc call recordings)"""
