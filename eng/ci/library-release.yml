@@ -1,7 +1,7 @@
 parameters:
   - name: libraryVersion
     type: string
-    displayName: 'Library version to release (e.g., 0.1.0)'
+    displayName: 'Library version to release (e.g., 0.1.0, 0.1.0b1, 0.1.0.post1)'
   - name: blobPath
     type: string
     default: 'azure-connectors/python/connector-sdk'
