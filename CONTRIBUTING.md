@@ -204,12 +204,21 @@ open _build/html/index.html
 
 ## Release Process
 
-Releases are automated via GitHub Actions (`.github/workflows/release.yml`). Only maintainers can create releases.
+Releases use the Azure DevOps `eng/ci/library-release.yml` pipeline. Only
+maintainers can start the release.
 
-1. Update version in `src/pyproject.toml`
-2. Update `CHANGELOG.md` with release notes
-3. Create and push a tag: `git tag v0.1.0 && git push origin v0.1.0`
-4. GitHub Actions will build, test, and publish to PyPI
+1. Update `CHANGELOG.md` with release notes.
+2. Run the official release pipeline with the intended version (for example
+  `1.2.3`, `1.2.3b1`, or `1.2.3.post1`).
+3. The pipeline creates `release/{version}`, updates
+  `src/azure/connectors/__init__.py`, builds the artifacts, creates a GitHub
+  draft release, and uploads artifacts to Azure SDK partner drops.
+4. Trigger the partner-release pipeline for PyPI using the BlobPath printed by
+  the official release pipeline, then approve the final confirmation gate.
+
+Do not delete or recreate published release tags as a normal retry path. If a
+release fails after the tag is pushed, use a new version such as
+`1.2.3.post1`; retagging is break-glass admin work only.
 
 See [ROADMAP.md](ROADMAP.md) for release planning.
 
