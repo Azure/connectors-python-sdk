@@ -16,8 +16,7 @@ parameters:
     displayName: 'GitHub repository name'
   - name: githubServiceConnection
     type: string
-    default: '$(GitHubServiceConnection)'
-    displayName: 'Azure Pipelines GitHub service connection used for release operations'
+    displayName: 'Pre-created Azure Pipelines GitHub service connection used for release operations'
 
 resources:
   repositories:

@@ -23,8 +23,7 @@ parameters:
     displayName: 'Azure SDK partner-release pipeline URL (used in manual PyPI publish instructions)'
   - name: githubServiceConnection
     type: string
-    default: '$(GitHubServiceConnection)'
-    displayName: 'Azure Pipelines GitHub service connection used for GitHub Release creation'
+    displayName: 'Pre-created Azure Pipelines GitHub service connection used for GitHub Release creation'
 
 jobs:
   - job: "CreateReleaseTag"
