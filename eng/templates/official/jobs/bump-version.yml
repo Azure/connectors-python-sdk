@@ -1,7 +1,7 @@
 parameters:
   - name: libraryVersion
     type: string
-    displayName: 'Library version to release (e.g., 0.2.0)'
+    displayName: 'Library version to release (e.g., 0.2.0, 0.2.0.dev1, 0.2.0b1, 0.2.0.post1)'
   - name: githubOrg
     type: string
     default: 'Azure'
@@ -24,7 +24,7 @@ jobs:
         $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        if($newLibraryVersion -match '^\d+\.\d+\.\d+(dev|a|b|rc)?\d*$') {
+        if($newLibraryVersion -match '^\d+\.\d+\.\d+((a|b|rc)\d+|\.dev\d+|\.post\d+|-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$') {
             # Create GitHub credential
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
@@ -46,7 +46,7 @@ jobs:
             git push origin "release/$newLibraryVersion"
 
         } else {
-            Write-Host "NewLibraryVersion $newLibraryVersion is malformed (example: 1.5.0)"
+            Write-Host "NewLibraryVersion $newLibraryVersion is malformed (examples: 1.5.0, 1.5.0.dev1, 1.5.0b1, 1.5.0.post1)"
             exit -1
         }
       displayName: 'Push release/x.y.z'
