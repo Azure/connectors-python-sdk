@@ -204,7 +204,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str],
+        x_ms_api_version: Optional[str] = "2019-12-01",
     ):
         """
         Get virtual machine in a VM scale set
@@ -254,7 +254,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str],
+        x_ms_api_version: Optional[str] = "2019-12-01",
     ):
         """
         Deallocate virtual machine in a VM scale set
@@ -303,7 +303,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str],
+        x_ms_api_version: Optional[str] = "2019-12-01",
     ):
         """
         Power off virtual machine in a VM scale set
@@ -351,7 +351,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str],
+        x_ms_api_version: Optional[str] = "2019-12-01",
     ):
         """
         Redeploy virtual machine in a VM scale set
@@ -398,7 +398,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str],
+        x_ms_api_version: Optional[str] = "2019-12-01",
     ):
         """
         Reimage virtual machine in a VM scale set
@@ -445,7 +445,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str],
+        x_ms_api_version: Optional[str] = "2019-12-01",
     ):
         """
         Restart virtual machine in a VM scale set
@@ -491,7 +491,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str],
+        x_ms_api_version: Optional[str] = "2019-12-01",
     ):
         """
         Start virtual machine in a VM scale set

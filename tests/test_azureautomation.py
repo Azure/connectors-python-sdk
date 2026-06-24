@@ -268,18 +268,30 @@ class TestGetJobOutputAsync:
 
         mock_response = MockResponse(
             status=200,
-            text="Job output content here"
+            text="Job output content here",
+            content=b"Job output content here"
         )
-        mock_response.content = b"Job output content here"
 
         with patch.object(
-            client, 'get_job_output_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            return_value=b"Job output content here"
-        ) as mock_method:
-            result = await client.get_job_output_async()
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_job_output_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation",
+                job_id="job456"
+            )
 
-            mock_method.assert_called_once()
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/subscriptions/sub123" in call_args[0][1]
+            assert "/resourceGroups/rg-test" in call_args[0][1]
+            assert "/automationAccounts/myAutomation" in call_args[0][1]
+            assert "/jobs/job456/output" in call_args[0][1]
             assert result == b"Job output content here"
 
     @pytest.mark.asyncio
@@ -290,13 +302,24 @@ class TestGetJobOutputAsync:
             token_provider=mock_token_provider
         )
 
+        mock_response = MockResponse(
+            status=404,
+            text="Not found"
+        )
+
         with patch.object(
-            client, 'get_job_output_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            side_effect=ConnectorException("GET", "/path", 404, "Not found")
+            return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_job_output_async()
+                await client.get_job_output_async(
+                    subscription_id="sub123",
+                    resource_group_name="rg-test",
+                    automation_account="myAutomation",
+                    job_id="job456"
+                )
 
             assert exc_info.value.status_code == 404
 
@@ -323,19 +346,32 @@ class TestGetStatusOfJobAsync:
             token_provider=mock_token_provider
         )
 
-        expected_response = {
-            "id": "/subscriptions/xxx/jobs/job123",
-            "properties": {"status": "Running"}
-        }
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "/subscriptions/xxx/jobs/job123", "properties": {"status": "Running"}}'
+        )
 
         with patch.object(
-            client, 'get_status_of_job_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            return_value=expected_response
-        ) as mock_method:
-            result = await client.get_status_of_job_async()
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_status_of_job_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation",
+                job_id="job456"
+            )
 
-            mock_method.assert_called_once()
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/subscriptions/sub123" in call_args[0][1]
+            assert "/resourceGroups/rg-test" in call_args[0][1]
+            assert "/automationAccounts/myAutomation" in call_args[0][1]
+            assert "/jobs/job456" in call_args[0][1]
+            assert "/output" not in call_args[0][1]
             assert result["properties"]["status"] == "Running"
 
     @pytest.mark.asyncio
@@ -346,12 +382,20 @@ class TestGetStatusOfJobAsync:
             token_provider=mock_token_provider
         )
 
+        mock_response = MockResponse(status=200, text="")
+
         with patch.object(
-            client, 'get_status_of_job_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            return_value=None
+            return_value=mock_response
         ):
-            result = await client.get_status_of_job_async()
+            result = await client.get_status_of_job_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation",
+                job_id="job456"
+            )
 
             assert result is None
 
@@ -363,13 +407,24 @@ class TestGetStatusOfJobAsync:
             token_provider=mock_token_provider
         )
 
+        mock_response = MockResponse(
+            status=500,
+            text="Server error"
+        )
+
         with patch.object(
-            client, 'get_status_of_job_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            side_effect=ConnectorException("GET", "/path", 500, "Server error")
+            return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_status_of_job_async()
+                await client.get_status_of_job_async(
+                    subscription_id="sub123",
+                    resource_group_name="rg-test",
+                    automation_account="myAutomation",
+                    job_id="job456"
+                )
 
             assert exc_info.value.status_code == 500
 
@@ -396,19 +451,33 @@ class TestCreateJobAsync:
             token_provider=mock_token_provider
         )
 
-        expected_response = {
-            "id": "/subscriptions/xxx/jobs/newjob123",
-            "properties": {"status": "New", "runbook": {"name": "MyRunbook"}}
-        }
+        mock_response = MockResponse(
+            status=200,
+            text=(
+                '{"id": "/subscriptions/xxx/jobs/newjob123", '
+                '"properties": {"status": "New", "runbook": {"name": "MyRunbook"}}}'
+            )
+        )
 
         with patch.object(
-            client, 'create_job_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            return_value=expected_response
-        ) as mock_method:
-            result = await client.create_job_async()
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.create_job_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation"
+            )
 
-            mock_method.assert_called_once()
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "PUT"
+            assert "/subscriptions/sub123" in call_args[0][1]
+            assert "/resourceGroups/rg-test" in call_args[0][1]
+            assert "/automationAccounts/myAutomation" in call_args[0][1]
+            assert "/jobs" in call_args[0][1]
             assert result["properties"]["status"] == "New"
 
     @pytest.mark.asyncio
@@ -419,19 +488,31 @@ class TestCreateJobAsync:
             token_provider=mock_token_provider
         )
 
-        expected_response = {
-            "id": "/subscriptions/xxx/jobs/newjob123",
-            "properties": {"status": "Completed"}
-        }
+        mock_response = MockResponse(
+            status=200,
+            text=(
+                '{"id": "/subscriptions/xxx/jobs/newjob123", '
+                '"properties": {"status": "Completed"}}'
+            )
+        )
 
         with patch.object(
-            client, 'create_job_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            return_value=expected_response
-        ) as mock_method:
-            result = await client.create_job_async(wait="true")
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.create_job_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation",
+                wait="true"
+            )
 
-            mock_method.assert_called_once_with(wait="true")
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "PUT"
+            assert "wait=true" in call_args[0][1]
             assert result["properties"]["status"] == "Completed"
 
     @pytest.mark.asyncio
@@ -442,12 +523,19 @@ class TestCreateJobAsync:
             token_provider=mock_token_provider
         )
 
+        mock_response = MockResponse(status=200, text="")
+
         with patch.object(
-            client, 'create_job_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            return_value=None
+            return_value=mock_response
         ):
-            result = await client.create_job_async()
+            result = await client.create_job_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation"
+            )
 
             assert result is None
 
@@ -459,13 +547,23 @@ class TestCreateJobAsync:
             token_provider=mock_token_provider
         )
 
+        mock_response = MockResponse(
+            status=400,
+            text="Bad request"
+        )
+
         with patch.object(
-            client, 'create_job_async',
+            client._http_client,
+            'send_async',
             new_callable=AsyncMock,
-            side_effect=ConnectorException("PUT", "/path", 400, "Bad request")
+            return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_job_async()
+                await client.create_job_async(
+                    subscription_id="sub123",
+                    resource_group_name="rg-test",
+                    automation_account="myAutomation"
+                )
 
             assert exc_info.value.status_code == 400
 
@@ -488,17 +586,34 @@ class TestCreateJobAsync:
             token_provider=mock_token_provider
         )
 
-        with patch.object(
-            client, 'create_job_async',
-            new_callable=AsyncMock,
-            return_value={}
-        ) as mock_method:
-            # Call without wait parameter
-            await client.create_job_async()
-            mock_method.assert_called_once_with()
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "job123"}'
+        )
 
-            mock_method.reset_mock()
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            # Call without wait parameter
+            await client.create_job_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation"
+            )
+            call_args = mock_send.call_args
+            assert "wait=" not in call_args[0][1]
+
+            mock_send.reset_mock()
 
             # Call with wait parameter
-            await client.create_job_async(wait="true")
-            mock_method.assert_called_once_with(wait="true")
+            await client.create_job_async(
+                subscription_id="sub123",
+                resource_group_name="rg-test",
+                automation_account="myAutomation",
+                wait="true"
+            )
+            call_args = mock_send.call_args
+            assert "wait=true" in call_args[0][1]

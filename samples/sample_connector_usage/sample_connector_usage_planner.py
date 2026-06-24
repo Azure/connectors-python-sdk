@@ -12,10 +12,14 @@ Installation:
     pip install azure-connectors
 
 Usage:
+    Set environment variable:
+    $env:PLANNER_CONNECTION_URL = "https://[region].azure-apihub.net/apim/planner/[connection-id]"
+
     python sample_connector_usage_planner.py
 """
 
 import asyncio
+import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors.planner import (
     PlannerClient,
@@ -26,7 +30,10 @@ from azure.connectors.planner import (
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/planner/[connection-id]
-CONNECTION_RUNTIME_URL = ""
+CONNECTION_RUNTIME_URL = os.environ.get(
+    "PLANNER_CONNECTION_URL",
+    ""
+)
 
 
 async def example_1_list_my_tasks():

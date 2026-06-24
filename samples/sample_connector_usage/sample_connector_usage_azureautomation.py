@@ -15,8 +15,12 @@ Installation:
     pip install azure-connectors
 
 Usage:
-    Set environment variable:
+    Set environment variables:
     $env:AZUREAUTOMATION_CONNECTION_URL = "https://....azure-apihub.net/apim/..."
+    $env:AZUREAUTOMATION_SUBSCRIPTION_ID = "00000000-0000-0000-0000-000000000000"
+    $env:AZUREAUTOMATION_RESOURCE_GROUP = "my-resource-group"
+    $env:AZUREAUTOMATION_ACCOUNT = "my-automation-account"
+    $env:AZUREAUTOMATION_JOB_ID = "00000000-0000-0000-0000-000000000000"  # for status/output
 
     python sample_connector_usage_azureautomation.py
 
@@ -41,6 +45,24 @@ from azure.connectors.azureautomation import (
 # https://[region].azure-apihub.net/apim/azureautomation/[connection-id]
 CONNECTION_RUNTIME_URL = os.environ.get(
     "AZUREAUTOMATION_CONNECTION_URL",
+    ""
+)
+
+# Required parameters for Azure Automation operations
+SUBSCRIPTION_ID = os.environ.get(
+    "AZUREAUTOMATION_SUBSCRIPTION_ID",
+    ""
+)
+RESOURCE_GROUP_NAME = os.environ.get(
+    "AZUREAUTOMATION_RESOURCE_GROUP",
+    ""
+)
+AUTOMATION_ACCOUNT = os.environ.get(
+    "AZUREAUTOMATION_ACCOUNT",
+    ""
+)
+JOB_ID = os.environ.get(
+    "AZUREAUTOMATION_JOB_ID",
     ""
 )
 
@@ -76,10 +98,11 @@ async def example_2_create_job():
     ) as client:
         try:
             # Create a new automation job
-            # Note: The connector requires subscription, resource group,
-            # automation account, and runbook to be configured in the
-            # connection settings.
-            result = await client.create_job_async()
+            result = await client.create_job_async(
+                subscription_id=SUBSCRIPTION_ID,
+                resource_group_name=RESOURCE_GROUP_NAME,
+                automation_account=AUTOMATION_ACCOUNT
+            )
 
             if result:
                 print(f"Job created: {result.get('id', 'N/A')}")
@@ -105,7 +128,12 @@ async def example_3_create_job_and_wait():
     ) as client:
         try:
             # Create job with wait parameter to wait for completion
-            result = await client.create_job_async(wait="true")
+            result = await client.create_job_async(
+                subscription_id=SUBSCRIPTION_ID,
+                resource_group_name=RESOURCE_GROUP_NAME,
+                automation_account=AUTOMATION_ACCOUNT,
+                wait="true"
+            )
 
             if result:
                 props = result.get("properties", {})
@@ -130,8 +158,12 @@ async def example_4_get_job_status():
     ) as client:
         try:
             # Get status of a job
-            # Note: Job ID must be configured in connection settings
-            result = await client.get_status_of_job_async()
+            result = await client.get_status_of_job_async(
+                subscription_id=SUBSCRIPTION_ID,
+                resource_group_name=RESOURCE_GROUP_NAME,
+                automation_account=AUTOMATION_ACCOUNT,
+                job_id=JOB_ID
+            )
 
             if result:
                 print(f"Job ID: {result.get('id', 'N/A')}")
@@ -159,7 +191,12 @@ async def example_5_get_job_output():
     ) as client:
         try:
             # Get output from a completed job
-            output = await client.get_job_output_async()
+            output = await client.get_job_output_async(
+                subscription_id=SUBSCRIPTION_ID,
+                resource_group_name=RESOURCE_GROUP_NAME,
+                automation_account=AUTOMATION_ACCOUNT,
+                job_id=JOB_ID
+            )
 
             if output:
                 # Output is returned as bytes
@@ -216,6 +253,14 @@ async def main():
         print("Error: AZUREAUTOMATION_CONNECTION_URL environment variable "
               "not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
+        print("\nRunning data type examples without connection...\n")
+        await example_6_dataclass_usage()
+        return
+
+    if not all([SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, AUTOMATION_ACCOUNT]):
+        print("Error: Missing required environment variables.")
+        print("Required: AZUREAUTOMATION_SUBSCRIPTION_ID, "
+              "AZUREAUTOMATION_RESOURCE_GROUP, AZUREAUTOMATION_ACCOUNT")
         print("\nRunning data type examples without connection...\n")
         await example_6_dataclass_usage()
         return

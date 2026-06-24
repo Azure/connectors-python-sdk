@@ -15,6 +15,8 @@ from azure.connectors.teams import (
     CreateSectionInput,
     PostMessageToSelfRequest,
     NewChat,
+    DynamicGetMessageDetailsSchema,
+    DynamicListMembersSchema,
 )
 from azure.connectors.sdk import ConnectorClientOptions, ConnectorException
 from tests.conftest import MockResponse
@@ -294,11 +296,31 @@ class TestChannelOperations:
             assert "/beta/groups/group123/channels" in call_args[0][1]
             assert result["id"] == "channel123"
 
-    @pytest.mark.skip(reason="Method get_channel_async does not exist in generated SDK")
     @pytest.mark.asyncio
     async def test_get_channel_success(self, mock_token_provider):
         """Test successful channel retrieval."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "channel123", "displayName": "General"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_channel_async("group123", "channel123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/beta/teams/group123/channels/channel123" in call_args[0][1]
+            assert result["id"] == "channel123"
 
     @pytest.mark.asyncio
     async def test_get_all_channels_for_team_success(self, mock_token_provider):
@@ -330,11 +352,31 @@ class TestChannelOperations:
 class TestChatOperations:
     """Tests for chat operations."""
 
-    @pytest.mark.skip(reason="Method get_chats_async does not exist in generated SDK")
     @pytest.mark.asyncio
     async def test_get_chats_success(self, mock_token_provider):
         """Test successful retrieval of chats."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "chat1", "topic": "Test Chat"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_chats_async("oneOnOne", "Test")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/flowbot/actions/listchats/chattypes/oneOnOne/topic/Test" in call_args[0][1]
+            assert "value" in result
 
     @pytest.mark.asyncio
     async def test_create_chat_success(self, mock_token_provider):
@@ -420,57 +462,220 @@ class TestTagOperations:
             assert "/v1.0/teams/group123/tags" in call_args[0][1]
             assert result["id"] == "tag123"
 
-    @pytest.mark.skip(reason="Method add_member_to_tag_async does not exist in generated SDK")
     @pytest.mark.asyncio
     async def test_add_member_to_tag_success(self, mock_token_provider):
         """Test successful member addition to tag."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method get_tag_members_async does not exist in generated SDK")
+        mock_response = MockResponse(
+            status=201,
+            text='{"user_id": "user123"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = AddMemberToTagInput(user_id="user123")
+            result = await client.add_member_to_tag_async(input_data, "group123", "tag123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/v1.0/teams/group123/tags/tag123/members" in call_args[0][1]
+            assert result["user_id"] == "user123"
+
     @pytest.mark.asyncio
     async def test_get_tag_members_success(self, mock_token_provider):
         """Test successful retrieval of tag members."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method delete_tag_member_async does not exist in generated SDK")
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "member1", "displayName": "User 1"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_tag_members_async("group123", "tag123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/v1.0/teams/group123/tags/tag123/members" in call_args[0][1]
+            assert "value" in result
+
     @pytest.mark.asyncio
     async def test_delete_tag_member_success(self, mock_token_provider):
         """Test successful tag member deletion."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method delete_tag_async does not exist in generated SDK")
+        mock_response = MockResponse(status=204, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.delete_tag_member_async("group123", "tag123", "member123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "DELETE"
+            assert "/v1.0/teams/group123/tags/tag123/members/member123" in call_args[0][1]
+
     @pytest.mark.asyncio
     async def test_delete_tag_success(self, mock_token_provider):
         """Test successful tag deletion."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=204, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.delete_tag_async("group123", "tag123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "DELETE"
+            assert "/v1.0/teams/group123/tags/tag123" in call_args[0][1]
 
 
 class TestMessageOperations:
     """Tests for message operations."""
 
-    @pytest.mark.skip(reason="Method does not exist in generated SDK")
     @pytest.mark.asyncio
     async def test_get_messages_from_channel_success(self, mock_token_provider):
         """Test successful retrieval of channel messages."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method get_message_details_async does not exist in generated SDK")
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "msg1", "body": {"content": "Hello"}}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_messages_from_channel_async("group123", "channel123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/beta/teams/group123/channels/channel123/messages" in call_args[0][1]
+            assert "value" in result
+
     @pytest.mark.asyncio
     async def test_get_message_details_success(self, mock_token_provider):
         """Test successful retrieval of message details."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method list_replies_to_message_async does not exist in generated SDK")
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "msg123", "body": {"content": "Message content"}}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = DynamicGetMessageDetailsSchema()
+            result = await client.get_message_details_async(input_data, "msg123", "channel")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/beta/teams/messages/msg123/messageType/channel" in call_args[0][1]
+            assert result["id"] == "msg123"
+
     @pytest.mark.asyncio
     async def test_list_replies_to_message_success(self, mock_token_provider):
         """Test successful listing of message replies."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method list_replies_to_message_async does not exist in generated SDK")
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "reply1", "body": {"content": "Reply"}}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.list_replies_to_message_async(
+                "group123", "channel123", "msg123"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            path = call_args[0][1]
+            assert "/v1.0/teams/group123/channels/channel123" in path
+            assert "/messages/msg123/replies" in path
+            assert "value" in result
+
     @pytest.mark.asyncio
     async def test_list_replies_with_top_parameter(self, mock_token_provider):
         """Test listing replies with top parameter."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "reply1", "body": {"content": "Reply"}}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.list_replies_to_message_async(
+                "group123", "channel123", "msg123", top="10"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            path = call_args[0][1]
+            assert "/v1.0/teams/group123/channels/channel123" in path
+            assert "/messages/msg123/replies" in path
+            assert "$top=10" in path
+            assert "value" in result
 
     @pytest.mark.asyncio
     async def test_post_message_to_self_success(self, mock_token_provider):
@@ -503,11 +708,32 @@ class TestMessageOperations:
 class TestMemberOperations:
     """Tests for member operations."""
 
-    @pytest.mark.skip(reason="Method list_members_async does not exist in generated SDK")
     @pytest.mark.asyncio
     async def test_list_members_success(self, mock_token_provider):
         """Test successful listing of members."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "member1", "displayName": "User 1"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = DynamicListMembersSchema()
+            result = await client.list_members_async(input_data, "channel")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/v1.0/teams/listmembers/threadType/channel" in call_args[0][1]
+            assert "value" in result
 
     @pytest.mark.asyncio
     async def test_list_team_members_success(self, mock_token_provider):
@@ -584,17 +810,58 @@ class TestMemberOperations:
 class TestTriggerOperations:
     """Tests for trigger operations."""
 
-    @pytest.mark.skip(reason="Method on_new_channel_message_async does not exist in generated SDK")
     @pytest.mark.asyncio
     async def test_on_new_channel_message_success(self, mock_token_provider):
         """Test successful new channel message trigger."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method on_new_channel_message_async does not exist in generated SDK")
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "msg1", "body": {"content": "New message"}}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.on_new_channel_message_async("group123", "channel123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/trigger/beta/teams/group123/channels/channel123/messages" in call_args[0][1]
+            assert "value" in result
+
     @pytest.mark.asyncio
     async def test_on_new_channel_message_with_top(self, mock_token_provider):
         """Test new channel message trigger with top parameter."""
-        pass
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "msg1", "body": {"content": "New message"}}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.on_new_channel_message_async("group123", "channel123", top="5")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/trigger/beta/teams/group123/channels/channel123/messages" in call_args[0][1]
+            assert "$top=5" in call_args[0][1]
+            assert "value" in result
 
 
 class TestTeamOperations:

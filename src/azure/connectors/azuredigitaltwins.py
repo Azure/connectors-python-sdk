@@ -254,7 +254,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def add_models_async(
         self,
         input: AddModelsInput,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Add Model
@@ -289,7 +289,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     async def list_models_async(
         self,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
         dependencies_for: Optional[str] = None,
         include_model_definition: Optional[str] = None,
         continuation_token: Optional[str] = None,
@@ -342,7 +342,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def delete_model_async(
         self,
         modelid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Delete Model
@@ -373,7 +373,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def get_model_by_id_async(
         self,
         modelid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
         include_model_definition: Optional[str] = None,
     ):
         """
@@ -415,7 +415,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: UpdateModelInput,
         modelid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Update Model's Property
@@ -445,7 +445,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def get_twin_by_id_async(
         self,
         twinid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Get Twin by Id
@@ -480,7 +480,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def delete_twin_async(
         self,
         twinid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Delete Twin
@@ -512,7 +512,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: AddTwinInput,
         twinid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Add Twin
@@ -548,7 +548,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: UpdateTwinInput,
         twinid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Update Twin
@@ -579,7 +579,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         component_path: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Get Component
@@ -619,7 +619,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: UpdateComponentInput,
         twinid: str,
         component_path: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Update Component
@@ -653,7 +653,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Get Relationship by Id
@@ -692,7 +692,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Delete Relationship
@@ -727,7 +727,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: AddRelationshipInput,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Add Relationship
@@ -767,7 +767,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: UpdateRelationshipInput,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Update Relationship
@@ -800,7 +800,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def list_incoming_relationships_async(
         self,
         twinid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
         continuation_token: Optional[str] = None,
     ):
         """
@@ -845,7 +845,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: SendTelemetryInput,
         twinid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Send Telemetry
@@ -880,7 +880,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: SendComponentTelemetryInput,
         twinid: str,
         component_path: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Send Component Telemetry
@@ -917,7 +917,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def list_relationships_async(
         self,
         twinid: str,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
         continuation_token: Optional[str] = None,
     ):
         """
@@ -961,7 +961,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def query_twins_async(
         self,
         input: QueryTwinsInput,
-        api_version: Optional[str],
+        api_version: Optional[str] = "2020-10-31",
     ):
         """
         Query API
