@@ -152,8 +152,8 @@ async def example_4_list_secrets():
             if result and result.get("value"):
                 secrets = result["value"]
                 print(f"Found {len(secrets)} secrets:")
-                for secret in secrets:
-                    print(f"  - {secret.get('name')} (enabled: {secret.get('is_enabled')})")
+                for _ in secrets:
+                    print("  - [REDACTED]")
             else:
                 print("No secrets found")
 
@@ -181,7 +181,7 @@ async def example_5_get_secret():
                 masked = value[:3] + "***" if len(value) > 3 else "***"
                 print(f"Value (masked): {masked}")
             else:
-                print(f"Secret '{SECRET_NAME}' not found")
+                print("Secret not found")
 
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
@@ -209,7 +209,7 @@ async def example_6_get_secret_metadata():
                 print(f"Created: {result.get('created_time')}")
                 print(f"Updated: {result.get('last_updated_time')}")
             else:
-                print(f"Secret '{SECRET_NAME}' not found")
+                print("Secret not found")
 
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
