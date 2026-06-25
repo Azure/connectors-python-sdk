@@ -201,7 +201,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def send_messages_async(
         self,
@@ -226,7 +234,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_message_from_queue_async(
         self,
@@ -346,7 +362,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def abandon_message_in_queue_async(
         self,
@@ -383,7 +407,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_deferred_message_from_queue_async(
         self,
@@ -468,7 +500,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def dead_letter_message_in_queue_async(
         self,
@@ -511,7 +551,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def renew_lock_on_message_in_queue_async(
         self,
@@ -542,7 +590,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_messages_from_queue_async(
         self,
@@ -707,7 +763,15 @@ class ServicebusClient(ConnectorClientBase):
             f"/{str(queue_name)}/sessions/{str(session_id)}/close"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def renew_lock_on_session_in_queue_async(
         self,
@@ -724,7 +788,15 @@ class ServicebusClient(ConnectorClientBase):
             f"/{str(queue_name)}/sessions/{str(session_id)}/renewlock"
         )
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_message_from_topic_async(
         self,
@@ -861,7 +933,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def abandon_message_in_topic_async(
         self,
@@ -903,7 +983,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_deferred_message_from_topic_async(
         self,
@@ -1000,7 +1088,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def dead_letter_message_in_topic_async(
         self,
@@ -1048,7 +1144,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def renew_lock_on_message_in_topic_async(
         self,
@@ -1084,7 +1188,15 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def create_topic_subscription_async(
         self,
@@ -1141,7 +1253,15 @@ class ServicebusClient(ConnectorClientBase):
             f"/{str(topic_name)}/subscriptions/{str(subscription_name)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_messages_from_topic_async(
         self,
@@ -1332,7 +1452,15 @@ class ServicebusClient(ConnectorClientBase):
             f"/close"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def renew_lock_on_session_in_topic_async(
         self,
@@ -1355,4 +1483,12 @@ class ServicebusClient(ConnectorClientBase):
             f"/renewlock"
         )
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )

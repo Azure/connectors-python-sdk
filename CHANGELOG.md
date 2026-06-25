@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **13 new connector clients** with unit tests and samples:
   - ARM (Azure Resource Manager), Azure AD, Azure Cosmos DB, Azure Event Hubs, Azure Queues, Azure Tables, Excel Online (Business), Microsoft Dataverse, Microsoft Defender ATP, Outlook, Service Bus, SMTP, Word Online (Business)
 
+### Changed
+
+- **Comprehensive error handling improvements** across 14 connector clients:
+  - Added error handling tests for all HTTP operations (4xx/5xx responses)
+  - Fixed variable shadowing in `outlook.py` and `office365.py` (`respond_to_event_async`)
+  - Fixed incorrect `ConnectorException` signature in `teams.py` (2 methods)
+
 ## [0.2.0b2] - 2026-05-13
 
 ### Added

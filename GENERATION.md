@@ -323,8 +323,10 @@ If a connector name is not recognized:
 If generated code has syntax errors or type issues:
 
 1. Check BPM repository is up to date (especially PR 15456622 for `--python` support)
-2. Report issues to BPM team with connector name and error details
-3. Review swagger definition for edge cases
+2. Fix the generator, not the generated output — see [Generator File Locations](#generator-file-locations-bpm-repository)
+3. Report issues to BPM team with connector name and error details (file in [BPM Azure DevOps](https://dev.azure.com/msazure/One/_workitems))
+4. Add the defect to the [Known Generator Defects Registry](#known-generator-defects-registry)
+5. Review swagger definition for edge cases
 
 ## Example Workflows
 
@@ -356,6 +358,113 @@ LogicAppsCompiler.exe $outputDir unused --directClient --python --connectors=$co
 3. **Updates** - Regenerate periodically to pick up connector schema updates
 4. **Testing** - Always run full test suite after regeneration
 5. **Documentation** - Keep README and ROADMAP in sync with available connectors
+
+## Generated Client Acceptance Criteria
+
+Every generated connector client MUST satisfy these invariants before merge:
+
+### 1. Request Body Handling (Create/Update Operations)
+
+- Every `POST`, `PUT`, or `PATCH` operation that accepts input parameters MUST construct and send a request body
+- All input parameters marked as body parameters in swagger MUST be serialized into the request
+- Create/update operations MUST NOT silently drop input parameters
+
+**Validation:** Unit tests MUST assert that the outgoing request body contains expected fields for create/update operations.
+
+### 2. Response Status Checking (All Operations)
+
+- Every HTTP operation MUST capture the response and check the status code
+- Non-2xx responses MUST raise `ConnectorException` with status code and message
+- Void operations (DELETE, PATCH, fire-and-forget POST) MUST NOT discard the response unchecked
+
+**Correct pattern:**
+```python
+response = await self.http_client.send_async(
+    method="DELETE",
+    url=request_uri,
+)
+if not (200 <= response.status < 300):
+    raise ConnectorException(
+        f"Operation failed with status {response.status}: {await response.text()}"
+    )
+```
+
+**Incorrect pattern (MUST NOT pass review):**
+```python
+await self.http_client.send_async(  # Result discarded - silent failures!
+    method="DELETE",
+    url=request_uri,
+)
+```
+
+**Validation:** The `test_no_unchecked_send_async_calls` test in `tests/test_code_quality.py` scans for unchecked `send_async` calls. Additionally, unit tests for void methods MUST assert that non-2xx responses raise `ConnectorException`.
+
+### 3. Test Coverage
+
+- No skipped tests without a tracked issue link in the skip reason
+- Each public method MUST have tests for: success case, error response handling, parameter serialization
+- Void methods MUST have explicit tests verifying non-2xx raises exception
+
+**Validation:** Tests with `@pytest.mark.skip` MUST include a GitHub issue link (e.g., `reason="Template variable bug - see #123"`).
+
+### 4. Type Completeness
+
+- All public types (dataclasses) referenced by method signatures MUST be defined
+- No `# type: ignore` comments unless accompanied by a tracked issue link
+- All optional parameters MUST have `Optional[T]` type hints and default values
+
+## Generator File Locations (BPM Repository)
+
+When fixing generator bugs (per the "fix the generator, not generated output" rule), these are the key files:
+
+### Python Generator
+
+| File | Purpose |
+|------|--------|
+| `src/tools/CodefulSdkGenerator/DirectClient/DirectClientPythonGenerator.cs` | Entry point for Python generation; orchestrates the generation pipeline |
+| `src/tools/CodefulSdkGenerator/DirectClient/DirectClientPythonCodeGenerator.cs` | Core code emitter; generates Python client classes, methods, and type definitions |
+
+### Key Differences from .NET Generator
+
+The .NET SDK centralizes error handling in `ConnectorClientBase.CallConnectorAsync()` — this base method auto-throws on non-2xx for both value-returning and void operations. The Python emitter must explicitly generate the status check in each method body because Python's `http_client.send_async()` does not auto-raise.
+
+**If you find a Python generator bug:**
+1. Fix it in `DirectClientPythonCodeGenerator.cs`
+2. Add a test case in `CodefulSdkGenerator.Tests/`
+3. Regenerate affected connectors
+4. Add the defect to the Known Generator Defects Registry below
+
+### C# Generator
+
+| File | Purpose |
+|------|--------|
+| `src/tools/CodefulSdkGenerator/DirectClient/DirectClientCSharpGenerator.cs` | C# generation entry point |
+| `src/tools/CodefulSdkGenerator/DirectClient/DirectClientCSharpCodeGenerator.cs` | C# code emitter |
+
+### Shared Infrastructure
+
+| File | Purpose |
+|------|--------|
+| `src/tools/CodefulSdkGenerator/ConnectorsGenerator.cs` | ARM API fetching, swagger parsing, JSON sanitization |
+| `src/tools/CodefulSdkGenerator/Data/ManagedConnectorSkipList.txt` | Connectors skipped due to known issues |
+| `src/tools/CodefulSdkGenerator/Data/*.txt` | Character replacement and reformatting lists |
+
+## Known Generator Defects Registry
+
+Track known generator issues here to prevent silent recurrence across releases.
+
+| Defect | BPM Issue | Affected Connectors | Status | Notes |
+|--------|-----------|---------------------|--------|-------|
+| Teams template variable causes NameError at import | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | `teams` | Workaround (skip import test) | `DynamicValueLookup` references undefined variable; test skipped with issue link |
+| Void operations not checking response status | Fixed in generator | Pre-2024 connectors | Fixed | Regenerate affected connectors: `azurequeues`, `azuretables`, `commondataservice`, `eventhubs`, `excelonlinebusiness`, `office365`, `onedrive`, `outlook`, `servicebus`, `sharepointonline`, `smtp`, `azuread` |
+| api_version parameters missing default values | Fixed in generator | `azuredigitaltwins`, `azurevm`, others | Fixed | Generator now uses swagger default value for api_version/api-version parameters |
+| Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
+
+**Adding a new defect:**
+1. File an issue in BPM Azure DevOps
+2. Add a row to this table with connector list
+3. Add `@pytest.mark.skip(reason="Generator defect - see GENERATION.md")` to affected tests
+4. Update status when fixed and connectors regenerated
 
 ## Related Documentation
 

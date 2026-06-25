@@ -298,7 +298,15 @@ class AzuretablesClient(ConnectorClientBase):
             f"/etag(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def delete_table_async(
         self,
@@ -319,7 +327,15 @@ class AzuretablesClient(ConnectorClientBase):
             f"/{str(table_name)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_entities_async(
         self,
@@ -517,7 +533,15 @@ class AzuretablesClient(ConnectorClientBase):
             f"/entities(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
         )
 
-        await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def insert_replace_entity_async(
         self,
@@ -543,7 +567,15 @@ class AzuretablesClient(ConnectorClientBase):
             f"/entities(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
         )
 
-        await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async("PUT", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PUT",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def merge_entity_async(
         self,
@@ -569,7 +601,15 @@ class AzuretablesClient(ConnectorClientBase):
             f"/etag(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
         )
 
-        await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def replace_entity_async(
         self,
@@ -595,4 +635,12 @@ class AzuretablesClient(ConnectorClientBase):
             f"/etag(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
         )
 
-        await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async("PUT", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PUT",
+                path,
+                response.status,
+                response.text,
+            )

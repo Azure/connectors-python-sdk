@@ -387,6 +387,29 @@ class TestDeleteRecord:
             url = mock_send.call_args[0][1]
             assert "partitionId=" in url
 
+    @pytest.mark.asyncio
+    async def test_delete_record_error(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text="Record not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_record_async(
+                    entity_name="accounts",
+                    record_id="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestUpdateRecord:
     """Tests for update_record_async method."""
@@ -480,6 +503,33 @@ class TestFileImageOperations:
             assert call_args[0][0] == "PUT"
             assert "/annotations(123)/documentbody" in call_args[0][1]
             assert "x-ms-file-name=" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_upload_file_error(self, mock_token_provider):
+        """Test that upload error raises ConnectorException."""
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=413, text="File too large")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            input_data = UpdateEntityFileImageFieldContentInput()
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.update_entity_file_image_field_content_async(
+                    input=input_data,
+                    entity_name="annotations",
+                    record_id="123",
+                    file_image_field_name="documentbody",
+                    x_ms_file_name="large-file.pdf"
+                )
+
+            assert exc_info.value.status_code == 413
 
     @pytest.mark.asyncio
     async def test_download_file_success(self, mock_token_provider):
@@ -708,6 +758,34 @@ class TestRelationshipOperations:
             assert "/accounts(123)/contact_customer_accounts/$ref" in call_args[0][1]
 
     @pytest.mark.asyncio
+    async def test_associate_entities_error(self, mock_token_provider):
+        """Test that association error raises ConnectorException."""
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text="Invalid relationship")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            input_data = AssociateEntityRequest(
+                id="https://org.crm.dynamics.com/api/data/v9.0/contacts(456)"
+            )
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.associate_entities_async(
+                    input=input_data,
+                    entity_name="accounts",
+                    record_id="123",
+                    association_entity_relationship="invalid_relationship"
+                )
+
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.asyncio
     async def test_disassociate_entities_success(self, mock_token_provider):
         """Test successful entity disassociation."""
         client = CommondataserviceClient(
@@ -733,6 +811,31 @@ class TestRelationshipOperations:
             assert call_args[0][0] == "DELETE"
             assert "$ref" in call_args[0][1]
             assert "$id=" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_disassociate_entities_error(self, mock_token_provider):
+        """Test that disassociation error raises ConnectorException."""
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text="Relationship not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.disassociate_entities_async(
+                    entity_name="accounts",
+                    record_id="123",
+                    association_entity_relationship="nonexistent",
+                    id="https://org.crm.dynamics.com/api/data/v9.0/contacts(456)"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestSearchRecords:
@@ -821,6 +924,32 @@ class TestTriggerOperations:
             assert "/callbackregistrations" in call_args[0][1]
 
     @pytest.mark.asyncio
+    async def test_subscribe_webhook_trigger_error(self, mock_token_provider):
+        """Test webhook subscription error."""
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text="Invalid callback registration")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            input_data = CallbackRegistration(
+                url="invalid-url",
+                entityname="accounts",
+                message=1,
+                scope=1
+            )
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.subscribe_webhook_trigger_async(input=input_data)
+
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.asyncio
     async def test_business_events_trigger(self, mock_token_provider):
         """Test business events trigger subscription."""
         client = CommondataserviceClient(
@@ -847,6 +976,30 @@ class TestTriggerOperations:
             assert call_args[0][0] == "POST"
             assert "/v9.2/callbackregistrations" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_business_events_trigger_error(self, mock_token_provider):
+        """Test business events trigger error."""
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text="Invalid trigger configuration")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            input_data = WhenAnActionIsPerformedSubscriptionRequest(
+                url="invalid-url",
+                entityname="accounts"
+            )
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.business_events_trigger_async(input=input_data)
+
+            assert exc_info.value.status_code == 400
+
 
 class TestExecuteChangeset:
     """Tests for changeset operations."""
@@ -871,6 +1024,26 @@ class TestExecuteChangeset:
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/$batch" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_execute_changeset_error(self, mock_token_provider):
+        """Test changeset execution error."""
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text="Changeset validation failed")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.execute_changeset_async()
+
+            assert exc_info.value.status_code == 400
 
 
 class TestDataclasses:

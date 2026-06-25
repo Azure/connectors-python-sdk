@@ -309,6 +309,28 @@ class TestUpdateDraftEmail:
             assert call_args[1]["body"] is input_message
             assert result is None
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = Office365Client(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Draft not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                input_message = ClientDraftHtmlMessage()
+                await client.update_draft_email_async(input_message, "nonexistent")
+
+            assert exc_info.value.status_code == 404
+
 
 class TestSendDraftEmail:
     """Tests for send_draft_email_async method."""
@@ -359,6 +381,27 @@ class TestSendDraftEmail:
             path = call_args[0][1]
             assert "https://example.azure.com/connections/test/Draft/Send/" in path
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = Office365Client(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Draft not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.send_draft_email_async("nonexistent")
+
+            assert exc_info.value.status_code == 404
+
 
 class TestAssignCategory:
     """Tests for assign_category_async method."""
@@ -388,6 +431,30 @@ class TestAssignCategory:
             path = call_args[0][1]
             assert "messageId=msg123" in path
             assert "category=Red%20category" in path
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = Office365Client(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.assign_category_async(
+                    message_id="nonexistent",
+                    category="Red category"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestDeleteEmail:

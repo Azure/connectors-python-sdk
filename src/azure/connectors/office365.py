@@ -3183,7 +3183,14 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async("PATCH", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def send_draft_email_async(
         self,
@@ -3196,7 +3203,14 @@ class Office365Client(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/Draft/Send/{str(message_id)}"
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+        if response.status >= 400:
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def assign_category_async(
         self,
@@ -3223,7 +3237,14 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+        if response.status >= 400:
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def assign_category_bulk_async(
         self,
@@ -3339,7 +3360,14 @@ class Office365Client(ConnectorClientBase):
             f"/$value"
         )
 
-        await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async("PUT", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "PUT",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def http_request_async(
         self,
@@ -3491,7 +3519,14 @@ class Office365Client(ConnectorClientBase):
             f"/codeless/v1.0/me/calendars/{str(calendar)}/events/{str(event)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+        if response.status >= 400:
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def calendar_get_item_async(
         self,
@@ -3867,7 +3902,14 @@ class Office365Client(ConnectorClientBase):
             f"/{str(id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+        if response.status >= 400:
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def contact_get_item_async(
         self,
@@ -4076,7 +4118,14 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+        if response.status >= 400:
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def export_email_async(
         self,
@@ -4166,7 +4215,14 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async("PATCH", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def forward_email_async(
         self,
@@ -4192,7 +4248,14 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_attachment_async(
         self,
@@ -4624,7 +4687,14 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async("PATCH", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def move_async(
         self,
@@ -4990,7 +5060,14 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def respond_to_event_async(
         self,
@@ -5008,7 +5085,14 @@ class Office365Client(ConnectorClientBase):
             f"/codeless/v1.0/me/events/{str(event_id)}/{str(response)}"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        http_response = await self.http_client.send_async("POST", path, body=input)
+        if http_response.status >= 400:
+            raise ConnectorException(
+                "POST",
+                path,
+                http_response.status,
+                http_response.text,
+            )
 
     async def send_email_async(
         self,
@@ -5021,7 +5105,14 @@ class Office365Client(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/v2/Mail"
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def set_automatic_replies_setting_async(
         self,
@@ -5159,4 +5250,11 @@ class Office365Client(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+        if response.status >= 400:
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )

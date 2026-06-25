@@ -215,6 +215,34 @@ class TestCreateIdColumn:
             assert call_args[0][0] == "POST"
             assert "/createIdColumn" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid table"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_id_column_async(
+                    drive="drive-id",
+                    file="file-id",
+                    table="InvalidTable",
+                    source="me",
+                    id_column="ID",
+                    populate_column="true"
+                )
+
+            assert exc_info.value.status_code == 400
+
 
 class TestGetItems:
     """Tests for get_items_async method."""
@@ -285,6 +313,32 @@ class TestGetItems:
             assert "$top=" in url
             assert "$skip=" in url
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_items_async(
+                    drive="drive-id",
+                    file="file-id",
+                    table="NonexistentTable",
+                    source="me"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestGetComments:
     """Tests for get_comments_async method."""
@@ -318,6 +372,30 @@ class TestGetComments:
             assert call_args[0][0] == "GET"
             assert "/workbook/comments" in call_args[0][1]
             assert result["value"][0]["id"] == "comment1"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_comments_async(
+                    drive="drive-id",
+                    file="nonexistent-file"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetComment:
@@ -353,6 +431,31 @@ class TestGetComment:
             assert call_args[0][0] == "GET"
             assert "/comments/comment1" in call_args[0][1]
             assert result["content"] == "Please review"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Comment not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_comment_async(
+                    drive="drive-id",
+                    file="file-id",
+                    commentid="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestReplyComment:
@@ -394,6 +497,33 @@ class TestReplyComment:
             assert "/replies" in call_args[0][1]
             assert result["content"] == "I will review it"
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid comment reply"}')
+        comment_details = CommentDetails(content="", content_type="plain")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.reply_comment_async(
+                    input=comment_details,
+                    drive="drive-id",
+                    file="file-id",
+                    commentid="comment1"
+                )
+
+            assert exc_info.value.status_code == 400
+
 
 class TestGetItem:
     """Tests for get_item_async method."""
@@ -432,6 +562,34 @@ class TestGetItem:
             assert "/items/row-123" in call_args[0][1]
             assert result["Name"] == "John Doe"
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Row not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_item_async(
+                    drive="drive-id",
+                    file="file-id",
+                    table="Table1",
+                    id="nonexistent",
+                    source="me",
+                    id_column="ID"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestDeleteItem:
     """Tests for delete_item_async method."""
@@ -465,6 +623,34 @@ class TestDeleteItem:
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert "/items/row-123" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Row not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_item_async(
+                    drive="drive-id",
+                    file="file-id",
+                    table="Table1",
+                    id="nonexistent",
+                    source="me",
+                    id_column="ID"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestPatchItem:
@@ -577,6 +763,286 @@ class TestRunScriptProd:
             assert call_args[0][0] == "POST"
             assert "/officescripting/api/unattended/run" in call_args[0][1]
             assert result["result"] == "Script executed successfully"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Script execution failed"}')
+        script_input = RunScriptProdInput(additional_properties={})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.run_script_prod_async(
+                    input=script_input,
+                    drive="drive-id",
+                    file="file-id",
+                    script_drive="script-drive-id",
+                    script_id="invalid-script",
+                    source="me",
+                    script_source="sites"
+                )
+
+            assert exc_info.value.status_code == 400
+
+
+class TestGetAllWorksheets:
+    """Tests for get_all_worksheets_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_json_response(self, mock_token_provider):
+        """Test successful GET request."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "sheet1", "name": "Sheet1", "position": 0}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_all_worksheets_async(
+                drive="drive-id",
+                file="file-id",
+                source="me"
+            )
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/worksheets" in call_args[0][1]
+            assert result["value"][0]["name"] == "Sheet1"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_all_worksheets_async(
+                    drive="drive-id",
+                    file="nonexistent",
+                    source="me"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestCreateWorksheet:
+    """Tests for create_worksheet_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_json_response(self, mock_token_provider):
+        """Test successful POST request."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=201,
+            text='{"id": "newsheet", "name": "NewSheet", "position": 1}'
+        )
+        worksheet_input = CreateWorksheetInput(name="NewSheet")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.create_worksheet_async(
+                input=worksheet_input,
+                drive="drive-id",
+                file="file-id",
+                source="me"
+            )
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/worksheets" in call_args[0][1]
+            assert result["name"] == "NewSheet"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid worksheet name"}')
+        worksheet_input = CreateWorksheetInput(name="")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_worksheet_async(
+                    input=worksheet_input,
+                    drive="drive-id",
+                    file="file-id",
+                    source="me"
+                )
+
+            assert exc_info.value.status_code == 400
+
+
+class TestGetTables:
+    """Tests for get_tables_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_json_response(self, mock_token_provider):
+        """Test successful GET request."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"name": "Table1"}, {"name": "Table2"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_tables_async(
+                drive="drive-id",
+                file="file-id",
+                source="me"
+            )
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/tables" in call_args[0][1]
+            assert len(result["value"]) == 2
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_tables_async(
+                    drive="drive-id",
+                    file="nonexistent",
+                    source="me"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestAddRow:
+    """Tests for add_row_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_json_response(self, mock_token_provider):
+        """Test successful POST request."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=201,
+            text='{"Name": "New Item", "Value": 250}'
+        )
+        item_input = Item(dynamic_properties={"Name": "New Item", "Value": 250})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.add_row_async(
+                input=item_input,
+                drive="drive-id",
+                file="file-id",
+                table="Table1",
+                source="me"
+            )
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/rows" in call_args[0][1]
+            assert result["Name"] == "New Item"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ExcelonlinebusinessClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid row data"}')
+        item_input = Item(dynamic_properties={})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.add_row_async(
+                    input=item_input,
+                    drive="drive-id",
+                    file="file-id",
+                    table="Table1",
+                    source="me"
+                )
+
+            assert exc_info.value.status_code == 400
 
 
 class TestDataClasses:

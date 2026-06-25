@@ -12,6 +12,10 @@ from azure.connectors.teams import (
     CreateATeamInput,
     AddMemberToTeamInput,
     AddMemberToChannelInput,
+    NewChat,
+    HttpRequestInput,
+    WebhookChatMessageTriggerInput,
+    DynamicUserMessageWithOptionsSubscriptionRequest,
 )
 from azure.connectors.sdk import ConnectorClientOptions, ConnectorException
 from tests.conftest import MockResponse
@@ -231,137 +235,432 @@ class TestTeamsListOperations:
 
             assert "value" in result
 
-
-class TestChannelOperations:
-    """Tests for channel operations."""
-
-    @pytest.mark.skip(reason="Method has template variable bug - groupId not defined")
     @pytest.mark.asyncio
-    async def test_get_channels_for_group_success(self, mock_token_provider):
-        """Test successful retrieval of channels."""
-        pass
+    async def test_get_all_teams_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug - groupId not defined")
-    @pytest.mark.asyncio
-    async def test_create_channel_success(self, mock_token_provider):
-        """Test successful channel creation."""
-        pass
+        mock_response = MockResponse(
+            status=401,
+            text='{"error": "Unauthorized"}'
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug - groupId/channelId not defined")
-    @pytest.mark.asyncio
-    async def test_get_channel_success(self, mock_token_provider):
-        """Test successful channel retrieval."""
-        pass
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_all_associated_teams_async()
 
-    @pytest.mark.skip(reason="Method has template variable bug - groupId not defined")
+            assert exc_info.value.status_code == 401
+
+
+class TestUserOperations:
+    """Tests for user operations."""
+
     @pytest.mark.asyncio
-    async def test_get_all_channels_for_team_success(self, mock_token_provider):
-        """Test successful retrieval of all channels for a team."""
-        pass
+    async def test_at_mention_user_success(self, mock_token_provider):
+        """Test successful @mention token retrieval."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "user123", "displayName": "John Doe", "mail": "john@example.com"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.at_mention_user_async("user123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/v1.0/users/user123" in call_args[0][1]
+            assert result["displayName"] == "John Doe"
+
+    @pytest.mark.asyncio
+    async def test_at_mention_user_error(self, mock_token_provider):
+        """Test @mention user error handling."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "User not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.at_mention_user_async("nonexistent")
+
+            assert exc_info.value.status_code == 404
 
 
 class TestChatOperations:
     """Tests for chat operations."""
 
-    @pytest.mark.skip(reason="Method has template variable bug")
     @pytest.mark.asyncio
-    async def test_get_chats_success(self, mock_token_provider):
-        """Test successful retrieval of chats."""
-        pass
+    async def test_create_chat_success(self, mock_token_provider):
+        """Test successful chat creation."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
+        mock_response = MockResponse(
+            status=201,
+            text='{"id": "chat123", "chatType": "oneOnOne"}'
+        )
 
-class TestTagOperations:
-    """Tests for tag operations."""
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = NewChat()
+            result = await client.create_chat_async(input_data)
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/beta/chats" in call_args[0][1]
+            assert result["id"] == "chat123"
+
     @pytest.mark.asyncio
-    async def test_get_tags_success(self, mock_token_provider):
-        """Test successful retrieval of tags."""
-        pass
+    async def test_create_chat_error(self, mock_token_provider):
+        """Test chat creation error handling."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(status=400, text='{"error": "Bad Request"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_chat_async(NewChat())
+
+            assert exc_info.value.status_code == 400
+
+
+class TestTeamCreationOperations:
+    """Tests for team creation operations."""
+
     @pytest.mark.asyncio
-    async def test_create_tag_success(self, mock_token_provider):
-        """Test successful tag creation."""
-        pass
+    async def test_create_a_team_success(self, mock_token_provider):
+        """Test successful team creation."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(
+            status=201,
+            text='{"id": "team123", "displayName": "New Team"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = CreateATeamInput(
+                display_name="New Team",
+                description="A new team",
+                visibility="Private"
+            )
+            result = await client.create_a_team_async(input_data)
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/beta/teams" in call_args[0][1]
+            assert result["displayName"] == "New Team"
+
     @pytest.mark.asyncio
-    async def test_add_member_to_tag_success(self, mock_token_provider):
-        """Test successful member addition to tag."""
-        pass
+    async def test_create_a_team_error(self, mock_token_provider):
+        """Test team creation error handling."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_a_team_async(CreateATeamInput())
+
+            assert exc_info.value.status_code == 403
+
+
+class TestMembershipTriggers:
+    """Tests for membership trigger operations."""
+
     @pytest.mark.asyncio
-    async def test_get_tag_members_success(self, mock_token_provider):
-        """Test successful retrieval of tag members."""
-        pass
+    async def test_on_group_membership_add_success(self, mock_token_provider):
+        """Test successful membership add trigger."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "member1", "displayName": "New Member"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.on_group_membership_add_async()
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/trigger/v1.0/groups/delta" in call_args[0][1]
+            assert "value" in result
+
     @pytest.mark.asyncio
-    async def test_delete_tag_member_success(self, mock_token_provider):
-        """Test successful tag member deletion."""
-        pass
+    async def test_on_group_membership_add_with_select(self, mock_token_provider):
+        """Test membership add trigger with select parameter."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"displayName": "New Member"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.on_group_membership_add_async(select="displayName")
+
+            call_args = mock_send.call_args
+            assert "$select=" in call_args[0][1]
+            assert "value" in result
+
     @pytest.mark.asyncio
-    async def test_delete_tag_success(self, mock_token_provider):
-        """Test successful tag deletion."""
-        pass
+    async def test_on_group_membership_removal_success(self, mock_token_provider):
+        """Test successful membership removal trigger."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "member1", "displayName": "Removed Member"}]}'
+        )
 
-class TestMessageOperations:
-    """Tests for message operations."""
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.on_group_membership_removal_async()
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/trigger/v1.0/groups/removal" in call_args[0][1]
+            assert "value" in result
+
     @pytest.mark.asyncio
-    async def test_get_messages_from_channel_success(self, mock_token_provider):
-        """Test successful retrieval of channel messages."""
-        pass
+    async def test_on_group_membership_removal_error(self, mock_token_provider):
+        """Test membership removal trigger error handling."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.on_group_membership_removal_async()
+
+            assert exc_info.value.status_code == 401
+
+
+class TestHttpRequestOperations:
+    """Tests for HTTP request operations."""
+
     @pytest.mark.asyncio
-    async def test_get_message_details_success(self, mock_token_provider):
-        """Test successful retrieval of message details."""
-        pass
+    async def test_http_request_success(self, mock_token_provider):
+        """Test successful HTTP request."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(
+            status=200,
+            text='{"data": "response data"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = HttpRequestInput()
+            result = await client.http_request_async(input_data)
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/httprequest" in call_args[0][1]
+            assert result["data"] == "response data"
+
     @pytest.mark.asyncio
-    async def test_list_replies_to_message_success(self, mock_token_provider):
-        """Test successful listing of message replies."""
-        pass
+    async def test_http_request_error(self, mock_token_provider):
+        """Test HTTP request error handling."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(status=500, text='{"error": "Internal Server Error"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.http_request_async(HttpRequestInput())
+
+            assert exc_info.value.status_code == 500
+
+
+class TestWebhookOperations:
+    """Tests for webhook and subscription operations."""
+
     @pytest.mark.asyncio
-    async def test_list_replies_with_top_parameter(self, mock_token_provider):
-        """Test listing replies with top parameter."""
-        pass
+    async def test_webhook_chat_message_trigger_success(self, mock_token_provider):
+        """Test successful webhook chat message trigger."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
+        mock_response = MockResponse(status=200, text='')
 
-class TestMemberOperations:
-    """Tests for member operations."""
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = WebhookChatMessageTriggerInput()
+            await client.webhook_chat_message_trigger_async(input_data)
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/beta/subscriptions/chatmessagetrigger" in call_args[0][1]
+
     @pytest.mark.asyncio
-    async def test_list_members_success(self, mock_token_provider):
-        """Test successful listing of members."""
-        pass
+    async def test_webhook_chat_message_trigger_error(self, mock_token_provider):
+        """Test webhook chat message trigger error handling."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
+        mock_response = MockResponse(status=400, text='{"error": "Bad Request"}')
 
-class TestTriggerOperations:
-    """Tests for trigger operations."""
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException):
+                await client.webhook_chat_message_trigger_async(WebhookChatMessageTriggerInput())
 
-    @pytest.mark.skip(reason="Method has template variable bug")
     @pytest.mark.asyncio
-    async def test_on_new_channel_message_success(self, mock_token_provider):
-        """Test successful new channel message trigger."""
-        pass
+    async def test_subscribe_user_message_with_options_success(self, mock_token_provider):
+        """Test successful user message subscription."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
 
-    @pytest.mark.skip(reason="Method has template variable bug")
+        mock_response = MockResponse(status=200, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = DynamicUserMessageWithOptionsSubscriptionRequest()
+            await client.subscribe_user_message_with_options_async(input_data)
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/flowbot/actions/messagewithoptions" in call_args[0][1]
+
     @pytest.mark.asyncio
-    async def test_on_new_channel_message_with_top(self, mock_token_provider):
-        """Test new channel message trigger with top parameter."""
-        pass
+    async def test_subscribe_user_message_with_options_error(self, mock_token_provider):
+        """Test user message subscription error handling."""
+        client = TeamsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException):
+                await client.subscribe_user_message_with_options_async(
+                    DynamicUserMessageWithOptionsSubscriptionRequest()
+                )
 
 
 class TestDataClasses:

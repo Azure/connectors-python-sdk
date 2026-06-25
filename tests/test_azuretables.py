@@ -214,6 +214,31 @@ class TestCreateTable:
             assert "/storageAccounts/mystorageaccount/tables" in call_args[0][1]
             assert result["TableName"] == "newtable"
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=409, text='{"error": "Table already exists"}')
+        table_input = CreateTableInput(additional_properties={"TableName": "existingtable"})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_table_async(
+                    input=table_input,
+                    storage_account_name="mystorageaccount"
+                )
+
+            assert exc_info.value.status_code == 409
+
 
 class TestDeleteEntity:
     """Tests for delete_entity_async method."""
@@ -246,6 +271,32 @@ class TestDeleteEntity:
             assert call_args[0][0] == "DELETE"
             assert "/etag(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_entity_async(
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                    partition_key="nonexistent",
+                    row_key="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestDeleteTable:
     """Tests for delete_table_async method."""
@@ -275,6 +326,30 @@ class TestDeleteTable:
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert "/storageAccounts/mystorageaccount/tables/mytable" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_table_async(
+                    storage_account_name="mystorageaccount",
+                    table_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetEntities:
@@ -433,6 +508,32 @@ class TestGetEntity:
             url = call_args[0][1]
             assert "$select=Name" in url
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_entity_async(
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                    partition_key="nonexistent",
+                    row_key="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestGetTable:
     """Tests for get_table_async method."""
@@ -466,6 +567,30 @@ class TestGetTable:
             assert call_args[0][0] == "GET"
             assert "/storageAccounts/mystorageaccount/tables/mytable" in call_args[0][1]
             assert result["TableName"] == "mytable"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_table_async(
+                    storage_account_name="mystorageaccount",
+                    table_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetTables:
@@ -521,6 +646,29 @@ class TestGetTables:
             )
             assert result is None
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Storage account not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_tables_async(
+                    storage_account_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestInsertMergeEntity:
     """Tests for insert_merge_entity_async method."""
@@ -556,6 +704,34 @@ class TestInsertMergeEntity:
             call_args = mock_send.call_args
             assert call_args[0][0] == "PATCH"
             assert "/entities(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid entity data"}')
+        entity_input = InsertMergeEntityInput(additional_properties={})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.insert_merge_entity_async(
+                    input=entity_input,
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                    partition_key="pk1",
+                    row_key="rk1"
+                )
+
+            assert exc_info.value.status_code == 400
 
 
 class TestInsertReplaceEntity:
@@ -593,6 +769,34 @@ class TestInsertReplaceEntity:
             assert call_args[0][0] == "PUT"
             assert "/entities(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid entity data"}')
+        entity_input = InsertReplaceEntityInput(additional_properties={})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.insert_replace_entity_async(
+                    input=entity_input,
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                    partition_key="pk1",
+                    row_key="rk1"
+                )
+
+            assert exc_info.value.status_code == 400
+
 
 class TestMergeEntity:
     """Tests for merge_entity_async method."""
@@ -629,6 +833,34 @@ class TestMergeEntity:
             assert call_args[0][0] == "PATCH"
             assert "/etag(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
+        entity_input = MergeEntityInput(additional_properties={})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.merge_entity_async(
+                    input=entity_input,
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                    partition_key="nonexistent",
+                    row_key="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestReplaceEntity:
     """Tests for replace_entity_async method."""
@@ -664,6 +896,34 @@ class TestReplaceEntity:
             call_args = mock_send.call_args
             assert call_args[0][0] == "PUT"
             assert "/etag(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
+        entity_input = ReplaceEntityInput(additional_properties={})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.replace_entity_async(
+                    input=entity_input,
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                    partition_key="nonexistent",
+                    row_key="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestDataClasses:

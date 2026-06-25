@@ -170,6 +170,32 @@ class TestDeleteMessage:
             url = call_args[0][1]
             assert "popreceipt=" not in url
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzurequeuesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_message_async(
+                    storage_account_name="mystorageaccount",
+                    queue_name="myqueue",
+                    message_id="nonexistent",
+                    popreceipt="receipt-abc"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestGetMessages:
     """Tests for get_messages_async method."""
@@ -310,6 +336,29 @@ class TestListQueues:
             )
             assert result is None
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzurequeuesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Storage account not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.list_queues_async(
+                    storage_account_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestOnMessages:
     """Tests for on_messages_async method (trigger)."""
@@ -369,6 +418,30 @@ class TestOnMessages:
             call_args = mock_send.call_args
             url = call_args[0][1]
             assert "visibilitytimeout=60" in url
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzurequeuesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Queue not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.on_messages_async(
+                    storage_account_name="mystorageaccount",
+                    queue_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestOnMessageThresholdReached:
@@ -468,6 +541,32 @@ class TestPutMessage:
             # Verify body is passed
             body = call_args.kwargs.get('body') or call_args[1].get('body')
             assert body is message_input
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzurequeuesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid message format"}')
+        message_input = PutMessageInput(additional_properties={})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.put_message_async(
+                    input=message_input,
+                    storage_account_name="mystorageaccount",
+                    queue_name="myqueue"
+                )
+
+            assert exc_info.value.status_code == 400
 
 
 class TestPutQueue:

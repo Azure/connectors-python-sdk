@@ -1660,7 +1660,15 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/subscriptions/chatmessagetrigger"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def subscribe_user_message_with_options_async(
         self,
@@ -1683,7 +1691,15 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def at_mention_user_async(
         self,

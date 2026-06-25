@@ -22,32 +22,30 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class TablesList:
-    """Response for Get all lists and libraries"""
+class CreateAgreementsSolutionDocumentInput:
+    """
+    Agreements Solution - Generate document within Agreements Solution
+    workspace
+    """
 
-    value: Optional[List[Table]] = None
-    """List of Tables"""
-
-
-@dataclass
-class ApproveHubSiteJoinResponse:
-    """Response for Approve hub site join request"""
-
-    approval_token: Optional[str] = None
-    """Approval Token"""
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
-class SharingLinkPermission:
-    """Response for Create sharing link for a file or folder"""
+class SPBlobMetadataResponse:
+    """
+    Response for Agreements Solution - Generate document within Agreements
+    Solution workspace
+    """
 
-    link: Optional[SharingLink] = None
-
-
-@dataclass
-class BlobMetadata:
-    """Response for Copy file (deprecated)"""
-
+    item_id: Optional[int] = None
+    """
+    The value that can be used to Get or Update file properties in libraries.
+    """
     id: Optional[str] = None
     """The unique id of the file or folder."""
     name: Optional[str] = None
@@ -74,13 +72,32 @@ class BlobMetadata:
 
 
 @dataclass
-class SPBlobMetadataResponse:
-    """Response for Copy file"""
+class TablesList:
+    """Response for Get all lists and libraries"""
 
-    item_id: Optional[int] = None
-    """
-    The value that can be used to Get or Update file properties in libraries.
-    """
+    value: Optional[List[Table]] = None
+    """List of Tables"""
+
+
+@dataclass
+class ApproveHubSiteJoinResponse:
+    """Response for Approve hub site join request"""
+
+    approval_token: Optional[str] = None
+    """Approval Token"""
+
+
+@dataclass
+class SharingLinkPermission:
+    """Response for Create sharing link for a file or folder"""
+
+    link: Optional[SharingLink] = None
+
+
+@dataclass
+class BlobMetadata:
+    """Response for Copy file (deprecated)"""
+
     id: Optional[str] = None
     """The unique id of the file or folder."""
     name: Optional[str] = None
@@ -196,6 +213,46 @@ class SPListExpandedUser:
     job_title: Optional[str] = None
     """user job title"""
     type_: Optional[str] = None
+
+
+@dataclass
+class TableForm:
+    """Response for Get form metadata (preview)"""
+
+    form_id: Optional[str] = None
+    """Gets or sets the form ID"""
+    display_name: Optional[str] = None
+    """Gets or sets the form display name"""
+    type_: Optional[str] = None
+    """Gets or sets the form type"""
+    link: Optional[str] = None
+    """Gets or sets the form link/URL"""
+    created_by: Optional[str] = None
+    """Gets or sets the user who created the form"""
+    created: Optional[str] = None
+    """Gets or sets the date the form was created"""
+    modified: Optional[str] = None
+    """Gets or sets the date the form was last modified"""
+    modified_by: Optional[str] = None
+    """Gets or sets the user who last modified the form"""
+    output_format: Optional[str] = None
+    """
+    Gets or sets the output format (e.g. \"Word document\", \"PDF document\",
+    \"None\")
+    """
+    fields_metadata: Optional[List[FormFieldMetadata]] = None
+    """Gets or sets Form Fields"""
+
+
+@dataclass
+class SubmitDocGenFormInput:
+    """Generate a document from a form (preview)"""
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -391,20 +448,6 @@ class Table:
 
 
 @dataclass
-class CreateAgreementsSolutionDocumentInput:
-    """
-    Agreements Solution - Generate document within Agreements Solution
-    workspace
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class ApplicationPermissionIdentity:
     """Definition: ApplicationPermissionIdentity"""
 
@@ -539,6 +582,22 @@ class FileCheckInParameters:
     """Type comments describing what has changed in this version"""
     checkin_type: Optional[int] = None
     """Select the type of version you would like to check in"""
+
+
+@dataclass
+class FormFieldMetadata:
+    """Definition: FormFieldMetadata"""
+
+    id: Optional[str] = None
+    """Gets or sets the field ID"""
+    name: Optional[str] = None
+    """Gets or sets the field Name"""
+    is_required: Optional[bool] = None
+    """Gets or sets a value indicating whether the field is required"""
+    data_type: Optional[str] = None
+    """Gets or sets the field data type"""
+    default_value: Optional[str] = None
+    """Gets or sets the default value"""
 
 
 @dataclass
@@ -897,12 +956,21 @@ class TableCapabilitiesMetadata:
     sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
     filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
     select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
+    count_restrictions: Optional[TableCountRestrictionsMetadata] = None
     is_only_server_pagable: Optional[bool] = None
     """Server paging restrictions"""
     filter_function_support: Optional[List[str]] = None
     """List of supported filter capabilities"""
     server_paging_options: Optional[List[str]] = None
     """List of supported server-driven paging capabilities"""
+
+
+@dataclass
+class TableCountRestrictionsMetadata:
+    """Definition: TableCountRestrictionsMetadata"""
+
+    countable: Optional[bool] = None
+    """Indicates whether this table has countable columns"""
 
 
 @dataclass
@@ -931,7 +999,7 @@ class TableMetadata:
     schema: Optional[ObjectEntity] = None
     referenced_entities: Optional[ObjectEntity] = None
     web_url: Optional[str] = None
-    """Url link"""
+    """URL link"""
 
 
 @dataclass
@@ -1013,6 +1081,54 @@ class SharepointonlineClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "sharepointonline"
+
+    async def create_agreements_solution_document_async(
+        self,
+        input: CreateAgreementsSolutionDocumentInput,
+        dataset: str,
+        template: str,
+        document_name: Optional[str] = None,
+    ):
+        """
+        Agreements Solution - Generate document within Agreements Solution
+        workspace
+
+        Use this action to create documents based on modern templates in a
+        Agreements Solution workspace. This is behind a payment wall currently
+        in planning (either license or PayG).
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/agreements"
+            f"/templates"
+            f"/{str(template)}"
+            f"/createnewdocument"
+        )
+        query_params = []
+        if document_name is not None:
+            value = str(document_name)
+            if isinstance(document_name, bool):
+                value = value.lower()
+            query_params.append(f"documentName={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def get_all_tables_async(
         self,
@@ -1110,7 +1226,15 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def create_sharing_link_async(
         self,
@@ -1250,6 +1374,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         folder_path: Optional[str],
         name: Optional[str],
+        overwrite: Optional[str] = None,
         query_parameters_single_encoded: Optional[str] = None,
     ):
         """
@@ -1273,6 +1398,11 @@ class SharepointonlineClient(ConnectorClientBase):
             if isinstance(name, bool):
                 value = value.lower()
             query_params.append(f"name={quote(value)}")
+        if overwrite is not None:
+            value = str(overwrite)
+            if isinstance(overwrite, bool):
+                value = value.lower()
+            query_params.append(f"overwrite={quote(value)}")
         if query_parameters_single_encoded is not None:
             value = str(query_parameters_single_encoded)
             if isinstance(query_parameters_single_encoded, bool):
@@ -1374,7 +1504,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_file_content_async(
         self,
@@ -1411,7 +1549,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_metadata_by_path_async(
         self,
@@ -1504,7 +1642,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_folder_metadata_async(
         self,
@@ -1607,7 +1745,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/datasets/{quote(str(dataset), safe='')}/httprequest"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def join_hub_site_async(
         self,
@@ -1647,7 +1793,15 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def move_file_async(
         self,
@@ -1741,7 +1895,15 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_tables_async(
         self,
@@ -1895,6 +2057,98 @@ class SharepointonlineClient(ConnectorClientBase):
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_table_form_async(
+        self,
+        dataset: str,
+        table: str,
+        form: str,
+    ):
+        """
+        Get form metadata (preview)
+
+        Use this action to get the form metadata, which includes the form ID,
+        title, link, form type, and the output format. It also gets the form
+        questions used to collect information. Document generation forms is a
+        part of AI in SharePoint Public Preview. For more info on getting
+        started, see:
+        https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/forms"
+            f"/{str(form)}"
+        )
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def submit_doc_gen_form_async(
+        self,
+        input: SubmitDocGenFormInput,
+        dataset: str,
+        table: str,
+        form: str,
+        view: Optional[str] = None,
+    ):
+        """
+        Generate a document from a form (preview)
+
+        Use this action to create documents from a document generation
+        template. Map the template fields to the corresponding content in the
+        data source. Document generation forms is a part of AI in SharePoint
+        Public Preview. For more info on getting started, see:
+        https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/forms"
+            f"/{str(form)}"
+            f"/submitdocgenform"
+        )
+        query_params = []
+        if view is not None:
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
                 path,
                 response.status,
                 response.text,
@@ -2166,7 +2420,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{str(id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def patch_item_async(
         self,
@@ -2350,7 +2612,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/checkinfile"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def check_out_file_async(
         self,
@@ -2376,7 +2646,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/checkoutfile"
         )
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def discard_file_check_out_async(
         self,
@@ -2405,7 +2683,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/discardfilecheckout"
         )
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_file_item_async(
         self,
@@ -2481,7 +2767,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/grantaccess"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def patch_file_item_async(
         self,
@@ -2656,7 +2950,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/unshare"
         )
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_item_attachments_async(
         self,
@@ -2768,7 +3070,15 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{str(attachment_id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_attachment_content_async(
         self,
@@ -2806,7 +3116,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_on_changed_items_async(
         self,
@@ -3017,6 +3327,131 @@ class SharepointonlineClient(ConnectorClientBase):
             if isinstance(view, bool):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_on_new_items_from_form_async(
+        self,
+        dataset: str,
+        table: str,
+        form: Optional[str],
+        view: Optional[str] = None,
+    ):
+        """
+        When a form is submitted (preview)
+
+        This operation triggers a flow when a list, document generation, or
+        file upload form is submitted. Document generation forms is a part of
+        AI in SharePoint Public Preview. For more info on getting started,
+        see:https://learn.microsoft.com/en-us/sharepoint/ai-in-sharepoint-structured-document-generation
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/onnewitemsfromform"
+        )
+        query_params = []
+        if form is not None:
+            value = str(form)
+            if isinstance(form, bool):
+                value = value.lower()
+            query_params.append(f"form={quote(value)}")
+        if view is not None:
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_on_recurrence_digest_async(
+        self,
+        dataset: str,
+        table: str,
+        update: Optional[str],
+        add: Optional[str],
+        run_schedule: Optional[str],
+        folder_path: Optional[str] = None,
+        view: Optional[str] = None,
+        start_time: Optional[str] = None,
+    ):
+        """
+        Recurring digest of updates (preview)
+
+        Recurring digest of updates for a list or library.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(str(dataset), safe='')}"
+            f"/tables"
+            f"/{str(table)}"
+            f"/onrecurrencedigest"
+        )
+        query_params = []
+        if update is not None:
+            value = str(update)
+            if isinstance(update, bool):
+                value = value.lower()
+            query_params.append(f"update={quote(value)}")
+        if add is not None:
+            value = str(add)
+            if isinstance(add, bool):
+                value = value.lower()
+            query_params.append(f"add={quote(value)}")
+        if run_schedule is not None:
+            value = str(run_schedule)
+            if isinstance(run_schedule, bool):
+                value = value.lower()
+            query_params.append(f"runSchedule={quote(value)}")
+        if folder_path is not None:
+            value = str(folder_path)
+            if isinstance(folder_path, bool):
+                value = value.lower()
+            query_params.append(f"folderPath={quote(value)}")
+        if view is not None:
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
+        if start_time is not None:
+            value = str(start_time)
+            if isinstance(start_time, bool):
+                value = value.lower()
+            query_params.append(f"startTime={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -3279,66 +3714,6 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_agreements_solution_document_async(
-        self,
-        input: CreateAgreementsSolutionDocumentInput,
-        dataset: str,
-        template: str,
-        document_name: Optional[str] = None,
-        table: Optional[str] = None,
-        view: Optional[str] = None,
-    ):
-        """
-        Agreements Solution - Generate document within Agreements Solution
-        workspace
-
-        Use this action to create documents based on modern templates in a
-        Agreements Solution workspace. This is behind a payment wall currently
-        in planning (either license or PayG).
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/agreements"
-            f"/templates"
-            f"/{str(template)}"
-            f"/createnewdocument"
-        )
-        query_params = []
-        if document_name is not None:
-            value = str(document_name)
-            if isinstance(document_name, bool):
-                value = value.lower()
-            query_params.append(f"documentName={quote(value)}")
-        if table is not None:
-            value = str(table)
-            if isinstance(table, bool):
-                value = value.lower()
-            query_params.append(f"table={quote(value)}")
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def on_new_file_async(
         self,
         dataset: str,
@@ -3386,7 +3761,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def on_updated_file_async(
         self,
@@ -3442,7 +3817,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def extract_folder_async(
         self,

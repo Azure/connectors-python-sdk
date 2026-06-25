@@ -1534,7 +1534,15 @@ class OutlookClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/Mail/{str(message_id)}"
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def move_async(
         self,
@@ -1582,7 +1590,15 @@ class OutlookClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/Mail/Flag/{str(message_id)}"
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def mark_as_read_async(
         self,
@@ -1597,7 +1613,15 @@ class OutlookClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/Mail/MarkAsRead/{str(message_id)}"
         )
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_attachment_async(
         self,
@@ -1624,7 +1648,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def send_mail_with_options_async(
         self,
@@ -1725,7 +1749,15 @@ class OutlookClient(ConnectorClientBase):
             f"/datasets/calendars/tables/{str(table)}/items/{str(id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def contact_get_tables_async(
         self,
@@ -1883,7 +1915,15 @@ class OutlookClient(ConnectorClientBase):
             f"/datasets/contacts/tables/{str(table)}/items/{str(id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def contact_patch_item_async(
         self,
@@ -1932,7 +1972,15 @@ class OutlookClient(ConnectorClientBase):
             f"/codeless/api/v2.0/me/events/{str(event_id)}/{str(response)}"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        http_response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= http_response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                http_response.status,
+                http_response.text,
+            )
 
     async def forward_email_async(
         self,
@@ -1949,7 +1997,15 @@ class OutlookClient(ConnectorClientBase):
             f"/codeless/api/v2.0/me/messages/{str(message_id)}/forward"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def calendar_get_item_async(
         self,
@@ -2762,7 +2818,15 @@ class OutlookClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{str(message_id)}"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def send_email_async(
         self,
@@ -2775,4 +2839,12 @@ class OutlookClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/v2/Mail"
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
