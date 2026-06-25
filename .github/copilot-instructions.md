@@ -317,59 +317,69 @@ async def test_get_user_returns_user_when_found():
 
 ## Releasing a New Version
 
-The release workflow (`.github/workflows/release.yml`) builds, tests, and publishes the package. The version is defined in `pyproject.toml`.
+The official release flow is the Azure DevOps `eng/ci/library-release.yml`
+pipeline. It creates a `release/{version}` branch, updates
+`src/azure/connectors/__init__.py`, builds the wheel and source distribution,
+creates a GitHub draft release with the artifacts, uploads partner drops, and
+then requires a manual partner-release/PyPI step. The package version is loaded
+from `azure.connectors.__version__` via `src/pyproject.toml`.
 
-### Standard Release (tag push)
+### Standard Release (ADO pipeline)
 
-Creates a GitHub Release with auto-generated notes and publishes to PyPI:
+Run the ADO release pipeline with the intended version. The pipeline creates a
+bare numeric Git tag such as `1.2.3` or `1.2.3b1`; Python release tags are not
+`v`-prefixed.
 
 ```shell
-git checkout main
-git pull origin main
-# Update version in pyproject.toml first
-git tag v1.2.3
-git push origin v1.2.3
+# Example versions accepted by the release pipeline:
+1.2.3
+1.2.3a1
+1.2.3b1
+1.2.3rc1
 ```
 
 ### Pre-release
 
-Use SemVer pre-release suffixes:
+Use Python/PEP 440 pre-release suffixes:
 
 ```shell
-git tag v1.2.3a1   # Alpha
-git tag v1.2.3b1   # Beta
-git tag v1.2.3rc1  # Release candidate
-git push origin v1.2.3a1
+1.2.3a1   # Alpha
+1.2.3b1   # Beta
+1.2.3rc1  # Release candidate
 ```
 
-### Manual Dispatch (packages only, no GitHub Release)
+### Manual PyPI Publication
 
-Use when you need to publish without creating a tag or GitHub Release:
-
-1. Go to Actions → Release → Run workflow
-2. Enter the version (e.g., `1.2.3`)
+After artifacts are uploaded to the Azure SDK partner drops location, manually
+trigger the partner-release pipeline using the BlobPath printed by the official
+pipeline. Return to the original run and approve the final manual gate once the
+partner-release pipeline has started.
 
 ### Re-releasing a Version
 
-If a release fails midway:
+Do not delete or recreate a published release tag as a normal retry path. Release
+tags are part of the supply-chain integrity boundary and are protected by tag
+rulesets. If a release fails after a tag was pushed, use a new version. For a
+retry of the same base package, use a PEP 440 post-release such as
+`1.2.3.post1`.
 
 ```shell
-gh release delete v1.2.3 --yes     # delete the failed GitHub Release (if one was created)
-git push origin --delete v1.2.3    # delete remote tag
-git tag -d v1.2.3                  # delete local tag
-git tag v1.2.3                     # re-tag on current HEAD
-git push origin v1.2.3             # push to trigger release
+# Run the official release pipeline again with a new version:
+1.2.3.post1
 ```
 
-**Note:** PyPI does not allow re-uploading the same version. If the package was pushed successfully but the release failed, use a new version number (e.g., `1.2.3.post1`).
+**Note:** PyPI does not allow re-uploading the same version. If the package was
+pushed successfully but the release failed, always use a new version number.
+Deleting or retagging an existing remote tag should be treated as break-glass
+admin work, not the standard process.
 
 ### What the Release Workflow Does
 
-1. Builds and tests with pytest
+1. Creates and validates a `release/{version}` branch
 2. Builds wheel and sdist with `python -m build`
-3. Uploads distribution files as build artifacts
-4. Publishes to PyPI (requires `PYPI_API_TOKEN` secret)
-5. Creates a GitHub Release with the distribution files attached (tag push only)
+3. Creates a GitHub draft release with the distribution files attached
+4. Uploads distribution files to Azure SDK partner drops
+5. Guides the maintainer through the manual partner-release/PyPI publication
 
 ## Adding a New Connector
 
@@ -405,11 +415,13 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 
 7. **Update `samples/sample_connector_usage/README.md`** — add the new sample to the samples table
 
-8. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
+8. **Update `CHANGELOG.md`** — add the new connector to the `[Unreleased]` section under `### Added`
 
-9. **Run all tests** — `pytest` must pass with zero failures before committing
+9. **Update the connection setup skill** — add the connector's API name to the supported list in `.github/skills/connection-setup/SKILL.md` (Step 2)
 
-10. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
+10. **Run all tests** — `pytest` must pass with zero failures before committing
+
+11. **Create a PR** — reference the GitHub issue (e.g., `Closes #9`)
 
 ### Validation checklist
 
@@ -422,3 +434,5 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 - [ ] README.md connector table updated
 - [ ] Sample file created and compiles without errors
 - [ ] Samples README updated
+- [ ] CHANGELOG.md updated
+- [ ] Connection setup skill updated

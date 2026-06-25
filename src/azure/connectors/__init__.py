@@ -28,6 +28,18 @@ try:
 except (ImportError, NameError):
     ArmClient = None  # type: ignore[assignment,misc]
 try:
+    from .azureautomation import AzureautomationClient
+except (ImportError, NameError):
+    AzureautomationClient = None  # type: ignore[assignment,misc]
+try:
+    from .azuredatafactory import AzuredatafactoryClient
+except (ImportError, NameError):
+    AzuredatafactoryClient = None  # type: ignore[assignment,misc]
+try:
+    from .azuredigitaltwins import AzuredigitaltwinsClient
+except (ImportError, NameError):
+    AzuredigitaltwinsClient = None  # type: ignore[assignment,misc]
+try:
     from .kusto import KustoClient
 except (ImportError, NameError):
     KustoClient = None  # type: ignore[assignment,misc]
@@ -52,6 +64,10 @@ try:
 except (ImportError, NameError):
     Office365usersClient = None  # type: ignore[assignment,misc]
 try:
+    from .office365groups import Office365groupsClient
+except (ImportError, NameError):
+    Office365groupsClient = None  # type: ignore[assignment,misc]
+try:
     from .azureblob import AzureblobClient
 except (ImportError, NameError):
     AzureblobClient = None  # type: ignore[assignment,misc]
@@ -63,6 +79,14 @@ try:
     from .onedrive import OnedriveClient
 except (ImportError, NameError):
     OnedriveClient = None  # type: ignore[assignment,misc]
+try:
+    from .onenote import OnenoteClient
+except (ImportError, NameError):
+    OnenoteClient = None  # type: ignore[assignment,misc]
+try:
+    from .planner import PlannerClient
+except (ImportError, NameError):
+    PlannerClient = None  # type: ignore[assignment,misc]
 try:
     from .azuread import AzureadClient
 except (ImportError, NameError):
@@ -84,6 +108,10 @@ try:
 except (ImportError, NameError):
     AzuretablesClient = None  # type: ignore[assignment,misc]
 try:
+    from .azurevm import AzurevmClient
+except (ImportError, NameError):
+    AzurevmClient = None  # type: ignore[assignment,misc]
+try:
     from .documentdb import DocumentdbClient
 except (ImportError, NameError):
     DocumentdbClient = None  # type: ignore[assignment,misc]
@@ -91,6 +119,14 @@ try:
     from .eventhubs import EventhubsClient
 except (ImportError, NameError):
     EventhubsClient = None  # type: ignore[assignment,misc]
+try:
+    from .keyvault import KeyvaultClient
+except (ImportError, NameError):
+    KeyvaultClient = None  # type: ignore[assignment,misc]
+try:
+    from .microsoftbookings import MicrosoftbookingsClient
+except (ImportError, NameError):
+    MicrosoftbookingsClient = None  # type: ignore[assignment,misc]
 try:
     from .outlook import OutlookClient
 except (ImportError, NameError):
@@ -111,6 +147,10 @@ try:
     from .wordonlinebusiness import WordonlinebusinessClient
 except (ImportError, NameError):
     WordonlinebusinessClient = None  # type: ignore[assignment,misc]
+try:
+    from .yammer import YammerClient
+except (ImportError, NameError):
+    YammerClient = None  # type: ignore[assignment,misc]
 
 __version__ = '0.3.0b2'
 
@@ -125,25 +165,35 @@ __all__ = [
     'TriggerCallbackPayload',
     'TriggerCallbackBody',
     'ArmClient',
+    'AzureautomationClient',
+    'AzuredatafactoryClient',
+    'AzuredigitaltwinsClient',
     'KustoClient',
     'Office365Client',
     'SharepointonlineClient',
     'TeamsClient',
     'MsgraphgroupsanduserClient',
     'Office365usersClient',
+    'Office365groupsClient',
     'AzureblobClient',
     'MqClient',
     'OnedriveClient',
+    'OnenoteClient',
+    'PlannerClient',
     'AzureadClient',
     'SmtpClient',
     'ExcelonlinebusinessClient',
     'AzurequeuesClient',
     'AzuretablesClient',
+    'AzurevmClient',
     'DocumentdbClient',
     'EventhubsClient',
+    'KeyvaultClient',
+    'MicrosoftbookingsClient',
     'OutlookClient',
     'CommondataserviceClient',
     'ServicebusClient',
     'WdatpClient',
     'WordonlinebusinessClient',
+    'YammerClient',
 ]

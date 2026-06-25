@@ -16,6 +16,8 @@ from azure.connectors.teams import (
     HttpRequestInput,
     WebhookChatMessageTriggerInput,
     DynamicUserMessageWithOptionsSubscriptionRequest,
+    CreateSectionInput,
+    PostMessageToSelfRequest,
 )
 from azure.connectors.sdk import ConnectorClientOptions, ConnectorException
 from tests.conftest import MockResponse
@@ -441,11 +443,12 @@ class TestMembershipTriggers:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.on_group_membership_add_async()
+            result = await client.on_group_membership_add_async(group_id="team-123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/trigger/v1.0/groups/delta" in call_args[0][1]
+            assert "groupId=team-123" in call_args[0][1]
             assert "value" in result
 
     @pytest.mark.asyncio
@@ -467,7 +470,10 @@ class TestMembershipTriggers:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.on_group_membership_add_async(select="displayName")
+            result = await client.on_group_membership_add_async(
+                group_id="team-123",
+                select="displayName"
+            )
 
             call_args = mock_send.call_args
             assert "$select=" in call_args[0][1]
@@ -492,11 +498,12 @@ class TestMembershipTriggers:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.on_group_membership_removal_async()
+            result = await client.on_group_membership_removal_async(group_id="team-123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/trigger/v1.0/groups/removal" in call_args[0][1]
+            assert "groupId=team-123" in call_args[0][1]
             assert "value" in result
 
     @pytest.mark.asyncio
@@ -516,7 +523,7 @@ class TestMembershipTriggers:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.on_group_membership_removal_async()
+                await client.on_group_membership_removal_async(group_id="team-123")
 
             assert exc_info.value.status_code == 401
 
@@ -718,6 +725,31 @@ class TestDataClasses:
         )
         assert member.user_id == "user@example.com"
         assert member.owner is False
+
+    def test_create_section_input_creation(self):
+        """Test CreateSectionInput data class creation."""
+        section = CreateSectionInput(
+            display_name="My Section",
+            is_expanded=True
+        )
+        assert section.display_name == "My Section"
+        assert section.is_expanded is True
+
+    def test_post_message_to_self_request_creation(self):
+        """Test PostMessageToSelfRequest data class creation."""
+        message = PostMessageToSelfRequest(
+            body={"content": "Test message content"}
+        )
+        assert message.body["content"] == "Test message content"
+
+    def test_new_chat_creation(self):
+        """Test NewChat data class creation."""
+        chat = NewChat(
+            topic="Group Chat Topic",
+            members="user1@example.com;user2@example.com"
+        )
+        assert chat.topic == "Group Chat Topic"
+        assert chat.members == "user1@example.com;user2@example.com"
 
 
 class TestEdgeCases:
