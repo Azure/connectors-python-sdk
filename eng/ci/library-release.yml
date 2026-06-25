@@ -14,6 +14,9 @@ parameters:
     type: string
     default: 'connectors-python-sdk'
     displayName: 'GitHub repository name'
+  - name: githubServiceConnection
+    type: string
+    displayName: 'Pre-created Azure Pipelines GitHub service connection used for release operations'
 
 resources:
   repositories:
@@ -58,3 +61,4 @@ extends:
               blobPath: ${{ parameters.blobPath }}
               githubOrg: ${{ parameters.githubOrg }}
               githubRepo: ${{ parameters.githubRepo }}
+              githubServiceConnection: ${{ parameters.githubServiceConnection }}
