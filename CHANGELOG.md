@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Yammer** (`yammer.py`) connector client with unit tests and samples
+- **Planner** (`planner.py`) connector client with unit tests and samples
+- **OneNote** (`onenote.py`) connector client with unit tests and samples
+- **Office 365 Groups** (`office365groups.py`) connector client with unit tests and samples
+- **Microsoft Bookings** (`microsoftbookings.py`) connector client with unit tests and samples
+- **Azure Key Vault** (`keyvault.py`) connector client with unit tests and samples
+- **Azure VM** (`azurevm.py`) connector client with unit tests and samples
+- **Azure Digital Twins** (`azuredigitaltwins.py`) connector client with unit tests and samples
+- **Azure Data Factory** (`azuredatafactory.py`) connector client with unit tests and samples
+- **Azure Automation** (`azureautomation.py`) connector client with unit tests and samples
+
+## [0.3.0b2]
+
+### Added
+
 - **13 new connector clients** with unit tests and samples:
   - ARM (Azure Resource Manager), Azure AD, Azure Cosmos DB, Azure Event Hubs, Azure Queues, Azure Tables, Excel Online (Business), Microsoft Dataverse, Microsoft Defender ATP, Outlook, Service Bus, SMTP, Word Online (Business)
 
@@ -105,8 +120,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EditorConfig and VSCode settings
 - Pyproject.toml packaging configuration
 
-[Unreleased]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.2.0b2...HEAD
-[0.2.0b2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0db1...v0.2.0b2
+[Unreleased]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.3.0b2...HEAD
+[0.3.0b2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.2.0b2...v0.3.0b2
+[0.2.0b2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0b1...v0.2.0b2
 [0.2.0b1]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev2...v0.2.0b1
 [0.1.0dev2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev1...v0.1.0dev2
 [0.1.0dev1]: https://github.com/Azure/Connectors-Python-SDK/releases/tag/v0.1.0dev1
