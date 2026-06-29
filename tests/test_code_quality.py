@@ -65,17 +65,17 @@ class TestCodeQuality(unittest.TestCase):
                 f'flake8 validation failed:\n{output}') from None
 
     def test_no_unchecked_send_async_calls(self):
-        """Verify all send_async calls capture response and check status.
+        """Verify all send_async calls capture their response.
 
         Generated connector code must not discard send_async responses.
-        Void operations (DELETE, PATCH, fire-and-forget POST) must capture
-        the response and raise ConnectorException on non-2xx status codes.
+        This check catches the most egregious error: calling send_async
+        without capturing the response at all (fire-and-forget). It does
+        NOT validate that the captured response is checked with the correct
+        status guard pattern — that requires manual review or regeneration.
 
         See GENERATION.md "Generated Client Acceptance Criteria" for details.
         """
         connector_dir = ROOT_PATH / 'src' / 'azure' / 'connectors'
-
-        # Skip files that are not generated connectors
         skip_files = {'__init__.py', 'sdk.py'}
 
         violations: list[LintViolation] = []
@@ -87,7 +87,6 @@ class TestCodeQuality(unittest.TestCase):
             violations.extend(self._find_unchecked_send_async(filepath))
 
         if violations:
-            # Format violations for readable output
             messages = [
                 f"  {v.file}:{v.line}: {v.message}"
                 for v in sorted(violations, key=lambda x: (x.file, x.line))
@@ -96,8 +95,7 @@ class TestCodeQuality(unittest.TestCase):
 
             raise AssertionError(
                 f"Found {len(violations)} unchecked send_async call(s).\n"
-                f"Void operations must capture response and raise "
-                f"ConnectorException on non-2xx.\n"
+                f"All send_async calls must capture the response.\n"
                 f"Fix the generator (see GENERATION.md) and regenerate, "
                 f"or regenerate with the latest generator.\n\n"
                 f"{violation_text}"
@@ -108,13 +106,12 @@ class TestCodeQuality(unittest.TestCase):
     ) -> list[LintViolation]:
         """Find send_async calls whose result is not captured.
 
-        The correct pattern is:
-            response = await self.http_client.send_async(...)
-            if not (200 <= response.status < 300):
-                raise ConnectorException(...)
-
-        The incorrect pattern is:
+        Detects the pattern:
             await self.http_client.send_async(...)  # Result discarded!
+
+        This is a minimal check that catches discarded responses. It does
+        NOT validate that captured responses are checked with the correct
+        guard (e.g., `if not (200 <= response.status < 300):`).
         """
         violations: list[LintViolation] = []
 
@@ -122,21 +119,17 @@ class TestCodeQuality(unittest.TestCase):
             source = filepath.read_text(encoding='utf-8')
             tree = ast.parse(source)
         except SyntaxError:
-            # If file has syntax errors, skip (mypy/flake8 will catch it)
+            # NOTE(victoriahall): Syntax errors are caught by mypy/flake8.
             return violations
 
         for node in ast.walk(tree):
-            # Look for Expr nodes containing Await
-            # (Expr means the value is discarded, not assigned)
+            # NOTE(victoriahall): ast.Expr means the value is discarded, not assigned.
             if isinstance(node, ast.Expr) and isinstance(node.value, ast.Await):
                 await_expr = node.value.value
 
-                # Check if this is a call to send_async
                 if isinstance(await_expr, ast.Call):
                     func = await_expr.func
 
-                    # Match: self.http_client.send_async(...) or
-                    #        self._http_client.send_async(...)
                     if isinstance(func, ast.Attribute) and func.attr == 'send_async':
                         if isinstance(func.value, ast.Attribute):
                             attr_name = func.value.attr

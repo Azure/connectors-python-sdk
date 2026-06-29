@@ -2800,14 +2800,6 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
     async def subscribe_user_message_with_options_async(
         self,
         input: DynamicUserMessageWithOptionsSubscriptionRequest,

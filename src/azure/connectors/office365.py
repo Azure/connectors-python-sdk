@@ -3184,7 +3184,8 @@ class Office365Client(ConnectorClientBase):
             path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("PATCH", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
                 path,
@@ -3204,7 +3205,8 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/Draft/Send/{str(message_id)}"
 
         response = await self.http_client.send_async("POST", path, body=None)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
                 path,
@@ -3238,7 +3240,8 @@ class Office365Client(ConnectorClientBase):
             path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("POST", path, body=None)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
                 path,
@@ -3361,7 +3364,8 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async("PUT", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
                 path,
@@ -3520,7 +3524,8 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async("DELETE", path, body=None)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 path,
@@ -3903,7 +3908,8 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async("DELETE", path, body=None)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 path,
@@ -4119,7 +4125,8 @@ class Office365Client(ConnectorClientBase):
             path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("DELETE", path, body=None)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 path,
@@ -4160,7 +4167,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def find_meeting_times_async(
         self,
@@ -4216,7 +4223,8 @@ class Office365Client(ConnectorClientBase):
             path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("PATCH", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
                 path,
@@ -4229,6 +4237,8 @@ class Office365Client(ConnectorClientBase):
         input: DirectForwardMessage,
         message_id: str,
         mailbox_address: Optional[str] = None,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
     ):
         """
         Forward an email (V2)
@@ -4245,11 +4255,22 @@ class Office365Client(ConnectorClientBase):
             if isinstance(mailbox_address, bool):
                 value = value.lower()
             query_params.append(f"mailboxAddress={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("POST", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
                 path,
@@ -4320,6 +4341,8 @@ class Office365Client(ConnectorClientBase):
         mailbox_address: Optional[str] = None,
         include_attachments: Optional[str] = None,
         internet_message_id: Optional[str] = None,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
     ):
         """
         Get email (V2)
@@ -4343,6 +4366,16 @@ class Office365Client(ConnectorClientBase):
             if isinstance(internet_message_id, bool):
                 value = value.lower()
             query_params.append(f"internetMessageId={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -4688,7 +4721,8 @@ class Office365Client(ConnectorClientBase):
             path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("PATCH", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
                 path,
@@ -5061,7 +5095,8 @@ class Office365Client(ConnectorClientBase):
             path += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async("POST", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
                 path,
@@ -5073,7 +5108,7 @@ class Office365Client(ConnectorClientBase):
         self,
         input: ResponseToEventInvite,
         event_id: str,
-        response: str,
+        response_type: str,
     ):
         """
         Respond to an event invite (V2)
@@ -5082,16 +5117,17 @@ class Office365Client(ConnectorClientBase):
         """
         path = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/events/{str(event_id)}/{str(response)}"
+            f"/codeless/v1.0/me/events/{str(event_id)}/{str(response_type)}"
         )
 
-        http_response = await self.http_client.send_async("POST", path, body=input)
-        if http_response.status >= 400:
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
                 path,
-                http_response.status,
-                http_response.text,
+                response.status,
+                response.text,
             )
 
     async def send_email_async(
@@ -5106,7 +5142,8 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v2/Mail"
 
         response = await self.http_client.send_async("POST", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
                 path,
@@ -5251,7 +5288,8 @@ class Office365Client(ConnectorClientBase):
         path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
 
         response = await self.http_client.send_async("POST", path, body=input)
-        if response.status >= 400:
+
+        if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
                 path,
