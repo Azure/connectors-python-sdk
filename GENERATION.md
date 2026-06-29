@@ -75,28 +75,34 @@ Generates typed async Python clients for calling connectors directly from Azure 
 
 ```powershell
 # Generate all connectors
-LogicAppsCompiler.exe <output-directory> unused --directClient --python
+LogicAppsCompiler.exe <output-directory> unused --directClient --language=python
 
 # Generate specific connectors only
-LogicAppsCompiler.exe <output-directory> unused --directClient --python --connectors=office365,sharepointonline,teams
+LogicAppsCompiler.exe <output-directory> unused --directClient --language=python --connectors=office365,sharepointonline,teams
 
 # Example: Generate to this SDK repo's src/azure/connectors folder
-LogicAppsCompiler.exe "c:\Users\victoriahall\Documents\repos\connectors-python-sdk\src\azure\connectors" unused --directClient --python --connectors=office365
+LogicAppsCompiler.exe "c:\Users\victoriahall\Documents\repos\connectors-python-sdk\src\azure\connectors" unused --directClient --language=python --connectors=office365
+
+# Alternative: Legacy alias (shorter but deprecated)
+LogicAppsCompiler.exe <output-directory> unused --pythonDirectClient --connectors=office365
 ```
 
 **Output structure per connector:**
 
 - `{connector}.py` - Combined dataclass models and client in one file (e.g., `office365.py`, `sharepointonline.py`)
 
-**Important:** The `--python` flag was added in BPM PR 15456622. Ensure your BPM repository is up to date.
+**Note:** The `--directClient --language=python` syntax is the canonical form. The legacy `--pythonDirectClient` alias is also supported. Do NOT use `--directClient --python` — that flag is not recognized and defaults to C#.
 
 ### Generate C# DirectClient SDK
 
-For the .NET SDK, omit the `--python` flag:
+For the .NET SDK, use `--directClient` without `--language` (defaults to C#) or explicitly specify `--language=csharp`:
 
 ```powershell
-# Generate C# clients
+# Generate C# clients (default language)
 LogicAppsCompiler.exe <output-directory> unused --directClient --connectors=office365
+
+# Or explicitly
+LogicAppsCompiler.exe <output-directory> unused --directClient --language=csharp --connectors=office365
 ```
 
 ## Generated Code Structure
@@ -322,7 +328,7 @@ If a connector name is not recognized:
 
 If generated code has syntax errors or type issues:
 
-1. Check BPM repository is up to date (especially PR 15456622 for `--python` support)
+1. Check BPM repository is up to date (use `--directClient --language=python` or legacy `--pythonDirectClient`)
 2. Fix the generator, not the generated output — see [Generator File Locations](#generator-file-locations-bpm-repository)
 3. Report issues to BPM team with connector name and error details (file in [BPM Azure DevOps](https://dev.azure.com/msazure/One/_workitems))
 4. Add the defect to the [Known Generator Defects Registry](#known-generator-defects-registry)
@@ -337,7 +343,7 @@ If generated code has syntax errors or type issues:
 $outputDir = "c:\Users\victoriahall\Documents\repos\connectors-python-sdk\src\azure\connectors"
 
 # Generate three core connectors
-LogicAppsCompiler.exe $outputDir unused --directClient --python --connectors=office365,sharepointonline,teams
+LogicAppsCompiler.exe $outputDir unused --directClient --language=python --connectors=office365,sharepointonline,teams
 
 # Verify output
 Get-ChildItem $outputDir -Filter *.py
@@ -348,7 +354,7 @@ Get-ChildItem $outputDir -Filter *.py
 ```powershell
 # Generate all currently validated connectors
 $connectors = "office365,sharepointonline,teams,kusto,msgraphgroupsanduser"
-LogicAppsCompiler.exe $outputDir unused --directClient --python --connectors=$connectors
+LogicAppsCompiler.exe $outputDir unused --directClient --language=python --connectors=$connectors
 ```
 
 ## Code Generation Best Practices
@@ -385,9 +391,14 @@ response = await self.http_client.send_async(
 )
 if not (200 <= response.status < 300):
     raise ConnectorException(
-        f"Operation failed with status {response.status}: {await response.text()}"
+        "DELETE",
+        request_uri,
+        response.status,
+        response.text,
     )
 ```
+
+**Note:** `ConnectorException` takes four positional arguments: `method`, `path`, `status_code`, `response_body`. The exception automatically formats these into a user-friendly message.
 
 **Incorrect pattern (MUST NOT pass review):**
 ```python

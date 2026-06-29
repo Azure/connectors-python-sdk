@@ -2725,7 +2725,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/subscriptions/chatmessagetrigger"
         )
 
-        response = response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
