@@ -13,6 +13,7 @@ from azure.connectors.sdk import (
     ConnectorClientOptions,
     TokenProvider,
     ManagedIdentityTokenProvider,
+    ConnectorException,
 )
 
 
@@ -202,4 +203,12 @@ class SmtpClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/SendEmailV3"
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )

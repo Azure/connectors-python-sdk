@@ -12,7 +12,14 @@ from azure.connectors.sharepointonline import (
     PostItemInput,
     PatchItemInput,
     CreateApprovalRequestInput,
+    CreateAttachmentInput,
+    FileCheckInParameters,
     ItemPermissionCreateLinkBody,
+    ItemGrantAccessBody,
+    MoveFileParameters,
+    CopyFolderParameters,
+    MoveFolderParameters,
+    PatchFileItemInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -360,6 +367,89 @@ class TestFileOperations:
 
             assert result == file_content
 
+    @pytest.mark.asyncio
+    async def test_create_file_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=400,
+            text='{"error": "Bad request"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_file_async(
+                    CreateFileInput(),
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "/Shared Documents",
+                    "document.docx"
+                )
+
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_get_file_metadata_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "File not found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_file_metadata_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "missing_file"
+                )
+
+            assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_delete_file_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=403,
+            text='{"error": "Forbidden"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_file_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "protected_file"
+                )
+
+            assert exc_info.value.status_code == 403
+
 
 class TestFolderOperations:
     """Tests for folder operation methods."""
@@ -417,6 +507,62 @@ class TestFolderOperations:
             )
 
             assert result["ItemCount"] == 10
+
+    @pytest.mark.asyncio
+    async def test_create_folder_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=409,
+            text='{"error": "Folder already exists"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_new_folder_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "Documents",
+                    "/Shared Documents",
+                    "ExistingFolder"
+                )
+
+            assert exc_info.value.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_get_folder_metadata_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "Folder not found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_folder_metadata_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "missing_folder"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestItemOperations:
@@ -564,6 +710,89 @@ class TestItemOperations:
             assert call_args[0][0] == "DELETE"
             assert result is None
 
+    @pytest.mark.asyncio
+    async def test_get_items_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "List not found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_items_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "MissingList"
+                )
+
+            assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_post_item_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=400,
+            text='{"error": "Invalid item data"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.post_item_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "CustomList",
+                    PostItemInput()
+                )
+
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_delete_item_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=403,
+            text='{"error": "Access denied"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_item_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "CustomList",
+                    999
+                )
+
+            assert exc_info.value.status_code == 403
+
 
 class TestSharingOperations:
     """Tests for sharing and permissions operations."""
@@ -625,6 +854,64 @@ class TestSharingOperations:
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert result is None
+
+    @pytest.mark.asyncio
+    async def test_create_sharing_link_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=400,
+            text='{"error": "Invalid sharing parameters"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_sharing_link_async(
+                    ItemPermissionCreateLinkBody(),
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "Documents",
+                    "item123"
+                )
+
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_grant_access_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=403,
+            text='{"error": "Insufficient permissions"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.grant_access_async(
+                    ItemGrantAccessBody(),
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "Documents",
+                    "item123"
+                )
+
+            assert exc_info.value.status_code == 403
 
 
 class TestCopyMoveOperations:
@@ -706,7 +993,6 @@ class TestCopyMoveOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            from azure.connectors.sharepointonline import CopyFolderParameters
             input_data = CopyFolderParameters()
             result = await client.copy_folder_async(
                 input_data,
@@ -714,6 +1000,61 @@ class TestCopyMoveOperations:
             )
 
             assert result["success"] is True
+
+    @pytest.mark.asyncio
+    async def test_copy_file_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "Source file not found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.copy_file_async(
+                    dataset="https://contoso.sharepoint.com/sites/site1",
+                    source="/Shared Documents/missing.docx",
+                    destination="/Backup/missing.docx"
+                )
+
+            assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_move_file_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=400,
+            text='{"error": "Invalid destination"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.move_file_async(
+                    MoveFileParameters(),
+                    "https://contoso.sharepoint.com/sites/site1"
+                )
+
+            assert exc_info.value.status_code == 400
 
 
 class TestApprovalOperations:
@@ -773,6 +1114,65 @@ class TestApprovalOperations:
             )
 
             assert result["status"] == "approved"
+
+    @pytest.mark.asyncio
+    async def test_create_approval_request_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=400,
+            text='{"error": "Invalid approval type"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_approval_request_async(
+                    CreateApprovalRequestInput(),
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "Documents",
+                    "item123",
+                    "invalid"
+                )
+
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_set_approval_status_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "Item not found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.set_approval_status_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "Documents",
+                    "missing_item",
+                    "approved"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestDataClasses:
@@ -911,3 +1311,692 @@ class TestEdgeCases:
                 await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
 
             assert exc_info.value.status_code == 500
+
+
+class TestCheckInOutOperations:
+    """Tests for file check-in/check-out operations."""
+
+    @pytest.mark.asyncio
+    async def test_check_out_file(self, mock_token_provider):
+        """Test checking out a file."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.check_out_file_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "Documents",
+                "file123"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "checkoutfile" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_check_in_file(self, mock_token_provider):
+        """Test checking in a file."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = FileCheckInParameters()
+            await client.check_in_file_async(
+                input_data,
+                "https://contoso.sharepoint.com/sites/site1",
+                "Documents",
+                "file123"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "checkinfile" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_discard_check_out(self, mock_token_provider):
+        """Test discarding a file check-out."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.discard_file_check_out_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "Documents",
+                "file123"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "discardfilecheckout" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_check_out_file_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=423,
+            text='{"error": "File is locked"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.check_out_file_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "Documents",
+                    "locked_file"
+                )
+
+            assert exc_info.value.status_code == 423
+
+
+class TestAttachmentOperations:
+    """Tests for attachment operations."""
+
+    @pytest.mark.asyncio
+    async def test_get_item_attachments(self, mock_token_provider):
+        """Test getting attachments for a list item."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='[{"id": "att1", "display_name": "doc.pdf"}]'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_item_attachments_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "CustomList",
+                "1"
+            )
+
+            assert isinstance(result, list)
+
+    @pytest.mark.asyncio
+    async def test_create_attachment(self, mock_token_provider):
+        """Test creating an attachment."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=201,
+            text='{"id": "att123", "display_name": "newfile.pdf"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = CreateAttachmentInput()
+            result = await client.create_attachment_async(
+                input_data,
+                "https://contoso.sharepoint.com/sites/site1",
+                "CustomList",
+                "1",
+                "newfile.pdf"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert result["id"] == "att123"
+
+    @pytest.mark.asyncio
+    async def test_delete_attachment(self, mock_token_provider):
+        """Test deleting an attachment."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=204, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.delete_attachment_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "CustomList",
+                "1",
+                "att123"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "DELETE"
+
+    @pytest.mark.asyncio
+    async def test_get_attachment_content(self, mock_token_provider):
+        """Test getting attachment content."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        file_content = b"attachment binary content"
+        mock_response = MockResponse(
+            status=200,
+            text=file_content.decode('latin-1')
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_attachment_content_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "CustomList",
+                "1",
+                "att123"
+            )
+
+            assert result == file_content
+
+    @pytest.mark.asyncio
+    async def test_create_attachment_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=413,
+            text='{"error": "Attachment too large"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_attachment_async(
+                    CreateAttachmentInput(),
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "CustomList",
+                    "1",
+                    "largefile.pdf"
+                )
+
+            assert exc_info.value.status_code == 413
+
+
+class TestSearchOperations:
+    """Tests for search operations."""
+
+    @pytest.mark.asyncio
+    async def test_search_for_user(self, mock_token_provider):
+        """Test searching for a user."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"display_name": "John Doe", "email": "john@contoso.com"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.search_for_user_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "CustomList",
+                "entity1",
+                "john"
+            )
+
+            assert result["display_name"] == "John Doe"
+
+    @pytest.mark.asyncio
+    async def test_search_for_user_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=400,
+            text='{"error": "Multiple users found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.search_for_user_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "CustomList",
+                    "entity1",
+                    "smith"
+                )
+
+            assert exc_info.value.status_code == 400
+
+
+class TestFileItemOperations:
+    """Tests for file item operations."""
+
+    @pytest.mark.asyncio
+    async def test_get_file_item(self, mock_token_provider):
+        """Test getting file item properties."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"Id": "file123", "Name": "document.docx", "Size": 1024}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_file_item_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "Documents",
+                "file123"
+            )
+
+            assert result["Id"] == "file123"
+
+    @pytest.mark.asyncio
+    async def test_patch_file_item(self, mock_token_provider):
+        """Test updating file item properties."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"Id": "file123", "Title": "Updated Title"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            input_data = PatchFileItemInput()
+            result = await client.patch_file_item_async(
+                input_data,
+                "https://contoso.sharepoint.com/sites/site1",
+                "Documents",
+                "file123"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "PATCH"
+            assert result["Title"] == "Updated Title"
+
+    @pytest.mark.asyncio
+    async def test_unshare_item(self, mock_token_provider):
+        """Test unsharing an item."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=204, text='')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.unshare_item_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "Documents",
+                "item123"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "unshare" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_get_file_item_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "File not found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_file_item_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "Documents",
+                    "missing_file"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestMoveFolderOperations:
+    """Tests for move folder operations."""
+
+    @pytest.mark.asyncio
+    async def test_move_folder(self, mock_token_provider):
+        """Test moving a folder."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"Id": "folder123", "Path": "/Archive/OldFolder"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            input_data = MoveFolderParameters()
+            result = await client.move_folder_async(
+                input_data,
+                "https://contoso.sharepoint.com/sites/site1"
+            )
+
+            assert "/Archive/" in result["Path"]
+
+    @pytest.mark.asyncio
+    async def test_move_folder_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=400,
+            text='{"error": "Invalid destination"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.move_folder_async(
+                    MoveFolderParameters(),
+                    "https://contoso.sharepoint.com/sites/site1"
+                )
+
+            assert exc_info.value.status_code == 400
+
+
+class TestTriggerOperations:
+    """Tests for trigger operations."""
+
+    @pytest.mark.asyncio
+    async def test_get_on_new_items(self, mock_token_provider):
+        """Test getting new items trigger."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"Id": 1, "Title": "New Item"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_on_new_items_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "CustomList"
+            )
+
+            assert "value" in result
+
+    @pytest.mark.asyncio
+    async def test_get_on_updated_items(self, mock_token_provider):
+        """Test getting updated items trigger."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"Id": 1, "Title": "Updated Item"}]}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_on_updated_items_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "CustomList"
+            )
+
+            assert "value" in result
+
+    @pytest.mark.asyncio
+    async def test_get_on_new_items_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "List not found"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_on_new_items_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "MissingList"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestByPathOperations:
+    """Tests for operations using file/folder paths."""
+
+    @pytest.mark.asyncio
+    async def test_get_file_metadata_by_path(self, mock_token_provider):
+        """Test getting file metadata by path."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"Id": "file123", "Name": "document.docx", '
+                 '"Path": "/Shared Documents/document.docx"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_file_metadata_by_path_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "/Shared Documents/document.docx"
+            )
+
+            assert result["Name"] == "document.docx"
+
+    @pytest.mark.asyncio
+    async def test_get_file_content_by_path(self, mock_token_provider):
+        """Test getting file content by path."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        file_content = b"file binary content"
+        mock_response = MockResponse(
+            status=200,
+            text=file_content.decode('latin-1')
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_file_content_by_path_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "/Shared Documents/document.docx"
+            )
+
+            assert result == file_content
+
+    @pytest.mark.asyncio
+    async def test_get_folder_metadata_by_path(self, mock_token_provider):
+        """Test getting folder metadata by path."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"Id": "folder123", "Name": "Documents", "ItemCount": 10}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_folder_metadata_by_path_async(
+                "https://contoso.sharepoint.com/sites/site1",
+                "/Shared Documents"
+            )
+
+            assert result["ItemCount"] == 10
+
+    @pytest.mark.asyncio
+    async def test_get_file_metadata_by_path_error_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=404,
+            text='{"error": "File not found at path"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_file_metadata_by_path_async(
+                    "https://contoso.sharepoint.com/sites/site1",
+                    "/Shared Documents/missing.docx"
+                )
+
+            assert exc_info.value.status_code == 404

@@ -497,7 +497,15 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_items_async(
         self,
@@ -512,6 +520,8 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         select: Optional[str] = None,
         id_column: Optional[str] = None,
         date_time_format: Optional[str] = None,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
     ):
         """
         List rows present in a table
@@ -563,6 +573,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             if isinstance(date_time_format, bool):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -723,6 +743,8 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         source: Optional[str],
         id_column: Optional[str],
         date_time_format: Optional[str] = None,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
     ):
         """
         Get a row
@@ -756,6 +778,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             if isinstance(date_time_format, bool):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -813,7 +845,15 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def patch_item_async(
         self,
@@ -875,6 +915,231 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_all_worksheets_async(
+        self,
+        drive: str,
+        file: str,
+        source: Optional[str],
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
+    ):
+        """
+        Get worksheets
+
+        Get a list of worksheets in the Excel workbook.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless"
+            f"/v1.0"
+            f"/drives"
+            f"/{str(drive)}"
+            f"/items"
+            f"/{str(file)}"
+            f"/workbook"
+            f"/worksheets"
+        )
+        query_params = []
+        if source is not None:
+            value = str(source)
+            if isinstance(source, bool):
+                value = value.lower()
+            query_params.append(f"source={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def create_worksheet_async(
+        self,
+        input: CreateWorksheetInput,
+        drive: str,
+        file: str,
+        source: Optional[str],
+    ):
+        """
+        Create worksheet
+
+        Create a new worksheet in the Excel workbook.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless"
+            f"/v1.0"
+            f"/drives"
+            f"/{str(drive)}"
+            f"/items"
+            f"/{str(file)}"
+            f"/workbook"
+            f"/worksheets"
+        )
+        query_params = []
+        if source is not None:
+            value = str(source)
+            if isinstance(source, bool):
+                value = value.lower()
+            query_params.append(f"source={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tables_async(
+        self,
+        drive: str,
+        file: str,
+        source: Optional[str],
+        select: Optional[str] = None,
+        extract_sensitivity_label: Optional[str] = None,
+        fetch_sensitivity_label_metadata: Optional[str] = None,
+    ):
+        """
+        Get tables
+
+        Get a list of tables in the Excel workbook.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless"
+            f"/v1.0"
+            f"/drives"
+            f"/{str(drive)}"
+            f"/items"
+            f"/{str(file)}"
+            f"/workbook"
+            f"/tables"
+        )
+        query_params = []
+        if source is not None:
+            value = str(source)
+            if isinstance(source, bool):
+                value = value.lower()
+            query_params.append(f"source={quote(value)}")
+        if select is not None:
+            value = str(select)
+            if isinstance(select, bool):
+                value = value.lower()
+            query_params.append(f"$select={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def add_row_async(
+        self,
+        input: Item,
+        drive: str,
+        file: str,
+        table: str,
+        source: Optional[str],
+        date_time_format: Optional[str] = None,
+    ):
+        """
+        Add a row into a table
+
+        Add a new row into the Excel table.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/codeless"
+            f"/v1.2"
+            f"/drives"
+            f"/{str(drive)}"
+            f"/items"
+            f"/{str(file)}"
+            f"/workbook"
+            f"/tables"
+            f"/{str(table)}"
+            f"/rows"
+        )
+        query_params = []
+        if source is not None:
+            value = str(source)
+            if isinstance(source, bool):
+                value = value.lower()
+            query_params.append(f"source={quote(value)}")
+        if date_time_format is not None:
+            value = str(date_time_format)
+            if isinstance(date_time_format, bool):
+                value = value.lower()
+            query_params.append(f"dateTimeFormat={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
                 path,
                 response.status,
                 response.text,

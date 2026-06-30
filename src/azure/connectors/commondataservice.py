@@ -644,7 +644,15 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/api/data/v9.1/callbackregistrations"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def list_records_async(
         self,
@@ -837,7 +845,15 @@ class CommondataserviceClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def update_record_async(
         self,
@@ -906,7 +922,15 @@ class CommondataserviceClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async("PUT", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PUT",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_entity_file_image_field_content_async(
         self,
@@ -950,7 +974,7 @@ class CommondataserviceClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def perform_unbound_action_async(
         self,
@@ -1044,7 +1068,15 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/$ref"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def disassociate_entities_async(
         self,
@@ -1079,7 +1111,15 @@ class CommondataserviceClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_relevant_rows_async(
         self,
@@ -1124,7 +1164,15 @@ class CommondataserviceClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/api/data/v9.1/$batch"
 
-        await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def business_events_trigger_async(
         self,
@@ -1140,4 +1188,12 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/api/data/v9.2/callbackregistrations"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )

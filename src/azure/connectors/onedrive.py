@@ -254,7 +254,15 @@ class OnedriveClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_file_metadata_by_path_async(
         self,
@@ -328,7 +336,7 @@ class OnedriveClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_content_async(
         self,
@@ -363,7 +371,7 @@ class OnedriveClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def create_file_async(
         self,
@@ -670,7 +678,7 @@ class OnedriveClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def convert_file_by_path_async(
         self,
@@ -712,7 +720,7 @@ class OnedriveClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_tags_async(
         self,
@@ -804,7 +812,15 @@ class OnedriveClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_file_thumbnail_async(
         self,
@@ -1250,7 +1266,7 @@ class OnedriveClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def on_new_files_async(
         self,
@@ -1366,7 +1382,7 @@ class OnedriveClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def on_updated_files_async(
         self,

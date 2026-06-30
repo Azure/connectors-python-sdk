@@ -15,6 +15,7 @@ from azure.connectors.smtp import (
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ManagedIdentityTokenProvider,
+    ConnectorException,
 )
 from tests.conftest import MockResponse
 
@@ -269,6 +270,33 @@ class TestSendEmail:
             return_value=mock_response
         ):
             await client.send_email_async(input=email_input)
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = SmtpClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid email format"}')
+        email_input = EmailV3(
+            from_="invalid",
+            to="recipient@contoso.com",
+            subject="Test",
+            body="Test body"
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.send_email_async(input=email_input)
+
+            assert exc_info.value.status_code == 400
 
 
 class TestDataClasses:

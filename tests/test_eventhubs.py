@@ -333,6 +333,31 @@ class TestSendEvent:
             url = call_args[0][1]
             assert "partitionKey=partition-1" in url
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = EventhubsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid event format"}')
+        event_input = SendEvent(content_data='{"invalid": true}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.send_event_async(
+                    input=event_input,
+                    event_hub_name="myeventhub"
+                )
+
+            assert exc_info.value.status_code == 400
+
 
 class TestSendEvents:
     """Tests for send_events_async method."""
@@ -398,6 +423,31 @@ class TestSendEvents:
             url = call_args[0][1]
             assert "partitionKey=partition-2" in url
             assert "/events/batch" in url
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = EventhubsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=413, text='{"error": "Batch too large"}')
+        events_input = SendEventsInput(additional_properties={"events": []})
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.send_events_async(
+                    input=events_input,
+                    event_hub_name="myeventhub"
+                )
+
+            assert exc_info.value.status_code == 413
 
 
 class TestDataClasses:

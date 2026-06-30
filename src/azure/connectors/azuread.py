@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Any, Dict, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -399,6 +400,104 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def get_group_async(
+        self,
+        id: str,
+    ):
+        """
+        Get group
+
+        Get details for a group.
+        """
+        path = f"{self._connection_runtime_url}/v1.0/groups/{str(id)}"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_user_async(
+        self,
+        id: str,
+    ):
+        """
+        Get user
+
+        Get details for a user.
+        """
+        path = f"{self._connection_runtime_url}/v1.0/users/{str(id)}"
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def update_user_async(
+        self,
+        input: UpdateUserRequest,
+        id: str,
+    ):
+        """
+        Update user
+
+        Update the info for a user.
+        """
+        path = f"{self._connection_runtime_url}/v1.0/users/{str(id)}"
+
+        response = await self.http_client.send_async("PATCH", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def refresh_tokens_async(
+        self,
+        id: str,
+    ):
+        """
+        Refresh tokens
+
+        Invalidate all refresh tokens for a user
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/users/{str(id)}/revokeSignInSessions"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
     async def create_user_async(
         self,
         input: CreateUserRequest,
@@ -425,6 +524,44 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def get_group_members_async(
+        self,
+        id: str,
+        top: Optional[str] = None,
+    ):
+        """
+        Get group members
+
+        Get the users who are members of a group. You can query up to 1000
+        items using the Top parameter. If you need to retrieve more than 1000
+        values, please turn on the Settings->Pagination feature and provide a
+        Threshold limit.
+        """
+        path = f"{self._connection_runtime_url}/v1.0/groups/{str(id)}/members"
+        query_params = []
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            path += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async("GET", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def remove_member_from_group_async(
         self,
         group_id: str,
@@ -440,7 +577,64 @@ class AzureadClient(ConnectorClientBase):
             f"/v1.0/groups/{str(group_id)}/members/{str(member_id)}/$ref"
         )
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def add_user_to_group_async(
+        self,
+        input: GetGroupRequest,
+        id: str,
+    ):
+        """
+        Add user to group
+
+        Add a user to a group in this Microsoft Entra ID tenant.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/groups/{str(id)}/members/$ref"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+    async def assign_manager_async(
+        self,
+        input: AssignManagerRequest,
+        id: str,
+    ):
+        """
+        Assign manager
+
+        Assign a manager for a user.
+        """
+        path = (
+            f"{self._connection_runtime_url}/v1.0/users/{str(id)}/manager/$ref"
+        )
+
+        response = await self.http_client.send_async("PUT", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PUT",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def create_group_async(
         self,
@@ -452,6 +646,67 @@ class AzureadClient(ConnectorClientBase):
         Create a group in your Microsoft Entra ID tenant.
         """
         path = f"{self._connection_runtime_url}/v1.0/groups"
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def check_member_groups_async(
+        self,
+        input: CheckMemberGroupsRequest,
+        id: str,
+    ):
+        """
+        Check group membership (V2)
+
+        If the user is a member of the given group, the result will contain the
+        given id. Otherwise the result will be empty.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/v1.0/users/{str(id)}/checkMemberGroups"
+        )
+
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_member_groups_async(
+        self,
+        input: GetMemberGroupsRequest,
+        id: str,
+    ):
+        """
+        Get groups of a user (V2)
+
+        Get the groups a user is a member of.
+        """
+        path = (
+            f"{self._connection_runtime_url}"
+            f"/v2/v1.0/users/{str(id)}/getMemberGroups"
+        )
 
         response = await self.http_client.send_async("POST", path, body=input)
 

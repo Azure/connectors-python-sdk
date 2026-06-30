@@ -14,6 +14,11 @@ from azure.connectors.azuread import (
     GetGroupResponse,
     GetUserResponse,
     GetGroupMembersResponse,
+    UpdateUserRequest,
+    GetGroupRequest,
+    AssignManagerRequest,
+    CheckMemberGroupsRequest,
+    GetMemberGroupsRequest,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -449,6 +454,30 @@ class TestRemoveMemberFromGroup:
             assert "5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b" in call_args[0][1]
             assert "8a9bf2d1-c322-5933-7bbf-4g7c9bf6f06c" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Member not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.remove_member_from_group_async(
+                    group_id="group-abc123",
+                    member_id="nonexistent-user"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestCreateGroup:
     """Tests for create_group_async method."""
@@ -726,3 +755,716 @@ class TestEdgeCases:
             await client.create_group_async(input=group_input2)
 
             assert mock_send.call_count == 2
+
+
+class TestGetGroup:
+    """Tests for get_group_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_json_response(self, mock_token_provider):
+        """Test successful GET request returns group."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "group-123", "displayName": "Engineering", "mailEnabled": true}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_group_async(id="group-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/v1.0/groups/group-123" in call_args[0][1]
+            assert result["id"] == "group-123"
+            assert result["displayName"] == "Engineering"
+
+    @pytest.mark.asyncio
+    async def test_empty_response_returns_none(self, mock_token_provider):
+        """Test that empty response returns None."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_group_async(id="group-123")
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Group not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_group_async(id="nonexistent-group")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetUser:
+    """Tests for get_user_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_json_response(self, mock_token_provider):
+        """Test successful GET request returns user."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text=(
+                '{"id": "user-456", "displayName": "John Doe", '
+                '"mail": "john.doe@contoso.com", "jobTitle": "Engineer"}'
+            )
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_user_async(id="user-456")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/v1.0/users/user-456" in call_args[0][1]
+            assert result["id"] == "user-456"
+            assert result["displayName"] == "John Doe"
+
+    @pytest.mark.asyncio
+    async def test_empty_response_returns_none(self, mock_token_provider):
+        """Test that empty response returns None."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_user_async(id="user-456")
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "User not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_user_async(id="nonexistent-user")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestUpdateUser:
+    """Tests for update_user_async method (void operation)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful PATCH request."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=204, text="")
+        user_input = UpdateUserRequest(
+            display_name="John Updated",
+            job_title="Senior Engineer"
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.update_user_async(input=user_input, id="user-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "PATCH"
+            assert "/v1.0/users/user-123" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_with_all_fields(self, mock_token_provider):
+        """Test update with all optional fields."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=204, text="")
+        user_input = UpdateUserRequest(
+            user_principal_name="john.doe@contoso.com",
+            display_name="John Doe",
+            mail_nickname="johndoe",
+            given_name="John",
+            surname="Doe",
+            account_enabled=True,
+            job_title="Senior Engineer",
+            department="Engineering",
+            mobile_phone="+1-555-123-4567",
+            office_location="Building A",
+            preferred_language="en-US",
+            business_phones=["+1-555-987-6543"],
+            other_mails=["john.personal@email.com"]
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            await client.update_user_async(input=user_input, id="user-123")
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid user data"}')
+        user_input = UpdateUserRequest(display_name="")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.update_user_async(input=user_input, id="user-123")
+
+            assert exc_info.value.status_code == 400
+
+
+class TestRefreshTokens:
+    """Tests for refresh_tokens_async method (void operation)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful POST request to revoke sign-in sessions."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.refresh_tokens_async(id="user-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/v1.0/users/user-123/revokeSignInSessions" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "User not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.refresh_tokens_async(id="nonexistent-user")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetGroupMembers:
+    """Tests for get_group_members_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_members(self, mock_token_provider):
+        """Test successful GET request returns group members."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text=(
+                '{"value": [{"id": "user1", "displayName": "User One"}, '
+                '{"id": "user2", "displayName": "User Two"}], "nextLink": null}'
+            )
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_group_members_async(id="group-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/v1.0/groups/group-123/members" in call_args[0][1]
+            assert len(result["value"]) == 2
+
+    @pytest.mark.asyncio
+    async def test_with_top_parameter(self, mock_token_provider):
+        """Test GET request with top query parameter."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": "user1"}], "nextLink": "https://graph.microsoft.com/next"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_group_members_async(id="group-123", top="10")
+
+            call_args = mock_send.call_args
+            assert "$top=10" in call_args[0][1]
+            assert result["nextLink"] is not None
+
+    @pytest.mark.asyncio
+    async def test_empty_response_returns_none(self, mock_token_provider):
+        """Test that empty response returns None."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_group_members_async(id="group-123")
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Group not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_group_members_async(id="nonexistent-group")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestAddUserToGroup:
+    """Tests for add_user_to_group_async method (void operation)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful POST request to add user to group."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=204, text="")
+        user_ref = GetGroupRequest(id="user-456")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.add_user_to_group_async(input=user_ref, id="group-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/v1.0/groups/group-123/members/$ref" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "User already in group"}')
+        user_ref = GetGroupRequest(id="user-456")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.add_user_to_group_async(input=user_ref, id="group-123")
+
+            assert exc_info.value.status_code == 400
+
+
+class TestAssignManager:
+    """Tests for assign_manager_async method (void operation)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful PUT request to assign manager."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=204, text="")
+        manager_ref = AssignManagerRequest(id="manager-789")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            await client.assign_manager_async(input=manager_ref, id="user-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "PUT"
+            assert "/v1.0/users/user-123/manager/$ref" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "User not found"}')
+        manager_ref = AssignManagerRequest(id="manager-789")
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.assign_manager_async(input=manager_ref, id="nonexistent-user")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestCheckMemberGroups:
+    """Tests for check_member_groups_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_user_is_member(self, mock_token_provider):
+        """Test successful check when user is member of group."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": ["group-123"]}'
+        )
+        check_input = CheckMemberGroupsRequest(group_ids=["group-123", "group-456"])
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.check_member_groups_async(input=check_input, id="user-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/v2/v1.0/users/user-123/checkMemberGroups" in call_args[0][1]
+            assert "group-123" in result["value"]
+
+    @pytest.mark.asyncio
+    async def test_success_user_is_not_member(self, mock_token_provider):
+        """Test successful check when user is not member of any group."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text='{"value": []}')
+        check_input = CheckMemberGroupsRequest(group_ids=["group-123"])
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.check_member_groups_async(input=check_input, id="user-123")
+            assert result["value"] == []
+
+    @pytest.mark.asyncio
+    async def test_empty_response_returns_none(self, mock_token_provider):
+        """Test that empty response returns None."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text="")
+        check_input = CheckMemberGroupsRequest(group_ids=["group-123"])
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.check_member_groups_async(input=check_input, id="user-123")
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "User not found"}')
+        check_input = CheckMemberGroupsRequest(group_ids=["group-123"])
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.check_member_groups_async(input=check_input, id="nonexistent-user")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetMemberGroups:
+    """Tests for get_member_groups_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_with_groups(self, mock_token_provider):
+        """Test successful POST request returns user's groups."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": ["group-1", "group-2", "group-3"]}'
+        )
+        member_input = GetMemberGroupsRequest(security_enabled_only=False)
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.get_member_groups_async(input=member_input, id="user-123")
+
+            mock_send.assert_called_once()
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/v2/v1.0/users/user-123/getMemberGroups" in call_args[0][1]
+            assert len(result["value"]) == 3
+
+    @pytest.mark.asyncio
+    async def test_with_security_enabled_only(self, mock_token_provider):
+        """Test with security_enabled_only filter."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text='{"value": ["sec-group-1"]}')
+        member_input = GetMemberGroupsRequest(security_enabled_only=True)
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_member_groups_async(input=member_input, id="user-123")
+            assert len(result["value"]) == 1
+
+    @pytest.mark.asyncio
+    async def test_empty_response_returns_none(self, mock_token_provider):
+        """Test that empty response returns None."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=200, text="")
+        member_input = GetMemberGroupsRequest()
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            result = await client.get_member_groups_async(input=member_input, id="user-123")
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = AzureadClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=403, text='{"error": "Insufficient permissions"}')
+        member_input = GetMemberGroupsRequest()
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_member_groups_async(input=member_input, id="user-123")
+
+            assert exc_info.value.status_code == 403
+
+
+class TestAdditionalDataClasses:
+    """Tests for additional data class creation and attributes."""
+
+    def test_update_user_request_creation(self):
+        """Test UpdateUserRequest dataclass creation."""
+        request = UpdateUserRequest(
+            user_principal_name="john@contoso.com",
+            display_name="John Doe",
+            job_title="Engineer",
+            department="IT"
+        )
+
+        assert request.user_principal_name == "john@contoso.com"
+        assert request.display_name == "John Doe"
+        assert request.job_title == "Engineer"
+        assert request.department == "IT"
+
+    def test_get_group_request_creation(self):
+        """Test GetGroupRequest dataclass creation."""
+        request = GetGroupRequest(id="5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b")
+
+        assert request.id == "5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b"
+
+    def test_assign_manager_request_creation(self):
+        """Test AssignManagerRequest dataclass creation."""
+        request = AssignManagerRequest(id="manager-id-123")
+
+        assert request.id == "manager-id-123"
+
+    def test_check_member_groups_request_creation(self):
+        """Test CheckMemberGroupsRequest dataclass creation."""
+        request = CheckMemberGroupsRequest(
+            group_ids=["group-1", "group-2", "group-3"]
+        )
+
+        assert len(request.group_ids) == 3
+        assert "group-1" in request.group_ids
+
+    def test_get_member_groups_request_creation(self):
+        """Test GetMemberGroupsRequest dataclass creation."""
+        request = GetMemberGroupsRequest(security_enabled_only=True)
+
+        assert request.security_enabled_only is True

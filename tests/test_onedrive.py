@@ -235,6 +235,27 @@ class TestGetFileContent:
             call_args = mock_send.call_args
             assert "inferContentType=true" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_file_content_async(id="nonexistent")
+
+            assert exc_info.value.status_code == 404
+
 
 class TestGetFileContentByPath:
     """Tests for get_file_content_by_path_async method."""
@@ -266,6 +287,27 @@ class TestGetFileContentByPath:
             assert call_args[0][0] == "GET"
             assert "GetFileContentByPath" in call_args[0][1]
             assert result == binary_content
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Path not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_file_content_by_path_async(path="/invalid/path")
+
+            assert exc_info.value.status_code == 404
 
 
 class TestCreateFile:
@@ -304,6 +346,31 @@ class TestCreateFile:
             assert "name=" in call_args[0][1]
             assert result["id"] == "newfile123"
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid folder path"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_file_async(
+                    input=CreateFileInput(),
+                    folder_path="/invalid",
+                    name="file.txt"
+                )
+
+            assert exc_info.value.status_code == 400
+
 
 class TestUpdateFile:
     """Tests for update_file_async method."""
@@ -339,6 +406,30 @@ class TestUpdateFile:
             assert "/files/file123" in call_args[0][1]
             assert result["name"] == "updated.txt"
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.update_file_async(
+                    input=UpdateFileInput(),
+                    id="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestDeleteFile:
     """Tests for delete_file_async method."""
@@ -365,6 +456,27 @@ class TestDeleteFile:
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert "/files/file123" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_file_async(id="nonexistent")
+
+            assert exc_info.value.status_code == 404
 
 
 class TestCopyFile:
@@ -427,6 +539,30 @@ class TestCopyFile:
             call_args = mock_send.call_args
             assert "overwrite=true" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid destination"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.copy_file_async(
+                    source="invalid",
+                    destination="invalid"
+                )
+
+            assert exc_info.value.status_code == 400
+
 
 class TestCopyDriveFile:
     """Tests for copy_drive_file_async method."""
@@ -462,6 +598,30 @@ class TestCopyDriveFile:
             assert "destination=" in call_args[0][1]
             assert result["id"] == "copiedfile123"
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Source file not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.copy_drive_file_async(
+                    id="nonexistent",
+                    destination="/Documents/copy.txt"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestMoveFile:
     """Tests for move_file_async method."""
@@ -496,6 +656,30 @@ class TestMoveFile:
             assert "/move" in call_args[0][1]
             assert "destination=" in call_args[0][1]
             assert result["path"] == "/Archive/moved_file.txt"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OnedriveClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.move_file_async(
+                    id="nonexistent",
+                    destination="/Archive/file.txt"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestListFolder:

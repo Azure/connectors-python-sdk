@@ -169,7 +169,15 @@ class AzurequeuesClient(ConnectorClientBase):
         if query_params:
             path += '?' + '&'.join(query_params)
 
-        await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async("DELETE", path, body=None)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def get_messages_async(
         self,
@@ -362,7 +370,15 @@ class AzurequeuesClient(ConnectorClientBase):
             f"/messages"
         )
 
-        await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async("POST", path, body=input)
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                path,
+                response.status,
+                response.text,
+            )
 
     async def put_queue_async(
         self,

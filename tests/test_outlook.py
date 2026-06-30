@@ -212,6 +212,27 @@ class TestDeleteEmail:
             assert call_args[0][0] == "DELETE"
             assert "/Mail/msg123" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_email_async(message_id="nonexistent")
+
+            assert exc_info.value.status_code == 404
+
 
 class TestMoveEmail:
     """Tests for move_async method."""
@@ -243,6 +264,27 @@ class TestMoveEmail:
             assert "/Mail/Move/msg123" in call_args[0][1]
             assert "folderPath=Archive" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.move_async(message_id="nonexistent", folder_path="Archive")
+
+            assert exc_info.value.status_code == 404
+
 
 class TestFlagEmail:
     """Tests for flag_async method."""
@@ -270,6 +312,27 @@ class TestFlagEmail:
             assert call_args[0][0] == "POST"
             assert "/Mail/Flag/msg123" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.flag_async(message_id="nonexistent")
+
+            assert exc_info.value.status_code == 404
+
 
 class TestMarkAsRead:
     """Tests for mark_as_read_async method."""
@@ -296,6 +359,27 @@ class TestMarkAsRead:
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/Mail/MarkAsRead/msg123" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.mark_as_read_async(message_id="nonexistent")
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetAttachment:
@@ -327,6 +411,30 @@ class TestGetAttachment:
             assert call_args[0][0] == "GET"
             assert "/Mail/msg123/Attachments/att456" in call_args[0][1]
             assert isinstance(result, bytes)
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Attachment not found"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_attachment_async(
+                    message_id="msg123",
+                    attachment_id="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestSendEmail:
@@ -360,6 +468,32 @@ class TestSendEmail:
             assert call_args[0][0] == "POST"
             assert "/v2/Mail" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=400, text='{"error": "Invalid email format"}')
+        email_input = ClientSendHtmlMessage(
+            to="invalid",
+            subject="Test",
+            body="Test"
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.send_email_async(input=email_input)
+
+            assert exc_info.value.status_code == 400
+
 
 class TestReplyTo:
     """Tests for reply_to_async method."""
@@ -390,6 +524,31 @@ class TestReplyTo:
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v3/Mail/ReplyTo/msg123" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+        reply_input = ReplyHtmlMessage(
+            body="<p>Reply</p>",
+            reply_all=False
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.reply_to_async(input=reply_input, message_id="nonexistent")
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetEmails:

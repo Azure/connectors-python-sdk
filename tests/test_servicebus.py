@@ -175,6 +175,24 @@ class TestSendMessages:
             assert call_args[0][0] == "POST"
             assert "myqueue/messages/batch" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_send_messages_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(400, '{"error": "Invalid batch format"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                input_data = SendMessagesInput()
+                await client.send_messages_async(input=input_data, entity_name="myqueue")
+
+            assert exc_info.value.status_code == 400
+
 
 class TestGetMessageFromQueue:
     """Tests for get_message_from_queue_async method."""
@@ -299,6 +317,25 @@ class TestGetMessageFromQueueWithPeekLock:
             call_args = mock_send.call_args
             assert "sessionId=session-abc" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_peek_lock_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Queue not found"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_new_message_from_queue_with_peek_lock_async(
+                    queue_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestCompleteMessageInQueue:
     """Tests for complete_message_in_queue_async method."""
@@ -326,6 +363,26 @@ class TestCompleteMessageInQueue:
             assert "myqueue/messages/complete" in call_args[0][1]
             assert "lockToken=token-123" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_complete_message_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.complete_message_in_queue_async(
+                    queue_name="myqueue",
+                    lock_token="expired-token"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestAbandonMessageInQueue:
     """Tests for abandon_message_in_queue_async method."""
@@ -352,6 +409,26 @@ class TestAbandonMessageInQueue:
             assert call_args[0][0] == "POST"
             assert "myqueue/messages/abandon" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_abandon_message_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.abandon_message_in_queue_async(
+                    queue_name="myqueue",
+                    lock_token="expired-token"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestDeferMessageInQueue:
     """Tests for defer_message_in_queue_async method."""
@@ -376,6 +453,26 @@ class TestDeferMessageInQueue:
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert "myqueue/messages/defer" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_defer_message_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.defer_message_in_queue_async(
+                    queue_name="myqueue",
+                    lock_token="expired-token"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetDeferredMessageFromQueue:
@@ -404,6 +501,26 @@ class TestGetDeferredMessageFromQueue:
             assert "sequenceNumber=42" in call_args[0][1]
             assert result["sequenceNumber"] == 42
 
+    @pytest.mark.asyncio
+    async def test_get_deferred_message_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Message not found"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_deferred_message_from_queue_async(
+                    queue_name="myqueue",
+                    sequence_number="999"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestDeadLetterMessageInQueue:
     """Tests for dead_letter_message_in_queue_async method."""
@@ -430,6 +547,27 @@ class TestDeadLetterMessageInQueue:
             call_args = mock_send.call_args
             assert "myqueue/messages/deadletter" in call_args[0][1]
             assert "deadLetterReason=Processing%20failed" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_dead_letter_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.dead_letter_message_in_queue_async(
+                    queue_name="myqueue",
+                    lock_token="expired-token",
+                    dead_letter_reason="Failed"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestRenewLockOnMessageInQueue:
@@ -499,6 +637,23 @@ class TestGetMessagesFromQueue:
             call_args = mock_send.call_args
             assert "maxMessageCount=10" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_get_messages_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Queue not found"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_messages_from_queue_async(queue_name="nonexistent")
+
+            assert exc_info.value.status_code == 404
+
 
 class TestCloseSessionInQueue:
     """Tests for close_session_in_queue_async method."""
@@ -525,6 +680,26 @@ class TestCloseSessionInQueue:
             assert call_args[0][0] == "DELETE"
             assert "myqueue/sessions/session-123/close" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_close_session_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Session not found"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.close_session_in_queue_async(
+                    queue_name="myqueue",
+                    session_id="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestRenewLockOnSessionInQueue:
     """Tests for renew_lock_on_session_in_queue_async method."""
@@ -549,6 +724,26 @@ class TestRenewLockOnSessionInQueue:
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert "myqueue/sessions/session-123/renewlock" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_renew_session_lock_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Session not found"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.renew_lock_on_session_in_queue_async(
+                    queue_name="myqueue",
+                    session_id="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetMessageFromTopic:
@@ -575,6 +770,26 @@ class TestGetMessageFromTopic:
             call_args = mock_send.call_args
             assert "mytopic/subscriptions/mysub/messages/head" in call_args[0][1]
             assert result["messageId"] == "msg-456"
+
+    @pytest.mark.asyncio
+    async def test_get_topic_message_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Subscription not found"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_message_from_topic_async(
+                    topic_name="mytopic",
+                    subscription_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestCompleteMessageInTopic:
@@ -603,6 +818,27 @@ class TestCompleteMessageInTopic:
             assert call_args[0][0] == "DELETE"
             assert "mytopic/subscriptions/mysub/messages/complete" in call_args[0][1]
 
+    @pytest.mark.asyncio
+    async def test_complete_topic_message_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.complete_message_in_topic_async(
+                    topic_name="mytopic",
+                    subscription_name="mysub",
+                    lock_token="expired-token"
+                )
+
+            assert exc_info.value.status_code == 404
+
 
 class TestAbandonMessageInTopic:
     """Tests for abandon_message_in_topic_async method."""
@@ -628,6 +864,27 @@ class TestAbandonMessageInTopic:
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert "mytopic/subscriptions/mysub/messages/abandon" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_abandon_topic_message_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.abandon_message_in_topic_async(
+                    topic_name="mytopic",
+                    subscription_name="mysub",
+                    lock_token="expired-token"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestCreateTopicSubscription:
@@ -658,6 +915,28 @@ class TestCreateTopicSubscription:
             assert "mytopic/subscriptions/newsub" in call_args[0][1]
             assert result["subscriptionName"] == "newsub"
 
+    @pytest.mark.asyncio
+    async def test_create_subscription_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(400, '{"error": "Invalid subscription name"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                input_data = CreateTopicSubscriptionInput()
+                await client.create_topic_subscription_async(
+                    input=input_data,
+                    topic_name="mytopic",
+                    subscription_name="invalid"
+                )
+
+            assert exc_info.value.status_code == 400
+
 
 class TestDeleteTopicSubscription:
     """Tests for delete_topic_subscription_async method."""
@@ -683,6 +962,26 @@ class TestDeleteTopicSubscription:
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
             assert "mytopic/subscriptions/mysub" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_delete_subscription_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        mock_response = MockResponse(404, '{"error": "Subscription not found"}')
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_topic_subscription_async(
+                    topic_name="mytopic",
+                    subscription_name="nonexistent"
+                )
+
+            assert exc_info.value.status_code == 404
 
 
 class TestGetMessagesFromTopic:
