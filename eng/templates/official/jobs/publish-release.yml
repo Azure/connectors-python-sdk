@@ -21,36 +21,33 @@ parameters:
     type: string
     default: 'https://dev.azure.com/azure-sdk/internal/_build?definitionId=6991'
     displayName: 'Azure SDK partner-release pipeline URL (used in manual PyPI publish instructions)'
-  - name: githubServiceConnection
-    type: string
-    displayName: 'Pre-created Azure Pipelines GitHub service connection used for GitHub Release creation'
 
 jobs:
   - job: "CreateReleaseTag"
     displayName: 'Create Release Tag'
     steps:
-    - checkout: self
-      persistCredentials: true
+    - checkout: none
 
     - powershell: |
+        $githubUser = "$(GithubUser)"
+        $githubToken = "$(GithubPat)"
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        # Configure git identity
+        # Create GitHub credential
         git config --global user.name "AzureConnectors"
         git config --global user.email "azurelogicapps@microsoft.com"
         
-        # Checkout the release branch created by the BumpVersion stage.
-        git fetch origin "release/$newLibraryVersion"
-        git checkout "origin/release/$newLibraryVersion"
-        $releaseTagCommit = git rev-parse HEAD
-        Write-Host "##vso[task.setvariable variable=ReleaseTagCommit]$releaseTagCommit"
+        # Clone Repository
+        git clone --branch "release/$newLibraryVersion" --single-branch `
+          "https://${githubUser}:${githubToken}@github.com/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}.git" .
+        Write-Host "Cloned ${{ parameters.githubRepo }} into local"
         
         # Create release tag X.Y.Z
         Write-Host "Creating release tag $newLibraryVersion"
         git tag -a "$newLibraryVersion" -m "$newLibraryVersion"
         
         # Push tag to remote
-        git push origin "refs/tags/$newLibraryVersion"
+        git push origin $newLibraryVersion
       displayName: 'Tag and push x.y.z'
 
     - download: current
@@ -60,6 +57,20 @@ jobs:
     - pwsh: |
         $ErrorActionPreference = 'Stop'
         $ProgressPreference = 'SilentlyContinue'
+
+        $githubUser = "$(GithubUser)"
+        $githubToken = "$(GithubPat)"
+        $newLibraryVersion = "${{ parameters.libraryVersion }}"
+
+        $credential = [System.Convert]::ToBase64String(
+            [System.Text.Encoding]::ASCII.GetBytes("${githubUser}:${githubToken}"))
+
+        $apiHeaders = @{
+            "Accept"               = "application/vnd.github+json"
+            "Authorization"        = "Basic $credential"
+            "X-GitHub-Api-Version" = "2022-11-28"
+            "Content-Type"         = "application/json"
+        }
 
         # ---- Locate and validate assets BEFORE creating the release ----
         # Artifact contains dist files directly (targetPath in build-artifacts.yml is src/dist)
@@ -78,27 +89,68 @@ jobs:
         }
         Write-Host "Assets to upload:"
         $assetsToUpload | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Length) bytes)" }
-      displayName: 'Validate GitHub release assets'
 
-    - task: GitHubRelease@1
+        # ---- Create draft release ----
+        Write-Host "Creating GitHub draft release for $newLibraryVersion"
+        $body = (@{tag_name="$newLibraryVersion";name="Release $newLibraryVersion";body="- Fill in Release Note Here";draft=$true} | ConvertTo-Json -Compress)
+        $createResponse = Invoke-WebRequest -Headers $apiHeaders -Method Post -Body "$body" `
+            -Uri "https://api.github.com/repos/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}/releases"
+        if ($createResponse.StatusCode -ne 201) {
+            throw "Failed to create release. HTTP $($createResponse.StatusCode)"
+        }
+        $release = $createResponse.Content | ConvertFrom-Json
+        Write-Host "Draft release created: $($release.html_url)"
+
+        # ---- Upload assets; fail hard on duplicate-name (PyPI-style) ----
+        $uploadUrlBase = $release.upload_url -replace '\{\?name,label\}$', ''
+        $uploadHeaders = @{
+            "Accept"               = "application/vnd.github+json"
+            "Authorization"        = "Basic $credential"
+            "X-GitHub-Api-Version" = "2022-11-28"
+        }
+
+        # Wrap upload loop so any failure deletes the incomplete draft release.
+        # This keeps the world clean for retries: an operator can rerun the job
+        # without manually purging a stranded empty/partial draft.
+        try {
+            foreach ($asset in $assetsToUpload) {
+                $assetUploadUrl = '{0}?name={1}' -f $uploadUrlBase, [System.Uri]::EscapeDataString($asset.Name)
+                Write-Host "Uploading $($asset.Name)..."
+                try {
+                    $uploadResponse = Invoke-WebRequest -Headers $uploadHeaders -Method Post `
+                        -Uri $assetUploadUrl -ContentType 'application/octet-stream' -InFile $asset.FullName
+                } catch {
+                    $status = $null
+                    if ($_.Exception.Response) {
+                        $status = [int]$_.Exception.Response.StatusCode
+                    }
+                    if ($status -eq 422) {
+                        throw "Asset '$($asset.Name)' already exists on release $newLibraryVersion. GitHub releases must be unique per filename (same policy as PyPI). If this is intentional, delete the asset from the GitHub release UI and rerun, or bump the version."
+                    }
+                    throw "Upload failed for $($asset.Name): HTTP $status - $($_.Exception.Message)"
+                }
+                if ($uploadResponse.StatusCode -ne 201) {
+                    throw "Upload failed for $($asset.Name). HTTP $($uploadResponse.StatusCode)"
+                }
+                Write-Host "  -> uploaded"
+            }
+        } catch {
+            $uploadError = $_
+            if ($release -and $release.id) {
+                $releaseDeleteUri = "https://api.github.com/repos/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}/releases/$($release.id)"
+                Write-Host "##[warning]Asset upload failed. Cleaning up incomplete draft release $($release.id)..."
+                try {
+                    Invoke-WebRequest -Headers $apiHeaders -Method Delete -Uri $releaseDeleteUri | Out-Null
+                    Write-Host "Draft release $($release.id) deleted."
+                } catch {
+                    Write-Host "##[warning]Failed to delete draft release $($release.id): $($_.Exception.Message). Manual cleanup required at https://github.com/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}/releases"
+                }
+            }
+            throw $uploadError
+        }
+
+        Write-Host "All assets attached to draft release: $($release.html_url)"
       displayName: 'Create GitHub release draft and attach assets'
-      inputs:
-        gitHubConnection: '${{ parameters.githubServiceConnection }}'
-        repositoryName: '${{ parameters.githubOrg }}/${{ parameters.githubRepo }}'
-        action: 'create'
-        target: '$(ReleaseTagCommit)'
-        tagSource: 'userSpecifiedTag'
-        tag: '${{ parameters.libraryVersion }}'
-        title: 'Release ${{ parameters.libraryVersion }}'
-        releaseNotesSource: 'inline'
-        releaseNotesInline: '- Fill in Release Note Here'
-        assets: |
-          $(Pipeline.Workspace)/${{ parameters.artifactName }}/*.whl
-          $(Pipeline.Workspace)/${{ parameters.artifactName }}/*.tar.gz
-        isDraft: true
-        isPreRelease: false
-        makeLatest: false
-        addChangeLog: false
 
   - job: "CheckGitHubRelease"
     dependsOn: ['CreateReleaseTag']
@@ -190,4 +242,3 @@ jobs:
 
             Approve this gate once the partner-release pipeline has been started.
             Reject if the blob upload looks wrong or you do not intend to publish.
-
