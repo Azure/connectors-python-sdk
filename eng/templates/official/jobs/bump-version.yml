@@ -26,10 +26,9 @@ jobs:
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
         if($newLibraryVersion -match '^\d+\.\d+\.\d+((a|b|rc)\d+|\.dev\d+|\.post\d+|-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$') {
-            # Configure git identity and origin URL
+            # Configure git identity
             git config --global user.name "AzureConnectors"
             git config --global user.email "azurelogicapps@microsoft.com"
-            git remote set-url origin "https://github.com/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}.git"
         
             # Heading to Artifact Repository
             Write-Host "Operating based on ${{ parameters.githubRepo }}"
