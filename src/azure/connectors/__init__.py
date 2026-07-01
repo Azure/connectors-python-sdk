@@ -40,6 +40,10 @@ try:
 except (ImportError, NameError):
     AzuredigitaltwinsClient = None  # type: ignore[assignment,misc]
 try:
+    from .azuremonitorlogs import AzuremonitorlogsClient
+except (ImportError, NameError):
+    AzuremonitorlogsClient = None  # type: ignore[assignment,misc]
+try:
     from .kusto import KustoClient
 except (ImportError, NameError):
     KustoClient = None  # type: ignore[assignment,misc]
@@ -172,6 +176,7 @@ __all__ = [
     'AzureautomationClient',
     'AzuredatafactoryClient',
     'AzuredigitaltwinsClient',
+    'AzuremonitorlogsClient',
     'KustoClient',
     'Office365Client',
     'SharepointonlineClient',

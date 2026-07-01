@@ -24,6 +24,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azureblob.py` | Azure Blob Storage | `AZUREBLOB_CONNECTION_URL` |
 | `sample_connector_usage_azuredatafactory.py` | Azure Data Factory | `AZUREDATAFACTORY_CONNECTION_URL` |
 | `sample_connector_usage_azuredigitaltwins.py` | Azure Digital Twins | `AZUREDIGITALTWINS_CONNECTION_URL` |
+| `sample_connector_usage_azuremonitorlogs.py` | Azure Monitor Logs | `AZUREMONITORLOGS_CONNECTION_URL` |
 | `sample_connector_usage_azurequeues.py` | Azure Storage Queues | `AZUREQUEUES_CONNECTION_URL` |
 | `sample_connector_usage_azuretables.py` | Azure Storage Tables | `AZURETABLES_CONNECTION_URL` |
 | `sample_connector_usage_azurevm.py` | Azure VM | `AZUREVM_CONNECTION_URL` |

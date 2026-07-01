@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Azure Digital Twins** (`azuredigitaltwins.py`) connector client with unit tests and samples
 - **Azure Data Factory** (`azuredatafactory.py`) connector client with unit tests and samples
 - **Azure Automation** (`azureautomation.py`) connector client with unit tests and samples
+- **Azure Monitor Logs** (`azuremonitorlogs.py`) connector client with unit tests and samples
 
 ## [0.3.0b2]
 
