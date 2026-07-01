@@ -35,10 +35,9 @@ jobs:
     - powershell: |
         $newLibraryVersion = "${{ parameters.libraryVersion }}"
         
-        # Configure git identity and origin URL
+        # Configure git identity
         git config --global user.name "AzureConnectors"
         git config --global user.email "azurelogicapps@microsoft.com"
-        git remote set-url origin "https://github.com/${{ parameters.githubOrg }}/${{ parameters.githubRepo }}.git"
         
         # Checkout the release branch created by the BumpVersion stage.
         git fetch origin "release/$newLibraryVersion"
