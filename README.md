@@ -180,6 +180,7 @@ The following connectors have been generated and validated with comprehensive te
 | **OneDrive for Business** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 49 tests |
 | **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated | 60 tests |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 49 tests |
+| **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated | 14 tests |
 | **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated | 66 tests |
 | **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated | 52 tests |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 80 tests |
@@ -187,7 +188,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
 
-**Total:** 1049 connector tests + 141 SDK component tests
+**Total:** 1063 connector tests + 141 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

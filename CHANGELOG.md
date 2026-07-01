@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Salesforce** (`salesforce.py`) connector client with unit tests and samples
 - **Yammer** (`yammer.py`) connector client with unit tests and samples
 - **Planner** (`planner.py`) connector client with unit tests and samples
 - **OneNote** (`onenote.py`) connector client with unit tests and samples

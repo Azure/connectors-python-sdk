@@ -88,6 +88,10 @@ try:
 except (ImportError, NameError):
     PlannerClient = None  # type: ignore[assignment,misc]
 try:
+    from .salesforce import SalesforceClient
+except (ImportError, NameError):
+    SalesforceClient = None  # type: ignore[assignment,misc]
+try:
     from .azuread import AzureadClient
 except (ImportError, NameError):
     AzureadClient = None  # type: ignore[assignment,misc]
@@ -180,6 +184,7 @@ __all__ = [
     'OnedriveClient',
     'OnenoteClient',
     'PlannerClient',
+    'SalesforceClient',
     'AzureadClient',
     'SmtpClient',
     'ExcelonlinebusinessClient',
