@@ -30,12 +30,16 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azurevm.py` | Azure VM | `AZUREVM_CONNECTION_URL` |
 | `sample_connector_usage_commondataservice.py` | Microsoft Dataverse | `COMMONDATASERVICE_CONNECTION_URL` |
 | `sample_connector_usage_documentdb.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
+| `sample_connector_usage_docusign.py` | DocuSign | `DOCUSIGN_CONNECTION_URL` |
 | `sample_connector_usage_kusto.py` | Azure Data Explorer | `KUSTO_CONNECTION_URL` |
 | `sample_connector_usage_eventhubs.py` | Azure Event Hubs | `EVENTHUBS_CONNECTION_URL` |
+| `sample_connector_usage_github.py` | GitHub | `GITHUB_CONNECTION_URL` |
 | `sample_connector_usage_keyvault.py` | Azure Key Vault | `KEYVAULT_CONNECTION_URL` |
+| `sample_connector_usage_jira.py` | Jira | `JIRA_CONNECTION_URL` |
 | `sample_connector_usage_excelonlinebusiness.py` | Excel Online (Business) | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_mq.py` | IBM MQ | `MQ_CONNECTION_URL` |
 | `sample_connector_usage_microsoftbookings.py` | Microsoft Bookings | `MICROSOFTBOOKINGS_CONNECTION_URL` |
+| `sample_connector_usage_microsoftforms.py` | Microsoft Forms | `MICROSOFTFORMS_CONNECTION_URL` |
 | `sample_connector_usage_msgraph.py` | MS Graph Groups & Users | `MSGRAPH_CONNECTION_URL` |
 | `sample_connector_usage_office365.py` | Office 365 Outlook | `OFFICE365_CONNECTION_URL` |
 | `sample_connector_usage_office365groups.py` | Office 365 Groups | `OFFICE365GROUPS_CONNECTION_URL` |
@@ -45,10 +49,14 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_salesforce.py` | Salesforce | `SALESFORCE_CONNECTION_URL` |
 | `sample_connector_usage_onenote.py` | OneNote | `ONENOTE_CONNECTION_URL` |
 | `sample_connector_usage_planner.py` | Microsoft Planner | `PLANNER_CONNECTION_URL` |
+| `sample_connector_usage_powerbi.py` | Power BI | `POWERBI_CONNECTION_URL` |
 | `sample_connector_usage_servicebus.py` | Azure Service Bus | `SERVICEBUS_CONNECTION_URL` |
 | `sample_connector_usage_sharepoint.py` | SharePoint Online | `SHAREPOINT_CONNECTION_URL` |
+| `sample_connector_usage_shifts.py` | Shifts | `SHIFTS_CONNECTION_URL` |
+| `sample_connector_usage_slack.py` | Slack | `SLACK_CONNECTION_URL` |
 | `sample_connector_usage_smtp.py` | SMTP | `SMTP_CONNECTION_URL` |
 | `sample_connector_usage_teams.py` | Microsoft Teams | `TEAMS_CONNECTION_URL` |
+| `sample_connector_usage_todo.py` | Microsoft To Do | `TODO_CONNECTION_URL` |
 | `sample_connector_usage_wdatp.py` | Windows Defender ATP | `WDATP_CONNECTION_URL` |
 | `sample_connector_usage_wordonlinebusiness.py` | Word Online (Business) | `WORDONLINEBUSINESS_CONNECTION_URL` |
 | `sample_connector_usage_yammer.py` | Yammer (Viva Engage) | `YAMMER_CONNECTION_URL` |

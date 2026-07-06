@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GitHub** (`github.py`) connector client with unit tests and samples
+- **Slack** (`slack.py`) connector client with unit tests and samples
+- **Jira** (`jira.py`) connector client with unit tests and samples
+- **Power BI** (`powerbi.py`) connector client with unit tests and samples
+- **Microsoft Forms** (`microsoftforms.py`) connector client with unit tests and samples
+- **Microsoft To Do** (`todo.py`) connector client with unit tests and samples
+- **Shifts** (`shifts.py`) connector client with unit tests and samples
+- **DocuSign** (`docusign.py`) connector client with unit tests and samples
 - **Salesforce** (`salesforce.py`) connector client with unit tests and samples
 - **Yammer** (`yammer.py`) connector client with unit tests and samples
 - **Planner** (`planner.py`) connector client with unit tests and samples
