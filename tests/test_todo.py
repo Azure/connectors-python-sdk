@@ -114,7 +114,12 @@ class TestGetAllTodoListsAsync:
         )
         mock_response = MockResponse(status=200, text='{"value": [{"id": "list-1"}]}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.get_all_todo_lists_async()
 
             mock_send.assert_called_once()
@@ -133,7 +138,12 @@ class TestGetAllTodoListsAsync:
         )
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response):
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
             with pytest.raises(ConnectorException):
                 await client.get_all_todo_lists_async()
 
@@ -151,7 +161,12 @@ class TestCreateTodoListAsync:
         payload = CreateToDoListV2(display_name="Work")
         mock_response = MockResponse(status=201, text='{"id": "list-1", "displayName": "Work"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.create_to_do_list_async(input=payload)
 
             mock_send.assert_called_once()
@@ -172,7 +187,12 @@ class TestCreateTodoListAsync:
         payload = CreateToDoListV2(display_name="Work")
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response):
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
             with pytest.raises(ConnectorException):
                 await client.create_to_do_list_async(input=payload)
 
@@ -190,7 +210,12 @@ class TestCreateAndUpdateTodoAsync:
         payload = CreateToDoV2(title="Buy milk", status="notStarted")
         mock_response = MockResponse(status=201, text='{"id": "task-1", "title": "Buy milk"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.create_to_do_async(input=payload, folder_id="list-1")
 
             mock_send.assert_called_once()
@@ -209,9 +234,15 @@ class TestCreateAndUpdateTodoAsync:
             token_provider=mock_token_provider,
         )
         payload = UpdateToDoV2(title="Buy milk and eggs", status="inProgress")
-        mock_response = MockResponse(status=200, text='{"id": "task-1", "title": "Buy milk and eggs"}')
+        mock_response = MockResponse(
+            status=200, text='{"id": "task-1", "title": "Buy milk and eggs"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.update_to_do_async(input=payload, folder_id="list-1", id="task-1")
 
             mock_send.assert_called_once()
@@ -235,7 +266,12 @@ class TestListTodosByFolderAsync:
         )
         mock_response = MockResponse(status=200, text='{"value": [{"id": "task-1"}]}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.list_to_dos_by_folder_async(folder_id="list-1", top="10")
 
             mock_send.assert_called_once()
@@ -258,7 +294,12 @@ class TestTodoTriggersAsync:
         )
         mock_response = MockResponse(status=200, text='{"id": "task-1"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.on_new_to_do_in_folder_async(folder_id="list-1")
 
             mock_send.assert_called_once()
@@ -276,6 +317,11 @@ class TestTodoTriggersAsync:
         )
         mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response):
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
             with pytest.raises(ConnectorException):
                 await client.on_update_to_do_in_folder_async(folder_id="list-1")

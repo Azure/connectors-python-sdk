@@ -188,7 +188,7 @@ class TimeRangeTypesListResult:
     """Definition: TimeRangeTypesListResult"""
 
     value: Optional[List[TimeRangeItem]] = None
-    """The list of time range types (Relative\Absolute\SetInQuery). """
+    """The list of time range types (Relative/Absolute/SetInQuery). """
     next_link: Optional[str] = None
     """The URL to get the next set of results. """
 

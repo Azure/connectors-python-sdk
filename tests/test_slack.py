@@ -6,7 +6,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from azure.connectors.sdk import ConnectorClientOptions, ConnectorException, ManagedIdentityTokenProvider
+from azure.connectors.sdk import (
+    ConnectorClientOptions,
+    ConnectorException,
+    ManagedIdentityTokenProvider,
+)
 from azure.connectors.slack import PostMessageRequest, SlackClient
 from tests.conftest import MockResponse
 

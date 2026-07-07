@@ -163,7 +163,8 @@ class TestListFormsAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        mock_response = MockResponse(status=200, text='{"value": [{"id": "form-1", "title": "Survey"}]}')
+        mock_response = MockResponse(
+            status=200, text='{"value": [{"id": "form-1", "title": "Survey"}]}')
 
         with patch.object(
             client._http_client,
@@ -256,7 +257,8 @@ class TestGetQuestionsAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        mock_response = MockResponse(status=200, text='{"value": [{"id": "q1", "title": "How satisfied are you?"}]}')
+        mock_response = MockResponse(
+            status=200, text='{"value": [{"id": "q1", "title": "How satisfied are you?"}]}')
 
         with patch.object(
             client._http_client,

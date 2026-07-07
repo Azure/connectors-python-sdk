@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -568,8 +567,6 @@ class WebhookPushResponseResourceEntity:
     """Full resource path."""
     type_: Optional[str] = None
     """Resoure Type."""
-    id: Optional[str] = None
-    """ID of the resource that is updated."""
     team_id: Optional[str] = None
     """ID of team where the update happened."""
 

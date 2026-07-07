@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -85,8 +84,6 @@ class ToDoHtml:
     context: Optional[str] = None
     id: Optional[str] = None
     etag: Optional[str] = None
-    id: Optional[str] = None
-    """Unique identifier of the to-do."""
     created_date_time: Optional[str] = None
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
     last_modified_date_time: Optional[str] = None

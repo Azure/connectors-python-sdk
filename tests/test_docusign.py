@@ -118,7 +118,12 @@ class TestGetLoginAccountsAsync:
         )
         mock_response = MockResponse(status=200, text='{"accounts": [{"accountId": "123"}]}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.get_login_accounts_async()
 
             mock_send.assert_called_once()
@@ -137,7 +142,12 @@ class TestGetLoginAccountsAsync:
         )
         mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response):
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
             with pytest.raises(ConnectorException):
                 await client.get_login_accounts_async()
 
@@ -154,7 +164,12 @@ class TestSearchListEnvelopesAsync:
         )
         mock_response = MockResponse(status=200, text='{"value": [{"envelopeId": "env-1"}]}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.search_list_envelopes_async(
                 account_id="acct-1",
                 envelope_title="Quarterly Contract",
@@ -180,7 +195,12 @@ class TestSearchListEnvelopesAsync:
         )
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response):
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
             with pytest.raises(ConnectorException):
                 await client.search_list_envelopes_async(account_id="acct-1")
 
@@ -198,7 +218,12 @@ class TestCreateBlankEnvelopeAsync:
         payload = CombinedEmailBodyAndCustomFields()
         mock_response = MockResponse(status=201, text='{"envelopeId": "env-1"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.create_blank_envelope_async(
                 input=payload,
                 account_id="acct-1",
@@ -224,7 +249,12 @@ class TestCreateBlankEnvelopeAsync:
         payload = CombinedEmailBodyAndCustomFields()
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response):
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
             with pytest.raises(ConnectorException):
                 await client.create_blank_envelope_async(
                     input=payload,
@@ -246,7 +276,12 @@ class TestSendEnvelopeAsync:
         payload = DynamicSigners()
         mock_response = MockResponse(status=201, text='{"envelopeId": "env-2"}')
 
-        with patch.object(client._http_client, "send_async", new_callable=AsyncMock, return_value=mock_response) as mock_send:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
             result = await client.send_envelope_async(
                 input=payload,
                 account_id="acct-1",
