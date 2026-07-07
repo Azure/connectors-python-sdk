@@ -10,6 +10,7 @@ from azure.connectors.shifts import (
     ShiftsClient,
     CreateShiftRequest,
     WebHookRequest,
+    EditOpenShiftRequest,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -327,3 +328,104 @@ class TestTriggerForShiftsAsync:
             assert method == "POST"
             assert "/trigger/teams/team-123/shifts" in path
             assert result is None
+
+
+class TestDeleteTimeOffAsync:
+    """Tests for delete_time_off_async method (DELETE)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful time-off deletion."""
+        client = ShiftsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=204, text="")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.delete_time_off_async(team_id="team-1", time_off_id="toff-1")
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            assert method == "DELETE"
+            assert "/teams/team-1/schedule/timesoff/toff-1" in path
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test DELETE error path raises ConnectorException."""
+        client = ShiftsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=404, text='{"error": "Time off not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.delete_time_off_async(team_id="team-1", time_off_id="missing")
+
+
+class TestUpdateOpenShiftAsync:
+    """Tests for update_open_shift_async method (PUT with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+        """Test PUT sends input body and returns result."""
+        client = ShiftsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = EditOpenShiftRequest()
+        mock_response = MockResponse(status=200, text='{"id": "oshift-1"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.update_open_shift_async(
+                input=payload,
+                team_id="team-1",
+                open_shift_id="oshift-1",
+            )
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            body = mock_send.call_args[1].get("body")
+            assert method == "PUT"
+            assert "/teams/team-1/schedule/openShifts/oshift-1" in path
+            assert body is payload
+            assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PUT error path raises ConnectorException."""
+        client = ShiftsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = EditOpenShiftRequest()
+        mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.update_open_shift_async(
+                    input=payload,
+                    team_id="team-1",
+                    open_shift_id="oshift-1",
+                )

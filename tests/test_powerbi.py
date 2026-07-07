@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from azure.connectors.powerbi import PowerbiClient, QuerySpecification
+from azure.connectors.powerbi import PowerbiClient, UpdateGoalRequest, QuerySpecification
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
@@ -330,4 +330,62 @@ class TestRefreshDatasetAsync:
                 await client.refresh_dataset_async(
                     groupid="group-123",
                     datasetid="dataset-456",
+                )
+
+
+class TestUpdateGoalAsync:
+    """Tests for update_goal_async method (PATCH with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body(self, mock_token_provider):
+        """Test PATCH sends input body."""
+        client = PowerbiClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = UpdateGoalRequest()
+        mock_response = MockResponse(status=200, text='{"id": "goal-1"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.update_goal_async(
+                input=payload,
+                groupid="group-1",
+                scorecard_id="sc-1",
+                goal_id="goal-1",
+            )
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            body = mock_send.call_args[1].get("body")
+            assert method == "PATCH"
+            assert "/groups/group-1/internalScorecards(sc-1)/goals(goal-1)" in path
+            assert body is payload
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PATCH error path raises ConnectorException."""
+        client = PowerbiClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = UpdateGoalRequest()
+        mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.update_goal_async(
+                    input=payload,
+                    groupid="group-1",
+                    scorecard_id="sc-1",
+                    goal_id="goal-1",
                 )

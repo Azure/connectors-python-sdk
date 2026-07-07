@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from azure.connectors.jira import JiraClient, CreateIssueInput
+from azure.connectors.jira import JiraClient, CreateIssueInput, EditIssueInput
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
@@ -304,3 +304,102 @@ class TestGetIssueAsync:
             assert "/v2/issue/PROJ-1" in path
             assert result is not None
             assert result.get("key") == "PROJ-1"
+
+
+class TestDeleteProjectAsync:
+    """Tests for delete_project_async method (DELETE)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful project deletion."""
+        client = JiraClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=204, text="")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.delete_project_async(project_id_or_key="PROJ")
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            assert method == "DELETE"
+            assert "/v2/project/PROJ" in path
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test DELETE error path raises ConnectorException."""
+        client = JiraClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.delete_project_async(project_id_or_key="PROJ")
+
+
+class TestEditIssueAsync:
+    """Tests for edit_issue_async method (PUT with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+        """Test PUT sends input body and returns result."""
+        client = JiraClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = EditIssueInput(fields={"summary": "Updated"})
+        mock_response = MockResponse(status=200, text='{"key": "PROJ-1"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.edit_issue_async(
+                input=payload,
+                issue_id_or_key="PROJ-1",
+            )
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            body = mock_send.call_args[1].get("body")
+            assert method == "PUT"
+            assert "/v2/3/issue/PROJ-1" in path
+            assert body is payload
+            assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PUT error path raises ConnectorException."""
+        client = JiraClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = EditIssueInput(fields={})
+        mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.edit_issue_async(
+                    input=payload,
+                    issue_id_or_key="PROJ-1",
+                )

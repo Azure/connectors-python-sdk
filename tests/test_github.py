@@ -6,7 +6,12 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from azure.connectors.github import GithubClient, IssueBasicDetailsModel
+from azure.connectors.github import (
+    GithubClient,
+    IssueBasicDetailsModel,
+    PullRequestUpdateRequest,
+    RequestReviewersBody,
+)
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
@@ -280,4 +285,124 @@ class TestGetIssuesAsync:
                 await client.get_issues_async(
                     repository_owner="octocat",
                     repository_name="hello-world",
+                )
+
+
+class TestUpdatePullRequestAsync:
+    """Tests for update_pull_request_async method (PATCH with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+        """Test PATCH sends input body and returns updated PR."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = PullRequestUpdateRequest(title="Updated title", state="closed")
+        mock_response = MockResponse(
+            status=200,
+            text='{"number": 42, "state": "closed"}',
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.update_pull_request_async(
+                input=payload,
+                repository_owner="octocat",
+                repository_name="hello-world",
+                pull_number="42",
+            )
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            body = mock_send.call_args[1].get("body")
+            assert method == "PATCH"
+            assert "/repos/octocat/hello-world/pulls/42" in path
+            assert body is payload
+            assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PATCH error path raises ConnectorException."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = PullRequestUpdateRequest(title="")
+        mock_response = MockResponse(
+            status=422,
+            text='{"message": "Validation Failed"}',
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.update_pull_request_async(
+                    input=payload,
+                    repository_owner="octocat",
+                    repository_name="hello-world",
+                    pull_number="42",
+                )
+
+
+class TestRemoveReviewersPullRequestAsync:
+    """Tests for remove_reviewers_pull_request_async method (DELETE)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful DELETE of PR reviewers."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = RequestReviewersBody(reviewers=["alice"])
+        mock_response = MockResponse(status=200, text='{"number": 42}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.remove_reviewers_pull_request_async(
+                input=payload,
+                repository_owner="octocat",
+                repository_name="hello-world",
+                pull_number="42",
+            )
+
+            mock_send.assert_called_once()
+            method = mock_send.call_args[0][0]
+            assert method == "DELETE"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test DELETE error path raises ConnectorException."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = RequestReviewersBody(reviewers=["alice"])
+        mock_response = MockResponse(status=404, text='{"message": "Not Found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.remove_reviewers_pull_request_async(
+                    input=payload,
+                    repository_owner="octocat",
+                    repository_name="missing-repo",
+                    pull_number="0",
                 )

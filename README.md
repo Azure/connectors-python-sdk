@@ -186,9 +186,9 @@ The following connectors have been generated and validated with comprehensive te
 | **OneDrive for Business** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 49 tests |
 | **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated | 60 tests |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 49 tests |
-| **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated | 14 tests |
 | **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated | 66 tests |
 | **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated | 18 tests |
+| **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated | 14 tests |
 | **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated | 52 tests |
 | **Shifts** | `azure.connectors.shifts` | ✅ Complete | 🔄 SDK Generated | 18 tests |
 | **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated | 15 tests |

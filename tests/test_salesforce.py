@@ -4,7 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
-from azure.connectors.salesforce import SalesforceClient
+from azure.connectors.salesforce import SalesforceClient, UploadJobDataInput, CloseJobRequest
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ManagedIdentityTokenProvider,
@@ -270,3 +270,144 @@ class TestPostItem:
             assert "/v2/datasets/default/tables/account/items" in call_args[0][1]
             assert call_args.kwargs["body"] == payload
             assert result["id"] == "001xx0000000001"
+
+
+class TestDeleteItemAsync:
+    """Tests for delete_item_async method (DELETE)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful record deletion."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.delete_item_async(table="account", id="001xx0000000001")
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            assert method == "DELETE"
+            assert "/datasets/default/tables/account/items/001xx0000000001" in path
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test DELETE error path raises ConnectorException."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.delete_item_async(table="account", id="missing-id")
+
+
+class TestUploadJobDataAsync:
+    """Tests for upload_job_data_async method (PUT with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body(self, mock_token_provider):
+        """Test PUT operation sends input body."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = UploadJobDataInput()
+        mock_response = MockResponse(status=201, text="")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.upload_job_data_async(input=payload, job_id="job-1")
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            body = mock_send.call_args[1].get("body")
+            assert method == "PUT"
+            assert "/codeless/jobs/ingest/job-1/batches" in path
+            assert body is payload
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PUT error path raises ConnectorException."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = UploadJobDataInput()
+        mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.upload_job_data_async(input=payload, job_id="job-1")
+
+
+class TestCloseJobAsync:
+    """Tests for close_job_async method (PATCH with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+        """Test PATCH sends input body and returns result."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = CloseJobRequest(state="UploadComplete")
+        mock_response = MockResponse(status=200, text='{"id": "job-1", "state": "UploadComplete"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.close_job_async(input=payload, job_id="job-1")
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            body = mock_send.call_args[1].get("body")
+            assert method == "PATCH"
+            assert "/codeless/jobs/ingest/job-1" in path
+            assert body is payload
+            assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PATCH error path raises ConnectorException."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = CloseJobRequest(state="Aborted")
+        mock_response = MockResponse(status=404, text='{"error": "Job not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.close_job_async(input=payload, job_id="missing-job")

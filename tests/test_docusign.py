@@ -10,6 +10,7 @@ from azure.connectors.docusign import (
     DocusignClient,
     CombinedEmailBodyAndCustomFields,
     DynamicSigners,
+    UpdateDocgenFormFieldsInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -299,3 +300,140 @@ class TestSendEnvelopeAsync:
             assert "templateId=template-1" in path
             assert body is payload
             assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test send envelope error path raises ConnectorException."""
+        client = DocusignClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = DynamicSigners()
+        mock_response = MockResponse(status=400, text='{"error": "Invalid template"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.send_envelope_async(
+                    input=payload,
+                    account_id="acct-1",
+                    status="sent",
+                    template_id="bad-template",
+                    email_subject="Sign this document",
+                )
+
+
+class TestUpdateDocgenFormFieldsAsync:
+    """Tests for update_docgen_form_fields_async method (PUT with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+        """Test PUT operation sends input body and returns response."""
+        client = DocusignClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = UpdateDocgenFormFieldsInput()
+        mock_response = MockResponse(status=200, text='{"docgenFields": []}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.update_docgen_form_fields_async(
+                input=payload,
+                account_id="acct-1",
+                envelope_id="env-1",
+                document_guid=None,
+            )
+
+            mock_send.assert_called_once()
+            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
+            body = mock_send.call_args[1].get("body")
+            assert method == "PUT"
+            assert "/accounts/acct-1/envelopes/env-1/docGenFormFields" in path
+            assert body is payload
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PUT error path raises ConnectorException."""
+        client = DocusignClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = UpdateDocgenFormFieldsInput()
+        mock_response = MockResponse(status=422, text='{"error": "Invalid fields"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.update_docgen_form_fields_async(
+                    input=payload,
+                    account_id="acct-1",
+                    envelope_id="env-1",
+                    document_guid=None,
+                )
+
+
+class TestRemoveRecipientFromEnvelopeAsync:
+    """Tests for remove_recipient_from_envelope_async method (DELETE)."""
+
+    @pytest.mark.asyncio
+    async def test_success_returns_result(self, mock_token_provider):
+        """Test successful DELETE returns response."""
+        client = DocusignClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=200, text='{"recipientsRemoved": true}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.remove_recipient_from_envelope_async(
+                account_id="acct-1",
+                envelope_id="env-1",
+                folder_id=None,
+                remove_recipient_from_envelope_recipient_id=None,
+            )
+
+            mock_send.assert_called_once()
+            method = mock_send.call_args[0][0]
+            assert method == "DELETE"
+            assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test DELETE error path raises ConnectorException."""
+        client = DocusignClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=404, text='{"error": "Envelope not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.remove_recipient_from_envelope_async(
+                    account_id="acct-1",
+                    envelope_id="missing-env",
+                    folder_id=None,
+                    remove_recipient_from_envelope_recipient_id=None,
+                )

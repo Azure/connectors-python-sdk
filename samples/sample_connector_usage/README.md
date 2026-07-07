@@ -44,12 +44,12 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_office365.py` | Office 365 Outlook | `OFFICE365_CONNECTION_URL` |
 | `sample_connector_usage_office365groups.py` | Office 365 Groups | `OFFICE365GROUPS_CONNECTION_URL` |
 | `sample_connector_usage_office365users.py` | Office 365 Users | `OFFICE365USERS_CONNECTION_URL` |
-| `sample_connector_usage_outlook.py` | Outlook.com | `OUTLOOK_CONNECTION_URL` |
 | `sample_connector_usage_onedrive.py` | OneDrive for Business | `ONEDRIVE_CONNECTION_URL` |
-| `sample_connector_usage_salesforce.py` | Salesforce | `SALESFORCE_CONNECTION_URL` |
 | `sample_connector_usage_onenote.py` | OneNote | `ONENOTE_CONNECTION_URL` |
+| `sample_connector_usage_outlook.py` | Outlook.com | `OUTLOOK_CONNECTION_URL` |
 | `sample_connector_usage_planner.py` | Microsoft Planner | `PLANNER_CONNECTION_URL` |
 | `sample_connector_usage_powerbi.py` | Power BI | `POWERBI_CONNECTION_URL` |
+| `sample_connector_usage_salesforce.py` | Salesforce | `SALESFORCE_CONNECTION_URL` |
 | `sample_connector_usage_servicebus.py` | Azure Service Bus | `SERVICEBUS_CONNECTION_URL` |
 | `sample_connector_usage_sharepoint.py` | SharePoint Online | `SHAREPOINT_CONNECTION_URL` |
 | `sample_connector_usage_shifts.py` | Shifts | `SHIFTS_CONNECTION_URL` |
