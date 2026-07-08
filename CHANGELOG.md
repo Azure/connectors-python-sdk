@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Google Drive** (`googledrive.py`) connector client with unit tests and samples
 - **Google Tasks** (`googletasks.py`) connector client with unit tests and samples
 - **Excel Online** (`excelonline.py`) connector client with unit tests and samples
+- **OneDrive for Business** (`onedriveforbusiness.py`) connector client with unit tests and samples
 - **FTP** (`ftp.py`) connector client with unit tests and samples
 - **RSS** (`rss.py`) connector client with unit tests and samples
 - **Office 365 Groups Mail** (`office365groupsmail.py`) connector client with unit tests and samples

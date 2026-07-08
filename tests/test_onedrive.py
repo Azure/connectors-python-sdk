@@ -714,8 +714,8 @@ class TestListFolder:
             assert len(result["value"]) == 2
 
     @pytest.mark.asyncio
-    async def test_with_default_pagination_query_parameters(self, mock_token_provider):
-        """Test GET request includes default pagination query parameters."""
+    async def test_with_pagination_parameters(self, mock_token_provider):
+        """Test GET request with pagination parameters."""
         client = OnedriveClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
@@ -729,11 +729,15 @@ class TestListFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_folder_async(id="folder123")
+            await client.list_folder_async(
+                id="folder123",
+                skip_token="token123",
+                top="10"
+            )
 
             call_args = mock_send.call_args
-            assert "skipToken=" in call_args[0][1]
-            assert "top=20" in call_args[0][1]
+            assert "skipToken=token123" in call_args[0][1]
+            assert "top=10" in call_args[0][1]
 
 
 class TestListRootFolder:

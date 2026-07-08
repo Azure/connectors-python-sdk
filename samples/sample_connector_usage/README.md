@@ -53,6 +53,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_office365groupsmail.py` | Office 365 Groups Mail | `OFFICE365GROUPSMAIL_CONNECTION_URL` |
 | `sample_connector_usage_office365users.py` | Office 365 Users | `OFFICE365USERS_CONNECTION_URL` |
 | `sample_connector_usage_onedrive.py` | OneDrive (Personal) | `ONEDRIVE_CONNECTION_URL` |
+| `sample_connector_usage_onedriveforbusiness.py` | OneDrive for Business | `ONEDRIVEFORBUSINESS_CONNECTION_URL` |
 | `sample_connector_usage_onenote.py` | OneNote | `ONENOTE_CONNECTION_URL` |
 | `sample_connector_usage_outlook.py` | Outlook.com | `OUTLOOK_CONNECTION_URL` |
 | `sample_connector_usage_planner.py` | Microsoft Planner | `PLANNER_CONNECTION_URL` |

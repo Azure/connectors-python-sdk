@@ -92,6 +92,10 @@ try:
 except (ImportError, NameError):
     OnedriveClient = None  # type: ignore[assignment,misc]
 try:
+    from .onedriveforbusiness import OnedriveforbusinessClient
+except (ImportError, NameError):
+    OnedriveforbusinessClient = None  # type: ignore[assignment,misc]
+try:
     from .onenote import OnenoteClient
 except (ImportError, NameError):
     OnenoteClient = None  # type: ignore[assignment,misc]
@@ -271,6 +275,7 @@ __all__ = [
     'DropboxClient',
     'MqClient',
     'OnedriveClient',
+    'OnedriveforbusinessClient',
     'OnenoteClient',
     'PlannerClient',
     'AzureadClient',
