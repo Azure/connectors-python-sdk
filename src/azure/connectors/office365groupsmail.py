@@ -732,7 +732,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/{str(post_id)}"
         )
         query_params = []
-        query_params.append(f"$expand={quote("attachments")}")
+        query_params.append(f"$expand={quote('attachments')}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -803,10 +803,10 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/trigger/v1.0/groups/{str(group_id)}/conversations"
         )
         query_params = []
-        query_params.append(f"$select={quote("id,lastDeliveredDateTime")}")
+        query_params.append(f"$select={quote('id,lastDeliveredDateTime')}")
         expand_value = "threads($select=id;$expand=posts($select=id,createdDateTime))"
         query_params.append(f"$expand={quote(expand_value)}")
-        query_params.append(f"$orderby={quote("lastDeliveredDateTime desc")}")
+        query_params.append(f"$orderby={quote('lastDeliveredDateTime desc')}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -963,9 +963,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/v1.0/me/memberOf/$/microsoft.graph.group"
         )
         query_params = []
-        query_params.append(f"$filter={quote("groupTypes/any(c:c eq 'Unified')")}")
-        query_params.append(f"$select={quote("id,displayName")}")
-        query_params.append(f"$top={quote("999")}")
+        query_params.append(f"$filter={quote('groupTypes/any(c:c eq \'Unified\'')}")
+        query_params.append(f"$select={quote('id,displayName')}")
+        query_params.append(f"$top={quote('999')}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
