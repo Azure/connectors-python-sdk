@@ -65,7 +65,7 @@ Remove-Item $tempFile -ErrorAction SilentlyContinue
 
 ### Step 2: Create Connection
 
-Supported SDK connector names: `arm`, `azureautomation`, `azuredatafactory`, `azuredigitaltwins`, `azuremonitorlogs`, `azuread`, `azureblob`, `azurequeues`, `azuretables`, `azurevm`, `commondataservice`, `documentdb`, `docusign`, `eventhubs`, `excelonlinebusiness`, `github`, `jira`, `keyvault`, `kusto`, `microsoftbookings`, `microsoftforms`, `mq`, `msgraphgroupsanduser`, `office365`, `office365groups`, `office365users`, `onedrive`, `onenote`, `outlook`, `planner`, `powerbi`, `salesforce`, `servicebus`, `sharepointonline`, `shifts`, `slack`, `smtp`, `teams`, `todo`, `wdatp`, `wordonlinebusiness`, `yammer` (and any `Microsoft.Web/connections` connector name).
+Supported SDK connector names: `arm`, `azureautomation`, `azuredatafactory`, `azuredigitaltwins`, `azuremonitorlogs`, `azuread`, `azureblob`, `box`, `azurequeues`, `azuretables`, `azurevm`, `commondataservice`, `documentdb`, `dropbox`, `docusign`, `eventhubs`, `excelonline`, `excelonlinebusiness`, `ftp`, `github`, `googlecalendar`, `googledrive`, `googletasks`, `jira`, `keyvault`, `kusto`, `microsoftbookings`, `microsoftforms`, `mq`, `msgraphgroupsanduser`, `office365`, `office365groups`, `office365groupsmail`, `office365users`, `onedrive`, `onenote`, `outlook`, `planner`, `powerbi`, `rss`, `salesforce`, `servicebus`, `sharepointonline`, `shifts`, `slack`, `smtp`, `teams`, `todo`, `wdatp`, `wordonlinebusiness`, `yammer` (and any `Microsoft.Web/connections` connector name).
 
 ```powershell
 $connectorName = "<connector-name>"      # e.g., "azureblob", "kusto", "mq", "msgraphgroupsanduser", "office365", "office365users", "sharepointonline", "teams"

@@ -22,6 +22,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azureautomation.py` | Azure Automation | `AZUREAUTOMATION_CONNECTION_URL` |
 | `sample_connector_usage_azuread.py` | Azure AD (Entra ID) | `AZUREAD_CONNECTION_URL` |
 | `sample_connector_usage_azureblob.py` | Azure Blob Storage | `AZUREBLOB_CONNECTION_URL` |
+| `sample_connector_usage_box.py` | Box | `BOX_CONNECTION_URL` |
 | `sample_connector_usage_azuredatafactory.py` | Azure Data Factory | `AZUREDATAFACTORY_CONNECTION_URL` |
 | `sample_connector_usage_azuredigitaltwins.py` | Azure Digital Twins | `AZUREDIGITALTWINS_CONNECTION_URL` |
 | `sample_connector_usage_azuremonitorlogs.py` | Azure Monitor Logs | `AZUREMONITORLOGS_CONNECTION_URL` |
@@ -30,10 +31,16 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azurevm.py` | Azure VM | `AZUREVM_CONNECTION_URL` |
 | `sample_connector_usage_commondataservice.py` | Microsoft Dataverse | `COMMONDATASERVICE_CONNECTION_URL` |
 | `sample_connector_usage_documentdb.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
+| `sample_connector_usage_dropbox.py` | Dropbox | `DROPBOX_CONNECTION_URL` |
 | `sample_connector_usage_docusign.py` | DocuSign | `DOCUSIGN_CONNECTION_URL` |
 | `sample_connector_usage_kusto.py` | Azure Data Explorer | `KUSTO_CONNECTION_URL` |
 | `sample_connector_usage_eventhubs.py` | Azure Event Hubs | `EVENTHUBS_CONNECTION_URL` |
+| `sample_connector_usage_excelonline.py` | Excel Online | `EXCELONLINE_CONNECTION_URL` |
+| `sample_connector_usage_ftp.py` | FTP | `FTP_CONNECTION_URL` |
 | `sample_connector_usage_github.py` | GitHub | `GITHUB_CONNECTION_URL` |
+| `sample_connector_usage_googlecalendar.py` | Google Calendar | `GOOGLECALENDAR_CONNECTION_URL` |
+| `sample_connector_usage_googletasks.py` | Google Tasks | `GOOGLETASKS_CONNECTION_URL` |
+| `sample_connector_usage_googledrive.py` | Google Drive | `GOOGLEDRIVE_CONNECTION_URL` |
 | `sample_connector_usage_keyvault.py` | Azure Key Vault | `KEYVAULT_CONNECTION_URL` |
 | `sample_connector_usage_jira.py` | Jira | `JIRA_CONNECTION_URL` |
 | `sample_connector_usage_excelonlinebusiness.py` | Excel Online (Business) | `EXCELONLINE_CONNECTION_URL` |
@@ -43,12 +50,14 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_msgraph.py` | MS Graph Groups & Users | `MSGRAPH_CONNECTION_URL` |
 | `sample_connector_usage_office365.py` | Office 365 Outlook | `OFFICE365_CONNECTION_URL` |
 | `sample_connector_usage_office365groups.py` | Office 365 Groups | `OFFICE365GROUPS_CONNECTION_URL` |
+| `sample_connector_usage_office365groupsmail.py` | Office 365 Groups Mail | `OFFICE365GROUPSMAIL_CONNECTION_URL` |
 | `sample_connector_usage_office365users.py` | Office 365 Users | `OFFICE365USERS_CONNECTION_URL` |
-| `sample_connector_usage_onedrive.py` | OneDrive for Business | `ONEDRIVE_CONNECTION_URL` |
+| `sample_connector_usage_onedrive.py` | OneDrive (Personal) | `ONEDRIVE_CONNECTION_URL` |
 | `sample_connector_usage_onenote.py` | OneNote | `ONENOTE_CONNECTION_URL` |
 | `sample_connector_usage_outlook.py` | Outlook.com | `OUTLOOK_CONNECTION_URL` |
 | `sample_connector_usage_planner.py` | Microsoft Planner | `PLANNER_CONNECTION_URL` |
 | `sample_connector_usage_powerbi.py` | Power BI | `POWERBI_CONNECTION_URL` |
+| `sample_connector_usage_rss.py` | RSS | `RSS_CONNECTION_URL` |
 | `sample_connector_usage_salesforce.py` | Salesforce | `SALESFORCE_CONNECTION_URL` |
 | `sample_connector_usage_servicebus.py` | Azure Service Bus | `SERVICEBUS_CONNECTION_URL` |
 | `sample_connector_usage_sharepoint.py` | SharePoint Online | `SHAREPOINT_CONNECTION_URL` |

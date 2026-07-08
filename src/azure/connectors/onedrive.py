@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
+from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -865,7 +866,6 @@ class OnedriveClient(ConnectorClientBase):
         self,
         folder_id: Optional[str],
         include_subfolders: Optional[str] = None,
-        simulate: Optional[str] = None,
     ):
         """
         When a file is deleted (properties only)
@@ -877,6 +877,7 @@ class OnedriveClient(ConnectorClientBase):
             f"/datasets/default/triggers/batch/ondeletedfile"
         )
         query_params = []
+        query_params.append(f"simulate={quote('false')}")
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -887,11 +888,6 @@ class OnedriveClient(ConnectorClientBase):
             if isinstance(include_subfolders, bool):
                 value = value.lower()
             query_params.append(f"includeSubfolders={quote(value)}")
-        if simulate is not None:
-            value = str(simulate)
-            if isinstance(simulate, bool):
-                value = value.lower()
-            query_params.append(f"simulate={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1173,8 +1169,6 @@ class OnedriveClient(ConnectorClientBase):
     async def list_folder_async(
         self,
         id: str,
-        skip_token: Optional[str] = None,
-        top: Optional[str] = None,
     ):
         """
         List files in folder
@@ -1186,16 +1180,8 @@ class OnedriveClient(ConnectorClientBase):
             f"/datasets/default/foldersV2/{str(id)}"
         )
         query_params = []
-        if skip_token is not None:
-            value = str(skip_token)
-            if isinstance(skip_token, bool):
-                value = value.lower()
-            query_params.append(f"skipToken={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
+        query_params.append(f"skipToken={quote('')}")
+        query_params.append(f"top={quote('20')}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1219,7 +1205,6 @@ class OnedriveClient(ConnectorClientBase):
         folder_id: Optional[str],
         include_subfolders: Optional[str] = None,
         infer_content_type: Optional[str] = None,
-        simulate: Optional[str] = None,
     ):
         """
         When a file is created
@@ -1233,6 +1218,7 @@ class OnedriveClient(ConnectorClientBase):
             f"/datasets/default/triggers/onnewfilev2"
         )
         query_params = []
+        query_params.append(f"simulate={quote('false')}")
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -1248,11 +1234,6 @@ class OnedriveClient(ConnectorClientBase):
             if isinstance(infer_content_type, bool):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
-        if simulate is not None:
-            value = str(simulate)
-            if isinstance(simulate, bool):
-                value = value.lower()
-            query_params.append(f"simulate={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1273,7 +1254,6 @@ class OnedriveClient(ConnectorClientBase):
         folder_id: Optional[str],
         include_subfolders: Optional[str] = None,
         max_file_count: Optional[str] = None,
-        simulate: Optional[str] = None,
     ):
         """
         When a file is created (properties only)
@@ -1286,6 +1266,7 @@ class OnedriveClient(ConnectorClientBase):
             f"/datasets/default/triggers/batch/onnewfilesv2"
         )
         query_params = []
+        query_params.append(f"simulate={quote('false')}")
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -1301,11 +1282,6 @@ class OnedriveClient(ConnectorClientBase):
             if isinstance(max_file_count, bool):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
-        if simulate is not None:
-            value = str(simulate)
-            if isinstance(simulate, bool):
-                value = value.lower()
-            query_params.append(f"simulate={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1328,9 +1304,7 @@ class OnedriveClient(ConnectorClientBase):
         self,
         folder_id: Optional[str],
         include_subfolders: Optional[str] = None,
-        include_file_content: Optional[str] = None,
         infer_content_type: Optional[str] = None,
-        simulate: Optional[str] = None,
     ):
         """
         When a file is modified
@@ -1344,6 +1318,8 @@ class OnedriveClient(ConnectorClientBase):
             f"/datasets/default/triggers/onupdatedfilev2"
         )
         query_params = []
+        query_params.append(f"includeFileContent={quote('true')}")
+        query_params.append(f"simulate={quote('false')}")
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -1354,21 +1330,11 @@ class OnedriveClient(ConnectorClientBase):
             if isinstance(include_subfolders, bool):
                 value = value.lower()
             query_params.append(f"includeSubfolders={quote(value)}")
-        if include_file_content is not None:
-            value = str(include_file_content)
-            if isinstance(include_file_content, bool):
-                value = value.lower()
-            query_params.append(f"includeFileContent={quote(value)}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
-        if simulate is not None:
-            value = str(simulate)
-            if isinstance(simulate, bool):
-                value = value.lower()
-            query_params.append(f"simulate={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1389,7 +1355,6 @@ class OnedriveClient(ConnectorClientBase):
         folder_id: Optional[str],
         include_subfolders: Optional[str] = None,
         max_file_count: Optional[str] = None,
-        simulate: Optional[str] = None,
     ):
         """
         When a file is modified (properties only)
@@ -1401,6 +1366,7 @@ class OnedriveClient(ConnectorClientBase):
             f"/datasets/default/triggers/batch/onupdatedfilesv2"
         )
         query_params = []
+        query_params.append(f"simulate={quote('false')}")
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -1416,11 +1382,6 @@ class OnedriveClient(ConnectorClientBase):
             if isinstance(max_file_count, bool):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
-        if simulate is not None:
-            value = str(simulate)
-            if isinstance(simulate, bool):
-                value = value.lower()
-            query_params.append(f"simulate={quote(value)}")
         if query_params:
             path += '?' + '&'.join(query_params)
 
