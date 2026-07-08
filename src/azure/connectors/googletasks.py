@@ -5,9 +5,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from datetime import datetime
+from dataclasses import dataclass
+from typing import Optional, List
 import json
 
 from azure.connectors.sdk import (

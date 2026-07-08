@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
-from datetime import datetime
 from urllib.parse import quote
 import json
 
@@ -805,7 +804,8 @@ class Office365groupsmailClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append(f"$select={quote("id,lastDeliveredDateTime")}")
-        query_params.append(f"$expand={quote("threads($select=id;$expand=posts($select=id,createdDateTime))")}")
+        expand_value = "threads($select=id;$expand=posts($select=id,createdDateTime))"
+        query_params.append(f"$expand={quote(expand_value)}")
         query_params.append(f"$orderby={quote("lastDeliveredDateTime desc")}")
         if query_params:
             path += '?' + '&'.join(query_params)
