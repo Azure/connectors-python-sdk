@@ -963,7 +963,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/v1.0/me/memberOf/$/microsoft.graph.group"
         )
         query_params = []
-        query_params.append(f"$filter={quote('groupTypes/any(c:c eq \'Unified\'')}")
+        filter_value = "groupTypes/any(c:c eq 'Unified')"
+        query_params.append(f"$filter={quote(filter_value)}")
         query_params.append(f"$select={quote('id,displayName')}")
         query_params.append(f"$top={quote('999')}")
         if query_params:
