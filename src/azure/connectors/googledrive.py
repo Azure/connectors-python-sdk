@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class BlobMetadata:
-    """Response for Get file metadata using id"""
+    """
+    Response for Get file metadata using id
+    """
 
     id: Optional[str] = None
     """The unique id of the file or folder."""
@@ -54,7 +56,9 @@ class BlobMetadata:
 
 @dataclass
 class UpdateFileInput:
-    """Update file"""
+    """
+    Update file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -65,7 +69,9 @@ class UpdateFileInput:
 
 @dataclass
 class CreateFileInput:
-    """Create file"""
+    """
+    Create file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -76,7 +82,9 @@ class CreateFileInput:
 
 @dataclass
 class TableMetadata:
-    """Response for Get sheet metadata"""
+    """
+    Response for Get sheet metadata
+    """
 
     name: Optional[str] = None
     """Table name"""
@@ -93,7 +101,9 @@ class TableMetadata:
 
 @dataclass
 class TablesList:
-    """Response for Get sheets"""
+    """
+    Response for Get sheets
+    """
 
     value: Optional[List[Table]] = None
     """List of Tables"""
@@ -101,7 +111,9 @@ class TablesList:
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -109,7 +121,9 @@ class DataSetsMetadata:
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
@@ -125,7 +139,9 @@ class TabularDataSetsMetadata:
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
@@ -137,7 +153,9 @@ class BlobDataSetsMetadata:
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -148,7 +166,9 @@ class ObjectEntity:
 
 @dataclass
 class TableCapabilitiesMetadata:
-    """Definition: TableCapabilitiesMetadata"""
+    """
+    Definition: TableCapabilitiesMetadata
+    """
 
     sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
     filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
@@ -163,7 +183,9 @@ class TableCapabilitiesMetadata:
 
 @dataclass
 class TableSortRestrictionsMetadata:
-    """Definition: TableSortRestrictionsMetadata"""
+    """
+    Definition: TableSortRestrictionsMetadata
+    """
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
@@ -175,7 +197,9 @@ class TableSortRestrictionsMetadata:
 
 @dataclass
 class TableFilterRestrictionsMetadata:
-    """Definition: TableFilterRestrictionsMetadata"""
+    """
+    Definition: TableFilterRestrictionsMetadata
+    """
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
@@ -187,7 +211,9 @@ class TableFilterRestrictionsMetadata:
 
 @dataclass
 class TableSelectRestrictionsMetadata:
-    """Definition: TableSelectRestrictionsMetadata"""
+    """
+    Definition: TableSelectRestrictionsMetadata
+    """
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
@@ -195,7 +221,9 @@ class TableSelectRestrictionsMetadata:
 
 @dataclass
 class Table:
-    """Definition: Table"""
+    """
+    Definition: Table
+    """
 
     name: Optional[str] = None
     """The name of the table. The name is used at runtime."""
@@ -207,14 +235,18 @@ class Table:
 
 @dataclass
 class Item:
-    """Definition: Item"""
+    """
+    Definition: Item
+    """
 
     dynamic_properties: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class ItemsList:
-    """Definition: ItemsList"""
+    """
+    Definition: ItemsList
+    """
 
     value: Optional[List[Item]] = None
     """List of Items"""
@@ -222,7 +254,9 @@ class ItemsList:
 
 @dataclass
 class DataSetsList:
-    """Definition: DataSetsList"""
+    """
+    Definition: DataSetsList
+    """
 
     value: Optional[List[DataSet]] = None
     """List of datasets"""
@@ -230,7 +264,9 @@ class DataSetsList:
 
 @dataclass
 class DataSet:
-    """Definition: DataSet"""
+    """
+    Definition: DataSet
+    """
 
     name: Optional[str] = None
     """Dataset name"""
@@ -242,7 +278,9 @@ class DataSet:
 
 @dataclass
 class Procedure:
-    """Definition: Procedure"""
+    """
+    Definition: Procedure
+    """
 
     name: Optional[str] = None
     """Procedure name"""
@@ -252,7 +290,9 @@ class Procedure:
 
 @dataclass
 class PassThroughNativeQuery:
-    """Definition: PassThroughNativeQuery"""
+    """
+    Definition: PassThroughNativeQuery
+    """
 
     language: Optional[str] = None
     """Query language"""
