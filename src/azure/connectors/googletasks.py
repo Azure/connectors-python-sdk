@@ -22,7 +22,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class TaskListList:
-    """Response for List task lists"""
+    """
+    Response for List task lists
+    """
 
     items: Optional[List[TaskListEntry]] = None
     """Task lists in the lists."""
@@ -30,7 +32,9 @@ class TaskListList:
 
 @dataclass
 class TaskListEntry:
-    """Response for Create a task list"""
+    """
+    Response for Create a task list
+    """
 
     id: Optional[str] = None
     """The identifier of the task list."""
@@ -44,7 +48,9 @@ class TaskListEntry:
 
 @dataclass
 class TaskList:
-    """Response for Lists the tasks for a task list"""
+    """
+    Response for Lists the tasks for a task list
+    """
 
     items: Optional[List[TaskObject]] = None
     """The tasks in the list."""
@@ -52,7 +58,9 @@ class TaskList:
 
 @dataclass
 class TaskObject:
-    """Response for Create a task in a task list"""
+    """
+    Response for Create a task in a task list
+    """
 
     id: Optional[str] = None
     """The identifier of the task."""
@@ -78,7 +86,9 @@ class TaskObject:
 
 @dataclass
 class TaskListCreate:
-    """Definition: TaskListCreate"""
+    """
+    Definition: TaskListCreate
+    """
 
     title: Optional[str] = None
     """The title of the task list."""
@@ -86,7 +96,9 @@ class TaskListCreate:
 
 @dataclass
 class TaskCreate:
-    """Definition: TaskCreate"""
+    """
+    Definition: TaskCreate
+    """
 
     title: Optional[str] = None
     """The title of the task."""

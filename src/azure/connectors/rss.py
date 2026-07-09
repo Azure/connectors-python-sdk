@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class TriggerBatchResponseFeedItem:
-    """Response for When a feed item is published"""
+    """
+    Response for When a feed item is published
+    """
 
     value: Optional[List[FeedItem]] = None
     """A list of the response objects"""
@@ -31,7 +33,9 @@ class TriggerBatchResponseFeedItem:
 
 @dataclass
 class FeedItem:
-    """Response for List all RSS feed items"""
+    """
+    Response for List all RSS feed items
+    """
 
     id: Optional[str] = None
     """Feed ID"""

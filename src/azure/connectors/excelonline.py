@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class TableMetadata:
-    """Response for Create table"""
+    """
+    Response for Create table
+    """
 
     name: Optional[str] = None
     """Table name"""
@@ -40,7 +42,9 @@ class TableMetadata:
 
 @dataclass
 class ItemsList:
-    """Response for List rows present in a table"""
+    """
+    Response for List rows present in a table
+    """
 
     value: Optional[List[Item]] = None
     """List of Items"""
@@ -48,21 +52,27 @@ class ItemsList:
 
 @dataclass
 class Item:
-    """Response for Get a row"""
+    """
+    Response for Get a row
+    """
 
     dynamic_properties: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class GetAllWorksheetsResponse:
-    """Response for Get worksheets"""
+    """
+    Response for Get worksheets
+    """
 
     value: Optional[List[WorksheetMetadata]] = None
 
 
 @dataclass
 class CreateWorksheetInput:
-    """Create worksheet"""
+    """
+    Create worksheet
+    """
 
     name: Optional[str] = None
     """Worksheet name."""
@@ -70,7 +80,9 @@ class CreateWorksheetInput:
 
 @dataclass
 class WorksheetMetadata:
-    """Response for Create worksheet"""
+    """
+    Response for Create worksheet
+    """
 
     id: Optional[str] = None
     """Worksheet Id."""
@@ -84,21 +96,27 @@ class WorksheetMetadata:
 
 @dataclass
 class GetTablesResponse:
-    """Response for Get tables"""
+    """
+    Response for Get tables
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class GetColumnsResponse:
-    """Response for Get table columns"""
+    """
+    Response for Get table columns
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -106,7 +124,9 @@ class DataSetsMetadata:
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
@@ -122,7 +142,9 @@ class TabularDataSetsMetadata:
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
@@ -134,7 +156,9 @@ class BlobDataSetsMetadata:
 
 @dataclass
 class TableToCreate:
-    """Definition: TableToCreate"""
+    """
+    Definition: TableToCreate
+    """
 
     table_name: Optional[str] = None
     """Enter the Excel table name."""
@@ -146,7 +170,9 @@ class TableToCreate:
 
 @dataclass
 class TableCapabilitiesMetadata:
-    """Definition: TableCapabilitiesMetadata"""
+    """
+    Definition: TableCapabilitiesMetadata
+    """
 
     sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
     filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
@@ -161,7 +187,9 @@ class TableCapabilitiesMetadata:
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -172,7 +200,9 @@ class ObjectEntity:
 
 @dataclass
 class TableSortRestrictionsMetadata:
-    """Definition: TableSortRestrictionsMetadata"""
+    """
+    Definition: TableSortRestrictionsMetadata
+    """
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
@@ -184,7 +214,9 @@ class TableSortRestrictionsMetadata:
 
 @dataclass
 class TableFilterRestrictionsMetadata:
-    """Definition: TableFilterRestrictionsMetadata"""
+    """
+    Definition: TableFilterRestrictionsMetadata
+    """
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
@@ -196,7 +228,9 @@ class TableFilterRestrictionsMetadata:
 
 @dataclass
 class TableSelectRestrictionsMetadata:
-    """Definition: TableSelectRestrictionsMetadata"""
+    """
+    Definition: TableSelectRestrictionsMetadata
+    """
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
@@ -204,7 +238,9 @@ class TableSelectRestrictionsMetadata:
 
 @dataclass
 class TablesList:
-    """Definition: TablesList"""
+    """
+    Definition: TablesList
+    """
 
     value: Optional[List[Table]] = None
     """List of Tables"""
@@ -212,7 +248,9 @@ class TablesList:
 
 @dataclass
 class Table:
-    """Definition: Table"""
+    """
+    Definition: Table
+    """
 
     name: Optional[str] = None
     """The name of the table. The name is used at runtime."""
@@ -224,7 +262,9 @@ class Table:
 
 @dataclass
 class BlobMetadata:
-    """Definition: BlobMetadata"""
+    """
+    Definition: BlobMetadata
+    """
 
     id: Optional[str] = None
     """The unique id of the file or folder."""
@@ -293,7 +333,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/drives/{str(drive)}/files/{str(file)}/tables"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -336,8 +376,8 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/createIdColumn"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
-        query_params.append(f"populateColumn={quote('false')}")
+        query_params.append("source=" + quote("me"))
+        query_params.append("populateColumn=" + quote("false"))
         if id_column is not None:
             value = str(id_column)
             if isinstance(id_column, bool):
@@ -378,7 +418,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/drives/{str(drive)}/files/{str(file)}/tables/{str(table)}/items"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -454,7 +494,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/{str(id)}"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if id_column is not None:
             value = str(id_column)
             if isinstance(id_column, bool):
@@ -508,7 +548,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/{str(id)}"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if id_column is not None:
             value = str(id_column)
             if isinstance(id_column, bool):
@@ -557,7 +597,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/{str(id)}"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if id_column is not None:
             value = str(id_column)
             if isinstance(id_column, bool):
@@ -608,7 +648,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/worksheets"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -650,7 +690,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/worksheets"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -691,7 +731,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/tables"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -737,7 +777,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/rows"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
@@ -786,7 +826,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/columns"
         )
         query_params = []
-        query_params.append(f"source={quote('me')}")
+        query_params.append("source=" + quote("me"))
         if query_params:
             path += '?' + '&'.join(query_params)
 

@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class ListConversationsResponse:
-    """Response for List the conversations of a group"""
+    """
+    Response for List the conversations of a group
+    """
 
     next_link: Optional[str] = None
     """Link to get next page of results"""
@@ -32,7 +34,9 @@ class ListConversationsResponse:
 
 @dataclass
 class CreateConversationResponse:
-    """Response for Create a new conversation in a group"""
+    """
+    Response for Create a new conversation in a group
+    """
 
     context: Optional[str] = None
     """The @odata.context link."""
@@ -46,7 +50,9 @@ class CreateConversationResponse:
 
 @dataclass
 class Conversation:
-    """Response for Get a group conversation"""
+    """
+    Response for Get a group conversation
+    """
 
     id: Optional[str] = None
     """The conversations's unique identifier."""
@@ -73,7 +79,9 @@ class Conversation:
 
 @dataclass
 class ListConversationThreadsResponse:
-    """Response for List the conversation threads of a conversation"""
+    """
+    Response for List the conversation threads of a conversation
+    """
 
     next_link: Optional[str] = None
     """Link to get next page of results"""
@@ -84,7 +92,9 @@ class ListConversationThreadsResponse:
 
 @dataclass
 class NewConversationThreadResponse:
-    """Response for Create a conversation thread"""
+    """
+    Response for Create a conversation thread
+    """
 
     context: Optional[str] = None
     """The @odata.context link."""
@@ -94,7 +104,9 @@ class NewConversationThreadResponse:
 
 @dataclass
 class ListGroupThreadsResponse:
-    """Response for List the threads of a group"""
+    """
+    Response for List the threads of a group
+    """
 
     next_link: Optional[str] = None
     """Link to get next page of results"""
@@ -103,7 +115,9 @@ class ListGroupThreadsResponse:
 
 @dataclass
 class ConversationThread:
-    """Response for Get a conversation thread"""
+    """
+    Response for Get a conversation thread
+    """
 
     id: Optional[str] = None
     """The conversation thread's unique identifier."""
@@ -136,7 +150,9 @@ class ConversationThread:
 
 @dataclass
 class ListThreadPostsResponse:
-    """Response for List the posts of a conversation thread"""
+    """
+    Response for List the posts of a conversation thread
+    """
 
     next_link: Optional[str] = None
     """Link to get next page of results"""
@@ -148,7 +164,9 @@ class ListThreadPostsResponse:
 
 @dataclass
 class Post:
-    """Response for Get a thread post"""
+    """
+    Response for Get a thread post
+    """
 
     id: Optional[str] = None
     """The post's unique identifier."""
@@ -179,7 +197,9 @@ class Post:
 
 @dataclass
 class GetAttachmentsResponse:
-    """Response for List the attachments of a post"""
+    """
+    Response for List the attachments of a post
+    """
 
     next_link: Optional[str] = None
     """Link to get next page of results"""
@@ -191,7 +211,9 @@ class GetAttachmentsResponse:
 
 @dataclass
 class OnNewEmailInGroupResponse:
-    """Response for When a new email arrives to a group"""
+    """
+    Response for When a new email arrives to a group
+    """
 
     value: Optional[List[ConversationTriggerResponse]] = None
     """Response of the trigger."""
@@ -199,7 +221,9 @@ class OnNewEmailInGroupResponse:
 
 @dataclass
 class HttpRequestInput:
-    """Send an HTTP request"""
+    """
+    Send an HTTP request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -210,7 +234,9 @@ class HttpRequestInput:
 
 @dataclass
 class ObjectWithoutType:
-    """Response for Send an HTTP request"""
+    """
+    Response for Send an HTTP request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -221,7 +247,9 @@ class ObjectWithoutType:
 
 @dataclass
 class ListGroupsResponse:
-    """Response for List user groups"""
+    """
+    Response for List user groups
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """Array with the groups the user is part of."""
@@ -229,7 +257,9 @@ class ListGroupsResponse:
 
 @dataclass
 class Attachment:
-    """Definition: Attachment"""
+    """
+    Definition: Attachment
+    """
 
     id: Optional[str] = None
     """Id of the attachment."""
@@ -245,7 +275,9 @@ class Attachment:
 
 @dataclass
 class EmailAddress:
-    """Definition: EmailAddress"""
+    """
+    Definition: EmailAddress
+    """
 
     email_address: Optional[Dict[str, Any]] = None
     """
@@ -256,7 +288,9 @@ class EmailAddress:
 
 @dataclass
 class ItemBody:
-    """Definition: ItemBody"""
+    """
+    Definition: ItemBody
+    """
 
     content_type: Optional[str] = None
     """Content type of the body."""
@@ -266,14 +300,18 @@ class ItemBody:
 
 @dataclass
 class ReplyConversationThreadBody:
-    """Definition: ReplyConversationThreadBody"""
+    """
+    Definition: ReplyConversationThreadBody
+    """
 
     post: Optional[NewPostBody] = None
 
 
 @dataclass
 class ForwardPostBody:
-    """Definition: ForwardPostBody"""
+    """
+    Definition: ForwardPostBody
+    """
 
     comment: Optional[str] = None
     """Comment to forward with the post."""
@@ -283,7 +321,9 @@ class ForwardPostBody:
 
 @dataclass
 class ForwardPostV2Body:
-    """Definition: ForwardPost_V2Body"""
+    """
+    Definition: ForwardPost_V2Body
+    """
 
     comment: Optional[str] = None
     """Comment to forward with the post."""
@@ -293,7 +333,9 @@ class ForwardPostV2Body:
 
 @dataclass
 class CreateConversationBody:
-    """Definition: CreateConversationBody"""
+    """
+    Definition: CreateConversationBody
+    """
 
     topic: Optional[str] = None
     """Topic of the new conversation."""
@@ -302,7 +344,9 @@ class CreateConversationBody:
 
 @dataclass
 class NewPostBody:
-    """Definition: NewPostBody"""
+    """
+    Definition: NewPostBody
+    """
 
     body: Optional[Dict[str, Any]] = None
     """Body of the new post."""
@@ -316,7 +360,9 @@ class NewPostBody:
 
 @dataclass
 class GetUsersGraphAction:
-    """Definition: GetUsers__GraphAction"""
+    """
+    Definition: GetUsers__GraphAction
+    """
 
     email_address: Optional[Dict[str, Any]] = None
     """User email address."""
@@ -324,7 +370,9 @@ class GetUsersGraphAction:
 
 @dataclass
 class ClientSendAttachment:
-    """Definition: ClientSendAttachment"""
+    """
+    Definition: ClientSendAttachment
+    """
 
     type_: Optional[str] = None
     """@odata.type for a file attachment."""
@@ -336,7 +384,9 @@ class ClientSendAttachment:
 
 @dataclass
 class ConversationTriggerResponse:
-    """Definition: ConversationTriggerResponse"""
+    """
+    Definition: ConversationTriggerResponse
+    """
 
     id: Optional[str] = None
     """The conversation unique identifier."""
@@ -350,7 +400,9 @@ class ConversationTriggerResponse:
 
 @dataclass
 class ConversationThreadTriggerResponse:
-    """Definition: ConversationThreadTriggerResponse"""
+    """
+    Definition: ConversationThreadTriggerResponse
+    """
 
     id: Optional[str] = None
     """The conversation thread's unique identifier."""
@@ -359,7 +411,9 @@ class ConversationThreadTriggerResponse:
 
 @dataclass
 class PostTriggerResponse:
-    """Definition: PostTriggerResponse"""
+    """
+    Definition: PostTriggerResponse
+    """
 
     id: Optional[str] = None
     """The post's unique identifier."""
@@ -732,7 +786,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/{str(post_id)}"
         )
         query_params = []
-        query_params.append(f"$expand={quote('attachments')}")
+        query_params.append("$expand=" + quote("attachments"))
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -803,10 +857,11 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/trigger/v1.0/groups/{str(group_id)}/conversations"
         )
         query_params = []
-        query_params.append(f"$select={quote('id,lastDeliveredDateTime')}")
-        expand_value = "threads($select=id;$expand=posts($select=id,createdDateTime))"
-        query_params.append(f"$expand={quote(expand_value)}")
-        query_params.append(f"$orderby={quote('lastDeliveredDateTime desc')}")
+        query_params.append("$select=" + quote("id,lastDeliveredDateTime"))
+        query_params.append(
+            "$expand=" + quote("threads($select=id;$expand=posts($select=id,createdDateTime))")
+        )
+        query_params.append("$orderby=" + quote("lastDeliveredDateTime desc"))
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -963,10 +1018,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/v1.0/me/memberOf/$/microsoft.graph.group"
         )
         query_params = []
-        filter_value = "groupTypes/any(c:c eq 'Unified')"
-        query_params.append(f"$filter={quote(filter_value)}")
-        query_params.append(f"$select={quote('id,displayName')}")
-        query_params.append(f"$top={quote('999')}")
+        query_params.append("$filter=" + quote("groupTypes/any(c:c eq 'Unified')"))
+        query_params.append("$select=" + quote("id,displayName"))
+        query_params.append("$top=" + quote("999"))
         if query_params:
             path += '?' + '&'.join(query_params)
 

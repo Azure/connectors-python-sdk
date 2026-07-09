@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CalendarList:
-    """Response for List calendars"""
+    """
+    Response for List calendars
+    """
 
     items: Optional[List[CalendarListEntry]] = None
     """Calendars in the list."""
@@ -31,7 +33,9 @@ class CalendarList:
 
 @dataclass
 class CalendarEventList:
-    """Response for List the events on a calendar"""
+    """
+    Response for List the events on a calendar
+    """
 
     items: Optional[List[ResponseEvent]] = None
     """Events in the calendar."""
@@ -39,7 +43,9 @@ class CalendarEventList:
 
 @dataclass
 class ResponseEvent:
-    """Response for Create an event"""
+    """
+    Response for Create an event
+    """
 
     summary: Optional[str] = None
     """A summary of the event."""
@@ -79,7 +85,9 @@ class ResponseEvent:
 
 @dataclass
 class ObjectEntity:
-    """Response for Delete an event"""
+    """
+    Response for Delete an event
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -100,7 +108,9 @@ class CalendarEventChangedList:
 
 @dataclass
 class CalendarListEntry:
-    """Definition: CalendarListEntry"""
+    """
+    Definition: CalendarListEntry
+    """
 
     id: Optional[str] = None
     """Identifier of the calendar."""
@@ -116,7 +126,9 @@ class CalendarListEntry:
 
 @dataclass
 class RequestEvent:
-    """Definition: RequestEvent"""
+    """
+    Definition: RequestEvent
+    """
 
     summary: Optional[str] = None
     """A summary of the event."""
@@ -141,7 +153,9 @@ class RequestEvent:
 
 @dataclass
 class PatchEvent:
-    """Definition: PatchEvent"""
+    """
+    Definition: PatchEvent
+    """
 
     summary: Optional[str] = None
     """A summary of the event."""
@@ -166,7 +180,9 @@ class PatchEvent:
 
 @dataclass
 class ResponseEventWithActionType:
-    """Definition: ResponseEventWithActionType"""
+    """
+    Definition: ResponseEventWithActionType
+    """
 
     action_type: Optional[str] = None
     """Type of action which changed the event in change trigger."""
@@ -613,7 +629,7 @@ class GooglecalendarClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/users/me/calendarList/1"
         query_params = []
-        query_params.append(f"minAccessRole={quote('writer')}")
+        query_params.append("minAccessRole=" + quote("writer"))
         if query_params:
             path += '?' + '&'.join(query_params)
 

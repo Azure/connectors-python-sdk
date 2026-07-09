@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class BlobMetadata:
-    """Response for Get file metadata"""
+    """
+    Response for Get file metadata
+    """
 
     id: Optional[str] = None
     """The unique identifier of the file or folder."""
@@ -56,7 +58,9 @@ class BlobMetadata:
 
 @dataclass
 class UpdateFileInput:
-    """Update file"""
+    """
+    Update file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -67,7 +71,9 @@ class UpdateFileInput:
 
 @dataclass
 class CreateFileInput:
-    """Create file"""
+    """
+    Create file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -78,7 +84,9 @@ class CreateFileInput:
 
 @dataclass
 class Thumbnail:
-    """Response for Get file thumbnail"""
+    """
+    Response for Get file thumbnail
+    """
 
     url: Optional[str] = None
     """A URL that points to the thumbnail."""
@@ -90,7 +98,9 @@ class Thumbnail:
 
 @dataclass
 class SharingLink:
-    """Response for Create share link"""
+    """
+    Response for Create share link
+    """
 
     web_url: Optional[str] = None
     """A URL that points to the file or folder."""
@@ -98,7 +108,9 @@ class SharingLink:
 
 @dataclass
 class BlobMetadataPage:
-    """Response for List files in folder"""
+    """
+    Response for List files in folder
+    """
 
     value: Optional[List[BlobMetadata]] = None
     """Blob metadata collection."""
@@ -108,7 +120,9 @@ class BlobMetadataPage:
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -116,7 +130,9 @@ class DataSetsMetadata:
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
@@ -132,7 +148,9 @@ class TabularDataSetsMetadata:
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
@@ -144,7 +162,9 @@ class BlobDataSetsMetadata:
 
 @dataclass
 class Tags:
-    """Definition: Tags"""
+    """
+    Definition: Tags
+    """
 
     tags: Optional[List[str]] = None
     """A list of tags."""
@@ -152,7 +172,9 @@ class Tags:
 
 @dataclass
 class ForASelectedFileResponse:
-    """Definition: ForASelectedFileResponse"""
+    """
+    Definition: ForASelectedFileResponse
+    """
 
     file_path: Optional[str] = None
     """The unique path of the file."""
@@ -1057,8 +1079,8 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/foldersV2/{str(id)}"
         )
         query_params = []
-        query_params.append(f"skipToken={quote('')}")
-        query_params.append(f"top={quote('20')}")
+        query_params.append("skipToken=" + quote(""))
+        query_params.append("top=" + quote("20"))
         if query_params:
             path += '?' + '&'.join(query_params)
 
@@ -1095,7 +1117,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/triggers/onnewfilev2"
         )
         query_params = []
-        query_params.append(f"simulate={quote('false')}")
+        query_params.append("simulate=" + quote("false"))
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -1143,7 +1165,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/triggers/batch/onnewfilesv2"
         )
         query_params = []
-        query_params.append(f"simulate={quote('false')}")
+        query_params.append("simulate=" + quote("false"))
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -1195,8 +1217,8 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/triggers/onupdatedfilev2"
         )
         query_params = []
-        query_params.append(f"includeFileContent={quote('true')}")
-        query_params.append(f"simulate={quote('false')}")
+        query_params.append("includeFileContent=" + quote("true"))
+        query_params.append("simulate=" + quote("false"))
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -1243,7 +1265,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/triggers/batch/onupdatedfilesv2"
         )
         query_params = []
-        query_params.append(f"simulate={quote('false')}")
+        query_params.append("simulate=" + quote("false"))
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):

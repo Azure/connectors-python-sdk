@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateFileInput:
-    """Create file"""
+    """
+    Create file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -34,7 +36,9 @@ class CreateFileInput:
 
 @dataclass
 class BlobMetadata:
-    """Response for Create file"""
+    """
+    Response for Create file
+    """
 
     id: Optional[str] = None
     """The unique id of the file or folder."""
@@ -63,7 +67,9 @@ class BlobMetadata:
 
 @dataclass
 class UpdateFileInput:
-    """Update file"""
+    """
+    Update file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -74,7 +80,9 @@ class UpdateFileInput:
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -82,7 +90,9 @@ class DataSetsMetadata:
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
@@ -98,7 +108,9 @@ class TabularDataSetsMetadata:
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
@@ -110,7 +122,9 @@ class BlobDataSetsMetadata:
 
 @dataclass
 class BlobMetadataResponse:
-    """Definition: BlobMetadataResponse"""
+    """
+    Definition: BlobMetadataResponse
+    """
 
     id: Optional[str] = None
     """The unique id of the file or folder."""
@@ -139,7 +153,9 @@ class BlobMetadataResponse:
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -150,7 +166,9 @@ class ObjectEntity:
 
 @dataclass
 class BlobMetadataPage:
-    """Definition: BlobMetadataPage"""
+    """
+    Definition: BlobMetadataPage
+    """
 
     value: Optional[List[BlobMetadata]] = None
     """Blob metadata collection."""
@@ -206,7 +224,7 @@ class FtpClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
@@ -334,7 +352,7 @@ class FtpClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/datasets/default/copyFile"
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
@@ -379,7 +397,7 @@ class FtpClient(ConnectorClientBase):
         """
         path = f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if path is not None:
             value = str(path)
             if isinstance(path, bool):
@@ -418,7 +436,7 @@ class FtpClient(ConnectorClientBase):
             f"/datasets/default/GetFileContentByPath"
         )
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if path is not None:
             value = str(path)
             if isinstance(path, bool):
@@ -501,7 +519,7 @@ class FtpClient(ConnectorClientBase):
             f"/datasets/default/triggers/batch/onupdatedfile"
         )
         query_params = []
-        query_params.append(f"checkBothCreatedAndModifiedDateTime={quote('false')}")
+        query_params.append("checkBothCreatedAndModifiedDateTime=" + quote("false"))
         if folder_id is not None:
             value = str(folder_id)
             if isinstance(folder_id, bool):
@@ -601,7 +619,7 @@ class FtpClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
