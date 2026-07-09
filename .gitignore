@@ -44,11 +44,3 @@ samples/generated/*.cs
 **/*.egg-info/
 **/build
 **/.idea
-
-
-.tmp/
-.github/agents
-.github/skills/connector*
-.github/skills/david*
-.github/skills/manvir*
-.github/skills/pre*
