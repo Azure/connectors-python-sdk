@@ -413,10 +413,21 @@ await self.http_client.send_async(  # Result discarded - silent failures!
 ### 3. Test Coverage
 
 - No skipped tests without a tracked issue link in the skip reason
-- Each public method MUST have tests for: success case, error response handling, parameter serialization
 - Void methods MUST have explicit tests verifying non-2xx raises exception
 
-**Validation:** Tests with `@pytest.mark.skip` MUST include a GitHub issue link (e.g., `reason="Template variable bug - see #123"`).
+**Coverage scope:** Test coverage is required by HTTP method category, not one test class per generated method. For each connector, the test suite MUST include:
+
+| HTTP verb in connector | Required test coverage |
+|---|---|
+| GET (any) | At least 1 success test (path/query serialization) + 1 error test |
+| POST with body | At least 1 test asserting body is forwarded + 1 error test |
+| PUT with body | At least 1 test asserting body is forwarded + 1 error test |
+| PATCH with body | At least 1 test asserting body is forwarded + 1 error test |
+| DELETE | At least 1 success test + 1 error test verifying exception raised |
+
+**Connectors with >20 public methods** are not required to have a test class per method. Representative coverage — one test group per HTTP verb type used by the connector — satisfies the acceptance criteria, provided the body-forwarding and non-2xx paths are both covered.
+
+**Minimum per method:** The above table is the floor. For operations that are clearly distinct in behavior (e.g., two POST operations where one fires a trigger vs. one creates a resource), additional test groups are appropriate but not strictly required before merge.
 
 ### 4. Type Completeness
 
