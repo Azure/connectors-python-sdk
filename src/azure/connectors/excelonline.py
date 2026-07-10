@@ -328,21 +328,23 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Create a new table in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives/{str(drive)}/files/{str(file)}/tables"
         )
         query_params = []
         query_params.append("source=" + quote("me"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -365,7 +367,7 @@ class ExcelonlineClient(ConnectorClientBase):
         Add a key column to an Excel table. The new column will be appended to
         the right. The new key column must be unique in the table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
             f"/{str(drive)}"
@@ -384,14 +386,16 @@ class ExcelonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"idColumn={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -413,7 +417,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         List rows present in a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives/{str(drive)}/files/{str(file)}/tables/{str(table)}/items"
         )
@@ -450,14 +454,16 @@ class ExcelonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -482,7 +488,7 @@ class ExcelonlineClient(ConnectorClientBase):
         Get a row using a key column. This action will retrieve all the values
         of the specified row given a column and key column.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
             f"/{str(drive)}"
@@ -506,14 +512,16 @@ class ExcelonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -536,7 +544,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Delete a row using a key column.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
             f"/{str(drive)}"
@@ -555,14 +563,16 @@ class ExcelonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"idColumn={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -585,7 +595,7 @@ class ExcelonlineClient(ConnectorClientBase):
         append (instead of overwrite) a value, use the \"Get a row\" action to
         retrieve the content first.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
             f"/{str(drive)}"
@@ -609,14 +619,16 @@ class ExcelonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -636,7 +648,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Get a list of worksheets in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
@@ -650,14 +662,16 @@ class ExcelonlineClient(ConnectorClientBase):
         query_params = []
         query_params.append("source=" + quote("me"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -678,7 +692,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Create a new worksheet in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
@@ -692,14 +706,16 @@ class ExcelonlineClient(ConnectorClientBase):
         query_params = []
         query_params.append("source=" + quote("me"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -719,7 +735,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Get a list of tables in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
@@ -733,14 +749,16 @@ class ExcelonlineClient(ConnectorClientBase):
         query_params = []
         query_params.append("source=" + quote("me"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -763,7 +781,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Add a new row into the Excel table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.2"
@@ -784,14 +802,16 @@ class ExcelonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -812,7 +832,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Get table columns.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
@@ -828,14 +848,16 @@ class ExcelonlineClient(ConnectorClientBase):
         query_params = []
         query_params.append("source=" + quote("me"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

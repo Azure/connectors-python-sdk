@@ -150,14 +150,16 @@ class GoogletasksClient(ConnectorClientBase):
 
         List all task lists.
         """
-        path = f"{self._connection_runtime_url}/users/@me/lists"
+        request_url = f"{self._connection_runtime_url}/users/@me/lists"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -176,14 +178,16 @@ class GoogletasksClient(ConnectorClientBase):
 
         Creates a new task list.
         """
-        path = f"{self._connection_runtime_url}/users/@me/lists"
+        request_url = f"{self._connection_runtime_url}/users/@me/lists"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -202,16 +206,18 @@ class GoogletasksClient(ConnectorClientBase):
 
         Lists the tasks for a specific task list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/lists/{str(task_list_id)}/tasks"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -221,7 +227,7 @@ class GoogletasksClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def craete_task_async(
+    async def create_task_async(
         self,
         input: TaskCreate,
         task_list_id: str,
@@ -231,16 +237,18 @@ class GoogletasksClient(ConnectorClientBase):
 
         Create a task in a specific task list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/lists/{str(task_list_id)}/tasks"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -260,17 +268,19 @@ class GoogletasksClient(ConnectorClientBase):
 
         Get specific task from the specified task list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{str(task_list_id)}/tasks/{str(task_id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -288,14 +298,18 @@ class GoogletasksClient(ConnectorClientBase):
 
         Trigger when a new task list is created.
         """
-        path = f"{self._connection_runtime_url}/trigger1/users/@me/lists"
+        request_url = (
+            f"{self._connection_runtime_url}/trigger1/users/@me/lists"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -314,17 +328,19 @@ class GoogletasksClient(ConnectorClientBase):
 
         Triggers when a task is added to the specified task list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger2/lists/{str(task_list_id)}/tasks"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -343,17 +359,19 @@ class GoogletasksClient(ConnectorClientBase):
 
         Triggers when a task is due in the specified task list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger4/lists/{str(task_list_id)}/tasks"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -372,17 +390,19 @@ class GoogletasksClient(ConnectorClientBase):
 
         Triggers when the a task is completed in the specified task list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger5/lists/{str(task_list_id)}/tasks"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

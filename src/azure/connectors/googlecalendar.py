@@ -265,7 +265,7 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation is used to list all calendars in your Google account.
         """
-        path = f"{self._connection_runtime_url}/users/me/calendarList"
+        request_url = f"{self._connection_runtime_url}/users/me/calendarList"
         query_params = []
         if min_access_role is not None:
             value = str(min_access_role)
@@ -273,14 +273,16 @@ class GooglecalendarClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"minAccessRole={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -303,7 +305,7 @@ class GooglecalendarClient(ConnectorClientBase):
         This operation is used to return the first page of arbitrarily ordered
         events on the selected calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/calendars/{str(calendar_id)}/events"
         )
@@ -324,14 +326,16 @@ class GooglecalendarClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"q={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -351,17 +355,19 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation is used to create an event on a specific calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/calendars/{str(calendar_id)}/events"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -382,17 +388,19 @@ class GooglecalendarClient(ConnectorClientBase):
         This operation is used to get the details of a specific event from a
         calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/calendars/{str(calendar_id)}/events/{str(event_id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -412,17 +420,19 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation is used to delete an event from a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/calendars/{str(calendar_id)}/events/{str(event_id)}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -443,17 +453,19 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation is used to update an existing event on a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/calendars/{str(calendar_id)}/events/{str(event_id)}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -472,17 +484,19 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation triggers when a new event is added to a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger1/calendars/{str(calendar_id)}/events"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -501,17 +515,19 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation triggers when an event is updated in a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger2/calendars/{str(calendar_id)}/events"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -530,17 +546,19 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation triggers when a new event is deleted from a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger3/calendars/{str(calendar_id)}/events"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -561,7 +579,7 @@ class GooglecalendarClient(ConnectorClientBase):
         This operation triggers when a new event is added, updated or deleted
         from a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger4/calendars/{str(calendar_id)}/events"
         )
@@ -572,14 +590,16 @@ class GooglecalendarClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"singleEvents={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -598,17 +618,19 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation triggers when an event starts.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/eventstarted/calendars/{str(calendar_id)}/events"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -627,18 +649,20 @@ class GooglecalendarClient(ConnectorClientBase):
         This operation is used to list all calendars in your Google account
         that you can write to.
         """
-        path = f"{self._connection_runtime_url}/users/me/calendarList/1"
+        request_url = f"{self._connection_runtime_url}/users/me/calendarList/1"
         query_params = []
         query_params.append("minAccessRole=" + quote("writer"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

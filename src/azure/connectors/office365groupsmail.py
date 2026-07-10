@@ -465,17 +465,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Get all the conversations in this group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/conversations"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -495,17 +497,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Create a new conversation in this group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/conversations"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -525,7 +529,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Retrieves the properties of a particular conversation.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
@@ -534,12 +538,14 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/{str(conversation_id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -559,7 +565,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Get all the threads in a group conversation.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
@@ -569,12 +575,14 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/threads"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -595,7 +603,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Create a new thread in the specified conversation.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
@@ -605,12 +613,14 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/threads"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -629,17 +639,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Get all the threads of a group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/threads"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -659,17 +671,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Start a new group conversation by first creating a thread.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/threads"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -689,17 +703,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Get a specific thread that belongs to a group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -719,17 +735,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Deletes the specified conversation thread.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -744,17 +762,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Get all the posts of the specified conversation thread.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}/posts"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -775,7 +795,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Retrieves a post in a specified thread.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
@@ -788,14 +808,16 @@ class Office365groupsmailClient(ConnectorClientBase):
         query_params = []
         query_params.append("$expand=" + quote("attachments"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -816,7 +838,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Retrieve a list of attachments that belong to a post.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
@@ -828,12 +850,14 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/attachments"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -852,7 +876,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         When a new email arrives to a group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/trigger/v1.0/groups/{str(group_id)}/conversations"
         )
@@ -863,14 +887,16 @@ class Office365groupsmailClient(ConnectorClientBase):
         )
         query_params.append("$orderby=" + quote("lastDeliveredDateTime desc"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -891,17 +917,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Reply to a thread in a group conversation and add a new post to it.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}/reply"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -919,7 +947,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         Reply to a post and add a new post to the specified thread in a group
         conversation.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
@@ -931,12 +959,14 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/reply"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -951,14 +981,16 @@ class Office365groupsmailClient(ConnectorClientBase):
         Construct a Microsoft Graph REST API request to invoke. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api
         """
-        path = f"{self._connection_runtime_url}/httprequest"
+        request_url = f"{self._connection_runtime_url}/httprequest"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -981,7 +1013,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Forward a post to a recipient.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
             f"/groups"
@@ -995,12 +1027,14 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/forward"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1013,7 +1047,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Retrieves all Office 365 Groups the user is part of.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/memberOf/$/microsoft.graph.group"
         )
@@ -1022,14 +1056,16 @@ class Office365groupsmailClient(ConnectorClientBase):
         query_params.append("$select=" + quote("id,displayName"))
         query_params.append("$top=" + quote("999"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

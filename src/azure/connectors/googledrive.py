@@ -341,16 +341,18 @@ class GoogledriveClient(ConnectorClientBase):
 
         Retrieves file metadata from Google Drive using id
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -370,16 +372,18 @@ class GoogledriveClient(ConnectorClientBase):
 
         Updates a file in Google Drive
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -398,16 +402,18 @@ class GoogledriveClient(ConnectorClientBase):
 
         Deletes a file from Google Drive
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -421,23 +427,27 @@ class GoogledriveClient(ConnectorClientBase):
 
         Retrieves file metadata from Google Drive using path
         """
-        path = f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        )
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if path is not None:
             value = str(path)
             if isinstance(path, bool):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -457,12 +467,12 @@ class GoogledriveClient(ConnectorClientBase):
 
         Retrieves file content from Google Drive using path
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/GetFileContentByPath"
         )
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if path is not None:
             value = str(path)
             if isinstance(path, bool):
@@ -474,14 +484,16 @@ class GoogledriveClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -498,7 +510,7 @@ class GoogledriveClient(ConnectorClientBase):
 
         Retrieves file content from Google Drive using id
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/content"
         )
@@ -509,14 +521,16 @@ class GoogledriveClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -534,9 +548,9 @@ class GoogledriveClient(ConnectorClientBase):
 
         Uploads a file to Google Drive
         """
-        path = f"{self._connection_runtime_url}/datasets/default/files"
+        request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
@@ -548,14 +562,16 @@ class GoogledriveClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -576,9 +592,11 @@ class GoogledriveClient(ConnectorClientBase):
 
         Copies a file on Google Drive
         """
-        path = f"{self._connection_runtime_url}/datasets/default/copyFile"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/copyFile"
+        )
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
@@ -595,14 +613,16 @@ class GoogledriveClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -621,17 +641,19 @@ class GoogledriveClient(ConnectorClientBase):
 
         List files in a Google Drive folder
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/folders/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -649,14 +671,18 @@ class GoogledriveClient(ConnectorClientBase):
 
         Lists files in the Google Drive root folder
         """
-        path = f"{self._connection_runtime_url}/datasets/default/folders"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/folders"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -677,11 +703,11 @@ class GoogledriveClient(ConnectorClientBase):
 
         Extracts an archive file into a folder in Google Drive (example: .zip)
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
-        query_params.append(f"queryParametersSingleEncoded={quote('true')}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
@@ -698,14 +724,16 @@ class GoogledriveClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -725,7 +753,7 @@ class GoogledriveClient(ConnectorClientBase):
 
         Retrieves Google Sheet metadata
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/$metadata.json"
             f"/datasets"
@@ -734,12 +762,14 @@ class GoogledriveClient(ConnectorClientBase):
             f"/{str(table)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -758,17 +788,19 @@ class GoogledriveClient(ConnectorClientBase):
 
         Retrieves sheet names from a Google Sheet file
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/{quote(str(dataset), safe='')}/tables"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

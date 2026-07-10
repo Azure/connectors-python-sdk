@@ -30,8 +30,8 @@ async def _invoke_operation(client: GoogletasksClient, operation: str):
         return await client.create_task_list_async(input=TaskListCreate(title="Work"))
     if operation == "list_tasks":
         return await client.list_tasks_async(task_list_id="list123")
-    if operation == "craete_task":
-        return await client.craete_task_async(
+    if operation == "create_task":
+        return await client.create_task_async(
             input=TaskCreate(title="Buy milk"),
             task_list_id="list123",
         )
@@ -180,8 +180,8 @@ class TestGoogletasksClientMethods:
             assert isinstance(mock_send.call_args.kwargs["body"], TaskListCreate)
 
     @pytest.mark.asyncio
-    async def test_craete_task_success(self, mock_token_provider):
-        """Test craete_task_async sends body and returns parsed JSON."""
+    async def test_create_task_success(self, mock_token_provider):
+        """Test create_task_async sends body and returns parsed JSON."""
         client = GoogletasksClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
@@ -194,7 +194,7 @@ class TestGoogletasksClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.craete_task_async(
+            result = await client.create_task_async(
                 input=TaskCreate(title="Buy milk"),
                 task_list_id="list123",
             )
@@ -252,7 +252,7 @@ class TestGoogletasksClientErrorHandling:
             "list_task_lists",
             "create_task_list",
             "list_tasks",
-            "craete_task",
+            "create_task",
             "list_task",
             "on_new_task_list",
             "on_new_task_in_list",

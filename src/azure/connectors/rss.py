@@ -102,7 +102,7 @@ class RssClient(ConnectorClientBase):
         This operation triggers a workflow when a new item is published in an
         RSS feed.
         """
-        path = f"{self._connection_runtime_url}/OnNewFeed"
+        request_url = f"{self._connection_runtime_url}/OnNewFeed"
         query_params = []
         if feed_url is not None:
             value = str(feed_url)
@@ -115,14 +115,16 @@ class RssClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sinceProperty={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -143,7 +145,7 @@ class RssClient(ConnectorClientBase):
 
         This operation retrieves all items from an RSS feed.
         """
-        path = f"{self._connection_runtime_url}/ListFeedItems"
+        request_url = f"{self._connection_runtime_url}/ListFeedItems"
         query_params = []
         if feed_url is not None:
             value = str(feed_url)
@@ -161,14 +163,16 @@ class RssClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sinceProperty={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

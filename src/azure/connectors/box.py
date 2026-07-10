@@ -219,16 +219,18 @@ class BoxClient(ConnectorClientBase):
 
         Retrieves the file metadata from Box using file id.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -248,16 +250,18 @@ class BoxClient(ConnectorClientBase):
 
         Updates an existing file in Box.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -276,16 +280,18 @@ class BoxClient(ConnectorClientBase):
 
         Deletes an existing file from Box.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -299,7 +305,9 @@ class BoxClient(ConnectorClientBase):
 
         Retrieves the file metadata from Box using path.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if path is not None:
@@ -308,14 +316,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -335,7 +345,7 @@ class BoxClient(ConnectorClientBase):
 
         Retrieves the file contents from Box using path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/GetFileContentByPath"
         )
@@ -352,14 +362,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -376,7 +388,7 @@ class BoxClient(ConnectorClientBase):
 
         Retrieves the file content from Box using id.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/content"
         )
@@ -387,14 +399,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -412,7 +426,7 @@ class BoxClient(ConnectorClientBase):
 
         Uploads a file to Box.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/files"
+        request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if folder_path is not None:
@@ -426,14 +440,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -454,7 +470,9 @@ class BoxClient(ConnectorClientBase):
 
         Copy a file to a file path in Box.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/copyFile"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/copyFile"
+        )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if source is not None:
@@ -473,14 +491,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -499,17 +519,19 @@ class BoxClient(ConnectorClientBase):
 
         Lists the files and folders in a Box folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/folders/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -527,14 +549,18 @@ class BoxClient(ConnectorClientBase):
 
         Lists the files and folders in the Box root folder.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/folders"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/folders"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -555,7 +581,7 @@ class BoxClient(ConnectorClientBase):
 
         Extracts an archive file into a folder in Box (example: .zip).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
@@ -576,14 +602,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -608,7 +636,7 @@ class BoxClient(ConnectorClientBase):
         Trigger-&gt;Settings successful trigger runs may produce empty array
         for 'List of Files' output.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/batch/onnewfileV2"
         )
@@ -624,14 +652,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -656,7 +686,7 @@ class BoxClient(ConnectorClientBase):
         Trigger-&gt;Settings successful trigger runs may produce empty array
         for 'List of Files' output.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/batch/onupdatedfileV2"
         )
@@ -672,14 +702,16 @@ class BoxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

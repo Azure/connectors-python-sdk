@@ -217,16 +217,18 @@ class DropboxClient(ConnectorClientBase):
 
         This operation gets the metadata for a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -246,16 +248,18 @@ class DropboxClient(ConnectorClientBase):
 
         This operation updates a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -274,16 +278,18 @@ class DropboxClient(ConnectorClientBase):
 
         This operation deletes a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -297,7 +303,9 @@ class DropboxClient(ConnectorClientBase):
 
         This operation gets the metadata of a file using the path.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if path is not None:
@@ -306,14 +314,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -333,7 +343,7 @@ class DropboxClient(ConnectorClientBase):
 
         This operation gets the content of a file using the path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/GetFileContentByPath"
         )
@@ -350,14 +360,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -374,7 +386,7 @@ class DropboxClient(ConnectorClientBase):
 
         This operation gets the content of a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/content"
         )
@@ -385,14 +397,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -410,7 +424,7 @@ class DropboxClient(ConnectorClientBase):
 
         This operation creates a file in a folder.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/files"
+        request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if folder_path is not None:
@@ -424,14 +438,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -452,7 +468,9 @@ class DropboxClient(ConnectorClientBase):
 
         This operation copies a file to Dropbox.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/copyFile"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/copyFile"
+        )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
         if source is not None:
@@ -471,14 +489,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -501,7 +521,7 @@ class DropboxClient(ConnectorClientBase):
         it is required to trigger on subfolders, multiple triggers should be
         created.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/onnewfile"
         )
@@ -518,14 +538,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -545,7 +567,7 @@ class DropboxClient(ConnectorClientBase):
         is required to trigger on subfolders, multiple triggers should be
         created.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/onupdatedfile"
         )
@@ -563,14 +585,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -590,7 +614,7 @@ class DropboxClient(ConnectorClientBase):
         it is required to trigger on subfolders, multiple triggers should be
         created.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/batch/onnewfile"
         )
@@ -606,14 +630,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -636,7 +662,7 @@ class DropboxClient(ConnectorClientBase):
         is required to trigger on subfolders, multiple triggers should be
         created.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/batch/onupdatedfile"
         )
@@ -652,14 +678,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -678,17 +706,19 @@ class DropboxClient(ConnectorClientBase):
 
         This operation gets the list of files and subfolders in a folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/folders/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -707,14 +737,18 @@ class DropboxClient(ConnectorClientBase):
         This operation gets the list of files and subfolders in the root
         folder.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/folders"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/folders"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -735,7 +769,7 @@ class DropboxClient(ConnectorClientBase):
 
         This operation extracts an archive file into a folder (example: .zip).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
@@ -756,14 +790,16 @@ class DropboxClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

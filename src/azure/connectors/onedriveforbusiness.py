@@ -225,16 +225,18 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation gets the metadata for a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -254,16 +256,18 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation updates a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -282,16 +286,18 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation deletes a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -305,7 +311,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation gets the metadata of a file using the path.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
+        )
         query_params = []
         if path is not None:
             value = str(path)
@@ -313,14 +321,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -340,7 +350,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation gets the content of a file using the path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/GetFileContentByPath"
         )
@@ -356,14 +366,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -380,7 +392,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation gets the content of a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/content"
         )
@@ -391,14 +403,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -416,7 +430,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation creates a file.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/files"
+        request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
         if folder_path is not None:
             value = str(folder_path)
@@ -429,14 +443,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -457,7 +473,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation uploads a file from a URL to OneDrive.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/copyFile"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/copyFile"
+        )
         query_params = []
         if source is not None:
             value = str(source)
@@ -475,14 +493,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -503,7 +523,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation copies a file within OneDrive.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/copy"
         )
@@ -519,14 +539,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -547,7 +569,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation copies a file within OneDrive by path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/CopyFileByPath"
         )
         query_params = []
@@ -567,14 +589,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -595,7 +619,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation moves or renames a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/move"
         )
@@ -611,14 +635,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -639,7 +665,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation moves or renames a file using the path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/MoveFileByPath"
         )
         query_params = []
@@ -659,14 +685,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -687,7 +715,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         This operation converts a file to another format. The list of supported
         conversions can be found at https://aka.ms/onedriveconversions
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/convert"
         )
@@ -698,14 +726,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"type={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -724,7 +754,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         list of supported conversions can be found at
         https://aka.ms/onedriveconversions
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/ConvertFileByPath"
         )
@@ -740,14 +770,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"type={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -765,7 +797,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         This operation gets the thumbnail of a file. The thumbnail will only be
         valid for 6 hours.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/thumbnail"
         )
@@ -776,14 +808,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"size={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -802,14 +836,18 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         This operation gets the list of files and subfolders in the root
         folder.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/folders"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/folders"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -832,7 +870,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         This operation finds files within a folder using search or name pattern
         match.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/folders/{str(id)}/search"
         )
@@ -853,14 +891,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -883,7 +923,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         This operation finds files within a folder by path using search or name
         pattern match.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/findFile"
+        request_url = (
+            f"{self._connection_runtime_url}/datasets/default/findFile"
+        )
         query_params = []
         if query is not None:
             value = str(query)
@@ -906,14 +948,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -934,7 +978,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation creates a share link for a file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/files/{str(id)}/shareV2"
         )
@@ -950,14 +994,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"scope={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -978,7 +1024,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation creates a share link for a file using the path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/CreateShareLinkByPathV2"
         )
@@ -999,14 +1045,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"scope={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1028,7 +1076,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         This operation extracts an archive file into a folder (example: .zip).
         Maximum archive size is 50 MB and 100 files inside.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
@@ -1048,14 +1096,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1074,7 +1124,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation gets the list of files and subfolders in a folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/foldersV2/{str(id)}"
         )
@@ -1082,14 +1132,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         query_params.append("skipToken=" + quote(""))
         query_params.append("top=" + quote("20"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1112,7 +1164,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         Files larger than 50 MB will be skipped and not returned by this
         trigger. Files moved within OneDrive are not considered new files.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/onnewfilev2"
         )
@@ -1134,14 +1186,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1160,7 +1214,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         This operation triggers a flow when a new file is created in a folder.
         Files moved within OneDrive are not considered new files.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/batch/onnewfilesv2"
         )
@@ -1182,14 +1236,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1212,7 +1268,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         Files larger than 50 MB will be skipped and not returned by this
         trigger.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/onupdatedfilev2"
         )
@@ -1235,14 +1291,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1260,7 +1318,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         This operation triggers a flow when a file is modified in a folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/triggers/batch/onupdatedfilesv2"
         )
@@ -1282,14 +1340,16 @@ class OnedriveforbusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"maxFileCount={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
