@@ -158,6 +158,8 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure Automation** | `azure.connectors.azureautomation` | ✅ Complete | 🔄 SDK Generated | 32 tests |
 | **Azure AD** | `azure.connectors.azuread` | ✅ Complete | 🔄 SDK Generated | 68 tests |
 | **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | ✅ E2E Validated | 51 tests |
+| **Box** | `azure.connectors.box` | ✅ Complete | 🔄 SDK Generated | 30 tests |
+| **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated | 32 tests |
 | **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated | 46 tests |
 | **Azure Data Factory** | `azure.connectors.azuredatafactory` | ✅ Complete | 🔄 SDK Generated | 38 tests |
 | **Azure Digital Twins** | `azure.connectors.azuredigitaltwins` | ✅ Complete | 🔄 SDK Generated | 44 tests |
@@ -165,11 +167,16 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated | 37 tests |
 | **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated | 18 tests |
 | **Azure Event Hubs** | `azure.connectors.eventhubs` | ✅ Complete | 🔄 SDK Generated | 32 tests |
+| **FTP** | `azure.connectors.ftp` | ✅ Complete | 🔄 SDK Generated | 28 tests |
 | **GitHub** | `azure.connectors.github` | ✅ Complete | 🔄 SDK Generated | 15 tests |
+| **Google Calendar** | `azure.connectors.googlecalendar` | ✅ Complete | 🔄 SDK Generated | 29 tests |
+| **Google Tasks** | `azure.connectors.googletasks` | ✅ Complete | 🔄 SDK Generated | 24 tests |
+| **Google Drive** | `azure.connectors.googledrive` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Azure Key Vault** | `azure.connectors.keyvault` | ✅ Complete | 🔄 SDK Generated | 42 tests |
 | **Azure Queues** | `azure.connectors.azurequeues` | ✅ Complete | 🔄 SDK Generated | 38 tests |
 | **Azure Tables** | `azure.connectors.azuretables` | ✅ Complete | 🔄 SDK Generated | 53 tests |
 | **Azure VM** | `azure.connectors.azurevm` | ✅ Complete | 🔄 SDK Generated | 43 tests |
+| **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated | 26 tests |
 | **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 53 tests |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated | 33 tests |
 | **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated | 16 tests |
@@ -183,11 +190,14 @@ The following connectors have been generated and validated with comprehensive te
 | **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated | 72 tests |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated | 46 tests |
 | **Office 365 Groups** | `azure.connectors.office365groups` | ✅ Complete | 🔄 SDK Generated | 50 tests |
-| **OneDrive for Business** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 49 tests |
+| **Office 365 Groups Mail** | `azure.connectors.office365groupsmail` | ✅ Complete | 🔄 SDK Generated | 31 tests |
+| **OneDrive (Personal)** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 50 tests |
+| **OneDrive for Business** | `azure.connectors.onedriveforbusiness` | ✅ Complete | 🔄 SDK Generated | 37 tests |
 | **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated | 60 tests |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 49 tests |
 | **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated | 66 tests |
 | **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated | 18 tests |
+| **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated | 13 tests |
 | **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated | 14 tests |
 | **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated | 52 tests |
 | **Shifts** | `azure.connectors.shifts` | ✅ Complete | 🔄 SDK Generated | 18 tests |
@@ -197,7 +207,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
 
-**Total:** 1227 connector tests + 141 SDK component tests
+**Total:** 1508 connector tests + 141 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

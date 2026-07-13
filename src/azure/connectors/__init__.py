@@ -68,9 +68,21 @@ try:
 except (ImportError, NameError):
     Office365groupsClient = None  # type: ignore[assignment,misc]
 try:
+    from .office365groupsmail import Office365groupsmailClient
+except (ImportError, NameError):
+    Office365groupsmailClient = None  # type: ignore[assignment,misc]
+try:
     from .azureblob import AzureblobClient
 except (ImportError, NameError):
     AzureblobClient = None  # type: ignore[assignment,misc]
+try:
+    from .box import BoxClient
+except (ImportError, NameError):
+    BoxClient = None  # type: ignore[assignment,misc]
+try:
+    from .dropbox import DropboxClient
+except (ImportError, NameError):
+    DropboxClient = None  # type: ignore[assignment,misc]
 try:
     from .mq import MqClient
 except (ImportError, NameError):
@@ -79,6 +91,10 @@ try:
     from .onedrive import OnedriveClient
 except (ImportError, NameError):
     OnedriveClient = None  # type: ignore[assignment,misc]
+try:
+    from .onedriveforbusiness import OnedriveforbusinessClient
+except (ImportError, NameError):
+    OnedriveforbusinessClient = None  # type: ignore[assignment,misc]
 try:
     from .onenote import OnenoteClient
 except (ImportError, NameError):
@@ -100,6 +116,10 @@ try:
 except (ImportError, NameError):
     ExcelonlinebusinessClient = None  # type: ignore[assignment,misc]
 try:
+    from .excelonline import ExcelonlineClient
+except (ImportError, NameError):
+    ExcelonlineClient = None  # type: ignore[assignment,misc]
+try:
     from .azurequeues import AzurequeuesClient
 except (ImportError, NameError):
     AzurequeuesClient = None  # type: ignore[assignment,misc]
@@ -119,6 +139,10 @@ try:
     from .eventhubs import EventhubsClient
 except (ImportError, NameError):
     EventhubsClient = None  # type: ignore[assignment,misc]
+try:
+    from .ftp import FtpClient
+except (ImportError, NameError):
+    FtpClient = None  # type: ignore[assignment,misc]
 try:
     from .keyvault import KeyvaultClient
 except (ImportError, NameError):
@@ -168,6 +192,21 @@ except (ImportError, NameError):
     GithubClient = None  # type: ignore[assignment,misc]
 
 try:
+    from .googlecalendar import GooglecalendarClient
+except (ImportError, NameError):
+    GooglecalendarClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .googletasks import GoogletasksClient
+except (ImportError, NameError):
+    GoogletasksClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .googledrive import GoogledriveClient
+except (ImportError, NameError):
+    GoogledriveClient = None  # type: ignore[assignment,misc]
+
+try:
     from .jira import JiraClient
 except (ImportError, NameError):
     JiraClient = None  # type: ignore[assignment,misc]
@@ -181,6 +220,11 @@ try:
     from .powerbi import PowerbiClient
 except (ImportError, NameError):
     PowerbiClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .rss import RssClient
+except (ImportError, NameError):
+    RssClient = None  # type: ignore[assignment,misc]
 
 try:
     from .salesforce import SalesforceClient
@@ -225,19 +269,25 @@ __all__ = [
     'MsgraphgroupsanduserClient',
     'Office365usersClient',
     'Office365groupsClient',
+    'Office365groupsmailClient',
     'AzureblobClient',
+    'BoxClient',
+    'DropboxClient',
     'MqClient',
     'OnedriveClient',
+    'OnedriveforbusinessClient',
     'OnenoteClient',
     'PlannerClient',
     'AzureadClient',
     'SmtpClient',
+    'ExcelonlineClient',
     'ExcelonlinebusinessClient',
     'AzurequeuesClient',
     'AzuretablesClient',
     'AzurevmClient',
     'DocumentdbClient',
     'EventhubsClient',
+    'FtpClient',
     'KeyvaultClient',
     'MicrosoftbookingsClient',
     'OutlookClient',
@@ -249,9 +299,13 @@ __all__ = [
     "AzuremonitorlogsClient",
     "DocusignClient",
     "GithubClient",
+    "GooglecalendarClient",
+    "GoogletasksClient",
+    "GoogledriveClient",
     "JiraClient",
     "MicrosoftformsClient",
     "PowerbiClient",
+    "RssClient",
     "SalesforceClient",
     "ShiftsClient",
     "SlackClient",
