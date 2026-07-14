@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Pipedrive** (`pipedrive.py`) connector client with unit tests and samples
+- **Zendesk** (`zendesk.py`) connector client with unit tests and samples
+- **SQL Server** (`sql.py`) connector client with unit tests and samples
+- **Plumsail Documents** (`plumsail.py`) connector client with unit tests and samples
+- **PDF.co** (`pdfco.py`) connector client with unit tests and samples
+- **Fin & Ops Apps (Dynamics 365)** (`dynamicsax.py`) connector client with unit tests and samples
+- **Cloudmersive Document Conversion** (`cloudmersiveconvert.py`) connector client with unit tests and samples
+- **Azure IoT Central** (`azureiotcentral.py`) connector client with unit tests and samples
+- **Azure Event Grid** (`azureeventgrid.py`) connector client with unit tests and samples
+- **Universal Print** (`universalprint.py`) connector client with unit tests and samples
 - **GitHub** (`github.py`) connector client with unit tests and samples
 - **Slack** (`slack.py`) connector client with unit tests and samples
 - **Jira** (`jira.py`) connector client with unit tests and samples

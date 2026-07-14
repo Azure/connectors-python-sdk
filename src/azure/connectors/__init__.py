@@ -246,6 +246,56 @@ try:
 except (ImportError, NameError):
     TodoClient = None  # type: ignore[assignment,misc]
 
+try:
+    from .universalprint import UniversalprintClient
+except (ImportError, NameError):
+    UniversalprintClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .azureeventgrid import AzureeventgridClient
+except (ImportError, NameError):
+    AzureeventgridClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .azureiotcentral import AzureiotcentralClient
+except (ImportError, NameError):
+    AzureiotcentralClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .cloudmersiveconvert import CloudmersiveconvertClient
+except (ImportError, NameError):
+    CloudmersiveconvertClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .dynamicsax import DynamicsaxClient
+except (ImportError, NameError):
+    DynamicsaxClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .pdfco import PdfcoClient
+except (ImportError, NameError):
+    PdfcoClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .plumsail import PlumsailClient
+except (ImportError, NameError):
+    PlumsailClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .sql import SqlClient
+except (ImportError, NameError):
+    SqlClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .zendesk import ZendeskClient
+except (ImportError, NameError):
+    ZendeskClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .pipedrive import PipedriveClient
+except (ImportError, NameError):
+    PipedriveClient = None  # type: ignore[assignment,misc]
+
 __version__ = '0.3.0b2'
 
 __all__ = [
@@ -310,4 +360,14 @@ __all__ = [
     "ShiftsClient",
     "SlackClient",
     "TodoClient",
+    "UniversalprintClient",
+    "AzureeventgridClient",
+    "AzureiotcentralClient",
+    "CloudmersiveconvertClient",
+    "DynamicsaxClient",
+    "PdfcoClient",
+    "PlumsailClient",
+    "SqlClient",
+    "ZendeskClient",
+    "PipedriveClient",
 ]

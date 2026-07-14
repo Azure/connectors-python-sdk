@@ -204,10 +204,20 @@ The following connectors have been generated and validated with comprehensive te
 | **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated | 15 tests |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 80 tests |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 28 tests |
+| **Universal Print** | `azure.connectors.universalprint` | ✅ Complete | 🔄 SDK Generated | 15 tests |
+| **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated | 18 tests |
+| **Azure IoT Central** | `azure.connectors.azureiotcentral` | ✅ Complete | 🔄 SDK Generated | 173 tests |
+| **Cloudmersive Document Conversion** | `azure.connectors.cloudmersiveconvert` | ✅ Complete | 🔄 SDK Generated | 15 tests |
+| **Fin & Ops Apps (Dynamics 365)** | `azure.connectors.dynamicsax` | ✅ Complete | 🔄 SDK Generated | 47 tests |
+| **PDF.co** | `azure.connectors.pdfco` | ✅ Complete | 🔄 SDK Generated | 16 tests |
+| **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated | 15 tests |
+| **SQL Server** | `azure.connectors.sql` | ✅ Complete | 🔄 SDK Generated | 49 tests |
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
+| **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated | 30 tests |
+| **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated | 28 tests |
 
-**Total:** 1508 connector tests + 141 SDK component tests
+**Total:** 2410 connector tests + 141 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 
