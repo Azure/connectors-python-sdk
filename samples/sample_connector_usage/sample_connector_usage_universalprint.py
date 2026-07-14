@@ -15,7 +15,7 @@ Installation:
 
 Usage:
     Set environment variable:
-    $env:UNIVERSALPRINT_CONNECTION_URL = "https://[region].azure-apihub.net/apim/universalprint/[connection-id]"
+    $env:UNIVERSALPRINT_CONNECTION_URL = "<connection-runtime-url>"
 
     python sample_connector_usage_universalprint.py
 """

@@ -15,7 +15,7 @@ Installation:
 
 Usage:
     Set environment variable:
-    $env:PIPEDRIVE_CONNECTION_URL = "https://[region].azure-apihub.net/apim/pipedrive/[connection-id]"
+    $env:PIPEDRIVE_CONNECTION_URL = "<connection-runtime-url>"
 
     python sample_connector_usage_pipedrive.py
 """

@@ -32,7 +32,7 @@ from tests.conftest import MockResponse
 
 
 async def _invoke_operation(client: SqlClient, operation: str):
-    """Invoke a SQL operation by name for shared error-handling tests."""
+    """Invoke a SQL operation by name for shared method tests."""
     if operation == "delete_item":
         return await client.delete_item_async(
             server="srv", database="db", table="tbl", id="1"
@@ -521,6 +521,25 @@ class TestSqlClientMethods:
             await client.get_table_async(table="tbl")
 
             assert "/$metadata.json/datasets/default/tables/tbl" in mock_send.call_args[0][1]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_all_operations_success(self, mock_token_provider, operation):
+        """Test every operation issues a request and returns without error."""
+        base_url = "https://example.azure.com/connections/test"
+        client = SqlClient(base_url, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await _invoke_operation(client, operation)
+
+            assert mock_send.call_count == 1
+            assert mock_send.call_args[0][1].startswith(base_url)
 
 
 class TestSqlClientErrorHandling:
