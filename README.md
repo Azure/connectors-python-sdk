@@ -217,7 +217,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated | 28 tests |
 
-**Total:** 2410 connector tests + 141 SDK component tests
+**Total:** 62 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

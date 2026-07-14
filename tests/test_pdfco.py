@@ -268,3 +268,118 @@ class TestPdfFillerAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.pdf_filler_async(input=PdfFillerInput())
+
+
+BASE_URL = "https://example.azure.com/connections/test"
+
+OPERATION_ARGS = {
+    "barcode_generator": {"input": {}},
+    "barcode_reader": {"input": {}},
+    "document_parser": {"input": {}},
+    "email_attachment_extraction": {"input": {}},
+    "email_decode": {"input": {}},
+    "email_send": {"input": {}},
+    "html_to_pdf": {"input": {}},
+    "job_check": {"input": {}},
+    "merge_pdf": {"input": {}},
+    "merge_pdf_simplified": {"input": {}},
+    "p_d_f_add_security": {"input": {}},
+    "p_d_f_attachment_extraction": {"input": {}},
+    "p_d_f_auto_rotate_pages": {"input": {}},
+    "p_d_f_classifier": {"input": {}},
+    "p_d_f_compress": {"input": {}},
+    "p_d_f_delete_pages": {"input": {}},
+    "p_d_f_find_table": {"input": {}},
+    "p_d_f_forms_info_reader": {"input": {}},
+    "p_d_f_from_c_s_v": {"input": {}},
+    "p_d_f_from_doc": {"input": {}},
+    "p_d_f_from_email": {"input": {}},
+    "p_d_f_from_images": {"input": {}},
+    "p_d_f_from_x_l_s_x_l_s_x": {"input": {}},
+    "p_d_f_info_reader": {"input": {}},
+    "p_d_f_rotate_pages": {"input": {}},
+    "p_d_f_searchable": {"input": {}},
+    "p_d_f_security_remove": {"input": {}},
+    "p_d_f_serarch_text": {"input": {}},
+    "p_d_f_to_c_s_v": {"input": {}},
+    "p_d_f_to_j_p_g": {"input": {}},
+    "p_d_f_to_j_s_o_n": {"input": {}},
+    "p_d_f_to_j_s_o_n_meta": {"input": {}},
+    "p_d_f_to_p_n_g": {"input": {}},
+    "p_d_f_to_t_i_f_f": {"input": {}},
+    "p_d_f_to_text": {"input": {}},
+    "p_d_f_to_text_simple": {"input": {}},
+    "p_d_f_to_w_e_b_p": {"input": {}},
+    "p_d_f_to_x_l_s": {"input": {}},
+    "p_d_f_to_x_l_s_x": {"input": {}},
+    "p_d_f_to_x_m_l": {"input": {}},
+    "p_d_f_un_searchable": {"input": {}},
+    "pdf_filler": {"input": {}},
+    "search_and_delete_text": {"input": {}},
+    "search_and_replace": {"input": {}},
+    "search_and_replace_with_image": {"input": {}},
+    "split_pdf2": {"input": {}},
+    "split_pdf": {"input": {}},
+    "url_to_pdf": {"input": {}},
+    "x_l_sto_c_s_v": {"input": {}},
+    "x_l_sto_h_t_m_l": {"input": {}},
+    "x_l_sto_j_s_o_n": {"input": {}},
+    "x_l_sto_t_x_t": {"input": {}},
+    "x_l_sto_x_m_l": {"input": {}},
+}
+
+ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
+
+
+async def _invoke_operation(client: PdfcoClient, operation: str):
+    """Invoke a PDF.co operation by name for shared method tests."""
+    method = getattr(client, f"{operation}_async")
+    return await method(**OPERATION_ARGS[operation])
+
+
+class TestPdfcoClientAllOperations:
+    """Success path smoke tests covering every generated operation."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_all_operations_success(self, mock_token_provider, operation):
+        """Test every operation issues a request and returns without error."""
+        client = PdfcoClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await _invoke_operation(client, operation)
+
+            assert mock_send.call_count == 1
+            assert mock_send.call_args[0][1].startswith(BASE_URL)
+
+
+class TestPdfcoClientAllOperationsErrorHandling:
+    """Error handling tests that ensure every operation raises ConnectorException."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_error_response_raises_exception_for_all_operations(
+        self,
+        mock_token_provider,
+        operation,
+    ):
+        """Test non-2xx responses raise ConnectorException for every operation."""
+        client = PdfcoClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=500, text='{"error":"server failure"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await _invoke_operation(client, operation)
+
+            assert exc_info.value.status_code == 500

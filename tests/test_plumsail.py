@@ -252,3 +252,116 @@ class TestProcessesFlowTriggersAsync:
                 await client.flow_v1_processes_flow_triggers_async(
                     input=AddPowerAutomateWebhookData()
                 )
+
+
+BASE_URL = "https://example.azure.com/connections/test"
+
+OPERATION_ARGS = {
+    "flow_v1_documents_flow_schema_add_watermark_to_pdf": {"type_": "test"},
+    "flow_v1_documents_flow_schema_parse_csv": {"headers": "test"},
+    "flow_v1_documents_flow_schema_reg_exp_match": {"pattern": "test"},
+    "flow_v1_documents_flow_schema_split_pdf": {"type_": "test"},
+    "flow_v1_documents_jobs_add_watermark_to_pdf": {"input": {}, "type_": "test"},
+    "flow_v1_documents_jobs_any2_pdf_v2": {"input": {}},
+    "flow_v1_documents_jobs_apply_docx": {"input": {}},
+    "flow_v1_documents_jobs_apply_docx_template": {"input": {}},
+    "flow_v1_documents_jobs_apply_html": {"input": {}},
+    "flow_v1_documents_jobs_apply_pptx": {"input": {}},
+    "flow_v1_documents_jobs_apply_xlsx_template": {"input": {}},
+    "flow_v1_documents_jobs_compress_pdf": {"input": {}},
+    "flow_v1_documents_jobs_create_archive": {"input": {}},
+    "flow_v1_documents_jobs_csv2_xlsx": {"input": {}},
+    "flow_v1_documents_jobs_doc2_docx": {"input": {}},
+    "flow_v1_documents_jobs_docx2_pdf": {"input": {}},
+    "flow_v1_documents_jobs_email2_pdf": {"input": {}},
+    "flow_v1_documents_jobs_extract_archive": {"input": {}},
+    "flow_v1_documents_jobs_extract_text_from_pdf": {"input": {}},
+    "flow_v1_documents_jobs_fill_in_pdf_form": {"input": {}},
+    "flow_v1_documents_jobs_get_pdf_form": {"input": {}},
+    "flow_v1_documents_jobs_get_pdf_protection_info": {"input": {}},
+    "flow_v1_documents_jobs_html2_docx": {"input": {}},
+    "flow_v1_documents_jobs_html2_pdf": {"input": {}},
+    "flow_v1_documents_jobs_image2_pdf": {"input": {}},
+    "flow_v1_documents_jobs_json2_csv": {"input": {}},
+    "flow_v1_documents_jobs_json2_xlsx": {"input": {}},
+    "flow_v1_documents_jobs_merge_any_to_pdf_v2": {"input": {}},
+    "flow_v1_documents_jobs_merge_docx": {"input": {}},
+    "flow_v1_documents_jobs_merge_xlsx": {"input": {}},
+    "flow_v1_documents_jobs_parse_csv": {"input": {}},
+    "flow_v1_documents_jobs_pdf2_image_v2": {"input": {}},
+    "flow_v1_documents_jobs_ppt2_pptx": {"input": {}},
+    "flow_v1_documents_jobs_pptx2_pdf": {"input": {}},
+    "flow_v1_documents_jobs_protect_pdf": {"input": {}},
+    "flow_v1_documents_jobs_reg_exp_match": {"input": {}},
+    "flow_v1_documents_jobs_reg_exp_replace": {"input": {}},
+    "flow_v1_documents_jobs_reg_exp_test": {"input": {}},
+    "flow_v1_documents_jobs_split_pdf_v2": {"input": {}, "type_": "test"},
+    "flow_v1_documents_jobs_xls2_xlsx": {"input": {}},
+    "flow_v1_documents_jobs_xslx2_pdf": {"input": {}},
+    "flow_v1_processes_flow_jobs_execute_process": {"input": {}, "process_id": "test"},
+    "flow_v1_processes_flow_jobs_execute_process_with_generated_data": {
+        "input": {},
+        "process_id": "test",
+    },
+    "flow_v1_processes_flow_schema_get_json_data": {"process_id": "test"},
+    "flow_v1_processes_flow_schema_get_processes": {},
+    "flow_v1_processes_flow_triggers": {"input": {}},
+    "flow_v1_processes_flow_triggers_by_process_id_schema_get": {"process_id": "test"},
+    "profiles_me_get": {},
+}
+
+ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
+
+
+async def _invoke_operation(client: PlumsailClient, operation: str):
+    """Invoke a Plumsail operation by name for shared method tests."""
+    method = getattr(client, f"{operation}_async")
+    return await method(**OPERATION_ARGS[operation])
+
+
+class TestPlumsailClientAllOperations:
+    """Success path smoke tests covering every generated operation."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_all_operations_success(self, mock_token_provider, operation):
+        """Test every operation issues a request and returns without error."""
+        client = PlumsailClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await _invoke_operation(client, operation)
+
+            assert mock_send.call_count == 1
+            assert mock_send.call_args[0][1].startswith(BASE_URL)
+
+
+class TestPlumsailClientAllOperationsErrorHandling:
+    """Error handling tests that ensure every operation raises ConnectorException."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_error_response_raises_exception_for_all_operations(
+        self,
+        mock_token_provider,
+        operation,
+    ):
+        """Test non-2xx responses raise ConnectorException for every operation."""
+        client = PlumsailClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=500, text='{"error":"server failure"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await _invoke_operation(client, operation)
+
+            assert exc_info.value.status_code == 500

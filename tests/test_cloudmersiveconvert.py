@@ -251,3 +251,193 @@ class TestConvertDocumentAutodetectGetInfoAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.convert_document_autodetect_get_info_async()
+
+
+BASE_URL = "https://example.azure.com/connections/test"
+
+OPERATION_ARGS = {
+    "compare_document_docx": {},
+    "convert_data_csv_to_json": {},
+    "convert_data_json_to_xml": {"input": {}},
+    "convert_data_xls_to_json": {},
+    "convert_data_xlsx_to_json": {},
+    "convert_data_xml_edit_add_attribute_with_x_path": {},
+    "convert_data_xml_edit_add_child_with_x_path": {},
+    "convert_data_xml_edit_remove_all_child_nodes_with_x_path": {},
+    "convert_data_xml_edit_replace_with_x_path": {},
+    "convert_data_xml_edit_set_value_with_x_path": {},
+    "convert_data_xml_filter_with_x_path": {},
+    "convert_data_xml_query_with_x_query": {},
+    "convert_data_xml_query_with_x_query_multi": {},
+    "convert_data_xml_remove_with_x_path": {},
+    "convert_data_xml_to_json": {},
+    "convert_data_xml_transform_with_xslt_to_xml": {},
+    "convert_document_autodetect_get_info": {},
+    "convert_document_autodetect_to_pdf": {},
+    "convert_document_autodetect_to_png_array": {},
+    "convert_document_autodetect_to_txt": {},
+    "convert_document_csv_to_xlsx": {},
+    "convert_document_doc_to_docx": {},
+    "convert_document_doc_to_pdf": {},
+    "convert_document_doc_to_txt": {},
+    "convert_document_docx_to_pdf": {},
+    "convert_document_docx_to_txt": {},
+    "convert_document_html_to_pdf": {},
+    "convert_document_html_to_png": {},
+    "convert_document_html_to_txt": {},
+    "convert_document_pdf_to_docx": {},
+    "convert_document_pdf_to_docx_rasterize": {},
+    "convert_document_pdf_to_png_array": {},
+    "convert_document_pdf_to_png_single": {},
+    "convert_document_pdf_to_pptx": {},
+    "convert_document_pdf_to_txt": {},
+    "convert_document_png_array_to_pdf": {},
+    "convert_document_ppt_to_pdf": {},
+    "convert_document_ppt_to_pptx": {},
+    "convert_document_pptx_to_pdf": {},
+    "convert_document_pptx_to_txt": {},
+    "convert_document_xls_to_csv": {},
+    "convert_document_xls_to_pdf": {},
+    "convert_document_xls_to_xlsx": {},
+    "convert_document_xlsx_to_csv": {},
+    "convert_document_xlsx_to_pdf": {},
+    "convert_document_xlsx_to_txt": {},
+    "convert_image_get_image_info": {},
+    "convert_image_image_format_convert": {"format1": "test", "format2": "test"},
+    "convert_image_image_set_d_p_i": {"dpi": "test"},
+    "convert_image_multipage_image_format_convert": {"format1": "test", "format2": "test"},
+    "convert_template_apply_html_template": {"input": {}},
+    "convert_web_html_to_docx": {"input": {}},
+    "convert_web_html_to_pdf": {"input": {}},
+    "convert_web_html_to_png": {"input": {}},
+    "convert_web_html_to_txt": {"input": {}},
+    "convert_web_md_to_html": {},
+    "convert_web_url_to_pdf": {"input": {}},
+    "convert_web_url_to_screenshot": {"input": {}},
+    "convert_web_url_to_txt": {"input": {}},
+    "edit_document_begin_editing": {},
+    "edit_document_docx_body": {"input": {}},
+    "edit_document_docx_create_blank_document": {"input": {}},
+    "edit_document_docx_delete_pages": {"input": {}},
+    "edit_document_docx_delete_table_row": {"input": {}},
+    "edit_document_docx_delete_table_row_range": {"input": {}},
+    "edit_document_docx_get_comments_hierarchical": {"input": {}},
+    "edit_document_docx_get_headers_and_footers": {"input": {}},
+    "edit_document_docx_get_images": {"input": {}},
+    "edit_document_docx_get_sections": {"input": {}},
+    "edit_document_docx_get_styles": {"input": {}},
+    "edit_document_docx_get_table_by_index": {"input": {}},
+    "edit_document_docx_get_table_row": {"input": {}},
+    "edit_document_docx_get_tables": {"input": {}},
+    "edit_document_docx_insert_comment_on_paragraph": {"input": {}},
+    "edit_document_docx_insert_image": {"input": {}},
+    "edit_document_docx_insert_paragraph": {"input": {}},
+    "edit_document_docx_insert_table": {"input": {}},
+    "edit_document_docx_insert_table_row": {"input": {}},
+    "edit_document_docx_pages": {"input": {}},
+    "edit_document_docx_remove_headers_and_footers": {"input": {}},
+    "edit_document_docx_remove_object": {"input": {}},
+    "edit_document_docx_replace": {"input": {}},
+    "edit_document_docx_set_footer_add_page_number": {"input": {}},
+    "edit_document_docx_set_footer": {"input": {}},
+    "edit_document_docx_set_header": {"input": {}},
+    "edit_document_docx_update_table_cell": {"input": {}},
+    "edit_document_docx_update_table_row": {"input": {}},
+    "edit_document_finish_editing": {"input": {}},
+    "edit_document_pptx_delete_slides": {"input": {}},
+    "edit_document_pptx_replace": {"input": {}},
+    "edit_document_xlsx_clear_cell_by_index": {"input": {}},
+    "edit_document_xlsx_create_blank_spreadsheet": {"input": {}},
+    "edit_document_xlsx_create_spreadsheet_from_data": {"input": {}},
+    "edit_document_xlsx_delete_worksheet": {"input": {}},
+    "edit_document_xlsx_get_cell_by_identifier": {"input": {}},
+    "edit_document_xlsx_get_cell_by_index": {"input": {}},
+    "edit_document_xlsx_get_columns": {"input": {}},
+    "edit_document_xlsx_get_images": {"input": {}},
+    "edit_document_xlsx_get_rows_and_cells": {"input": {}},
+    "edit_document_xlsx_get_styles": {"input": {}},
+    "edit_document_xlsx_get_worksheets": {"input": {}},
+    "edit_document_xlsx_insert_worksheet": {"input": {}},
+    "edit_document_xlsx_set_cell_by_identifier": {"input": {}},
+    "edit_document_xlsx_set_cell_by_index": {"input": {}},
+    "merge_document_docx": {},
+    "merge_document_docx_multi": {},
+    "merge_document_pdf": {},
+    "merge_document_pdf_multi": {},
+    "merge_document_png": {},
+    "merge_document_pptx": {},
+    "merge_document_pptx_multi": {},
+    "merge_document_txt": {},
+    "merge_document_txt_multi": {},
+    "merge_document_xlsx": {},
+    "merge_document_xlsx_multi": {},
+    "split_document_docx": {},
+    "split_document_pdf_by_page": {},
+    "split_document_pptx": {},
+    "split_document_txt_by_line": {},
+    "split_document_txt_by_string": {},
+    "split_document_xlsx": {},
+    "validate_document_autodetect_validation": {},
+    "validate_document_docx_validation": {},
+    "validate_document_json_validation": {},
+    "validate_document_pdf_validation": {},
+    "validate_document_pptx_validation": {},
+    "validate_document_xlsx_validation": {},
+    "validate_document_xml_validation": {},
+}
+
+ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
+
+
+async def _invoke_operation(client: CloudmersiveconvertClient, operation: str):
+    """Invoke a Cloudmersive Convert operation by name for shared method tests."""
+    method = getattr(client, f"{operation}_async")
+    return await method(**OPERATION_ARGS[operation])
+
+
+class TestCloudmersiveconvertClientAllOperations:
+    """Success path smoke tests covering every generated operation."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_all_operations_success(self, mock_token_provider, operation):
+        """Test every operation issues a request and returns without error."""
+        client = CloudmersiveconvertClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await _invoke_operation(client, operation)
+
+            assert mock_send.call_count == 1
+            assert mock_send.call_args[0][1].startswith(BASE_URL)
+
+
+class TestCloudmersiveconvertClientAllOperationsErrorHandling:
+    """Error handling tests that ensure every operation raises ConnectorException."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_error_response_raises_exception_for_all_operations(
+        self,
+        mock_token_provider,
+        operation,
+    ):
+        """Test non-2xx responses raise ConnectorException for every operation."""
+        client = CloudmersiveconvertClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=500, text='{"error":"server failure"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await _invoke_operation(client, operation)
+
+            assert exc_info.value.status_code == 500
