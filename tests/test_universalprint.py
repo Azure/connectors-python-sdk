@@ -2,6 +2,8 @@
 
 """Unit tests for UniversalprintClient."""
 
+import inspect
+
 import pytest
 from unittest.mock import AsyncMock, patch
 
@@ -249,3 +251,39 @@ class TestUniversalprintClientErrorHandling:
         ):
             with pytest.raises(ConnectorException):
                 await _invoke_operation(client, operation)
+
+
+class TestUniversalprintClientSignatures:
+    """Tests that verify required/optional parameter semantics on public methods."""
+
+    def test_print_file_required_params_have_no_default(self):
+        """Test printer and file_name are required (no default value)."""
+        signature = inspect.signature(UniversalprintClient.print_file_async)
+
+        assert signature.parameters["printer"].default is inspect.Parameter.empty
+        assert signature.parameters["file_name"].default is inspect.Parameter.empty
+
+    def test_print_file_required_params_annotated_as_str(self):
+        """Test printer and file_name are annotated as str, not Optional."""
+        signature = inspect.signature(UniversalprintClient.print_file_async)
+
+        assert signature.parameters["printer"].annotation == "str"
+        assert signature.parameters["file_name"].annotation == "str"
+
+    def test_print_file_optional_params_default_to_none(self):
+        """Test optional configuration params default to None."""
+        signature = inspect.signature(UniversalprintClient.print_file_async)
+
+        assert signature.parameters["configuration_copies"].default is None
+        assert signature.parameters["configuration_color_mode"].default is None
+
+    @pytest.mark.asyncio
+    async def test_print_file_missing_required_param_raises_type_error(self, mock_token_provider):
+        """Test omitting a required query param raises TypeError."""
+        client = UniversalprintClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with pytest.raises(TypeError):
+            await client.print_file_async(input=PrintFileInput())

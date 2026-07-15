@@ -346,3 +346,290 @@ class TestAttachmentDeleteAttachmentAsync:
                     document_id="doc-1",
                     attachment_id="att-1",
                 )
+
+
+BASE_URL = "https://example.azure.com/connections/test"
+
+OPERATION_ARGS = {
+    "attachment_delete_attachment": {
+        "package_id": "package-1",
+        "document_id": "doc-1",
+        "attachment_id": "att-1",
+    },
+    "attachment_download_attachment": {
+        "package_id": "package-1",
+        "document_id": "doc-1",
+        "attachment_id": "att-1",
+    },
+    "attachment_get_attachments": {"package_id": "package-1", "document_id": "doc-1"},
+    "attachment_upload_attachment": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "checkbox_add_check_box": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "checkbox_update_check_box": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "contacts_get": {"record_per_page": "10", "page_no": "1"},
+    "documents_delete_document": {"package_id": "package-1", "document_id": "doc-1"},
+    "documents_download_document_bytes": {
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "documents_get_certify_policy": {"package_id": "package-1", "document_id": "doc-1"},
+    "documents_get_document_details": {"package_id": "package-1", "document_id": "doc-1"},
+    "documents_rename_document": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "documents_update_certify_policy": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "documents_upload_from_library": {"package_id": "package-1", "document_id": "doc-1"},
+    "documents_upload_stream": {"input": {}, "package_id": "package-1"},
+    "enterprise_documents_get_enterprise_workflow_access": {
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "enterprise_documents_update_enterprise_workflow_access": {
+        "input": {},
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "fields_auto_assign_field": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "fields_auto_place": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "fields_delete_document_field": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "fields_fill_form_fields": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "fields_get_all_document_fields": {
+        "package_id": "package-1",
+        "document_id": "doc-1",
+        "page_no": "1",
+    },
+    "folder_move_package": {"input": {}, "package_id": "package-1"},
+    "initials_add_initial": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "initials_fill": {"input": {}, "package_id": "package-1", "document_id": "doc-1"},
+    "initials_update_initial": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "in_person_add_in_person": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "in_person_update_in_person": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "package_add_package": {"input": {}},
+    "package_approve": {"input": {}, "package_id": "package-1"},
+    "package_decline": {"input": {}, "package_id": "package-1"},
+    "package_delete_package": {"package_id_bulk_action": "package-1"},
+    "package_download_package_bytes": {"package_id_bulk_action": "package-1"},
+    "package_finish": {"package_id": "package-1"},
+    "package_gatekeeper_approve": {"input": {}, "package_id": "package-1"},
+    "package_gatekeeper_decline": {"input": {}, "package_id": "package-1"},
+    "package_get_all_packages": {
+        "document_status": "PENDING",
+        "page_no": "1",
+        "record_per_page": "10",
+    },
+    "package_get_package_details": {"package_id": "package-1"},
+    "package_rename_package": {"input": {}, "package_id_bulk_action": "package-1"},
+    "package_submit": {"package_id": "package-1"},
+    "q_r_add_q_r_code": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "q_r_update_q_r_code": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "radio_add_radio_box": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "radio_update_radio_box": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "settings_get_templates": {"record_per_page": "10", "page_no": "1"},
+    "signature_add_signature": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "signature_update_signature": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "signing_bulk_sign_documents": {
+        "input": {},
+        "package_id_bulk_action": "package-1",
+    },
+    "signing_bulk_sign_status": {"input": {}, "bulk_action": "action-1"},
+    "signing_sign_document": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "template_get_enterprise_templates": {"record_per_page": "10", "page_no": "1"},
+    "text_box_add_text_box": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "text_box_update_text_box": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "workflow_apply_template": {
+        "input": {},
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
+    "workflow_evidence_report_download_bytes": {"package_id": "package-1"},
+    "workflow_get_workflow_detail": {"package_id": "package-1"},
+    "workflow_get_workflow_history": {
+        "package_id": "package-1",
+        "page_no": "1",
+        "records_per_page": "10",
+    },
+    "workflow_get_workflow_reminder": {"package_id": "package-1", "order": "1"},
+    "workflow_get_workflow_users": {"package_id": "package-1"},
+    "workflow_mark_workflow_completed": {"package_id": "package-1"},
+    "workflow_permission_get_workflow_permissions": {
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "workflow_permission_update_workflow_permissions": {
+        "input": {},
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "workflow_recall_workflow": {"package_id": "package-1"},
+    "workflow_start_workflow": {"package_id": "package-1"},
+    "workflow_update_workflow": {"input": {}, "package_id": "package-1"},
+    "workflow_update_workflow_post_process": {"input": {}, "package_id": "package-1"},
+    "workflow_update_workflow_reminder": {
+        "input": {},
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "workflow_workflow_add_group": {"input": {}, "package_id": "package-1"},
+    "workflow_workflow_add_placeholder": {"input": {}, "package_id": "package-1"},
+    "workflow_workflow_add_user": {"input": {}, "package_id": "package-1"},
+    "workflow_workflow_delete_user": {"package_id": "package-1", "order": "1"},
+    "workflow_workflow_update_placeholder": {
+        "input": {},
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "workflow_workflow_user_update": {
+        "input": {},
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "workflow_workflow_user_update_order": {
+        "input": {},
+        "package_id": "package-1",
+        "order": "1",
+    },
+    "work_space_delete_shared_space": {"id": "space-1"},
+    "work_space_get_shared_space": {"id": "space-1"},
+    "work_space_update_shared_space": {"input": {}, "id": "space-1"},
+}
+
+ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
+
+
+async def _invoke_operation(client: SigninghubClient, operation: str):
+    """Invoke a SigningHub operation by name for shared method tests."""
+    method = getattr(client, f"{operation}_async")
+    return await method(**OPERATION_ARGS[operation])
+
+
+class TestSigninghubClientAllOperations:
+    """Success path smoke tests covering every generated operation."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_all_operations_success(self, mock_token_provider, operation):
+        """Test every operation issues a request and returns without error."""
+        client = SigninghubClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await _invoke_operation(client, operation)
+
+            assert mock_send.call_count == 1
+            assert mock_send.call_args[0][1].startswith(BASE_URL)
+
+
+class TestSigninghubClientAllOperationsErrorHandling:
+    """Error handling tests that ensure every operation raises ConnectorException."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_error_response_raises_exception_for_all_operations(
+        self,
+        mock_token_provider,
+        operation,
+    ):
+        """Test non-2xx responses raise ConnectorException for every operation."""
+        client = SigninghubClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=500, text='{"error":"server failure"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await _invoke_operation(client, operation)
+
+            assert exc_info.value.status_code == 500

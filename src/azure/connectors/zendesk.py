@@ -248,7 +248,7 @@ class ZendeskClient(ConnectorClientBase):
 
     async def get_tables_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get tables
 
@@ -281,7 +281,7 @@ class ZendeskClient(ConnectorClientBase):
         skip: Optional[str] = None,
         top: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get items
 
@@ -341,7 +341,7 @@ class ZendeskClient(ConnectorClientBase):
         self,
         input: Item,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create Item
 
@@ -373,7 +373,7 @@ class ZendeskClient(ConnectorClientBase):
         self,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get item
 
@@ -405,7 +405,7 @@ class ZendeskClient(ConnectorClientBase):
         self,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Delete item
 
@@ -433,7 +433,7 @@ class ZendeskClient(ConnectorClientBase):
         input: Item,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update item
 
@@ -468,7 +468,7 @@ class ZendeskClient(ConnectorClientBase):
         orderby: Optional[str] = None,
         skip: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         When an item is created
 
@@ -521,14 +521,14 @@ class ZendeskClient(ConnectorClientBase):
 
     async def search_articles_async(
         self,
-        query: Optional[str],
+        query: str,
         locale: Optional[str] = None,
         brand_id: Optional[str] = None,
         category: Optional[str] = None,
         section: Optional[str] = None,
         label_names: Optional[str] = None,
         multibrand: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Search Articles
 
@@ -540,11 +540,10 @@ class ZendeskClient(ConnectorClientBase):
             f"/api/v2/help_center/articles/search"
         )
         query_params = []
-        if query is not None:
-            value = str(query)
-            if isinstance(query, bool):
-                value = value.lower()
-            query_params.append(f"query={quote(value)}")
+        value = str(query)
+        if isinstance(query, bool):
+            value = value.lower()
+        query_params.append(f"query={quote(value)}")
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -602,7 +601,7 @@ class ZendeskClient(ConnectorClientBase):
         orderby: Optional[str] = None,
         skip: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         When an item is modified
 
@@ -656,7 +655,7 @@ class ZendeskClient(ConnectorClientBase):
     async def get_table_async(
         self,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get item metadata
 

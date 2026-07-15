@@ -81,8 +81,8 @@ class UniversalprintClient(ConnectorClientBase):
     async def print_file_async(
         self,
         input: PrintFileInput,
-        printer: Optional[str],
-        file_name: Optional[str],
+        printer: str,
+        file_name: str,
         configuration_copies: Optional[str] = None,
         configuration_orientation: Optional[str] = None,
         configuration_color_mode: Optional[str] = None,
@@ -93,7 +93,7 @@ class UniversalprintClient(ConnectorClientBase):
         configuration_quality: Optional[str] = None,
         configuration_media_type: Optional[str] = None,
         configuration_finishings: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Print PDF
 
@@ -101,16 +101,14 @@ class UniversalprintClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/print/shares"
         query_params = []
-        if printer is not None:
-            value = str(printer)
-            if isinstance(printer, bool):
-                value = value.lower()
-            query_params.append(f"printer={quote(value)}")
-        if file_name is not None:
-            value = str(file_name)
-            if isinstance(file_name, bool):
-                value = value.lower()
-            query_params.append(f"fileName={quote(value)}")
+        value = str(printer)
+        if isinstance(printer, bool):
+            value = value.lower()
+        query_params.append(f"printer={quote(value)}")
+        value = str(file_name)
+        if isinstance(file_name, bool):
+            value = value.lower()
+        query_params.append(f"fileName={quote(value)}")
         if configuration_copies is not None:
             value = str(configuration_copies)
             if isinstance(configuration_copies, bool):
@@ -178,7 +176,7 @@ class UniversalprintClient(ConnectorClientBase):
 
     async def list_recent_shares_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List recently used shares
 

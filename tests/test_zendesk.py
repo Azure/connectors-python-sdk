@@ -2,6 +2,8 @@
 
 """Unit tests for ZendeskClient."""
 
+import inspect
+
 import pytest
 from unittest.mock import AsyncMock, patch
 
@@ -412,3 +414,53 @@ class TestZendeskClientErrorHandling:
         ):
             with pytest.raises(ConnectorException):
                 await _invoke_operation(client, operation)
+
+
+class TestZendeskClientSignatures:
+    """Tests that verify parameter and return annotations on public methods."""
+
+    def test_search_articles_query_required_and_annotated_str(self):
+        """Test the query parameter is required and annotated as str, not Optional."""
+        signature = inspect.signature(ZendeskClient.search_articles_async)
+
+        assert signature.parameters["query"].default is inspect.Parameter.empty
+        assert signature.parameters["query"].annotation == "str"
+
+    def test_search_articles_optional_params_default_to_none(self):
+        """Test optional search params default to None."""
+        signature = inspect.signature(ZendeskClient.search_articles_async)
+
+        assert signature.parameters["locale"].default is None
+
+    @pytest.mark.asyncio
+    async def test_search_articles_missing_query_raises_type_error(self, mock_token_provider):
+        """Test omitting the required query param raises TypeError."""
+        client = ZendeskClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with pytest.raises(TypeError):
+            await client.search_articles_async()
+
+    @pytest.mark.parametrize(
+        "method_name",
+        [
+            "get_tables_async",
+            "get_items_async",
+            "post_item_async",
+            "get_item_async",
+            "delete_item_async",
+            "patch_item_async",
+            "get_on_new_items_async",
+            "search_articles_async",
+            "get_on_updated_items_async",
+            "get_table_async",
+        ],
+    )
+    def test_public_methods_have_return_annotation(self, method_name):
+        """Test every public async method declares a non-empty return annotation."""
+        signature = inspect.signature(getattr(ZendeskClient, method_name))
+
+        assert signature.return_annotation is not inspect.Signature.empty
+        assert signature.return_annotation in ("dict[str, Any] | None", "None")

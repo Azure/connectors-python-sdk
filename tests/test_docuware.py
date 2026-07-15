@@ -358,3 +358,111 @@ class TestDownloadFileAsync:
                 "/FileCabinets/cabinet-1/Documents/doc-1/Sections/1/Download"
             )
             assert result == b"file-bytes"
+
+
+BASE_URL = "https://example.azure.com/connections/test"
+
+OPERATION_ARGS = {
+    "get_organization": {},
+    "get_file_cabinets": {"file_cabinet_type": None},
+    "get_document_information": {"file_cabinet_id": "cabinet-1", "document_id": "doc-1"},
+    "delete_document": {"file_cabinet_id": "cabinet-1", "document_id": "doc-1"},
+    "download_file": {
+        "file_cabinet_id": "cabinet-1",
+        "document_id": "doc-1",
+        "file_number": "1",
+        "document_format": None,
+    },
+    "download_document": {
+        "file_cabinet_id": "cabinet-1",
+        "document_id": "doc-1",
+        "document_format": None,
+    },
+    "store_to_file_cabinet": {"file_cabinet": "cabinet-1", "store_dialog_id": None},
+    "import_to_document_tray": {"document_tray": "tray-1"},
+    "list_documents_in_document_tray": {"document_tray": "tray-1"},
+    "search_for_documents_in_file_cabinet": {
+        "input": {},
+        "file_cabinet": "cabinet-1",
+        "search_dialog_id": None,
+    },
+    "update_index_fields": {
+        "input": {},
+        "file_cabinet_id": "cabinet-1",
+        "document_id": "doc-1",
+    },
+    "transfer_document": {"input": {}, "destination_file_cabinet_id": "cabinet-2"},
+    "place_a_stamp": {"input": {}, "file_cabinet_id": "cabinet-1", "document_id": "doc-1"},
+    "get_dialogs": {"file_cabinet": "cabinet-1"},
+    "get_dialog_fields": {"file_cabinet": "cabinet-1", "dialog_id": "dialog-1"},
+    "append_file": {"file_cabinet": "cabinet-1", "doc_id": None},
+    "delete_file": {
+        "file_cabinet": "cabinet-1",
+        "document_id": "doc-1",
+        "file_number": "1",
+    },
+    "replace_file": {
+        "file_cabinet": "cabinet-1",
+        "document_id": "doc-1",
+        "file_number": "1",
+    },
+    "get_stamps": {"file_cabinet": "cabinet-1"},
+    "get_stamp_fields": {"file_cabinet": "cabinet-1", "stamp": "stamp-1"},
+    "get_file_cabinet_fields": {"file_cabinet": "cabinet-1"},
+}
+
+ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
+
+
+async def _invoke_operation(client: DocuwareClient, operation: str):
+    """Invoke a DocuWare operation by name for shared method tests."""
+    method = getattr(client, f"{operation}_async")
+    return await method(**OPERATION_ARGS[operation])
+
+
+class TestDocuwareClientAllOperations:
+    """Success path smoke tests covering every generated operation."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_all_operations_success(self, mock_token_provider, operation):
+        """Test every operation issues a request and returns without error."""
+        client = DocuwareClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await _invoke_operation(client, operation)
+
+            assert mock_send.call_count == 1
+            assert mock_send.call_args[0][1].startswith(BASE_URL)
+
+
+class TestDocuwareClientAllOperationsErrorHandling:
+    """Error handling tests that ensure every operation raises ConnectorException."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("operation", ALL_OPERATIONS)
+    async def test_error_response_raises_exception_for_all_operations(
+        self,
+        mock_token_provider,
+        operation,
+    ):
+        """Test non-2xx responses raise ConnectorException for every operation."""
+        client = DocuwareClient(BASE_URL, token_provider=mock_token_provider)
+        mock_response = MockResponse(status=500, text='{"error":"server failure"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await _invoke_operation(client, operation)
+
+            assert exc_info.value.status_code == 500
