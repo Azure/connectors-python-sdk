@@ -80,6 +80,8 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_sql.py` | SQL Server | `SQL_CONNECTION_URL` |
 | `sample_connector_usage_zendesk.py` | Zendesk | `ZENDESK_CONNECTION_URL` |
 | `sample_connector_usage_pipedrive.py` | Pipedrive | `PIPEDRIVE_CONNECTION_URL` |
+| `sample_connector_usage_docuware.py` | DocuWare | `DOCUWARE_CONNECTION_URL` |
+| `sample_connector_usage_signinghub.py` | SigningHub | `SIGNINGHUB_CONNECTION_URL` |
 
 Set the appropriate environment variable to your connection runtime URL before running:
 

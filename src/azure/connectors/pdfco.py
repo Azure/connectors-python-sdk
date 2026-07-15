@@ -539,7 +539,7 @@ class SplitPdf2Response:
 
 
 @dataclass
-class PDFSerarchTextInput:
+class PDFSearchTextInput:
     """
     PDF Search Text
     """
@@ -589,7 +589,7 @@ class PDFSerarchTextInput:
 
 
 @dataclass
-class PDFSerarchTextResponse:
+class PDFSearchTextResponse:
     """
     Response for PDF Search Text
     """
@@ -4228,9 +4228,9 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_serarch_text_async(
+    async def p_d_f_search_text_async(
         self,
-        input: PDFSerarchTextInput,
+        input: PDFSearchTextInput,
     ):
         """
         PDF Search Text

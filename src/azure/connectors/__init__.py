@@ -296,6 +296,16 @@ try:
 except (ImportError, NameError):
     PipedriveClient = None  # type: ignore[assignment,misc]
 
+try:
+    from .docuware import DocuwareClient
+except (ImportError, NameError):
+    DocuwareClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .signinghub import SigninghubClient
+except (ImportError, NameError):
+    SigninghubClient = None  # type: ignore[assignment,misc]
+
 __version__ = '0.3.0b2'
 
 __all__ = [
@@ -370,4 +380,6 @@ __all__ = [
     "SqlClient",
     "ZendeskClient",
     "PipedriveClient",
+    "DocuwareClient",
+    "SigninghubClient",
 ]

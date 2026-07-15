@@ -216,8 +216,10 @@ The following connectors have been generated and validated with comprehensive te
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated |
 | **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated |
 | **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated |
+| **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
+| **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 62 connectors supported
+**Total:** 64 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

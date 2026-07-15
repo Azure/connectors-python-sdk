@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **DocuWare** (`docuware.py`) connector client with unit tests and samples
+- **SigningHub** (`signinghub.py`) connector client with unit tests and samples
 - **Pipedrive** (`pipedrive.py`) connector client with unit tests and samples
 - **Zendesk** (`zendesk.py`) connector client with unit tests and samples
 - **SQL Server** (`sql.py`) connector client with unit tests and samples

@@ -300,7 +300,7 @@ OPERATION_ARGS = {
     "p_d_f_rotate_pages": {"input": {}},
     "p_d_f_searchable": {"input": {}},
     "p_d_f_security_remove": {"input": {}},
-    "p_d_f_serarch_text": {"input": {}},
+    "p_d_f_search_text": {"input": {}},
     "p_d_f_to_c_s_v": {"input": {}},
     "p_d_f_to_j_p_g": {"input": {}},
     "p_d_f_to_j_s_o_n": {"input": {}},
