@@ -60,19 +60,6 @@ class GetAttachmentResponse:
 
 
 @dataclass
-class AttachmentUploadAttachmentInput:
-    """
-    Upload Attachment
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class AddAttachmentResponse:
     """
     Response for Upload Attachment
@@ -229,19 +216,6 @@ class UploadDocumentLibraryResponse:
     """Package name"""
     metadata: Optional[Any] = None
     """Uploaded document pdf meta information"""
-
-
-@dataclass
-class DocumentsUploadStreamInput:
-    """
-    Upload Document
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
 
 @dataclass
@@ -5197,7 +5171,7 @@ class SigninghubClient(ConnectorClientBase):
         package_id: str,
         document_id: str,
         attachment_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete Attachment
 
@@ -5237,7 +5211,7 @@ class SigninghubClient(ConnectorClientBase):
         package_id: str,
         document_id: str,
         attachment_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Download Attachment
 
@@ -5276,7 +5250,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Attachments
 
@@ -5312,10 +5286,10 @@ class SigninghubClient(ConnectorClientBase):
 
     async def attachment_upload_attachment_async(
         self,
-        input: AttachmentUploadAttachmentInput,
+        input: bytes,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Upload Attachment
 
@@ -5333,7 +5307,10 @@ class SigninghubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -5354,7 +5331,7 @@ class SigninghubClient(ConnectorClientBase):
         input: CheckBoxFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add CheckBox Field
 
@@ -5406,7 +5383,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateCheckBoxFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update CheckBox Field
 
@@ -5454,7 +5431,7 @@ class SigninghubClient(ConnectorClientBase):
         page_no: str,
         sort_by: Optional[str] = None,
         asc: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Contacts
 
@@ -5505,7 +5482,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete Document
 
@@ -5538,7 +5515,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Download Document
 
@@ -5571,7 +5548,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Certify Policy for a document
 
@@ -5609,7 +5586,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Document Details
 
@@ -5648,7 +5625,7 @@ class SigninghubClient(ConnectorClientBase):
         input: RenameDocumentRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Rename Document
 
@@ -5682,7 +5659,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateCertifyPolicyRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Certify Policy for a document
 
@@ -5720,7 +5697,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add or Update Document from Library
 
@@ -5760,9 +5737,9 @@ class SigninghubClient(ConnectorClientBase):
 
     async def documents_upload_stream_async(
         self,
-        input: DocumentsUploadStreamInput,
+        input: bytes,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Upload Document
 
@@ -5784,7 +5761,10 @@ class SigninghubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -5804,7 +5784,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Workflow User Authentication (Document Opening) of Enterprise
         Package
@@ -5850,7 +5830,7 @@ class SigninghubClient(ConnectorClientBase):
         input: AccessUpdateRequest,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Workflow User Authentication (Document Opening) of Enterprise
         Package
@@ -5893,7 +5873,7 @@ class SigninghubClient(ConnectorClientBase):
         input: FieldsAutoAssignFieldInput,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Assign Document Field
 
@@ -5941,7 +5921,7 @@ class SigninghubClient(ConnectorClientBase):
         input: AutoPlaceFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         AutoPlace Fields
 
@@ -6004,7 +5984,7 @@ class SigninghubClient(ConnectorClientBase):
         input: DeleteDocumentFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete Document Field
 
@@ -6043,7 +6023,7 @@ class SigninghubClient(ConnectorClientBase):
         input: FormFillingRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Fill Form Fields
 
@@ -6082,7 +6062,7 @@ class SigninghubClient(ConnectorClientBase):
         package_id: str,
         document_id: str,
         page_no: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Document Fields
 
@@ -6121,7 +6101,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: MoveToRequest,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Move Package to Custom or Shared Space folder
 
@@ -6155,7 +6135,7 @@ class SigninghubClient(ConnectorClientBase):
         input: InitialFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Initial Field
 
@@ -6203,7 +6183,7 @@ class SigninghubClient(ConnectorClientBase):
         input: InitialFillingRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Fill Initials
 
@@ -6242,7 +6222,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateInitialFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Initial Field
 
@@ -6288,7 +6268,7 @@ class SigninghubClient(ConnectorClientBase):
         input: InPersonFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add In-person Field
 
@@ -6345,7 +6325,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateInPersonFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update In-person Field
 
@@ -6390,7 +6370,7 @@ class SigninghubClient(ConnectorClientBase):
     async def package_add_package_async(
         self,
         input: AddDocumentPackageRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Package
 
@@ -6425,7 +6405,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: ApproveRequest,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Approve Document
 
@@ -6458,7 +6438,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: DeclineRequest,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Decline Document
 
@@ -6490,7 +6470,7 @@ class SigninghubClient(ConnectorClientBase):
     async def package_delete_package_async(
         self,
         package_id_bulk_action: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete Package
 
@@ -6527,7 +6507,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id_bulk_action: str,
         document_ids: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Download Package
 
@@ -6572,7 +6552,7 @@ class SigninghubClient(ConnectorClientBase):
     async def package_finish_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Finish Processing
 
@@ -6622,7 +6602,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: ApproveRequest,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Gatekeeper Approve Document
 
@@ -6655,7 +6635,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: DeclineRequest,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Gatekeeper Decline Document
 
@@ -6708,7 +6688,7 @@ class SigninghubClient(ConnectorClientBase):
         document_statuses: Optional[str] = None,
         owned_by: Optional[str] = None,
         smart_form: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Packages
 
@@ -6843,7 +6823,7 @@ class SigninghubClient(ConnectorClientBase):
     async def package_get_package_details_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Package Details
 
@@ -6878,7 +6858,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: RenameDocumentPackageRequest,
         package_id_bulk_action: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Rename Package
 
@@ -6910,7 +6890,7 @@ class SigninghubClient(ConnectorClientBase):
     async def package_submit_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Submit Document
 
@@ -6950,7 +6930,7 @@ class SigninghubClient(ConnectorClientBase):
         input: QrCodeRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add QR Code
 
@@ -6990,7 +6970,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateQrCodeRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update QR Code
 
@@ -7030,7 +7010,7 @@ class SigninghubClient(ConnectorClientBase):
         input: RadioBoxFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add RadioBox Field
 
@@ -7082,7 +7062,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateRadioBoxFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update RadioBox Field
 
@@ -7130,7 +7110,7 @@ class SigninghubClient(ConnectorClientBase):
         page_no: str,
         sort_by: Optional[str] = None,
         asc: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Templates
 
@@ -7180,7 +7160,7 @@ class SigninghubClient(ConnectorClientBase):
         input: DigitalSignatureFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Digital Signature Field
 
@@ -7229,7 +7209,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateDigitalSignatureFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Digital Signature Field
 
@@ -7275,7 +7255,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: BulkSignRequest,
         package_id_bulk_action: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Bulk Sign Packages
 
@@ -7343,7 +7323,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: BulkSignStatusRequest,
         bulk_action: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Bulk Signing Status
 
@@ -7393,7 +7373,7 @@ class SigninghubClient(ConnectorClientBase):
         input: SignDocumentRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Sign Document
 
@@ -7460,7 +7440,7 @@ class SigninghubClient(ConnectorClientBase):
         sort_by: Optional[str] = None,
         asc: Optional[str] = None,
         id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Enterprise Templates
 
@@ -7515,7 +7495,7 @@ class SigninghubClient(ConnectorClientBase):
         input: TextBoxFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add TextBox Field
 
@@ -7563,7 +7543,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateTextBoxFieldRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update TextBox Field
 
@@ -7609,7 +7589,7 @@ class SigninghubClient(ConnectorClientBase):
         input: ApplyTemplateRequest,
         package_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Apply Workflow Template
 
@@ -7661,7 +7641,7 @@ class SigninghubClient(ConnectorClientBase):
     async def workflow_evidence_report_download_bytes_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Process Evidence Report
 
@@ -7693,7 +7673,7 @@ class SigninghubClient(ConnectorClientBase):
     async def workflow_get_workflow_detail_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Workflow Details
 
@@ -7727,7 +7707,7 @@ class SigninghubClient(ConnectorClientBase):
         package_id: str,
         page_no: str,
         records_per_page: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Workflow History
 
@@ -7767,7 +7747,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Workflow Reminder
 
@@ -7804,7 +7784,7 @@ class SigninghubClient(ConnectorClientBase):
     async def workflow_get_workflow_users_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Workflow Users
 
@@ -7836,7 +7816,7 @@ class SigninghubClient(ConnectorClientBase):
     async def workflow_mark_workflow_completed_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Complete Workflow in the Middle (Terminate Workflow)
 
@@ -7875,7 +7855,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Workflow User Permissions
 
@@ -7910,7 +7890,7 @@ class SigninghubClient(ConnectorClientBase):
         input: WorkflowPermissionsUpdateRequest,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Workflow User Permissions
 
@@ -7947,7 +7927,7 @@ class SigninghubClient(ConnectorClientBase):
     async def workflow_recall_workflow_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Recall Document
 
@@ -7980,7 +7960,7 @@ class SigninghubClient(ConnectorClientBase):
     async def workflow_start_workflow_async(
         self,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Share Document Package
 
@@ -8016,7 +7996,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: WorkflowDetailUpdateRequest,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Workflow Details
 
@@ -8052,7 +8032,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: PostProcessUpdateRequest,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Post Processing
 
@@ -8086,7 +8066,7 @@ class SigninghubClient(ConnectorClientBase):
         input: UpdateReminderRequest,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Workflow Reminders
 
@@ -8124,7 +8104,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: WorkflowWorkflowAddGroupInput,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Groups to Workflow
 
@@ -8163,7 +8143,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: WorkflowWorkflowAddPlaceholderInput,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Placeholder to Workflow
 
@@ -8204,7 +8184,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: WorkflowWorkflowAddUserInput,
         package_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Users to Workflow
 
@@ -8263,7 +8243,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete Workflow User
 
@@ -8297,7 +8277,7 @@ class SigninghubClient(ConnectorClientBase):
         input: WorkflowPlaceholderUpdateRequest,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Placeholder
 
@@ -8337,7 +8317,7 @@ class SigninghubClient(ConnectorClientBase):
         input: WorkflowUserUpdateRequest,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Workflow User
 
@@ -8378,7 +8358,7 @@ class SigninghubClient(ConnectorClientBase):
         input: WorkflowUserReorderRequest,
         package_id: str,
         order: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Workflow Users Order
 
@@ -8410,7 +8390,7 @@ class SigninghubClient(ConnectorClientBase):
     async def work_space_delete_shared_space_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete Shared Space
 
@@ -8443,7 +8423,7 @@ class SigninghubClient(ConnectorClientBase):
     async def work_space_get_shared_space_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Shared Space
 
@@ -8476,7 +8456,7 @@ class SigninghubClient(ConnectorClientBase):
         self,
         input: UpdateWorkSpaceRequest,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update Shared Space
 

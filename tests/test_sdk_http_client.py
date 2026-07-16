@@ -377,6 +377,66 @@ class TestConnectorHttpClient:
             assert headers["Content-Type"] == "application/json"
 
     @pytest.mark.asyncio
+    async def test_send_async_with_bytes_body_sends_raw_octet_stream(self, mock_token_provider):
+        """Test send_async sends raw bytes as application/octet-stream."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = b"\x00\x01raw-binary\xff"
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async(
+                "POST", "https://api.example.com/upload", body=body
+            )
+
+            call_args = mock_send.call_args
+            headers = call_args[0][3]
+            sent_body = call_args[0][4]
+            assert headers["Content-Type"] == "application/octet-stream"
+            assert sent_body == body
+            assert isinstance(sent_body, bytes)
+
+    @pytest.mark.asyncio
+    async def test_send_async_with_bytes_body_honors_explicit_content_type(
+        self, mock_token_provider
+    ):
+        """Test send_async honors an explicit content_type for a bytes body."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = b"%PDF-1.4 binary"
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async(
+                "POST",
+                "https://api.example.com/upload",
+                body=body,
+                content_type="application/pdf",
+            )
+
+            call_args = mock_send.call_args
+            headers = call_args[0][3]
+            sent_body = call_args[0][4]
+            assert headers["Content-Type"] == "application/pdf"
+            assert sent_body == body
+
+    @pytest.mark.asyncio
     async def test_delay_retry_with_exponential_backoff(self, mock_token_provider):
         """Test retry delay with exponential backoff."""
         options = ConnectorClientOptions(

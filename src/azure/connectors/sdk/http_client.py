@@ -93,6 +93,7 @@ class ConnectorHttpClient:
         url: str,
         scopes: Optional[List[str]] = None,
         body: Optional[Any] = None,
+        content_type: Optional[str] = None,
     ) -> _ResponseSnapshot:
         """
         Send an HTTP request with authentication and retry.
@@ -101,7 +102,12 @@ class ConnectorHttpClient:
             method: The HTTP method.
             url: The request URL.
             scopes: The authentication scopes. Defaults to API Hub scopes.
-            body: Optional request body (will be JSON-serialized).
+            body: Optional request body. When ``content_type`` is provided
+                or ``body`` is raw ``bytes``, the body is sent as-is;
+                otherwise it is JSON-serialized.
+            content_type: Optional request content type. Defaults to
+                ``application/json``. Set to ``application/octet-stream``
+                to send raw binary bodies without JSON serialization.
 
         Returns:
             The HTTP response.
@@ -112,18 +118,32 @@ class ConnectorHttpClient:
         token = await self._token_provider.get_access_token_async(scopes)
         session = await self._ensure_session()
 
+        # NOTE(victoriahall): Raw binary bodies (e.g. file uploads that
+        # consume application/octet-stream) must be sent verbatim, not
+        # JSON-serialized. Detect them by an explicit content_type or by
+        # a bytes body, mirroring the .NET CallConnectorAsync(byte[],
+        # contentType) overload.
+        is_binary_body = isinstance(body, (bytes, bytearray))
+        if content_type is None:
+            content_type = (
+                "application/octet-stream"
+                if is_binary_body
+                else "application/json"
+            )
+
         headers = {
             "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
+            "Content-Type": content_type,
         }
 
-        # NOTE(victoriahall): Convert dataclass objects to dictionaries
-        # for JSON serialization. Generated connector clients pass
-        # dataclass instances as body parameters.
-        json_body = None
+        request_body: Optional[Any] = None
         if body is not None:
-            if is_dataclass(body) and not isinstance(body, type):
-                # Convert dataclass to dict, excluding None values
+            if is_binary_body:
+                request_body = bytes(body)
+            elif is_dataclass(body) and not isinstance(body, type):
+                # NOTE(victoriahall): Convert dataclass objects to
+                # dictionaries for JSON serialization. Generated connector
+                # clients pass dataclass instances as body parameters.
                 body_dict = asdict(cast(Any, body))
 
                 # NOTE(victoriahall): Handle dynamic schemas with
@@ -141,12 +161,12 @@ class ConnectorHttpClient:
                 body_dict = {
                     k: v for k, v in body_dict.items() if v is not None
                 }
-                json_body = json.dumps(body_dict)
+                request_body = json.dumps(body_dict)
             else:
-                json_body = json.dumps(body)
+                request_body = json.dumps(body)
 
         return await self._send_with_retry(
-            session, method, url, headers, json_body
+            session, method, url, headers, request_body
         )
 
     async def _send_with_retry(
@@ -155,7 +175,7 @@ class ConnectorHttpClient:
         method: str,
         url: str,
         headers: Dict[str, str],
-        body: Optional[str],
+        body: Optional[Any],
     ) -> _ResponseSnapshot:
         """Send request with retry logic."""
         last_exception = None

@@ -21,66 +21,6 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class AutodetectGetInfoResult:
-    """
-    Response for Get document type information
-    """
-
-    alternate_file_type_candidates: Optional[List[AlternateFileFormatCandidate]] = None
-    """Alternate file type options and their probability"""
-    author: Optional[str] = None
-    """
-    User name of the creator/author of the document, if available, null if not
-    available
-    """
-    date_modified: Optional[str] = None
-    """
-    The timestamp that the document was last modified, if available, null if
-    not available
-    """
-    detected_file_extension: Optional[str] = None
-    """Detected file extension of the file format, with a leading period"""
-    detected_mime_type: Optional[str] = None
-    """MIME type of this file extension"""
-    page_count: Optional[int] = None
-    """
-    Number of pages in a page-based document; for presentations, this is the
-    number of slides and for a spreadsheet this is the number of worksheets.
-    Contains 0 when the page count cannot be determined, or if the concept of
-    page count does not apply (e.g. for an image)
-    """
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class AutodetectToPngResult:
-    """
-    Response for Convert Document to PNG array
-    """
-
-    png_result_pages: Optional[List[ConvertedPngPage]] = None
-    """Array of converted pages"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class TextConversionResult:
-    """
-    Response for Convert Document to Text (txt)
-    """
-
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-    text_result: Optional[str] = None
-    """
-    Plain Text (TXT) format conversion result of the input document. The text
-    result is returned as a string.
-    """
-
-
-@dataclass
 class CreateBlankDocxResponse:
     """
     Response for Create a blank Word DOCX document
@@ -604,75 +544,6 @@ class SetXlsxCellResponse:
 
 
 @dataclass
-class PdfToPngResult:
-    """
-    Response for Convert HTML document file to PNG image array
-    """
-
-    png_result_pages: Optional[List[ConvertedPngPage]] = None
-    """Array of converted pages"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class MultipageImageFormatConversionResult:
-    """
-    Response for Multi-page image format conversion
-    """
-
-    page_count: Optional[int] = None
-    """The number of pages in the converted output"""
-    pages: Optional[List[PageConversionResult]] = None
-    """Converted page results"""
-    successful: Optional[bool] = None
-    """True if successful, false otherwise"""
-
-
-@dataclass
-class GetImageInfoResult:
-    """
-    Response for Get information about an image
-    """
-
-    bit_depth: Optional[int] = None
-    """Bit depth of the image"""
-    color_count: Optional[int] = None
-    """Unique colors in the image"""
-    color_space: Optional[str] = None
-    """Color space of the image"""
-    color_type: Optional[str] = None
-    """Color type of the image"""
-    comment: Optional[str] = None
-    """Comment string in the image"""
-    compression_level: Optional[int] = None
-    """
-    Compression level value from 0 (lowest quality) to 100 (highest quality)
-    """
-    d_p_i: Optional[float] = None
-    """DPI (pixels per unit, e.g. pixels per inch) of the image"""
-    d_p_i_unit: Optional[str] = None
-    """Units of the DPI measurement; can be either in Inches or Centimeters"""
-    exif_profile_name: Optional[str] = None
-    """Name of the EXIF profile used"""
-    exif_values: Optional[List[ExifValue]] = None
-    """EXIF tags and values embedded in the image"""
-    has_transparency: Optional[bool] = None
-    """True if the image contains transparency, otherwise false"""
-    height: Optional[int] = None
-    """Height in pixels of the image"""
-    image_format: Optional[str] = None
-    """Image format"""
-    image_hash_signature: Optional[str] = None
-    """SHA256 hash signature of the image"""
-    mime_type: Optional[str] = None
-    """MIME type of the image format"""
-    successful: Optional[bool] = None
-    width: Optional[int] = None
-    """Width in pixels of the image"""
-
-
-@dataclass
 class ConvertDataJsonToXmlInput:
     """
     Convert JSON to XML conversion
@@ -686,90 +557,6 @@ class ConvertDataJsonToXmlInput:
 
 
 @dataclass
-class MergeDocumentTxtResponse:
-    """
-    Response for Merge Two Text (TXT) Files Together
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class SplitDocxDocumentResult:
-    """
-    Response for Split a single Word Document DOCX into Separate Documents by Page
-    """
-
-    result_documents: Optional[List[SplitDocumentResult]] = None
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitPdfResult:
-    """
-    Response for Split a PDF file into separate PDF files, one per page
-    """
-
-    documents: Optional[List[PdfDocument]] = None
-    """PDF documents as output"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitPptxPresentationResult:
-    """
-    Response for Split a single PowerPoint Presentation PPTX into Separate Slides
-    """
-
-    result_presentations: Optional[List[PresentationResult]] = None
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitTextDocumentByLinesResult:
-    """
-    Response for Split a single Text file (txt) into lines
-    """
-
-    line_count: Optional[int] = None
-    """The count of lines in the text file"""
-    result_lines: Optional[List[TextDocumentLine]] = None
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitTextDocumentByStringResult:
-    """
-    Response for Split a single Text file (txt) by a string delimiter
-    """
-
-    element_count: Optional[int] = None
-    """The count of elements in the text file"""
-    result_elements: Optional[List[TextDocumentElement]] = None
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitXlsxWorksheetResult:
-    """
-    Response for Split a single Excel XLSX into Separate Worksheets
-    """
-
-    result_worksheets: Optional[List[WorksheetResult]] = None
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
 class HtmlTemplateApplicationResponse:
     """
     Response for Apply HTML template
@@ -779,39 +566,6 @@ class HtmlTemplateApplicationResponse:
     """Final HTML result of all operations on input"""
     successful: Optional[bool] = None
     """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class AutodetectDocumentValidationResult:
-    """
-    Response for Autodetect content type and validate
-    """
-
-    document_is_valid: Optional[bool] = None
-    """True if the document is valid and has no errors, false otherwise"""
-    error_count: Optional[int] = None
-    """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[List[DocumentValidationError]] = None
-    """Details of errors and warnings found"""
-    file_format_extension: Optional[str] = None
-    warning_count: Optional[int] = None
-    """Number of validation warnings found in the document"""
-
-
-@dataclass
-class DocumentValidationResult:
-    """
-    Response for Validate a Word document (DOCX)
-    """
-
-    document_is_valid: Optional[bool] = None
-    """True if the document is valid and has no errors, false otherwise"""
-    error_count: Optional[int] = None
-    """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[List[DocumentValidationError]] = None
-    """Details of errors and warnings found"""
-    warning_count: Optional[int] = None
-    """Number of validation warnings found in the document"""
 
 
 @dataclass
@@ -840,18 +594,6 @@ class HtmlToTextResponse:
 
 
 @dataclass
-class HtmlMdResult:
-    """
-    Response for Convert Markdown to HTML
-    """
-
-    html: Optional[str] = None
-    """Resulting HTML from the conversion"""
-    successful: Optional[bool] = None
-    """True if operation was successful, false otherwise"""
-
-
-@dataclass
 class UrlToTextResponse:
     """
     Response for Convert website URL page to text (txt)
@@ -861,149 +603,6 @@ class UrlToTextResponse:
     """True if successful, false otherwise"""
     text_content_result: Optional[str] = None
     """Text content result from the URL website input"""
-
-
-@dataclass
-class XmlAddAttributeWithXPathResult:
-    """
-    Response for Adds an attribute to all XML nodes matching XPath expression
-    """
-
-    nodes_edited_count: Optional[int] = None
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = None
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlAddChildWithXPathResult:
-    """
-    Response for Adds an XML node as a child to XML nodes matching XPath expression
-    """
-
-    nodes_edited_count: Optional[int] = None
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = None
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlRemoveWithXPathResult:
-    """
-    Response for Remove, delete XML nodes and items matching XPath expression
-    """
-
-    nodes_removed_count: Optional[int] = None
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = None
-    """
-    Resulting, modified XML document with matching nodes removed as a string
-    """
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-    xml_nodes_removed: Optional[List[str]] = None
-    """Matching selected XML nodes as strings"""
-
-
-@dataclass
-class XmlRemoveAllChildrenWithXPathResult:
-    """
-    Response for Removes, deletes all children of nodes matching XPath expression, but
-    """
-
-    nodes_edited_count: Optional[int] = None
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = None
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlReplaceWithXPathResult:
-    """
-    Response for Replaces XML nodes matching XPath expression with new node
-    """
-
-    nodes_edited_count: Optional[int] = None
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = None
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlSetValueWithXPathResult:
-    """
-    Response for Sets the value contents of XML nodes matching XPath expression
-    """
-
-    nodes_edited_count: Optional[int] = None
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = None
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlQueryWithXQueryResult:
-    """
-    Response for Query an XML file using XQuery query, get results
-    """
-
-    error_message: Optional[str] = None
-    """If an error occurs, additional details on the error"""
-    resulting_xml: Optional[str] = None
-    """Resulting XML result output"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlQueryWithXQueryMultiResult:
-    """
-    Response for Query multiple XML files using XQuery query, get results
-    """
-
-    error_message: Optional[str] = None
-    """If an error occurs, additional details on the error"""
-    resulting_xml: Optional[str] = None
-    """Resulting XML result output"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlFilterWithXPathResult:
-    """
-    Response for Filter, select XML nodes using XPath expression, get results
-    """
-
-    result_count: Optional[int] = None
-    """Count of the matching results"""
-    successful: Optional[bool] = None
-    """True if the operation was successful, false otherwise"""
-    xml_nodes: Optional[List[str]] = None
-    """Matching selected XML nodes as strings"""
-
-
-@dataclass
-class ConvertDataXmlToJsonResponse:
-    """
-    Response for Convert XML to JSON conversion
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
 
 @dataclass
@@ -1033,6 +632,68 @@ class AlternateFileFormatCandidate:
     Probability that this extension is the right one; possible values are
     between 0.0 (lowest confidence) and 1.0 (highest confidence)
     """
+
+
+@dataclass
+class AutodetectDocumentValidationResult:
+    """
+    Definition: AutodetectDocumentValidationResult
+    """
+
+    document_is_valid: Optional[bool] = None
+    """True if the document is valid and has no errors, false otherwise"""
+    error_count: Optional[int] = None
+    """Number of validation errors found in the document"""
+    errors_and_warnings: Optional[List[DocumentValidationError]] = None
+    """Details of errors and warnings found"""
+    file_format_extension: Optional[str] = None
+    warning_count: Optional[int] = None
+    """Number of validation warnings found in the document"""
+
+
+@dataclass
+class AutodetectGetInfoResult:
+    """
+    Definition: AutodetectGetInfoResult
+    """
+
+    alternate_file_type_candidates: Optional[List[AlternateFileFormatCandidate]] = None
+    """Alternate file type options and their probability"""
+    author: Optional[str] = None
+    """
+    User name of the creator/author of the document, if available, null if not
+    available
+    """
+    date_modified: Optional[str] = None
+    """
+    The timestamp that the document was last modified, if available, null if
+    not available
+    """
+    detected_file_extension: Optional[str] = None
+    """Detected file extension of the file format, with a leading period"""
+    detected_mime_type: Optional[str] = None
+    """MIME type of this file extension"""
+    page_count: Optional[int] = None
+    """
+    Number of pages in a page-based document; for presentations, this is the
+    number of slides and for a spreadsheet this is the number of worksheets.
+    Contains 0 when the page count cannot be determined, or if the concept of
+    page count does not apply (e.g. for an image)
+    """
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class AutodetectToPngResult:
+    """
+    Definition: AutodetectToPngResult
+    """
+
+    png_result_pages: Optional[List[ConvertedPngPage]] = None
+    """Array of converted pages"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
 
 
 @dataclass
@@ -1297,6 +958,22 @@ class DocumentValidationError:
     """XPath to the error"""
     uri: Optional[str] = None
     """URI of the part in question"""
+
+
+@dataclass
+class DocumentValidationResult:
+    """
+    Definition: DocumentValidationResult
+    """
+
+    document_is_valid: Optional[bool] = None
+    """True if the document is valid and has no errors, false otherwise"""
+    error_count: Optional[int] = None
+    """Number of validation errors found in the document"""
+    errors_and_warnings: Optional[List[DocumentValidationError]] = None
+    """Details of errors and warnings found"""
+    warning_count: Optional[int] = None
+    """Number of validation warnings found in the document"""
 
 
 @dataclass
@@ -2273,6 +1950,49 @@ class GetDocxTablesRequest:
 
 
 @dataclass
+class GetImageInfoResult:
+    """
+    Definition: GetImageInfoResult
+    """
+
+    bit_depth: Optional[int] = None
+    """Bit depth of the image"""
+    color_count: Optional[int] = None
+    """Unique colors in the image"""
+    color_space: Optional[str] = None
+    """Color space of the image"""
+    color_type: Optional[str] = None
+    """Color type of the image"""
+    comment: Optional[str] = None
+    """Comment string in the image"""
+    compression_level: Optional[int] = None
+    """
+    Compression level value from 0 (lowest quality) to 100 (highest quality)
+    """
+    d_p_i: Optional[float] = None
+    """DPI (pixels per unit, e.g. pixels per inch) of the image"""
+    d_p_i_unit: Optional[str] = None
+    """Units of the DPI measurement; can be either in Inches or Centimeters"""
+    exif_profile_name: Optional[str] = None
+    """Name of the EXIF profile used"""
+    exif_values: Optional[List[ExifValue]] = None
+    """EXIF tags and values embedded in the image"""
+    has_transparency: Optional[bool] = None
+    """True if the image contains transparency, otherwise false"""
+    height: Optional[int] = None
+    """Height in pixels of the image"""
+    image_format: Optional[str] = None
+    """Image format"""
+    image_hash_signature: Optional[str] = None
+    """SHA256 hash signature of the image"""
+    mime_type: Optional[str] = None
+    """MIME type of the image format"""
+    successful: Optional[bool] = None
+    width: Optional[int] = None
+    """Width in pixels of the image"""
+
+
+@dataclass
 class GetPdfAnnotationsResult:
     """
     Definition: GetPdfAnnotationsResult
@@ -2435,6 +2155,18 @@ class GetXlsxWorksheetsRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
+
+
+@dataclass
+class HtmlMdResult:
+    """
+    Definition: HtmlMdResult
+    """
+
+    html: Optional[str] = None
+    """Resulting HTML from the conversion"""
+    successful: Optional[bool] = None
+    """True if operation was successful, false otherwise"""
 
 
 @dataclass
@@ -2651,6 +2383,20 @@ class InsertXlsxWorksheetRequest:
 
 
 @dataclass
+class MultipageImageFormatConversionResult:
+    """
+    Definition: MultipageImageFormatConversionResult
+    """
+
+    page_count: Optional[int] = None
+    """The number of pages in the converted output"""
+    pages: Optional[List[PageConversionResult]] = None
+    """Converted page results"""
+    successful: Optional[bool] = None
+    """True if successful, false otherwise"""
+
+
+@dataclass
 class PageConversionResult:
     """
     Definition: PageConversionResult
@@ -2808,6 +2554,18 @@ class PdfTextByPageResult:
 
     pages: Optional[List[PdfPageText]] = None
     """Pages in the PDF"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class PdfToPngResult:
+    """
+    Definition: PdfToPngResult
+    """
+
+    png_result_pages: Optional[List[ConvertedPngPage]] = None
+    """Array of converted pages"""
     successful: Optional[bool] = None
     """True if the operation was successful, false otherwise"""
 
@@ -3200,6 +2958,92 @@ class SplitDocumentResult:
 
 
 @dataclass
+class SplitDocxDocumentResult:
+    """
+    Definition: SplitDocxDocumentResult
+    """
+
+    result_documents: Optional[List[SplitDocumentResult]] = None
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitPdfResult:
+    """
+    Definition: SplitPdfResult
+    """
+
+    documents: Optional[List[PdfDocument]] = None
+    """PDF documents as output"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitPptxPresentationResult:
+    """
+    Definition: SplitPptxPresentationResult
+    """
+
+    result_presentations: Optional[List[PresentationResult]] = None
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitTextDocumentByLinesResult:
+    """
+    Definition: SplitTextDocumentByLinesResult
+    """
+
+    line_count: Optional[int] = None
+    """The count of lines in the text file"""
+    result_lines: Optional[List[TextDocumentLine]] = None
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitTextDocumentByStringResult:
+    """
+    Definition: SplitTextDocumentByStringResult
+    """
+
+    element_count: Optional[int] = None
+    """The count of elements in the text file"""
+    result_elements: Optional[List[TextDocumentElement]] = None
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitXlsxWorksheetResult:
+    """
+    Definition: SplitXlsxWorksheetResult
+    """
+
+    result_worksheets: Optional[List[WorksheetResult]] = None
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class TextConversionResult:
+    """
+    Definition: TextConversionResult
+    """
+
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+    text_result: Optional[str] = None
+    """
+    Plain Text (TXT) format conversion result of the input document. The text
+    result is returned as a string.
+    """
+
+
+@dataclass
 class TextDocumentElement:
     """
     Definition: TextDocumentElement
@@ -3405,6 +3249,136 @@ class XlsxWorksheet:
 
 
 @dataclass
+class XmlAddAttributeWithXPathResult:
+    """
+    Definition: XmlAddAttributeWithXPathResult
+    """
+
+    nodes_edited_count: Optional[int] = None
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = None
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlAddChildWithXPathResult:
+    """
+    Definition: XmlAddChildWithXPathResult
+    """
+
+    nodes_edited_count: Optional[int] = None
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = None
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlFilterWithXPathResult:
+    """
+    Definition: XmlFilterWithXPathResult
+    """
+
+    result_count: Optional[int] = None
+    """Count of the matching results"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+    xml_nodes: Optional[List[str]] = None
+    """Matching selected XML nodes as strings"""
+
+
+@dataclass
+class XmlQueryWithXQueryMultiResult:
+    """
+    Definition: XmlQueryWithXQueryMultiResult
+    """
+
+    error_message: Optional[str] = None
+    """If an error occurs, additional details on the error"""
+    resulting_xml: Optional[str] = None
+    """Resulting XML result output"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlQueryWithXQueryResult:
+    """
+    Definition: XmlQueryWithXQueryResult
+    """
+
+    error_message: Optional[str] = None
+    """If an error occurs, additional details on the error"""
+    resulting_xml: Optional[str] = None
+    """Resulting XML result output"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlRemoveAllChildrenWithXPathResult:
+    """
+    Definition: XmlRemoveAllChildrenWithXPathResult
+    """
+
+    nodes_edited_count: Optional[int] = None
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = None
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlRemoveWithXPathResult:
+    """
+    Definition: XmlRemoveWithXPathResult
+    """
+
+    nodes_removed_count: Optional[int] = None
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = None
+    """
+    Resulting, modified XML document with matching nodes removed as a string
+    """
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+    xml_nodes_removed: Optional[List[str]] = None
+    """Matching selected XML nodes as strings"""
+
+
+@dataclass
+class XmlReplaceWithXPathResult:
+    """
+    Definition: XmlReplaceWithXPathResult
+    """
+
+    nodes_edited_count: Optional[int] = None
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = None
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlSetValueWithXPathResult:
+    """
+    Definition: XmlSetValueWithXPathResult
+    """
+
+    nodes_edited_count: Optional[int] = None
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = None
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = None
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
 class ZipDirectory:
     """
     Definition: ZipDirectory
@@ -3481,377 +3455,10 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "cloudmersiveconvert"
 
-    async def convert_document_autodetect_get_info_async(
-        self,
-    ):
-        """
-        Get document type information
-
-        Auto-detects a document's type information; does not require file
-        extension. Analyzes file contents to confirm file type. Even if no file
-        extension is present, the auto-detect system will reliably analyze the
-        contents of the file and identify its file type. Supports over 100
-        image file formats, Office document file formats, PDF, and more.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/autodetect/get-info"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_autodetect_to_pdf_async(
-        self,
-    ):
-        """
-        Convert Document to PDF
-
-        Automatically detect file type and convert it to PDF. Supports all of
-        the major Office document file formats including Word (DOCX, DOC),
-        Excel (XLSX, XLS), PowerPoint (PPTX, PPT), over 100 image formats, HTML
-        files, and even multi-page TIFF files.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/autodetect/to/pdf"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_autodetect_to_png_array_async(
-        self,
-    ):
-        """
-        Convert Document to PNG array
-
-        Automatically detect file type and convert it to an array of PNG
-        images. Supports all of the major Office document file formats, over
-        100 image formats, and even multi-page TIFF files.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/autodetect/to/png"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_autodetect_to_txt_async(
-        self,
-    ):
-        """
-        Convert Document to Text (txt)
-
-        Automatically detect file type and convert it to Text. Supports all of
-        the major Office document file formats including Word (DOCX, DOC),
-        Excel (XLSX, XLS), PowerPoint (PPTX, PPT) and PDF files. For
-        spreadsheets, all worksheets will be included. If you wish to exclude
-        certain pages, worksheets, slides, etc. use the Split document API
-        first, or the delete pages/slides/worksheet APIs first to adjust the
-        document to the target state prior to converting to text.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/autodetect/to/txt"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def compare_document_docx_async(
-        self,
-    ):
-        """
-        Compare Two Word DOCX
-
-        Compare two Office Word Documents (docx) files and highlight the
-        differences
-        """
-        request_url = f"{self._connection_runtime_url}/convert/compare/docx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_data_csv_to_json_async(
-        self,
-    ):
-        """
-        Convert CSV to JSON conversion
-
-        Convert a CSV file to a JSON object array
-        """
-        request_url = f"{self._connection_runtime_url}/convert/csv/to/json"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_csv_to_xlsx_async(
-        self,
-    ):
-        """
-        Convert CSV to Excel XLSX Spreadsheet
-
-        Convert CSV file to Office Excel XLSX Workbooks file format.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/csv/to/xlsx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_doc_to_docx_async(
-        self,
-    ):
-        """
-        Convert Word DOC (97-03) Document to DOCX
-
-        Convert/upgrade Office Word (97-2003 Format) Documents (doc) to the
-        modern DOCX format
-        """
-        request_url = f"{self._connection_runtime_url}/convert/doc/to/docx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_doc_to_pdf_async(
-        self,
-    ):
-        """
-        Convert Word DOC (97-03) Document to PDF
-
-        Convert Office Word (97-2003 Format) Documents (doc) to standard PDF
-        """
-        request_url = f"{self._connection_runtime_url}/convert/doc/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_doc_to_txt_async(
-        self,
-    ):
-        """
-        Convert Word DOC (97-03) Document to Text (txt)
-
-        Convert Office Word DOC (97-03) Document (doc) to text
-        """
-        request_url = f"{self._connection_runtime_url}/convert/doc/to/txt"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_docx_to_pdf_async(
-        self,
-    ):
-        """
-        Convert Word DOCX Document to PDF
-
-        Convert Office Word Documents (docx) to standard PDF
-        """
-        request_url = f"{self._connection_runtime_url}/convert/docx/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_docx_to_txt_async(
-        self,
-    ):
-        """
-        Convert Word DOCX Document to Text (txt)
-
-        Convert Office Word Documents (docx) to text
-        """
-        request_url = f"{self._connection_runtime_url}/convert/docx/to/txt"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def edit_document_begin_editing_async(
-        self,
-    ):
-        """
-        Begin editing a document
-
-        Uploads a document to Cloudmersive to begin a series of one or more
-        editing operations. To edit a document, first call Begin Editing on the
-        document. Then perform operations on the document using the secure URL
-        returned from BeginEditing, such as Word DOCX Delete Pages and Insert
-        Table. Finally, perform finish editing on the URL to return the
-        resulting edited document. The editing URL is temporary and only stored
-        in-memory cache, and will automatically expire from the cache after 30
-        minutes, and cannot be directly accessed.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/edit/begin-editing"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def edit_document_docx_create_blank_document_async(
         self,
         input: CreateBlankDocxRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a blank Word DOCX document
 
@@ -3883,7 +3490,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_delete_pages_async(
         self,
         input: RemoveDocxPagesRequest,
-    ):
+    ) -> bytes:
         """
         Delete, remove pages from a Word DOCX document
 
@@ -3911,7 +3518,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_delete_table_row_async(
         self,
         input: DeleteDocxTableRowRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Deletes a table row in an existing table in a Word DOCX document
 
@@ -3943,7 +3550,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_delete_table_row_range_async(
         self,
         input: DeleteDocxTableRowRangeRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Deletes a range of multiple table rows in an existing table in a Word
 
@@ -3975,7 +3582,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_body_async(
         self,
         input: GetDocxBodyRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get body from a Word DOCX document
 
@@ -4006,7 +3613,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_comments_hierarchical_async(
         self,
         input: GetDocxGetCommentsHierarchicalRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get comments from a Word DOCX document hierarchically
 
@@ -4039,7 +3646,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_headers_and_footers_async(
         self,
         input: GetDocxHeadersAndFootersRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get content of a footer from a Word DOCX document
 
@@ -4070,7 +3677,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_images_async(
         self,
         input: GetDocxImagesRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get images from a Word DOCX document
 
@@ -4100,7 +3707,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_pages_async(
         self,
         input: GetDocxPagesRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get pages and content from a Word DOCX document
 
@@ -4131,7 +3738,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_sections_async(
         self,
         input: GetDocxSectionsRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get sections from a Word DOCX document
 
@@ -4161,7 +3768,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_styles_async(
         self,
         input: GetDocxStylesRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get styles from a Word DOCX document
 
@@ -4191,7 +3798,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_table_row_async(
         self,
         input: GetDocxTableRowRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Gets the contents of an existing table row in an existing table in a W
 
@@ -4222,7 +3829,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_table_by_index_async(
         self,
         input: GetDocxTableByIndexRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a specific table by index in a Word DOCX document
 
@@ -4254,7 +3861,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_tables_async(
         self,
         input: GetDocxTablesRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get all tables in Word DOCX document
 
@@ -4284,7 +3891,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_comment_on_paragraph_async(
         self,
         input: DocxInsertCommentOnParagraphRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Insert a new comment into a Word DOCX document attached to a paragraph
 
@@ -4317,7 +3924,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_image_async(
         self,
         input: DocxInsertImageRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Insert image into a Word DOCX document
 
@@ -4348,7 +3955,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_paragraph_async(
         self,
         input: InsertDocxInsertParagraphRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Insert a new paragraph into a Word DOCX document
 
@@ -4382,7 +3989,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_table_async(
         self,
         input: InsertDocxTablesRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Insert a new table into a Word DOCX document
 
@@ -4413,7 +4020,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_table_row_async(
         self,
         input: InsertDocxTableRowRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Insert a new row into an existing table in a Word DOCX document
 
@@ -4445,7 +4052,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_remove_headers_and_footers_async(
         self,
         input: RemoveDocxHeadersAndFootersRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Remove headers and footers from Word DOCX document
 
@@ -4477,7 +4084,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_remove_object_async(
         self,
         input: DocxRemoveObjectRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete any object in a Word DOCX document
 
@@ -4511,7 +4118,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_replace_async(
         self,
         input: ReplaceStringRequest,
-    ):
+    ) -> bytes:
         """
         Replace string in Word DOCX document
 
@@ -4538,7 +4145,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_set_footer_async(
         self,
         input: DocxSetFooterRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Set the footer in a Word DOCX document
 
@@ -4569,7 +4176,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_set_footer_add_page_number_async(
         self,
         input: DocxSetFooterAddPageNumberRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add page number to footer in a Word DOCX document
 
@@ -4601,7 +4208,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_set_header_async(
         self,
         input: DocxSetHeaderRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Set the header in a Word DOCX document
 
@@ -4632,7 +4239,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_update_table_cell_async(
         self,
         input: UpdateDocxTableCellRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update, set contents of a table cell in an existing table in a Word DO
 
@@ -4665,7 +4272,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_update_table_row_async(
         self,
         input: UpdateDocxTableRowRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update, set contents of a table row in an existing table in a Word DOCX
         document
@@ -4699,7 +4306,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_finish_editing_async(
         self,
         input: FinishEditingRequest,
-    ):
+    ) -> bytes:
         """
         Finish editing document, and download result from document editing
 
@@ -4728,7 +4335,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_pptx_delete_slides_async(
         self,
         input: RemovePptxSlidesRequest,
-    ):
+    ) -> bytes:
         """
         Delete, remove slides from a PowerPoint PPTX presentation document
 
@@ -4756,7 +4363,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_pptx_replace_async(
         self,
         input: ReplaceStringRequest,
-    ):
+    ) -> bytes:
         """
         Replace string in PowerPoint PPTX presentation
 
@@ -4784,7 +4391,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_clear_cell_by_index_async(
         self,
         input: ClearXlsxCellRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Clear cell contents in an Excel XLSX spreadsheet, worksheet by index
 
@@ -4816,7 +4423,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_create_blank_spreadsheet_async(
         self,
         input: CreateBlankSpreadsheetRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a blank Excel XLSX spreadsheet
 
@@ -4846,7 +4453,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_create_spreadsheet_from_data_async(
         self,
         input: CreateSpreadsheetFromDataRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a new Excel XLSX spreadsheet from column and row data
 
@@ -4878,7 +4485,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_delete_worksheet_async(
         self,
         input: RemoveXlsxWorksheetRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete, remove worksheet from an Excel XLSX spreadsheet document
 
@@ -4911,7 +4518,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_cell_by_identifier_async(
         self,
         input: GetXlsxCellByIdentifierRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get cell from an Excel XLSX spreadsheet, worksheet by cell identifier
 
@@ -4943,7 +4550,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_cell_by_index_async(
         self,
         input: GetXlsxCellRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get cell from an Excel XLSX spreadsheet, worksheet by index
 
@@ -4975,7 +4582,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_columns_async(
         self,
         input: GetXlsxColumnsRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
 
@@ -5005,7 +4612,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_images_async(
         self,
         input: GetXlsxImagesRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get images from a Excel XLSX spreadsheet, worksheet
 
@@ -5035,7 +4642,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_rows_and_cells_async(
         self,
         input: GetXlsxRowsAndCellsRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
 
@@ -5066,7 +4673,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_styles_async(
         self,
         input: GetXlsxStylesRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get styles from a Excel XLSX spreadsheet, worksheet
 
@@ -5096,7 +4703,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_worksheets_async(
         self,
         input: GetXlsxWorksheetsRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get worksheets from a Excel XLSX spreadsheet
 
@@ -5127,7 +4734,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_insert_worksheet_async(
         self,
         input: InsertXlsxWorksheetRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Insert a new worksheet into an Excel XLSX spreadsheet
 
@@ -5158,7 +4765,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_set_cell_by_identifier_async(
         self,
         input: SetXlsxCellByIdentifierRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Set, update cell contents in an Excel XLSX spreadsheet, worksheet by c
 
@@ -5191,7 +4798,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_set_cell_by_index_async(
         self,
         input: SetXlsxCellRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Set, update cell contents in an Excel XLSX spreadsheet, worksheet by
         index
@@ -5224,7 +4831,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_html_to_docx_async(
         self,
         input: HtmlToOfficeRequest,
-    ):
+    ) -> bytes:
         """
         Convert HTML to Word DOCX Document
 
@@ -5246,212 +4853,10 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def convert_document_html_to_pdf_async(
-        self,
-    ):
-        """
-        Convert HTML document file to PDF Document
-
-        Convert standard HTML, with full support for CSS, JavaScript, Images,
-        and other complex behavior to PDF. To use external files such as
-        images, use an absolute URL to the file.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/html/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_html_to_png_async(
-        self,
-    ):
-        """
-        Convert HTML document file to PNG image array
-
-        Convert standard HTML, with full support for CSS, JavaScript, Images,
-        and other complex behavior to an array of PNG images, one for each
-        page. To use external files in your HTML such as images, use an
-        absolute URL to the file.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/html/to/png"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_html_to_txt_async(
-        self,
-    ):
-        """
-        HTML Document file to Text (txt)
-
-        HTML document to text
-        """
-        request_url = f"{self._connection_runtime_url}/convert/html/to/txt"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_image_multipage_image_format_convert_async(
-        self,
-        format1: str,
-        format2: str,
-    ):
-        """
-        Multi-page image format conversion
-
-        Convert between over 100 file formats, including support for
-        Multiple-Page formats (e.g. PDFs, TIFFs, etc. with multiple pages).
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/convert/image-multipage/{str(format1)}/to/{str(format2)}"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_image_get_image_info_async(
-        self,
-    ):
-        """
-        Get information about an image
-
-        Get details from an image such as size, format and MIME type,
-        compression, EXIF data such as location, DPI, unique colors,
-        transparency information, and more
-        """
-        request_url = f"{self._connection_runtime_url}/convert/image/get-info"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_image_image_set_d_p_i_async(
-        self,
-        dpi: str,
-    ):
-        """
-        Change image DPI
-
-        Resize an image to have a different DPI
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/image/set-dpi/{str(dpi)}"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_image_image_format_convert_async(
-        self,
-        format1: str,
-        format2: str,
-    ):
-        """
-        Image format conversion
-
-        Convert between over 100 file formats, including key formats such as
-        Photoshop (PSD), PNG, JPG, GIF, NEF, and BMP.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/convert/image/{str(format1)}/to/{str(format2)}"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
     async def convert_data_json_to_xml_async(
         self,
         input: ConvertDataJsonToXmlInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Convert JSON to XML conversion
 
@@ -5476,760 +4881,10 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def merge_document_docx_async(
-        self,
-    ):
-        """
-        Merge Two Word DOCX Together
-
-        Combine two Office Word Documents (docx) into one single Office Word
-        document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/merge/docx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_docx_multi_async(
-        self,
-    ):
-        """
-        Merge Multple Word DOCX Together
-
-        Combine multiple Office Word Documents (docx) into one single Office
-        Word document
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/merge/docx/multi"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_pdf_async(
-        self,
-    ):
-        """
-        Merge Two PDF Files Together
-
-        Combine two PDF files (pdf) into a single PDF document, preserving the
-        order of the input documents in the combined document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/merge/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_pdf_multi_async(
-        self,
-    ):
-        """
-        Merge Multple PDF Files Together
-
-        Combine multiple PDF files (pdf) into a single PDF document, preserving
-        the order of the input documents in the combined document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/merge/pdf/multi"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_png_async(
-        self,
-    ):
-        """
-        Merge Multple PNG Files Together
-
-        Combine multiple PNG files into a single PNG document, preserving the
-        order of the input documents in the combined document by stacking them
-        vertically
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/merge/png/vertical"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_pptx_async(
-        self,
-    ):
-        """
-        Merge Two PowerPoint PPTX Together
-
-        Combine two Office PowerPoint presentations (pptx) into one single
-        Office PowerPoint presentation
-        """
-        request_url = f"{self._connection_runtime_url}/convert/merge/pptx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_pptx_multi_async(
-        self,
-    ):
-        """
-        Merge Multple PowerPoint PPTX Together
-
-        Combine multiple Office PowerPoint presentations (pptx) into one single
-        Office PowerPoint presentation
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/merge/pptx/multi"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_txt_async(
-        self,
-    ):
-        """
-        Merge Two Text (TXT) Files Together
-
-        Combine two Text (.TXT) files into a single text document, preserving
-        the order of the input documents in the combined document by stacking
-        them vertically.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/merge/txt"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def merge_document_txt_multi_async(
-        self,
-    ):
-        """
-        Merge Multple Text (TXT) Files Together
-
-        Combine multiple Text (.TXT) files into a single text document,
-        preserving the order of the input documents in the combined document by
-        stacking them vertically.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/merge/txt/multi"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_xlsx_async(
-        self,
-    ):
-        """
-        Merge Two Excel XLSX Together
-
-        Combine two Office Excel spreadsheets (xlsx) into a single Office Excel
-        spreadsheet
-        """
-        request_url = f"{self._connection_runtime_url}/convert/merge/xlsx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def merge_document_xlsx_multi_async(
-        self,
-    ):
-        """
-        Merge Multple Excel XLSX Together
-
-        Combine multiple Office Excel spreadsheets (xlsx) into a single Office
-        Excel spreadsheet
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/merge/xlsx/multi"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_pdf_to_docx_async(
-        self,
-    ):
-        """
-        Convert PDF to Word DOCX Document
-
-        Convert standard PDF to Office Word Documents (docx). Converts a PDF at
-        high fidelity into Word format, where it can be easily edited and
-        processed.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/pdf/to/docx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_pdf_to_docx_rasterize_async(
-        self,
-    ):
-        """
-        Convert PDF to Word DOCX Document based on rasterized version of the
-        PDF
-
-        Convert standard PDF to Office Word Documents (docx), but first
-        rasterize the PDF. Converts a PDF at high fidelity into Word format.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/pdf/to/docx/rasterize"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_pdf_to_png_array_async(
-        self,
-    ):
-        """
-        Convert PDF to PNG Image Array
-
-        Convert PDF document to PNG array, one image per page.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/pdf/to/png"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_pdf_to_png_single_async(
-        self,
-    ):
-        """
-        Convert PDF to Single PNG image
-
-        Convert PDF document to a single tall PNG image, by
-        stacking/concatenating the images vertically into a single \"tall\"
-        image
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/pdf/to/png/merge-single"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_pdf_to_pptx_async(
-        self,
-    ):
-        """
-        Convert PDF to PowerPoint PPTX Presentation
-
-        Convert standard PDF to Office PowerPoint Presentation (pptx). Converts
-        a PDF file at high fidelity into PowerPoint format, where it can be
-        easily edited and processed.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/pdf/to/pptx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_pdf_to_txt_async(
-        self,
-    ):
-        """
-        Convert PDF Document to Text (txt)
-
-        PDF document to text
-        """
-        request_url = f"{self._connection_runtime_url}/convert/pdf/to/txt"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_png_array_to_pdf_async(
-        self,
-    ):
-        """
-        Convert PNG Array to PDF
-
-        Convert an array of PNG images, one image per page, into a
-        newly-created PDF. Supports images of different sizes as input.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/png/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_ppt_to_pdf_async(
-        self,
-    ):
-        """
-        Convert PowerPoint PPT (97-03) Presentation to PDF
-
-        Convert Office PowerPoint (97-2003) Documents (ppt) to standard PDF
-        """
-        request_url = f"{self._connection_runtime_url}/convert/ppt/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_ppt_to_pptx_async(
-        self,
-    ):
-        """
-        Convert PowerPoint PPT (97-03) Presentation to PPTX
-
-        Convert/upgrade Office PowerPoint (97-2003) Documents (ppt) to modern
-        PPTX
-        """
-        request_url = f"{self._connection_runtime_url}/convert/ppt/to/pptx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_pptx_to_pdf_async(
-        self,
-    ):
-        """
-        Convert PowerPoint PPTX Presentation to PDF
-
-        Convert Office PowerPoint Documents (pptx) to standard PDF
-        """
-        request_url = f"{self._connection_runtime_url}/convert/pptx/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_pptx_to_txt_async(
-        self,
-    ):
-        """
-        Convert PowerPoint PPTX Presentation to Text (txt)
-
-        Convert Office PowerPoint Documents (pptx) to standard Text
-        """
-        request_url = f"{self._connection_runtime_url}/convert/pptx/to/txt"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def split_document_docx_async(
-        self,
-    ):
-        """
-        Split a single Word Document DOCX into Separate Documents by Page
-
-        Split a Word DOCX Document, comprised of multiple pages into separate
-        Word DOCX document files, with each containing exactly one page.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/split/docx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def split_document_pdf_by_page_async(
-        self,
-    ):
-        """
-        Split a PDF file into separate PDF files, one per page
-
-        Split an input PDF file into separate pages, comprised of one PDF file
-        per page.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/split/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def split_document_pptx_async(
-        self,
-    ):
-        """
-        Split a single PowerPoint Presentation PPTX into Separate Slides
-
-        Split an PowerPoint PPTX Presentation, comprised of multiple slides
-        into separate PowerPoint PPTX presentation files, with each containing
-        exactly one slide.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/split/pptx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def split_document_txt_by_line_async(
-        self,
-    ):
-        """
-        Split a single Text file (txt) into lines
-
-        Split a Text (txt) Document by line, returning each line separately in
-        order. Supports multiple types of newlines.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/split/txt/by-line"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def split_document_txt_by_string_async(
-        self,
-    ):
-        """
-        Split a single Text file (txt) by a string delimiter
-
-        Split a Text (txt) Document by a string delimiter, returning each
-        component of the string as an array of strings.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/split/txt/by-string"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def split_document_xlsx_async(
-        self,
-    ):
-        """
-        Split a single Excel XLSX into Separate Worksheets
-
-        Split an Excel XLSX Spreadsheet, comprised of multiple Worksheets (or
-        Tabs) into separate Excel XLSX spreadsheet files, with each containing
-        exactly one Worksheet.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/split/xlsx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def convert_template_apply_html_template_async(
         self,
         input: HtmlTemplateApplicationRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Apply HTML template
 
@@ -6257,209 +4912,10 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def validate_document_autodetect_validation_async(
-        self,
-    ):
-        """
-        Autodetect content type and validate
-
-        Automatically detect the type of content, verify and validate that the
-        content is indeed fully valid at depth, and then report the validation
-        result.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/validate/autodetect"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def validate_document_docx_validation_async(
-        self,
-    ):
-        """
-        Validate a Word document (DOCX)
-
-        Validate a Word document (DOCX); if the document is not valid,
-        identifies the errors in the document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/validate/docx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def validate_document_json_validation_async(
-        self,
-    ):
-        """
-        Validate a JSON file
-
-        Validate a JSON (JavaScript Object Notation) document file; if the
-        document is not valid, identifies the errors in the document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/validate/json"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def validate_document_pdf_validation_async(
-        self,
-    ):
-        """
-        Validate a PDF document file
-
-        Validate a PDF document; if the document is not valid, identifies the
-        errors in the document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/validate/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def validate_document_pptx_validation_async(
-        self,
-    ):
-        """
-        Validate a PowerPoint presentation (PPTX)
-
-        Validate a PowerPoint presentation (PPTX); if the document is not
-        valid, identifies the errors in the document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/validate/pptx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def validate_document_xlsx_validation_async(
-        self,
-    ):
-        """
-        Validate a Excel document (XLSX)
-
-        Validate a Excel document (XLSX); if the document is not valid,
-        identifies the errors in the document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/validate/xlsx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def validate_document_xml_validation_async(
-        self,
-    ):
-        """
-        Validate an XML file
-
-        Validate an XML document file; if the document is not valid, identifies
-        the errors in the document
-        """
-        request_url = f"{self._connection_runtime_url}/convert/validate/xml"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def convert_web_html_to_pdf_async(
         self,
         input: HtmlToPdfRequest,
-    ):
+    ) -> bytes:
         """
         Convert HTML string to PDF
 
@@ -6485,7 +4941,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_html_to_png_async(
         self,
         input: HtmlToPngRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Convert HTML string to PNG screenshot
 
@@ -6514,7 +4970,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_html_to_txt_async(
         self,
         input: HtmlToTextRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Convert HTML string to text (txt)
 
@@ -6539,37 +4995,10 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_md_to_html_async(
-        self,
-    ):
-        """
-        Convert Markdown to HTML
-
-        Convert a markdown file (.md) to HTML
-        """
-        request_url = f"{self._connection_runtime_url}/convert/web/md/to/html"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def convert_web_url_to_pdf_async(
         self,
         input: ScreenshotRequest,
-    ):
+    ) -> bytes:
         """
         Convert a URL to PDF
 
@@ -6595,7 +5024,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_url_to_screenshot_async(
         self,
         input: ScreenshotRequest,
-    ):
+    ) -> bytes:
         """
         Take screenshot of URL
 
@@ -6624,7 +5053,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_url_to_txt_async(
         self,
         input: UrlToTextRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Convert website URL page to text (txt)
 
@@ -6634,558 +5063,6 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         response = await self.http_client.send_async(
             "POST", request_url, body=input
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_xls_to_csv_async(
-        self,
-    ):
-        """
-        Convert Excel XLS (97-03) Spreadsheet to CSV
-
-        Convert/upgrade Office Excel (97-2003) Workbooks (xls) to standard CSV
-        format.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xls/to/csv"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_data_xls_to_json_async(
-        self,
-    ):
-        """
-        Convert Excel (97-2003) XLS to JSON conversion
-
-        Convert an Excel (97-2003) XLS file to a JSON object array
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xls/to/json"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_xls_to_pdf_async(
-        self,
-    ):
-        """
-        Convert Excel XLS (97-03) Spreadsheet to PDF
-
-        Convert Office Excel (97-2003) Workbooks (xls) to standard PDF.
-        Converts all worksheets in the workbook to PDF.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xls/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_xls_to_xlsx_async(
-        self,
-    ):
-        """
-        Convert Excel XLS (97-03) Spreadsheet to XLSX
-
-        Convert/upgrade Office Excel (97-2003) Workbooks (xls) to modern XLSX
-        format.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xls/to/xlsx"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_xlsx_to_csv_async(
-        self,
-    ):
-        """
-        Convert Excel XLSX Spreadsheet to CSV
-
-        Convert Office Excel Workbooks (XLSX) to standard Comma-Separated
-        Values (CSV) format. Supports both XLSX and XLSB file Excel formats.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/csv"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_data_xlsx_to_json_async(
-        self,
-    ):
-        """
-        Convert Excel XLSX to JSON conversion
-
-        Convert an Excel XLSX file to a JSON object array
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/json"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_document_xlsx_to_pdf_async(
-        self,
-    ):
-        """
-        Convert Excel XLSX Spreadsheet to PDF
-
-        Convert Office Excel Workbooks (XLSX) to standard PDF. Converts all
-        worksheets in the workbook to PDF. Supports both XLSX and XLSB Excel
-        file formats.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/pdf"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def convert_document_xlsx_to_txt_async(
-        self,
-    ):
-        """
-        Convert Excel XLSX Spreadsheet to Text (txt)
-
-        Convert Office Excel Workbooks (XLSX) to standard Text. Converts all
-        worksheets in the workbook to Text. Supports both XLSX and XLSB file
-        formats. When a spreadsheet contains multiple worksheets, will export
-        all of the text from all of the worksheets. If you wish to export the
-        text from only one worksheet, try using the Split XLSX API to split the
-        spreadsheet into multiple worksheet files, and then run XLSX to Text on
-        the individual worksheet file that you need to extract the text from.
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/txt"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_edit_add_attribute_with_x_path_async(
-        self,
-    ):
-        """
-        Adds an attribute to all XML nodes matching XPath expression
-
-        Return the reuslts of editing an XML document by adding an attribute to
-        all of the nodes that match an input XPath expression.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/convert/xml/edit/xpath/add-attribute"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_edit_add_child_with_x_path_async(
-        self,
-    ):
-        """
-        Adds an XML node as a child to XML nodes matching XPath expression
-
-        Return the reuslts of editing an XML document by adding an XML node as
-        a child to all of the nodes that match an input XPath expression.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/edit/xpath/add-child"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_remove_with_x_path_async(
-        self,
-    ):
-        """
-        Remove, delete XML nodes and items matching XPath expression
-
-        Return the reuslts of editing an XML document by removing all of the
-        nodes that match an input XPath expression
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/edit/xpath/remove"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_edit_remove_all_child_nodes_with_x_path_async(
-        self,
-    ):
-        """
-        Removes, deletes all children of nodes matching XPath expression, but
-
-        Return the reuslts of editing an XML document by removing all child
-        nodes of the nodes that match an input XPath expression.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/convert/xml/edit/xpath/remove-all-children"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_edit_replace_with_x_path_async(
-        self,
-    ):
-        """
-        Replaces XML nodes matching XPath expression with new node
-
-        Return the reuslts of editing an XML document by replacing all of the
-        nodes that match an input XPath expression with a new XML node
-        expression.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/edit/xpath/replace"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_edit_set_value_with_x_path_async(
-        self,
-    ):
-        """
-        Sets the value contents of XML nodes matching XPath expression
-
-        Return the reuslts of editing an XML document by setting the contents
-        of all of the nodes that match an input XPath expression. Supports
-        elements and attributes.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/edit/xpath/set-value"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_query_with_x_query_async(
-        self,
-    ):
-        """
-        Query an XML file using XQuery query, get results
-
-        Return the reuslts of querying a single XML document with an XQuery
-        expression. Supports XQuery 3.1 and earlier. This API is optimized for
-        a single XML document as input. Provided XML document is automatically
-        loaded as the default context; to access elements in the document,
-        simply refer to them without a document reference, such as
-        bookstore/book
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/query/xquery"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_query_with_x_query_multi_async(
-        self,
-    ):
-        """
-        Query multiple XML files using XQuery query, get results
-
-        Return the reuslts of querying an XML document with an XQuery
-        expression. Supports XQuery 3.1 and earlier. This API is optimized for
-        multiple XML documents as input. You can refer to the contents of a
-        given document by name, for example doc(\"books.xml\") or
-        doc(\"restaurants.xml\") if you included two input files named
-        books.xml and restaurants.xml. If input files contain no file name,
-        they will default to file names input1.xml, input2.xml and so on.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/query/xquery/multi"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_filter_with_x_path_async(
-        self,
-    ):
-        """
-        Filter, select XML nodes using XPath expression, get results
-
-        Return the reuslts of filtering, selecting an XML document with an
-        XPath expression
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/select/xpath"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_to_json_async(
-        self,
-    ):
-        """
-        Convert XML to JSON conversion
-
-        Convert an XML string or file into JSON
-        """
-        request_url = f"{self._connection_runtime_url}/convert/xml/to/json"
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def convert_data_xml_transform_with_xslt_to_xml_async(
-        self,
-    ):
-        """
-        Transform XML document file with XSLT into a new XML document
-
-        Convert an XML string or file into JSON
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/convert/xml/transform/xslt/to/xml"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
         )
 
         if not (200 <= response.status < 300):

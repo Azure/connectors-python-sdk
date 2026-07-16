@@ -182,38 +182,6 @@ class TestGetFileCabinetsAsync:
             assert result is not None
 
 
-class TestStoreToFileCabinetAsync:
-    """Tests for store_to_file_cabinet_async method (POST, no request body)."""
-
-    @pytest.mark.asyncio
-    async def test_success_sends_post(self, mock_token_provider):
-        """Test that the operation issues a POST to the documents endpoint."""
-        client = DocuwareClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"DocumentId": 42}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.store_to_file_cabinet_async(
-                file_cabinet="cabinet-1",
-                store_dialog_id=None,
-            )
-
-            mock_send.assert_called_once()
-            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
-            assert method == "POST"
-            assert path.endswith("/FileCabinets/cabinet-1/Documents")
-            assert mock_send.call_args.kwargs["body"] is None
-            assert result is not None
-            assert result["DocumentId"] == 42
-
-
 class TestSearchForDocumentsInFileCabinetAsync:
     """Tests for search_for_documents_in_file_cabinet_async (POST with body)."""
 
@@ -236,13 +204,14 @@ class TestSearchForDocumentsInFileCabinetAsync:
             result = await client.search_for_documents_in_file_cabinet_async(
                 input=request,
                 file_cabinet="cabinet-1",
-                search_dialog_id=None,
+                search_dialog_id="dialog-1",
             )
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
-            assert path.endswith("/FileCabinets/cabinet-1/Search")
+            assert "/FileCabinets/cabinet-1/Search" in path
+            assert "SearchDialogId=dialog-1" in path
             assert mock_send.call_args.kwargs["body"] is request
             assert result is not None
             assert result["Count"] == 1
@@ -267,7 +236,7 @@ class TestSearchForDocumentsInFileCabinetAsync:
                 await client.search_for_documents_in_file_cabinet_async(
                     input=request,
                     file_cabinet="cabinet-1",
-                    search_dialog_id=None,
+                    search_dialog_id="dialog-1",
                 )
 
             assert exc_info.value.status_code == 400
@@ -348,15 +317,16 @@ class TestDownloadFileAsync:
                 file_cabinet_id="cabinet-1",
                 document_id="doc-1",
                 file_number="1",
-                document_format=None,
+                document_format="pdf",
             )
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
-            assert path.endswith(
-                "/FileCabinets/cabinet-1/Documents/doc-1/Sections/1/Download"
+            assert (
+                "/FileCabinets/cabinet-1/Documents/doc-1/Sections/1/Download" in path
             )
+            assert "DocumentFormat=pdf" in path
             assert result == b"file-bytes"
 
 
@@ -378,8 +348,6 @@ OPERATION_ARGS = {
         "document_id": "doc-1",
         "document_format": None,
     },
-    "store_to_file_cabinet": {"file_cabinet": "cabinet-1", "store_dialog_id": None},
-    "import_to_document_tray": {"document_tray": "tray-1"},
     "list_documents_in_document_tray": {"document_tray": "tray-1"},
     "search_for_documents_in_file_cabinet": {
         "input": {},
@@ -395,17 +363,6 @@ OPERATION_ARGS = {
     "place_a_stamp": {"input": {}, "file_cabinet_id": "cabinet-1", "document_id": "doc-1"},
     "get_dialogs": {"file_cabinet": "cabinet-1"},
     "get_dialog_fields": {"file_cabinet": "cabinet-1", "dialog_id": "dialog-1"},
-    "append_file": {"file_cabinet": "cabinet-1", "doc_id": None},
-    "delete_file": {
-        "file_cabinet": "cabinet-1",
-        "document_id": "doc-1",
-        "file_number": "1",
-    },
-    "replace_file": {
-        "file_cabinet": "cabinet-1",
-        "document_id": "doc-1",
-        "file_number": "1",
-    },
     "get_stamps": {"file_cabinet": "cabinet-1"},
     "get_stamp_fields": {"file_cabinet": "cabinet-1", "stamp": "stamp-1"},
     "get_file_cabinet_fields": {"file_cabinet": "cabinet-1"},

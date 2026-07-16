@@ -22,62 +22,6 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class StoreToFileCabinetResponse:
-    """
-    Response for Store to file cabinet
-    """
-
-    sections: Optional[List[Dict[str, Any]]] = None
-    """Sections"""
-    document_id: Optional[int] = None
-    """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = None
-    """IndexFields"""
-    document_title: Optional[str] = None
-    """DocumentTitle"""
-    file_cabinet_id: Optional[str] = None
-    """FileCabinetId"""
-    total_pages: Optional[int] = None
-    """TotalPages"""
-    file_size: Optional[int] = None
-    """FileSize"""
-    content_type: Optional[str] = None
-    """ContentType"""
-    version_status: Optional[str] = None
-    """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = None
-    """DocumentFlags"""
-
-
-@dataclass
-class ImportToDocumentTrayResponse:
-    """
-    Response for Import to document tray
-    """
-
-    sections: Optional[List[Dict[str, Any]]] = None
-    """Sections"""
-    document_id: Optional[int] = None
-    """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = None
-    """IndexFields"""
-    document_title: Optional[str] = None
-    """DocumentTitle"""
-    file_cabinet_id: Optional[str] = None
-    """FileCabinetId"""
-    total_pages: Optional[int] = None
-    """TotalPages"""
-    file_size: Optional[int] = None
-    """FileSize"""
-    content_type: Optional[str] = None
-    """ContentType"""
-    version_status: Optional[str] = None
-    """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = None
-    """DocumentFlags"""
-
-
-@dataclass
 class SearchForDocumentsInFileCabinetInput:
     """
     Search in file cabinet
@@ -274,62 +218,6 @@ class GetDialogsResponse:
 
 
 @dataclass
-class AppendFileResponse:
-    """
-    Response for Append a file
-    """
-
-    signature_status: Optional[List[str]] = None
-    """SignatureStatus"""
-    section_id: Optional[str] = None
-    """SectionId"""
-    content_type: Optional[str] = None
-    """ContentType"""
-    have_more_pages: Optional[bool] = None
-    """HaveMorePages"""
-    page_count: Optional[int] = None
-    """PageCount"""
-    file_size: Optional[int] = None
-    """FileSize"""
-    original_file_name: Optional[str] = None
-    """OriginalFileName"""
-    content_modified: Optional[str] = None
-    """ContentModified"""
-    has_text_annotation: Optional[bool] = None
-    """HasTextAnnotation"""
-    annotations_preview: Optional[bool] = None
-    """AnnotationsPreview"""
-
-
-@dataclass
-class ReplaceFileResponse:
-    """
-    Response for Replace a file
-    """
-
-    signature_status: Optional[List[str]] = None
-    """SignatureStatus"""
-    section_id: Optional[str] = None
-    """SectionId"""
-    content_type: Optional[str] = None
-    """ContentType"""
-    have_more_pages: Optional[bool] = None
-    """HaveMorePages"""
-    page_count: Optional[int] = None
-    """PageCount"""
-    file_size: Optional[int] = None
-    """FileSize"""
-    original_file_name: Optional[str] = None
-    """OriginalFileName"""
-    content_modified: Optional[str] = None
-    """ContentModified"""
-    has_text_annotation: Optional[bool] = None
-    """HasTextAnnotation"""
-    annotations_preview: Optional[bool] = None
-    """AnnotationsPreview"""
-
-
-@dataclass
 class GetStampsResponse:
     """
     Response for Get stamps
@@ -414,92 +302,12 @@ class DocuwareClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "docuware"
 
-    async def store_to_file_cabinet_async(
-        self,
-        file_cabinet: str,
-        store_dialog_id: Optional[str],
-    ):
-        """
-        Store to file cabinet
-
-        Stores a new document to a file cabinet.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(file_cabinet)}/Documents"
-        )
-        query_params = []
-        if store_dialog_id is not None:
-            value = str(store_dialog_id)
-            if isinstance(store_dialog_id, bool):
-                value = value.lower()
-            query_params.append(f"StoreDialogId={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def import_to_document_tray_async(
-        self,
-        document_tray: str,
-        store_dialog_id: Optional[str] = None,
-    ):
-        """
-        Import to document tray
-
-        Import a new document into a document tray.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/DocumentTrays/{str(document_tray)}/Documents"
-        )
-        query_params = []
-        if store_dialog_id is not None:
-            value = str(store_dialog_id)
-            if isinstance(store_dialog_id, bool):
-                value = value.lower()
-            query_params.append(f"StoreDialogId={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def search_for_documents_in_file_cabinet_async(
         self,
         input: SearchForDocumentsInFileCabinetInput,
         file_cabinet: str,
-        search_dialog_id: Optional[str],
-    ):
+        search_dialog_id: str,
+    ) -> dict[str, Any] | None:
         """
         Search in file cabinet
 
@@ -510,11 +318,10 @@ class DocuwareClient(ConnectorClientBase):
             f"/FileCabinets/{str(file_cabinet)}/Search"
         )
         query_params = []
-        if search_dialog_id is not None:
-            value = str(search_dialog_id)
-            if isinstance(search_dialog_id, bool):
-                value = value.lower()
-            query_params.append(f"SearchDialogId={quote(value)}")
+        value = str(search_dialog_id)
+        if isinstance(search_dialog_id, bool):
+            value = value.lower()
+        query_params.append(f"SearchDialogId={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -537,7 +344,7 @@ class DocuwareClient(ConnectorClientBase):
 
     async def get_organization_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get organization
 
@@ -564,8 +371,8 @@ class DocuwareClient(ConnectorClientBase):
 
     async def get_file_cabinets_async(
         self,
-        file_cabinet_type: Optional[str],
-    ):
+        file_cabinet_type: str,
+    ) -> dict[str, Any] | None:
         """
         Get file cabinets and document trays
 
@@ -573,11 +380,10 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/FileCabinets"
         query_params = []
-        if file_cabinet_type is not None:
-            value = str(file_cabinet_type)
-            if isinstance(file_cabinet_type, bool):
-                value = value.lower()
-            query_params.append(f"FileCabinetType={quote(value)}")
+        value = str(file_cabinet_type)
+        if isinstance(file_cabinet_type, bool):
+            value = value.lower()
+        query_params.append(f"FileCabinetType={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -602,7 +408,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         file_cabinet_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get document information
 
@@ -637,7 +443,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         file_cabinet_id: str,
         document_id: str,
-    ):
+    ) -> None:
         """
         Delete a document
 
@@ -668,8 +474,8 @@ class DocuwareClient(ConnectorClientBase):
         file_cabinet_id: str,
         document_id: str,
         file_number: str,
-        document_format: Optional[str],
-    ):
+        document_format: str,
+    ) -> bytes:
         """
         Download a file
 
@@ -687,11 +493,10 @@ class DocuwareClient(ConnectorClientBase):
             f"/Download"
         )
         query_params = []
-        if document_format is not None:
-            value = str(document_format)
-            if isinstance(document_format, bool):
-                value = value.lower()
-            query_params.append(f"DocumentFormat={quote(value)}")
+        value = str(document_format)
+        if isinstance(document_format, bool):
+            value = value.lower()
+        query_params.append(f"DocumentFormat={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -713,8 +518,8 @@ class DocuwareClient(ConnectorClientBase):
         self,
         file_cabinet_id: str,
         document_id: str,
-        document_format: Optional[str],
-    ):
+        document_format: str,
+    ) -> bytes:
         """
         Download a document
 
@@ -729,11 +534,10 @@ class DocuwareClient(ConnectorClientBase):
             f"/Download"
         )
         query_params = []
-        if document_format is not None:
-            value = str(document_format)
-            if isinstance(document_format, bool):
-                value = value.lower()
-            query_params.append(f"DocumentFormat={quote(value)}")
+        value = str(document_format)
+        if isinstance(document_format, bool):
+            value = value.lower()
+        query_params.append(f"DocumentFormat={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -756,7 +560,7 @@ class DocuwareClient(ConnectorClientBase):
         input: UpdateIndexFieldsInput,
         file_cabinet_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update index fields
 
@@ -793,7 +597,7 @@ class DocuwareClient(ConnectorClientBase):
         input: TransferDocumentInput,
         destination_file_cabinet_id: str,
         store_dialog_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Transfer documents
 
@@ -835,7 +639,7 @@ class DocuwareClient(ConnectorClientBase):
         input: PlaceAStampInput,
         file_cabinet_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Place a stamp
 
@@ -871,7 +675,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         file_cabinet: str,
         dialog_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get dialogs
 
@@ -907,123 +711,10 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def append_file_async(
-        self,
-        file_cabinet: str,
-        doc_id: Optional[str],
-    ):
-        """
-        Append a file
-
-        Appends a file/section to an existing document.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(file_cabinet)}/Sections"
-        )
-        query_params = []
-        if doc_id is not None:
-            value = str(doc_id)
-            if isinstance(doc_id, bool):
-                value = value.lower()
-            query_params.append(f"DocID={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def delete_file_async(
-        self,
-        file_cabinet: str,
-        document_id: str,
-        file_number: str,
-    ):
-        """
-        Delete a file
-
-        Deletes a file/section from an existing document.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/FileCabinets"
-            f"/{str(file_cabinet)}"
-            f"/Documents"
-            f"/{str(document_id)}"
-            f"/Sections"
-            f"/{str(file_number)}"
-            f"/Data"
-        )
-
-        response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "DELETE",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-    async def replace_file_async(
-        self,
-        file_cabinet: str,
-        document_id: str,
-        file_number: str,
-    ):
-        """
-        Replace a file
-
-        Replaces a file/section in an existing document.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/FileCabinets"
-            f"/{str(file_cabinet)}"
-            f"/Documents"
-            f"/{str(document_id)}"
-            f"/Sections"
-            f"/{str(file_number)}"
-            f"/Data"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def get_stamps_async(
         self,
         file_cabinet: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get stamps
 
@@ -1055,7 +746,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         file_cabinet: str,
         stamp: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get stamp fields
 
@@ -1087,7 +778,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         file_cabinet: str,
         field_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get file cabinet fields
 
@@ -1127,7 +818,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         file_cabinet: str,
         dialog_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get dialog fields
 
@@ -1162,7 +853,7 @@ class DocuwareClient(ConnectorClientBase):
     async def list_documents_in_document_tray_async(
         self,
         document_tray: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List documents in document tray
 

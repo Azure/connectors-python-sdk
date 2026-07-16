@@ -363,7 +363,7 @@ OPERATION_ARGS = {
     },
     "attachment_get_attachments": {"package_id": "package-1", "document_id": "doc-1"},
     "attachment_upload_attachment": {
-        "input": {},
+        "input": b"raw-attachment-bytes",
         "package_id": "package-1",
         "document_id": "doc-1",
     },
@@ -396,7 +396,7 @@ OPERATION_ARGS = {
         "document_id": "doc-1",
     },
     "documents_upload_from_library": {"package_id": "package-1", "document_id": "doc-1"},
-    "documents_upload_stream": {"input": {}, "package_id": "package-1"},
+    "documents_upload_stream": {"input": b"raw-document-bytes", "package_id": "package-1"},
     "enterprise_documents_get_enterprise_workflow_access": {
         "package_id": "package-1",
         "order": "1",
