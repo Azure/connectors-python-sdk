@@ -247,6 +247,30 @@ class TestDynamicsaxClientMethods:
             assert mock_send.call_args.kwargs["body"] is item_input
 
     @pytest.mark.asyncio
+    async def test_patch_item_sends_body(self, mock_token_provider):
+        """Test patch_item_async patches the item with the provided body."""
+        client = _make_client(token_provider=mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"id":"1"}')
+        item_input = PatchItemInput()
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.patch_item_async(
+                input=item_input,
+                dataset="ds",
+                table="tbl",
+                id="1",
+            )
+
+            assert result["id"] == "1"
+            assert mock_send.call_args[0][0] == "PATCH"
+            assert mock_send.call_args.kwargs["body"] is item_input
+
+    @pytest.mark.asyncio
     async def test_delete_item_returns_none(self, mock_token_provider):
         """Test delete_item_async issues a DELETE and returns None."""
         client = _make_client(token_provider=mock_token_provider)

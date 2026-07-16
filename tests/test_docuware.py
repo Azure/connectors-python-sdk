@@ -9,6 +9,7 @@ import pytest
 from azure.connectors.docuware import (
     DocuwareClient,
     SearchForDocumentsInFileCabinetInput,
+    UpdateIndexFieldsInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -240,6 +241,35 @@ class TestSearchForDocumentsInFileCabinetAsync:
                 )
 
             assert exc_info.value.status_code == 400
+
+
+class TestUpdateIndexFieldsAsync:
+    """Tests for update_index_fields_async method (PUT with body)."""
+
+    @pytest.mark.asyncio
+    async def test_success_forwards_request_body(self, mock_token_provider):
+        """Test that the PUT operation forwards the request body to send_async."""
+        client = DocuwareClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        request = UpdateIndexFieldsInput()
+        mock_response = MockResponse(status=200, text="{}")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.update_index_fields_async(
+                input=request,
+                file_cabinet_id="cabinet-1",
+                document_id="document-1",
+            )
+
+            assert mock_send.call_args[0][0] == "PUT"
+            assert mock_send.call_args.kwargs["body"] is request
 
 
 class TestDeleteDocumentAsync:

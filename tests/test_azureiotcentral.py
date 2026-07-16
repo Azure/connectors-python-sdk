@@ -375,6 +375,59 @@ class TestAzureiotcentralClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
+    async def test_execute_component_command_sends_post_and_body(
+        self,
+        mock_token_provider,
+    ):
+        """Test devices_execute_component_command_async forwards the POST body."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+        body = DeviceCommand()
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.devices_execute_component_command_async(
+                input=body,
+                device_id="d-1",
+                component_name="component-1",
+                command_name="command-1",
+                application="app-1",
+            )
+
+            assert mock_send.call_args[0][0] == "POST"
+            assert mock_send.call_args.kwargs["body"] is body
+
+    @pytest.mark.asyncio
+    async def test_device_relationships_update_sends_patch_and_body(
+        self,
+        mock_token_provider,
+    ):
+        """Test device_relationships_update_async forwards the PATCH body."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text="{}")
+        body = DeviceRelationship()
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.device_relationships_update_async(
+                input=body,
+                device_id="d-1",
+                relationship_id="relationship-1",
+                application="app-1",
+            )
+
+            assert mock_send.call_args[0][0] == "PATCH"
+            assert mock_send.call_args.kwargs["body"] is body
+
+    @pytest.mark.asyncio
     async def test_device_groups_remove_returns_none(self, mock_token_provider):
         """Test device_groups_remove_async issues a DELETE and returns None."""
         client = _make_client(mock_token_provider)

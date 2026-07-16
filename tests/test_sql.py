@@ -369,12 +369,13 @@ class TestSqlClientMethods:
 
     @pytest.mark.asyncio
     async def test_patch_item_uses_patch_verb(self, mock_token_provider):
-        """Test patch_item_async issues a PATCH to the row endpoint."""
+        """Test patch_item_async issues a PATCH and forwards the body."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
         mock_response = MockResponse(status=200, text='{"id":"1"}')
+        body = PatchItemInput()
 
         with patch.object(
             client._http_client,
@@ -383,7 +384,7 @@ class TestSqlClientMethods:
             return_value=mock_response,
         ) as mock_send:
             await client.patch_item_async(
-                input=PatchItemInput(),
+                input=body,
                 server="srv",
                 database="db",
                 table="tbl",
@@ -392,6 +393,7 @@ class TestSqlClientMethods:
 
             assert mock_send.call_args[0][0] == "PATCH"
             assert "/v2/datasets/srv,db/tables/tbl/items/1" in mock_send.call_args[0][1]
+            assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
     async def test_delete_item_uses_delete_verb(self, mock_token_provider):

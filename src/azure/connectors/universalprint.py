@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -20,19 +20,6 @@ from azure.connectors.sdk import (
 
 
 # Type Definitions
-
-@dataclass
-class PrintFileInput:
-    """
-    Print PDF
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
 
 @dataclass
 class ListRecentSharesResponse:
@@ -80,7 +67,7 @@ class UniversalprintClient(ConnectorClientBase):
 
     async def print_file_async(
         self,
-        input: PrintFileInput,
+        input: bytes,
         printer: str,
         file_name: str,
         configuration_copies: Optional[str] = None,
@@ -163,7 +150,10 @@ class UniversalprintClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):

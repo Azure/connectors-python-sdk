@@ -22,13 +22,11 @@ Usage:
 
 import asyncio
 import os
+from pathlib import Path
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.universalprint import (
-    PrintFileInput,
-    UniversalprintClient,
-)
+from azure.connectors.universalprint import UniversalprintClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/universalprint/[connection-id]
@@ -64,13 +62,16 @@ async def example_2_print_file():
     print("\n=== Example 2: Print File ===")
 
     credential = DefaultAzureCredential()
+    pdf_file_path = Path(
+        os.environ.get("UNIVERSALPRINT_PDF_PATH", "document.pdf")
+    )
 
     async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             await client.print_file_async(
-                input=PrintFileInput(),
+                input=pdf_file_path.read_bytes(),
                 printer="your-printer-share-id",
-                file_name="document.pdf",
+                file_name=pdf_file_path.name,
                 configuration_copies="1",
                 configuration_color_mode="color",
                 configuration_orientation="portrait",

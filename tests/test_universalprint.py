@@ -7,10 +7,7 @@ import inspect
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from azure.connectors.universalprint import (
-    PrintFileInput,
-    UniversalprintClient,
-)
+from azure.connectors.universalprint import UniversalprintClient
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
@@ -23,7 +20,7 @@ async def _invoke_operation(client: UniversalprintClient, operation: str):
     """Invoke a Universal Print operation by name for shared tests."""
     if operation == "print_file":
         return await client.print_file_async(
-            input=PrintFileInput(),
+            input=b"%PDF-1.4 test",
             printer="printer123",
             file_name="document.pdf",
         )
@@ -131,7 +128,7 @@ class TestUniversalprintClientMethods:
             token_provider=mock_token_provider,
         )
         mock_response = MockResponse(status=202, text="")
-        body = PrintFileInput()
+        body = b"%PDF-1.4 test"
 
         with patch.object(
             client._http_client,
@@ -149,6 +146,10 @@ class TestUniversalprintClientMethods:
             assert mock_send.call_args[0][0] == "POST"
             assert "/v1.0/print/shares" in mock_send.call_args[0][1]
             assert mock_send.call_args.kwargs["body"] is body
+            assert (
+                mock_send.call_args.kwargs["content_type"]
+                == "application/octet-stream"
+            )
 
     @pytest.mark.asyncio
     async def test_print_file_includes_query_params(self, mock_token_provider):
@@ -166,7 +167,7 @@ class TestUniversalprintClientMethods:
             return_value=mock_response,
         ) as mock_send:
             await client.print_file_async(
-                input=PrintFileInput(),
+                input=b"%PDF-1.4 test",
                 printer="printer123",
                 file_name="document.pdf",
                 configuration_copies="2",
@@ -286,4 +287,4 @@ class TestUniversalprintClientSignatures:
         )
 
         with pytest.raises(TypeError):
-            await client.print_file_async(input=PrintFileInput())
+            await client.print_file_async(input=b"%PDF-1.4 test")
