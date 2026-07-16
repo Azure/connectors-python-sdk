@@ -260,53 +260,11 @@ class AddDealRequest:
 
 
 @dataclass
-class AddDealRequestV2:
-    """
-    Definition: AddDealRequestV2
-    """
-
-    title: Optional[str] = None
-    """Title of the deal."""
-    pipeline_id: Optional[str] = None
-    """The id of the pipeline to fetch stages from."""
-    stage_id: Optional[str] = None
-    """Stage of the deal."""
-    status: Optional[str] = None
-    """Status of the deal."""
-    value: Optional[int] = None
-    """Monetary value of the deal."""
-    currency: Optional[str] = None
-    """Currency of the deal."""
-    person_id: Optional[str] = None
-    """User id of person the deal is associated with."""
-    org_id: Optional[str] = None
-    """Id of the organization associated with the deal."""
-    expected_close_date: Optional[str] = None
-    """yyyy-MM-dd"""
-    visible_to: Optional[str] = None
-    """Owner, followers or entire company."""
-
-
-@dataclass
 class UpdateDealStageRequest:
     """
     Definition: UpdateDealStageRequest
     """
 
-    stage_id: Optional[str] = None
-    """Stage of the deal."""
-    expected_close_date: Optional[str] = None
-    """yyyy-MM-dd"""
-
-
-@dataclass
-class UpdateDealStageRequestV2:
-    """
-    Definition: UpdateDealStageRequestV2
-    """
-
-    pipeline_id: Optional[str] = None
-    """The id of the pipeline to fetch stages from."""
     stage_id: Optional[str] = None
     """Stage of the deal."""
     expected_close_date: Optional[str] = None
@@ -387,101 +345,6 @@ class ListOrganizationsResponse:
     """data"""
 
 
-@dataclass
-class TrigNewDealResponseV2:
-    """
-    Definition: TrigNewDealResponseV2
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class DealResponseV2:
-    """
-    Definition: DealResponseV2
-    """
-
-    id: Optional[int] = None
-    """Id of the deal."""
-    creator_user_id: Optional[Dict[str, Any]] = None
-    user_id: Optional[Dict[str, Any]] = None
-    person_id: Optional[Dict[str, Any]] = None
-    org_id: Optional[Dict[str, Any]] = None
-    status: Optional[str] = None
-    """Open, won, lost or deleted."""
-    title: Optional[str] = None
-    """Title of the deal."""
-    value: Optional[float] = None
-    """Monetary value of the deal."""
-    currency: Optional[str] = None
-    """Currency associated with the deal value."""
-    add_time: Optional[str] = None
-    """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    update_time: Optional[str] = None
-    """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    stage_id: Optional[int] = None
-    """ID of stage the deal is placed in a pipeline."""
-    stage_change_time: Optional[str] = None
-    """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    active: Optional[bool] = None
-    """True if the deal is active."""
-    deleted: Optional[bool] = None
-    """True if the deal has been deleted."""
-    next_activity_date: Optional[str] = None
-    """yyyy-MM-dd"""
-    next_activity_time: Optional[str] = None
-    """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    next_activity_id: Optional[int] = None
-    """Id of the next activity."""
-    last_activity_id: Optional[int] = None
-    """Id of the last activity."""
-    last_activity_date: Optional[str] = None
-    """yyyy-MM-dd"""
-    lost_reason: Optional[str] = None
-    """Message about why the deal was lost (to be used when status=lost)."""
-    visible_to: Optional[str] = None
-    """Owner, followers or entire company."""
-    close_time: Optional[str] = None
-    """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    pipeline_id: Optional[int] = None
-    """Id of pipeline the deal is associated with."""
-    products_count: Optional[int] = None
-    """Number of products associated with the deal."""
-    files_count: Optional[int] = None
-    """Number of files associated with the deal."""
-    notes_count: Optional[int] = None
-    """Number of notes associated with the deal."""
-    followers_count: Optional[int] = None
-    """Number of followers associated with the deal."""
-    email_messages_count: Optional[int] = None
-    """Number of email messages associated with the deal."""
-    activities_count: Optional[int] = None
-    """Number of activities associated with the deal."""
-    done_activities_count: Optional[int] = None
-    """Number of done activities associated with the deal."""
-    undone_activities_count: Optional[int] = None
-    """Number of undone activities associated with the deals."""
-    reference_activities_count: Optional[int] = None
-    """Number of referenced activities associated with the deal."""
-    participants_count: Optional[int] = None
-    """Number of participants associated with the deal."""
-    expected_close_date: Optional[str] = None
-    """yyyy-MM-dd"""
-    next_activity_subject: Optional[str] = None
-    """Subject of next activity associated with the deal."""
-    next_activity_type: Optional[str] = None
-    """Type of next activity associated with the deal."""
-    next_activity_duration: Optional[str] = None
-    """Duration of next activity associated with the deal."""
-    next_activity_note: Optional[str] = None
-    """Notes for next activity associated with the deal"""
-
-
 # Client Class
 
 class PipedriveClient(ConnectorClientBase):
@@ -518,7 +381,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def trig_new_activity_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         When a new activity is added
 
@@ -546,7 +409,7 @@ class PipedriveClient(ConnectorClientBase):
     async def get_deal_async(
         self,
         deal_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get deal by id
 
@@ -575,7 +438,7 @@ class PipedriveClient(ConnectorClientBase):
         self,
         input: UpdateDealStatusRequest,
         deal_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update deal status
 
@@ -607,7 +470,7 @@ class PipedriveClient(ConnectorClientBase):
     async def add_activity_async(
         self,
         input: AddActivityRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add activity
 
@@ -636,7 +499,7 @@ class PipedriveClient(ConnectorClientBase):
     async def get_stage_async(
         self,
         stage_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get stage by id
 
@@ -665,8 +528,8 @@ class PipedriveClient(ConnectorClientBase):
 
     async def add_deal_async(
         self,
-        input: AddDealRequestV2,
-    ):
+        input: AddDealRequest,
+    ) -> dict[str, Any] | None:
         """
         Add deal (V2)
 
@@ -693,7 +556,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def trig_new_deal_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         When a new deal is added (V2)
 
@@ -722,9 +585,9 @@ class PipedriveClient(ConnectorClientBase):
 
     async def update_deal_stage_async(
         self,
-        input: UpdateDealStageRequestV2,
+        input: UpdateDealStageRequest,
         deal_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update deal stage (V2)
 
@@ -755,7 +618,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def list_deals_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List deals
 

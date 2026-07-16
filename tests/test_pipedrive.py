@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 
 from azure.connectors.pipedrive import (
     AddActivityRequest,
-    AddDealRequestV2,
+    AddDealRequest,
     PipedriveClient,
-    UpdateDealStageRequestV2,
+    UpdateDealStageRequest,
     UpdateDealStatusRequest,
 )
 from azure.connectors.sdk import (
@@ -36,12 +36,12 @@ async def _invoke_operation(client: PipedriveClient, operation: str):
     if operation == "get_stage":
         return await client.get_stage_async(stage_id="1")
     if operation == "add_deal":
-        return await client.add_deal_async(input=AddDealRequestV2())
+        return await client.add_deal_async(input=AddDealRequest())
     if operation == "trig_new_deal":
         return await client.trig_new_deal_async()
     if operation == "update_deal_stage":
         return await client.update_deal_stage_async(
-            input=UpdateDealStageRequestV2(),
+            input=UpdateDealStageRequest(),
             deal_id="1",
         )
     if operation == "list_deals":
@@ -255,7 +255,7 @@ class TestPipedriveClientMethods:
             token_provider=mock_token_provider,
         )
         mock_response = MockResponse(status=201, text='{"data":{"id":99}}')
-        body = AddDealRequestV2()
+        body = AddDealRequest()
 
         with patch.object(
             client._http_client,
@@ -298,7 +298,7 @@ class TestPipedriveClientMethods:
             token_provider=mock_token_provider,
         )
         mock_response = MockResponse(status=200, text='{"data":{"id":42}}')
-        body = UpdateDealStageRequestV2()
+        body = UpdateDealStageRequest()
 
         with patch.object(
             client._http_client,

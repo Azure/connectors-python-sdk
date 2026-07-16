@@ -62,7 +62,7 @@ class DeviceGroupDeviceCollection:
     Response for Get devices by device group ID
     """
 
-    value: Optional[List[DeviceV1]] = None
+    value: Optional[List[Device]] = None
     """The collection of devices belonging to the device group."""
     next_link: Optional[str] = None
     """URL to get the next page of devices in the group."""
@@ -543,7 +543,7 @@ class DeviceCollection:
     Response for List devices
     """
 
-    value: Optional[List[DeviceV1]] = None
+    value: Optional[List[Device]] = None
     """The collection of devices."""
     next_link: Optional[str] = None
     """URL to get the next page of devices."""
@@ -575,7 +575,7 @@ class DeviceTemplateCollection:
     Response for List device templates
     """
 
-    value: Optional[List[DeviceTemplateV1]] = None
+    value: Optional[List[DeviceTemplate]] = None
     """The collection of device templates."""
     next_link: Optional[str] = None
     """URL to get the next page of device templates."""
@@ -599,7 +599,7 @@ class RoleCollection:
     Response for List roles
     """
 
-    value: Optional[List[RoleV1]] = None
+    value: Optional[List[Role]] = None
     """The collection of roles."""
 
 
@@ -626,7 +626,7 @@ class UserStatic:
     """Unique ID of the user."""
     type_: Optional[str] = None
     """Type of the user."""
-    roles: Optional[List[RoleAssignmentV1]] = None
+    roles: Optional[List[RoleAssignment]] = None
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -639,7 +639,7 @@ class UserCollection:
     Response for List users
     """
 
-    value: Optional[List[UserStaticV1]] = None
+    value: Optional[List[UserStatic]] = None
     """The collection of users."""
 
 
@@ -887,197 +887,6 @@ class Application:
 
 
 @dataclass
-class DeviceV1:
-    """
-    Definition: DeviceV1
-    """
-
-    id: Optional[str] = None
-    """Unique ID of the device."""
-    etag: Optional[str] = None
-    """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = None
-    """Display name of the device."""
-    template: Optional[str] = None
-    """The device template definition for the device."""
-    simulated: Optional[bool] = None
-    """Whether the device is simulated."""
-    enabled: Optional[bool] = None
-    """Whether the device connection to IoT Central has been enabled."""
-    provisioned: Optional[bool] = None
-    """Whether resources have been allocated for the device."""
-
-
-@dataclass
-class DeviceV2:
-    """
-    Definition: DeviceV2
-    """
-
-    id: Optional[str] = None
-    """Unique ID of the device."""
-    etag: Optional[str] = None
-    """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = None
-    """Display name of the device."""
-    template: Optional[str] = None
-    """The device template definition for the device."""
-    simulated: Optional[bool] = None
-    """Whether the device is simulated."""
-    enabled: Optional[bool] = None
-    """Whether the device connection to IoT Central has been enabled."""
-    organizations: Optional[List[str]] = None
-    """
-    List of organizations of the device, only one organization is supported
-    today, multiple organizations will be supported soon.
-    """
-    provisioned: Optional[bool] = None
-    """Whether resources have been allocated for the device."""
-
-
-@dataclass
-class DeviceCollectionV1:
-    """
-    Definition: DeviceCollectionV1
-    """
-
-    value: Optional[List[DeviceV1]] = None
-    """The collection of devices."""
-    next_link: Optional[str] = None
-    """URL to get the next page of devices."""
-
-
-@dataclass
-class DeviceCommandV1:
-    """
-    Definition: DeviceCommandV1
-    """
-
-    id: Optional[str] = None
-    """The request ID of the device command execution."""
-    request: Optional[Any] = None
-    """The payload for the device command."""
-    response: Optional[Any] = None
-    """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
-    """
-    Connection timeout in seconds to wait for a disconnected device to come
-    online. Defaults to 0 seconds.
-    """
-    response_timeout: Optional[int] = None
-    """
-    Response timeout in seconds to wait for a command completion on a device.
-    Defaults to 30 seconds.
-    """
-    response_code: Optional[int] = None
-    """The status code of the device command response."""
-
-
-@dataclass
-class DeviceComponentCommandV1:
-    """
-    Definition: DeviceComponentCommandV1
-    """
-
-    id: Optional[str] = None
-    """The request ID of the device command execution."""
-    request: Optional[Any] = None
-    """The payload for the device command."""
-    response: Optional[Any] = None
-    """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
-    """
-    Connection timeout in seconds to wait for a disconnected device to come
-    online. Defaults to 0 seconds.
-    """
-    response_timeout: Optional[int] = None
-    """
-    Response timeout in seconds to wait for a command completion on a device.
-    Defaults to 30 seconds.
-    """
-    response_code: Optional[int] = None
-    """The status code of the device command response."""
-
-
-@dataclass
-class DeviceModuleCommandV1:
-    """
-    Definition: DeviceModuleCommandV1
-    """
-
-    id: Optional[str] = None
-    """The request ID of the device command execution."""
-    request: Optional[Any] = None
-    """The payload for the device command."""
-    response: Optional[Any] = None
-    """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
-    """
-    Connection timeout in seconds to wait for a disconnected device to come
-    online. Defaults to 0 seconds.
-    """
-    response_timeout: Optional[int] = None
-    """
-    Response timeout in seconds to wait for a command completion on a device.
-    Defaults to 30 seconds.
-    """
-    response_code: Optional[int] = None
-    """The status code of the device command response."""
-
-
-@dataclass
-class DeviceModuleComponentCommandV1:
-    """
-    Definition: DeviceModuleComponentCommandV1
-    """
-
-    id: Optional[str] = None
-    """The request ID of the device command execution."""
-    request: Optional[Any] = None
-    """The payload for the device command."""
-    response: Optional[Any] = None
-    """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
-    """
-    Connection timeout in seconds to wait for a disconnected device to come
-    online. Defaults to 0 seconds.
-    """
-    response_timeout: Optional[int] = None
-    """
-    Response timeout in seconds to wait for a command completion on a device.
-    Defaults to 30 seconds.
-    """
-    response_code: Optional[int] = None
-    """The status code of the device command response."""
-
-
-@dataclass
-class DevicePropertiesV1:
-    """
-    Definition: DevicePropertiesV1
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class ModulePropertiesV1:
-    """
-    Definition: ModulePropertiesV1
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class DeviceRelationship:
     """
     Definition: DeviceRelationship
@@ -1087,98 +896,6 @@ class DeviceRelationship:
     """Unique ID of the device relationship."""
     target: Optional[str] = None
     """The device ID of the source (child) device."""
-
-
-@dataclass
-class DeviceTelemetryV1:
-    """
-    Definition: DeviceTelemetryV1
-    """
-
-    value: Optional[Any] = None
-    """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
-    """
-    String-formatted date representing the time when the telemetry value was
-    sent.
-    """
-
-
-@dataclass
-class DeviceComponentTelemetryV1:
-    """
-    Definition: DeviceComponentTelemetryV1
-    """
-
-    value: Optional[Any] = None
-    """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
-    """
-    String-formatted date representing the time when the telemetry value was
-    sent.
-    """
-
-
-@dataclass
-class DeviceModuleTelemetryV1:
-    """
-    Definition: DeviceModuleTelemetryV1
-    """
-
-    value: Optional[Any] = None
-    """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
-    """
-    String-formatted date representing the time when the telemetry value was
-    sent.
-    """
-
-
-@dataclass
-class DeviceModuleComponentTelemetryV1:
-    """
-    Definition: DeviceModuleComponentTelemetryV1
-    """
-
-    value: Optional[Any] = None
-    """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
-    """
-    String-formatted date representing the time when the telemetry value was
-    sent.
-    """
-
-
-@dataclass
-class DeviceTemplateV1:
-    """
-    Definition: DeviceTemplateV1
-    """
-
-    id: Optional[str] = None
-    """Unique ID of the device template."""
-    etag: Optional[str] = None
-    """ETag used to prevent conflict in device template updates."""
-    type_: Optional[List[str]] = None
-    """The JSON-LD types of this device template."""
-    display_name: Optional[str] = None
-    """Display name of the device template."""
-    description: Optional[str] = None
-    """Detailed description of the device template."""
-    capability_model: Optional[Any] = None
-    """The capability model utilized by this device template."""
-
-
-@dataclass
-class DeviceTemplateCollectionV1:
-    """
-    Definition: DeviceTemplateCollectionV1
-    """
-
-    value: Optional[List[DeviceTemplateV1]] = None
-    """The collection of device templates."""
-    next_link: Optional[str] = None
-    """URL to get the next page of device templates."""
 
 
 @dataclass
@@ -1279,19 +996,6 @@ class JobCancellationThreshold:
 
 
 @dataclass
-class JobV1:
-    """
-    Definition: JobV1
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class OrganizationStatic:
     """
     Definition: OrganizationStatic
@@ -1302,28 +1006,6 @@ class OrganizationStatic:
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
-
-
-@dataclass
-class RoleV1:
-    """
-    Definition: RoleV1
-    """
-
-    id: Optional[str] = None
-    """Unique ID of the role."""
-    display_name: Optional[str] = None
-    """Display name of the role."""
-
-
-@dataclass
-class RoleCollectionV1:
-    """
-    Definition: RoleCollectionV1
-    """
-
-    value: Optional[List[RoleV1]] = None
-    """The collection of roles."""
 
 
 @dataclass
@@ -1395,19 +1077,6 @@ class JobScheduleEnd:
 
 
 @dataclass
-class ScheduledJobV1:
-    """
-    Definition: ScheduledJobV1
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class ScheduledJobPatch:
     """
     Definition: ScheduledJobPatch
@@ -1426,50 +1095,7 @@ class ScheduledJobPatch:
 
 
 @dataclass
-class UserV1:
-    """
-    Definition: UserV1
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class UserPatchV1:
-    """
-    Definition: UserPatchV1
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class UserStaticV1:
-    """
-    Definition: UserStaticV1
-    """
-
-    id: Optional[str] = None
-    """Unique ID of the user."""
-    type_: Optional[str] = None
-    """Type of the user."""
-    roles: Optional[List[RoleAssignmentV1]] = None
-    """
-    List of role assignments that specify the permissions to access the
-    application.
-    """
-
-
-@dataclass
-class EmailUserV1:
+class EmailUser:
     """
     Definition: EmailUserV1
     """
@@ -1478,7 +1104,7 @@ class EmailUserV1:
     """Unique ID of the user."""
     type_: Optional[str] = None
     """Type of the user."""
-    roles: Optional[List[RoleAssignmentV1]] = None
+    roles: Optional[List[RoleAssignment]] = None
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -1488,7 +1114,7 @@ class EmailUserV1:
 
 
 @dataclass
-class ServicePrincipalUserV1:
+class ServicePrincipalUser:
     """
     Definition: ServicePrincipalUserV1
     """
@@ -1497,7 +1123,7 @@ class ServicePrincipalUserV1:
     """Unique ID of the user."""
     type_: Optional[str] = None
     """Type of the user."""
-    roles: Optional[List[RoleAssignmentV1]] = None
+    roles: Optional[List[RoleAssignment]] = None
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -1509,17 +1135,7 @@ class ServicePrincipalUserV1:
 
 
 @dataclass
-class UserCollectionV1:
-    """
-    Definition: UserCollectionV1
-    """
-
-    value: Optional[List[UserStaticV1]] = None
-    """The collection of users."""
-
-
-@dataclass
-class RoleAssignmentV1:
+class RoleAssignment:
     """
     Definition: RoleAssignmentV1
     """
@@ -1610,8 +1226,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def device_groups_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List device groups
 
@@ -1621,11 +1237,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/ga_2022_07_31/deviceGroups"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1649,8 +1264,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_groups_get_async(
         self,
         device_group_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get a device group
 
@@ -1661,11 +1276,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1690,8 +1304,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         input: DeviceGroup,
         device_group_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Create a device group
 
@@ -1702,11 +1316,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1730,8 +1343,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_groups_remove_async(
         self,
         device_group_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Delete device group
 
@@ -1742,11 +1355,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1765,8 +1377,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_groups_get_devices_async(
         self,
         device_group_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get devices by device group ID
 
@@ -1777,11 +1389,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}/devices"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1805,9 +1416,9 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def devices_get_cloud_properties_async(
         self,
         device_id: str,
-        application: Optional[str],
+        application: str,
         instance_of: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get device cloud properties (deprecated)
 
@@ -1818,11 +1429,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/devices/{str(device_id)}/cloudProperties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
@@ -1852,9 +1462,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         input: DeviceCloudProperties,
         device_id: str,
-        application: Optional[str],
+        application: str,
         instance_of: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update device cloud properties (deprecated)
 
@@ -1865,11 +1475,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/devices/{str(device_id)}/cloudProperties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
@@ -1901,9 +1510,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         component_name: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         instance_of: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Execute a device command (deprecated)
 
@@ -1921,11 +1530,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
@@ -1954,8 +1562,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_relationships_list_async(
         self,
         device_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List relationships
 
@@ -1966,11 +1574,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/devices/{str(device_id)}/relationships"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1995,8 +1602,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         relationship_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get device relationship
 
@@ -2013,11 +1620,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(relationship_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2043,8 +1649,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: DeviceRelationship,
         relationship_id: str,
         device_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Create a device relationship
 
@@ -2061,11 +1667,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(relationship_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2091,8 +1696,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: DeviceRelationship,
         device_id: str,
         relationship_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Update a device relationship
 
@@ -2109,11 +1714,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(relationship_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2138,8 +1742,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         relationship_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Delete a device relationship
 
@@ -2156,11 +1760,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(relationship_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2178,8 +1781,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def jobs_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List jobs
 
@@ -2187,11 +1790,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/ga_2022_07_31/jobs"
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2215,8 +1817,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def jobs_get_async(
         self,
         job_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get a job
 
@@ -2227,11 +1829,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/jobs/{str(job_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2256,9 +1857,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         input: Job,
         job_id: str,
-        application: Optional[str],
+        application: str,
         job_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a job
 
@@ -2269,11 +1870,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/jobs/{str(job_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
@@ -2302,8 +1902,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def jobs_get_devices_async(
         self,
         job_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get device statuses
 
@@ -2314,11 +1914,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/jobs/{str(job_id)}/devices"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2342,8 +1941,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def jobs_stop_async(
         self,
         job_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Stop a running job
 
@@ -2354,11 +1953,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/jobs/{str(job_id)}/stop"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2377,8 +1975,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def jobs_resume_async(
         self,
         job_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Resume a stopped job
 
@@ -2389,11 +1987,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/jobs/{str(job_id)}/resume"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2413,8 +2010,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         job_id: str,
         rerun_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Resume a job on failed devices
 
@@ -2425,11 +2022,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/jobs/{str(job_id)}/rerun/{str(rerun_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2452,8 +2048,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def organizations_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List organizations
 
@@ -2463,11 +2059,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/ga_2022_07_31/organizations"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2491,8 +2086,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def organizations_get_async(
         self,
         organization_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get an organization
 
@@ -2503,11 +2098,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/organizations/{str(organization_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2532,8 +2126,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         input: Organization,
         organization_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Create an organization
 
@@ -2544,11 +2138,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/organizations/{str(organization_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2572,8 +2165,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def organizations_remove_async(
         self,
         organization_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Delete organization
 
@@ -2584,11 +2177,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/organizations/{str(organization_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2606,8 +2198,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def scheduled_jobs_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List scheduled jobs
 
@@ -2617,11 +2209,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/ga_2022_07_31/scheduledJobs"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2645,8 +2236,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def scheduled_jobs_get_async(
         self,
         scheduled_job_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get a scheduled job
 
@@ -2657,11 +2248,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2686,10 +2276,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         input: ScheduledJob,
         scheduled_job_id: str,
-        application: Optional[str],
+        application: str,
         job_type: Optional[str] = None,
         scheduled_job_end_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a scheduled job
 
@@ -2700,11 +2290,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
@@ -2739,9 +2328,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         input: ScheduledJobPatch,
         scheduled_job_id: str,
-        application: Optional[str],
+        application: str,
         scheduled_job_end_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a scheduled job
 
@@ -2752,11 +2341,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
@@ -2785,8 +2373,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def scheduled_jobs_remove_async(
         self,
         scheduled_job_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Delete a scheduled job
 
@@ -2797,11 +2385,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2820,8 +2407,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def scheduled_jobs_list_jobs_async(
         self,
         scheduled_job_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get jobs by scheduled job ID
 
@@ -2832,11 +2419,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}/jobs"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2860,8 +2446,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def workflow_create_trigger_async(
         self,
         input: WorkflowTrigger,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         When a rule is fired
 
@@ -2872,11 +2458,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/triggers"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2900,8 +2485,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def devices_get_async(
         self,
         device_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get a device by ID
 
@@ -2911,11 +2496,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/devices/{str(device_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2940,9 +2524,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get device command response
 
@@ -2953,11 +2537,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/devices/{str(device_id)}/commands/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -2988,9 +2571,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         component_name: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get component command response
 
@@ -3008,11 +2591,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3043,9 +2625,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         component_name: str,
         telemetry_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get component telemetry value
 
@@ -3063,11 +2645,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(telemetry_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3098,9 +2679,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         module: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get module command response
 
@@ -3118,11 +2699,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3154,9 +2734,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: str,
         component_name: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get module component command response
 
@@ -3176,11 +2756,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3212,9 +2791,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: str,
         component_name: str,
         telemetry_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get module component telemetry value
 
@@ -3234,11 +2813,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(telemetry_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3268,9 +2846,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         module: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get module properties
 
@@ -3287,11 +2865,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/properties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3322,9 +2899,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         module: str,
         telemetry_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get module telemetry value
 
@@ -3342,11 +2919,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(telemetry_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3375,9 +2951,9 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def devices_get_properties_async(
         self,
         device_id: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get device properties
 
@@ -3388,11 +2964,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/devices/{str(device_id)}/properties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3422,9 +2997,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         telemetry_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get device telemetry value
 
@@ -3435,11 +3010,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/devices/{str(device_id)}/telemetry/{str(telemetry_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3467,8 +3041,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List devices
 
@@ -3476,11 +3050,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v1/devices"
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3504,8 +3077,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def devices_remove_async(
         self,
         device_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Delete a device
 
@@ -3515,11 +3088,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/devices/{str(device_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3537,12 +3109,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_command_async(
         self,
-        input: DeviceCommandV1,
+        input: DeviceCommand,
         device_id: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run a device command
 
@@ -3553,11 +3125,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/devices/{str(device_id)}/commands/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3585,13 +3156,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_component_command_async(
         self,
-        input: DeviceComponentCommandV1,
+        input: DeviceComponentCommand,
         device_id: str,
         component_name: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run a component command
 
@@ -3609,11 +3180,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3641,13 +3211,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_module_command_async(
         self,
-        input: DeviceModuleCommandV1,
+        input: DeviceModuleCommand,
         device_id: str,
         module: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run a module command
 
@@ -3665,11 +3235,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3697,14 +3266,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_module_component_command_async(
         self,
-        input: DeviceModuleComponentCommandV1,
+        input: DeviceModuleComponentCommand,
         device_id: str,
         module: str,
         component_name: str,
         command_name: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run a module component command
 
@@ -3724,11 +3293,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/{str(command_name)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3756,10 +3324,10 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_set_async(
         self,
-        input: DeviceV2,
+        input: Device,
         device_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Create or update a device
 
@@ -3770,11 +3338,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/devices/{str(device_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3797,12 +3364,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_update_module_properties_async(
         self,
-        input: ModulePropertiesV1,
+        input: ModuleProperties,
         device_id: str,
         module: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update module properties
 
@@ -3819,11 +3386,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/properties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3851,11 +3417,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_update_properties_async(
         self,
-        input: DevicePropertiesV1,
+        input: DeviceProperties,
         device_id: str,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update device properties
 
@@ -3866,11 +3432,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/devices/{str(device_id)}/properties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -3899,8 +3464,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_templates_get_async(
         self,
         template_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get a device template by ID
 
@@ -3911,11 +3476,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/deviceTemplates/{str(template_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3938,8 +3502,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def device_templates_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List device templates
 
@@ -3947,11 +3511,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v1/deviceTemplates"
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3975,8 +3538,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_templates_remove_async(
         self,
         template_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Delete a device template
 
@@ -3987,11 +3550,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/deviceTemplates/{str(template_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4010,8 +3572,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def roles_get_async(
         self,
         role_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get role
 
@@ -4021,11 +3583,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/roles/{str(role_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4048,8 +3609,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def roles_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List roles
 
@@ -4057,11 +3618,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v1/roles"
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4084,11 +3644,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def users_create_async(
         self,
-        input: UserV1,
+        input: User,
         user_id: str,
-        application: Optional[str],
+        application: str,
         user_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create user
 
@@ -4098,11 +3658,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
@@ -4131,8 +3690,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def users_get_async(
         self,
         user_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         Get user
 
@@ -4142,11 +3701,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4169,8 +3727,8 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def users_list_async(
         self,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> dict[str, Any] | None:
         """
         List users
 
@@ -4178,11 +3736,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v1/users"
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4206,8 +3763,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def users_remove_async(
         self,
         user_id: str,
-        application: Optional[str],
-    ):
+        application: str,
+    ) -> None:
         """
         Delete user
 
@@ -4217,11 +3774,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4239,11 +3795,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def users_update_async(
         self,
-        input: UserPatchV1,
+        input: UserPatch,
         user_id: str,
-        application: Optional[str],
+        application: str,
         user_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update user
 
@@ -4253,11 +3809,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
@@ -4285,7 +3840,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def applications_list_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get the list of applications accessible to the signed-in user
         """
@@ -4312,10 +3867,10 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def workflow_get_components_async(
         self,
-        application: Optional[str],
-        template: Optional[str],
+        application: str,
+        template: str,
         module: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Workflow_GetComponents
         """
@@ -4324,16 +3879,14 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/components"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
-        if template is not None:
-            value = str(template)
-            if isinstance(template, bool):
-                value = value.lower()
-            query_params.append(f"template={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
+        value = str(template)
+        if isinstance(template, bool):
+            value = value.lower()
+        query_params.append(f"template={quote(value)}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
@@ -4361,12 +3914,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def workflow_get_capabilities_async(
         self,
-        application: Optional[str],
-        template: Optional[str],
+        application: str,
+        template: str,
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Workflow_GetCapabilities
         """
@@ -4375,16 +3928,14 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/capabilities"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
-        if template is not None:
-            value = str(template)
-            if isinstance(template, bool):
-                value = value.lower()
-            query_params.append(f"template={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
+        value = str(template)
+        if isinstance(template, bool):
+            value = value.lower()
+        query_params.append(f"template={quote(value)}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
@@ -4422,12 +3973,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def workflow_get_capabilities_v1_async(
         self,
-        application: Optional[str],
-        template: Optional[str],
+        application: str,
+        template: str,
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Workflow_GetCapabilities_V1
         """
@@ -4436,16 +3987,14 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/_internal/workflow/capabilities"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
-        if template is not None:
-            value = str(template)
-            if isinstance(template, bool):
-                value = value.lower()
-            query_params.append(f"template={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
+        value = str(template)
+        if isinstance(template, bool):
+            value = value.lower()
+        query_params.append(f"template={quote(value)}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
@@ -4483,10 +4032,10 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def workflow_get_components_v1_async(
         self,
-        application: Optional[str],
-        template: Optional[str],
+        application: str,
+        template: str,
         module: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Workflow_GetComponents_V1
         """
@@ -4495,16 +4044,14 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/_internal/workflow/components"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
-        if template is not None:
-            value = str(template)
-            if isinstance(template, bool):
-                value = value.lower()
-            query_params.append(f"template={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
+        value = str(template)
+        if isinstance(template, bool):
+            value = value.lower()
+        query_params.append(f"template={quote(value)}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
@@ -4532,9 +4079,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def workflow_get_modules_async(
         self,
-        application: Optional[str],
-        template: Optional[str],
-    ):
+        application: str,
+        template: str,
+    ) -> dict[str, Any] | None:
         """
         Workflow_GetModules_V1
         """
@@ -4542,16 +4089,14 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/v1/_internal/workflow/modules"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
-        if template is not None:
-            value = str(template)
-            if isinstance(template, bool):
-                value = value.lower()
-            query_params.append(f"template={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
+        value = str(template)
+        if isinstance(template, bool):
+            value = value.lower()
+        query_params.append(f"template={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4574,9 +4119,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_device_cloud_properties_async(
         self,
-        application: Optional[str],
+        application: str,
         instance_of: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_DeviceCloudProperties
         """
@@ -4585,11 +4130,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/schema/DeviceCloudProperties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
@@ -4617,11 +4161,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_device_command_async(
         self,
-        application: Optional[str],
+        application: str,
         instance_of: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand
         """
@@ -4630,11 +4174,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/schema/DeviceCommand"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
@@ -4672,12 +4215,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_device_command_v1_async(
         self,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand_V1
         """
@@ -4686,11 +4229,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/_internal/workflow/schema/DeviceCommand"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -4733,9 +4275,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_device_properties_async(
         self,
-        application: Optional[str],
+        application: str,
         instance_of: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_DeviceProperties
         """
@@ -4744,11 +4286,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/schema/DeviceProperties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
@@ -4776,10 +4317,10 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_device_properties_v1_async(
         self,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
         module: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_DeviceProperties_V1
         """
@@ -4788,11 +4329,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/_internal/workflow/schema/DeviceProperties"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -4825,11 +4365,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_device_telemetry_async(
         self,
-        application: Optional[str],
+        application: str,
         instance_of: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_DeviceTelemetry
         """
@@ -4838,11 +4378,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/schema/DeviceTelemetry"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
@@ -4880,12 +4419,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_device_telemetry_v1_async(
         self,
-        application: Optional[str],
+        application: str,
         template: Optional[str] = None,
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_DeviceTelemetry_V1
         """
@@ -4894,11 +4433,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/_internal/workflow/schema/DeviceTelemetry"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
@@ -4941,9 +4479,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_job_async(
         self,
-        application: Optional[str],
+        application: str,
         job_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_Job
         """
@@ -4952,11 +4490,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/_internal/workflow/schema/Job"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
@@ -4984,11 +4521,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_scheduled_job_async(
         self,
-        application: Optional[str],
+        application: str,
         scheduled_job_end_type: Optional[str] = None,
         job_type: Optional[str] = None,
         patch: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_ScheduledJob
         """
@@ -4997,11 +4534,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/ga_2022_07_31/_internal/workflow/schema/ScheduledJob"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
@@ -5039,10 +4575,10 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_user_async(
         self,
-        application: Optional[str],
+        application: str,
         user_type: Optional[str] = None,
         patch: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Schema_User_V1
         """
@@ -5051,11 +4587,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/v1/_internal/workflow/schema/User"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
@@ -5088,9 +4623,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def schema_webhook_action_body_async(
         self,
-        application: Optional[str],
+        application: str,
         rule: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Schema_WebhookActionBody
         """
@@ -5099,11 +4634,10 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api/preview/_internal/workflow/schema/WebhookActionBody"
         )
         query_params = []
-        if application is not None:
-            value = str(application)
-            if isinstance(application, bool):
-                value = value.lower()
-            query_params.append(f"application={quote(value)}")
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
         if rule is not None:
             value = str(rule)
             if isinstance(rule, bool):

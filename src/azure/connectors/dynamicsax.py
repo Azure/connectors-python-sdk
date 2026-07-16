@@ -485,9 +485,9 @@ class DynamicsaxClient(ConnectorClientBase):
         input: BusinessEventSubscription,
         dataset: str,
         businessevent: str,
-        businesseventcategory: Optional[str],
+        businesseventcategory: str,
         legal_entity: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         When a Business Event occurs
 
@@ -501,11 +501,10 @@ class DynamicsaxClient(ConnectorClientBase):
             f"/{str(businessevent)}"
         )
         query_params = []
-        if businesseventcategory is not None:
-            value = str(businesseventcategory)
-            if isinstance(businesseventcategory, bool):
-                value = value.lower()
-            query_params.append(f"businesseventcategory={quote(value)}")
+        value = str(businesseventcategory)
+        if isinstance(businesseventcategory, bool):
+            value = value.lower()
+        query_params.append(f"businesseventcategory={quote(value)}")
         if legal_entity is not None:
             value = str(legal_entity)
             if isinstance(legal_entity, bool):
@@ -536,7 +535,7 @@ class DynamicsaxClient(ConnectorClientBase):
         input: ExecuteProcedureInput,
         dataset: str,
         procedure: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Execute action
 
@@ -578,7 +577,7 @@ class DynamicsaxClient(ConnectorClientBase):
         skip: Optional[str] = None,
         select: Optional[str] = None,
         cross_company: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists items present in table
 
@@ -653,7 +652,7 @@ class DynamicsaxClient(ConnectorClientBase):
         input: PostItemInput,
         dataset: str,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create record
 
@@ -690,7 +689,7 @@ class DynamicsaxClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a record
 
@@ -728,7 +727,7 @@ class DynamicsaxClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Delete record
 
@@ -762,7 +761,7 @@ class DynamicsaxClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a record
 
@@ -798,7 +797,7 @@ class DynamicsaxClient(ConnectorClientBase):
     async def get_tables_async(
         self,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get list of entities
 
@@ -828,7 +827,7 @@ class DynamicsaxClient(ConnectorClientBase):
 
     async def get_data_sets_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get instances
 
@@ -856,7 +855,7 @@ class DynamicsaxClient(ConnectorClientBase):
     async def get_business_event_categories_async(
         self,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Gets business events categories
 
@@ -888,7 +887,7 @@ class DynamicsaxClient(ConnectorClientBase):
         self,
         dataset: str,
         businesseventcategory: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Gets business events
 
@@ -923,9 +922,9 @@ class DynamicsaxClient(ConnectorClientBase):
     async def get_legal_entities_async(
         self,
         dataset: str,
-        businesseventcategory: Optional[str],
-        businessevent: Optional[str],
-    ):
+        businesseventcategory: str,
+        businessevent: str,
+    ) -> dict[str, Any] | None:
         """
         Gets legal entities
 
@@ -936,16 +935,14 @@ class DynamicsaxClient(ConnectorClientBase):
             f"/datasets/{quote(str(dataset), safe='')}/legalentities"
         )
         query_params = []
-        if businesseventcategory is not None:
-            value = str(businesseventcategory)
-            if isinstance(businesseventcategory, bool):
-                value = value.lower()
-            query_params.append(f"businesseventcategory={quote(value)}")
-        if businessevent is not None:
-            value = str(businessevent)
-            if isinstance(businessevent, bool):
-                value = value.lower()
-            query_params.append(f"businessevent={quote(value)}")
+        value = str(businesseventcategory)
+        if isinstance(businesseventcategory, bool):
+            value = value.lower()
+        query_params.append(f"businesseventcategory={quote(value)}")
+        value = str(businessevent)
+        if isinstance(businessevent, bool):
+            value = value.lower()
+        query_params.append(f"businessevent={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -969,7 +966,7 @@ class DynamicsaxClient(ConnectorClientBase):
     async def get_procedures_async(
         self,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get actions
 
@@ -1001,7 +998,7 @@ class DynamicsaxClient(ConnectorClientBase):
         self,
         dataset: str,
         procedure: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get actions metadata
 
@@ -1037,7 +1034,7 @@ class DynamicsaxClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get entity metadata
 

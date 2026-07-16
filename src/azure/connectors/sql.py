@@ -323,7 +323,7 @@ class DataSetsList:
 
 
 @dataclass
-class DataSetsMetadataV2:
+class DataSetsMetadata:
     """
     Definition: DataSetsMetadataV2
     """
@@ -746,31 +746,9 @@ class PassThroughPQResult:
 
 
 @dataclass
-class PassThroughPQResultV2:
-    """
-    Definition: PassThroughPQResultV2
-    """
-
-    value: Optional[PQRowsV2] = None
-
-
-@dataclass
 class PQRows:
     """
     Definition: PQRows
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class PQRowsV2:
-    """
-    Definition: PQRowsV2
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -820,7 +798,7 @@ class SqlClient(ConnectorClientBase):
         database: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Delete row (V2)
 
@@ -854,7 +832,7 @@ class SqlClient(ConnectorClientBase):
         input: SqlPassThroughNativeQueryBody,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Execute a SQL query (V2)
 
@@ -888,7 +866,7 @@ class SqlClient(ConnectorClientBase):
         server: str,
         database: str,
         procedure: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Execute stored procedure (V2)
 
@@ -926,7 +904,7 @@ class SqlClient(ConnectorClientBase):
         database: str,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get row (V2)
 
@@ -974,7 +952,7 @@ class SqlClient(ConnectorClientBase):
         count: Optional[str] = None,
         extract_sensitivity_label: Optional[str] = None,
         purview_account_name: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get rows (V2)
 
@@ -1064,7 +1042,7 @@ class SqlClient(ConnectorClientBase):
         top: Optional[str] = None,
         orderby: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         When an item is created (V2)
 
@@ -1129,7 +1107,7 @@ class SqlClient(ConnectorClientBase):
         top: Optional[str] = None,
         orderby: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         When an item is modified (V2)
 
@@ -1190,7 +1168,7 @@ class SqlClient(ConnectorClientBase):
         database: str,
         extract_sensitivity_label: Optional[str] = None,
         purview_account_name: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get tables (V2)
 
@@ -1238,7 +1216,7 @@ class SqlClient(ConnectorClientBase):
         database: str,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update row (V2)
 
@@ -1278,7 +1256,7 @@ class SqlClient(ConnectorClientBase):
         server: str,
         database: str,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Insert row (V2)
 
@@ -1313,7 +1291,7 @@ class SqlClient(ConnectorClientBase):
 
     async def get_servers_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the servers
 
@@ -1340,8 +1318,8 @@ class SqlClient(ConnectorClientBase):
 
     async def get_databases_async(
         self,
-        server: Optional[str],
-    ):
+        server: str,
+    ) -> dict[str, Any] | None:
         """
         List the databases
 
@@ -1349,11 +1327,10 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/databases"
         query_params = []
-        if server is not None:
-            value = str(server)
-            if isinstance(server, bool):
-                value = value.lower()
-            query_params.append(f"server={quote(value)}")
+        value = str(server)
+        if isinstance(server, bool):
+            value = value.lower()
+        query_params.append(f"server={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1378,7 +1355,7 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         GetTablesForDeleteItem
 
@@ -1411,7 +1388,7 @@ class SqlClient(ConnectorClientBase):
         input: SqlPassThroughNativeQueryBody,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get pass-through native SQL query metadata
 
@@ -1448,7 +1425,7 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get stored procedures
 
@@ -1481,7 +1458,7 @@ class SqlClient(ConnectorClientBase):
         server: str,
         database: str,
         procedure: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get metadata of a Procedure
 
@@ -1518,7 +1495,7 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         GetTablesForGetItem
 
@@ -1553,7 +1530,7 @@ class SqlClient(ConnectorClientBase):
         table: str,
         extract_sensitivity_label: Optional[str] = None,
         purview_account_name: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get metadata of a table
 
@@ -1603,7 +1580,7 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         GetTablesForOnItemCreated
 
@@ -1639,7 +1616,7 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         GetTablesForOnItemUpdated
 
@@ -1675,7 +1652,7 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         GetTablesForPatchItem
 
@@ -1708,7 +1685,7 @@ class SqlClient(ConnectorClientBase):
         server: str,
         database: str,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get metadata of a table for Patch operation
 
@@ -1746,7 +1723,7 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         GetTablesForPostItem
 
@@ -1777,7 +1754,7 @@ class SqlClient(ConnectorClientBase):
     async def get_table_async(
         self,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get table metadata
 
@@ -1808,7 +1785,7 @@ class SqlClient(ConnectorClientBase):
     async def get_pass_through_native_query_metadata_async(
         self,
         input: PassThroughNativeQueryBody,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get pass-through native SQL query metadata
 
@@ -1839,7 +1816,7 @@ class SqlClient(ConnectorClientBase):
     async def get_procedure_async(
         self,
         procedure: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get procedure metadata
 
@@ -1869,7 +1846,7 @@ class SqlClient(ConnectorClientBase):
 
     async def get_procedures_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get stored procedures
 

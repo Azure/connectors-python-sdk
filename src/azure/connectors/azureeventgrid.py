@@ -137,7 +137,7 @@ class AzureeventgridClient(ConnectorClientBase):
         subscription_id: str,
         resource_type: str,
         subscription_name: Optional[str] = None,
-    ):
+    ) -> None:
         """
         When a resource event occurs
 
@@ -176,7 +176,7 @@ class AzureeventgridClient(ConnectorClientBase):
 
     async def subscriptions_list_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List subscriptions
 
@@ -207,7 +207,7 @@ class AzureeventgridClient(ConnectorClientBase):
 
     async def topic_types_list_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         TopicTypes_List
         """
