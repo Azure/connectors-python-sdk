@@ -56,7 +56,7 @@ class ApplyHtmlTemplateResponse:
 
 
 @dataclass
-class FlowV1DocumentsJobsSplitPdfV2Input:
+class FlowDocumentsJobsSplitPdfInput:
     """
     Split PDF
     """
@@ -101,7 +101,7 @@ class GetPdfProtectionInfoResponse:
 
 
 @dataclass
-class FlowV1DocumentsJobsAddWatermarkToPdfInput:
+class FlowDocumentsJobsAddWatermarkToPdfInput:
     """
     Add a watermark to PDF
     """
@@ -170,7 +170,7 @@ class DocumentContentWithFilenameResponse:
 
 
 @dataclass
-class FlowV1ProcessesFlowJobsExecuteProcessInput:
+class FlowProcessesFlowJobsExecuteProcessInput:
     """
     Start document generation process with json
     """
@@ -204,16 +204,6 @@ class Any2PdfRequest:
     """Content of document that should be converted"""
     filename: Optional[str] = None
     """Full name of the file to be converted. Including file extension"""
-
-
-@dataclass
-class Any2PdfRequestV2:
-    """
-    Definition: Any2PdfRequestV2
-    """
-
-    document_content: Optional[str] = None
-    """Content of document that should be converted"""
 
 
 @dataclass
@@ -611,20 +601,6 @@ class MergeAny2PdfRequest:
 
 
 @dataclass
-class MergeAny2PdfRequestV2:
-    """
-    Definition: MergeAny2PdfRequestV2
-    """
-
-    documents_contents: Optional[List[str]] = None
-    """The array of raw contents of files to merge"""
-    generate_bookmarks: Optional[bool] = None
-    """Generate a bookmark for each merged file"""
-    preserve_bookmarks: Optional[bool] = None
-    """Preserve bookmarks from each merged PDF"""
-
-
-@dataclass
 class MergeDocxRequest:
     """
     Definition: MergeDocxRequest
@@ -704,36 +680,6 @@ class Pdf2ImageRequest:
 
     document_content: Optional[str] = None
     """Raw content of PDF document"""
-    start_page: Optional[int] = None
-    """The first page to start extraction (1 based)"""
-    end_page: Optional[int] = None
-    """The last page to extract (inclusive)"""
-    pages: Optional[str] = None
-    """
-    Page numbers for extraction separated by ';' (only this pages will be
-    extracted)
-    """
-    format: Optional[str] = None
-    """The format of the result image"""
-    dpi: Optional[int] = None
-    """The resolution of the result image"""
-    password: Optional[str] = None
-    """Password to decrypt document"""
-
-
-@dataclass
-class Pdf2ImageRequestV2:
-    """
-    Definition: Pdf2ImageRequestV2
-    """
-
-    document_content: Optional[str] = None
-    """Raw content of PDF document"""
-    filename_prefix: Optional[str] = None
-    """
-    Optional. Output files will have this prefix followed by an index number
-    for name
-    """
     start_page: Optional[int] = None
     """The first page to start extraction (1 based)"""
     end_page: Optional[int] = None
@@ -968,7 +914,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_processes_flow_triggers_async(
         self,
         input: AddPowerAutomateWebhookData,
-    ):
+    ) -> None:
         """
         Process finished
 
@@ -992,7 +938,7 @@ class PlumsailClient(ConnectorClientBase):
 
     async def profiles_me_get_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Profile Info
 
@@ -1020,7 +966,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_docx_template_async(
         self,
         input: ApplyDocxTemplateRequest,
-    ):
+    ) -> bytes:
         """
         Create document from DOCX template
 
@@ -1049,7 +995,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_xlsx_template_async(
         self,
         input: ApplyXlsxTemplateRequest,
-    ):
+    ) -> bytes:
         """
         Create document from XLSX template
 
@@ -1078,7 +1024,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_pptx_async(
         self,
         input: ApplyPptxTemplateRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create document from PPTX template
 
@@ -1109,7 +1055,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_docx_async(
         self,
         input: MergeFieldsTemplateRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Fill merge fields in DOCX document
 
@@ -1143,7 +1089,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_html_async(
         self,
         input: ApplyHtmlFlowTemplateRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create HTML from template
 
@@ -1177,7 +1123,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_html2_pdf_async(
         self,
         input: Html2PdfFlowRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Convert HTML to PDF
 
@@ -1209,7 +1155,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_html2_docx_async(
         self,
         input: Html2DocxFlowRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Convert HTML to DOCX
 
@@ -1241,7 +1187,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_docx2_pdf_async(
         self,
         input: Docx2PdfRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Convert DOCX to PDF
 
@@ -1273,7 +1219,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_xslx2_pdf_async(
         self,
         input: Xlsx2PdfRequest,
-    ):
+    ) -> bytes:
         """
         Convert XLSX to PDF
 
@@ -1302,7 +1248,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_pptx2_pdf_async(
         self,
         input: Pptx2PdfRequest,
-    ):
+    ) -> bytes:
         """
         Convert PPTX to PDF
 
@@ -1330,8 +1276,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_jobs_any2_pdf_v2_async(
         self,
-        input: Any2PdfRequestV2,
-    ):
+        input: Any2PdfRequest,
+    ) -> bytes:
         """
         Convert to PDF
 
@@ -1359,7 +1305,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_email2_pdf_async(
         self,
         input: Email2PdfRequest,
-    ):
+    ) -> bytes:
         """
         Convert Email to PDF
 
@@ -1387,7 +1333,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_doc2_docx_async(
         self,
         input: Doc2DocxRequest,
-    ):
+    ) -> bytes:
         """
         Convert DOC to DOCX
 
@@ -1416,7 +1362,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_xls2_xlsx_async(
         self,
         input: Xls2XlsxRequest,
-    ):
+    ) -> bytes:
         """
         Convert XLS to XLSX
 
@@ -1445,7 +1391,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_ppt2_pptx_async(
         self,
         input: Ppt2PptxRequest,
-    ):
+    ) -> bytes:
         """
         Convert PPT to PPTX
 
@@ -1473,9 +1419,9 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_jobs_split_pdf_v2_async(
         self,
-        input: FlowV1DocumentsJobsSplitPdfV2Input,
-        type_: Optional[str],
-    ):
+        input: FlowDocumentsJobsSplitPdfInput,
+        type_: str,
+    ) -> dict[str, Any] | None:
         """
         Split PDF
 
@@ -1486,11 +1432,10 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/SplitPdfV2"
         )
         query_params = []
-        if type_ is not None:
-            value = str(type_)
-            if isinstance(type_, bool):
-                value = value.lower()
-            query_params.append(f"type={quote(value)}")
+        value = str(type_)
+        if isinstance(type_, bool):
+            value = value.lower()
+        query_params.append(f"type={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1513,8 +1458,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_jobs_merge_any_to_pdf_v2_async(
         self,
-        input: MergeAny2PdfRequestV2,
-    ):
+        input: MergeAny2PdfRequest,
+    ) -> bytes:
         """
         Merge any files into PDF
 
@@ -1544,7 +1489,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_extract_text_from_pdf_async(
         self,
         input: Pdf2TextRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Extract text from PDF document
 
@@ -1576,8 +1521,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_jobs_pdf2_image_v2_async(
         self,
-        input: Pdf2ImageRequestV2,
-    ):
+        input: Pdf2ImageRequest,
+    ) -> dict[str, Any] | None:
         """
         Convert PDF to Image
 
@@ -1610,7 +1555,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_image2_pdf_async(
         self,
         input: Image2PdfRequest,
-    ):
+    ) -> bytes:
         """
         Convert Images to PDF
 
@@ -1637,7 +1582,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_fill_in_pdf_form_async(
         self,
         input: FillInPdfFormRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Fill in PDF Form
 
@@ -1669,7 +1614,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_get_pdf_form_async(
         self,
         input: GetPdfFormRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Form from PDF
 
@@ -1701,7 +1646,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_protect_pdf_async(
         self,
         input: ProtectPdfRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Protect PDF document
 
@@ -1733,7 +1678,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_get_pdf_protection_info_async(
         self,
         input: PdfProtectionInfoRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get information about PDF protection
 
@@ -1766,7 +1711,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_compress_pdf_async(
         self,
         input: CompressPdfRequest,
-    ):
+    ) -> bytes:
         """
         Compress PDF document
 
@@ -1794,9 +1739,9 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_jobs_add_watermark_to_pdf_async(
         self,
-        input: FlowV1DocumentsJobsAddWatermarkToPdfInput,
-        type_: Optional[str],
-    ):
+        input: FlowDocumentsJobsAddWatermarkToPdfInput,
+        type_: str,
+    ) -> dict[str, Any] | None:
         """
         Add a watermark to PDF
 
@@ -1808,11 +1753,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/AddWatermarkToPdf"
         )
         query_params = []
-        if type_ is not None:
-            value = str(type_)
-            if isinstance(type_, bool):
-                value = value.lower()
-            query_params.append(f"type={quote(value)}")
+        value = str(type_)
+        if isinstance(type_, bool):
+            value = value.lower()
+        query_params.append(f"type={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1836,7 +1780,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_merge_docx_async(
         self,
         input: MergeDocxRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Merge DOCX files
 
@@ -1868,7 +1812,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_parse_csv_async(
         self,
         input: ParseCsvFlowRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Parse CSV
 
@@ -1899,7 +1843,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_csv2_xlsx_async(
         self,
         input: Csv2XlsxRequest,
-    ):
+    ) -> bytes:
         """
         Convert CSV to Excel
 
@@ -1927,7 +1871,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_json2_xlsx_async(
         self,
         input: Json2XlsxRequest,
-    ):
+    ) -> bytes:
         """
         Convert JSON to Excel
 
@@ -1955,7 +1899,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_json2_csv_async(
         self,
         input: Json2CsvRequest,
-    ):
+    ) -> bytes:
         """
         Convert JSON to CSV
 
@@ -1983,7 +1927,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_reg_exp_match_async(
         self,
         input: RegExpMatchRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Regular Expression Match
 
@@ -2018,7 +1962,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_reg_exp_replace_async(
         self,
         input: RegExpReplaceRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Regular Expression Replace
 
@@ -2053,7 +1997,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_reg_exp_test_async(
         self,
         input: RegExpTestRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Regular Expression Test
 
@@ -2087,7 +2031,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_create_archive_async(
         self,
         input: CreateArchiveRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create Archive
 
@@ -2118,7 +2062,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_extract_archive_async(
         self,
         input: ExtractArchiveRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Extract Archive
 
@@ -2149,7 +2093,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_merge_xlsx_async(
         self,
         input: MergeXlsxRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Merge XLSX files
 
@@ -2180,9 +2124,9 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_processes_flow_jobs_execute_process_async(
         self,
-        input: FlowV1ProcessesFlowJobsExecuteProcessInput,
-        process_id: Optional[str],
-    ):
+        input: FlowProcessesFlowJobsExecuteProcessInput,
+        process_id: str,
+    ) -> bytes:
         """
         Start document generation process with json
 
@@ -2196,11 +2140,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/ProcessesFlow/jobs/ExecuteProcess"
         )
         query_params = []
-        if process_id is not None:
-            value = str(process_id)
-            if isinstance(process_id, bool):
-                value = value.lower()
-            query_params.append(f"processId={quote(value)}")
+        value = str(process_id)
+        if isinstance(process_id, bool):
+            value = value.lower()
+        query_params.append(f"processId={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2221,8 +2164,8 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_processes_flow_jobs_execute_process_with_generated_data_async(
         self,
         input: ProcessJsonData,
-        process_id: Optional[str],
-    ):
+        process_id: str,
+    ) -> bytes:
         """
         Start document generation process
 
@@ -2236,11 +2179,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/ProcessesFlow/jobs/ExecuteProcessWithGeneratedData"
         )
         query_params = []
-        if process_id is not None:
-            value = str(process_id)
-            if isinstance(process_id, bool):
-                value = value.lower()
-            query_params.append(f"processId={quote(value)}")
+        value = str(process_id)
+        if isinstance(process_id, bool):
+            value = value.lower()
+        query_params.append(f"processId={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2260,8 +2202,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_flow_schema_split_pdf_async(
         self,
-        type_: Optional[str],
-    ):
+        type_: str,
+    ) -> None:
         """
         SplitPdfSchema
 
@@ -2272,11 +2214,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/DocumentsFlow/Schema/SplitPdf"
         )
         query_params = []
-        if type_ is not None:
-            value = str(type_)
-            if isinstance(type_, bool):
-                value = value.lower()
-            query_params.append(f"type={quote(value)}")
+        value = str(type_)
+        if isinstance(type_, bool):
+            value = value.lower()
+        query_params.append(f"type={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2294,8 +2235,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_flow_schema_add_watermark_to_pdf_async(
         self,
-        type_: Optional[str],
-    ):
+        type_: str,
+    ) -> None:
         """
         AddWatermarkToPdfSchema
 
@@ -2306,11 +2247,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/DocumentsFlow/Schema/AddWatermarkToPdf"
         )
         query_params = []
-        if type_ is not None:
-            value = str(type_)
-            if isinstance(type_, bool):
-                value = value.lower()
-            query_params.append(f"type={quote(value)}")
+        value = str(type_)
+        if isinstance(type_, bool):
+            value = value.lower()
+        query_params.append(f"type={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2328,7 +2268,7 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_processes_flow_schema_get_processes_async(
         self,
-    ):
+    ) -> None:
         """
         GetProcessesSchema
 
@@ -2353,8 +2293,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_flow_schema_parse_csv_async(
         self,
-        headers: Optional[str],
-    ):
+        headers: str,
+    ) -> None:
         """
         ParseCsv
 
@@ -2365,11 +2305,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/DocumentsFlow/Schema/ParseCsv"
         )
         query_params = []
-        if headers is not None:
-            value = str(headers)
-            if isinstance(headers, bool):
-                value = value.lower()
-            query_params.append(f"headers={quote(value)}")
+        value = str(headers)
+        if isinstance(headers, bool):
+            value = value.lower()
+        query_params.append(f"headers={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2387,8 +2326,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_processes_flow_schema_get_json_data_async(
         self,
-        process_id: Optional[str],
-    ):
+        process_id: str,
+    ) -> None:
         """
         GetJsonSchema
 
@@ -2399,11 +2338,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/ProcessesFlow/Schema/GetJsonData"
         )
         query_params = []
-        if process_id is not None:
-            value = str(process_id)
-            if isinstance(process_id, bool):
-                value = value.lower()
-            query_params.append(f"processId={quote(value)}")
+        value = str(process_id)
+        if isinstance(process_id, bool):
+            value = value.lower()
+        query_params.append(f"processId={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2422,7 +2360,7 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_processes_flow_triggers_by_process_id_schema_get_async(
         self,
         process_id: str,
-    ):
+    ) -> None:
         """
         Get schema of a process
 
@@ -2447,8 +2385,8 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_flow_schema_reg_exp_match_async(
         self,
-        pattern: Optional[str],
-    ):
+        pattern: str,
+    ) -> None:
         """
         RegexMatchSchema
 
@@ -2459,11 +2397,10 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/DocumentsFlow/Schema/RegExpMatch"
         )
         query_params = []
-        if pattern is not None:
-            value = str(pattern)
-            if isinstance(pattern, bool):
-                value = value.lower()
-            query_params.append(f"pattern={quote(value)}")
+        value = str(pattern)
+        if isinstance(pattern, bool):
+            value = value.lower()
+        query_params.append(f"pattern={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
