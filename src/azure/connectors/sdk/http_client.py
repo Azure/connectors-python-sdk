@@ -102,12 +102,12 @@ class ConnectorHttpClient:
             method: The HTTP method.
             url: The request URL.
             scopes: The authentication scopes. Defaults to API Hub scopes.
-            body: Optional request body. When ``content_type`` is provided
-                or ``body`` is raw ``bytes``, the body is sent as-is;
-                otherwise it is JSON-serialized.
-            content_type: Optional request content type. Defaults to
-                ``application/json``. Set to ``application/octet-stream``
-                to send raw binary bodies without JSON serialization.
+            body: Optional request body. Raw ``bytes`` and ``bytearray``
+                values are sent as-is; all other values are JSON-serialized.
+            content_type: Optional Content-Type header value. Defaults to
+                ``application/octet-stream`` for raw binary bodies and
+                ``application/json`` otherwise. This value does not change
+                how the body is serialized.
 
         Returns:
             The HTTP response.
@@ -120,9 +120,9 @@ class ConnectorHttpClient:
 
         # NOTE(victoriahall): Raw binary bodies (e.g. file uploads that
         # consume application/octet-stream) must be sent verbatim, not
-        # JSON-serialized. Detect them by an explicit content_type or by
-        # a bytes body, mirroring the .NET CallConnectorAsync(byte[],
-        # contentType) overload.
+        # JSON-serialized. Detect them by body type; content_type controls
+        # only the request header. This mirrors the .NET
+        # CallConnectorAsync(byte[], contentType) overload.
         is_binary_body = isinstance(body, (bytes, bytearray))
         if content_type is None:
             content_type = (
