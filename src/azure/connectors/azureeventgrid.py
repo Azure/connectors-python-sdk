@@ -91,9 +91,15 @@ class Subscription:
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """The subscription Id."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The subscription display name."""
 
 
@@ -130,49 +136,6 @@ class AzureeventgridClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "azureeventgrid"
-
-    async def create_subscription_async(
-        self,
-        input: EventRequest,
-        subscription_id: str,
-        resource_type: str,
-        subscription_name: Optional[str] = None,
-    ) -> None:
-        """
-        When a resource event occurs
-
-        When an Azure Event Grid subscription fires an event.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/subscriptions"
-            f"/{str(subscription_id)}"
-            f"/providers"
-            f"/{str(resource_type)}"
-            f"/resource"
-            f"/eventSubscriptions"
-        )
-        query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-15-preview"))
-        if subscription_name is not None:
-            value = str(subscription_name)
-            if isinstance(subscription_name, bool):
-                value = value.lower()
-            query_params.append(f"subscriptionName={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
 
     async def subscriptions_list_async(
         self,
@@ -236,3 +199,24 @@ class AzureeventgridClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "CreateSubscription": {
+        "operation_id": "CreateSubscription",
+        "path": (
+            "/{connectionId}/subscriptions/{subscriptionId}/providers/{resourceType}/resource"
+            "/eventSubscriptions"
+        ),
+        "method": "post",
+        "required_parameters": ["subscriptionId", "resourceType", "body"],
+        "callback_payload_type": None,
+    },
+}

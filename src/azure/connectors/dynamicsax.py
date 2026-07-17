@@ -31,9 +31,15 @@ class BusinessEventSubscriptionResponse:
     """Id of the subscription"""
     resource: Optional[str] = None
     """Resource of the subscription request"""
-    notification_type: Optional[str] = None
+    notification_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationType"},
+    )
     """Notification Type"""
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """Notification Url"""
 
 
@@ -58,7 +64,10 @@ class AxOnlineProcedureResult:
 
     value: Optional[str] = None
     """Output parameter values"""
-    output_parameters: Optional[Dict[str, Any]] = None
+    output_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "OutputParameters"},
+    )
     """Output parameter values"""
 
 
@@ -210,12 +219,24 @@ class TableMetadata:
     """Table name"""
     title: Optional[str] = None
     """Table title"""
-    x_ms_permission: Optional[str] = None
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
     schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """Url link"""
 
 
@@ -250,13 +271,25 @@ class TabularDataSetsMetadata:
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
@@ -268,9 +301,15 @@ class BlobDataSetsMetadata:
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
@@ -280,14 +319,32 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
@@ -299,9 +356,15 @@ class TableSortRestrictionsMetadata:
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
@@ -313,9 +376,15 @@ class TableFilterRestrictionsMetadata:
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
@@ -335,7 +404,10 @@ class BusinessEventSubscription:
     Definition: BusinessEventSubscription
     """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "NotificationUrl"},
+    )
     """
     Callback URL to the flow engine. Expected as part of the request and
     provided by Flow.
@@ -348,11 +420,14 @@ class BusinessEventData:
     Definition: BusinessEventData
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Business event Id"""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Business event data name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Business event data display name"""
 
 
@@ -362,9 +437,12 @@ class TriggerFieldData:
     Definition: TriggerFieldData
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Business event data name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Business event data display name"""
 
 
@@ -374,9 +452,12 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Procedure name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Procedure display name"""
 
 
@@ -386,9 +467,12 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Dataset name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Dataset display name"""
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
@@ -400,11 +484,17 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
@@ -414,7 +504,10 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = None
+    language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Language"},
+    )
     """Query language"""
 
 
@@ -424,7 +517,10 @@ class Item:
     Definition: Item
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
@@ -443,7 +539,10 @@ class ExportableItem:
     Definition: ExportableItem
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 # Client Class
@@ -479,56 +578,6 @@ class DynamicsaxClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "dynamicsax"
-
-    async def subscribe_on_a_business_event_async(
-        self,
-        input: BusinessEventSubscription,
-        dataset: str,
-        businessevent: str,
-        businesseventcategory: str,
-        legal_entity: Optional[str] = None,
-    ) -> dict[str, Any] | None:
-        """
-        When a Business Event occurs
-
-        Triggers a flow when a Business Event occurs in Dynamics 365.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/subscribebusinessevent"
-            f"/{str(businessevent)}"
-        )
-        query_params = []
-        value = str(businesseventcategory)
-        if isinstance(businesseventcategory, bool):
-            value = value.lower()
-        query_params.append(f"businesseventcategory={quote(value)}")
-        if legal_entity is not None:
-            value = str(legal_entity)
-            if isinstance(legal_entity, bool):
-                value = value.lower()
-            query_params.append(f"legalEntity={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def execute_procedure_async(
         self,
@@ -1065,3 +1114,21 @@ class DynamicsaxClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "SubscribeOnABusinessEvent": {
+        "operation_id": "SubscribeOnABusinessEvent",
+        "path": "/{connectionId}/datasets/{dataset}/subscribebusinessevent/{businessevent}",
+        "method": "post",
+        "required_parameters": ["dataset", "businesseventcategory", "businessevent"],
+        "callback_payload_type": "BusinessEventSubscriptionResponse",
+    },
+}

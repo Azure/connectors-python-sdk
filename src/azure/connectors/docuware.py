@@ -40,9 +40,12 @@ class SearchForDocumentsInFileCabinetResponse:
     Response for Search in file cabinet
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
     """Count"""
-    documents: Optional[List[Dict[str, Any]]] = None
+    documents: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Documents"},
+    )
     """Documents"""
 
 
@@ -52,7 +55,7 @@ class GetOrganizationResponse:
     Response for Get organization
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Name"""
 
 
@@ -62,7 +65,10 @@ class GetFileCabinetsResponse:
     Response for Get file cabinets and document trays
     """
 
-    file_cabinets: Optional[List[Dict[str, Any]]] = None
+    file_cabinets: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "FileCabinets"},
+    )
     """FileCabinets"""
 
 
@@ -72,25 +78,55 @@ class GetDocumentInformationResponse:
     Response for Get document information
     """
 
-    sections: Optional[List[Dict[str, Any]]] = None
+    sections: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Sections"},
+    )
     """Sections"""
-    document_id: Optional[int] = None
+    document_id: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "DocumentId"},
+    )
     """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = None
+    index_fields: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "IndexFields"},
+    )
     """IndexFields"""
-    document_title: Optional[str] = None
+    document_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DocumentTitle"},
+    )
     """DocumentTitle"""
-    file_cabinet_id: Optional[str] = None
+    file_cabinet_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileCabinetId"},
+    )
     """FileCabinetId"""
-    total_pages: Optional[int] = None
+    total_pages: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "TotalPages"},
+    )
     """TotalPages"""
-    file_size: Optional[int] = None
+    file_size: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "FileSize"},
+    )
     """FileSize"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
     """ContentType"""
-    version_status: Optional[str] = None
+    version_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "VersionStatus"},
+    )
     """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = None
+    document_flags: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DocumentFlags"},
+    )
     """DocumentFlags"""
 
 
@@ -113,25 +149,55 @@ class UpdateIndexFieldsResponse:
     Response for Update index fields
     """
 
-    sections: Optional[List[Dict[str, Any]]] = None
+    sections: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Sections"},
+    )
     """Sections"""
-    document_id: Optional[int] = None
+    document_id: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "DocumentId"},
+    )
     """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = None
+    index_fields: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "IndexFields"},
+    )
     """IndexFields"""
-    document_title: Optional[str] = None
+    document_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DocumentTitle"},
+    )
     """DocumentTitle"""
-    file_cabinet_id: Optional[str] = None
+    file_cabinet_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileCabinetId"},
+    )
     """FileCabinetId"""
-    total_pages: Optional[int] = None
+    total_pages: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "TotalPages"},
+    )
     """TotalPages"""
-    file_size: Optional[int] = None
+    file_size: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "FileSize"},
+    )
     """FileSize"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
     """ContentType"""
-    version_status: Optional[str] = None
+    version_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "VersionStatus"},
+    )
     """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = None
+    document_flags: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DocumentFlags"},
+    )
     """DocumentFlags"""
 
 
@@ -141,12 +207,24 @@ class TransferDocumentInput:
     Transfer documents
     """
 
-    source_file_cabinet_id: Optional[str] = None
+    source_file_cabinet_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SourceFileCabinetId"},
+    )
     """Select the source File Cabinet or Document Tray."""
-    documents: Optional[List[Dict[str, Any]]] = None
-    keep_source: Optional[bool] = None
+    documents: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Documents"},
+    )
+    keep_source: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "KeepSource"},
+    )
     """Choose whether the source documents should be deleted or not."""
-    fill_intellix: Optional[bool] = None
+    fill_intellix: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "FillIntellix"},
+    )
     """Choose whether intelligent indexing should be used when storing."""
 
 
@@ -156,9 +234,12 @@ class TransferDocumentResponse:
     Response for Transfer documents
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
     """Count"""
-    documents: Optional[List[Dict[str, Any]]] = None
+    documents: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Documents"},
+    )
     """Documents"""
 
 
@@ -168,21 +249,42 @@ class PlaceAStampInput:
     Place a stamp
     """
 
-    file_number: Optional[int] = None
+    file_number: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "FileNumber"},
+    )
     """Specify the file/section containing the page to be stamped."""
-    page_number: Optional[int] = None
+    page_number: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "PageNumber"},
+    )
     """Specify the page number to place the stamp on."""
-    layer: Optional[int] = None
+    layer: Optional[int] = field(default=None, metadata={"wire_name": "Layer"})
     """Specify the document layer to place the stamp on [1-5]"""
-    position_x: Optional[float] = None
+    position_x: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "PositionX"},
+    )
     """[Optional] Position from the left edge of the page in mm."""
-    position_y: Optional[float] = None
+    position_y: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "PositionY"},
+    )
     """[Optional] Position from the upper edge of the page in mm."""
-    stamp_id: Optional[str] = None
+    stamp_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "StampId"},
+    )
     """Select or specify the stamp to be used."""
-    password: Optional[str] = None
+    password: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Password"},
+    )
     """Specify the password for the stamp (if required)."""
-    fields: Optional[List[Dict[str, Any]]] = None
+    fields: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Fields"},
+    )
 
 
 @dataclass
@@ -191,19 +293,31 @@ class PlaceAStampResponse:
     Response for Place a stamp
     """
 
-    created: Optional[Dict[str, Any]] = None
+    created: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Created"},
+    )
     """Created"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
     """Type"""
-    color: Optional[str] = None
+    color: Optional[str] = field(default=None, metadata={"wire_name": "Color"})
     """Color"""
-    rotation: Optional[int] = None
+    rotation: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Rotation"},
+    )
     """Rotation"""
-    transparent: Optional[bool] = None
+    transparent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "Transparent"},
+    )
     """Transparent"""
-    stroke_width: Optional[int] = None
+    stroke_width: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "StrokeWidth"},
+    )
     """StrokeWidth"""
-    guid: Optional[str] = None
+    guid: Optional[str] = field(default=None, metadata={"wire_name": "Guid"})
     """Guid"""
 
 
@@ -213,7 +327,10 @@ class GetDialogsResponse:
     Response for Get dialogs
     """
 
-    dialogs: Optional[List[Dict[str, Any]]] = None
+    dialogs: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Dialogs"},
+    )
     """Dialogs"""
 
 
@@ -223,7 +340,10 @@ class GetStampsResponse:
     Response for Get stamps
     """
 
-    stamps: Optional[List[Dict[str, Any]]] = None
+    stamps: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Stamps"},
+    )
     """Stamps"""
 
 
@@ -233,7 +353,10 @@ class GetStampFieldsResponse:
     Response for Get stamp fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = None
+    fields: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Fields"},
+    )
     """Fields"""
 
 
@@ -243,7 +366,10 @@ class GetFileCabinetFieldsResponse:
     Response for Get file cabinet fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = None
+    fields: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Fields"},
+    )
     """Fields"""
 
 
@@ -253,7 +379,10 @@ class GetDialogFieldsResponse:
     Response for Get dialog fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = None
+    fields: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Fields"},
+    )
     """Fields"""
 
 
@@ -263,9 +392,12 @@ class ListDocumentsInDocumentTrayResponse:
     Response for List documents in document tray
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
     """Count"""
-    documents: Optional[List[Dict[str, Any]]] = None
+    documents: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Documents"},
+    )
 
 
 # Client Class

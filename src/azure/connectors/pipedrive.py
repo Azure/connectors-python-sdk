@@ -129,7 +129,7 @@ class ActivityResponse:
     """Id of the user whom the activity is assigned to."""
     done: Optional[bool] = None
     """0 = Not done, 1 = Done"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the activity."""
     due_date: Optional[str] = None
     """YYYY-MM-DD"""
@@ -212,7 +212,7 @@ class AddActivityRequest:
     Definition: AddActivityRequest
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Activity type."""
     subject: Optional[str] = None
     """Subject of the activity."""
@@ -379,33 +379,6 @@ class PipedriveClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "pipedrive"
 
-    async def trig_new_activity_async(
-        self,
-    ) -> dict[str, Any] | None:
-        """
-        When a new activity is added
-
-        Triggers when a new activity is added to the authorized account.
-        """
-        request_url = f"{self._connection_runtime_url}/trigger/v1/activities"
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def get_deal_async(
         self,
         deal_id: str,
@@ -554,35 +527,6 @@ class PipedriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def trig_new_deal_async(
-        self,
-    ) -> dict[str, Any] | None:
-        """
-        When a new deal is added (V2)
-
-        Triggers when a new deal is added to the authorized account (V2).
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/connector-v2/trigger/v1/deals"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def update_deal_stage_async(
         self,
         input: UpdateDealStageRequest,
@@ -642,3 +586,28 @@ class PipedriveClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "TrigNewActivity": {
+        "operation_id": "TrigNewActivity",
+        "path": "/{connectionId}/trigger/v1/activities",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "TrigNewActivityResponse",
+    },
+    "TrigNewDealV2": {
+        "operation_id": "TrigNewDealV2",
+        "path": "/{connectionId}/connector-v2/trigger/v1/deals",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "TrigNewDealResponse",
+    },
+}

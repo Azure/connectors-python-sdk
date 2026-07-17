@@ -29,7 +29,10 @@ class DeviceGroupCollection:
 
     value: Optional[List[DeviceGroup]] = None
     """The collection of device groups."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of device groups."""
 
 
@@ -41,7 +44,10 @@ class DeviceGroup:
 
     id: Optional[str] = None
     """Unique ID of the device group."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the device group."""
     filter: Optional[str] = None
     """Query defining which devices should be in this group."""
@@ -64,7 +70,10 @@ class DeviceGroupDeviceCollection:
 
     value: Optional[List[Device]] = None
     """The collection of devices belonging to the device group."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of devices in the group."""
 
 
@@ -93,17 +102,26 @@ class DeviceCommand:
     """The payload for the device command."""
     response: Optional[Any] = None
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
+    connection_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "connectionTimeout"},
+    )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = None
+    response_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseTimeout"},
+    )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = None
+    response_code: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseCode"},
+    )
     """The status code of the device command response."""
 
 
@@ -115,7 +133,10 @@ class DeviceRelationshipCollection:
 
     value: Optional[List[DeviceRelationshipStatic]] = None
     """The collection of device relationships."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of device relationships."""
 
 
@@ -141,7 +162,10 @@ class JobCollection:
 
     value: Optional[List[JobStatic]] = None
     """The collection of jobs."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of jobs."""
 
 
@@ -153,7 +177,10 @@ class JobStatic:
 
     id: Optional[str] = None
     """Unique ID of the job."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the job."""
     description: Optional[str] = None
     """Detailed description of the job."""
@@ -161,7 +188,10 @@ class JobStatic:
     """The ID of the device group on which to execute the job."""
     batch: Optional[JobBatch] = None
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = None
+    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+        default=None,
+        metadata={"wire_name": "cancellationThreshold"},
+    )
     """The cancellation threshold for the job."""
     data: Optional[List[Dict[str, Any]]] = None
     """
@@ -173,7 +203,10 @@ class JobStatic:
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    scheduled_job_id: Optional[str] = None
+    scheduled_job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "scheduledJobId"},
+    )
     """Id of the scheduled job definition that created this job."""
 
 
@@ -185,7 +218,10 @@ class Job:
 
     id: Optional[str] = None
     """Unique ID of the job."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the job."""
     description: Optional[str] = None
     """Detailed description of the job."""
@@ -193,14 +229,20 @@ class Job:
     """The ID of the device group on which to execute the job."""
     batch: Optional[JobBatch] = None
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = None
+    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+        default=None,
+        metadata={"wire_name": "cancellationThreshold"},
+    )
     """The cancellation threshold for the job."""
     organizations: Optional[List[str]] = None
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    scheduled_job_id: Optional[str] = None
+    scheduled_job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "scheduledJobId"},
+    )
     """Id of the scheduled job definition that created this job."""
 
 
@@ -212,7 +254,10 @@ class JobDeviceStatusCollection:
 
     value: Optional[List[JobDeviceStatus]] = None
     """The collection of job device statuses."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of job device statuses."""
 
 
@@ -224,7 +269,10 @@ class OrganizationCollection:
 
     value: Optional[List[Organization]] = None
     """The collection of organizations."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of organizations."""
 
 
@@ -236,7 +284,10 @@ class Organization:
 
     id: Optional[str] = None
     """Unique ID of the organization."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the organization."""
     parent: Optional[str] = None
     """Display name of the parent organization."""
@@ -250,7 +301,10 @@ class ScheduledJobCollection:
 
     value: Optional[List[ScheduledJob]] = None
     """The collection of scheduled jobs."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of scheduled jobs."""
 
 
@@ -264,7 +318,10 @@ class ScheduledJob:
     """ETag used to prevent conflict in scheduled job updates."""
     id: Optional[str] = None
     """Unique ID of the scheduled job."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the scheduled job."""
     description: Optional[str] = None
     """Detailed description of the scheduled job."""
@@ -272,7 +329,10 @@ class ScheduledJob:
     """The ID of the device group on which to execute the job."""
     batch: Optional[JobBatch] = None
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = None
+    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+        default=None,
+        metadata={"wire_name": "cancellationThreshold"},
+    )
     """The cancellation threshold for the scheduled job."""
     organizations: Optional[List[str]] = None
     """
@@ -297,7 +357,10 @@ class ScheduledJobStatic:
     """ETag used to prevent conflict in scheduled job updates."""
     id: Optional[str] = None
     """Unique ID of the scheduled job."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the scheduled job."""
     description: Optional[str] = None
     """Detailed description of the scheduled job."""
@@ -305,7 +368,10 @@ class ScheduledJobStatic:
     """The ID of the device group on which to execute the job."""
     batch: Optional[JobBatch] = None
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = None
+    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+        default=None,
+        metadata={"wire_name": "cancellationThreshold"},
+    )
     """The cancellation threshold for the scheduled job."""
     data: Optional[List[Dict[str, Any]]] = None
     """
@@ -333,7 +399,10 @@ class ScheduledJobJobCollection:
 
     value: Optional[List[JobStatic]] = None
     """The collection of jobs."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of jobs."""
 
 
@@ -361,7 +430,10 @@ class Device:
     """Unique ID of the device."""
     etag: Optional[str] = None
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the device."""
     template: Optional[str] = None
     """The device template definition for the device."""
@@ -385,17 +457,26 @@ class DeviceComponentCommand:
     """The payload for the device command."""
     response: Optional[Any] = None
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
+    connection_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "connectionTimeout"},
+    )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = None
+    response_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseTimeout"},
+    )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = None
+    response_code: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseCode"},
+    )
     """The status code of the device command response."""
 
 
@@ -426,17 +507,26 @@ class DeviceModuleCommand:
     """The payload for the device command."""
     response: Optional[Any] = None
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
+    connection_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "connectionTimeout"},
+    )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = None
+    response_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseTimeout"},
+    )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = None
+    response_code: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseCode"},
+    )
     """The status code of the device command response."""
 
 
@@ -452,17 +542,26 @@ class DeviceModuleComponentCommand:
     """The payload for the device command."""
     response: Optional[Any] = None
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = None
+    connection_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "connectionTimeout"},
+    )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = None
+    response_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseTimeout"},
+    )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = None
+    response_code: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseCode"},
+    )
     """The status code of the device command response."""
 
 
@@ -545,7 +644,10 @@ class DeviceCollection:
 
     value: Optional[List[Device]] = None
     """The collection of devices."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of devices."""
 
 
@@ -555,17 +657,26 @@ class DeviceTemplate:
     Response for Get a device template by ID
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "@id"})
     """Unique ID of the device template."""
     etag: Optional[str] = None
     """ETag used to prevent conflict in device template updates."""
-    type_: Optional[List[str]] = None
+    type_: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "@type"},
+    )
     """The JSON-LD types of this device template."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the device template."""
     description: Optional[str] = None
     """Detailed description of the device template."""
-    capability_model: Optional[Any] = None
+    capability_model: Optional[Any] = field(
+        default=None,
+        metadata={"wire_name": "capabilityModel"},
+    )
     """The capability model utilized by this device template."""
 
 
@@ -577,7 +688,10 @@ class DeviceTemplateCollection:
 
     value: Optional[List[DeviceTemplate]] = None
     """The collection of device templates."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of device templates."""
 
 
@@ -589,7 +703,10 @@ class Role:
 
     id: Optional[str] = None
     """Unique ID of the role."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the role."""
 
 
@@ -624,7 +741,7 @@ class UserStatic:
 
     id: Optional[str] = None
     """Unique ID of the user."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the user."""
     roles: Optional[List[RoleAssignment]] = None
     """
@@ -664,7 +781,10 @@ class ApplicationCollection:
 
     value: Optional[List[Application]] = None
     """The collection of applications."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of applications."""
 
 
@@ -780,9 +900,12 @@ class Action:
 
     id: Optional[str] = None
     """Unique ID of the action."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the action."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the action."""
     rules: Optional[List[str]] = None
     """Unique IDs of the rules that are tied to the action."""
@@ -796,9 +919,12 @@ class EmailAction:
 
     id: Optional[str] = None
     """Unique ID of the email action."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the email action."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the email action."""
     rules: Optional[List[str]] = None
     """Unique IDs of the rules that are tied to the email action."""
@@ -812,9 +938,12 @@ class WebhookAction:
 
     id: Optional[str] = None
     """Unique ID of the webhook action."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the webhook action."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the webhook action."""
     rules: Optional[List[str]] = None
     """Unique IDs of the rules that are tied to the webhook action."""
@@ -830,9 +959,12 @@ class PowerAutomateAction:
 
     id: Optional[str] = None
     """Unique ID of the Power Automate action."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the Power Automate action."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the Power Automate action."""
     rules: Optional[List[str]] = None
     """Unique IDs of the rules that are tied to the Power Automate action."""
@@ -846,9 +978,12 @@ class LogicAppsAction:
 
     id: Optional[str] = None
     """Unique ID of the Logic Apps action."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the Logic Apps action."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the Logic Apps action."""
     rules: Optional[List[str]] = None
     """Unique IDs of the rules that are tied to the Logic Apps action."""
@@ -862,9 +997,12 @@ class ActionGroupsAction:
 
     id: Optional[str] = None
     """Unique ID of the Action Groups action."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the Action Groups action."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the Action Groups action."""
     rules: Optional[List[str]] = None
     """Unique IDs of the rules that are tied to the Action Groups action."""
@@ -878,7 +1016,10 @@ class Application:
 
     id: Optional[str] = None
     """Unique ID of the application."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the application."""
     subdomain: Optional[str] = None
     """The URL subdomain of the application."""
@@ -964,7 +1105,7 @@ class JobBatch:
     Definition: JobBatch
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     Whether batching is done on a specified number of devices or a percentage
     of the total devices.
@@ -979,7 +1120,7 @@ class JobCancellationThreshold:
     Definition: JobCancellationThreshold
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     Whether the cancellation threshold is per a specified number of devices or
     a percentage of the total devices.
@@ -1016,7 +1157,10 @@ class Rule:
 
     id: Optional[str] = None
     """Unique ID of the rule."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the rule."""
 
 
@@ -1028,7 +1172,10 @@ class RuleCollection:
 
     value: Optional[List[Rule]] = None
     """The collection of rules."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of rules."""
 
 
@@ -1068,7 +1215,7 @@ class JobScheduleEnd:
     Definition: JobScheduleEnd
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the job schedule end."""
     date: Optional[str] = None
     """The date when to end the scheduled job (YYYY-MM-DDTHH:MM:SSZ)."""
@@ -1102,7 +1249,7 @@ class EmailUser:
 
     id: Optional[str] = None
     """Unique ID of the user."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the user."""
     roles: Optional[List[RoleAssignment]] = None
     """
@@ -1121,16 +1268,22 @@ class ServicePrincipalUser:
 
     id: Optional[str] = None
     """Unique ID of the user."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the user."""
     roles: Optional[List[RoleAssignment]] = None
     """
     List of role assignments that specify the permissions to access the
     application.
     """
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The Microsoft Entra ID tenant ID of the service principal."""
-    object_id: Optional[str] = None
+    object_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "objectId"},
+    )
     """The Microsoft Entra ID object ID of the service principal."""
 
 
@@ -1154,9 +1307,15 @@ class WebhookActionDevice:
     """Unique ID of the device."""
     etag: Optional[str] = None
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the device."""
-    instance_of: Optional[str] = None
+    instance_of: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "instanceOf"},
+    )
     """The device template definition for the device."""
     simulated: Optional[bool] = None
     """Whether the device is simulated."""
@@ -1164,7 +1323,10 @@ class WebhookActionDevice:
     """Whether the device has been approved to connect to IoT Central."""
     provisioned: Optional[bool] = None
     """Whether resources have been allocated for the device."""
-    cloud_properties: Optional[Dict[str, Any]] = None
+    cloud_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "cloudProperties"},
+    )
     """Cloud properties that triggered the webhook."""
     properties: Optional[Dict[str, Any]] = None
     """Device properties that triggered the webhook."""
@@ -2433,45 +2595,6 @@ class AzureiotcentralClient(ConnectorClientBase):
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def workflow_create_trigger_async(
-        self,
-        input: WorkflowTrigger,
-        application: str,
-    ) -> dict[str, Any] | None:
-        """
-        When a rule is fired
-
-        Create an action which triggers when a rule is fired in IoT Central.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/api/preview/_internal/workflow/triggers"
-        )
-        query_params = []
-        value = str(application)
-        if isinstance(application, bool):
-            value = value.lower()
-        query_params.append(f"application={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
                 request_url,
                 response.status,
                 response.text,
@@ -4657,3 +4780,21 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "Workflow_CreateTrigger": {
+        "operation_id": "Workflow_CreateTrigger",
+        "path": "/{connectionId}/api/preview/_internal/workflow/triggers",
+        "method": "post",
+        "required_parameters": ["application", "body"],
+        "callback_payload_type": "WorkflowTrigger",
+    },
+}

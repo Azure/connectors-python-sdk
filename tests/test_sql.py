@@ -22,6 +22,7 @@ from azure.connectors.sql import (
     SqlPassThroughNativeQueryBody,
     Table,
     TablesList,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -56,14 +57,6 @@ async def _invoke_operation(client: SqlClient, operation: str):
         )
     if operation == "get_items":
         return await client.get_items_async(server="srv", database="db", table="tbl")
-    if operation == "get_on_new_items":
-        return await client.get_on_new_items_async(
-            server="srv", database="db", table="tbl"
-        )
-    if operation == "get_on_updated_items":
-        return await client.get_on_updated_items_async(
-            server="srv", database="db", table="tbl"
-        )
     if operation == "get_tables":
         return await client.get_tables_async(server="srv", database="db")
     if operation == "patch_item":
@@ -136,8 +129,6 @@ ALL_OPERATIONS = [
     "execute_procedure",
     "get_item",
     "get_items",
-    "get_on_new_items",
-    "get_on_updated_items",
     "get_tables",
     "patch_item",
     "post_item",
@@ -487,25 +478,6 @@ class TestSqlClientMethods:
             assert "/v2/datasets/srv,db/procedures" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_on_new_items_success(self, mock_token_provider):
-        """Test get_on_new_items_async targets the onnewitems trigger endpoint."""
-        client = SqlClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"value":[]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.get_on_new_items_async(server="srv", database="db", table="tbl")
-
-            assert "/v2/datasets/srv,db/tables/tbl/onnewitems" in mock_send.call_args[0][1]
-
-    @pytest.mark.asyncio
     async def test_get_table_success(self, mock_token_provider):
         """Test get_table_async targets the legacy default metadata endpoint."""
         client = SqlClient(
@@ -603,3 +575,28 @@ class TestSqlTypeSerialization:
         assert sql_item.dynamic_properties is None
         assert query_body.query is None
         assert post_input.additional_properties == {}
+
+
+class TestSqlTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    def test_on_new_items_registered_as_trigger(self):
+        """Test the on-new-items route is registered as a trigger operation."""
+        assert "GetOnNewItems_V2" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["GetOnNewItems_V2"]
+
+        assert trigger["operation_id"] == "GetOnNewItems_V2"
+        assert trigger["path"].endswith("/onnewitems")
+
+    def test_on_updated_items_registered_as_trigger(self):
+        """Test the on-updated-items route is registered as a trigger operation."""
+        assert "GetOnUpdatedItems_V2" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["GetOnUpdatedItems_V2"]
+
+        assert trigger["operation_id"] == "GetOnUpdatedItems_V2"
+        assert trigger["path"].endswith("/onupdateditems")
+
+    def test_trigger_routes_not_client_methods(self):
+        """Test the trigger routes are no longer exposed as callable client methods."""
+        assert not hasattr(SqlClient, "get_on_new_items_async")
+        assert not hasattr(SqlClient, "get_on_updated_items_async")

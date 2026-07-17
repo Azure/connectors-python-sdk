@@ -11,6 +11,7 @@ from azure.connectors.pipedrive import (
     PipedriveClient,
     UpdateDealStageRequest,
     UpdateDealStatusRequest,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -22,8 +23,6 @@ from tests.conftest import MockResponse
 
 async def _invoke_operation(client: PipedriveClient, operation: str):
     """Invoke a Pipedrive operation by name for shared tests."""
-    if operation == "trig_new_activity":
-        return await client.trig_new_activity_async()
     if operation == "get_deal":
         return await client.get_deal_async(deal_id="1")
     if operation == "update_deal_status":
@@ -37,8 +36,6 @@ async def _invoke_operation(client: PipedriveClient, operation: str):
         return await client.get_stage_async(stage_id="1")
     if operation == "add_deal":
         return await client.add_deal_async(input=AddDealRequest())
-    if operation == "trig_new_deal":
-        return await client.trig_new_deal_async()
     if operation == "update_deal_stage":
         return await client.update_deal_stage_async(
             input=UpdateDealStageRequest(),
@@ -139,26 +136,6 @@ class TestPipedriveClientLifecycle:
 
 class TestPipedriveClientMethods:
     """Success path tests for Pipedrive methods."""
-
-    @pytest.mark.asyncio
-    async def test_trig_new_activity_success(self, mock_token_provider):
-        """Test trig_new_activity_async targets the activity trigger endpoint."""
-        client = PipedriveClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"data":[]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.trig_new_activity_async()
-
-            assert mock_send.call_args[0][0] == "GET"
-            assert "/trigger/v1/activities" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_get_deal_success(self, mock_token_provider):
@@ -271,26 +248,6 @@ class TestPipedriveClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_trig_new_deal_success(self, mock_token_provider):
-        """Test trig_new_deal_async targets the v2 deal trigger endpoint."""
-        client = PipedriveClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"data":[]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.trig_new_deal_async()
-
-            assert mock_send.call_args[0][0] == "GET"
-            assert "/connector-v2/trigger/v1/deals" in mock_send.call_args[0][1]
-
-    @pytest.mark.asyncio
     async def test_update_deal_stage_success(self, mock_token_provider):
         """Test update_deal_stage_async sends the body via PUT to the v2 endpoint."""
         client = PipedriveClient(
@@ -360,13 +317,11 @@ class TestPipedriveClientErrorHandling:
     @pytest.mark.parametrize(
         "operation",
         [
-            "trig_new_activity",
             "get_deal",
             "update_deal_status",
             "add_activity",
             "get_stage",
             "add_deal",
-            "trig_new_deal",
             "update_deal_stage",
             "list_deals",
         ],
@@ -391,3 +346,28 @@ class TestPipedriveClientErrorHandling:
         ):
             with pytest.raises(ConnectorException):
                 await _invoke_operation(client, operation)
+
+
+class TestPipedriveTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    def test_trig_new_activity_registered_as_trigger(self):
+        """Test the new-activity route is registered as a trigger operation."""
+        assert "TrigNewActivity" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["TrigNewActivity"]
+
+        assert trigger["operation_id"] == "TrigNewActivity"
+        assert trigger["path"].endswith("/trigger/v1/activities")
+
+    def test_trig_new_deal_registered_as_trigger(self):
+        """Test the new-deal route is registered as a trigger operation."""
+        assert "TrigNewDealV2" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["TrigNewDealV2"]
+
+        assert trigger["operation_id"] == "TrigNewDealV2"
+        assert trigger["path"].endswith("/connector-v2/trigger/v1/deals")
+
+    def test_trigger_routes_not_client_methods(self):
+        """Test the trigger routes are no longer exposed as callable client methods."""
+        assert not hasattr(PipedriveClient, "trig_new_activity_async")
+        assert not hasattr(PipedriveClient, "trig_new_deal_async")

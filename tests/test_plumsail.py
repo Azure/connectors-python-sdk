@@ -9,7 +9,7 @@ import pytest
 from azure.connectors.plumsail import (
     PlumsailClient,
     Pdf2TextRequest,
-    AddPowerAutomateWebhookData,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -205,55 +205,6 @@ class TestExtractTextFromPdfAsync:
                 )
 
 
-class TestProcessesFlowTriggersAsync:
-    """Tests for flow_v1_processes_flow_triggers_async (POST with body, no return)."""
-
-    @pytest.mark.asyncio
-    async def test_success_forwards_request_body(self, mock_token_provider):
-        """Test that the POST operation forwards the request body to send_async."""
-        client = PlumsailClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        request = AddPowerAutomateWebhookData()
-        mock_response = MockResponse(status=200, text="")
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.flow_v1_processes_flow_triggers_async(input=request)
-
-            mock_send.assert_called_once()
-            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
-            assert method == "POST"
-            assert path.endswith("/flow/v1/ProcessesFlow/triggers")
-            assert mock_send.call_args.kwargs["body"] is request
-            assert result is None
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
-        """Test that a non-2xx response raises ConnectorException."""
-        client = PlumsailClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=500, text="Internal Server Error")
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ):
-            with pytest.raises(ConnectorException):
-                await client.flow_v1_processes_flow_triggers_async(
-                    input=AddPowerAutomateWebhookData()
-                )
-
-
 BASE_URL = "https://example.azure.com/connections/test"
 
 OPERATION_ARGS = {
@@ -305,7 +256,6 @@ OPERATION_ARGS = {
     },
     "flow_v1_processes_flow_schema_get_json_data": {"process_id": "test"},
     "flow_v1_processes_flow_schema_get_processes": {},
-    "flow_v1_processes_flow_triggers": {"input": {}},
     "flow_v1_processes_flow_triggers_by_process_id_schema_get": {"process_id": "test"},
     "profiles_me_get": {},
 }
@@ -365,3 +315,20 @@ class TestPlumsailClientAllOperationsErrorHandling:
                 await _invoke_operation(client, operation)
 
             assert exc_info.value.status_code == 500
+
+
+class TestPlumsailTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    def test_processes_flow_triggers_registered_as_trigger(self):
+        """Test the processes flow triggers route is registered as a trigger operation."""
+        assert "FlowV1ProcessesFlowTriggersPost" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["FlowV1ProcessesFlowTriggersPost"]
+
+        assert trigger["operation_id"] == "FlowV1ProcessesFlowTriggersPost"
+        assert trigger["method"] == "post"
+        assert trigger["path"].endswith("/flow/v1/ProcessesFlow/triggers")
+
+    def test_processes_flow_triggers_not_a_client_method(self):
+        """Test the trigger route is no longer exposed as a callable client method."""
+        assert not hasattr(PlumsailClient, "flow_v1_processes_flow_triggers_async")

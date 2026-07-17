@@ -224,7 +224,10 @@ class UploadDocument:
     Response for Upload Document
     """
 
-    document_id: Optional[int] = None
+    document_id: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "documentId"},
+    )
     """
     This property is retained for backward compatibility and will be removed in
     later versions. Use document_id instead.
@@ -957,7 +960,10 @@ class Response:
     Definition: Response
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Message"},
+    )
     """
     The service-specific error message returned by the API. This message
     provides useful information about why the service has returned an error
@@ -971,9 +977,12 @@ class DetailedResponse:
     Definition: DetailedResponse
     """
 
-    error: Optional[str] = None
+    error: Optional[str] = field(default=None, metadata={"wire_name": "Error"})
     """Custom error code"""
-    message: Optional[str] = None
+    message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Message"},
+    )
     """
     The service specific error message returned by the API. This message
     provides useful information about why the service has returned an error
@@ -1655,7 +1664,7 @@ class FieldValidationValueRule:
     Definition: FieldValidationValueRule
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     Specifies the type of validation rule, which is currently always set to
     EQUALS for text field.
@@ -2049,7 +2058,7 @@ class DocumentDetails:
     """Date and time when the document was last modified."""
     size: Optional[int] = None
     """Size of the document in bytes."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the document e.g. \"PDF\"."""
     source: Optional[str] = None
     """Identifies where the document was uploaded e.g. \"My App\"."""
@@ -2306,7 +2315,7 @@ class ServicePlanEvidenceReport:
     Definition: ServicePlanEvidenceReport
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     Type of workflow evidence recording, Possible values are \"BASIC\",
     \"DETAILED\"
@@ -2366,7 +2375,10 @@ class ServicePlanSmtpServer:
 
     enabled: Optional[bool] = None
     """True, if SMTP Server is enabled for the service plan."""
-    server: Optional[str] = None
+    server: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Server"},
+    )
     """SMTP Server"""
 
 
@@ -2378,7 +2390,10 @@ class ServicePlanSmsNotification:
 
     enabled: Optional[bool] = None
     """True, if SMS notification gateway is enabled for the service plan."""
-    server: Optional[str] = None
+    server: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Server"},
+    )
     """SMS Gateway"""
 
 
@@ -3787,7 +3802,7 @@ class TextBoxFieldRequest:
     """The order of the user in workflow for which the field is being added."""
     page_no: Optional[int] = None
     """Page number on which the field is to be created."""
-    type_: Optional[Any] = None
+    type_: Optional[Any] = field(default=None, metadata={"wire_name": "type"})
     """
     Type of the field, possible values are \"TEXT\", \"NAME\", \"EMAIL\",
     \"COMPANY\", \"JOBTITLE\", \"DATE\". All text fields other then TEXT are
@@ -4130,7 +4145,7 @@ class DocumentLogsActionsInformation:
     Definition: DocumentLogsActionsInformation
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     The type of extra information about the action e.g. \"SIGNING_METHOD\"
     which means what signing method user used to sign the document.
@@ -4389,7 +4404,7 @@ class DigitalSignatureFieldResponse:
     """Page number of the document on which the field exists."""
     embedded: Optional[bool] = None
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     If field is assigned or not, possible values are ASSIGNED, UN_ASSIGNED,
     SIGNED, LOGGED_IN_USER, HIDDEN and PLACEHOLDER.
@@ -4510,7 +4525,7 @@ class HandSignatureFieldResponse:
     """Page number of the document on which the field exists."""
     embedded: Optional[bool] = None
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     If field is assigned or not, possible values are ASSIGNED, UN_ASSIGNED,
     SIGNED, LOGGED_IN_USER, HIDDEN and PLACEHOLDER.
@@ -4549,7 +4564,7 @@ class ElectronicSignatureFieldResponse:
     """Page number of the document on which the field exists."""
     embedded: Optional[bool] = None
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     If field is assigned or not, possible values are ASSIGNED, UN_ASSIGNED,
     SIGNED, LOGGED_IN_USER, HIDDEN and PLACEHOLDER.
@@ -4646,7 +4661,7 @@ class InPersonFieldResponse:
     """Page number of the document on which the field exists."""
     embedded: Optional[bool] = None
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     process_status: Optional[str] = None
     """
     Whether the field is processed or not. Possible values are UN_PROCESSED,
@@ -4718,7 +4733,7 @@ class TextFieldResponse:
     """Page number of the document on which the field exists."""
     embedded: Optional[bool] = None
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     Type of the text field, possible values are \"TEXT\", \"NAME\",
     \"COMPANY\", \"JOBTITLE\", \"EMAIL\", \"DATE\".
@@ -4803,7 +4818,7 @@ class RadioFieldResponse:
     """Page number of the document on which the field exists."""
     embedded: Optional[bool] = None
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     value: Optional[bool] = None
     """Value of the field."""
     read_only: Optional[bool] = None
@@ -4853,7 +4868,7 @@ class CheckboxFieldResponse:
     """Page number of the document on which the field exists."""
     embedded: Optional[bool] = None
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     value: Optional[bool] = None
     """Value of the field."""
     read_only: Optional[bool] = None
@@ -4998,7 +5013,7 @@ class QrCodeResponse:
 
     field_name: Optional[str] = None
     """Unique identifier of the field."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Field Type PDF_FIELD_TYPE like QR"""
     page_no: Optional[int] = None
     """Page number of the document on which the field exists."""
@@ -5047,7 +5062,10 @@ class AttachmentFieldResponse:
     """
     processed_by: Optional[str] = None
     """Email address of the user who processed the field."""
-    attachment_ref_id: Optional[int] = None
+    attachment_ref_id: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "attachmentRefId"},
+    )
     """Attachmet ref id"""
     note: Optional[str] = None
     """Attachmet note Only in case of \"MANDATORY\" attachment rule"""

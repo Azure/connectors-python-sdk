@@ -24,6 +24,7 @@ from azure.connectors.dynamicsax import (
     Table,
     TablesList,
     TriggerFieldDataList,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -36,12 +37,6 @@ BASE_URL = "https://example.azure.com/connections/test"
 
 # Maps each operation name (without the "_async" suffix) to its call kwargs.
 OPERATION_ARGS = {
-    "subscribe_on_a_business_event": {
-        "input": BusinessEventSubscription(),
-        "dataset": "ds",
-        "businessevent": "evt",
-        "businesseventcategory": "cat",
-    },
     "execute_procedure": {
         "input": ExecuteProcedureInput(),
         "dataset": "ds",
@@ -389,3 +384,19 @@ class TestDynamicsaxTypeSerialization:
         assert Procedure().name is None
         assert DataSet().name is None
         assert Table().name is None
+
+
+class TestDynamicsaxTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    def test_subscribe_on_a_business_event_registered_as_trigger(self):
+        """Test the business event subscription route is registered as a trigger operation."""
+        assert "SubscribeOnABusinessEvent" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["SubscribeOnABusinessEvent"]
+
+        assert trigger["operation_id"] == "SubscribeOnABusinessEvent"
+        assert trigger["method"] == "post"
+
+    def test_subscribe_on_a_business_event_not_a_client_method(self):
+        """Test the trigger route is no longer exposed as a callable client method."""
+        assert not hasattr(DynamicsaxClient, "subscribe_on_a_business_event_async")

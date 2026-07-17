@@ -14,6 +14,7 @@ from azure.connectors.azureeventgrid import (
     Subscription,
     SubscriptionListResult,
     TopicTypesResponse,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -25,12 +26,6 @@ from tests.conftest import MockResponse
 
 async def _invoke_operation(client: AzureeventgridClient, operation: str):
     """Invoke an Event Grid operation by name for shared error-handling tests."""
-    if operation == "create_subscription":
-        return await client.create_subscription_async(
-            input=EventRequest(),
-            subscription_id="sub-1",
-            resource_type="Microsoft.Storage.StorageAccounts",
-        )
     if operation == "subscriptions_list":
         return await client.subscriptions_list_async()
     if operation == "topic_types_list":
@@ -40,7 +35,6 @@ async def _invoke_operation(client: AzureeventgridClient, operation: str):
 
 
 ALL_OPERATIONS = [
-    "create_subscription",
     "subscriptions_list",
     "topic_types_list",
 ]
@@ -199,61 +193,6 @@ class TestAzureeventgridClientMethods:
 
             assert result is None
 
-    @pytest.mark.asyncio
-    async def test_create_subscription_sends_body_and_path(self, mock_token_provider):
-        """Test create_subscription_async posts the input to the event subscriptions endpoint."""
-        client = AzureeventgridClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text="")
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.create_subscription_async(
-                input=EventRequest(properties={"topic": "orders"}),
-                subscription_id="sub-1",
-                resource_type="Microsoft.Storage.StorageAccounts",
-            )
-
-            assert result is None
-            assert mock_send.call_args[0][0] == "POST"
-            request_url = mock_send.call_args[0][1]
-            assert (
-                "/subscriptions/sub-1/providers/Microsoft.Storage.StorageAccounts"
-                "/resource/eventSubscriptions" in request_url
-            )
-            assert isinstance(mock_send.call_args.kwargs["body"], EventRequest)
-
-    @pytest.mark.asyncio
-    async def test_create_subscription_appends_subscription_name(self, mock_token_provider):
-        """Test create_subscription_async appends the optional subscriptionName query param."""
-        client = AzureeventgridClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text="")
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.create_subscription_async(
-                input=EventRequest(),
-                subscription_id="sub-1",
-                resource_type="Microsoft.Storage.StorageAccounts",
-                subscription_name="my sub",
-            )
-
-            request_url = mock_send.call_args[0][1]
-            assert "subscriptionName=my%20sub" in request_url
-
 
 class TestAzureeventgridClientErrorHandling:
     """Error handling tests that ensure all methods raise ConnectorException."""
@@ -304,3 +243,21 @@ class TestAzureeventgridTypeSerialization:
         assert event_request.properties is None
         assert event_schema.additional_properties == {}
         assert subscription.subscription_id is None
+
+
+class TestAzureeventgridTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    def test_create_subscription_registered_as_trigger(self):
+        """Test the create subscription route is registered as a trigger operation."""
+        assert "CreateSubscription" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["CreateSubscription"]
+
+        assert trigger["operation_id"] == "CreateSubscription"
+        assert trigger["method"] == "post"
+        assert trigger["path"].endswith("/resource/eventSubscriptions")
+        assert "subscriptionId" in trigger["required_parameters"]
+
+    def test_create_subscription_not_a_client_method(self):
+        """Test the trigger route is no longer exposed as a callable client method."""
+        assert not hasattr(AzureeventgridClient, "create_subscription_async")

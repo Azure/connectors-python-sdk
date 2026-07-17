@@ -79,7 +79,10 @@ class GetItemsResponse:
     Response for Get rows (V2)
     """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = None
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+        default=None,
+        metadata={"wire_name": "@metadata"},
+    )
     """List of Sensitivity Labels"""
     value: Optional[List[SqlItem]] = None
     """List of Columns"""
@@ -101,7 +104,10 @@ class GetTablesResponse:
     Response for Get tables (V2)
     """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = None
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+        default=None,
+        metadata={"wire_name": "@metadata"},
+    )
     """List of Sensitivity Labels"""
     value: Optional[List[Table]] = None
     """List of Tables"""
@@ -235,12 +241,24 @@ class TableMetadata:
     """Table name"""
     title: Optional[str] = None
     """Table title"""
-    x_ms_permission: Optional[str] = None
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
     schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """Url link"""
 
 
@@ -252,9 +270,15 @@ class BlobDataSetsMetadata:
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
@@ -264,11 +288,17 @@ class Database:
     Definition: Database
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the database. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the database."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """
     Additional database properties provided by the connector to the clients.
     """
@@ -282,9 +312,12 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Dataset name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Dataset display name"""
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
@@ -298,18 +331,30 @@ class DataSetParameter:
 
     name: Optional[str] = None
     """Name"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Parameter url encoding"""
     description: Optional[str] = None
     """Description"""
     required: Optional[bool] = None
     """Is parameter required"""
-    x_ms_summary: Optional[str] = None
+    x_ms_summary: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-summary"},
+    )
     """Summary"""
-    x_ms_dynamic_values: Optional[DynamicValues] = None
-    x_ms_dynamic_tree: Optional[DynamicTree] = None
+    x_ms_dynamic_values: Optional[DynamicValues] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-dynamic-values"},
+    )
+    x_ms_dynamic_tree: Optional[DynamicTree] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-dynamic-tree"},
+    )
 
 
 @dataclass
@@ -330,11 +375,17 @@ class DataSetsMetadata:
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
-    dataset_format: Optional[str] = None
+    dataset_format: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "datasetFormat"},
+    )
     """Dataset Format"""
     parameters: Optional[List[DataSetParameter]] = None
     """Parameters"""
-    no_natural_key_column_connector: Optional[NoNaturalKeyColumnConnectorMetadata] = None
+    no_natural_key_column_connector: Optional[NoNaturalKeyColumnConnectorMetadata] = field(
+        default=None,
+        metadata={"wire_name": "noNaturalKeyColumnConnector"},
+    )
 
 
 @dataclass
@@ -345,7 +396,10 @@ class DataWithSensitivityLabelInfo:
 
     name: Optional[str] = None
     """Name"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
     """List of Sensitivity Label Information"""
 
 
@@ -368,15 +422,30 @@ class DynamicTreeOpenBrowse:
 
     path: Optional[str] = None
     """Path"""
-    item_value_path: Optional[str] = None
+    item_value_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "itemValuePath"},
+    )
     """Item value path"""
-    item_title_path: Optional[str] = None
+    item_title_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "itemTitlePath"},
+    )
     """Item title path"""
-    item_full_title_path: Optional[str] = None
+    item_full_title_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "itemFullTitlePath"},
+    )
     """Item full title path"""
-    item_is_parent: Optional[str] = None
+    item_is_parent: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "itemIsParent"},
+    )
     """Is item parent"""
-    selectable_filter: Optional[str] = None
+    selectable_filter: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "selectableFilter"},
+    )
     """Selectable filter"""
 
 
@@ -386,11 +455,20 @@ class DynamicTreeSettings:
     Definition: DynamicTreeSettings
     """
 
-    can_select_parent_nodes: Optional[bool] = None
+    can_select_parent_nodes: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "canSelectParentNodes"},
+    )
     """Can select parent nodes"""
-    can_select_leaf_nodes: Optional[bool] = None
+    can_select_leaf_nodes: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "canSelectLeafNodes"},
+    )
     """Can select leaf nodes"""
-    selected_item_placeholder: Optional[str] = None
+    selected_item_placeholder: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "selectedItemPlaceholder"},
+    )
     """Selected item placeholder in the path"""
 
 
@@ -402,11 +480,20 @@ class DynamicValues:
 
     path: Optional[str] = None
     """Path"""
-    value_collection: Optional[str] = None
+    value_collection: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "value-collection"},
+    )
     """Value collection"""
-    value_path: Optional[str] = None
+    value_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "value-path"},
+    )
     """Value path"""
-    value_title: Optional[str] = None
+    value_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "value-title"},
+    )
     """Value title"""
 
 
@@ -416,7 +503,10 @@ class Item:
     Definition: Item
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
@@ -435,11 +525,20 @@ class NoNaturalKeyColumnConnectorMetadata:
     Definition: NoNaturalKeyColumnConnectorMetadata
     """
 
-    create_key_column_path: Optional[str] = None
+    create_key_column_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createKeyColumnPath"},
+    )
     """Path to create key column"""
-    create_key_column_method: Optional[str] = None
+    create_key_column_method: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createKeyColumnMethod"},
+    )
     """Method to create key column"""
-    key_column_name_url_encoding: Optional[str] = None
+    key_column_name_url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "keyColumnNameUrlEncoding"},
+    )
     """Key column name url encoding"""
 
 
@@ -462,7 +561,10 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = None
+    language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Language"},
+    )
     """Query language"""
 
 
@@ -474,9 +576,15 @@ class PassThroughNativeQueryBody:
 
     query: Optional[str] = None
     """Query Text"""
-    formal_parameters: Optional[Dict[str, Any]] = None
+    formal_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "formalParameters"},
+    )
     """Formal Parameters"""
-    actual_parameters: Optional[Dict[str, Any]] = None
+    actual_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "actualParameters"},
+    )
     """Actual parameters"""
 
 
@@ -486,9 +594,15 @@ class PassThroughNativeQueryResult:
     Definition: PassThroughNativeQueryResult
     """
 
-    output_parameters: Optional[Dict[str, Any]] = None
+    output_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "OutputParameters"},
+    )
     """Output parameter values"""
-    result_sets: Optional[Dict[str, Any]] = None
+    result_sets: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "ResultSets"},
+    )
     """Collection of all result sets"""
 
 
@@ -498,9 +612,12 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Procedure name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Procedure display name"""
 
 
@@ -510,13 +627,22 @@ class ProcedureResult:
     Definition: ProcedureResult
     """
 
-    output_parameters: Optional[Dict[str, Any]] = None
+    output_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "OutputParameters"},
+    )
     """
     Output parameter values. The schema is dynamic based on the procedure.
     """
-    return_code: Optional[int] = None
+    return_code: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "ReturnCode"},
+    )
     """Return code of a procedure."""
-    result_sets: Optional[Dict[str, Any]] = None
+    result_sets: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "ResultSets"},
+    )
     """
     Result sets returned by a procedure. The schema is dynamic based on the
     procedure.
@@ -529,11 +655,17 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = None
+    sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelId"},
+    )
     """SensitivityLabel Id."""
     name: Optional[str] = None
     """SensitivityLabel name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """SensitivityLabel displayName info"""
     tooltip: Optional[str] = None
     """SensitivityLabel details on tooltip."""
@@ -541,13 +673,25 @@ class SensitivityLabelMetadata:
     """SensitivityLabel priority."""
     color: Optional[str] = None
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = None
+    is_encrypted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEncrypted"},
+    )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = None
+    is_parent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isParent"},
+    )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = None
+    parent_sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentSensitivityLabelId"},
+    )
     """Parent  SensitivityLabel Id."""
 
 
@@ -557,11 +701,17 @@ class Server:
     Definition: Server
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the server. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the server."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """
     Additional server properties provided by the connector to the clients.
     """
@@ -575,7 +725,10 @@ class SqlItem:
     Definition: SqlItem
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
@@ -584,11 +737,17 @@ class SqlPassThroughNativeQueryBody:
     Definition: SqlPassThroughNativeQueryBody
     """
 
-    actual_parameters: Optional[Dict[str, Any]] = None
+    actual_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "actualParameters"},
+    )
     """Actual parameters"""
     query: Optional[str] = None
     """Query Text"""
-    formal_parameters: Optional[Dict[str, Any]] = None
+    formal_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "formalParameters"},
+    )
     """Formal Parameters"""
 
 
@@ -598,9 +757,15 @@ class SqlPassThroughNativeQueryResult:
     Definition: SqlPassThroughNativeQueryResult
     """
 
-    output_parameters: Optional[Dict[str, Any]] = None
+    output_parameters: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "OutputParameters"},
+    )
     """Output parameter values"""
-    result_sets: Optional[Dict[str, Any]] = None
+    result_sets: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "ResultSets"},
+    )
     """Collection of all result sets"""
 
 
@@ -610,11 +775,17 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
@@ -624,15 +795,36 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    count_restrictions: Optional[TableCountRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    count_restrictions: Optional[TableCountRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "countRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
@@ -644,9 +836,15 @@ class TableFilterRestrictionsMetadata:
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
@@ -678,9 +876,15 @@ class TableSortRestrictionsMetadata:
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
@@ -692,13 +896,25 @@ class TabularDataSetsMetadata:
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
@@ -719,7 +935,10 @@ class PQMetadata:
     """
 
     value: Optional[PQMetadataValue] = None
-    result_type: Optional[str] = None
+    result_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resultType"},
+    )
     """Result Type"""
 
 
@@ -1013,135 +1232,6 @@ class SqlClient(ConnectorClientBase):
             if isinstance(purview_account_name, bool):
                 value = value.lower()
             query_params.append(f"purviewAccountName={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_new_items_async(
-        self,
-        server: str,
-        database: str,
-        table: str,
-        filter: Optional[str] = None,
-        top: Optional[str] = None,
-        orderby: Optional[str] = None,
-        select: Optional[str] = None,
-    ) -> dict[str, Any] | None:
-        """
-        When an item is created (V2)
-
-        Triggers a flow when an item is created in SQL
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/v2"
-            f"/datasets"
-            f"/{str(server)},{str(database)}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onnewitems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_updated_items_async(
-        self,
-        server: str,
-        database: str,
-        table: str,
-        filter: Optional[str] = None,
-        top: Optional[str] = None,
-        orderby: Optional[str] = None,
-        select: Optional[str] = None,
-    ) -> dict[str, Any] | None:
-        """
-        When an item is modified (V2)
-
-        Triggers a flow when an item is modified/inserted in SQL
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{str(server)},{str(database)}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onupdateditems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1872,3 +1962,28 @@ class SqlClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "GetOnNewItems_V2": {
+        "operation_id": "GetOnNewItems_V2",
+        "path": "/{connectionId}/v2/datasets/{server},{database}/tables/{table}/onnewitems",
+        "method": "get",
+        "required_parameters": ["server", "database", "table"],
+        "callback_payload_type": "SqlItemsList",
+    },
+    "GetOnUpdatedItems_V2": {
+        "operation_id": "GetOnUpdatedItems_V2",
+        "path": "/{connectionId}/datasets/{server},{database}/tables/{table}/onupdateditems",
+        "method": "get",
+        "required_parameters": ["server", "database", "table"],
+        "callback_payload_type": "SqlItemsList",
+    },
+}

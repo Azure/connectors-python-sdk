@@ -17,6 +17,7 @@ from azure.connectors.azureiotcentral import (
     ScheduledJob,
     User,
     WorkflowTrigger,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -99,7 +100,6 @@ OPERATION_ARGS = {
     },
     "scheduled_jobs_remove": {"scheduled_job_id": "sj-1", "application": "app-1"},
     "scheduled_jobs_list_jobs": {"scheduled_job_id": "sj-1", "application": "app-1"},
-    "workflow_create_trigger": {"input": {}, "application": "app-1"},
     "devices_get": {"device_id": "d-1", "application": "app-1"},
     "devices_get_command_response": {
         "device_id": "d-1",
@@ -579,3 +579,19 @@ class TestAzureiotcentralTypeSerialization:
         assert scheduled_job.id is None
         assert user.additional_properties == {}
         assert trigger.id is None
+
+
+class TestAzureiotcentralTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    def test_workflow_create_trigger_registered_as_trigger(self):
+        """Test the workflow create trigger route is registered as a trigger operation."""
+        assert "Workflow_CreateTrigger" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["Workflow_CreateTrigger"]
+
+        assert trigger["operation_id"] == "Workflow_CreateTrigger"
+        assert trigger["method"] == "post"
+
+    def test_workflow_create_trigger_not_a_client_method(self):
+        """Test the trigger route is no longer exposed as a callable client method."""
+        assert not hasattr(AzureiotcentralClient, "workflow_create_trigger_async")

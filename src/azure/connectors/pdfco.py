@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 import json
 
@@ -35,7 +35,10 @@ class HtmlToPdfInput:
     Override default margins with custom values (the order is `top right bottom
     left`). You can als set all margins: `10px`, `5mm`, `5in` for all sides.
     """
-    paper_size: Optional[str] = None
+    paper_size: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "paperSize"},
+    )
     """
     Select PDF paper size. Can be Letter, Legal, Tabloid, Ledger, A0, A1, A2,
     A3, A4, A5, A6 or a custom size. Custom size can be set in px (pixels), mm
@@ -44,7 +47,10 @@ class HtmlToPdfInput:
     """
     orientation: Optional[str] = None
     """PDF page orientation."""
-    print_background: Optional[bool] = None
+    print_background: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "printBackground"},
+    )
     """Enable or disable printing of document background"""
     header: Optional[str] = None
     """Set to HTML for header to be applied on every page at the header."""
@@ -65,7 +71,10 @@ class HtmlToPdfInput:
     (https://developer.pdf.co/api/profiles/index.html) for profile examples and
     more.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -82,9 +91,15 @@ class HtmlToPdfResponse:
 
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -96,7 +111,10 @@ class HtmlToPdfResponse:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 
@@ -118,7 +136,10 @@ class UrlToPdfInput:
     5mm, 5in for all sides or 5px 5px 5px 5px (the order of margins is top,
     right, bottom, left).
     """
-    paper_size: Optional[str] = None
+    paper_size: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "paperSize"},
+    )
     """
     Letter is set by default. Can be Letter, Legal, Tabloid, Ledger, A0, A1,
     A2, A3, A4, A5, A6 or a custom size. Custom size can be set in px (pixels),
@@ -127,7 +148,10 @@ class UrlToPdfInput:
     """
     orientation: Optional[str] = None
     """Output page orientation"""
-    print_background: Optional[bool] = None
+    print_background: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "printBackground"},
+    )
     """Enable or disable printing of document background"""
     header: Optional[str] = None
     """Set to HTML for header to be applied on every page at the header."""
@@ -148,7 +172,10 @@ class UrlToPdfInput:
     (https://developer.pdf.co/api/profiles/index.html) for profile examples and
     more.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -165,9 +192,15 @@ class UrlToPdfResponse:
 
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -179,7 +212,10 @@ class UrlToPdfResponse:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 
@@ -191,19 +227,28 @@ class PdfFillerInput:
 
     url: Optional[str] = None
     """Url to the input PDF document"""
-    annotations_string: Optional[str] = None
+    annotations_string: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "annotationsString"},
+    )
     """
     Annotation strings to be added to the PDF document. Format should be like
     \"x;y;page;text\". Refer to PDF.co documentations for more advanced formats
     and examples.
     """
-    images_string: Optional[str] = None
+    images_string: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "imagesString"},
+    )
     """
     Images to be added to the PDF document. Format should be like
     \"x;y;page;urltoimage;link;width;height\". Refer to PDF.co documentations
     for more advanced formats and examples.
     """
-    fields_string: Optional[str] = None
+    fields_string: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fieldsString"},
+    )
     """
     Fill PDF form fields. Format should be like \"page;fieldName;value\". Refer
     to PDF.co documentations for more advanced formats and examples.
@@ -229,7 +274,10 @@ class PdfFillerInput:
     (https://developer.pdf.co/api/profiles/index.html) for profile examples and
     more.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -246,9 +294,15 @@ class PdfFillerResponse:
 
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -260,7 +314,10 @@ class PdfFillerResponse:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 
@@ -292,7 +349,10 @@ class MergePdfSimplifiedInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -309,9 +369,15 @@ class MergePdfSimplifiedResponse:
 
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -323,7 +389,10 @@ class MergePdfSimplifiedResponse:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 
@@ -355,7 +424,10 @@ class MergePdfInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -372,9 +444,15 @@ class MergePdfResponse:
 
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -386,7 +464,10 @@ class MergePdfResponse:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 
@@ -424,7 +505,10 @@ class SplitPdfInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """Creates a background processing job."""
 
 
@@ -438,9 +522,15 @@ class SplitPdfResponse:
     """urls"""
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -452,7 +542,10 @@ class SplitPdfResponse:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 
@@ -464,17 +557,29 @@ class SplitPdf2Input:
 
     url: Optional[str] = None
     """Url to the source PDF document"""
-    search_string: Optional[str] = None
+    search_string: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "searchString"},
+    )
     """
     Text to search for on pages. Can also search by barcode, for more info
     visit
     https://developer.pdf.co/api/pdf-split/index.html?utm_source=api-docs#post-tag-pdf-split2
     """
-    exclude_key_pages: Optional[bool] = None
+    exclude_key_pages: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "excludeKeyPages"},
+    )
     """Set to true if you want to exclude pages where text was found"""
-    regex_search: Optional[bool] = None
+    regex_search: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "regexSearch"},
+    )
     """Set to true to enable regular expressions for the search string"""
-    case_sensitive: Optional[bool] = None
+    case_sensitive: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "caseSensitive"},
+    )
     """Set to true to enable case-sensitive search."""
     lang: Optional[str] = None
     """
@@ -506,7 +611,10 @@ class SplitPdf2Input:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """Creates a background processing job."""
 
 
@@ -520,9 +628,15 @@ class SplitPdf2Response:
     """urls"""
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -534,7 +648,10 @@ class SplitPdf2Response:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 
@@ -549,12 +666,18 @@ class PDFSearchTextInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    search_string: Optional[str] = None
+    search_string: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "searchString"},
+    )
     """
     Text to search can support regular expressions if you set the \"Regex
     Search\" parameter to true.
     """
-    regex_search: Optional[bool] = None
+    regex_search: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "regexSearch"},
+    )
     name: Optional[str] = None
     """name"""
     pages: Optional[str] = None
@@ -569,11 +692,17 @@ class PDFSearchTextInput:
     be in string format.
     """
     inline: Optional[bool] = None
-    word_matching_mode: Optional[str] = None
+    word_matching_mode: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "wordMatchingMode"},
+    )
     """Values can be either `SmartMatch', `ExactMatch', or `None'."""
     password: Optional[str] = None
     """Password of the PDF file"""
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck module to check the
@@ -598,8 +727,14 @@ class PDFSearchTextResponse:
     """body"""
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
-    page_count: Optional[int] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -609,7 +744,10 @@ class PDFSearchTextResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -627,12 +765,18 @@ class DocumentParserInput:
     PDF.co built-in files storage. To upload files via API, Check out the Files
     Upload section at https://developer.pdf.co/api/file-upload/index.html
     """
-    template_id: Optional[str] = None
+    template_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "templateId"},
+    )
     """
     Set ID of document parser template to be used. View and manage your
     templates at https://app.pdf.co/document-parser
     """
-    output_format: Optional[str] = None
+    output_format: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "outputFormat"},
+    )
     """
     Default is JSON. You can override the default output format to CSV or XML
     to generate CSV or XML output accordingly.
@@ -658,7 +802,10 @@ class DocumentParserInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with \"Job Check\" to check the
@@ -677,13 +824,22 @@ class DocumentParserResponse:
     """Output URL"""
     body: Optional[Dict[str, Any]] = None
     """body"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     error: Optional[bool] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     status: Optional[int] = None
     name: Optional[str] = None
     credits: Optional[int] = None
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     duration: Optional[int] = None
     message: Optional[str] = None
 
@@ -708,23 +864,38 @@ class JobCheckResponse:
     """status"""
     message: Optional[str] = None
     """message"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
-    job_duration: Optional[int] = None
+    job_duration: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "jobDuration"},
+    )
     """jobDuration"""
     duration: Optional[int] = None
     """duration"""
     error: Optional[bool] = None
     """error"""
-    error_code: Optional[int] = None
+    error_code: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "errorCode"},
+    )
     """errorCode"""
 
 
@@ -743,14 +914,20 @@ class BarcodeGeneratorInput:
     """
     value: Optional[str] = None
     """Set the string value to encode inside the barcode."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Set the barcode type, QRCode By default."""
-    decoration_image: Optional[str] = None
+    decoration_image: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "decorationImage"},
+    )
     """
     Set this to the image that you want to be inserted the logo inside the
     QR-Code barcode.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck Module to check the
@@ -779,7 +956,10 @@ class BarcodeGeneratorResponse:
     Response for Barcode Generator
     """
 
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     url: Optional[str] = None
     """url"""
@@ -791,7 +971,10 @@ class BarcodeGeneratorResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -841,7 +1024,10 @@ class BarcodeReaderInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck module to check the
@@ -856,13 +1042,19 @@ class BarcodeReaderResponse:
     Response for Barcode Reader
     """
 
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     url: Optional[str] = None
     """url"""
     barcodes: Optional[List[Dict[str, Any]]] = None
     """barcodes"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -870,7 +1062,10 @@ class BarcodeReaderResponse:
     """status"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -887,7 +1082,10 @@ class PDFInfoReaderInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck module to check the status
@@ -910,7 +1108,10 @@ class PDFInfoReaderResponse:
     Response for PDF Info Reader
     """
 
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     url: Optional[str] = None
     """url"""
@@ -922,7 +1123,10 @@ class PDFInfoReaderResponse:
     """status"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -939,7 +1143,10 @@ class PDFFormsInfoReaderInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck module to check the status
@@ -962,7 +1169,10 @@ class PDFFormsInfoReaderResponse:
     Response for PDF Forms Info Reader
     """
 
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     url: Optional[str] = None
     """url"""
@@ -974,7 +1184,10 @@ class PDFFormsInfoReaderResponse:
     """status"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1018,7 +1231,10 @@ class PDFFindTableInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with /job/check endpoint to check the
@@ -1033,13 +1249,19 @@ class PDFFindTableResponse:
     Response for PDF Find Table
     """
 
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     url: Optional[str] = None
     """url"""
     body: Optional[Dict[str, Any]] = None
     """body"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1049,7 +1271,10 @@ class PDFFindTableResponse:
     """name"""
     credits: Optional[int] = None
     """Credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1066,12 +1291,24 @@ class SearchAndReplaceInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    search_strings: Optional[List[str]] = None
+    search_strings: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "searchStrings"},
+    )
     """Search Strings"""
-    replace_strings: Optional[List[str]] = None
+    replace_strings: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "replaceStrings"},
+    )
     """Replacement Strings"""
-    case_sensitive: Optional[bool] = None
-    replacement_limit: Optional[int] = None
+    case_sensitive: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "caseSensitive"},
+    )
+    replacement_limit: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "replacementLimit"},
+    )
     """
     Limit the number of searches & replacements for every item. The default
     value is 0 which means unlimited searches and replacements so every found
@@ -1101,7 +1338,10 @@ class SearchAndReplaceInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck module to check the
@@ -1118,8 +1358,14 @@ class SearchAndReplaceResponse:
 
     url: Optional[str] = None
     """url"""
-    page_count: Optional[int] = None
-    job_id: Optional[str] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -1129,7 +1375,10 @@ class SearchAndReplaceResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
 
@@ -1145,10 +1394,19 @@ class SearchAndReplaceWithImageInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    case_sensitive: Optional[bool] = None
-    search_string: Optional[str] = None
+    case_sensitive: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "caseSensitive"},
+    )
+    search_string: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "searchString"},
+    )
     """Single text replacement. Word or phrase to be replaced"""
-    replace_image: Optional[str] = None
+    replace_image: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "replaceImage"},
+    )
     """Image URL to be inserted in the doc."""
     pages: Optional[str] = None
     """
@@ -1160,7 +1418,10 @@ class SearchAndReplaceWithImageInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with Job Check module to check the
@@ -1168,7 +1429,10 @@ class SearchAndReplaceWithImageInput:
     other tasks without waiting for this process to finish..
     """
     regex: Optional[bool] = None
-    replacement_limit: Optional[int] = None
+    replacement_limit: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "replacementLimit"},
+    )
     """
     Limit the number of searches & replacements for every item. The default
     value is 0 which means unlimited searches and replacements so every found
@@ -1192,11 +1456,17 @@ class SearchAndReplaceWithImageResponse:
     Response for PDF Search and Replace Text with Image
     """
 
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     url: Optional[str] = None
     """url"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1206,7 +1476,10 @@ class SearchAndReplaceWithImageResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1223,12 +1496,21 @@ class SearchAndDeleteTextInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    search_strings: Optional[List[str]] = None
+    search_strings: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "searchStrings"},
+    )
     """searchStrings"""
-    case_sensitive: Optional[bool] = None
+    case_sensitive: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "caseSensitive"},
+    )
     regex: Optional[bool] = None
     """Set to true to use regular expression for a search string(s)."""
-    replacement_limit: Optional[int] = None
+    replacement_limit: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "replacementLimit"},
+    )
     """
     Limit the number of searches & replacements for every item. The default
     value is 0 which means unlimited searches and replacements so every found
@@ -1262,7 +1544,10 @@ class SearchAndDeleteTextInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -1279,9 +1564,15 @@ class SearchAndDeleteTextResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1291,7 +1582,10 @@ class SearchAndDeleteTextResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1330,7 +1624,10 @@ class PDFSearchableInput:
     """
     password: Optional[str] = None
     """Password of PDF file"""
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set Async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck module to check the
@@ -1353,9 +1650,15 @@ class PDFSearchableResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1365,7 +1668,10 @@ class PDFSearchableResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1394,7 +1700,10 @@ class PDFUnSearchableInput:
     """
     password: Optional[str] = None
     """Password of PDF file"""
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set Async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck module to check the
@@ -1417,9 +1726,15 @@ class PDFUnSearchableResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1429,7 +1744,10 @@ class PDFUnSearchableResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1478,7 +1796,10 @@ class PDFToCSVInput:
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -1489,7 +1810,10 @@ class PDFToCSVInput:
     """File name for the generated output"""
     password: Optional[str] = None
     """password"""
-    line_grouping: Optional[str] = None
+    line_grouping: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineGrouping"},
+    )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
     expiration: Optional[int] = None
     """
@@ -1518,7 +1842,10 @@ class PDFToCSVResponse:
     """body"""
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -1528,7 +1855,10 @@ class PDFToCSVResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1577,7 +1907,10 @@ class PDFToJSONInput:
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -1588,7 +1921,10 @@ class PDFToJSONInput:
     """File name for the generated output"""
     password: Optional[str] = None
     """password"""
-    line_grouping: Optional[str] = None
+    line_grouping: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineGrouping"},
+    )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
     expiration: Optional[int] = None
     """
@@ -1617,9 +1953,15 @@ class PDFToJSONResponse:
     """body"""
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1629,7 +1971,10 @@ class PDFToJSONResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1678,7 +2023,10 @@ class PDFToJSONMetaInput:
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -1689,7 +2037,10 @@ class PDFToJSONMetaInput:
     """File name for the generated output"""
     password: Optional[str] = None
     """password"""
-    line_grouping: Optional[str] = None
+    line_grouping: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineGrouping"},
+    )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
     expiration: Optional[int] = None
     """
@@ -1718,9 +2069,15 @@ class PDFToJSONMetaResponse:
     """body"""
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1730,7 +2087,10 @@ class PDFToJSONMetaResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1779,7 +2139,10 @@ class PDFToTextInput:
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -1790,7 +2153,10 @@ class PDFToTextInput:
     """File name for the generated output"""
     password: Optional[str] = None
     """password"""
-    line_grouping: Optional[str] = None
+    line_grouping: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineGrouping"},
+    )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
     expiration: Optional[int] = None
     """
@@ -1819,9 +2185,15 @@ class PDFToTextResponse:
     """body"""
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1831,7 +2203,10 @@ class PDFToTextResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1859,7 +2234,10 @@ class PDFToTextSimpleInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -1890,9 +2268,15 @@ class PDFToTextSimpleResponse:
     """body"""
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -1902,7 +2286,10 @@ class PDFToTextSimpleResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -1950,7 +2337,10 @@ class PDFToXLSInput:
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -1961,7 +2351,10 @@ class PDFToXLSInput:
     """File name for the generated output"""
     password: Optional[str] = None
     """password"""
-    line_grouping: Optional[str] = None
+    line_grouping: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineGrouping"},
+    )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
     expiration: Optional[int] = None
     """
@@ -1988,9 +2381,15 @@ class PDFToXLSResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2000,7 +2399,10 @@ class PDFToXLSResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2048,7 +2450,10 @@ class PDFToXLSXInput:
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2059,7 +2464,10 @@ class PDFToXLSXInput:
     """File name for the generated output"""
     password: Optional[str] = None
     """password"""
-    line_grouping: Optional[str] = None
+    line_grouping: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineGrouping"},
+    )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
     expiration: Optional[int] = None
     """
@@ -2086,9 +2494,15 @@ class PDFToXLSXResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2098,7 +2512,10 @@ class PDFToXLSXResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2147,7 +2564,10 @@ class PDFToXMLInput:
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2158,7 +2578,10 @@ class PDFToXMLInput:
     """File name for the generated output"""
     password: Optional[str] = None
     """password"""
-    line_grouping: Optional[str] = None
+    line_grouping: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineGrouping"},
+    )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
     expiration: Optional[int] = None
     """
@@ -2187,9 +2610,15 @@ class PDFToXMLResponse:
     """url"""
     body: Optional[str] = None
     """body"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2199,7 +2628,10 @@ class PDFToXMLResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2242,7 +2674,10 @@ class PDFToJPGInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2265,9 +2700,15 @@ class PDFToJPGResponse:
 
     urls: Optional[List[str]] = None
     """urls"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2277,7 +2718,10 @@ class PDFToJPGResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2320,7 +2764,10 @@ class PDFToPNGInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2343,9 +2790,15 @@ class PDFToPNGResponse:
 
     urls: Optional[List[str]] = None
     """urls"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2355,7 +2808,10 @@ class PDFToPNGResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2398,7 +2854,10 @@ class PDFToWEBPInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2421,9 +2880,15 @@ class PDFToWEBPResponse:
 
     urls: Optional[List[str]] = None
     """urls"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2433,7 +2898,10 @@ class PDFToWEBPResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2476,7 +2944,10 @@ class PDFToTIFFInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2498,9 +2969,15 @@ class PDFToTIFFResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2510,7 +2987,10 @@ class PDFToTIFFResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2547,7 +3027,10 @@ class PDFFromCSVInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2569,9 +3052,15 @@ class PDFFromCSVResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2581,7 +3070,10 @@ class PDFFromCSVResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2618,7 +3110,10 @@ class PDFFromDocInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2640,9 +3135,15 @@ class PDFFromDocResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2652,7 +3153,10 @@ class PDFFromDocResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2680,7 +3184,10 @@ class PDFFromImagesInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2702,9 +3209,15 @@ class PDFFromImagesResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2714,7 +3227,10 @@ class PDFFromImagesResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2731,14 +3247,20 @@ class PDFFromEmailInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    embed_attachments: Optional[bool] = None
+    embed_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "embedAttachments"},
+    )
     """
     Set to true to automatically embeds all attachments from original input
     email MSG or EML files into the final output PDF. Set it to false if you
     don't want to embed attachments so it will convert only the body of the
     input email.
     """
-    convert_attachments: Optional[bool] = None
+    convert_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "convertAttachments"},
+    )
     """
     Set to false if you don't want to convert attachments from the original
     email and want to embed them as original files (as embedded pdf
@@ -2752,7 +3274,10 @@ class PDFFromEmailInput:
     set to CSS style margins like 10px, 5mm, 5in for all sides or 5px 5px 5px
     5px (the order of margins is top, right, bottom, left).
     """
-    paper_size: Optional[str] = None
+    paper_size: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "paperSize"},
+    )
     """
     Letter is set by default. Can be Letter, Legal, Tabloid, Ledger, A0, A1,
     A2, A3, A4, A5, A6 or a custom size. Custom size can be set in px (pixels),
@@ -2770,7 +3295,10 @@ class PDFFromEmailInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2792,9 +3320,15 @@ class PDFFromEmailResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2804,7 +3338,10 @@ class PDFFromEmailResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2821,64 +3358,97 @@ class PDFAddSecurityInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    owner_password: Optional[str] = None
+    owner_password: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ownerPassword"},
+    )
     """
     The main owner password that is used for document encryption and for
     setting/removing restrictions.
     """
-    user_password: Optional[str] = None
+    user_password: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userPassword"},
+    )
     """
     The optional user password will be asked for viewing and printing document.
     """
-    encryption_algorithm: Optional[str] = None
+    encryption_algorithm: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "encryptionAlgorithm"},
+    )
     """
     Encryption algorithm. Valid values: RC4_40bit, RC4_128bit, AES_128bit,
     AES_256bit. AES_128bit or higher is recommended
     """
-    allow_accessibility_support: Optional[bool] = None
+    allow_accessibility_support: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowAccessibilitySupport"},
+    )
     """
     Allow or prohibit content extraction for accessibility needs. Note: this
     restriction applies when userPassword (if any) is entered. This restriction
     does not apply if the user enters Owner Password.
     """
-    allow_assembly_document: Optional[bool] = None
+    allow_assembly_document: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowAssemblyDocument"},
+    )
     """
     Allow or prohibit assembling the document. Note: this restriction applies
     when userPassword (if any) is entered. This restriction does not apply if
     the user enters Owner Password.
     """
-    allow_print_document: Optional[bool] = None
+    allow_print_document: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowPrintDocument"},
+    )
     """
     Allow or prohibit printing PDF document. Note: this restriction applies
     when userPassword (if any) is entered. This restriction does not apply if
     the user enters Owner Password.
     """
-    allow_fill_forms: Optional[bool] = None
+    allow_fill_forms: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowFillForms"},
+    )
     """
     Allow or prohibit the filling of interactive form fields (including
     signature fields) in the PDF documents. Note: this restriction applies when
     userPassword (if any) is entered. This restriction does not apply if the
     user enters Owner Password.
     """
-    allow_modify_document: Optional[bool] = None
+    allow_modify_document: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowModifyDocument"},
+    )
     """
     Allow or prohibit modification of PDF document. Note: this restriction
     applies when userPassword (if any) is entered. This restriction does not
     apply if the user enters Owner Password.
     """
-    allow_content_extraction: Optional[bool] = None
+    allow_content_extraction: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowContentExtraction"},
+    )
     """
     Allow or prohibit copying content from PDF document. Note: this restriction
     applies when userPassword (if any) is entered. This restriction does not
     apply if the user enters Owner Password.
     """
-    allow_modify_annotations: Optional[bool] = None
+    allow_modify_annotations: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowModifyAnnotations"},
+    )
     """
     Allow or prohibit interacting with text annotations and forms in PDF
     document. Note: this restriction applies when userPassword (if any) is
     entered. This restriction does not apply if the user enters Owner Password.
     """
-    print_quality: Optional[str] = None
+    print_quality: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "printQuality"},
+    )
     """
     Allowed printing quality. Valid values: HighResolution, LowResolution.
     Note: this restriction applies when userPassword (if any) is entered. This
@@ -2894,7 +3464,10 @@ class PDFAddSecurityInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2916,9 +3489,15 @@ class PDFAddSecurityResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2928,7 +3507,10 @@ class PDFAddSecurityResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -2957,7 +3539,10 @@ class PDFSecurityRemoveInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -2979,9 +3564,15 @@ class PDFSecurityRemoveResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -2991,7 +3582,10 @@ class PDFSecurityRemoveResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3008,7 +3602,10 @@ class PDFFromXLSXLSXInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = None
+    worksheet_index: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "worksheetIndex"},
+    )
     """Set the WorkSheet index (Default is 0)."""
     name: Optional[str] = None
     """File name for the generated output."""
@@ -3020,7 +3617,10 @@ class PDFFromXLSXLSXInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -3042,9 +3642,15 @@ class PDFFromXLSXLSXResponse:
     """
 
     url: Optional[str] = None
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -3054,7 +3660,10 @@ class PDFFromXLSXLSXResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3071,11 +3680,20 @@ class XLStoCSVInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = None
+    worksheet_index: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "worksheetIndex"},
+    )
     """Set the WorkSheet index (Default is 0)."""
-    quotation_symbol: Optional[str] = None
+    quotation_symbol: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "quotationSymbol"},
+    )
     """Set the CSV Quotation Symbol"""
-    separator_symbol: Optional[str] = None
+    separator_symbol: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "separatorSymbol"},
+    )
     """Set the CSV Separator Symbol"""
     name: Optional[str] = None
     """File name for the generated output."""
@@ -3087,7 +3705,10 @@ class XLStoCSVInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -3110,7 +3731,10 @@ class XLStoCSVResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3120,7 +3744,10 @@ class XLStoCSVResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3137,7 +3764,10 @@ class XLStoJSONInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = None
+    worksheet_index: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "worksheetIndex"},
+    )
     """Set the WorkSheet index (Default is 0)."""
     name: Optional[str] = None
     """File name for the generated output."""
@@ -3149,7 +3779,10 @@ class XLStoJSONInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -3172,7 +3805,10 @@ class XLStoJSONResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3182,7 +3818,10 @@ class XLStoJSONResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3199,7 +3838,10 @@ class XLStoHTMLInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = None
+    worksheet_index: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "worksheetIndex"},
+    )
     """Set the WorkSheet index (Default is 0)."""
     name: Optional[str] = None
     """File name for the generated output."""
@@ -3211,7 +3853,10 @@ class XLStoHTMLInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -3234,7 +3879,10 @@ class XLStoHTMLResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3244,7 +3892,10 @@ class XLStoHTMLResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3261,7 +3912,10 @@ class XLStoTXTInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = None
+    worksheet_index: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "worksheetIndex"},
+    )
     """Set the WorkSheet index (Default is 0)."""
     name: Optional[str] = None
     """File name for the generated output."""
@@ -3273,7 +3927,10 @@ class XLStoTXTInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -3296,7 +3953,10 @@ class XLStoTXTResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3306,7 +3966,10 @@ class XLStoTXTResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3323,7 +3986,10 @@ class XLStoXMLInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = None
+    worksheet_index: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "worksheetIndex"},
+    )
     """Set the WorkSheet index (Default is 0)."""
     name: Optional[str] = None
     """File name for the generated output."""
@@ -3335,7 +4001,10 @@ class XLStoXMLInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set to true for long processes to run in the background, API will then
     return a jobId which you can use with JobCheck endpoint to check the status
@@ -3358,7 +4027,10 @@ class XLStoXMLResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3368,7 +4040,10 @@ class XLStoXMLResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3413,7 +4088,10 @@ class PDFRotatePagesInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3430,9 +4108,15 @@ class PDFRotatePagesResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -3442,7 +4126,10 @@ class PDFRotatePagesResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3485,7 +4172,10 @@ class PDFAutoRotatePagesInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3502,9 +4192,15 @@ class PDFAutoRotatePagesResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -3514,7 +4210,10 @@ class PDFAutoRotatePagesResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3557,7 +4256,10 @@ class PDFDeletePagesInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3574,9 +4276,15 @@ class PDFDeletePagesResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -3586,7 +4294,10 @@ class PDFDeletePagesResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3621,7 +4332,10 @@ class PDFCompressInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3638,9 +4352,15 @@ class PDFCompressResponse:
 
     url: Optional[str] = None
     """url"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -3650,7 +4370,10 @@ class PDFCompressResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3679,7 +4402,10 @@ class PDFClassifierInput:
     file with classification rules. This is useful if you have a separate
     developer working on CSV rules.
     """
-    case_sensitive: Optional[bool] = None
+    case_sensitive: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "caseSensitive"},
+    )
     """Defines if keywords in rules are case-sensitive or not."""
     inline: Optional[bool] = None
     """
@@ -3702,7 +4428,10 @@ class PDFClassifierInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3721,9 +4450,15 @@ class PDFClassifierResponse:
     """url"""
     body: Optional[Dict[str, Any]] = None
     """body"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """pageCount"""
     error: Optional[bool] = None
     """error"""
@@ -3733,7 +4468,10 @@ class PDFClassifierResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3750,7 +4488,7 @@ class EmailSendInput:
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
     """
     The \"From\" field with sender name and email. Example: John Doe
     <john@example.com>
@@ -3784,7 +4522,10 @@ class EmailSendInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3799,7 +4540,10 @@ class EmailSendResponse:
     Response for Send Email with Attachments
     """
 
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3807,7 +4551,10 @@ class EmailSendResponse:
     """status"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3830,7 +4577,10 @@ class EmailDecodeInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3849,7 +4599,10 @@ class EmailDecodeResponse:
     """url"""
     body: Optional[Dict[str, Any]] = None
     """body"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3859,7 +4612,10 @@ class EmailDecodeResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3882,7 +4638,10 @@ class EmailAttachmentExtractionInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with JobCheck endpoint to check the
@@ -3901,7 +4660,10 @@ class EmailAttachmentExtractionResponse:
     """url"""
     body: Optional[Dict[str, Any]] = None
     """body"""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
     error: Optional[bool] = None
     """error"""
@@ -3911,7 +4673,10 @@ class EmailAttachmentExtractionResponse:
     """name"""
     credits: Optional[int] = None
     """credits"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """remainingCredits"""
     duration: Optional[int] = None
     """duration"""
@@ -3945,7 +4710,10 @@ class PDFAttachmentExtractionInput:
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = None
+    async_: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "async"},
+    )
     """Creates a background processing job."""
 
 
@@ -3959,9 +4727,15 @@ class PDFAttachmentExtractionResponse:
     """urls"""
     url: Optional[str] = None
     """Output document URL."""
-    job_id: Optional[str] = None
+    job_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobId"},
+    )
     """jobId"""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "pageCount"},
+    )
     """Number of pages in the output document."""
     error: Optional[bool] = None
     """Indicates whether the operation is successful or not."""
@@ -3973,7 +4747,10 @@ class PDFAttachmentExtractionResponse:
     """PDF.co credits used for this request"""
     duration: Optional[int] = None
     """Request execution duration"""
-    remaining_credits: Optional[int] = None
+    remaining_credits: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "remainingCredits"},
+    )
     """PDF.co account remaining credits"""
 
 

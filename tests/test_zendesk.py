@@ -10,6 +10,7 @@ from unittest.mock import AsyncMock, patch
 from azure.connectors.zendesk import (
     Item,
     ZendeskClient,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -33,12 +34,8 @@ async def _invoke_operation(client: ZendeskClient, operation: str):
         return await client.delete_item_async(table="tickets", id="1")
     if operation == "patch_item":
         return await client.patch_item_async(input=Item(), table="tickets", id="1")
-    if operation == "get_on_new_items":
-        return await client.get_on_new_items_async(table="tickets")
     if operation == "search_articles":
         return await client.search_articles_async(query="password")
-    if operation == "get_on_updated_items":
-        return await client.get_on_updated_items_async(table="tickets")
     if operation == "get_table":
         return await client.get_table_async(table="tickets")
 
@@ -272,26 +269,6 @@ class TestZendeskClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_get_on_new_items_success(self, mock_token_provider):
-        """Test get_on_new_items_async targets the onnewitems trigger endpoint."""
-        client = ZendeskClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"value":[]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.get_on_new_items_async(table="tickets")
-
-            assert mock_send.call_args[0][0] == "GET"
-            assert "/datasets/default/tables/tickets/onnewitems" in mock_send.call_args[0][1]
-
-    @pytest.mark.asyncio
     async def test_search_articles_includes_query_params(self, mock_token_provider):
         """Test search_articles_async serializes the help center query parameters."""
         client = ZendeskClient(
@@ -313,26 +290,6 @@ class TestZendeskClientMethods:
             assert "/api/v2/help_center/articles/search" in request_url
             assert "query=password%20reset" in request_url
             assert "locale=en-us" in request_url
-
-    @pytest.mark.asyncio
-    async def test_get_on_updated_items_success(self, mock_token_provider):
-        """Test get_on_updated_items_async targets the v2 onupdateditems endpoint."""
-        client = ZendeskClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"value":[]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.get_on_updated_items_async(table="tickets")
-
-            assert mock_send.call_args[0][0] == "GET"
-            assert "/v2/datasets/default/tables/tickets/onupdateditems" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_get_table_success(self, mock_token_provider):
@@ -388,9 +345,7 @@ class TestZendeskClientErrorHandling:
             "get_item",
             "delete_item",
             "patch_item",
-            "get_on_new_items",
             "search_articles",
-            "get_on_updated_items",
             "get_table",
         ],
     )
@@ -452,9 +407,7 @@ class TestZendeskClientSignatures:
             "get_item_async",
             "delete_item_async",
             "patch_item_async",
-            "get_on_new_items_async",
             "search_articles_async",
-            "get_on_updated_items_async",
             "get_table_async",
         ],
     )
@@ -464,3 +417,28 @@ class TestZendeskClientSignatures:
 
         assert signature.return_annotation is not inspect.Signature.empty
         assert signature.return_annotation in ("dict[str, Any] | None", "None")
+
+
+class TestZendeskTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    def test_on_new_items_registered_as_trigger(self):
+        """Test the on-new-items route is registered as a trigger operation."""
+        assert "GetOnNewItems" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["GetOnNewItems"]
+
+        assert trigger["operation_id"] == "GetOnNewItems"
+        assert trigger["path"].endswith("/onnewitems")
+
+    def test_on_updated_items_registered_as_trigger(self):
+        """Test the on-updated-items route is registered as a trigger operation."""
+        assert "GetOnUpdatedItemsV2" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["GetOnUpdatedItemsV2"]
+
+        assert trigger["operation_id"] == "GetOnUpdatedItemsV2"
+        assert trigger["path"].endswith("/onupdateditems")
+
+    def test_trigger_routes_not_client_methods(self):
+        """Test the trigger routes are no longer exposed as callable client methods."""
+        assert not hasattr(ZendeskClient, "get_on_new_items_async")
+        assert not hasattr(ZendeskClient, "get_on_updated_items_async")

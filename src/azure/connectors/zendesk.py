@@ -45,7 +45,10 @@ class Item:
     Response for Create Item
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
@@ -65,10 +68,19 @@ class TableMetadata:
 
     name: Optional[str] = None
     title: Optional[str] = None
-    x_ms_permission: Optional[str] = None
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
     schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
 
 
 @dataclass
@@ -88,10 +100,22 @@ class TabularDataSetsMetadata:
     """
 
     source: Optional[str] = None
-    display_name: Optional[str] = None
-    url_encoding: Optional[str] = None
-    table_display_name: Optional[str] = None
-    table_plural_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
 
 
 @dataclass
@@ -101,8 +125,14 @@ class BlobDataSetsMetadata:
     """
 
     source: Optional[str] = None
-    display_name: Optional[str] = None
-    url_encoding: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
 
 
 @dataclass
@@ -111,12 +141,27 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
 
 
 @dataclass
@@ -140,9 +185,15 @@ class TableSortRestrictionsMetadata:
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
@@ -154,9 +205,15 @@ class TableFilterRestrictionsMetadata:
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
@@ -185,8 +242,11 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = None
-    display_name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
 
 
 @dataclass
@@ -195,8 +255,11 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = None
-    display_name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
 
 
 @dataclass
@@ -461,64 +524,6 @@ class ZendeskClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_on_new_items_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        skip: Optional[str] = None,
-        top: Optional[str] = None,
-    ) -> dict[str, Any] | None:
-        """
-        When an item is created
-
-        Triggers a flow when an item is created in Zendesk
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/onnewitems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def search_articles_async(
         self,
         query: str,
@@ -594,64 +599,6 @@ class ZendeskClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_on_updated_items_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        skip: Optional[str] = None,
-        top: Optional[str] = None,
-    ) -> dict[str, Any] | None:
-        """
-        When an item is modified
-
-        Triggers a flow when an item is modified in Zendesk
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/v2/datasets/default/tables/{str(table)}/onupdateditems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def get_table_async(
         self,
         table: str,
@@ -682,3 +629,28 @@ class ZendeskClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "GetOnNewItems": {
+        "operation_id": "GetOnNewItems",
+        "path": "/{connectionId}/datasets/default/tables/{table}/onnewitems",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnUpdatedItemsV2": {
+        "operation_id": "GetOnUpdatedItemsV2",
+        "path": "/{connectionId}/v2/datasets/default/tables/{table}/onupdateditems",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "ItemsList",
+    },
+}
