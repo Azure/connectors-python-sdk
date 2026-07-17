@@ -4,7 +4,7 @@
 
 import asyncio
 import json
-from dataclasses import asdict, is_dataclass
+from dataclasses import is_dataclass
 from typing import Any, Dict, List, NamedTuple, Optional, TypeVar, Generic, cast
 import aiohttp
 from aiohttp import ClientTimeout
@@ -12,6 +12,7 @@ from aiohttp import ClientTimeout
 from .authentication import TokenProvider
 from .options import ConnectorClientOptions
 from .exceptions import ConnectorException
+from .serialization import to_wire
 
 T = TypeVar("T")
 
@@ -141,27 +142,14 @@ class ConnectorHttpClient:
             if is_binary_body:
                 request_body = bytes(body)
             elif is_dataclass(body) and not isinstance(body, type):
-                # NOTE(victoriahall): Convert dataclass objects to
-                # dictionaries for JSON serialization. Generated connector
-                # clients pass dataclass instances as body parameters.
-                body_dict = asdict(cast(Any, body))
-
-                # NOTE(victoriahall): Handle dynamic schemas with
-                # additional_properties. Extract additional_properties and
-                # merge into main dict (like .NET [JsonExtensionData]).
-                if 'additional_properties' in body_dict:
-                    additional_props = body_dict.pop(
-                        'additional_properties'
-                    )
-                    if additional_props:
-                        # Merge additional properties into the main dict
-                        body_dict.update(additional_props)
-
-                # Filter out None values to avoid sending null fields
-                body_dict = {
-                    k: v for k, v in body_dict.items() if v is not None
-                }
-                request_body = json.dumps(body_dict)
+                # NOTE(victoriahall): Generated connector models expose
+                # idiomatic snake_case attributes, but the connector service
+                # contract is the Swagger JSON property name. Serialize through
+                # the shared wire serializer so each field is emitted under its
+                # Swagger property name (from field metadata), None values are
+                # omitted, and additional_properties are merged like the .NET
+                # [JsonExtensionData] behavior.
+                request_body = json.dumps(to_wire(cast(Any, body)))
             else:
                 request_body = json.dumps(body)
 
