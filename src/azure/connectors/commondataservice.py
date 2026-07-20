@@ -663,7 +663,7 @@ class CommondataserviceClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         Get row (legacy)
 
@@ -673,11 +673,11 @@ class CommondataserviceClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -706,7 +706,7 @@ class CommondataserviceClient(ConnectorClientBase):
         orderby: Optional[str] = None,
         top: Optional[str] = None,
         expand: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ):
         """
         List rows (legacy)
 
@@ -716,9 +716,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
         query_params = []
@@ -771,7 +771,7 @@ class CommondataserviceClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         When a row is added (Admin Only) (Deprecated)
 
@@ -781,9 +781,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/onnewitems"
         )
 
@@ -808,7 +808,7 @@ class CommondataserviceClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         When a row is modified (Admin Only) (Deprecated)
 
@@ -818,9 +818,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/onupdateditems"
         )
 
@@ -847,7 +847,7 @@ class CommondataserviceClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         Update a row (legacy)
 
@@ -857,11 +857,11 @@ class CommondataserviceClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -886,7 +886,7 @@ class CommondataserviceClient(ConnectorClientBase):
         input: PostItemInput,
         dataset: str,
         table: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         Add a new row (legacy)
 
@@ -896,9 +896,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
 
@@ -921,7 +921,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
     async def get_data_sets_async(
         self,
-    ) -> dict[str, Any] | None:
+    ):
         """
         GetDataSets_V2
         """
@@ -948,7 +948,7 @@ class CommondataserviceClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         Get table metadata
 
@@ -959,9 +959,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/v2"
             f"/$metadata.json"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -985,7 +985,7 @@ class CommondataserviceClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         Get table metadata - Patch
 
@@ -996,9 +996,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/v2"
             f"/$metadata.json"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/patchitem"
         )
 
@@ -1023,7 +1023,7 @@ class CommondataserviceClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         Get table metadata - Post
 
@@ -1034,9 +1034,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/v2"
             f"/$metadata.json"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/postitem"
         )
 
@@ -1061,7 +1061,7 @@ class CommondataserviceClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ) -> dict[str, Any] | None:
+    ):
         """
         Get table metadata
 
@@ -1071,9 +1071,9 @@ class CommondataserviceClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/$metadata.json"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
