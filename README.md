@@ -159,6 +159,8 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure AD** | `azure.connectors.azuread` | ✅ Complete | 🔄 SDK Generated | 68 tests |
 | **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | ✅ E2E Validated | 51 tests |
 | **Box** | `azure.connectors.box` | ✅ Complete | 🔄 SDK Generated | 30 tests |
+| **Campfire** | `azure.connectors.campfire` | ✅ Complete | 🔄 SDK Generated | 24 tests |
+| **ClickSend SMS** | `azure.connectors.clicksendsms` | ✅ Complete | 🔄 SDK Generated | 42 tests |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated | 32 tests |
 | **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated | 46 tests |
 | **Azure Data Factory** | `azure.connectors.azuredatafactory` | ✅ Complete | 🔄 SDK Generated | 38 tests |
@@ -178,8 +180,12 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure VM** | `azure.connectors.azurevm` | ✅ Complete | 🔄 SDK Generated | 43 tests |
 | **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated | 26 tests |
 | **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 53 tests |
+| **Freshservice** | `azure.connectors.freshservice` | ✅ Complete | 🔄 SDK Generated | 21 tests |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated | 33 tests |
+| **Infusionsoft (Keap)** | `azure.connectors.infusionsoft` | ✅ Complete | 🔄 SDK Generated | 22 tests |
+| **Insightly** | `azure.connectors.insightly` | ✅ Complete | 🔄 SDK Generated | 50 tests |
 | **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated | 16 tests |
+| **Mailchimp** | `azure.connectors.mailchimp` | ✅ Complete | 🔄 SDK Generated | 37 tests |
 | **Microsoft Bookings** | `azure.connectors.microsoftbookings` | ✅ Complete | 🔄 SDK Generated | 36 tests |
 | **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated | 53 tests |
 | **Microsoft Forms** | `azure.connectors.microsoftforms` | ✅ Complete | 🔄 SDK Generated | 17 tests |
@@ -187,6 +193,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated | 46 tests |
 | **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | ✅ E2E Validated | 44 tests |
 | **Microsoft To Do** | `azure.connectors.todo` | ✅ Complete | 🔄 SDK Generated | 17 tests |
+| **Monday.com** | `azure.connectors.monday` | ✅ Complete | 🔄 SDK Generated | 56 tests |
 | **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated | 72 tests |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated | 46 tests |
 | **Office 365 Groups** | `azure.connectors.office365groups` | ✅ Complete | 🔄 SDK Generated | 50 tests |
@@ -196,18 +203,23 @@ The following connectors have been generated and validated with comprehensive te
 | **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated | 60 tests |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 49 tests |
 | **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated | 66 tests |
+| **Plivo** | `azure.connectors.plivo` | ✅ Complete | 🔄 SDK Generated | 19 tests |
 | **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated | 18 tests |
+| **Projectplace** | `azure.connectors.projectplace` | ✅ Complete | 🔄 SDK Generated | 22 tests |
 | **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated | 13 tests |
 | **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated | 14 tests |
+| **SendGrid** | `azure.connectors.sendgrid` | ✅ Complete | 🔄 SDK Generated | 31 tests |
 | **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated | 52 tests |
 | **Shifts** | `azure.connectors.shifts` | ✅ Complete | 🔄 SDK Generated | 18 tests |
 | **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated | 15 tests |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 80 tests |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 28 tests |
+| **TextRequest** | `azure.connectors.textrequest` | ✅ Complete | 🔄 SDK Generated | 59 tests |
+| **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated | 40 tests |
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
 
-**Total:** 1508 connector tests + 141 SDK component tests
+**Total:** 1931 connector tests + 141 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **TextRequest** (`textrequest.py`) connector client with unit tests and samples
+- **Plivo** (`plivo.py`) connector client with unit tests and samples
+- **ClickSend SMS** (`clicksendsms.py`) connector client with unit tests and samples
+- **Campfire** (`campfire.py`) connector client with unit tests and samples
+- **Webex** (`webex.py`) connector client with unit tests and samples
+- **SendGrid** (`sendgrid.py`) connector client with unit tests and samples
+- **Mailchimp** (`mailchimp.py`) connector client with unit tests and samples
+- **Projectplace** (`projectplace.py`) connector client with unit tests and samples
+- **Monday.com** (`monday.py`) connector client with unit tests and samples
+- **Freshservice** (`freshservice.py`) connector client with unit tests and samples
+- **Infusionsoft (Keap)** (`infusionsoft.py`) connector client with unit tests and samples
+- **Insightly** (`insightly.py`) connector client with unit tests and samples
 - **GitHub** (`github.py`) connector client with unit tests and samples
 - **Slack** (`slack.py`) connector client with unit tests and samples
 - **Jira** (`jira.py`) connector client with unit tests and samples

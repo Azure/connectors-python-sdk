@@ -43,6 +43,18 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_googledrive.py` | Google Drive | `GOOGLEDRIVE_CONNECTION_URL` |
 | `sample_connector_usage_keyvault.py` | Azure Key Vault | `KEYVAULT_CONNECTION_URL` |
 | `sample_connector_usage_jira.py` | Jira | `JIRA_CONNECTION_URL` |
+| `sample_connector_usage_freshservice.py` | Freshservice | `FRESHSERVICE_CONNECTION_URL` |
+| `sample_connector_usage_infusionsoft.py` | Infusionsoft (Keap) | `INFUSIONSOFT_CONNECTION_URL` |
+| `sample_connector_usage_insightly.py` | Insightly | `INSIGHTLY_CONNECTION_URL` |
+| `sample_connector_usage_monday.py` | Monday.com | `MONDAY_CONNECTION_URL` |
+| `sample_connector_usage_projectplace.py` | Projectplace | `PROJECTPLACE_CONNECTION_URL` |
+| `sample_connector_usage_mailchimp.py` | Mailchimp | `MAILCHIMP_CONNECTION_URL` |
+| `sample_connector_usage_sendgrid.py` | SendGrid | `SENDGRID_CONNECTION_URL` |
+| `sample_connector_usage_webex.py` | Webex | `WEBEX_CONNECTION_URL` |
+| `sample_connector_usage_campfire.py` | Campfire | `CAMPFIRE_CONNECTION_URL` |
+| `sample_connector_usage_clicksendsms.py` | ClickSend SMS | `CLICKSENDSMS_CONNECTION_URL` |
+| `sample_connector_usage_plivo.py` | Plivo | `PLIVO_CONNECTION_URL` |
+| `sample_connector_usage_textrequest.py` | TextRequest | `TEXTREQUEST_CONNECTION_URL` |
 | `sample_connector_usage_excelonlinebusiness.py` | Excel Online (Business) | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_mq.py` | IBM MQ | `MQ_CONNECTION_URL` |
 | `sample_connector_usage_microsoftbookings.py` | Microsoft Bookings | `MICROSOFTBOOKINGS_CONNECTION_URL` |

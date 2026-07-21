@@ -246,6 +246,62 @@ try:
 except (ImportError, NameError):
     TodoClient = None  # type: ignore[assignment,misc]
 
+try:
+    from .insightly import InsightlyClient
+except (ImportError, NameError):
+    InsightlyClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .infusionsoft import InfusionsoftClient
+except (ImportError, NameError):
+    InfusionsoftClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .freshservice import FreshserviceClient
+except (ImportError, NameError):
+    FreshserviceClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .monday import MondayClient
+except (ImportError, NameError):
+    MondayClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .projectplace import ProjectplaceClient
+except (ImportError, NameError):
+    ProjectplaceClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .mailchimp import MailchimpClient
+except (ImportError, NameError):
+    MailchimpClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .sendgrid import SendgridClient
+except (ImportError, NameError):
+    SendgridClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .webex import WebexClient
+except (ImportError, NameError):
+    WebexClient = None  # type: ignore[assignment,misc]
+try:
+    from .campfire import CampfireClient
+except (ImportError, NameError):
+    CampfireClient = None  # type: ignore[assignment,misc]
+try:
+    from .clicksendsms import ClicksendsmsClient
+except (ImportError, NameError):
+    ClicksendsmsClient = None  # type: ignore[assignment,misc]
+try:
+    from .plivo import PlivoClient
+except (ImportError, NameError):
+    PlivoClient = None  # type: ignore[assignment,misc]
+try:
+    from .textrequest import TextrequestClient
+except (ImportError, NameError):
+    TextrequestClient = None  # type: ignore[assignment,misc]
+
 __version__ = '0.3.0b2'
 
 __all__ = [
@@ -310,4 +366,16 @@ __all__ = [
     "ShiftsClient",
     "SlackClient",
     "TodoClient",
+    "InsightlyClient",
+    "InfusionsoftClient",
+    "FreshserviceClient",
+    "MondayClient",
+    "ProjectplaceClient",
+    "MailchimpClient",
+    "SendgridClient",
+    "WebexClient",
+    "CampfireClient",
+    "ClicksendsmsClient",
+    "PlivoClient",
+    "TextrequestClient",
 ]
