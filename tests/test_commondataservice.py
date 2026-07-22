@@ -581,3 +581,91 @@ class TestGetTable:
                 await client.get_table_async(dataset="default", table="accounts")
 
             assert exc_info.value.status_code == 404
+
+
+class TestPathParameterEncoding:
+    """Tests that path parameters are double-encoded.
+
+    Dataverse routes requests through the apihub gateway, which decodes the
+    path once before forwarding. Path segments must therefore be encoded
+    twice so special characters survive. These tests use realistic values
+    with special characters (the ':' and '/' in an environment URL, and a
+    space in a table name) because plain values such as 'default' encode to
+    themselves and cannot distinguish single from double encoding.
+    """
+
+    @pytest.mark.asyncio
+    async def test_get_items_double_encodes_dataset_environment_url(self, mock_token_provider):
+        """Test that the environment URL dataset is double-encoded, not single-encoded."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"value": []}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.get_items_async(
+                dataset="https://org12345.crm.dynamics.com",
+                table="accounts",
+            )
+
+            url = mock_send.call_args[0][1]
+
+            # Double-encoded: ':' -> '%3A' -> '%253A', '/' -> '%2F' -> '%252F'.
+            assert (
+                "/v2/datasets/https%253A%252F%252Forg12345.crm.dynamics.com"
+                "/tables/accounts/items"
+            ) in url
+            # Single-encoded form must be absent (proves double, not single).
+            assert "https%3A%2F%2Forg12345.crm.dynamics.com" not in url
+
+    @pytest.mark.asyncio
+    async def test_get_item_double_encodes_all_segments(self, mock_token_provider):
+        """Test that dataset, table, and id segments are all double-encoded."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"name": "row"}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.get_item_async(
+                dataset="https://org12345.crm.dynamics.com",
+                table="my table",
+                id="a/b",
+            )
+
+            url = mock_send.call_args[0][1]
+
+            # Table space: ' ' -> '%20' -> '%2520'.
+            assert "/tables/my%2520table/" in url
+            assert "/tables/my%20table/" not in url
+            # Id slash: '/' -> '%2F' -> '%252F'.
+            assert "/items/a%252Fb" in url
+            assert "/items/a%2Fb" not in url
+            # Dataset double-encoded.
+            assert "https%253A%252F%252Forg12345.crm.dynamics.com" in url
+
+    @pytest.mark.asyncio
+    async def test_post_item_double_encodes_dataset_environment_url(self, mock_token_provider):
+        """Test that post_item double-encodes the environment URL dataset segment."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"accountid": "1"}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.post_item_async(
+                input=PostItemInput(additional_properties={"name": "Contoso"}),
+                dataset="https://org12345.crm.dynamics.com",
+                table="accounts",
+            )
+
+            url = mock_send.call_args[0][1]
+
+            assert "/v2/datasets/https%253A%252F%252Forg12345.crm.dynamics.com/tables/accounts/items" in url
+            assert "https%3A%2F%2Forg12345.crm.dynamics.com" not in url

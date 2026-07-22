@@ -181,7 +181,7 @@ The following connectors have been generated and validated with comprehensive te
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated | 33 tests |
 | **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated | 16 tests |
 | **Microsoft Bookings** | `azure.connectors.microsoftbookings` | ✅ Complete | 🔄 SDK Generated | 36 tests |
-| **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated | 53 tests |
+| **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated | 35 tests |
 | **Microsoft Forms** | `azure.connectors.microsoftforms` | ✅ Complete | 🔄 SDK Generated | 17 tests |
 | **Microsoft Defender ATP** | `azure.connectors.wdatp` | ✅ Complete | 🔄 SDK Generated | 32 tests |
 | **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated | 46 tests |

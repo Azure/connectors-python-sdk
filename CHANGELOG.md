@@ -47,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **13 new connector clients** with unit tests and samples:
   - ARM (Azure Resource Manager), Azure AD, Azure Cosmos DB, Azure Event Hubs, Azure Queues, Azure Tables, Excel Online (Business), Microsoft Dataverse, Microsoft Defender ATP, Outlook, Service Bus, SMTP, Word Online (Business)
 
+### Fixed
+
+- **Microsoft Dataverse** (`commondataservice.py`): path parameters are now double URL-encoded so values containing reserved characters (for example the `://` in an environment/organization URL used as the `dataset` segment) survive apihub gateway routing. Previously these segments were single-encoded and could be mis-routed. Fix applied in the CodefulSdkGenerator and regenerated; added regression tests covering encoding of the `dataset`, `table`, and `id` segments.
+
 ### Changed
 
 - **Comprehensive error handling improvements** across 14 connector clients:
