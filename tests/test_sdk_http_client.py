@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from azure.connectors.sdk.http_client import ConnectorHttpClient, ConnectorResponse
 from azure.connectors.sdk.options import ConnectorClientOptions
@@ -21,6 +21,37 @@ class TestDataClass:
 class TestDynamicDataClass:
     """Test dataclass with additional_properties for dynamic schemas."""
     required_field: str
+    additional_properties: dict = None
+
+
+@dataclass
+class WireNamedDataClass:
+    """Dataclass whose Swagger wire names differ from snake_case attributes."""
+    print_background: bool = field(
+        default=None, metadata={"wire_name": "printBackground"}
+    )
+    paper_size: str = field(default=None, metadata={"wire_name": "paperSize"})
+    html: str = None
+
+
+@dataclass
+class WireNamedChild:
+    """Nested child dataclass with a wire-named attribute."""
+    child_value: str = field(default=None, metadata={"wire_name": "childValue"})
+
+
+@dataclass
+class WireNamedParent:
+    """Parent dataclass with nested dataclasses and lists of dataclasses."""
+    parent_name: str = field(default=None, metadata={"wire_name": "parentName"})
+    child: WireNamedChild = None
+    children: list = None
+
+
+@dataclass
+class WireNamedDynamicDataClass:
+    """Dataclass combining a wire-named field with additional_properties."""
+    display_name: str = field(default=None, metadata={"wire_name": "displayName"})
     additional_properties: dict = None
 
 
@@ -333,6 +364,156 @@ class TestConnectorHttpClient:
             assert call_args[0][4] is None
 
     @pytest.mark.asyncio
+    async def test_send_async_uses_wire_names_for_dataclass_body(self, mock_token_provider):
+        """Test that dataclass fields are serialized under their Swagger wire names."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = WireNamedDataClass(
+            print_background=True, paper_size="A4", html="<p>hi</p>"
+        )
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async("POST", "https://api.example.com/pdf", body=body)
+
+            call_args = mock_send.call_args
+            import json
+            sent_body = json.loads(call_args[0][4])
+            # NOTE(victoriahall): Snake_case attributes must be emitted under the
+            # Swagger camelCase wire names, never the Python attribute names.
+            assert sent_body["printBackground"] is True
+            assert sent_body["paperSize"] == "A4"
+            assert sent_body["html"] == "<p>hi</p>"
+            assert "print_background" not in sent_body
+            assert "paper_size" not in sent_body
+
+    @pytest.mark.asyncio
+    async def test_send_async_uses_wire_names_for_nested_and_list_bodies(self, mock_token_provider):
+        """Test wire-name serialization through nested dataclasses and lists of dataclasses."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = WireNamedParent(
+            parent_name="root",
+            child=WireNamedChild(child_value="c"),
+            children=[WireNamedChild(child_value="a"), WireNamedChild(child_value="b")],
+        )
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async("POST", "https://api.example.com/tree", body=body)
+
+            call_args = mock_send.call_args
+            import json
+            sent_body = json.loads(call_args[0][4])
+            assert sent_body["parentName"] == "root"
+            assert sent_body["child"] == {"childValue": "c"}
+            assert sent_body["children"] == [
+                {"childValue": "a"},
+                {"childValue": "b"},
+            ]
+
+    @pytest.mark.asyncio
+    async def test_send_async_merges_additional_properties_with_wire_names(
+        self, mock_token_provider
+    ):
+        """Test that additional_properties merge alongside wire-named fields."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = WireNamedDynamicDataClass(
+            display_name="widget",
+            additional_properties={"dynamic1": "data1", "dynamic2": "data2"},
+        )
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async("POST", "https://api.example.com/dynamic", body=body)
+
+            call_args = mock_send.call_args
+            import json
+            sent_body = json.loads(call_args[0][4])
+            assert sent_body["displayName"] == "widget"
+            assert sent_body["dynamic1"] == "data1"
+            assert sent_body["dynamic2"] == "data2"
+            assert "display_name" not in sent_body
+            assert "additional_properties" not in sent_body
+
+    @pytest.mark.asyncio
+    async def test_send_async_omits_none_wire_named_fields(self, mock_token_provider):
+        """Test that None-valued wire-named fields are omitted from the payload."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = WireNamedDataClass(print_background=True, paper_size=None, html=None)
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async("POST", "https://api.example.com/pdf", body=body)
+
+            call_args = mock_send.call_args
+            import json
+            sent_body = json.loads(call_args[0][4])
+            assert sent_body == {"printBackground": True}
+            assert "paperSize" not in sent_body
+            assert "html" not in sent_body
+
+    @pytest.mark.asyncio
+    async def test_send_async_sends_binary_body_verbatim(self, mock_token_provider):
+        """Test that raw binary bodies are sent as bytes without JSON encoding."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = b"\x00\x01raw-binary\xff"
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async("POST", "https://api.example.com/upload", body=body)
+
+            call_args = mock_send.call_args
+            sent_body = call_args[0][4]
+            # NOTE(victoriahall): Binary payloads must never be JSON-encoded; the
+            # exact bytes must reach the transport unchanged.
+            assert isinstance(sent_body, bytes)
+            assert sent_body == b"\x00\x01raw-binary\xff"
+
+    @pytest.mark.asyncio
     async def test_send_async_sets_authorization_header(self, mock_token_provider):
         """Test that authorization header is set correctly."""
         mock_token_provider.get_access_token_async = AsyncMock(return_value="bearer_token_123")
@@ -375,6 +556,66 @@ class TestConnectorHttpClient:
             call_args = mock_send.call_args
             headers = call_args[0][3]
             assert headers["Content-Type"] == "application/json"
+
+    @pytest.mark.asyncio
+    async def test_send_async_with_bytes_body_sends_raw_octet_stream(self, mock_token_provider):
+        """Test send_async sends raw bytes as application/octet-stream."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = b"\x00\x01raw-binary\xff"
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async(
+                "POST", "https://api.example.com/upload", body=body
+            )
+
+            call_args = mock_send.call_args
+            headers = call_args[0][3]
+            sent_body = call_args[0][4]
+            assert headers["Content-Type"] == "application/octet-stream"
+            assert sent_body == body
+            assert isinstance(sent_body, bytes)
+
+    @pytest.mark.asyncio
+    async def test_send_async_with_bytes_body_honors_explicit_content_type(
+        self, mock_token_provider
+    ):
+        """Test send_async honors an explicit content_type for a bytes body."""
+        mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
+        options = ConnectorClientOptions()
+        client = ConnectorHttpClient(mock_token_provider, options)
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {}
+        mock_response.text = AsyncMock(return_value='{}')
+
+        body = b"%PDF-1.4 binary"
+
+        with patch.object(
+            client, '_send_with_retry', new_callable=AsyncMock, return_value=mock_response
+        ) as mock_send:
+            await client.send_async(
+                "POST",
+                "https://api.example.com/upload",
+                body=body,
+                content_type="application/pdf",
+            )
+
+            call_args = mock_send.call_args
+            headers = call_args[0][3]
+            sent_body = call_args[0][4]
+            assert headers["Content-Type"] == "application/pdf"
+            assert sent_body == body
 
     @pytest.mark.asyncio
     async def test_delay_retry_with_exponential_backoff(self, mock_token_provider):
