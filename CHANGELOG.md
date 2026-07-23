@@ -55,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Microsoft Dataverse** (`commondataservice.py`): regenerated with the corrected CodefulSdkGenerator so curated internal operations are retained. The client now exposes all 22 operations at parity with the .NET SDK (previously 11), adding attachment, association/disassociation, collection-relationship, option-set/multi-select metadata, delete, and pagination methods. Added unit tests covering the new operations.
+- **Microsoft Dataverse** (`commondataservice.py`): `get_next_page_async` now returns the page payload (`dict[str, Any] | None`) instead of discarding it as `None`, so pagination via `nextLink` is usable and at parity with the .NET `GetNextPageAsync`. Operations whose swagger omits a response schema now honor the per-operation response-type override in the Python generator path. Fix applied in the CodefulSdkGenerator and regenerated; added tests covering the returned payload and the trigger-operation registry.
 
 ## [0.3.0b2]
 

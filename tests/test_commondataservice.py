@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.commondataservice import (
+    TRIGGER_OPERATIONS,
     AssociateRecordsPatchItemInput,
     CommondataserviceClient,
     PatchItemInput,
@@ -515,20 +516,45 @@ class TestGetNextPage:
 
     @pytest.mark.asyncio
     async def test_get_next_page_success(self, mock_token_provider):
-        """Test successful follow of nextLink."""
+        """Test successful follow of nextLink returns the page payload."""
         client = _make_client(mock_token_provider)
-        mock_response = MockResponse(status=200, text='{"value": []}')
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"id": 1}], "@odata.nextLink": "token456"}',
+        )
 
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_next_page_async(next_link="token123")
+            result = await client.get_next_page_async(next_link="token123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/nextLink/token123" in call_args[0][1]
+            # NOTE(victoriahall): get_next_page must return the deserialized page body so
+            # pagination is usable. A regression here (returning None) makes it impossible
+            # to walk pages. Mirrors .NET GetNextPageAsync which returns the page payload.
+            assert result == {
+                "value": [{"id": 1}],
+                "@odata.nextLink": "token456",
+            }
+
+    @pytest.mark.asyncio
+    async def test_get_next_page_empty_body_returns_none(self, mock_token_provider):
+        """Test that an empty response body returns None."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            result = await client.get_next_page_async(next_link="token123")
+
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_get_next_page_error_response(self, mock_token_provider):
@@ -1134,3 +1160,60 @@ class TestPathParameterEncoding:
             )
             assert expected_path in url
             assert "https%3A%2F%2Forg12345.crm.dynamics.com" not in url
+
+
+class TestCommondataserviceTriggerOperations:
+    """Tests for the module-level trigger registration metadata."""
+
+    @pytest.mark.parametrize(
+        "operation_id, path",
+        [
+            (
+                "GetOnNewItems_V2",
+                "/{connectionId}/v2/datasets/{dataset}/tables/{table}/onnewitems",
+            ),
+            (
+                "GetOnUpdatedItems_V2",
+                "/{connectionId}/v2/datasets/{dataset}/tables/{table}/onupdateditems",
+            ),
+            (
+                "GetOnDeletedItems_V2",
+                "/{connectionId}/v2/datasets/{dataset}/tables/{table}/ondeleteditems",
+            ),
+        ],
+    )
+    def test_trigger_route_registered(self, operation_id, path):
+        """Test each x-ms-trigger route is registered in TRIGGER_OPERATIONS."""
+        assert operation_id in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS[operation_id]
+
+        assert trigger["operation_id"] == operation_id
+        assert trigger["path"] == path
+        assert trigger["method"] == "get"
+        assert trigger["required_parameters"] == ["dataset", "table"]
+        assert trigger["callback_payload_type"] == "ItemsList"
+
+    def test_trigger_registry_has_exactly_the_expected_operations(self):
+        """Test the registry contains only the three known trigger operations."""
+        assert set(TRIGGER_OPERATIONS) == {
+            "GetOnNewItems_V2",
+            "GetOnUpdatedItems_V2",
+            "GetOnDeletedItems_V2",
+        }
+
+    @pytest.mark.parametrize(
+        "method_name",
+        [
+            "get_on_new_items_v2_async",
+            "get_on_updated_items_v2_async",
+            "get_on_deleted_items_v2_async",
+            "get_on_new_items_async",
+            "get_on_updated_items_async",
+        ],
+    )
+    def test_trigger_route_not_a_client_method(self, method_name):
+        """Test trigger routes are not exposed as callable client methods."""
+        # NOTE(victoriahall): x-ms-trigger routes belong in the TRIGGER_OPERATIONS
+        # registry, not on the client. Guards against a regression that re-emits
+        # them as callable methods (mirrors the .NET CommondataserviceTriggers split).
+        assert not hasattr(CommondataserviceClient, method_name)

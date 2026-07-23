@@ -819,7 +819,7 @@ class CommondataserviceClient(ConnectorClientBase):
     async def get_next_page_async(
         self,
         next_link: str,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Follows nextLink to retrieve next page of data
 
@@ -841,6 +841,11 @@ class CommondataserviceClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def associate_records_patch_item_async(
         self,
