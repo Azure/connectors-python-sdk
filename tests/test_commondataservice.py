@@ -667,5 +667,9 @@ class TestPathParameterEncoding:
 
             url = mock_send.call_args[0][1]
 
-            assert "/v2/datasets/https%253A%252F%252Forg12345.crm.dynamics.com/tables/accounts/items" in url
+            expected_path = (
+                "/v2/datasets/https%253A%252F%252Forg12345.crm.dynamics.com"
+                "/tables/accounts/items"
+            )
+            assert expected_path in url
             assert "https%3A%2F%2Forg12345.crm.dynamics.com" not in url
