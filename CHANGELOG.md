@@ -52,6 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **RSS** (`rss.py`) connector client with unit tests and samples
 - **Office 365 Groups Mail** (`office365groupsmail.py`) connector client with unit tests and samples
 
+### Fixed
+
+- **Microsoft Dataverse** (`commondataservice.py`): regenerated with the corrected CodefulSdkGenerator so curated internal operations are retained. The client now exposes all 22 operations at parity with the .NET SDK (previously 11), adding attachment, association/disassociation, collection-relationship, option-set/multi-select metadata, delete, and pagination methods. Added unit tests covering the new operations.
+
 ## [0.3.0b2]
 
 ### Added

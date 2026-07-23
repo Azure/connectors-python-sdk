@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.commondataservice import (
+    AssociateRecordsPatchItemInput,
     CommondataserviceClient,
     PatchItemInput,
     PostItemInput,
@@ -218,80 +219,6 @@ class TestGetItems:
             assert exc_info.value.status_code == 500
 
 
-class TestGetOnNewItems:
-    """Tests for get_on_new_items_async method."""
-
-    @pytest.mark.asyncio
-    async def test_get_on_new_items_success(self, mock_token_provider):
-        """Test successful get on new items."""
-        client = _make_client(mock_token_provider)
-        mock_response = MockResponse(status=200, text='{"value": []}')
-
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
-        ) as mock_send:
-            mock_send.return_value = mock_response
-
-            await client.get_on_new_items_async(dataset="default", table="accounts")
-
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/v2/datasets/default/tables/accounts/onnewitems" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_get_on_new_items_error_response(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
-        mock_response = MockResponse(status=403, text="Forbidden")
-
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
-        ) as mock_send:
-            mock_send.return_value = mock_response
-
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_on_new_items_async(dataset="default", table="accounts")
-
-            assert exc_info.value.status_code == 403
-
-
-class TestGetOnUpdatedItems:
-    """Tests for get_on_updated_items_async method."""
-
-    @pytest.mark.asyncio
-    async def test_get_on_updated_items_success(self, mock_token_provider):
-        """Test successful get on updated items."""
-        client = _make_client(mock_token_provider)
-        mock_response = MockResponse(status=200, text='{"value": []}')
-
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
-        ) as mock_send:
-            mock_send.return_value = mock_response
-
-            await client.get_on_updated_items_async(dataset="default", table="accounts")
-
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/v2/datasets/default/tables/accounts/onupdateditems" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_get_on_updated_items_error_response(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
-        mock_response = MockResponse(status=404, text="Not found")
-
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
-        ) as mock_send:
-            mock_send.return_value = mock_response
-
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_on_updated_items_async(dataset="default", table="accounts")
-
-            assert exc_info.value.status_code == 404
-
-
 class TestPatchItem:
     """Tests for patch_item_async method."""
 
@@ -427,44 +354,6 @@ class TestGetDataSets:
             assert exc_info.value.status_code == 500
 
 
-class TestGetTableV2:
-    """Tests for get_table_v2_async method."""
-
-    @pytest.mark.asyncio
-    async def test_get_table_v2_success(self, mock_token_provider):
-        """Test successful get table metadata (v2)."""
-        client = _make_client(mock_token_provider)
-        mock_response = MockResponse(status=200, text='{"name": "accounts"}')
-
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
-        ) as mock_send:
-            mock_send.return_value = mock_response
-
-            result = await client.get_table_v2_async(dataset="default", table="accounts")
-
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/v2/$metadata.json/datasets/default/tables/accounts" in call_args[0][1]
-            assert result["name"] == "accounts"
-
-    @pytest.mark.asyncio
-    async def test_get_table_v2_error_response(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
-        mock_response = MockResponse(status=404, text="Not found")
-
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
-        ) as mock_send:
-            mock_send.return_value = mock_response
-
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_table_v2_async(dataset="default", table="accounts")
-
-            assert exc_info.value.status_code == 404
-
-
 class TestGetMetadataForPatchItem:
     """Tests for get_metadata_for_patch_item_async method."""
 
@@ -550,7 +439,7 @@ class TestGetTable:
 
     @pytest.mark.asyncio
     async def test_get_table_success(self, mock_token_provider):
-        """Test successful get table metadata (legacy)."""
+        """Test successful get table metadata."""
         client = _make_client(mock_token_provider)
         mock_response = MockResponse(status=200, text='{"name": "accounts"}')
 
@@ -563,7 +452,7 @@ class TestGetTable:
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
-            assert "/$metadata.json/datasets/default/tables/accounts" in call_args[0][1]
+            assert "/v2/$metadata.json/datasets/default/tables/accounts" in call_args[0][1]
             assert result["name"] == "accounts"
 
     @pytest.mark.asyncio
@@ -579,6 +468,578 @@ class TestGetTable:
 
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_table_async(dataset="default", table="accounts")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetDataSetsMetadata:
+    """Tests for get_data_sets_metadata_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_data_sets_metadata_success(self, mock_token_provider):
+        """Test successful get datasets metadata."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"tabular": {}}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            result = await client.get_data_sets_metadata_async()
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert call_args[0][1].endswith("/$metadata.json/datasets")
+            assert result == {"tabular": {}}
+
+    @pytest.mark.asyncio
+    async def test_get_data_sets_metadata_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=500, text="Server error")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_data_sets_metadata_async()
+
+            assert exc_info.value.status_code == 500
+
+
+class TestGetNextPage:
+    """Tests for get_next_page_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_next_page_success(self, mock_token_provider):
+        """Test successful follow of nextLink."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"value": []}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.get_next_page_async(next_link="token123")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/nextLink/token123" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_get_next_page_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_next_page_async(next_link="token123")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestAssociateRecordsPatchItem:
+    """Tests for associate_records_patch_item_async method."""
+
+    @pytest.mark.asyncio
+    async def test_associate_records_success(self, mock_token_provider):
+        """Test successful associate records."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.associate_records_patch_item_async(
+                AssociateRecordsPatchItemInput(),
+                dataset="default",
+                table="accounts",
+                id="1",
+                relationship="primarycontactid",
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "PATCH"
+            assert "/v2" in call_args[0][1]
+            assert "/Relationship" in call_args[0][1]
+
+    @pytest.mark.asyncio
+    async def test_associate_records_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=400, text="Bad request")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.associate_records_patch_item_async(
+                    AssociateRecordsPatchItemInput(),
+                    dataset="default",
+                    table="accounts",
+                    id="1",
+                    relationship="primarycontactid",
+                )
+
+            assert exc_info.value.status_code == 400
+
+
+class TestCreateAttachment:
+    """Tests for create_attachment_async method."""
+
+    @pytest.mark.asyncio
+    async def test_create_attachment_success(self, mock_token_provider):
+        """Test successful create attachment."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"annotationid": "abc"}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            result = await client.create_attachment_async(
+                b"file-bytes",
+                dataset="default",
+                table="accounts",
+                id="1",
+                display_name="note.txt",
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "POST"
+            assert "/attachments" in call_args[0][1]
+            assert "displayName=note.txt" in call_args[0][1]
+            assert call_args.kwargs["content_type"] == "application/octet-stream"
+            assert result == {"annotationid": "abc"}
+
+    @pytest.mark.asyncio
+    async def test_create_attachment_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=403, text="Forbidden")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_attachment_async(
+                    b"file-bytes",
+                    dataset="default",
+                    table="accounts",
+                    id="1",
+                    display_name="note.txt",
+                )
+
+            assert exc_info.value.status_code == 403
+
+
+class TestGetItemAttachments:
+    """Tests for get_item_attachments_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_item_attachments_success(self, mock_token_provider):
+        """Test successful get item attachments."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"value": []}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.get_item_attachments_async(
+                dataset="default", table="accounts", id="1"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert call_args[0][1].endswith("/attachments")
+
+    @pytest.mark.asyncio
+    async def test_get_item_attachments_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_item_attachments_async(
+                    dataset="default", table="accounts", id="1"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetAttachmentContent:
+    """Tests for get_attachment_content_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_attachment_content_success(self, mock_token_provider):
+        """Test successful get attachment content returns bytes."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, content=b"binary-data")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            result = await client.get_attachment_content_async(
+                dataset="default", table="accounts", id="1", attachment_id="att1"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert call_args[0][1].endswith("/$value")
+            assert result == b"binary-data"
+
+    @pytest.mark.asyncio
+    async def test_get_attachment_content_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_attachment_content_async(
+                    dataset="default", table="accounts", id="1", attachment_id="att1"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestDeleteAttachment:
+    """Tests for delete_attachment_async method."""
+
+    @pytest.mark.asyncio
+    async def test_delete_attachment_success(self, mock_token_provider):
+        """Test successful delete attachment."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.delete_attachment_async(
+                dataset="default", table="accounts", id="1", attachment_id="att1"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "DELETE"
+            assert call_args[0][1].endswith("/attachments/att1")
+
+    @pytest.mark.asyncio
+    async def test_delete_attachment_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_attachment_async(
+                    dataset="default", table="accounts", id="1", attachment_id="att1"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestDeleteItem:
+    """Tests for delete_item_async method."""
+
+    @pytest.mark.asyncio
+    async def test_delete_item_success(self, mock_token_provider):
+        """Test successful delete item."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.delete_item_async(dataset="default", table="accounts", id="1")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "DELETE"
+            assert call_args[0][1].endswith("/items/1")
+
+    @pytest.mark.asyncio
+    async def test_delete_item_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_item_async(
+                    dataset="default", table="accounts", id="1"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestDisassociateRecordsPostItem:
+    """Tests for disassociate_records_post_item_async method."""
+
+    @pytest.mark.asyncio
+    async def test_disassociate_records_success(self, mock_token_provider):
+        """Test successful disassociate records from multi-valued relationship."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.disassociate_records_post_item_async(
+                dataset="default",
+                table="accounts",
+                id="1",
+                relationship="contact_customer_accounts",
+                related_id="2",
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "DELETE"
+            assert "/Relationship" in call_args[0][1]
+            assert call_args[0][1].endswith("/RelatedId/2")
+
+    @pytest.mark.asyncio
+    async def test_disassociate_records_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=400, text="Bad request")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.disassociate_records_post_item_async(
+                    dataset="default",
+                    table="accounts",
+                    id="1",
+                    relationship="contact_customer_accounts",
+                    related_id="2",
+                )
+
+            assert exc_info.value.status_code == 400
+
+
+class TestDisassociateSingleValueRecordDeleteItem:
+    """Tests for disassociate_single_value_record_delete_item_async method."""
+
+    @pytest.mark.asyncio
+    async def test_disassociate_single_value_success(self, mock_token_provider):
+        """Test successful disassociate from single-valued relationship."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.disassociate_single_value_record_delete_item_async(
+                dataset="default",
+                table="accounts",
+                id="1",
+                relationship="primarycontactid",
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "DELETE"
+            assert call_args[0][1].endswith("/Relationship/primarycontactid")
+
+    @pytest.mark.asyncio
+    async def test_disassociate_single_value_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.disassociate_single_value_record_delete_item_async(
+                    dataset="default",
+                    table="accounts",
+                    id="1",
+                    relationship="primarycontactid",
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetCollectionRelationships:
+    """Tests for get_collection_relationships_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_collection_relationships_success(self, mock_token_provider):
+        """Test successful get collection relationships."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"value": []}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.get_collection_relationships_async(
+                dataset="default",
+                table="accounts",
+                id="1",
+                collection_type="onetomany",
+                relationship="account_tasks",
+                target="task",
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/Collection" in call_args[0][1]
+            assert call_args[0][1].endswith("/TargetTable/task")
+
+    @pytest.mark.asyncio
+    async def test_get_collection_relationships_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_collection_relationships_async(
+                    dataset="default",
+                    table="accounts",
+                    id="1",
+                    collection_type="onetomany",
+                    relationship="account_tasks",
+                    target="task",
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetMultiSelectMetadata:
+    """Tests for get_multi_select_metadata_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_multi_select_metadata_success(self, mock_token_provider):
+        """Test successful get multi-select metadata."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"name": "col"}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.get_multi_select_metadata_async(
+                dataset="default", table="accounts", item="col"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert call_args[0][1].endswith("/MultiSelect")
+
+    @pytest.mark.asyncio
+    async def test_get_multi_select_metadata_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_multi_select_metadata_async(
+                    dataset="default", table="accounts", item="col"
+                )
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetOptionSetMetadata:
+    """Tests for get_option_set_metadata_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_option_set_metadata_success(self, mock_token_provider):
+        """Test successful get option set metadata."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=200, text='{"name": "col"}')
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            await client.get_option_set_metadata_async(
+                dataset="default", table="accounts", item="col", type_="Picklist"
+            )
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert "/OptionSet" in call_args[0][1]
+            assert call_args[0][1].endswith("/Picklist")
+
+    @pytest.mark.asyncio
+    async def test_get_option_set_metadata_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=404, text="Not found")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_option_set_metadata_async(
+                    dataset="default", table="accounts", item="col", type_="Picklist"
+                )
 
             assert exc_info.value.status_code == 404
 
