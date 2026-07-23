@@ -152,62 +152,74 @@ asyncio.run(post_teams_message())
 
 The following connectors have been generated and validated with comprehensive test coverage:
 
-| Connector | Package | Status | Coverage | Tests |
-|-----------|---------|--------|----------|-------|
-| **ARM (Azure Resource Manager)** | `azure.connectors.arm` | ✅ Complete | 🔄 SDK Generated | 57 tests |
-| **Azure Automation** | `azure.connectors.azureautomation` | ✅ Complete | 🔄 SDK Generated | 32 tests |
-| **Azure AD** | `azure.connectors.azuread` | ✅ Complete | 🔄 SDK Generated | 68 tests |
-| **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | ✅ E2E Validated | 51 tests |
-| **Box** | `azure.connectors.box` | ✅ Complete | 🔄 SDK Generated | 30 tests |
-| **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated | 32 tests |
-| **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated | 46 tests |
-| **Azure Data Factory** | `azure.connectors.azuredatafactory` | ✅ Complete | 🔄 SDK Generated | 38 tests |
-| **Azure Digital Twins** | `azure.connectors.azuredigitaltwins` | ✅ Complete | 🔄 SDK Generated | 44 tests |
-| **Azure Monitor Logs** | `azure.connectors.azuremonitorlogs` | ✅ Complete | 🔄 SDK Generated | 30 tests |
-| **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated | 37 tests |
-| **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated | 18 tests |
-| **Azure Event Hubs** | `azure.connectors.eventhubs` | ✅ Complete | 🔄 SDK Generated | 32 tests |
-| **FTP** | `azure.connectors.ftp` | ✅ Complete | 🔄 SDK Generated | 28 tests |
-| **GitHub** | `azure.connectors.github` | ✅ Complete | 🔄 SDK Generated | 15 tests |
-| **Google Calendar** | `azure.connectors.googlecalendar` | ✅ Complete | 🔄 SDK Generated | 29 tests |
-| **Google Tasks** | `azure.connectors.googletasks` | ✅ Complete | 🔄 SDK Generated | 24 tests |
-| **Google Drive** | `azure.connectors.googledrive` | ✅ Complete | 🔄 SDK Generated | 30 tests |
-| **Azure Key Vault** | `azure.connectors.keyvault` | ✅ Complete | 🔄 SDK Generated | 42 tests |
-| **Azure Queues** | `azure.connectors.azurequeues` | ✅ Complete | 🔄 SDK Generated | 38 tests |
-| **Azure Tables** | `azure.connectors.azuretables` | ✅ Complete | 🔄 SDK Generated | 53 tests |
-| **Azure VM** | `azure.connectors.azurevm` | ✅ Complete | 🔄 SDK Generated | 43 tests |
-| **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated | 26 tests |
-| **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 53 tests |
-| **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated | 33 tests |
-| **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated | 16 tests |
-| **Microsoft Bookings** | `azure.connectors.microsoftbookings` | ✅ Complete | 🔄 SDK Generated | 36 tests |
-| **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated | 35 tests |
-| **Microsoft Forms** | `azure.connectors.microsoftforms` | ✅ Complete | 🔄 SDK Generated | 17 tests |
-| **Microsoft Defender ATP** | `azure.connectors.wdatp` | ✅ Complete | 🔄 SDK Generated | 32 tests |
-| **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated | 46 tests |
-| **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | ✅ E2E Validated | 44 tests |
-| **Microsoft To Do** | `azure.connectors.todo` | ✅ Complete | 🔄 SDK Generated | 17 tests |
-| **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated | 72 tests |
-| **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated | 46 tests |
-| **Office 365 Groups** | `azure.connectors.office365groups` | ✅ Complete | 🔄 SDK Generated | 50 tests |
-| **Office 365 Groups Mail** | `azure.connectors.office365groupsmail` | ✅ Complete | 🔄 SDK Generated | 31 tests |
-| **OneDrive (Personal)** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated | 50 tests |
-| **OneDrive for Business** | `azure.connectors.onedriveforbusiness` | ✅ Complete | 🔄 SDK Generated | 37 tests |
-| **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated | 60 tests |
-| **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 49 tests |
-| **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated | 66 tests |
-| **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated | 18 tests |
-| **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated | 13 tests |
-| **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated | 14 tests |
-| **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated | 52 tests |
-| **Shifts** | `azure.connectors.shifts` | ✅ Complete | 🔄 SDK Generated | 18 tests |
-| **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated | 15 tests |
-| **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 80 tests |
-| **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 28 tests |
-| **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
-| **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
+| Connector | Package | Status | Coverage |
+|-----------|---------|--------|----------|
+| **ARM (Azure Resource Manager)** | `azure.connectors.arm` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Automation** | `azure.connectors.azureautomation` | ✅ Complete | 🔄 SDK Generated |
+| **Azure AD** | `azure.connectors.azuread` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | ✅ E2E Validated |
+| **Box** | `azure.connectors.box` | ✅ Complete | 🔄 SDK Generated |
+| **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Data Factory** | `azure.connectors.azuredatafactory` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Digital Twins** | `azure.connectors.azuredigitaltwins` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Monitor Logs** | `azure.connectors.azuremonitorlogs` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated |
+| **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Event Hubs** | `azure.connectors.eventhubs` | ✅ Complete | 🔄 SDK Generated |
+| **FTP** | `azure.connectors.ftp` | ✅ Complete | 🔄 SDK Generated |
+| **GitHub** | `azure.connectors.github` | ✅ Complete | 🔄 SDK Generated |
+| **Google Calendar** | `azure.connectors.googlecalendar` | ✅ Complete | 🔄 SDK Generated |
+| **Google Tasks** | `azure.connectors.googletasks` | ✅ Complete | 🔄 SDK Generated |
+| **Google Drive** | `azure.connectors.googledrive` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Key Vault** | `azure.connectors.keyvault` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Queues** | `azure.connectors.azurequeues` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Tables** | `azure.connectors.azuretables` | ✅ Complete | 🔄 SDK Generated |
+| **Azure VM** | `azure.connectors.azurevm` | ✅ Complete | 🔄 SDK Generated |
+| **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated |
+| **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
+| **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated |
+| **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Bookings** | `azure.connectors.microsoftbookings` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Forms** | `azure.connectors.microsoftforms` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Defender ATP** | `azure.connectors.wdatp` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated |
+| **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | ✅ E2E Validated |
+| **Microsoft To Do** | `azure.connectors.todo` | ✅ Complete | 🔄 SDK Generated |
+| **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated |
+| **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated |
+| **Office 365 Groups** | `azure.connectors.office365groups` | ✅ Complete | 🔄 SDK Generated |
+| **Office 365 Groups Mail** | `azure.connectors.office365groupsmail` | ✅ Complete | 🔄 SDK Generated |
+| **OneDrive (Personal)** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated |
+| **OneDrive for Business** | `azure.connectors.onedriveforbusiness` | ✅ Complete | 🔄 SDK Generated |
+| **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated |
+| **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated |
+| **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated |
+| **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated |
+| **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated |
+| **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated |
+| **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated |
+| **Shifts** | `azure.connectors.shifts` | ✅ Complete | 🔄 SDK Generated |
+| **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated |
+| **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated |
+| **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated |
+| **Universal Print** | `azure.connectors.universalprint` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated |
+| **Azure IoT Central** | `azure.connectors.azureiotcentral` | ✅ Complete | 🔄 SDK Generated |
+| **Cloudmersive Document Conversion** | `azure.connectors.cloudmersiveconvert` | ✅ Complete | 🔄 SDK Generated |
+| **Fin & Ops Apps (Dynamics 365)** | `azure.connectors.dynamicsax` | ✅ Complete | 🔄 SDK Generated |
+| **PDF.co** | `azure.connectors.pdfco` | ✅ Complete | 🔄 SDK Generated |
+| **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated |
+| **SQL Server** | `azure.connectors.sql` | ✅ Complete | 🔄 SDK Generated |
+| **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
+| **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated |
+| **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated |
+| **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated |
+| **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
+| **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 1508 connector tests + 141 SDK component tests
+**Total:** 64 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 
