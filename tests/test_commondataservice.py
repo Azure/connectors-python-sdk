@@ -473,6 +473,48 @@ class TestGetTable:
             assert exc_info.value.status_code == 404
 
 
+class TestGetTables:
+    """Tests for get_tables_async method."""
+
+    @pytest.mark.asyncio
+    async def test_get_tables_success(self, mock_token_provider):
+        """Test successful table listing."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"Name": "accounts"}]}',
+        )
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            result = await client.get_tables_async(dataset="default")
+
+            call_args = mock_send.call_args
+            assert call_args[0][0] == "GET"
+            assert call_args[0][1].endswith("/v2/datasets/default/tables")
+            assert call_args.kwargs["body"] is None
+            assert result == {"value": [{"Name": "accounts"}]}
+
+    @pytest.mark.asyncio
+    async def test_get_tables_error_response(self, mock_token_provider):
+        """Test that error response raises ConnectorException."""
+        client = _make_client(mock_token_provider)
+        mock_response = MockResponse(status=500, text="Server error")
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_tables_async(dataset="default")
+
+            assert exc_info.value.status_code == 500
+
+
 class TestGetDataSetsMetadata:
     """Tests for get_data_sets_metadata_async method."""
 

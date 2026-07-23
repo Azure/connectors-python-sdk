@@ -212,7 +212,7 @@ async def example_6_get_table_metadata():
 
     async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_table_v2_async(
+            result = await client.get_table_async(
                 dataset=DATASET,
                 table="accounts",
             )
