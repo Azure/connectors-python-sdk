@@ -22,191 +22,65 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class EntityItemList:
-    """Response for List rows"""
-
-    value: Optional[List[EntityItem]] = None
-    """List of Items"""
-    next_link: Optional[str] = None
-    """The url to fetch next page data."""
-
-
-@dataclass
-class CreateRecordInput:
-    """Add a new row"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class CreateRecordResponse:
-    """Response for Add a new row"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class GetItemCodelessResponse:
-    """Response for Get a row by ID"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class UpdateRecordInput:
-    """Update a row"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class UpdateRecordResponse:
-    """Response for Update a row"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class UpdateEntityFileImageFieldContentInput:
-    """Upload a file or an image"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class PerformUnboundActionInput:
-    """Perform an unbound action"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class PerformUnboundActionResponse:
-    """Response for Perform an unbound action"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class PerformBoundActionInput:
-    """Perform a bound action"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class PerformBoundActionResponse:
-    """Response for Perform a bound action"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class SearchOutput:
-    """Response for Search rows"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-    """List of rows"""
-    totalrecordcount: Optional[int] = None
-    """Total count of results (-1 if returntotalrecordcount is set to false)"""
-    facets: Optional[Dict[str, Any]] = None
-    """Facet results"""
-
-
-@dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Response for GetDataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
 
 
 @dataclass
-class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+class AssociateRecordsPatchItemInput:
+    """
+    Associates one row to another on the provided relationship
+    """
 
-    source: Optional[str] = None
-    """Dataset source"""
-    display_name: Optional[str] = None
-    """Dataset display name"""
-    url_encoding: Optional[str] = None
-    """Dataset url encoding"""
-    table_display_name: Optional[str] = None
-    """Table display name"""
-    table_plural_name: Optional[str] = None
-    """Table plural display name"""
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
-class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+class Item:
+    """
+    Response for Associates one row to another on the provided relationship
+    """
 
-    source: Optional[str] = None
-    """Blob dataset source"""
-    display_name: Optional[str] = None
-    """Blob dataset display name"""
-    url_encoding: Optional[str] = None
-    """Blob dataset url encoding"""
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
 class ItemsList:
-    """Definition: ItemsList"""
+    """
+    Response for Retrieves all collection valued relationship items as an expand would
+    """
 
     value: Optional[List[Item]] = None
     """List of Items"""
 
 
 @dataclass
-class Item:
-    """Definition: Item"""
+class DataSetsList:
+    """
+    Response for GetDataSets_V2
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    value: Optional[List[DataSet]] = None
+    """List of datasets"""
 
 
 @dataclass
-class ObjectEntity:
-    """Definition: Object"""
+class GetItemResponse:
+    """
+    Response for Get row (legacy)
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -217,63 +91,240 @@ class ObjectEntity:
 
 @dataclass
 class TableMetadata:
-    """Definition: TableMetadata"""
+    """
+    Response for Get table metadata - Patch
+    """
 
     name: Optional[str] = None
     """Table name"""
     title: Optional[str] = None
     """Table title"""
-    x_ms_permission: Optional[str] = None
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
     schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """Url link"""
 
 
 @dataclass
-class TableCapabilitiesMetadata:
-    """Definition: TableCapabilitiesMetadata"""
+class ObjectEntity:
+    """
+    Response for Retrieves the metadata for multi select column metadata
+    """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class TablesList:
+    """
+    Response for GetTables_V2
+    """
+
+    value: Optional[List[Table]] = None
+    """List of Tables"""
+
+
+@dataclass
+class PatchItemInput:
+    """
+    Update a row (legacy)
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class PatchItemResponse:
+    """
+    Response for Update a row (legacy)
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class PostItemInput:
+    """
+    Add a new row (legacy)
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class PostItemResponse:
+    """
+    Response for Add a new row (legacy)
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class TabularDataSetsMetadata:
+    """
+    Definition: TabularDataSetsMetadata
+    """
+
+    source: Optional[str] = None
+    """Dataset source"""
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """Dataset display name"""
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
+    """Dataset url encoding"""
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
+    """Table display name"""
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
+    """Table plural display name"""
+
+
+@dataclass
+class BlobDataSetsMetadata:
+    """
+    Definition: BlobDataSetsMetadata
+    """
+
+    source: Optional[str] = None
+    """Blob dataset source"""
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """Blob dataset display name"""
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
+    """Blob dataset url encoding"""
+
+
+@dataclass
+class TableCapabilitiesMetadata:
+    """
+    Definition: TableCapabilitiesMetadata
+    """
+
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
 @dataclass
 class TableSortRestrictionsMetadata:
-    """Definition: TableSortRestrictionsMetadata"""
+    """
+    Definition: TableSortRestrictionsMetadata
+    """
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
 @dataclass
 class TableFilterRestrictionsMetadata:
-    """Definition: TableFilterRestrictionsMetadata"""
+    """
+    Definition: TableFilterRestrictionsMetadata
+    """
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
 @dataclass
 class TableSelectRestrictionsMetadata:
-    """Definition: TableSelectRestrictionsMetadata"""
+    """
+    Definition: TableSelectRestrictionsMetadata
+    """
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
@@ -281,9 +332,14 @@ class TableSelectRestrictionsMetadata:
 
 @dataclass
 class SubscriptionRequest:
-    """Definition: SubscriptionRequest"""
+    """
+    Definition: SubscriptionRequest
+    """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "NotificationUrl"},
+    )
     """
     Callback url to the flow engine. Expected as part of the request and
     provided by Flow.
@@ -292,25 +348,41 @@ class SubscriptionRequest:
 
 @dataclass
 class SubscriptionResponse:
-    """Definition: SubscriptionResponse"""
+    """
+    Definition: SubscriptionResponse
+    """
 
     id: Optional[str] = None
     """Id of the subscription"""
     resource: Optional[str] = None
     """Resource of the subscription request"""
-    notification_type: Optional[str] = None
+    notification_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationType"},
+    )
     """Notification Type"""
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """Notification Url"""
 
 
 @dataclass
 class UpdateTriggerSubscriptionRequest:
-    """Definition: UpdateTriggerSubscriptionRequest"""
+    """
+    Definition: UpdateTriggerSubscriptionRequest
+    """
 
-    attribute_filters: Optional[List[str]] = None
+    attribute_filters: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "AttributeFilters"},
+    )
     """Column filters"""
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "NotificationUrl"},
+    )
     """
     Callback url to the flow engine. Expected as part of the request and
     provided by Flow.
@@ -318,20 +390,17 @@ class UpdateTriggerSubscriptionRequest:
 
 
 @dataclass
-class DataSetsList:
-    """Definition: DataSetsList"""
-
-    value: Optional[List[DataSet]] = None
-    """List of datasets"""
-
-
-@dataclass
 class DataSet:
-    """Definition: DataSet"""
+    """
+    Definition: DataSet
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Dataset name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Dataset display name"""
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
@@ -339,53 +408,70 @@ class DataSet:
 
 @dataclass
 class Table:
-    """Definition: Table"""
+    """
+    Definition: Table
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
 @dataclass
 class Procedure:
-    """Definition: Procedure"""
+    """
+    Definition: Procedure
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Procedure name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Procedure display name"""
 
 
 @dataclass
 class PassThroughNativeQuery:
-    """Definition: PassThroughNativeQuery"""
+    """
+    Definition: PassThroughNativeQuery
+    """
 
-    language: Optional[str] = None
+    language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Language"},
+    )
     """Query language"""
 
 
 @dataclass
-class TablesList:
-    """Definition: TablesList"""
-
-    value: Optional[List[Table]] = None
-    """List of Tables"""
-
-
-@dataclass
 class DisplayCollectionName:
-    """Definition: DisplayCollectionName"""
+    """
+    Definition: DisplayCollectionName
+    """
 
-    user_localized_label: Optional[UserLocalizedLabel] = None
+    user_localized_label: Optional[UserLocalizedLabel] = field(
+        default=None,
+        metadata={"wire_name": "userLocalizedLabel"},
+    )
     """The user localized display name label object."""
 
 
 @dataclass
 class EntitiesDynamicValuesList:
-    """Definition: EntitiesDynamicValuesList"""
+    """
+    Definition: EntitiesDynamicValuesList
+    """
 
     value: Optional[List[EntitiesDynamicValuesListItem]] = None
     """List of tables as dynamic values."""
@@ -393,21 +479,37 @@ class EntitiesDynamicValuesList:
 
 @dataclass
 class EntitiesDynamicValuesListItem:
-    """Definition: EntitiesDynamicValuesListItem"""
+    """
+    Definition: EntitiesDynamicValuesListItem
+    """
 
-    metadata_id: Optional[str] = None
+    metadata_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "metadataId"},
+    )
     """The metadata id."""
-    entity_set_name: Optional[str] = None
+    entity_set_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "entitySetName"},
+    )
     """The name of the table."""
-    logical_name: Optional[str] = None
+    logical_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "logicalName"},
+    )
     """The logical name of the table."""
-    display_collection_name: Optional[DisplayCollectionName] = None
+    display_collection_name: Optional[DisplayCollectionName] = field(
+        default=None,
+        metadata={"wire_name": "displayCollectionName"},
+    )
     """The display name of the table."""
 
 
 @dataclass
 class OrganizationsDynamicValuesList:
-    """Definition: OrganizationsDynamicValuesList"""
+    """
+    Definition: OrganizationsDynamicValuesList
+    """
 
     value: Optional[List[OrganizationsDynamicValuesListItem]] = None
     """List of organizations as dynamic values."""
@@ -415,34 +517,63 @@ class OrganizationsDynamicValuesList:
 
 @dataclass
 class OrganizationsDynamicValuesListItem:
-    """Definition: OrganizationsDynamicValuesListItem"""
+    """
+    Definition: OrganizationsDynamicValuesListItem
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The organization id."""
-    friendly_name: Optional[str] = None
+    friendly_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FriendlyName"},
+    )
     """The name of the organization."""
-    url: Optional[str] = None
+    url: Optional[str] = field(default=None, metadata={"wire_name": "Url"})
     """The URL of the organization."""
 
 
 @dataclass
 class EntityMetadata:
-    """Definition: EntityMetadata"""
+    """
+    Definition: EntityMetadata
+    """
 
     schema: Optional[ObjectEntity] = None
     """Swagger schema"""
 
 
 @dataclass
-class EntityItem:
-    """Definition: EntityItem"""
+class EntityItemList:
+    """
+    Definition: EntityItemList
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    value: Optional[List[EntityItem]] = None
+    """List of Items"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The url to fetch next page data."""
+
+
+@dataclass
+class EntityItem:
+    """
+    Definition: EntityItem
+    """
+
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
 class CallbackRegistration:
-    """Definition: CallbackRegistration"""
+    """
+    Definition: CallbackRegistration
+    """
 
     version: Optional[int] = None
     """The callback registration table version"""
@@ -481,7 +612,9 @@ class CallbackRegistration:
 
 @dataclass
 class UserLocalizedLabel:
-    """Definition: UserLocalizedLabel"""
+    """
+    Definition: UserLocalizedLabel
+    """
 
     label: Optional[str] = None
     """The display name label of the table."""
@@ -489,7 +622,9 @@ class UserLocalizedLabel:
 
 @dataclass
 class WebhookNotificationContent:
-    """Definition: WebhookNotificationContent"""
+    """
+    Definition: WebhookNotificationContent
+    """
 
     schema: Optional[ObjectEntity] = None
     """Swagger schema"""
@@ -497,7 +632,9 @@ class WebhookNotificationContent:
 
 @dataclass
 class EntityRelationshipsDynamicValuesList:
-    """Definition: EntityRelationshipsDynamicValuesList"""
+    """
+    Definition: EntityRelationshipsDynamicValuesList
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """List of table relationships as dynamic values."""
@@ -505,9 +642,14 @@ class EntityRelationshipsDynamicValuesList:
 
 @dataclass
 class AssociateEntityRequest:
-    """Definition: AssociateEntityRequest"""
+    """
+    Definition: AssociateEntityRequest
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
     """
     Enter the row URL using OData ID from a previous step or typing the full
     URL (eg.
@@ -517,7 +659,9 @@ class AssociateEntityRequest:
 
 @dataclass
 class ActionsDynamicValuesList:
-    """Definition: ActionsDynamicValuesList"""
+    """
+    Definition: ActionsDynamicValuesList
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """List of actions as dynamic values"""
@@ -525,7 +669,9 @@ class ActionsDynamicValuesList:
 
 @dataclass
 class SearchRequestBody:
-    """Definition: SearchRequestBody"""
+    """
+    Definition: SearchRequestBody
+    """
 
     search: Optional[str] = None
     """
@@ -546,7 +692,7 @@ class SearchRequestBody:
     top: Optional[int] = None
     """Enter the number of search results to be listed (default = 50)"""
     filter: Optional[str] = None
-    """Enter an Odata style filter expression to narrow the search"""
+    """Enter an OData style filter expression to narrow the search"""
     entities: Optional[List[str]] = None
     """
     Enter a comma-separated list of tables to be searched (default is all
@@ -565,8 +711,24 @@ class SearchRequestBody:
 
 
 @dataclass
+class SearchOutput:
+    """
+    Definition: SearchOutput
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
+    """List of rows"""
+    totalrecordcount: Optional[int] = None
+    """Total count of results (-1 if returntotalrecordcount is set to false)"""
+    facets: Optional[Dict[str, Any]] = None
+    """Facet results"""
+
+
+@dataclass
 class WhenAnActionIsPerformedSubscriptionRequest:
-    """Definition: WhenAnActionIsPerformedSubscriptionRequest"""
+    """
+    Definition: WhenAnActionIsPerformedSubscriptionRequest
+    """
 
     version: Optional[int] = None
     """The callback registration table version."""
@@ -587,7 +749,9 @@ class WhenAnActionIsPerformedSubscriptionRequest:
 
 @dataclass
 class WebhookNotificationContentForWhenAnActionIsPerformed:
-    """Definition: WebhookNotificationContentForWhenAnActionIsPerformed"""
+    """
+    Definition: WebhookNotificationContentForWhenAnActionIsPerformed
+    """
 
     schema: Optional[ObjectEntity] = None
     """Swagger schema"""
@@ -627,61 +791,536 @@ class CommondataserviceClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "commondataservice"
 
-    async def subscribe_webhook_trigger_async(
+    async def get_data_sets_metadata_async(
         self,
-        input: CallbackRegistration,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        When a row is added, modified or deleted
+        GetDataSetsMetadata
+        """
+        request_url = f"{self._connection_runtime_url}/$metadata.json/datasets"
 
-        This trigger allows you to start a flow when a row is added, modified
-        or deleted in a Microsoft Dataverse table, such that it matches the
-        selected options. This connector was formerly known as Common Data
-        Service (legacy) and replaces the Dynamics 365 connector.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/api/data/v9.1/callbackregistrations"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-
-        response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                "POST",
-                path,
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )
 
-    async def list_records_async(
-        self,
-        entity_name: str,
-        select: Optional[str] = None,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        expand: Optional[str] = None,
-        fetch_xml: Optional[str] = None,
-        top: Optional[str] = None,
-        skiptoken: Optional[str] = None,
-        partition_id: Optional[str] = None,
-    ):
-        """
-        List rows
+        if not response.text:
+            return None
 
-        This action allows you to list the rows in a Microsoft Dataverse table
-        that match the selected options. This connector was formerly known as
-        Common Data Service (legacy) and replaces the Dynamics 365 connector.
+        return json.loads(response.text)
+
+    async def get_next_page_async(
+        self,
+        next_link: str,
+    ) -> dict[str, Any] | None:
         """
-        path = (
-            f"{self._connection_runtime_url}/api/data/v9.1/{str(entity_name)}"
+        Follows nextLink to retrieve next page of data
+
+        This operation gets the next page of data.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/nextLink/{quote(str(next_link), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def associate_records_patch_item_async(
+        self,
+        input: AssociateRecordsPatchItemInput,
+        dataset: str,
+        table: str,
+        id: str,
+        relationship: str,
+    ) -> dict[str, Any] | None:
+        """
+        Associates one row to another on the provided relationship
+
+        Associates one row to another on the provided relationship
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/Relationship"
+            f"/{quote(quote(str(relationship), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def create_attachment_async(
+        self,
+        input: bytes,
+        dataset: str,
+        table: str,
+        id: str,
+        display_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        Creates Note (annotation) for specified table row
+
+        Creates Note (annotation) for specified table row.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/attachments"
         )
         query_params = []
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
+        value = str(display_name)
+        if isinstance(display_name, bool):
+            value = value.lower()
+        query_params.append(f"displayName={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def delete_attachment_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+        attachment_id: str,
+    ) -> None:
+        """
+        Deletes specified attachment on the Note (annotation)
+
+        Deletes specified attachment on the Note (annotation).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/attachments"
+            f"/{quote(quote(str(attachment_id), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def delete_item_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+    ) -> None:
+        """
+        Delete a row (legacy)
+
+        This operation deletes a row from a table collection
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def disassociate_records_post_item_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+        relationship: str,
+        related_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Disassociates a row from a multi-valued relationship
+
+        Disassociates a row from a multi-valued relationship
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/Relationship"
+            f"/{quote(quote(str(relationship), safe=''), safe='')}"
+            f"/RelatedId"
+            f"/{quote(quote(str(related_id), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def disassociate_single_value_record_delete_item_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+        relationship: str,
+    ) -> dict[str, Any] | None:
+        """
+        Disassociates a row from a single-valued relationship
+
+        Disassociates a row from a single-valued relationship
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/Relationship"
+            f"/{quote(quote(str(relationship), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_attachment_content_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+        attachment_id: str,
+    ) -> bytes:
+        """
+        Retrieves file content for specified Note (annotation)
+
+        Retrieves file content for specified Note (annotation).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/attachments"
+            f"/{quote(quote(str(attachment_id), safe=''), safe='')}"
+            f"/$value"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        return response.content
+
+    async def get_collection_relationships_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+        collection_type: str,
+        relationship: str,
+        target: str,
+    ) -> dict[str, Any] | None:
+        """
+        Retrieves all collection valued relationship items as an expand would
+
+        Retrieves all collection valued relationship items as an expand would
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/Collection"
+            f"/{quote(quote(str(collection_type), safe=''), safe='')}"
+            f"/{quote(quote(str(relationship), safe=''), safe='')}"
+            f"/TargetTable"
+            f"/{quote(quote(str(target), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_data_sets_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        GetDataSets_V2
+        """
+        request_url = f"{self._connection_runtime_url}/v2/datasets"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_item_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get row (legacy)
+
+        This operation retrieves the specified row for a table
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_item_attachments_async(
+        self,
+        dataset: str,
+        table: str,
+        id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Retrieves all Notes (annotations) for the provided table row Id
+
+        Retrieves all Notes (annotations) for the provided table row Id.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/attachments"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_items_async(
+        self,
+        dataset: str,
+        table: str,
+        apply: Optional[str] = None,
+        filter: Optional[str] = None,
+        orderby: Optional[str] = None,
+        top: Optional[str] = None,
+        expand: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        List rows (legacy)
+
+        This operation gets rows for a table
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+        )
+        query_params = []
+        if apply is not None:
+            value = str(apply)
+            if isinstance(apply, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$apply={quote(value)}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -692,124 +1331,27 @@ class CommondataserviceClient(ConnectorClientBase):
             if isinstance(orderby, bool):
                 value = value.lower()
             query_params.append(f"$orderby={quote(value)}")
-        if expand is not None:
-            value = str(expand)
-            if isinstance(expand, bool):
-                value = value.lower()
-            query_params.append(f"$expand={quote(value)}")
-        if fetch_xml is not None:
-            value = str(fetch_xml)
-            if isinstance(fetch_xml, bool):
-                value = value.lower()
-            query_params.append(f"fetchXml={quote(value)}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
-        if skiptoken is not None:
-            value = str(skiptoken)
-            if isinstance(skiptoken, bool):
-                value = value.lower()
-            query_params.append(f"$skiptoken={quote(value)}")
-        if partition_id is not None:
-            value = str(partition_id)
-            if isinstance(partition_id, bool):
-                value = value.lower()
-            query_params.append(f"partitionId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def create_record_async(
-        self,
-        input: CreateRecordInput,
-        entity_name: str,
-    ):
-        """
-        Add a new row
-
-        This action allows you to add a new row in the selected Microsoft
-        Dataverse table. This connector was formerly known as Common Data
-        Service (legacy) and replaces the Dynamics 365 connector.
-        """
-        path = (
-            f"{self._connection_runtime_url}/api/data/v9.1/{str(entity_name)}"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_item_codeless_async(
-        self,
-        entity_name: str,
-        record_id: str,
-        select: Optional[str] = None,
-        expand: Optional[str] = None,
-        partition_id: Optional[str] = None,
-    ):
-        """
-        Get a row by ID
-
-        This action allows you to get the row that matches an ID in a Microsoft
-        Dataverse table. This connector was formerly known as Common Data
-        Service (legacy) and replaces the Dynamics 365 connector.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/api/data/v9.1/{str(entity_name)}({str(record_id)})"
-        )
-        query_params = []
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
             query_params.append(f"$expand={quote(value)}")
-        if partition_id is not None:
-            value = str(partition_id)
-            if isinstance(partition_id, bool):
-                value = value.lower()
-            query_params.append(f"partitionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -819,67 +1361,264 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_record_async(
+    async def get_metadata_for_patch_item_async(
         self,
-        entity_name: str,
-        record_id: str,
-        partition_id: Optional[str] = None,
-    ):
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
         """
-        Delete a row
+        Get table metadata - Patch
 
-        This action allows you to delete a row from a Microsoft Dataverse
-        table. This connector was formerly known as Common Data Service
-        (legacy) and replaces the Dynamics 365 connector.
+        Gets table metadata for patch operation
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/data/v9.1/{str(entity_name)}({str(record_id)})"
+            f"/v2"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/patchitem"
         )
-        query_params = []
-        if partition_id is not None:
-            value = str(partition_id)
-            if isinstance(partition_id, bool):
-                value = value.lower()
-            query_params.append(f"partitionId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                "DELETE",
-                path,
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )
 
-    async def update_record_async(
-        self,
-        input: UpdateRecordInput,
-        entity_name: str,
-        record_id: str,
-    ):
-        """
-        Update a row
+        if not response.text:
+            return None
 
-        This action allows you to modify any selected row in a Microsoft
-        Dataverse table, or adds a new row if it doesn?t exist. This connector
-        was formerly known as Common Data Service (legacy) and replaces the
-        Dynamics 365 connector.
+        return json.loads(response.text)
+
+    async def get_metadata_for_post_item_async(
+        self,
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
         """
-        path = (
+        Get table metadata - Post
+
+        Gets table metadata for post operation
+        """
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/data/v9.1/{str(entity_name)}({str(record_id)})"
+            f"/v2"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/postitem"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_multi_select_metadata_async(
+        self,
+        dataset: str,
+        table: str,
+        item: str,
+    ) -> dict[str, Any] | None:
+        """
+        Retrieves the metadata for multi select column metadata
+
+        Retrieves the metadata for multi select column metadata.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(item), safe=''), safe='')}"
+            f"/MultiSelect"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_option_set_metadata_async(
+        self,
+        dataset: str,
+        table: str,
+        item: str,
+        type_: str,
+    ) -> dict[str, Any] | None:
+        """
+        Retrieves the metadata for choice column metadata
+
+        Retrieves the metadata for choice column metadata.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(item), safe=''), safe='')}"
+            f"/OptionSet"
+            f"/{quote(str(type_), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_table_async(
+        self,
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get table metadata
+
+        Gets table metadata
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tables_async(
+        self,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        GetTables_V2
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def patch_item_async(
+        self,
+        input: PatchItemInput,
+        dataset: str,
+        table: str,
+        id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Update a row (legacy)
+
+        This operation updates an existing row for a table
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -889,114 +1628,35 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_entity_file_image_field_content_async(
+    async def post_item_async(
         self,
-        input: UpdateEntityFileImageFieldContentInput,
-        entity_name: str,
-        record_id: str,
-        file_image_field_name: str,
-        x_ms_file_name: Optional[str],
-    ):
+        input: PostItemInput,
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
         """
-        Upload a file or an image
+        Add a new row (legacy)
 
-        This action allows you to upload a file or an image content to a
-        Microsoft Dataverse table with a compatible column type. This connector
-        was formerly known as Common Data Service (legacy) and replaces the
-        Dynamics 365 connector.
+        This operation adds a new row of a table
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/api"
-            f"/data"
-            f"/v9.1"
-            f"/{str(entity_name)}({str(record_id)})"
-            f"/{str(file_image_field_name)}"
-        )
-        query_params = []
-        if x_ms_file_name is not None:
-            value = str(x_ms_file_name)
-            if isinstance(x_ms_file_name, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-file-name={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("PUT", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "PUT",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def get_entity_file_image_field_content_async(
-        self,
-        entity_name: str,
-        record_id: str,
-        file_image_field_name: str,
-        size: Optional[str] = None,
-    ):
-        """
-        Download a file or an image
-
-        This action allows you to download a file or an image content from a
-        Microsoft Dataverse table. This connector was formerly known as Common
-        Data Service (legacy) and replaces the Dynamics 365 connector.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/api"
-            f"/data"
-            f"/v9.1"
-            f"/{str(entity_name)}({str(record_id)})"
-            f"/{str(file_image_field_name)}"
-            f"/$value"
-        )
-        query_params = []
-        if size is not None:
-            value = str(size)
-            if isinstance(size, bool):
-                value = value.lower()
-            query_params.append(f"size={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def perform_unbound_action_async(
-        self,
-        input: PerformUnboundActionInput,
-        action_name: str,
-    ):
-        """
-        Perform an unbound action
-
-        This action allows you to perform Microsoft Dataverse actions available
-        in the environment that are not associated with any table.
-        """
-        path = (
-            f"{self._connection_runtime_url}/api/data/v9.2/{str(action_name)}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1006,194 +1666,34 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def perform_bound_action_async(
-        self,
-        input: PerformBoundActionInput,
-        entity_name: str,
-        action_name: str,
-        record_id: str,
-    ):
-        """
-        Perform a bound action
 
-        This action allows you to perform Microsoft Dataverse actions
-        associated with a selected table.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/api"
-            f"/data"
-            f"/v9.2"
-            f"/{str(entity_name)}({str(record_id)})"
-            f"/{str(action_name)}"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def associate_entities_async(
-        self,
-        input: AssociateEntityRequest,
-        entity_name: str,
-        record_id: str,
-        association_entity_relationship: str,
-    ):
-        """
-        Relate rows
-
-        This action allows you to link a row in one Microsoft Dataverse table
-        to another if the tables have a one-to-many or many-to-many
-        relationship. This connector was formerly known as Common Data Service
-        (legacy) and replaces the Dynamics 365 connector.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/api"
-            f"/data"
-            f"/v9.1"
-            f"/{str(entity_name)}({str(record_id)})"
-            f"/{str(association_entity_relationship)}"
-            f"/$ref"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def disassociate_entities_async(
-        self,
-        entity_name: str,
-        record_id: str,
-        association_entity_relationship: str,
-        id: Optional[str],
-    ):
-        """
-        Unrelate rows
-
-        This action allows you to remove the link between a row in one
-        Microsoft Dataverse table to another if the tables have a one-to-many
-        or many-to-many relationship. This connector was formerly known as
-        Common Data Service (legacy) and replaces the Dynamics 365 connector.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/api"
-            f"/data"
-            f"/v9.1"
-            f"/{str(entity_name)}({str(record_id)})"
-            f"/{str(association_entity_relationship)}"
-            f"/$ref"
-        )
-        query_params = []
-        if id is not None:
-            value = str(id)
-            if isinstance(id, bool):
-                value = value.lower()
-            query_params.append(f"$id={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("DELETE", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "DELETE",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def get_relevant_rows_async(
-        self,
-        input: SearchRequestBody,
-    ):
-        """
-        Search rows
-
-        This action allows you to search a Microsoft Dataverse environment
-        using Relevance Search, and returns the rows that match the search term
-        most closely. This connector was formerly known as Common Data Service
-        (legacy) and replaces the Dynamics 365 connector.
-        """
-        path = f"{self._connection_runtime_url}/api/search/v1.0/query"
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def execute_changeset_async(
-        self,
-    ):
-        """
-        Perform a changeset request
-
-        This action allows you to perform a group of Microsoft Dataverse
-        connector operations as a single transaction. If one of the operations
-        fails, all the successful actions are rolled back. This connector was
-        formerly known as Common Data Service (legacy) and replaces the
-        Dynamics 365 connector.
-        """
-        path = f"{self._connection_runtime_url}/api/data/v9.1/$batch"
-
-        response = await self.http_client.send_async("POST", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def business_events_trigger_async(
-        self,
-        input: WhenAnActionIsPerformedSubscriptionRequest,
-    ):
-        """
-        When an action is performed
-
-        Triggers when a Microsoft Dataverse action has completed.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/api/data/v9.2/callbackregistrations"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "GetOnDeletedItems_V2": {
+        "operation_id": "GetOnDeletedItems_V2",
+        "path": "/{connectionId}/v2/datasets/{dataset}/tables/{table}/ondeleteditems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnNewItems_V2": {
+        "operation_id": "GetOnNewItems_V2",
+        "path": "/{connectionId}/v2/datasets/{dataset}/tables/{table}/onnewitems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnUpdatedItems_V2": {
+        "operation_id": "GetOnUpdatedItems_V2",
+        "path": "/{connectionId}/v2/datasets/{dataset}/tables/{table}/onupdateditems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+}
