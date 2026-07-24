@@ -52,6 +52,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **RSS** (`rss.py`) connector client with unit tests and samples
 - **Office 365 Groups Mail** (`office365groupsmail.py`) connector client with unit tests and samples
 
+### Fixed
+
+- **Microsoft Dataverse** (`commondataservice.py`): path parameters are now double URL-encoded so values containing reserved characters (for example the `://` in an environment/organization URL used as the `dataset` segment) survive apihub gateway routing. Previously these segments were single-encoded and could be mis-routed. Fix applied in the CodefulSdkGenerator and regenerated; added regression tests covering encoding of the `dataset`, `table`, and `id` segments.
+- **Microsoft Dataverse** (`commondataservice.py`): regenerated with the corrected CodefulSdkGenerator so curated internal operations are retained. The client now exposes all 22 operations at parity with the .NET SDK (previously 11), adding attachment, association/disassociation, collection-relationship, option-set/multi-select metadata, delete, and pagination methods. Added unit tests covering the new operations.
+- **Microsoft Dataverse** (`commondataservice.py`): `get_next_page_async` now returns the page payload (`dict[str, Any] | None`) instead of discarding it as `None`, so pagination via `nextLink` is usable and at parity with the .NET `GetNextPageAsync`. Operations whose swagger omits a response schema now honor the per-operation response-type override in the Python generator path. Fix applied in the CodefulSdkGenerator and regenerated; added tests covering the returned payload and the trigger-operation registry.
+
 ## [0.3.0b2]
 
 ### Added
