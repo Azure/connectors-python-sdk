@@ -306,7 +306,7 @@ try:
 except (ImportError, NameError):
     SigninghubClient = None  # type: ignore[assignment,misc]
 
-__version__ = '0.3.0b2'
+__version__ = '0.4.0b1'
 
 __all__ = [
     'ConnectorClientBase',
