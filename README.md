@@ -218,8 +218,20 @@ The following connectors have been generated and validated with comprehensive te
 | **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated | 40 tests |
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
+| **Universal Print** | `azure.connectors.universalprint` | ✅ Complete | 🔄 SDK Generated | 10 tests |
+| **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated | 10 tests |
+| **Azure IoT Central** | `azure.connectors.azureiotcentral` | ✅ Complete | 🔄 SDK Generated | 10 tests |
+| **Cloudmersive Document Conversion** | `azure.connectors.cloudmersiveconvert` | ✅ Complete | 🔄 SDK Generated | 7 tests |
+| **Fin & Ops Apps (Dynamics 365)** | `azure.connectors.dynamicsax` | ✅ Complete | 🔄 SDK Generated | 10 tests |
+| **PDF.co** | `azure.connectors.pdfco` | ✅ Complete | 🔄 SDK Generated | 7 tests |
+| **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated | 9 tests |
+| **SQL Server** | `azure.connectors.sql` | ✅ Complete | 🔄 SDK Generated | 11 tests |
+| **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated | 13 tests |
+| **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated | 10 tests |
+| **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated | 7 tests |
+| **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 
-**Total:** 1931 connector tests + 141 SDK component tests
+**Total:** 2042 connector tests + 141 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

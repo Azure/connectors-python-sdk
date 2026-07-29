@@ -79,9 +79,21 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_smtp.py` | SMTP | `SMTP_CONNECTION_URL` |
 | `sample_connector_usage_teams.py` | Microsoft Teams | `TEAMS_CONNECTION_URL` |
 | `sample_connector_usage_todo.py` | Microsoft To Do | `TODO_CONNECTION_URL` |
+| `sample_connector_usage_universalprint.py` | Universal Print | `UNIVERSALPRINT_CONNECTION_URL` |
 | `sample_connector_usage_wdatp.py` | Windows Defender ATP | `WDATP_CONNECTION_URL` |
 | `sample_connector_usage_wordonlinebusiness.py` | Word Online (Business) | `WORDONLINEBUSINESS_CONNECTION_URL` |
 | `sample_connector_usage_yammer.py` | Yammer (Viva Engage) | `YAMMER_CONNECTION_URL` |
+| `sample_connector_usage_azureeventgrid.py` | Azure Event Grid | `AZUREEVENTGRID_CONNECTION_URL` |
+| `sample_connector_usage_azureiotcentral.py` | Azure IoT Central | `AZUREIOTCENTRAL_CONNECTION_URL` |
+| `sample_connector_usage_cloudmersiveconvert.py` | Cloudmersive Document Conversion | `CLOUDMERSIVECONVERT_CONNECTION_URL` |
+| `sample_connector_usage_dynamicsax.py` | Fin & Ops Apps (Dynamics 365) | `DYNAMICSAX_CONNECTION_URL` |
+| `sample_connector_usage_pdfco.py` | PDF.co | `PDFCO_CONNECTION_URL` |
+| `sample_connector_usage_plumsail.py` | Plumsail Documents | `PLUMSAIL_CONNECTION_URL` |
+| `sample_connector_usage_sql.py` | SQL Server | `SQL_CONNECTION_URL` |
+| `sample_connector_usage_zendesk.py` | Zendesk | `ZENDESK_CONNECTION_URL` |
+| `sample_connector_usage_pipedrive.py` | Pipedrive | `PIPEDRIVE_CONNECTION_URL` |
+| `sample_connector_usage_docuware.py` | DocuWare | `DOCUWARE_CONNECTION_URL` |
+| `sample_connector_usage_signinghub.py` | SigningHub | `SIGNINGHUB_CONNECTION_URL` |
 
 Set the appropriate environment variable to your connection runtime URL before running:
 
