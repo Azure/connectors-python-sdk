@@ -912,9 +912,9 @@ class TextrequestClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards"
-            f"/{str(dashboard_id)}"
+            f"/{quote(str(dashboard_id), safe='')}"
             f"/contacts"
-            f"/{str(phone_number)}"
+            f"/{quote(str(phone_number), safe='')}"
             f"/messages"
         )
         query_params = []
@@ -961,9 +961,9 @@ class TextrequestClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards"
-            f"/{str(dashboard_id)}"
+            f"/{quote(str(dashboard_id), safe='')}"
             f"/contacts"
-            f"/{str(phone_number)}"
+            f"/{quote(str(phone_number), safe='')}"
             f"/messages"
         )
 
@@ -1004,9 +1004,9 @@ class TextrequestClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards"
-            f"/{str(dashboard_id)}"
+            f"/{quote(str(dashboard_id), safe='')}"
             f"/contacts"
-            f"/{str(phone_number)}"
+            f"/{quote(str(phone_number), safe='')}"
             f"/conversations"
             f"/archive"
         )
@@ -1044,9 +1044,9 @@ class TextrequestClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards"
-            f"/{str(dashboard_id)}"
+            f"/{quote(str(dashboard_id), safe='')}"
             f"/contacts"
-            f"/{str(phone_number)}"
+            f"/{quote(str(phone_number), safe='')}"
             f"/conversations"
             f"/unarchive"
         )
@@ -1080,7 +1080,10 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/contacts/{str(phone_number)}"
+            f"/dashboards"
+            f"/{quote(str(dashboard_id), safe='')}"
+            f"/contacts"
+            f"/{quote(str(phone_number), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1112,7 +1115,10 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/contacts/{str(phone_number)}"
+            f"/dashboards"
+            f"/{quote(str(dashboard_id), safe='')}"
+            f"/contacts"
+            f"/{quote(str(phone_number), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1146,7 +1152,10 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/contacts/{str(phone_number)}"
+            f"/dashboards"
+            f"/{quote(str(dashboard_id), safe='')}"
+            f"/contacts"
+            f"/{quote(str(phone_number), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1203,7 +1212,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/contacts"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/contacts"
         )
         query_params = []
         if contact_phone_number is not None:
@@ -1358,7 +1367,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/contacts"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/contacts"
         )
 
         response = await self.http_client.send_async(
@@ -1390,7 +1399,10 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/groups/{str(group_id)}"
+            f"/dashboards"
+            f"/{quote(str(dashboard_id), safe='')}"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1424,7 +1436,10 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/groups/{str(group_id)}"
+            f"/dashboards"
+            f"/{quote(str(dashboard_id), safe='')}"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1458,7 +1473,10 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/groups/{str(group_id)}"
+            f"/dashboards"
+            f"/{quote(str(dashboard_id), safe='')}"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1491,7 +1509,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/groups"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/groups"
         )
         query_params = []
         value = str(page)
@@ -1534,7 +1552,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/groups"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/groups"
         )
 
         response = await self.http_client.send_async(
@@ -1568,7 +1586,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/tags"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/tags"
         )
         query_params = []
         value = str(page)
@@ -1611,7 +1629,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/fields"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/fields"
         )
 
         response = await self.http_client.send_async(
@@ -1643,7 +1661,10 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/payments/{str(payment_id)}"
+            f"/dashboards"
+            f"/{quote(str(dashboard_id), safe='')}"
+            f"/payments"
+            f"/{quote(str(payment_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1681,9 +1702,9 @@ class TextrequestClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards"
-            f"/{str(dashboard_id)}"
+            f"/{quote(str(dashboard_id), safe='')}"
             f"/payments"
-            f"/{str(payment_id)}"
+            f"/{quote(str(payment_id), safe='')}"
             f"/mark_as_paid"
         )
 
@@ -1719,9 +1740,9 @@ class TextrequestClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards"
-            f"/{str(dashboard_id)}"
+            f"/{quote(str(dashboard_id), safe='')}"
             f"/payments"
-            f"/{str(payment_id)}"
+            f"/{quote(str(payment_id), safe='')}"
             f"/resend"
         )
 
@@ -1757,9 +1778,9 @@ class TextrequestClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards"
-            f"/{str(dashboard_id)}"
+            f"/{quote(str(dashboard_id), safe='')}"
             f"/payments"
-            f"/{str(payment_id)}"
+            f"/{quote(str(payment_id), safe='')}"
             f"/cancel"
         )
 
@@ -1798,7 +1819,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/payments"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/payments"
         )
         query_params = []
         if reference_number is not None:
@@ -1862,7 +1883,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/payments"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/payments"
         )
 
         response = await self.http_client.send_async(
@@ -1892,7 +1913,8 @@ class TextrequestClient(ConnectorClientBase):
         Returns the name and phone of the dashboard.
         """
         request_url = (
-            f"{self._connection_runtime_url}/dashboards/{str(dashboard_id)}"
+            f"{self._connection_runtime_url}"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1922,7 +1944,8 @@ class TextrequestClient(ConnectorClientBase):
         Deletes the specified dashboard.
         """
         request_url = (
-            f"{self._connection_runtime_url}/dashboards/{str(dashboard_id)}"
+            f"{self._connection_runtime_url}"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1956,7 +1979,8 @@ class TextrequestClient(ConnectorClientBase):
         bulk export/import.
         """
         request_url = (
-            f"{self._connection_runtime_url}/dashboards/{str(dashboard_id)}"
+            f"{self._connection_runtime_url}"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1994,7 +2018,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/dashboards/{str(dashboard_id)}/conversations"
+            f"/dashboards/{quote(str(dashboard_id), safe='')}/conversations"
         )
         query_params = []
         if tags is not None:

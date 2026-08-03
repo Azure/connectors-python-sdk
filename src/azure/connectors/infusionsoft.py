@@ -175,7 +175,8 @@ class InfusionsoftClient(ConnectorClientBase):
         Update an existing task.
         """
         request_url = (
-            f"{self._connection_runtime_url}/crm/rest/v1/tasks/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/crm/rest/v1/tasks/{quote(str(id), safe='')}"
         )
 
         response = await self.http_client.send_async(

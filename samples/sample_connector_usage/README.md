@@ -53,7 +53,6 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_webex.py` | Webex | `WEBEX_CONNECTION_URL` |
 | `sample_connector_usage_campfire.py` | Campfire | `CAMPFIRE_CONNECTION_URL` |
 | `sample_connector_usage_clicksendsms.py` | ClickSend SMS | `CLICKSENDSMS_CONNECTION_URL` |
-| `sample_connector_usage_plivo.py` | Plivo | `PLIVO_CONNECTION_URL` |
 | `sample_connector_usage_textrequest.py` | TextRequest | `TEXTREQUEST_CONNECTION_URL` |
 | `sample_connector_usage_excelonlinebusiness.py` | Excel Online (Business) | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_mq.py` | IBM MQ | `MQ_CONNECTION_URL` |

@@ -294,10 +294,6 @@ try:
 except (ImportError, NameError):
     ClicksendsmsClient = None  # type: ignore[assignment,misc]
 try:
-    from .plivo import PlivoClient
-except (ImportError, NameError):
-    PlivoClient = None  # type: ignore[assignment,misc]
-try:
     from .textrequest import TextrequestClient
 except (ImportError, NameError):
     TextrequestClient = None  # type: ignore[assignment,misc]
@@ -436,7 +432,6 @@ __all__ = [
     "WebexClient",
     "CampfireClient",
     "ClicksendsmsClient",
-    "PlivoClient",
     "TextrequestClient",
     "UniversalprintClient",
     "AzureeventgridClient",

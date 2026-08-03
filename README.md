@@ -203,7 +203,6 @@ The following connectors have been generated and validated with comprehensive te
 | **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated | 60 tests |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 49 tests |
 | **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated | 66 tests |
-| **Plivo** | `azure.connectors.plivo` | ✅ Complete | 🔄 SDK Generated | 19 tests |
 | **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated | 18 tests |
 | **Projectplace** | `azure.connectors.projectplace` | ✅ Complete | 🔄 SDK Generated | 22 tests |
 | **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated | 13 tests |
@@ -231,7 +230,7 @@ The following connectors have been generated and validated with comprehensive te
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 | **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 
-**Total:** 2042 connector tests + 141 SDK component tests
+**Total:** 2023 connector tests + 141 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

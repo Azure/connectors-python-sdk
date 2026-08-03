@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -318,7 +319,8 @@ class SendgridClient(ConnectorClientBase):
         Get the global suppression
         """
         request_url = (
-            f"{self._connection_runtime_url}/suppressions/global/{str(email)}"
+            f"{self._connection_runtime_url}"
+            f"/suppressions/global/{quote(str(email), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -348,7 +350,8 @@ class SendgridClient(ConnectorClientBase):
         Delete the global suppression
         """
         request_url = (
-            f"{self._connection_runtime_url}/suppressions/global/{str(email)}"
+            f"{self._connection_runtime_url}"
+            f"/suppressions/global/{quote(str(email), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -378,9 +381,9 @@ class SendgridClient(ConnectorClientBase):
             f"/v3"
             f"/contactdb"
             f"/lists"
-            f"/{str(list_id)}"
+            f"/{quote(str(list_id), safe='')}"
             f"/recipients"
-            f"/{str(recipient_id)}"
+            f"/{quote(str(recipient_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -410,7 +413,8 @@ class SendgridClient(ConnectorClientBase):
         Get a specific bounce for a given email address.
         """
         request_url = (
-            f"{self._connection_runtime_url}/suppression/bounces/{str(email)}"
+            f"{self._connection_runtime_url}"
+            f"/suppression/bounces/{quote(str(email), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -440,7 +444,8 @@ class SendgridClient(ConnectorClientBase):
         Delete an email address from your bounce list.
         """
         request_url = (
-            f"{self._connection_runtime_url}/suppression/bounces/{str(email)}"
+            f"{self._connection_runtime_url}"
+            f"/suppression/bounces/{quote(str(email), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -465,7 +470,8 @@ class SendgridClient(ConnectorClientBase):
         Check if email is in unsubscribed email list.
         """
         request_url = (
-            f"{self._connection_runtime_url}/unsubscribes/{str(email)}"
+            f"{self._connection_runtime_url}"
+            f"/unsubscribes/{quote(str(email), safe='')}"
         )
 
         response = await self.http_client.send_async(

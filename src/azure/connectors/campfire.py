@@ -201,7 +201,8 @@ class CampfireClient(ConnectorClientBase):
         Sends a message to the given room.
         """
         request_url = (
-            f"{self._connection_runtime_url}/room/{str(room_id)}/speak.json"
+            f"{self._connection_runtime_url}"
+            f"/room/{quote(str(room_id), safe='')}/speak.json"
         )
         query_params = []
         value = str(account)
@@ -243,7 +244,8 @@ class CampfireClient(ConnectorClientBase):
         Retrieves information about a user by given ID
         """
         request_url = (
-            f"{self._connection_runtime_url}/users/{str(user_id)}.json"
+            f"{self._connection_runtime_url}"
+            f"/users/{quote(str(user_id), safe='')}.json"
         )
         query_params = []
         value = str(account)

@@ -22,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Azure Event Grid** (`azureeventgrid.py`) connector client with unit tests and samples
 - **Universal Print** (`universalprint.py`) connector client with unit tests and samples
 - **TextRequest** (`textrequest.py`) connector client with unit tests and samples
-- **Plivo** (`plivo.py`) connector client with unit tests and samples
 - **ClickSend SMS** (`clicksendsms.py`) connector client with unit tests and samples
 - **Campfire** (`campfire.py`) connector client with unit tests and samples
 - **Webex** (`webex.py`) connector client with unit tests and samples

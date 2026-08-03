@@ -153,7 +153,7 @@ class TestSendgridClientOperations:
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
-            assert url.endswith("/suppressions/global/a@b.com")
+            assert url.endswith("/suppressions/global/a%40b.com")
             assert result == {"recipient_email": "a@b.com"}
 
     @pytest.mark.asyncio
@@ -175,7 +175,7 @@ class TestSendgridClientOperations:
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "DELETE"
-            assert url.endswith("/suppressions/global/a@b.com")
+            assert url.endswith("/suppressions/global/a%40b.com")
             assert result is None
 
     @pytest.mark.asyncio
@@ -222,7 +222,7 @@ class TestSendgridClientOperations:
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
-            assert url.endswith("/suppression/bounces/a@b.com")
+            assert url.endswith("/suppression/bounces/a%40b.com")
             assert result == {"email": "a@b.com"}
 
     @pytest.mark.asyncio
@@ -244,7 +244,7 @@ class TestSendgridClientOperations:
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "DELETE"
-            assert url.endswith("/suppression/bounces/a@b.com")
+            assert url.endswith("/suppression/bounces/a%40b.com")
             assert result is None
 
     @pytest.mark.asyncio
@@ -266,7 +266,7 @@ class TestSendgridClientOperations:
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
-            assert url.endswith("/unsubscribes/a@b.com")
+            assert url.endswith("/unsubscribes/a%40b.com")
             assert result == {"isUnsubscribed": True}
 
     @pytest.mark.asyncio

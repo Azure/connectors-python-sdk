@@ -1813,7 +1813,10 @@ class InsightlyClient(ConnectorClientBase):
 
         Delete task
         """
-        request_url = f"{self._connection_runtime_url}/Tasks/{str(task_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/Tasks/{quote(str(task_id), safe='')}"
+        )
 
         response = await self.http_client.send_async(
             "DELETE", request_url, body=None
@@ -1842,7 +1845,8 @@ class InsightlyClient(ConnectorClientBase):
         Follow a task
         """
         request_url = (
-            f"{self._connection_runtime_url}/Tasks/{str(task_id)}/Follow"
+            f"{self._connection_runtime_url}"
+            f"/Tasks/{quote(str(task_id), safe='')}/Follow"
         )
 
         response = await self.http_client.send_async(
@@ -1872,7 +1876,8 @@ class InsightlyClient(ConnectorClientBase):
         Delete project
         """
         request_url = (
-            f"{self._connection_runtime_url}/Projects/{str(project_id)}"
+            f"{self._connection_runtime_url}"
+            f"/Projects/{quote(str(project_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1901,7 +1906,10 @@ class InsightlyClient(ConnectorClientBase):
 
         Delete lead
         """
-        request_url = f"{self._connection_runtime_url}/Leads/{str(lead_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/Leads/{quote(str(lead_id), safe='')}"
+        )
 
         response = await self.http_client.send_async(
             "DELETE", request_url, body=None
@@ -1930,7 +1938,8 @@ class InsightlyClient(ConnectorClientBase):
         Delete contact
         """
         request_url = (
-            f"{self._connection_runtime_url}/Contacts/{str(contact_id)}"
+            f"{self._connection_runtime_url}"
+            f"/Contacts/{quote(str(contact_id), safe='')}"
         )
 
         response = await self.http_client.send_async(

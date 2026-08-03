@@ -611,7 +611,10 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         Delete a specific contact list
         """
-        request_url = f"{self._connection_runtime_url}/lists/{str(list_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(list_id), safe='')}"
+        )
 
         response = await self.http_client.send_async(
             "DELETE", request_url, body=None
@@ -641,7 +644,8 @@ class ClicksendsmsClient(ConnectorClientBase):
         Create New Contact
         """
         request_url = (
-            f"{self._connection_runtime_url}/lists/{str(list_id)}/contacts"
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(list_id), safe='')}/contacts"
         )
 
         response = await self.http_client.send_async(
@@ -671,7 +675,8 @@ class ClicksendsmsClient(ConnectorClientBase):
         Get all Contacts in a List
         """
         request_url = (
-            f"{self._connection_runtime_url}/lists/{str(list_id)}/contacts"
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(list_id), safe='')}/contacts"
         )
 
         response = await self.http_client.send_async(
@@ -703,7 +708,10 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/lists/{str(list_id)}/contacts/{str(contact_id)}"
+            f"/lists"
+            f"/{quote(str(list_id), safe='')}"
+            f"/contacts"
+            f"/{quote(str(contact_id), safe='')}"
         )
 
         response = await self.http_client.send_async(

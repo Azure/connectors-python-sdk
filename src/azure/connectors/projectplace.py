@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Any, Dict
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -247,7 +248,10 @@ class ProjectplaceClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1/external_notifications/{str(board_id)}/create_card"
+            f"/v1"
+            f"/external_notifications"
+            f"/{quote(str(board_id), safe='')}"
+            f"/create_card"
         )
 
         response = await self.http_client.send_async(
@@ -279,7 +283,10 @@ class ProjectplaceClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1/external_notifications/{str(board_id)}/move_card"
+            f"/v1"
+            f"/external_notifications"
+            f"/{quote(str(board_id), safe='')}"
+            f"/move_card"
         )
 
         response = await self.http_client.send_async(

@@ -139,7 +139,7 @@ class TestTextrequestClientOperations:
 
             url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
-            assert "/dashboards/7/contacts/+15551112222/messages" in url
+            assert "/dashboards/7/contacts/%2B15551112222/messages" in url
             assert "page=1" in url
             assert "page_size=20" in url
             assert result == {"items": []}
@@ -160,7 +160,7 @@ class TestTextrequestClientOperations:
             )
 
             assert mock_send.call_args[0][0] == "POST"
-            assert "/dashboards/7/contacts/+15551112222/messages" in mock_send.call_args[0][1]
+            assert "/dashboards/7/contacts/%2B15551112222/messages" in mock_send.call_args[0][1]
             assert mock_send.call_args.kwargs["body"] is payload
             assert result == {"message_id": "m1"}
 
@@ -215,7 +215,7 @@ class TestTextrequestClientOperations:
             )
 
             assert mock_send.call_args[0][0] == "GET"
-            assert "/dashboards/7/contacts/+15551112222" in mock_send.call_args[0][1]
+            assert "/dashboards/7/contacts/%2B15551112222" in mock_send.call_args[0][1]
             assert result == {"phone_number": "+15551112222"}
 
     @pytest.mark.asyncio
@@ -233,7 +233,7 @@ class TestTextrequestClientOperations:
             )
 
             assert mock_send.call_args[0][0] == "DELETE"
-            assert "/dashboards/7/contacts/+15551112222" in mock_send.call_args[0][1]
+            assert "/dashboards/7/contacts/%2B15551112222" in mock_send.call_args[0][1]
             assert result == {"ok": True}
 
     @pytest.mark.asyncio
@@ -252,7 +252,7 @@ class TestTextrequestClientOperations:
             )
 
             assert mock_send.call_args[0][0] == "POST"
-            assert "/dashboards/7/contacts/+15551112222" in mock_send.call_args[0][1]
+            assert "/dashboards/7/contacts/%2B15551112222" in mock_send.call_args[0][1]
             assert mock_send.call_args.kwargs["body"] is payload
             assert result == {"phone_number": "+15551112222"}
 

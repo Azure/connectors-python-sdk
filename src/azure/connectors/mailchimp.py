@@ -1036,7 +1036,7 @@ class MailchimpClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/campaigns/{str(campaign_id)}/actions/send"
+            f"/campaigns/{quote(str(campaign_id), safe='')}/actions/send"
         )
 
         response = await self.http_client.send_async(
@@ -1133,7 +1133,10 @@ class MailchimpClient(ConnectorClientBase):
 
         Batch subscribe or unsubscribe list members.
         """
-        request_url = f"{self._connection_runtime_url}/lists/{str(list_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(list_id), safe='')}"
+        )
         query_params = []
         if skip_merge_validation is not None:
             value = str(skip_merge_validation)
@@ -1177,7 +1180,8 @@ class MailchimpClient(ConnectorClientBase):
         Show all the members of a list
         """
         request_url = (
-            f"{self._connection_runtime_url}/lists/{str(list_id)}/members"
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(list_id), safe='')}/members"
         )
         query_params = []
         if count is not None:
@@ -1221,7 +1225,8 @@ class MailchimpClient(ConnectorClientBase):
         Add or update a list member
         """
         request_url = (
-            f"{self._connection_runtime_url}/lists/{str(list_id)}/members"
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(list_id), safe='')}/members"
         )
 
         response = await self.http_client.send_async(
@@ -1281,7 +1286,10 @@ class MailchimpClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/lists/replacemailwithhash/{str(list_id)}/members"
+            f"/lists"
+            f"/replacemailwithhash"
+            f"/{quote(str(list_id), safe='')}"
+            f"/members"
         )
 
         response = await self.http_client.send_async(
@@ -1308,7 +1316,10 @@ class MailchimpClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/lists/replacemailwithhash/{str(list_id)}/members"
+            f"/lists"
+            f"/replacemailwithhash"
+            f"/{quote(str(list_id), safe='')}"
+            f"/members"
         )
 
         response = await self.http_client.send_async(

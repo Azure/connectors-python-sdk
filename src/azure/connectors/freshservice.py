@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -272,7 +273,7 @@ class FreshserviceClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v2/tickets/{str(ticket_id)}/notes"
+            f"/api/v2/tickets/{quote(str(ticket_id), safe='')}/notes"
         )
 
         response = await self.http_client.send_async(
@@ -331,7 +332,8 @@ class FreshserviceClient(ConnectorClientBase):
         Update a ticket (only specified values will be updated).
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v2/tickets/{str(ticket_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v2/tickets/{quote(str(ticket_id), safe='')}"
         )
 
         response = await self.http_client.send_async(

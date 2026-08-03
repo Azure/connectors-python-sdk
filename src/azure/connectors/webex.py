@@ -956,7 +956,8 @@ class WebexClient(ConnectorClientBase):
         Shows details for a message, by message ID.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v1/messages/{str(message_id)}"
+            f"{self._connection_runtime_url}"
+            f"/v1/messages/{quote(str(message_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1130,7 +1131,10 @@ class WebexClient(ConnectorClientBase):
 
         Return details of a given space
         """
-        request_url = f"{self._connection_runtime_url}/v1/rooms/{str(room_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1/rooms/{quote(str(room_id), safe='')}"
+        )
 
         response = await self.http_client.send_async(
             "GET", request_url, body=None
