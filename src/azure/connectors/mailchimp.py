@@ -196,7 +196,7 @@ class GetMembersResponseModel:
 @dataclass
 class CampaignResponseModel:
     """
-    Response for New Campaign (V2)
+    Response for New Campaign
     """
 
     id: Optional[str] = None
@@ -1251,7 +1251,7 @@ class MailchimpClient(ConnectorClientBase):
         input: NewCampaignRequest,
     ) -> dict[str, Any] | None:
         """
-        New Campaign (V2)
+        New Campaign
 
         Create a new campaign based on a Campaign Type, Recipients list and
         Campaign Settings (subject line, title, from_name and reply_to) (V2).

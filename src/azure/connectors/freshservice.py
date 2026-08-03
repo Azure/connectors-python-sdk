@@ -24,7 +24,7 @@ from azure.connectors.sdk import (
 @dataclass
 class AddNoteResponse:
     """
-    Response for Add a note to a ticket (V2)
+    Response for Add a note to a ticket
     """
 
     conversation: Optional[Dict[str, Any]] = None
@@ -33,7 +33,7 @@ class AddNoteResponse:
 @dataclass
 class CreateUpdateTicketResponse:
     """
-    Response for Create a ticket (V2)
+    Response for Create a ticket
     """
 
     ticket: Optional[Dict[str, Any]] = None
@@ -42,7 +42,7 @@ class CreateUpdateTicketResponse:
 @dataclass
 class ListTicketResponse:
     """
-    Response for When a ticket is created (V2)
+    Response for When a ticket is created
     """
 
     created_at: Optional[str] = None
@@ -267,7 +267,7 @@ class FreshserviceClient(ConnectorClientBase):
         ticket_id: str,
     ) -> dict[str, Any] | None:
         """
-        Add a note to a ticket (V2)
+        Add a note to a ticket
 
         Add a private or public note to a ticket.
         """
@@ -298,7 +298,7 @@ class FreshserviceClient(ConnectorClientBase):
         input: CreateTicketRequest,
     ) -> dict[str, Any] | None:
         """
-        Create a ticket (V2)
+        Create a ticket
 
         Create a ticket.
         """
@@ -327,7 +327,7 @@ class FreshserviceClient(ConnectorClientBase):
         ticket_id: str,
     ) -> dict[str, Any] | None:
         """
-        Update a ticket (V2)
+        Update a ticket
 
         Update a ticket (only specified values will be updated).
         """

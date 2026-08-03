@@ -496,7 +496,7 @@ class SendgridClient(ConnectorClientBase):
         input: EmailRequest,
     ) -> dict[str, Any] | None:
         """
-        Send email (V4)
+        Send email
 
         Sends an email (V4). Limited to 1000 recipients.
         """
