@@ -172,7 +172,8 @@ async def example_4_get_messages():
             )
 
             if result:
-                messages = result.get("QueueMessagesList", result)
+                queue_messages_list = result.get("QueueMessagesList", {})
+                messages = queue_messages_list.get("QueueMessage", [])
                 if isinstance(messages, list):
                     print(f"Retrieved {len(messages)} message(s) from '{QUEUE_NAME}':")
                     for i, msg in enumerate(messages, 1):
@@ -180,6 +181,8 @@ async def example_4_get_messages():
                         print(f"    ID: {msg.get('MessageId', 'N/A')}")
                         print(f"    Text: {msg.get('MessageText', 'N/A')[:50]}...")
                         print(f"    Pop Receipt: {msg.get('PopReceipt', 'N/A')[:20]}...")
+                        print(f"    Dequeue Count: {msg.get('DequeueCount', 'N/A')}")
+                        print(f"    Next Visible: {msg.get('TimeNextVisible', 'N/A')}")
                 else:
                     print(f"Response: {result}")
             else:

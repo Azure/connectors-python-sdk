@@ -133,12 +133,20 @@ class TestCreateFileItem:
             input_data = CreateFileItemInput(
                 additional_properties={"field1": "value1", "field2": "value2"}
             )
-            result = await client.create_file_item_async(input=input_data)
+            result = await client.create_file_item_async(
+                input=input_data,
+                source="me",
+                drive="drive-1",
+                file="file-1"
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/api/templates/getFile" in call_args[0][1]
+            assert "source=me" in call_args[0][1]
+            assert "drive=drive-1" in call_args[0][1]
+            assert "file=file-1" in call_args[0][1]
             assert isinstance(result, bytes)
 
     @pytest.mark.asyncio
@@ -157,7 +165,12 @@ class TestCreateFileItem:
             mock_send.return_value = mock_response
 
             input_data = CreateFileItemInput()
-            result = await client.create_file_item_async(input=input_data)
+            result = await client.create_file_item_async(
+                input=input_data,
+                source="me",
+                drive="drive-1",
+                file="file-1"
+            )
 
             assert result == b''
 
@@ -178,7 +191,12 @@ class TestCreateFileItem:
 
             input_data = CreateFileItemInput()
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_file_item_async(input=input_data)
+                await client.create_file_item_async(
+                    input=input_data,
+                    source="me",
+                    drive="drive-1",
+                    file="file-1"
+                )
 
             assert exc_info.value.status_code == 400
 
@@ -333,13 +351,17 @@ class TestGetFilePDF:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_file_p_d_f_async(format="PDF")
+            result = await client.get_file_p_d_f_async(
+                source="me",
+                drive="drive-1",
+                file="file-1"
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/api/templates/convertFile" in call_args[0][1]
-            assert "format=PDF" in call_args[0][1]
+            assert "format=pdf" in call_args[0][1]
             assert isinstance(result, bytes)
 
     @pytest.mark.asyncio
@@ -358,7 +380,9 @@ class TestGetFilePDF:
             mock_send.return_value = mock_response
 
             await client.get_file_p_d_f_async(
-                format="PDF",
+                source="me",
+                drive="drive-1",
+                file="file-1",
                 extract_sensitivity_label="true",
                 fetch_sensitivity_label_metadata="true"
             )
@@ -382,7 +406,11 @@ class TestGetFilePDF:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_file_p_d_f_async(format="PDF")
+            result = await client.get_file_p_d_f_async(
+                source="me",
+                drive="drive-1",
+                file="file-1"
+            )
 
             assert result == b''
 
@@ -402,30 +430,33 @@ class TestGetFilePDF:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_p_d_f_async(format="PDF")
+                await client.get_file_p_d_f_async(
+                    source="me",
+                    drive="drive-1",
+                    file="file-1"
+                )
 
             assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_convert_with_none_format(self, mock_token_provider):
-        """Test PDF conversion with None format parameter."""
+    async def test_get_drives_injects_personal_source(self, mock_token_provider):
+        """Test drive discovery injects the personal source value."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
 
-        mock_response = MockResponse(status=200, text="PDF_CONTENT")
+        mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_file_p_d_f_async(format=None)
+            await client.get_drives_async()
 
             call_args = mock_send.call_args
-            # format should not be in query params when None
-            assert "format=" not in call_args[0][1]
+            assert "source=me" in call_args[0][1]
 
 
 class TestDataclasses:

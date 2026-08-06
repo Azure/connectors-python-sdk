@@ -72,12 +72,8 @@ async def example_3_get_questions(form_id: str) -> None:
 
     credential = DefaultAzureCredential()
     async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        questions_response = await client.get_questions_async(form_id=form_id)
-        questions = questions_response.get("value", []) if questions_response else []
-
-        print(f"Found {len(questions)} questions")
-        for question in questions[:10]:
-            print(f"  - {question.get('title')} ({question.get('id')})")
+        await client.get_questions_async(form_id=form_id)
+        print("Question metadata request completed.")
 
 
 async def main() -> None:

@@ -37,6 +37,9 @@ CONNECTION_RUNTIME_URL = os.environ.get(
     "WORDONLINEBUSINESS_CONNECTION_URL",
     ""
 )
+SOURCE = os.environ.get("WORDONLINEBUSINESS_SOURCE", "me")
+DRIVE = os.environ.get("WORDONLINEBUSINESS_DRIVE", "")
+FILE = os.environ.get("WORDONLINEBUSINESS_FILE", "")
 
 
 async def example_1_populate_word_template():
@@ -62,7 +65,12 @@ async def example_1_populate_word_template():
                 }
             )
 
-            result = await client.create_file_item_async(input=input_data)
+            result = await client.create_file_item_async(
+                input=input_data,
+                source=SOURCE,
+                drive=DRIVE,
+                file=FILE
+            )
 
             print(f"Generated document size: {len(result)} bytes")
 
@@ -143,7 +151,11 @@ async def example_4_convert_word_to_pdf():
 
     async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_file_p_d_f_async(format="PDF")
+            result = await client.get_file_p_d_f_async(
+                source=SOURCE,
+                drive=DRIVE,
+                file=FILE
+            )
 
             print(f"PDF generated, size: {len(result)} bytes")
 
@@ -165,7 +177,9 @@ async def example_5_convert_with_sensitivity_labels():
     async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             result = await client.get_file_p_d_f_async(
-                format="PDF",
+                source=SOURCE,
+                drive=DRIVE,
+                file=FILE,
                 extract_sensitivity_label="true",
                 fetch_sensitivity_label_metadata="true"
             )
@@ -183,6 +197,10 @@ async def main():
     if not CONNECTION_RUNTIME_URL:
         print("Error: WORDONLINEBUSINESS_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
+        return
+
+    if not DRIVE or not FILE:
+        print("Error: WORDONLINEBUSINESS_DRIVE and WORDONLINEBUSINESS_FILE must be set.")
         return
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")

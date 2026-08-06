@@ -306,6 +306,11 @@ try:
 except (ImportError, NameError):
     SigninghubClient = None  # type: ignore[assignment,misc]
 
+try:
+    from .zohosign import ZohosignClient
+except (ImportError, NameError):
+    ZohosignClient = None  # type: ignore[assignment,misc]
+
 __version__ = '0.4.0b1'
 
 __all__ = [
@@ -382,4 +387,5 @@ __all__ = [
     "PipedriveClient",
     "DocuwareClient",
     "SigninghubClient",
+    "ZohosignClient",
 ]

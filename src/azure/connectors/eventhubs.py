@@ -23,17 +23,30 @@ from azure.connectors.sdk import (
 
 @dataclass
 class Event:
-    """Response for When events are available in Event Hub"""
+    """
+    Response for When events are available in Event Hub
+    """
 
-    content_data: Optional[ObjectEntity] = None
-    properties: Optional[Dict[str, Any]] = None
+    content_data: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "ContentData"},
+    )
+    properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Properties"},
+    )
     """Key-value pairs for each application property"""
-    system_properties: Optional[SystemProperties] = None
+    system_properties: Optional[SystemProperties] = field(
+        default=None,
+        metadata={"wire_name": "SystemProperties"},
+    )
 
 
 @dataclass
 class SendEventsInput:
-    """Send one or more events to the Event Hub partition"""
+    """
+    Send one or more events to the Event Hub partition
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -44,7 +57,9 @@ class SendEventsInput:
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Response for Generate event schema V2
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -55,25 +70,47 @@ class ObjectEntity:
 
 @dataclass
 class SystemProperties:
-    """Definition: SystemProperties"""
+    """
+    Definition: SystemProperties
+    """
 
-    enqueued_time_utc: Optional[str] = None
+    enqueued_time_utc: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "EnqueuedTimeUtc"},
+    )
     """Enqueued time"""
-    offset: Optional[str] = None
+    offset: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Offset"},
+    )
     """Offset in a partition"""
-    partition_key: Optional[str] = None
+    partition_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PartitionKey"},
+    )
     """Partition Key"""
-    sequence_number: Optional[int] = None
+    sequence_number: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "SequenceNumber"},
+    )
     """Sequence number"""
 
 
 @dataclass
 class SendEvent:
-    """Definition: SendEvent"""
+    """
+    Definition: SendEvent
+    """
 
-    content_data: Optional[str] = None
+    content_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentData"},
+    )
     """Content of the event"""
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Properties"},
+    )
     """Key-value pairs for each application property"""
 
 
@@ -111,65 +148,95 @@ class EventhubsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "eventhubs"
 
-    async def on_new_events_async(
+    async def send_event_async(
         self,
+        input: SendEvent,
         event_hub_name: str,
-        content_type: Optional[str] = None,
-        content_schema: Optional[str] = None,
-        consumer_group_name: Optional[str] = None,
-        minimum_partition_key: Optional[str] = None,
-        maximum_partition_key: Optional[str] = None,
-        maximum_events_count: Optional[str] = None,
-    ):
+        partition_key: Optional[str] = None,
+    ) -> None:
         """
-        When events are available in Event Hub
+        Send event
 
-        When events are available in Event Hub.
+        Send event.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(event_hub_name)}/events/batch/head"
+            f"/{quote(str(event_hub_name), safe='')}/events"
         )
         query_params = []
-        if content_type is not None:
-            value = str(content_type)
-            if isinstance(content_type, bool):
+        if partition_key is not None:
+            value = str(partition_key)
+            if isinstance(partition_key, bool):
                 value = value.lower()
-            query_params.append(f"contentType={quote(value)}")
-        if content_schema is not None:
-            value = str(content_schema)
-            if isinstance(content_schema, bool):
-                value = value.lower()
-            query_params.append(f"contentSchema={quote(value)}")
-        if consumer_group_name is not None:
-            value = str(consumer_group_name)
-            if isinstance(consumer_group_name, bool):
-                value = value.lower()
-            query_params.append(f"consumerGroupName={quote(value)}")
-        if minimum_partition_key is not None:
-            value = str(minimum_partition_key)
-            if isinstance(minimum_partition_key, bool):
-                value = value.lower()
-            query_params.append(f"minimumPartitionKey={quote(value)}")
-        if maximum_partition_key is not None:
-            value = str(maximum_partition_key)
-            if isinstance(maximum_partition_key, bool):
-                value = value.lower()
-            query_params.append(f"maximumPartitionKey={quote(value)}")
-        if maximum_events_count is not None:
-            value = str(maximum_events_count)
-            if isinstance(maximum_events_count, bool):
-                value = value.lower()
-            query_params.append(f"maximumEventsCount={quote(value)}")
+            query_params.append(f"partitionKey={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def send_events_async(
+        self,
+        input: SendEventsInput,
+        event_hub_name: str,
+        partition_key: str,
+    ) -> None:
+        """
+        Send one or more events to the Event Hub partition
+
+        Send one or more events to the Event Hub partition.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/{quote(str(event_hub_name), safe='')}/events/batch"
+        )
+        query_params = []
+        value = str(partition_key)
+        if isinstance(partition_key, bool):
+            value = value.lower()
+        query_params.append(f"partitionKey={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def get_event_hubs_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get all Event Hubs in a namespace
+
+        Get all Event Hubs in a namespace.
+        """
+        request_url = f"{self._connection_runtime_url}/eventhubs"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -179,67 +246,158 @@ class EventhubsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_event_async(
+    async def get_content_types_async(
         self,
-        input: SendEvent,
-        event_hub_name: str,
-        partition_key: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Send event
+        Get all content types
 
-        Send event.
+        Get all content types.
         """
-        path = f"{self._connection_runtime_url}/{str(event_hub_name)}/events"
-        query_params = []
-        if partition_key is not None:
-            value = str(partition_key)
-            if isinstance(partition_key, bool):
-                value = value.lower()
-            query_params.append(f"partitionKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
+        request_url = f"{self._connection_runtime_url}/contenttypes"
 
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def send_events_async(
-        self,
-        input: SendEventsInput,
-        event_hub_name: str,
-        partition_key: Optional[str] = None,
-    ):
-        """
-        Send one or more events to the Event Hub partition
-
-        Send one or more events to the Event Hub partition.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(event_hub_name)}/events/batch"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-        query_params = []
-        if partition_key is not None:
-            value = str(partition_key)
-            if isinstance(partition_key, bool):
-                value = value.lower()
-            query_params.append(f"partitionKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                "POST",
-                path,
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_consumer_groups_async(
+        self,
+        event_hub_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get all the consumer groups for an event hub
+
+        Get all the consumer groups for an event hub.
+        """
+        request_url = f"{self._connection_runtime_url}/consumergroups"
+        query_params = []
+        value = str(event_hub_name)
+        if isinstance(event_hub_name, bool):
+            value = value.lower()
+        query_params.append(f"eventHubName={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_partition_keys_async(
+        self,
+        event_hub_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get all partition keys in an Event Hub
+
+        Get all partition keys in an Event Hub.
+        """
+        request_url = f"{self._connection_runtime_url}/partitions"
+        query_params = []
+        value = str(event_hub_name)
+        if isinstance(event_hub_name, bool):
+            value = value.lower()
+        query_params.append(f"eventHubName={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def generate_event_schema_async(
+        self,
+        content_type: str,
+        content_schema: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Generate event schema V2
+
+        Generate event schema V2.
+        """
+        request_url = f"{self._connection_runtime_url}/eventschemaV2"
+        query_params = []
+        value = str(content_type)
+        if isinstance(content_type, bool):
+            value = value.lower()
+        query_params.append(f"contentType={quote(value)}")
+        if content_schema is not None:
+            value = str(content_schema)
+            if isinstance(content_schema, bool):
+                value = value.lower()
+            query_params.append(f"contentSchema={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewEvents": {
+        "operation_id": "OnNewEvents",
+        "path": "/{connectionId}/{eventHubName}/events/batch/head",
+        "method": "get",
+        "required_parameters": ["eventHubName"],
+        "callback_payload_type": "Event",
+    },
+}

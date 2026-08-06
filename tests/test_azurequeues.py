@@ -11,9 +11,11 @@ from azure.connectors.azurequeues import (
     PutMessageInput,
     StorageAccountList,
     StorageAccount,
-    Queue,
+    QueueInfo,
     MessagePost,
     QueueMessage,
+    QueueMessagesList,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -144,31 +146,19 @@ class TestDeleteMessage:
             assert "popreceipt=receipt-abc" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_without_popreceipt(self, mock_token_provider):
-        """Test DELETE request without popreceipt parameter."""
+    async def test_popreceipt_is_required(self, mock_token_provider):
+        """Test DELETE requires a pop receipt."""
         client = AzurequeuesClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
 
-        mock_response = MockResponse(status=204, text="")
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
+        with pytest.raises(TypeError):
             await client.delete_message_async(
                 storage_account_name="mystorageaccount",
                 queue_name="myqueue",
-                message_id="msg-123",
-                popreceipt=None
+                message_id="msg-123"
             )
-
-            call_args = mock_send.call_args
-            url = call_args[0][1]
-            assert "popreceipt=" not in url
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -360,149 +350,15 @@ class TestListQueues:
             assert exc_info.value.status_code == 404
 
 
-class TestOnMessages:
-    """Tests for on_messages_async method (trigger)."""
+class TestTriggerOperations:
+    """Tests for trigger registration contracts."""
 
-    @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
-        """Test successful GET trigger request."""
-        client = AzurequeuesClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"queueMessagesList": [{"messageId": "msg1", "messageText": "Triggered!"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_messages_async(
-                storage_account_name="mystorageaccount",
-                queue_name="myqueue"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/message_trigger" in call_args[0][1]
-            assert result["queueMessagesList"][0]["messageText"] == "Triggered!"
-
-    @pytest.mark.asyncio
-    async def test_with_visibilitytimeout(self, mock_token_provider):
-        """Test GET trigger request with visibilitytimeout parameter."""
-        client = AzurequeuesClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='{"queueMessagesList": []}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_messages_async(
-                storage_account_name="mystorageaccount",
-                queue_name="myqueue",
-                visibilitytimeout="60"
-            )
-
-            call_args = mock_send.call_args
-            url = call_args[0][1]
-            assert "visibilitytimeout=60" in url
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = AzurequeuesClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=404, text='{"error": "Queue not found"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.on_messages_async(
-                    storage_account_name="mystorageaccount",
-                    queue_name="nonexistent"
-                )
-
-            assert exc_info.value.status_code == 404
-
-
-class TestOnMessageThresholdReached:
-    """Tests for on_message_threshold_reached_async method (trigger)."""
-
-    @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
-        """Test successful GET trigger request."""
-        client = AzurequeuesClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"triggered": true, "count": 100}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_message_threshold_reached_async(
-                storage_account_name="mystorageaccount",
-                queue_name="myqueue",
-                threshold="50"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/count_trigger" in call_args[0][1]
-            assert "threshold=50" in call_args[0][1]
-            assert result["triggered"] is True
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = AzurequeuesClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=400, text='{"error": "Invalid threshold"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.on_message_threshold_reached_async(
-                    storage_account_name="mystorageaccount",
-                    queue_name="myqueue",
-                    threshold="invalid"
-                )
-
-            assert exc_info.value.status_code == 400
+    def test_triggers_are_registered_without_callable_methods(self):
+        """Test polling triggers are metadata-only operations."""
+        assert "OnMessages_V2" in TRIGGER_OPERATIONS
+        assert "OnMessageThresholdReached_V2" in TRIGGER_OPERATIONS
+        assert not hasattr(AzurequeuesClient, "on_messages_async")
+        assert not hasattr(AzurequeuesClient, "on_message_threshold_reached_async")
 
 
 class TestPutMessage:
@@ -632,13 +488,15 @@ class TestDataClasses:
     """Tests for data class creation and attributes."""
 
     def test_messages(self):
-        """Test Messages dataclass creation."""
-        msg = QueueMessage(message_id="msg1", message_text="Hello")
-        messages = Messages(queue_messages_list=[msg])
+        """Test the nested queue messages response shape."""
+        message = QueueMessage(message_id="msg1", message_text="Hello")
+        queue_messages = QueueMessagesList(queue_message=[message])
+        messages = Messages(queue_messages_list=queue_messages)
 
         assert messages.queue_messages_list is not None
-        assert len(messages.queue_messages_list) == 1
-        assert messages.queue_messages_list[0].message_id == "msg1"
+        assert messages.queue_messages_list.queue_message is not None
+        assert len(messages.queue_messages_list.queue_message) == 1
+        assert messages.queue_messages_list.queue_message[0].message_id == "msg1"
 
     def test_queue_array(self):
         """Test QueueArray dataclass creation."""
@@ -678,8 +536,8 @@ class TestDataClasses:
         assert account.display_name == "My Storage Account"
 
     def test_queue(self):
-        """Test Queue dataclass creation."""
-        queue = Queue(name="myqueue")
+        """Test QueueInfo dataclass creation."""
+        queue = QueueInfo(name="myqueue")
 
         assert queue.name == "myqueue"
 
@@ -697,7 +555,7 @@ class TestDataClasses:
             insertion_time="2024-01-15T10:30:00Z",
             expiration_time="2024-01-22T10:30:00Z",
             pop_receipt="receipt-abc",
-            time_next_visible="2024-01-15T10:35:00Z",
+            next_visible_time="2024-01-15T10:35:00Z",
             dequeue_count="1"
         )
 
@@ -706,7 +564,7 @@ class TestDataClasses:
         assert message.insertion_time == "2024-01-15T10:30:00Z"
         assert message.expiration_time == "2024-01-22T10:30:00Z"
         assert message.pop_receipt == "receipt-abc"
-        assert message.time_next_visible == "2024-01-15T10:35:00Z"
+        assert message.next_visible_time == "2024-01-15T10:35:00Z"
         assert message.dequeue_count == "1"
 
 

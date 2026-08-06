@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
@@ -23,7 +23,40 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateFileItemInput:
-    """Populate a Microsoft Word template"""
+    """
+    Populate a Microsoft Word template
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class GetSourcesResponse:
+    """
+    Response for Get sources
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class GetDrivesResponse:
+    """
+    Response for Get drives
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class GetFileSchemaResponse:
+    """
+    Response for Fetches the schema of the selected file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -34,7 +67,9 @@ class CreateFileItemInput:
 
 @dataclass
 class SensitivityLabelMetadata:
-    """Definition: SensitivityLabelMetadata"""
+    """
+    Definition: SensitivityLabelMetadata
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -45,7 +80,9 @@ class SensitivityLabelMetadata:
 
 @dataclass
 class GetFiles:
-    """Definition: GetFiles"""
+    """
+    Definition: GetFiles
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -56,30 +93,46 @@ class GetFiles:
 
 @dataclass
 class BlobMetadata:
-    """Definition: BlobMetadata"""
+    """
+    Definition: BlobMetadata
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique identifier of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The file locator of the file or folder."""
 
 
 @dataclass
 class ContentBody:
-    """Definition: ContentBody"""
+    """
+    Definition: ContentBody
+    """
 
     content: Optional[str] = None
     """Content of the word document"""
@@ -122,39 +175,59 @@ class WordonlinebusinessClient(ConnectorClientBase):
     async def create_file_item_async(
         self,
         input: CreateFileItemInput,
-    ):
+        source: str,
+        drive: str,
+        file: str,
+    ) -> bytes:
         """
         Populate a Microsoft Word template
 
         Reads a Microsoft Word template to then fill the template fields with
         selected dynamic values to generate a Word Document.
         """
-        path = f"{self._connection_runtime_url}/api/templates/getFile"
+        request_url = f"{self._connection_runtime_url}/api/templates/getFile"
+        query_params = []
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(drive)
+        if isinstance(drive, bool):
+            value = value.lower()
+        query_params.append(f"drive={quote(value)}")
+        value = str(file)
+        if isinstance(file, bool):
+            value = value.lower()
+        query_params.append(f"file={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def create_word_file_with_content_async(
         self,
         input: ContentBody,
         file_name: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a Microsoft Word document with the given content
 
         Creates a Microsoft Word file with the given content in the root
         directory (use only from Copilot Studio)
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/api/templates/createWordFileWithContent"
         )
@@ -165,14 +238,16 @@ class WordonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fileName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -184,17 +259,34 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
     async def get_file_p_d_f_async(
         self,
-        format: Optional[str],
+        source: str,
+        drive: str,
+        file: str,
         extract_sensitivity_label: Optional[str] = None,
         fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+    ) -> bytes:
         """
         Convert Word Document to PDF
 
         Gets a PDF version of the selected file
         """
-        path = f"{self._connection_runtime_url}/api/templates/convertFile"
+        request_url = (
+            f"{self._connection_runtime_url}/api/templates/convertFile"
+        )
         query_params = []
+        query_params.append("format=" + quote("pdf"))
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(drive)
+        if isinstance(drive, bool):
+            value = value.lower()
+        query_params.append(f"drive={quote(value)}")
+        value = str(file)
+        if isinstance(file, bool):
+            value = value.lower()
+        query_params.append(f"file={quote(value)}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
@@ -205,22 +297,127 @@ class WordonlinebusinessClient(ConnectorClientBase):
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
-        if format is not None:
-            value = str(format)
-            if isinstance(format, bool):
-                value = value.lower()
-            query_params.append(f"format={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
+
+    async def get_sources_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get sources
+
+        Get a list of sources.
+        """
+        request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
+        query_params = []
+        query_params.append("$top=" + quote(""))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_drives_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get drives
+
+        Get a list of drives.
+        """
+        request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
+        query_params = []
+        query_params.append("source=" + quote("me"))
+        query_params.append("$select=" + quote(""))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_file_schema_async(
+        self,
+        source: str,
+        drive: str,
+        file: str,
+    ) -> dict[str, Any] | None:
+        """
+        Fetches the schema of the selected file
+
+        Fetches the schema of the selected file.
+        """
+        request_url = f"{self._connection_runtime_url}/api/templates/schema"
+        query_params = []
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(drive)
+        if isinstance(drive, bool):
+            value = value.lower()
+        query_params.append(f"drive={quote(value)}")
+        value = str(file)
+        if isinstance(file, bool):
+            value = value.lower()
+        query_params.append(f"file={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)

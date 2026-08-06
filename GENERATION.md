@@ -15,18 +15,10 @@ The **CodefulSdkGenerator** tool generates typed Python clients from managed con
 
 ### Tools Required
 
-1. **ARMClient** - For authenticated Azure Resource Manager API calls
-   - Install via Chocolatey: `choco install armclient`
-   - Install via WinGet: `winget install projectkudu.ARMClient`
-   - The generator defaults to `C:\ProgramData\chocolatey\bin\ARMClient.exe`
-   - **If ARMClient is installed elsewhere** (e.g., via WinGet), set the `ARMCLIENT_PATH` environment variable:
-
-     ```powershell
-     # Find your ARMClient path
-     (Get-Command armclient).Source
-     # Set it persistently
-     [System.Environment]::SetEnvironmentVariable("ARMCLIENT_PATH", (Get-Command armclient).Source, "User")
-     ```
+1. **Azure CLI** - Provides the developer credential used by `DefaultAzureCredential`
+    - Install from [Microsoft Learn](https://learn.microsoft.com/cli/azure/install-azure-cli)
+    - Authenticate with `az login`
+    - Select the source subscription with `az account set --subscription <subscription-id>`
 
 2. **Azure Subscription** - Access to an Azure subscription with Logic Apps Standard
    - Required for fetching connector swagger definitions from ARM
@@ -39,9 +31,8 @@ Set environment variables (or use defaults):
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ARMCLIENT_PATH` | Path to ARMClient.exe | `C:\ProgramData\chocolatey\bin\ARMClient.exe` |
 | `ARMCACHE_PATH` | Cache directory for ARM responses | `%TEMP%\armcache` |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | (built-in default) |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | Active Azure CLI subscription |
 | `AZURE_RESOURCE_GROUP` | Resource group with Logic App | (built-in default) |
 | `AZURE_LOGICAPP_SITE` | Logic App Standard site name | (built-in default) |
 | `AZURE_LOCATION` | Azure region for managed APIs | `westus` |
@@ -75,23 +66,20 @@ Generates typed async Python clients for calling connectors directly from Azure 
 
 ```powershell
 # Generate all connectors
-LogicAppsCompiler.exe <output-directory> unused --directClient --language=python
+LogicAppsCompiler.exe <output-directory> --pythonDirectClient
 
 # Generate specific connectors only
-LogicAppsCompiler.exe <output-directory> unused --directClient --language=python --connectors=office365,sharepointonline,teams
+LogicAppsCompiler.exe <output-directory> --pythonDirectClient --connectors=office365,sharepointonline,teams
 
 # Example: Generate to this SDK repo's src/azure/connectors folder
-LogicAppsCompiler.exe "c:\Users\victoriahall\Documents\repos\connectors-python-sdk\src\azure\connectors" unused --directClient --language=python --connectors=office365
-
-# Alternative: Legacy alias (shorter but deprecated)
-LogicAppsCompiler.exe <output-directory> unused --pythonDirectClient --connectors=office365
+LogicAppsCompiler.exe "c:\Users\victoriahall\Documents\repos\connectors-python-sdk\src\azure\connectors" --pythonDirectClient --connectors=office365
 ```
 
 **Output structure per connector:**
 
 - `{connector}.py` - Combined dataclass models and client in one file (e.g., `office365.py`, `sharepointonline.py`)
 
-**Note:** The `--directClient --language=python` syntax is the canonical form. The legacy `--pythonDirectClient` alias is also supported. Do NOT use `--directClient --python` — that flag is not recognized and defaults to C#.
+**Note:** The CLI accepts one positional output directory. Use `--pythonDirectClient` for Python generation.
 
 ### Generate C# DirectClient SDK
 
@@ -99,10 +87,10 @@ For the .NET SDK, use `--directClient` without `--language` (defaults to C#) or 
 
 ```powershell
 # Generate C# clients (default language)
-LogicAppsCompiler.exe <output-directory> unused --directClient --connectors=office365
+LogicAppsCompiler.exe <output-directory> --directClient --connectors=office365
 
 # Or explicitly
-LogicAppsCompiler.exe <output-directory> unused --directClient --language=csharp --connectors=office365
+LogicAppsCompiler.exe <output-directory> --directClient --language=csharp --connectors=office365
 ```
 
 ## Generated Code Structure
@@ -304,16 +292,18 @@ After generating a new connector client:
 
 ## Troubleshooting
 
-### ARMClient Authentication
+### Azure Authentication
 
 If generation fails with authentication errors:
 
 ```powershell
-# Login with ARMClient
-armclient login
+# Authenticate the Azure CLI credential used by DefaultAzureCredential
+az login
+az account set --subscription $env:AZURE_SUBSCRIPTION_ID
 
-# Verify token
-armclient token
+# Verify the active subscription and ARM token
+az account show --output table
+az account get-access-token --resource https://management.azure.com/ --output table
 ```
 
 ### Connector Not Found
@@ -328,7 +318,7 @@ If a connector name is not recognized:
 
 If generated code has syntax errors or type issues:
 
-1. Check BPM repository is up to date (use `--directClient --language=python` or legacy `--pythonDirectClient`)
+1. Check the BPM repository is up to date and use `--pythonDirectClient`
 2. Fix the generator, not the generated output — see [Generator File Locations](#generator-file-locations-bpm-repository)
 3. Report issues to BPM team with connector name and error details (file in [BPM Azure DevOps](https://dev.azure.com/msazure/One/_workitems))
 4. Add the defect to the [Known Generator Defects Registry](#known-generator-defects-registry)
@@ -343,7 +333,7 @@ If generated code has syntax errors or type issues:
 $outputDir = "c:\Users\victoriahall\Documents\repos\connectors-python-sdk\src\azure\connectors"
 
 # Generate three core connectors
-LogicAppsCompiler.exe $outputDir unused --directClient --language=python --connectors=office365,sharepointonline,teams
+LogicAppsCompiler.exe $outputDir --pythonDirectClient --connectors=office365,sharepointonline,teams
 
 # Verify output
 Get-ChildItem $outputDir -Filter *.py
@@ -354,7 +344,7 @@ Get-ChildItem $outputDir -Filter *.py
 ```powershell
 # Generate all currently validated connectors
 $connectors = "office365,sharepointonline,teams,kusto,msgraphgroupsanduser"
-LogicAppsCompiler.exe $outputDir unused --directClient --language=python --connectors=$connectors
+LogicAppsCompiler.exe $outputDir --pythonDirectClient --connectors=$connectors
 ```
 
 ## Code Generation Best Practices
@@ -480,6 +470,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Teams template variable causes NameError at import | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | `teams` | Workaround (skip import test) | `DynamicValueLookup` references undefined variable; test skipped with issue link |
 | Void operations not checking response status | Fixed in generator | Pre-2024 connectors | Fixed | Regenerate affected connectors: `azurequeues`, `azuretables`, `commondataservice`, `eventhubs`, `excelonlinebusiness`, `office365`, `onedrive`, `outlook`, `servicebus`, `sharepointonline`, `smtp`, `azuread` |
 | api_version parameters missing default values | Fixed in generator | `azuredigitaltwins`, `azurevm`, others | Fixed | Generator now uses swagger default value for api_version/api-version parameters |
+| `TimeNextVisible` emitted as `time_next_visible` | Fixed in generator | `azurequeues` | Fixed | Connector-specific public-name override emits `next_visible_time` while preserving `TimeNextVisible` as the wire name. |
 | Path parameters under-encoded (missing double-encoding) | Fixed in generator | `commondataservice`, any connector with `x-ms-url-encoding: "double"` path params | Fixed | Python generator ignored `x-ms-url-encoding: "double"` and left most path params bare (`{str(param)}`), causing 404s when values contained slashes (e.g. full Dataverse dataset URLs). C# generator honored it (PR 16445892) but Python was not updated. Shared logic hoisted to `DirectClientGeneratorBase.ShouldDoubleEncodePathParameter`; Python now emits `quote(quote(str(param), safe=''), safe='')` for double-encoded params and `quote(str(param), safe='')` for all others. Regenerate affected connectors. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 
@@ -636,11 +627,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       
-      - name: Install ARMClient
-        run: choco install armclient -y
-      
       - name: Login to Azure
-        run: armclient login
+                uses: azure/login@v2
+                with:
+                    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
       - name: Build Generator
         run: |
@@ -650,8 +642,10 @@ jobs:
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+                    AZURE_LOCATION: westus
+                    ARMCACHE_PATH: ${{ runner.temp }}\armcache
         run: |
-          ./LogicAppsCompiler.exe ./generated unused --directClient --connectors=office365,servicebus
+                    ./LogicAppsCompiler.exe ./generated --pythonDirectClient --connectors=office365,servicebus
       
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
@@ -665,10 +659,10 @@ jobs:
 
 ### Common Issues
 
-**ARMClient not authenticated:**
+**Azure credential unavailable:**
 
 ```text
-Run: armclient login
+Run: az login, select the intended subscription, and retry.
 ```
 
 **Connector not found:**
@@ -696,11 +690,12 @@ Remove-Item -Path "$env:TEMP\armcache" -Recurse -Force
 To see the list of available connectors:
 
 ```powershell
-# Login to ARM
-armclient login
+# Authenticate and select the source subscription
+az login
+az account set --subscription "{subscriptionId}"
 
 # List managed APIs in a region
-armclient GET "https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Web/locations/westus/managedApis?api-version=2016-06-01"
+az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Web/locations/westus/managedApis?api-version=2018-07-01-preview"
 ```
 
 Common connectors:
