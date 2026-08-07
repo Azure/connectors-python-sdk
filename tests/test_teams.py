@@ -13,11 +13,10 @@ from azure.connectors.teams import (
     AddMemberToTeamInput,
     AddMemberToChannelInput,
     NewChat,
-    HttpRequestInput,
-    WebhookChatMessageTriggerInput,
     DynamicUserMessageWithOptionsSubscriptionRequest,
     CreateSectionInput,
     PostMessageToSelfRequest,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import ConnectorClientOptions, ConnectorException
 from tests.conftest import MockResponse
@@ -421,111 +420,26 @@ class TestTeamCreationOperations:
             assert exc_info.value.status_code == 403
 
 
-class TestMembershipTriggers:
-    """Tests for membership trigger operations."""
+class TestTriggerOperations:
+    """Tests for trigger registration contracts."""
 
-    @pytest.mark.asyncio
-    async def test_on_group_membership_add_success(self, mock_token_provider):
-        """Test successful membership add trigger."""
-        client = TeamsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    def test_triggers_are_registered_without_callable_methods(self):
+        """Test webhook and membership triggers are metadata-only operations."""
+        assert "WebhookChatMessageTrigger" in TRIGGER_OPERATIONS
+        assert "OnGroupMembershipAdd" in TRIGGER_OPERATIONS
+        assert "OnGroupMembershipRemoval" in TRIGGER_OPERATIONS
+        assert not hasattr(TeamsClient, "webhook_chat_message_trigger_async")
+        assert not hasattr(TeamsClient, "on_group_membership_add_async")
+        assert not hasattr(TeamsClient, "on_group_membership_removal_async")
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "member1", "displayName": "New Member"}]}'
-        )
 
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_group_membership_add_async(group_id="team-123")
+class TestGeneratedContractSurface:
+    """Tests for newly generated callable operations."""
 
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/trigger/v1.0/groups/delta" in call_args[0][1]
-            assert "groupId=team-123" in call_args[0][1]
-            assert "value" in result
-
-    @pytest.mark.asyncio
-    async def test_on_group_membership_add_with_select(self, mock_token_provider):
-        """Test membership add trigger with select parameter."""
-        client = TeamsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"displayName": "New Member"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_group_membership_add_async(
-                group_id="team-123",
-                select="displayName"
-            )
-
-            call_args = mock_send.call_args
-            assert "$select=" in call_args[0][1]
-            assert "value" in result
-
-    @pytest.mark.asyncio
-    async def test_on_group_membership_removal_success(self, mock_token_provider):
-        """Test successful membership removal trigger."""
-        client = TeamsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "member1", "displayName": "Removed Member"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_group_membership_removal_async(group_id="team-123")
-
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/trigger/v1.0/groups/removal" in call_args[0][1]
-            assert "groupId=team-123" in call_args[0][1]
-            assert "value" in result
-
-    @pytest.mark.asyncio
-    async def test_on_group_membership_removal_error(self, mock_token_provider):
-        """Test membership removal trigger error handling."""
-        client = TeamsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.on_group_membership_removal_async(group_id="team-123")
-
-            assert exc_info.value.status_code == 401
+    def test_channel_and_chat_operations_are_generated(self):
+        """Test current channel and chat operations are callable."""
+        assert hasattr(TeamsClient, "update_channel_properties_async")
+        assert hasattr(TeamsClient, "remove_member_from_chat_async")
 
 
 class TestHttpRequestOperations:
@@ -550,12 +464,14 @@ class TestHttpRequestOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_data = HttpRequestInput()
+            input_data = b'{"method":"GET","uri":"/teams"}'
             result = await client.http_request_async(input_data)
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/httprequest" in call_args[0][1]
+            assert call_args.kwargs["body"] is input_data
+            assert call_args.kwargs["content_type"] == "application/octet-stream"
             assert result["data"] == "response data"
 
     @pytest.mark.asyncio
@@ -575,55 +491,13 @@ class TestHttpRequestOperations:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.http_request_async(HttpRequestInput())
+                await client.http_request_async(b'{"method":"GET","uri":"/teams"}')
 
             assert exc_info.value.status_code == 500
 
 
 class TestWebhookOperations:
     """Tests for webhook and subscription operations."""
-
-    @pytest.mark.asyncio
-    async def test_webhook_chat_message_trigger_success(self, mock_token_provider):
-        """Test successful webhook chat message trigger."""
-        client = TeamsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            input_data = WebhookChatMessageTriggerInput()
-            await client.webhook_chat_message_trigger_async(input_data)
-
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "POST"
-            assert "/beta/subscriptions/chatmessagetrigger" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_webhook_chat_message_trigger_error(self, mock_token_provider):
-        """Test webhook chat message trigger error handling."""
-        client = TeamsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=400, text='{"error": "Bad Request"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException):
-                await client.webhook_chat_message_trigger_async(WebhookChatMessageTriggerInput())
 
     @pytest.mark.asyncio
     async def test_subscribe_user_message_with_options_success(self, mock_token_provider):

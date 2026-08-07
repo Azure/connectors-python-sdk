@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class GetFormResponseByIdResult:
-    """Response for Get response details"""
+    """
+    Response for Get response details
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -34,23 +36,36 @@ class GetFormResponseByIdResult:
 
 @dataclass
 class GetFormDetailsByIdResult:
-    """Response for Get form details"""
+    """
+    Response for Get form details
+    """
 
     title: Optional[str] = None
     """Title of the form."""
-    modified_date: Optional[str] = None
+    modified_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "modifiedDate"},
+    )
     """Datetime when form was last modified."""
-    created_date: Optional[str] = None
+    created_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDate"},
+    )
     """Datetime when form was created."""
     status: Optional[str] = None
     """Status of the form."""
-    created_by: Optional[str] = None
+    created_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdBy"},
+    )
     """User who created the form."""
 
 
 @dataclass
 class FormsList:
-    """Response for List forms"""
+    """
+    Response for List forms
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -61,11 +76,19 @@ class FormsList:
 
 @dataclass
 class WebhookRequestBody:
-    """Definition: WebhookRequestBody"""
+    """
+    Definition: WebhookRequestBody
+    """
 
-    event_type: Optional[str] = None
+    event_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "eventType"},
+    )
     """Webhook event"""
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """Webhook callback url"""
     source: Optional[str] = None
     """Source of webhook registration"""
@@ -73,14 +96,18 @@ class WebhookRequestBody:
 
 @dataclass
 class WebhookPayload:
-    """Definition: WebhookPayload"""
+    """
+    Definition: WebhookPayload
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class NewResponses:
-    """Definition: NewResponses"""
+    """
+    Definition: NewResponses
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -123,60 +150,36 @@ class MicrosoftformsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "microsoftforms"
 
-    async def create_form_webhook_async(
-        self,
-        input: WebhookRequestBody,
-        form_id: str,
-    ):
-        """
-        When a new response is submitted
-
-        This operation triggers a flow when a new response is submitted.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/formapi/api/forms/{str(form_id)}/webhooks"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
     async def get_form_response_by_id_async(
         self,
         form_id: str,
-        response_id: Optional[str],
-    ):
+        response_id: str,
+    ) -> dict[str, Any] | None:
         """
         Get response details
 
         This action retrieves a form response
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/formapi/api/forms('{str(form_id)}')/responses"
+            f"/formapi/api/forms('{quote(str(form_id), safe='')}')/responses"
         )
         query_params = []
-        if response_id is not None:
-            value = str(response_id)
-            if isinstance(response_id, bool):
-                value = value.lower()
-            query_params.append(f"response_id={quote(value)}")
+        value = str(response_id)
+        if isinstance(response_id, bool):
+            value = value.lower()
+        query_params.append(f"response_id={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -189,27 +192,29 @@ class MicrosoftformsClient(ConnectorClientBase):
     async def get_form_details_by_id_async(
         self,
         form_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get form details
 
         This action retrieves the details of a form
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/formapi/api/forms('{str(form_id)}')"
+            f"/formapi/api/forms('{quote(str(form_id), safe='')}')"
         )
         query_params = []
-        query_params.append(f"$select={quote('title,modifiedDate,createdDate,status,createdBy')}")
+        query_params.append("$select=" + quote("title,modifiedDate,createdDate,status,createdBy"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -221,20 +226,22 @@ class MicrosoftformsClient(ConnectorClientBase):
 
     async def list_forms_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List forms
 
         This operation returns a list of forms in your account.
         """
-        path = f"{self._connection_runtime_url}/formapi/api/forms"
+        request_url = f"{self._connection_runtime_url}/formapi/api/forms"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -247,28 +254,43 @@ class MicrosoftformsClient(ConnectorClientBase):
     async def get_questions_async(
         self,
         form_id: str,
-    ):
+    ) -> None:
         """
         Get questions
 
         Get questions definition in a form.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/formapi/api/forms('{str(form_id)}')/questions"
+            f"/formapi/api/forms('{quote(str(form_id), safe='')}')/questions"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
-        if not response.text:
-            return None
 
-        return json.loads(response.text)
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "CreateFormWebhook": {
+        "operation_id": "CreateFormWebhook",
+        "path": "/{connectionId}/formapi/api/forms/{form_id}/webhooks",
+        "method": "post",
+        "required_parameters": ["form_id"],
+        "callback_payload_type": None,
+    },
+}

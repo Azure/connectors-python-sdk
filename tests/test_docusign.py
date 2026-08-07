@@ -94,6 +94,28 @@ class TestDocusignClientLifecycle:
             await client.close()
             mock_close.assert_called_once()
 
+
+class TestGeneratedContractSurface:
+    """Tests for the current generated operation surface."""
+
+    @pytest.mark.parametrize(
+        "method_name",
+        [
+            "create_org_hook_envelope_async",
+            "scp_get_related_activities_async",
+            "scp_get_related_records_async",
+            "scp_get_key_sales_async",
+            "scp_get_email_summary_async",
+            "list_envelopes_async",
+            "sales_copilot_list_envelopes_async",
+            "create_envelope_from_template_async",
+            "create_hook_envelope_async",
+        ],
+    )
+    def test_deprecated_operations_are_not_generated(self, method_name):
+        """Test deprecated operations are absent from the callable client."""
+        assert not hasattr(DocusignClient, method_name)
+
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_token_provider):
         """Test async context manager functionality."""

@@ -23,30 +23,53 @@ from azure.connectors.sdk import (
 
 @dataclass
 class NewMeetingResponse:
-    """Response for Create a Teams meeting"""
+    """
+    Response for Create a Teams meeting
+    """
 
     id: Optional[str] = None
     """Unique identifier for the event"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """Timestamp the event was created"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """Timestamp the event was last modified"""
     categories: Optional[List[Any]] = None
     """The categories associated with the event"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """Time zone of the event"""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """
     The number of minutes before the event start time that the reminder alert
     occurs
     """
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if an alert is set to remind the user of the event"""
-    has_attachments: Optional[bool] = None
+    has_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasAttachments"},
+    )
     """Set to true if the event has attachments"""
     subject: Optional[str] = None
     """The text of the event's subject line"""
-    body_preview: Optional[str] = None
+    body_preview: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bodyPreview"},
+    )
     """The preview of the message associated with the event"""
     importance: Optional[str] = None
     """
@@ -54,36 +77,63 @@ class NewMeetingResponse:
     """
     sensitivity: Optional[str] = None
     """Sensitivity of the event"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    is_cancelled: Optional[bool] = None
+    is_cancelled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isCancelled"},
+    )
     """Set to true if the event has been canceled"""
-    is_organizer: Optional[bool] = None
+    is_organizer: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOrganizer"},
+    )
     """Set to true if the calendar owner is the organizer of the event"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """The organizer would like an invitee to send a response to the event"""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """
     The status to show. Possible values are: free, tentative, busy, oof,
     workingElsewhere, unknown.
     """
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     The event type. Possible values are: singleInstance, occurrence, exception,
     seriesMaster
     """
-    web_link: Optional[str] = None
+    web_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webLink"},
+    )
     """The URL to open the event in Outlook on the web."""
-    online_meeting_url: Optional[str] = None
+    online_meeting_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onlineMeetingUrl"},
+    )
     """A URL for an online meeting"""
-    allow_new_time_proposals: Optional[bool] = None
+    allow_new_time_proposals: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowNewTimeProposals"},
+    )
     """
     True if the meeting organizer allows invitees to propose a new time when
     responding
     """
     recurrence: Optional[Dict[str, Any]] = None
     """The recurrence pattern for the event"""
-    response_status: Optional[Dict[str, Any]] = None
+    response_status: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "responseStatus"},
+    )
     """Indicates the type of response sent in response to an event message"""
     body: Optional[Dict[str, Any]] = None
     """The body of the message associated with the event"""
@@ -97,46 +147,72 @@ class NewMeetingResponse:
     """The collection of attendees for the event"""
     organizer: Optional[Dict[str, Any]] = None
     """Organizer"""
-    online_meeting: Optional[Dict[str, Any]] = None
+    online_meeting: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "onlineMeeting"},
+    )
     """Details for an attendee to join the meeting online."""
 
 
 @dataclass
 class GetAllTeamsResponse:
-    """Response for List joined teams"""
+    """
+    Response for List joined teams
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[Dict[str, Any]]] = None
     """List of the teams you are a member of"""
 
 
 @dataclass
 class GetAllAssociatedTeamsResponse:
-    """Response for List associated teams"""
+    """
+    Response for List associated teams
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[AssociatedTeamInfo]] = None
     """List of the teams you are associated with"""
 
 
 @dataclass
 class GetChannelsForGroupResponse:
-    """Response for List channels"""
+    """
+    Response for List channels
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[GetChannelResponse]] = None
     """List of one or more channels for a specific team"""
 
 
 @dataclass
 class CreateChannelInput:
-    """Create a channel"""
+    """
+    Create a channel
+    """
 
     description: Optional[str] = None
     """Optional textual description for the channel"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Channel name as it appears in Microsoft Teams"""
-    membership_type: Optional[str] = None
+    membership_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "membershipType"},
+    )
     """
     The type of channel. Private channels are accessible only to specific
     members. Shared channels can be shared with users outside the team.
@@ -146,65 +222,123 @@ class CreateChannelInput:
 
 @dataclass
 class CreateChannelResponse:
-    """Response for Create a channel"""
+    """
+    Response for Create a channel
+    """
 
     description: Optional[str] = None
     """Optional textual description for the channel"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Channel name as it appears in Microsoft Teams"""
     id: Optional[str] = None
     """The channel's unique identifier"""
-    membership_type: Optional[str] = None
+    membership_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "membershipType"},
+    )
     """The type of channel membership"""
 
 
 @dataclass
 class GetChannelResponse:
-    """Response for Get details for a specific channel in a team"""
+    """
+    Response for Get details for a specific channel in a team
+    """
 
     id: Optional[str] = None
     """The unique identifier of the channel"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name of the channel"""
     description: Optional[str] = None
     """The description of the channel, optional"""
     email: Optional[str] = None
     """The email address for sending messages to the channel"""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The ID of the Microsoft Entra tenant."""
-    web_url: Optional[str] = None
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """A hyperlink for the channel in Microsoft Teams"""
-    files_folder_web_url: Optional[str] = None
+    files_folder_web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "filesFolderWebUrl"},
+    )
     """The SharePoint folder URL of the channel"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """Timestamp at which the channel was created. Read only"""
-    membership_type: Optional[str] = None
+    membership_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "membershipType"},
+    )
     """The channel membership type"""
 
 
 @dataclass
-class GetAllChannelsForTeamResponse:
-    """Response for List all channels"""
+class UpdateChannelPropertiesInput:
+    """
+    Update channel
+    """
 
-    context: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """The new display name for the channel."""
+    description: Optional[str] = None
+    """The new description for the channel."""
+
+
+@dataclass
+class GetAllChannelsForTeamResponse:
+    """
+    Response for List all channels
+    """
+
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[ChannelWithOwnerTeamId]] = None
     """List of one or more channels for a specific team"""
 
 
 @dataclass
 class GetChatsResponse:
-    """Response for List chats"""
+    """
+    Response for List chats
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[Dict[str, Any]]] = None
     """List of one or more chats you are a part of"""
 
 
 @dataclass
 class AtMentionTagResponse:
-    """Response for Get an @mention token for a team tag"""
+    """
+    Response for Get an @mention token for a team tag
+    """
 
-    at_mention: Optional[str] = None
+    at_mention: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "atMention"},
+    )
     """
     A token for the tag to @mention. It can be inserted into messages and
     adaptive cards sent from a person
@@ -213,20 +347,33 @@ class AtMentionTagResponse:
 
 @dataclass
 class GetMessagesFromConversationResponse:
-    """Response for Get messages in a channel"""
+    """
+    Response for Get messages in a channel
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """@odata.context"""
-    count: Optional[int] = None
+    count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "@odata.count"},
+    )
     """@odata.count"""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """@odata.nextLink"""
     value: Optional[ChatMessageList] = None
 
 
 @dataclass
 class DynamicGetMessageDetailsResponseSchema:
-    """Response for Get message details"""
+    """
+    Response for Get message details
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -237,7 +384,9 @@ class DynamicGetMessageDetailsResponseSchema:
 
 @dataclass
 class ListRepliesResponseSchema:
-    """Response for List replies of a channel message"""
+    """
+    Response for List replies of a channel message
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """List replies response"""
@@ -245,7 +394,9 @@ class ListRepliesResponseSchema:
 
 @dataclass
 class ListMembersResponseSchema:
-    """Response for List chat or channel members"""
+    """
+    Response for List chat or channel members
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """List members response"""
@@ -253,7 +404,9 @@ class ListMembersResponseSchema:
 
 @dataclass
 class ChatMessageList:
-    """Response for When a new channel message is added"""
+    """
+    Response for When a new channel message is added
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -264,39 +417,78 @@ class ChatMessageList:
 
 @dataclass
 class WebhookChatMessageTriggerInput:
-    """When a new chat message is added"""
+    """
+    When a new chat message is added
+    """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
 
 
 @dataclass
 class GetTeamResponse:
-    """Response for Get a team"""
+    """
+    Response for Get a team
+    """
 
     id: Optional[str] = None
     """The unique identifier of the team"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name of the team"""
     description: Optional[str] = None
     """The description of the team, optional"""
-    internal_id: Optional[str] = None
+    internal_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "internalId"},
+    )
     """The internal ID of the team"""
-    web_url: Optional[str] = None
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """A hyperlink that will go to the team in the Microsoft Teams client"""
-    is_archived: Optional[bool] = None
+    is_archived: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isArchived"},
+    )
     """Whether this team is in read-only mode"""
-    member_settings: Optional[MemberSettings] = None
-    guest_settings: Optional[GuestSettings] = None
-    messaging_settings: Optional[MessagingSettings] = None
-    fun_settings: Optional[FunSettings] = None
-    discovery_settings: Optional[DiscoverySettings] = None
+    member_settings: Optional[MemberSettings] = field(
+        default=None,
+        metadata={"wire_name": "memberSettings"},
+    )
+    guest_settings: Optional[GuestSettings] = field(
+        default=None,
+        metadata={"wire_name": "guestSettings"},
+    )
+    messaging_settings: Optional[MessagingSettings] = field(
+        default=None,
+        metadata={"wire_name": "messagingSettings"},
+    )
+    fun_settings: Optional[FunSettings] = field(
+        default=None,
+        metadata={"wire_name": "funSettings"},
+    )
+    discovery_settings: Optional[DiscoverySettings] = field(
+        default=None,
+        metadata={"wire_name": "discoverySettings"},
+    )
 
 
 @dataclass
 class AtMentionUser:
-    """Response for Get an @mention token for a user"""
+    """
+    Response for Get an @mention token for a user
+    """
 
-    at_mention: Optional[str] = None
+    at_mention: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "atMention"},
+    )
     """
     An @mention token for the user. This property can be inserted into messages
     """
@@ -304,7 +496,9 @@ class AtMentionUser:
 
 @dataclass
 class OnGroupMemberChangeResponse:
-    """Response for When a new team member is removed"""
+    """
+    Response for When a new team member is removed
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -315,7 +509,9 @@ class OnGroupMemberChangeResponse:
 
 @dataclass
 class NewChatResponse:
-    """Response for Create a chat"""
+    """
+    Response for Create a chat
+    """
 
     id: Optional[str] = None
     """The chat's unique identifier"""
@@ -323,19 +519,27 @@ class NewChatResponse:
 
 @dataclass
 class ChatMessage:
-    """Response for Post a message to myself"""
+    """
+    Response for Post a message to myself
+    """
 
     attachments: Optional[List[Dict[str, Any]]] = None
     """attachments"""
     body: Optional[Dict[str, Any]] = None
     """Plaintext representation of the content of the message"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """Timestamp of when the chat message was created"""
     deleted: Optional[bool] = None
     """deleted"""
     etag: Optional[str] = None
     """Version number of the chat message."""
-    from_: Optional[Dict[str, Any]] = None
+    from_: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "from"},
+    )
     """The message sender"""
     id: Optional[str] = None
     """Unique ID of the message"""
@@ -344,7 +548,10 @@ class ChatMessage:
     The importance of the message. The possible values are: normal, high,
     urgent.
     """
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """
     Timestamp when the chat message is created (initial setting) or modified,
     including when a reaction is added or removed
@@ -356,11 +563,17 @@ class ChatMessage:
     List of entities mentioned in the chat message. Supported entities are:
     user, bot, team, and channel.
     """
-    message_type: Optional[str] = None
+    message_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "messageType"},
+    )
     """The type of chat message"""
     reactions: Optional[List[Dict[str, Any]]] = None
     """Reactions for this chat message (for example, Like)"""
-    reply_to_id: Optional[str] = None
+    reply_to_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "replyToId"},
+    )
     """ID of the parent message of the thread"""
     subject: Optional[str] = None
     """The subject of the chat message, optional"""
@@ -373,9 +586,14 @@ class ChatMessage:
 
 @dataclass
 class CreateATeamInput:
-    """Create a team"""
+    """
+    Create a team
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name of the team"""
     description: Optional[str] = None
     """An optional description for the team"""
@@ -385,17 +603,27 @@ class CreateATeamInput:
 
 @dataclass
 class CreateATeamResponse:
-    """Response for Create a team"""
+    """
+    Response for Create a team
+    """
 
-    new_team_id: Optional[str] = None
+    new_team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newTeamId"},
+    )
     """Team ID of the team that was just created"""
 
 
 @dataclass
 class AddMemberToTeamInput:
-    """Add a member to a team"""
+    """
+    Add a member to a team
+    """
 
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """User principal name or Microsoft Entra ID to add"""
     owner: Optional[bool] = None
     """True, if the user should be a team owner"""
@@ -403,9 +631,14 @@ class AddMemberToTeamInput:
 
 @dataclass
 class AddMemberToChannelInput:
-    """Add a member to a channel"""
+    """
+    Add a member to a channel
+    """
 
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """User principal name or Microsoft Entra ID to add"""
     owner: Optional[bool] = None
     """True, if the user should be a channel owner"""
@@ -413,38 +646,42 @@ class AddMemberToChannelInput:
 
 @dataclass
 class PostToConversationResponse:
-    """Response for Post message in a chat or channel"""
+    """
+    Response for Post message in a chat or channel
+    """
 
     id: Optional[str] = None
     """Unique message ID"""
-    message_link: Optional[str] = None
+    message_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "messageLink"},
+    )
     """Link to the message in Microsoft Teams"""
-    conversation_id: Optional[str] = None
+    conversation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "conversationId"},
+    )
     """The chat's unique identifier"""
 
 
 @dataclass
 class PostCardAndWaitForResponseInput:
-    """Post adaptive card and wait for a response"""
+    """
+    Post adaptive card and wait for a response
+    """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     body: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class DynamicPostGatherInputToConversationResponse:
-    """Response for Post adaptive card and wait for a response"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    Response for Post adaptive card and wait for a response
     """
-
-
-@dataclass
-class HttpRequestInput:
-    """Send a Microsoft Graph HTTP request"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -455,7 +692,9 @@ class HttpRequestInput:
 
 @dataclass
 class ObjectWithoutType:
-    """Response for Send a Microsoft Graph HTTP request"""
+    """
+    Response for Send a Microsoft Graph HTTP request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -466,13 +705,21 @@ class ObjectWithoutType:
 
 @dataclass
 class AddMemberToChatInput:
-    """Add a user to a chat"""
+    """
+    Add a user to a chat
+    """
 
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """User principal name or Microsoft Entra ID to add"""
     owner: Optional[bool] = None
     """True, if the user should be a chat owner"""
-    visible_history_start_date_time: Optional[str] = None
+    visible_history_start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "visibleHistoryStartDateTime"},
+    )
     """
     Timestamp that represents how far back in the chat history the new member
     can see. If not specified, no history is shared.
@@ -481,103 +728,193 @@ class AddMemberToChatInput:
 
 @dataclass
 class GetOnlineMeetingResponse:
-    """Response for Get an online meeting"""
+    """
+    Response for Get an online meeting
+    """
 
     id: Optional[str] = None
     """The unique identifier of the online meeting"""
     subject: Optional[str] = None
     """The subject of the online meeting"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """The start time of the meeting in UTC"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """The end time of the meeting in UTC"""
-    creation_date_time: Optional[str] = None
+    creation_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "creationDateTime"},
+    )
     """The creation time of the meeting in UTC"""
-    join_web_url: Optional[str] = None
+    join_web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "joinWebUrl"},
+    )
     """The URL used to join the meeting online"""
-    join_meeting_id_settings: Optional[Dict[str, Any]] = None
+    join_meeting_id_settings: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "joinMeetingIdSettings"},
+    )
     """Settings related to the join meeting ID"""
     participants: Optional[Dict[str, Any]] = None
     """The participants of the meeting"""
-    audio_conferencing: Optional[Dict[str, Any]] = None
+    audio_conferencing: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "audioConferencing"},
+    )
     """Phone call-in information for the meeting"""
-    is_entry_exit_announced: Optional[bool] = None
+    is_entry_exit_announced: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEntryExitAnnounced"},
+    )
     """
     Whether announce notifications are enabled for callers joining or leaving
     the meeting
     """
-    allowed_presenters: Optional[str] = None
+    allowed_presenters: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allowedPresenters"},
+    )
     """Specifies who can be a presenter in the meeting"""
-    lobby_bypass_settings: Optional[Dict[str, Any]] = None
+    lobby_bypass_settings: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "lobbyBypassSettings"},
+    )
     """Specifies which participants can bypass the meeting lobby"""
-    record_automatically: Optional[bool] = None
+    record_automatically: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "recordAutomatically"},
+    )
     """Indicates whether to record the meeting automatically"""
-    allow_meeting_chat: Optional[str] = None
+    allow_meeting_chat: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allowMeetingChat"},
+    )
     """Specifies the mode of meeting chat"""
-    meeting_options_web_url: Optional[str] = None
+    meeting_options_web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "meetingOptionsWebUrl"},
+    )
     """A URL for the organizer to change settings for the meeting"""
 
 
 @dataclass
 class CallTranscriptCollectionResponse:
-    """Response for List meeting transcripts"""
+    """
+    Response for List meeting transcripts
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[CallTranscriptResponse]] = None
     """List of transcripts"""
 
 
 @dataclass
 class CallTranscriptResponse:
-    """Response for Get meeting transcript"""
+    """
+    Response for Get meeting transcript
+    """
 
     id: Optional[str] = None
     """The transcript ID"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The date and time when the transcript was created"""
-    transcript_content_url: Optional[str] = None
+    transcript_content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "transcriptContentUrl"},
+    )
     """The URL to access the transcript content"""
-    meeting_id: Optional[str] = None
+    meeting_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "meetingId"},
+    )
     """The meeting ID"""
-    meeting_organizer_id: Optional[str] = None
+    meeting_organizer_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "meetingOrganizerId"},
+    )
     """The meeting organizer's user ID"""
-    call_id: Optional[str] = None
+    call_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callId"},
+    )
     """The call ID"""
 
 
 @dataclass
 class CallRecordingCollectionResponse:
-    """Response for List meeting recordings"""
+    """
+    Response for List meeting recordings
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[CallRecordingResponse]] = None
     """List of recordings"""
 
 
 @dataclass
 class CallRecordingResponse:
-    """Response for Get meeting recording"""
+    """
+    Response for Get meeting recording
+    """
 
     id: Optional[str] = None
     """The recording ID"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The date and time when the recording was created"""
-    recording_content_url: Optional[str] = None
+    recording_content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recordingContentUrl"},
+    )
     """The URL to access the recording content"""
-    meeting_id: Optional[str] = None
+    meeting_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "meetingId"},
+    )
     """The meeting ID"""
-    meeting_organizer_id: Optional[str] = None
+    meeting_organizer_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "meetingOrganizerId"},
+    )
     """The meeting organizer's user ID"""
-    call_id: Optional[str] = None
+    call_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callId"},
+    )
     """The call ID"""
 
 
 @dataclass
 class ListSectionsResponse:
-    """Response for List sections"""
+    """
+    Response for List sections
+    """
 
-    context: Optional[str] = None
-    microsoft_graph_sections_version: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
+    microsoft_graph_sections_version: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@microsoft.graph.sectionsVersion"},
+    )
     """
     Version identifier for the sections hierarchy. Pass as If-Match on Create,
     Update, Delete, Add Item, Remove Item, and Move Item operations.
@@ -588,77 +925,138 @@ class ListSectionsResponse:
 
 @dataclass
 class CreateSectionInput:
-    """Create a section"""
+    """
+    Create a section
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = None
+    display_icon: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "displayIcon"},
+    )
     """
     The display icon for the section. Only iconType is writable; other fields
     are populated by the service.
     """
-    is_expanded: Optional[bool] = None
+    is_expanded: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isExpanded"},
+    )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = None
+    sort_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sortType"},
+    )
     """The sort type for the section"""
 
 
 @dataclass
 class SectionResponse:
-    """Response for Create a section"""
+    """
+    Response for Create a section
+    """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.etag"},
+    )
     """
     ETag for the sections collection. Pass as If-Match on Create, Update, and
     Delete.
     """
     id: Optional[str] = None
     """The section ID"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = None
+    display_icon: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "displayIcon"},
+    )
     """The display icon for the section"""
-    is_expanded: Optional[bool] = None
+    is_expanded: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isExpanded"},
+    )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = None
+    sort_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sortType"},
+    )
     """The sort type for the section"""
-    section_type: Optional[str] = None
+    section_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sectionType"},
+    )
     """The type of section"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The date and time when the section was created"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The date and time when the section was last modified"""
 
 
 @dataclass
 class UpdateSectionInput:
-    """Update a section"""
+    """
+    Update a section
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = None
+    display_icon: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "displayIcon"},
+    )
     """
     The display icon for the section. Only iconType is writable; other fields
     are populated by the service.
     """
-    is_expanded: Optional[bool] = None
+    is_expanded: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isExpanded"},
+    )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = None
+    sort_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sortType"},
+    )
     """The sort type for the section"""
 
 
 @dataclass
 class ListSectionItemsResponse:
-    """Response for List section items"""
+    """
+    Response for List section items
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[SectionItemResponse]] = None
     """List of section items"""
 
 
 @dataclass
 class AddSectionItemInput:
-    """Add an item to a section"""
+    """
+    Add an item to a section
+    """
 
     id: Optional[str] = None
     """
@@ -670,9 +1068,14 @@ class AddSectionItemInput:
 
 @dataclass
 class SectionItemResponse:
-    """Response for Add an item to a section"""
+    """
+    Response for Add an item to a section
+    """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.etag"},
+    )
     """
     ETag for the section items collection. Pass as If-Match on Add, Remove, and
     Move.
@@ -682,35 +1085,59 @@ class SectionItemResponse:
     The unique identifier of the item. Corresponds to the conversation ID of
     the underlying chat, channel, meeting, or community.
     """
-    item_type: Optional[str] = None
+    item_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "itemType"},
+    )
     """The type of the item"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The date and time when the item was added to the section"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The date and time when the item was last modified"""
 
 
 @dataclass
 class MoveSectionItemInput:
-    """Move a section item"""
+    """
+    Move a section item
+    """
 
-    target_section_id: Optional[str] = None
+    target_section_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "targetSectionId"},
+    )
     """The ID of the section to move the item to"""
 
 
 @dataclass
 class GetTagsResponseSchema:
-    """Response for List all tags for a team"""
+    """
+    Response for List all tags for a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class CreateTagInput:
-    """Create a tag for a team"""
+    """
+    Create a tag for a team
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name of the tag as it appears to the user in Microsoft Teams."""
     members: Optional[str] = None
     """
@@ -721,32 +1148,56 @@ class CreateTagInput:
 
 @dataclass
 class CreateTagResponseSchema:
-    """Response for Create a tag for a team"""
+    """
+    Response for Create a tag for a team
+    """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.type"},
+    )
     id: Optional[str] = None
     """Unique identifier of the tag"""
-    team_id: Optional[str] = None
+    team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "teamId"},
+    )
     """ID of the team in which the tag is defined"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name of the tag as it appears to the user in Microsoft Teams."""
-    member_count: Optional[int] = None
+    member_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "memberCount"},
+    )
     """The number of users assigned to the tag"""
 
 
 @dataclass
 class UpdateTagInput:
-    """Update a team tag"""
+    """
+    Update a team tag
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The new name of the tag as it appears to the user in Microsoft Teams."""
 
 
 @dataclass
 class AddMemberToTagInput:
-    """Add a member to a team tag"""
+    """
+    Add a member to a team tag
+    """
 
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """
     The user's ID of the member to add to the tag, must be in a format like
     '550e8400-e29b-41d4-a716-446655440000'.
@@ -755,47 +1206,150 @@ class AddMemberToTagInput:
 
 @dataclass
 class AddMemberToTagResponseSchema:
-    """Response for Add a member to a team tag"""
+    """
+    Response for Add a member to a team tag
+    """
 
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """User ID of the member added to the tag"""
 
 
 @dataclass
 class GetTagMembersResponseSchema:
-    """Response for List the members of a team tag"""
+    """
+    Response for List the members of a team tag
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class AiInsightCollectionResponse:
-    """Response for List AI insights"""
+    """
+    Response for List AI insights
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[AiInsightResponse]] = None
     """List of AI insights"""
 
 
 @dataclass
 class AiInsightResponse:
-    """Response for Get AI insight"""
+    """
+    Response for Get AI insight
+    """
 
     id: Optional[str] = None
     """The AI insight ID"""
-    call_id: Optional[str] = None
+    call_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callId"},
+    )
     """The call ID"""
-    content_correlation_id: Optional[str] = None
+    content_correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentCorrelationId"},
+    )
     """The content correlation ID"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The date and time when the AI insight was created"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """The date and time when the AI insight ended"""
 
 
 @dataclass
-class ObjectEntity:
-    """Definition: Object"""
+class GetMessageLocationsResponse:
+    """
+    Response for Conversation location for where to post
+    """
+
+    locations: Optional[List[Dict[str, Any]]] = None
+    """valid locations to post a message or reply, make verbose"""
+
+
+@dataclass
+class GetMessageDetailsSchema:
+    """
+    Response for Get message details response schema
+    """
+
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class ListMembersSchema:
+    """
+    Response for List members input schema
+    """
+
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class PostFeedSchema:
+    """
+    Response for Get feed notification input metadata
+    """
+
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class UnifiedActionSchema:
+    """
+    Response for Get unified action input metadata
+    """
+
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class ConnectorMetadata:
+    """
+    Response for Get message with options subscription input metadata
+    """
+
+    metadatatype: Optional[str] = None
+    activitytype: Optional[str] = None
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class WebhookTriggerSchema:
+    """
+    Response for Input schema for webhook trigger
+    """
+
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class DynamicResponseSchema:
+    """
+    Response for Get response schema
+    """
+
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class GetFlowContinuationSubscriptionWithPosterOutputMetadataInput:
+    """
+    Get flow continuation subscription output metadata
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -805,66 +1359,50 @@ class ObjectEntity:
 
 
 @dataclass
-class ConnectorMetadata:
-    """Definition: ConnectorMetadata"""
+class ObjectEntity:
+    """
+    Definition: Object
+    """
 
-    metadatatype: Optional[str] = None
-    activitytype: Optional[str] = None
-    schema: Optional[ObjectEntity] = None
-
-
-@dataclass
-class PostFeedSchema:
-    """Definition: PostFeedSchema"""
-
-    schema: Optional[ObjectEntity] = None
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
 class PostMessageSchema:
-    """Definition: PostMessageSchema"""
+    """
+    Definition: PostMessageSchema
+    """
 
     schema: Optional[ObjectEntity] = None
 
 
 @dataclass
 class PostCardSchema:
-    """Definition: PostCardSchema"""
+    """
+    Definition: PostCardSchema
+    """
 
     schema: Optional[ObjectEntity] = None
 
 
 @dataclass
 class PostCardAndWaitSchema:
-    """Definition: PostCardAndWaitSchema"""
-
-    schema: Optional[ObjectEntity] = None
-
-
-@dataclass
-class UnifiedActionSchema:
-    """Definition: UnifiedActionSchema"""
-
-    schema: Optional[ObjectEntity] = None
-
-
-@dataclass
-class GetMessageDetailsSchema:
-    """Definition: GetMessageDetailsSchema"""
-
-    schema: Optional[ObjectEntity] = None
-
-
-@dataclass
-class ListMembersSchema:
-    """Definition: ListMembersSchema"""
+    """
+    Definition: PostCardAndWaitSchema
+    """
 
     schema: Optional[ObjectEntity] = None
 
 
 @dataclass
 class DynamicGetMessageDetailsSchema:
-    """Definition: DynamicGetMessageDetailsSchema"""
+    """
+    Definition: DynamicGetMessageDetailsSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -875,7 +1413,9 @@ class DynamicGetMessageDetailsSchema:
 
 @dataclass
 class DynamicListMembersSchema:
-    """Definition: DynamicListMembersSchema"""
+    """
+    Definition: DynamicListMembersSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -886,7 +1426,9 @@ class DynamicListMembersSchema:
 
 @dataclass
 class DynamicUserNotificationRequest:
-    """Definition: DynamicUserNotificationRequest"""
+    """
+    Definition: DynamicUserNotificationRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -897,7 +1439,9 @@ class DynamicUserNotificationRequest:
 
 @dataclass
 class DynamicPostConversationNotificationRequest:
-    """Definition: DynamicPostConversationNotificationRequest"""
+    """
+    Definition: DynamicPostConversationNotificationRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -908,7 +1452,9 @@ class DynamicPostConversationNotificationRequest:
 
 @dataclass
 class DynamicChannelNotificationRequest:
-    """Definition: DynamicChannelNotificationRequest"""
+    """
+    Definition: DynamicChannelNotificationRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -919,7 +1465,9 @@ class DynamicChannelNotificationRequest:
 
 @dataclass
 class DynamicPostFeedNotificationRequest:
-    """Definition: DynamicPostFeedNotificationRequest"""
+    """
+    Definition: DynamicPostFeedNotificationRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -930,7 +1478,9 @@ class DynamicPostFeedNotificationRequest:
 
 @dataclass
 class DynamicPostMessageRequest:
-    """Definition: DynamicPostMessageRequest"""
+    """
+    Definition: DynamicPostMessageRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -941,7 +1491,9 @@ class DynamicPostMessageRequest:
 
 @dataclass
 class DynamicReplyMessageRequest:
-    """Definition: DynamicReplyMessageRequest"""
+    """
+    Definition: DynamicReplyMessageRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -952,7 +1504,9 @@ class DynamicReplyMessageRequest:
 
 @dataclass
 class DynamicPostCardRequest:
-    """Definition: DynamicPostCardRequest"""
+    """
+    Definition: DynamicPostCardRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -963,7 +1517,9 @@ class DynamicPostCardRequest:
 
 @dataclass
 class DynamicPostCardAndWaitRequest:
-    """Definition: DynamicPostCardAndWaitRequest"""
+    """
+    Definition: DynamicPostCardAndWaitRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -974,7 +1530,9 @@ class DynamicPostCardAndWaitRequest:
 
 @dataclass
 class DynamicReplyCardRequest:
-    """Definition: DynamicReplyCardRequest"""
+    """
+    Definition: DynamicReplyCardRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -985,7 +1543,9 @@ class DynamicReplyCardRequest:
 
 @dataclass
 class DynamicUpdateCardRequest:
-    """Definition: DynamicUpdateCardRequest"""
+    """
+    Definition: DynamicUpdateCardRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -996,7 +1556,9 @@ class DynamicUpdateCardRequest:
 
 @dataclass
 class DynamicUserAdaptiveCardRequest:
-    """Definition: DynamicUserAdaptiveCardRequest"""
+    """
+    Definition: DynamicUserAdaptiveCardRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1007,7 +1569,9 @@ class DynamicUserAdaptiveCardRequest:
 
 @dataclass
 class DynamicChannelAdaptiveCardRequest:
-    """Definition: DynamicChannelAdaptiveCardRequest"""
+    """
+    Definition: DynamicChannelAdaptiveCardRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1018,7 +1582,9 @@ class DynamicChannelAdaptiveCardRequest:
 
 @dataclass
 class DynamicUserMessageWithOptionsSubscriptionRequest:
-    """Definition: DynamicUserMessageWithOptionsSubscriptionRequest"""
+    """
+    Definition: DynamicUserMessageWithOptionsSubscriptionRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1029,7 +1595,9 @@ class DynamicUserMessageWithOptionsSubscriptionRequest:
 
 @dataclass
 class DynamicUserMessageWithOptionsSubscriptionResult:
-    """Definition: DynamicUserMessageWithOptionsSubscriptionResult"""
+    """
+    Definition: DynamicUserMessageWithOptionsSubscriptionResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1040,7 +1608,9 @@ class DynamicUserMessageWithOptionsSubscriptionResult:
 
 @dataclass
 class DynamicSelectedMessageTriggerResult:
-    """Definition: DynamicSelectedMessageTriggerResult"""
+    """
+    Definition: DynamicSelectedMessageTriggerResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1051,7 +1621,9 @@ class DynamicSelectedMessageTriggerResult:
 
 @dataclass
 class DynamicComposeMessageTriggerResult:
-    """Definition: DynamicComposeMessageTriggerResult"""
+    """
+    Definition: DynamicComposeMessageTriggerResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1062,7 +1634,9 @@ class DynamicComposeMessageTriggerResult:
 
 @dataclass
 class DynamicCardResponseTriggerResult:
-    """Definition: DynamicCardResponseTriggerResult"""
+    """
+    Definition: DynamicCardResponseTriggerResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1072,38 +1646,62 @@ class DynamicCardResponseTriggerResult:
 
 
 @dataclass
-class WebhookTriggerSchema:
-    """Definition: WebhookTriggerSchema"""
-
-    schema: Optional[ObjectEntity] = None
-
-
-@dataclass
 class MessageReactionWebhookResponseSchema:
-    """Definition: MessageReactionWebhookResponseSchema"""
+    """
+    Definition: MessageReactionWebhookResponseSchema
+    """
 
-    thread_type: Optional[str] = None
-    chat_id: Optional[str] = None
+    thread_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "threadType"},
+    )
+    chat_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "chatId"},
+    )
     """The chat's unique identifier"""
-    team_id: Optional[str] = None
+    team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "teamId"},
+    )
     """The team's unique identifier"""
-    channel_id: Optional[str] = None
+    channel_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "channelId"},
+    )
     """The channel's unique identifier"""
-    message_id: Optional[str] = None
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "messageId"},
+    )
     """Id of the message which was reacted"""
-    reply_to_id: Optional[str] = None
+    reply_to_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "replyToId"},
+    )
     """ID of the parent message of the thread"""
-    message_link: Optional[str] = None
+    message_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "messageLink"},
+    )
     """Link to the message which was reacted"""
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """Reacting user's Id"""
-    message_reaction: Optional[str] = None
+    message_reaction: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "messageReaction"},
+    )
     """Message reaction used"""
 
 
 @dataclass
 class TeamsIdentitySet:
-    """Definition: TeamsIdentitySet"""
+    """
+    Definition: TeamsIdentitySet
+    """
 
     application: Optional[Dict[str, Any]] = None
     """Application identity (bot or service)"""
@@ -1115,42 +1713,69 @@ class TeamsIdentitySet:
 
 @dataclass
 class CallEventWebhookResponseSchema:
-    """Definition: CallEventWebhookResponseSchema"""
+    """
+    Definition: CallEventWebhookResponseSchema
+    """
 
     id: Optional[str] = None
     """Event identifier"""
-    odata_id: Optional[str] = None
-    """OData identifier"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.type"},
+    )
     """
     OData type discriminator (always #microsoft.graph.callEvent;
     meeting-specific fields are flattened onto the base type by notification
     delivery).
     """
-    call_event_type: Optional[str] = None
+    call_event_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callEventType"},
+    )
     """Type of call event"""
-    event_date_time: Optional[str] = None
+    event_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "eventDateTime"},
+    )
     """When the event occurred"""
-    call_conversation_id: Optional[str] = None
+    call_conversation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callConversationId"},
+    )
     """Call conversation identifier"""
-    join_web_url: Optional[str] = None
+    join_web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "joinWebUrl"},
+    )
     """
     Meeting join URL (populated when the call is associated with an online
     meeting)
     """
-    chat_info: Optional[Dict[str, Any]] = None
+    chat_info: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "chatInfo"},
+    )
     """
     Chat information for the meeting (populated when the call is associated
     with an online meeting)
     """
-    organizer_meeting_info: Optional[Dict[str, Any]] = None
+    organizer_meeting_info: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "organizerMeetingInfo"},
+    )
     """
     Organizer info (populated when the call is associated with an online
     meeting)
     """
-    transcription_state: Optional[Dict[str, Any]] = None
+    transcription_state: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "transcriptionState"},
+    )
     """Transcription state (set on transcriptionStateUpdated events)"""
-    recording_state: Optional[Dict[str, Any]] = None
+    recording_state: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "recordingState"},
+    )
     """Recording state (set on recordingStateUpdated events)"""
     participants: Optional[List[Dict[str, Any]]] = None
     """Participants (set on rosterUpdated events)"""
@@ -1158,53 +1783,97 @@ class CallEventWebhookResponseSchema:
 
 @dataclass
 class TranscriptWebhookResponseSchema:
-    """Definition: TranscriptWebhookResponseSchema"""
+    """
+    Definition: TranscriptWebhookResponseSchema
+    """
 
     id: Optional[str] = None
     """Transcript identifier"""
-    odata_id: Optional[str] = None
-    """OData identifier"""
-    meeting_id: Optional[str] = None
+    meeting_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "meetingId"},
+    )
     """Online meeting identifier (empty for ad-hoc call transcripts)"""
-    call_id: Optional[str] = None
+    call_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callId"},
+    )
     """Call identifier (set for ad-hoc call transcripts)"""
-    content_correlation_id: Optional[str] = None
+    content_correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentCorrelationId"},
+    )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = None
-    transcript_content_url: Optional[str] = None
+    meeting_organizer: Optional[TeamsIdentitySet] = field(
+        default=None,
+        metadata={"wire_name": "meetingOrganizer"},
+    )
+    transcript_content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "transcriptContentUrl"},
+    )
     """URL to download the transcript content"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """When the transcript was created (UTC)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """When the transcript ended (UTC)"""
 
 
 @dataclass
 class RecordingWebhookResponseSchema:
-    """Definition: RecordingWebhookResponseSchema"""
+    """
+    Definition: RecordingWebhookResponseSchema
+    """
 
     id: Optional[str] = None
     """Recording identifier"""
-    odata_id: Optional[str] = None
-    """OData identifier"""
-    meeting_id: Optional[str] = None
+    meeting_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "meetingId"},
+    )
     """Online meeting identifier (empty for ad-hoc call recordings)"""
-    call_id: Optional[str] = None
+    call_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callId"},
+    )
     """Call identifier (set for ad-hoc call recordings)"""
-    content_correlation_id: Optional[str] = None
+    content_correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentCorrelationId"},
+    )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = None
-    recording_content_url: Optional[str] = None
+    meeting_organizer: Optional[TeamsIdentitySet] = field(
+        default=None,
+        metadata={"wire_name": "meetingOrganizer"},
+    )
+    recording_content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recordingContentUrl"},
+    )
     """URL to download the recording content"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """When the recording was created (UTC)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """When the recording ended (UTC)"""
 
 
 @dataclass
 class ChatMessageWebhookResponseSchema:
-    """Definition: ChatMessageWebhookResponseSchema"""
+    """
+    Definition: ChatMessageWebhookResponseSchema
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """Message details response"""
@@ -1212,7 +1881,9 @@ class ChatMessageWebhookResponseSchema:
 
 @dataclass
 class DynamicWebhookTriggerRequestSchema:
-    """Definition: DynamicWebhookTriggerRequestSchema"""
+    """
+    Definition: DynamicWebhookTriggerRequestSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1223,7 +1894,9 @@ class DynamicWebhookTriggerRequestSchema:
 
 @dataclass
 class DynamicKeywordWebhookTriggerResponseSchema:
-    """Definition: DynamicKeywordWebhookTriggerResponseSchema"""
+    """
+    Definition: DynamicKeywordWebhookTriggerResponseSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1234,7 +1907,9 @@ class DynamicKeywordWebhookTriggerResponseSchema:
 
 @dataclass
 class DynamicAtMentionWebhookTriggerResponseSchema:
-    """Definition: DynamicAtMentionWebhookTriggerResponseSchema"""
+    """
+    Definition: DynamicAtMentionWebhookTriggerResponseSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1245,7 +1920,9 @@ class DynamicAtMentionWebhookTriggerResponseSchema:
 
 @dataclass
 class DynamicNewMessageWebhookTriggerResponseSchema:
-    """Definition: DynamicNewMessageWebhookTriggerResponseSchema"""
+    """
+    Definition: DynamicNewMessageWebhookTriggerResponseSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1256,7 +1933,9 @@ class DynamicNewMessageWebhookTriggerResponseSchema:
 
 @dataclass
 class DynamicPostToConversationResponse:
-    """Definition: DynamicPostToConversationResponse"""
+    """
+    Definition: DynamicPostToConversationResponse
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1266,15 +1945,10 @@ class DynamicPostToConversationResponse:
 
 
 @dataclass
-class DynamicResponseSchema:
-    """Definition: DynamicResponseSchema"""
-
-    schema: Optional[ObjectEntity] = None
-
-
-@dataclass
 class MessageId:
-    """Definition: MessageId"""
+    """
+    Definition: MessageId
+    """
 
     id: Optional[str] = None
     """Unique message identifier"""
@@ -1282,7 +1956,9 @@ class MessageId:
 
 @dataclass
 class DynamicUserFlowContinuationSubscriptionResult:
-    """Definition: DynamicUserFlowContinuationSubscriptionResult"""
+    """
+    Definition: DynamicUserFlowContinuationSubscriptionResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1293,7 +1969,9 @@ class DynamicUserFlowContinuationSubscriptionResult:
 
 @dataclass
 class DynamicChannelFlowContinuationSubscriptionResult:
-    """Definition: DynamicChannelFlowContinuationSubscriptionResult"""
+    """
+    Definition: DynamicChannelFlowContinuationSubscriptionResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1304,7 +1982,9 @@ class DynamicChannelFlowContinuationSubscriptionResult:
 
 @dataclass
 class DynamicGatherInputSubscriptionResult:
-    """Definition: DynamicGatherInputSubscriptionResult"""
+    """
+    Definition: DynamicGatherInputSubscriptionResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1315,19 +1995,29 @@ class DynamicGatherInputSubscriptionResult:
 
 @dataclass
 class AssociatedTeamInfo:
-    """Definition: AssociatedTeamInfo"""
+    """
+    Definition: AssociatedTeamInfo
+    """
 
     id: Optional[str] = None
     """The unique identifier of the team"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name of the team"""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The ID of the Microsoft Entra tenant this team belongs to"""
 
 
 @dataclass
 class ChannelWithOwnerTeamId:
-    """Definition: ChannelWithOwnerTeamId"""
+    """
+    Definition: ChannelWithOwnerTeamId
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1338,9 +2028,14 @@ class ChannelWithOwnerTeamId:
 
 @dataclass
 class WebhookRequest:
-    """Definition: WebhookRequest"""
+    """
+    Definition: WebhookRequest
+    """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """
     Specify a well-formed URL of the endpoint that will receive notifications
     """
@@ -1348,245 +2043,495 @@ class WebhookRequest:
 
 @dataclass
 class GetTimeOffReasonsResponse:
-    """Definition: GetTimeOffReasonsResponse"""
+    """
+    Definition: GetTimeOffReasonsResponse
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[Dict[str, Any]]] = None
     """The list of time off reasons."""
 
 
 @dataclass
 class TimeOffRequestResponse:
-    """Definition: TimeOffRequestResponse"""
+    """
+    Definition: TimeOffRequestResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the TimeOff request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """Start of time requested off"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """End of time requested off"""
-    time_off_reason_id: Optional[str] = None
+    time_off_reason_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeOffReasonId"},
+    )
     """The ID of the TimeOff Reason"""
 
 
 @dataclass
 class OfferShiftRequestResponse:
-    """Definition: OfferShiftRequestResponse"""
+    """
+    Definition: OfferShiftRequestResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the Offer Shift request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = None
+    sender_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderShiftId"},
+    )
     """The ID of the shift from the sender"""
-    recipient_action_date_time: Optional[str] = None
+    recipient_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionDateTime"},
+    )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = None
+    recipient_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionMessage"},
+    )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = None
+    recipient_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientUserId"},
+    )
     """The ID of the recipient of the request"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
 
 
 @dataclass
 class SwapShiftsChangeRequestResponse:
-    """Definition: SwapShiftsChangeRequestResponse"""
+    """
+    Definition: SwapShiftsChangeRequestResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the Swap Shift request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = None
+    sender_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderShiftId"},
+    )
     """The ID of the shift from the sender"""
-    recipient_action_date_time: Optional[str] = None
+    recipient_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionDateTime"},
+    )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = None
+    recipient_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionMessage"},
+    )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = None
+    recipient_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientUserId"},
+    )
     """The ID of the recipient of the request"""
-    recipient_shift_id: Optional[str] = None
+    recipient_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientShiftId"},
+    )
     """The ID of the shift from the recipient"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
 
 
 @dataclass
 class OpenShiftChangeRequestResponse:
-    """Definition: OpenShiftChangeRequestResponse"""
+    """
+    Definition: OpenShiftChangeRequestResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the Open Shift Change request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
-    open_shift_id: Optional[str] = None
+    open_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "openShiftId"},
+    )
     """The ID of the open shift being requested"""
 
 
 @dataclass
 class EditOpenShiftRequest:
-    """Definition: EditOpenShiftRequest"""
+    """
+    Definition: EditOpenShiftRequest
+    """
 
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """Scheduling Group ID"""
-    shared_open_shift: Optional[Dict[str, Any]] = None
+    shared_open_shift: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "sharedOpenShift"},
+    )
 
 
 @dataclass
 class OpenShiftResponse:
-    """Definition: OpenShiftResponse"""
+    """
+    Definition: OpenShiftResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the open shift."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = None
-    shared_open_shift: Optional[SharedOpenShift] = None
-    draft_open_shift: Optional[DraftOpenShift] = None
+    last_modified_by: Optional[LastModifiedBy] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedBy"},
+    )
+    shared_open_shift: Optional[SharedOpenShift] = field(
+        default=None,
+        metadata={"wire_name": "sharedOpenShift"},
+    )
+    draft_open_shift: Optional[DraftOpenShift] = field(
+        default=None,
+        metadata={"wire_name": "draftOpenShift"},
+    )
 
 
 @dataclass
 class SharedOpenShift:
-    """Definition: SharedOpenShift"""
+    """
+    Definition: SharedOpenShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[str] = None
     """Theme"""
-    open_slot_count: Optional[int] = None
+    open_slot_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "openSlotCount"},
+    )
     """Open Slot Count"""
     activities: Optional[Activities] = None
 
 
 @dataclass
 class DraftOpenShift:
-    """Definition: DraftOpenShift"""
+    """
+    Definition: DraftOpenShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[str] = None
     """Theme"""
-    open_slot_count: Optional[int] = None
+    open_slot_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "openSlotCount"},
+    )
     """Open Slot Count"""
     activities: Optional[Activities] = None
 
 
 @dataclass
 class ShiftResponse:
-    """Definition: ShiftResponse"""
+    """
+    Definition: ShiftResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the shift."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """Assigned To User ID"""
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = None
-    shared_shift: Optional[SharedShift] = None
-    draft_shift: Optional[DraftShift] = None
+    last_modified_by: Optional[LastModifiedBy] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedBy"},
+    )
+    shared_shift: Optional[SharedShift] = field(
+        default=None,
+        metadata={"wire_name": "sharedShift"},
+    )
+    draft_shift: Optional[DraftShift] = field(
+        default=None,
+        metadata={"wire_name": "draftShift"},
+    )
 
 
 @dataclass
 class SharedShift:
-    """Definition: SharedShift"""
+    """
+    Definition: SharedShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[str] = None
     """Theme"""
@@ -1595,15 +2540,26 @@ class SharedShift:
 
 @dataclass
 class DraftShift:
-    """Definition: DraftShift"""
+    """
+    Definition: DraftShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[str] = None
     """Theme"""
@@ -1612,28 +2568,43 @@ class DraftShift:
 
 @dataclass
 class ScheduleResponse:
-    """Definition: ScheduleResponse"""
+    """
+    Definition: ScheduleResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the schedule."""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """The Time Zone of the schedule."""
-    provision_status: Optional[str] = None
+    provision_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisionStatus"},
+    )
     """The Provision Status of the schedule."""
-    provision_status_code: Optional[str] = None
+    provision_status_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisionStatusCode"},
+    )
     """The Provision Status Code of the schedule."""
 
 
 @dataclass
 class PostMessageToSelfRequest:
-    """Definition: PostMessageToSelfRequest"""
+    """
+    Definition: PostMessageToSelfRequest
+    """
 
     body: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class ThemeEditor:
-    """Definition: ThemeEditor"""
+    """
+    Definition: ThemeEditor
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1644,7 +2615,9 @@ class ThemeEditor:
 
 @dataclass
 class Activities:
-    """Definition: Activities"""
+    """
+    Definition: Activities
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1655,38 +2628,47 @@ class Activities:
 
 @dataclass
 class SchedulingGroupResponse:
-    """Definition: SchedulingGroupResponse"""
+    """
+    Definition: SchedulingGroupResponse
+    """
 
     id: Optional[str] = None
     """The unique ID of the scheduling group."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name for the scheduling group."""
-    is_active: Optional[bool] = None
+    is_active: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isActive"},
+    )
     """
     Indicates whether the scheduling group can be used when creating new
     entities or updating existing ones.
     """
-    user_ids: Optional[List[str]] = None
+    user_ids: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "userIds"},
+    )
     """List of IDs of users in the scheduling group."""
 
 
 @dataclass
-class AtMentionUserV1:
-    """Definition: AtMentionUser_V1"""
-
-    at_mention: Optional[str] = None
-    """
-    An @mention token for the user. This property can be inserted into messages
-    """
-
-
-@dataclass
 class BotMentionRequest:
-    """Definition: BotMentionRequest"""
+    """
+    Definition: BotMentionRequest
+    """
 
-    bot_id: Optional[str] = None
+    bot_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "botId"},
+    )
     """The bot's unique identifier (GUID)"""
-    app_id: Optional[str] = None
+    app_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "appId"},
+    )
     """The bot's app identifier (GUID)"""
     name: Optional[str] = None
     """The bot's display name"""
@@ -1694,9 +2676,14 @@ class BotMentionRequest:
 
 @dataclass
 class AtMentionBotResponse:
-    """Definition: AtMentionBotResponse"""
+    """
+    Definition: AtMentionBotResponse
+    """
 
-    at_mention: Optional[str] = None
+    at_mention: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "atMention"},
+    )
     """
     An @mention token for the bot. This property can be inserted into messages
     and adaptive cards
@@ -1705,7 +2692,9 @@ class AtMentionBotResponse:
 
 @dataclass
 class ChannelIdForTeam:
-    """Definition: ChannelIdForTeam"""
+    """
+    Definition: ChannelIdForTeam
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1716,14 +2705,18 @@ class ChannelIdForTeam:
 
 @dataclass
 class ChannelIds:
-    """Definition: ChannelIds"""
+    """
+    Definition: ChannelIds
+    """
 
     channel: Optional[ChannelIdForTeam] = None
 
 
 @dataclass
 class ChatId:
-    """Definition: ChatId"""
+    """
+    Definition: ChatId
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1734,7 +2727,9 @@ class ChatId:
 
 @dataclass
 class BotIdForChat:
-    """Definition: BotIdForChat"""
+    """
+    Definition: BotIdForChat
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1745,7 +2740,9 @@ class BotIdForChat:
 
 @dataclass
 class NewChat:
-    """Definition: NewChat"""
+    """
+    Definition: NewChat
+    """
 
     topic: Optional[str] = None
     """Title, displayed only in group chats"""
@@ -1755,19 +2752,30 @@ class NewChat:
 
 @dataclass
 class NewMeeting:
-    """Definition: NewMeeting"""
+    """
+    Definition: NewMeeting
+    """
 
     subject: Optional[str] = None
     """The text of the event's subject line"""
     body: Optional[Dict[str, Any]] = None
     """The body of the message associated with the event"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """Time zone of the event"""
     start: Optional[Dict[str, Any]] = None
     end: Optional[Dict[str, Any]] = None
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "requiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "optionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
     location: Optional[Dict[str, Any]] = None
     """The location of the event"""
@@ -1775,30 +2783,53 @@ class NewMeeting:
     """The importance of the event: low, normal or high"""
     recurrence: Optional[Dict[str, Any]] = None
     """The recurrence pattern for the meeting"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """
     The number of minutes before the event start time that the reminder alert
     occurs
     """
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if an alert is set to remind the user of the event"""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """Status to show during the event"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     """
-    is_online_meeting: Optional[bool] = None
+    is_online_meeting: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlineMeeting"},
+    )
     """Set to true, if the meeting should have an online meeting provider"""
-    online_meeting_provider: Optional[str] = None
+    online_meeting_provider: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onlineMeetingProvider"},
+    )
     """Represents the online meeting service provider"""
 
 
 @dataclass
 class LastModifiedBy:
-    """Definition: LastModifiedBy"""
+    """
+    Definition: LastModifiedBy
+    """
 
     application: Optional[str] = None
     """Application"""
@@ -1812,65 +2843,126 @@ class LastModifiedBy:
 
 @dataclass
 class MemberSettings:
-    """Definition: MemberSettings"""
+    """
+    Definition: MemberSettings
+    """
 
-    allow_create_update_channels: Optional[bool] = None
+    allow_create_update_channels: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowCreateUpdateChannels"},
+    )
     """If set to true, members can add and update channels"""
-    allow_delete_channels: Optional[bool] = None
+    allow_delete_channels: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowDeleteChannels"},
+    )
     """If set to true, members can delete channels"""
-    allow_add_remove_apps: Optional[bool] = None
+    allow_add_remove_apps: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowAddRemoveApps"},
+    )
     """If set to true, members can add and remove apps"""
-    allow_create_update_remove_tabs: Optional[bool] = None
+    allow_create_update_remove_tabs: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowCreateUpdateRemoveTabs"},
+    )
     """If set to true, members can add, update, and remove tabs"""
-    allow_create_update_remove_connectors: Optional[bool] = None
+    allow_create_update_remove_connectors: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowCreateUpdateRemoveConnectors"},
+    )
     """If set to true, members can add, update, and remove connectors"""
 
 
 @dataclass
 class GuestSettings:
-    """Definition: GuestSettings"""
+    """
+    Definition: GuestSettings
+    """
 
-    allow_create_update_channels: Optional[bool] = None
+    allow_create_update_channels: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowCreateUpdateChannels"},
+    )
     """If set to true, guests can add and update channels"""
-    allow_delete_channels: Optional[bool] = None
+    allow_delete_channels: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowDeleteChannels"},
+    )
     """If set to true, guests can delete channels"""
 
 
 @dataclass
 class MessagingSettings:
-    """Definition: MessagingSettings"""
+    """
+    Definition: MessagingSettings
+    """
 
-    allow_user_edit_messages: Optional[bool] = None
+    allow_user_edit_messages: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowUserEditMessages"},
+    )
     """If set to true, users can edit their messages"""
-    allow_user_delete_messages: Optional[bool] = None
+    allow_user_delete_messages: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowUserDeleteMessages"},
+    )
     """If set to true, users can delete their messages"""
-    allow_owner_delete_messages: Optional[bool] = None
+    allow_owner_delete_messages: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowOwnerDeleteMessages"},
+    )
     """If set to true, owners can delete any message"""
-    allow_team_mentions: Optional[bool] = None
+    allow_team_mentions: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowTeamMentions"},
+    )
     """If set to true, @team mentions are allowed"""
-    allow_channel_mentions: Optional[bool] = None
+    allow_channel_mentions: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowChannelMentions"},
+    )
     """If set to true, @channel mentions are allowed"""
 
 
 @dataclass
 class FunSettings:
-    """Definition: FunSettings"""
+    """
+    Definition: FunSettings
+    """
 
-    allow_giphy: Optional[bool] = None
+    allow_giphy: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowGiphy"},
+    )
     """If set to true, enables Giphy use"""
-    giphy_content_rating: Optional[str] = None
+    giphy_content_rating: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "giphyContentRating"},
+    )
     """Giphy content rating. Possible values are: moderate, strict"""
-    allow_stickers_and_memes: Optional[bool] = None
+    allow_stickers_and_memes: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowStickersAndMemes"},
+    )
     """If set to true, enables users to include stickers and memes"""
-    allow_custom_memes: Optional[bool] = None
+    allow_custom_memes: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "allowCustomMemes"},
+    )
     """If set to true, enables users to include custom memes"""
 
 
 @dataclass
 class DiscoverySettings:
-    """Definition: DiscoverySettings"""
+    """
+    Definition: DiscoverySettings
+    """
 
-    show_in_teams_search_and_suggestions: Optional[bool] = None
+    show_in_teams_search_and_suggestions: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "showInTeamsSearchAndSuggestions"},
+    )
     """
     If set to true, the team is visible via search and suggestions from the
     Teams client
@@ -1879,66 +2971,115 @@ class DiscoverySettings:
 
 @dataclass
 class SelectedMessageTriggerMetadata:
-    """Definition: SelectedMessageTriggerMetadata"""
+    """
+    Definition: SelectedMessageTriggerMetadata
+    """
 
-    teams_flow_run_context: Optional[ObjectEntity] = None
-    card_outputs: Optional[ObjectEntity] = None
+    teams_flow_run_context: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "TeamsFlowRunContext"},
+    )
+    card_outputs: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "CardOutputs"},
+    )
 
 
 @dataclass
 class ComposeMessageTriggerMetadata:
-    """Definition: ComposeMessageTriggerMetadata"""
+    """
+    Definition: ComposeMessageTriggerMetadata
+    """
 
-    teams_flow_run_context: Optional[ObjectEntity] = None
-    card_outputs: Optional[ObjectEntity] = None
+    teams_flow_run_context: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "TeamsFlowRunContext"},
+    )
+    card_outputs: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "CardOutputs"},
+    )
 
 
 @dataclass
 class CardResponseTriggerMetadata:
-    """Definition: CardResponseTriggerMetadata"""
+    """
+    Definition: CardResponseTriggerMetadata
+    """
 
-    teams_flow_run_context: Optional[ObjectEntity] = None
-    card_outputs: Optional[ObjectEntity] = None
+    teams_flow_run_context: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "TeamsFlowRunContext"},
+    )
+    card_outputs: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "CardOutputs"},
+    )
 
 
 @dataclass
 class VirtualAgentBots:
-    """Definition: VirtualAgentBots"""
+    """
+    Definition: VirtualAgentBots
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[Dict[str, Any]]] = None
     """List of the Microsoft Copilot Studio agents"""
 
 
 @dataclass
 class SectionItemConflictError:
-    """Definition: SectionItemConflictError"""
+    """
+    Definition: SectionItemConflictError
+    """
 
     error: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class DynamicCallEventTriggerRequest:
-    """Definition: DynamicCallEventTriggerRequest"""
+    """
+    Definition: DynamicCallEventTriggerRequest
+    """
 
-    callback_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """Webhook callback URL"""
+    scope: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class DynamicTranscriptTriggerRequest:
-    """Definition: DynamicTranscriptTriggerRequest"""
+    """
+    Definition: DynamicTranscriptTriggerRequest
+    """
 
-    callback_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """Webhook callback URL"""
+    scope: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class DynamicRecordingTriggerRequest:
-    """Definition: DynamicRecordingTriggerRequest"""
+    """
+    Definition: DynamicRecordingTriggerRequest
+    """
 
-    callback_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """Webhook callback URL"""
+    scope: Optional[Dict[str, Any]] = None
 
 
 # Client Class
@@ -1979,24 +3120,26 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: NewMeeting,
         calendarid: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a Teams meeting
 
         Create a meeting with a link at the bottom of the invite to join the
         meeting online on Microsoft Teams.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/me/calendars/{str(calendarid)}/events"
+            f"/v1.0/me/calendars/{quote(str(calendarid), safe='')}/events"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2008,20 +3151,22 @@ class TeamsClient(ConnectorClientBase):
 
     async def get_all_teams_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List joined teams
 
         Lists all the teams in Microsoft Teams that you are a member of
         """
-        path = f"{self._connection_runtime_url}/beta/me/joinedTeams"
+        request_url = f"{self._connection_runtime_url}/beta/me/joinedTeams"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2033,23 +3178,25 @@ class TeamsClient(ConnectorClientBase):
 
     async def get_all_associated_teams_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List associated teams
 
         Lists all the teams you are a direct member of, or are a member of a
         shared channel that is hosted inside the team.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2064,15 +3211,15 @@ class TeamsClient(ConnectorClientBase):
         group_id: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List channels
 
         Lists all the channels for a specific team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/groups/{str(group_id)}/channels"
+            f"/beta/groups/{quote(str(group_id), safe='')}/channels"
         )
         query_params = []
         if filter is not None:
@@ -2086,14 +3233,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$orderby={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2107,23 +3256,25 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: CreateChannelInput,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a channel
 
         Create a new channel within a specified team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/groups/{str(group_id)}/channels"
+            f"/beta/groups/{quote(str(group_id), safe='')}/channels"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2137,23 +3288,29 @@ class TeamsClient(ConnectorClientBase):
         self,
         group_id: str,
         channel_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get details for a specific channel in a team
 
         Get the channel details
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/teams/{str(group_id)}/channels/{str(channel_id)}"
+            f"/beta"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/channels"
+            f"/{quote(str(channel_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2163,21 +3320,56 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def update_channel_properties_async(
+        self,
+        input: UpdateChannelPropertiesInput,
+        group_id: str,
+        channel_id: str,
+    ) -> None:
+        """
+        Update channel
+
+        Updates the properties of a channel in a specific team. Only the
+        properties you provide are changed; omitted properties are left
+        unchanged. For shared channels, the team ID must refer to the host
+        team, which is the team that owns the shared channel.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/beta"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/channels"
+            f"/{quote(str(channel_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PATCH",
+                request_url,
+                response.status,
+                response.text,
+            )
+
     async def get_all_channels_for_team_async(
         self,
         group_id: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all channels
 
         Lists all the channels for a specific team, including channels that are
         shared with the team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/teams/{str(group_id)}/allChannels"
+            f"/beta/teams/{quote(str(group_id), safe='')}/allChannels"
         )
         query_params = []
         if filter is not None:
@@ -2191,14 +3383,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$orderby={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2212,31 +3406,33 @@ class TeamsClient(ConnectorClientBase):
         self,
         chat_type: str,
         topic: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List chats
 
         Lists recent chats you are a part of
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/flowbot"
             f"/actions"
             f"/listchats"
             f"/chattypes"
-            f"/{str(chat_type)}"
+            f"/{quote(str(chat_type), safe='')}"
             f"/topic"
-            f"/{str(topic)}"
+            f"/{quote(str(topic), safe='')}"
             f"/expandmembers"
             f"/false"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2251,29 +3447,31 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicPostFeedNotificationRequest,
         poster: str,
         notification_type: str,
-    ):
+    ) -> None:
         """
         Post a feed notification
 
         Posts a notification to a user's activity feed linking to a chat or
         team.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/flowbot"
             f"/feednotification"
             f"/poster"
-            f"/{str(poster)}"
+            f"/{quote(str(poster), safe='')}"
             f"/notificationType"
-            f"/{str(notification_type)}"
+            f"/{quote(str(notification_type), safe='')}"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2282,24 +3480,30 @@ class TeamsClient(ConnectorClientBase):
         self,
         group_id: str,
         tag_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get an @mention token for a team tag
 
         Creates a token that can be inserted into a message or adaptive card
         sent as a user in a channel to @mention a team tag.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/teams/{str(group_id)}/tags/{str(tag_id)}"
+            f"/beta"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/tags"
+            f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2313,7 +3517,7 @@ class TeamsClient(ConnectorClientBase):
         self,
         group_id: str,
         channel_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get messages in a channel
 
@@ -2321,17 +3525,24 @@ class TeamsClient(ConnectorClientBase):
         the team ID must refer to the host team, which is the team that owns
         the shared channel.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/teams/{str(group_id)}/channels/{str(channel_id)}/messages"
+            f"/beta"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/channels"
+            f"/{quote(str(channel_id), safe='')}"
+            f"/messages"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2346,28 +3557,30 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicGetMessageDetailsSchema,
         message_id: str,
         thread_type: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get message details
 
         Gets the details of a message in a chat or a channel.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
             f"/teams"
             f"/messages"
-            f"/{str(message_id)}"
+            f"/{quote(str(message_id), safe='')}"
             f"/messageType"
-            f"/{str(thread_type)}"
+            f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2383,7 +3596,7 @@ class TeamsClient(ConnectorClientBase):
         channel_id: str,
         message_id: str,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List replies of a channel message
 
@@ -2391,15 +3604,15 @@ class TeamsClient(ConnectorClientBase):
         channels, the team ID must refer to the host team, which is the team
         that owns the shared channel.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/channels"
-            f"/{str(channel_id)}"
+            f"/{quote(str(channel_id), safe='')}"
             f"/messages"
-            f"/{str(message_id)}"
+            f"/{quote(str(message_id), safe='')}"
             f"/replies"
         )
         query_params = []
@@ -2409,14 +3622,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2431,15 +3646,19 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicListMembersSchema,
         thread_type: str,
         filter: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List chat or channel members
 
         List direct members of a group chat or a channel
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/listmembers/threadType/{str(thread_type)}"
+            f"/v1.0"
+            f"/teams"
+            f"/listmembers"
+            f"/threadType"
+            f"/{quote(str(thread_type), safe='')}"
         )
         query_params = []
         if filter is not None:
@@ -2448,14 +3667,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$filter={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2464,346 +3685,11 @@ class TeamsClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
-
-    async def on_new_channel_message_async(
-        self,
-        group_id: str,
-        channel_id: str,
-        top: Optional[str] = None,
-    ):
-        """
-        When a new channel message is added
-
-        Triggers when a new message is posted to a channel in a team. Note that
-        this trigger only fires when a root messages is added in the channel.
-        Replies to an existing channel message will not result in the trigger
-        event firing. For shared channels, the team ID must refer to the host
-        team, which is the team that owns the shared channel.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger"
-            f"/beta"
-            f"/teams"
-            f"/{str(group_id)}"
-            f"/channels"
-            f"/{str(channel_id)}"
-            f"/messages"
-        )
-        query_params = []
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_channel_message_mentioning_me_async(
-        self,
-        group_id: str,
-        channel_id: str,
-        top: Optional[str] = None,
-    ):
-        """
-        When I am mentioned in a channel message
-
-        Triggers when a new message that @mentions the current user is added to
-        a channel in a team. For shared channels, the team ID must refer to the
-        host team, which is the team that owns the shared channel.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger"
-            f"/beta"
-            f"/teams"
-            f"/{str(group_id)}"
-            f"/channels"
-            f"/{str(channel_id)}"
-            f"/messages_mentioningme"
-        )
-        query_params = []
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def webhook_at_mention_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-        thread_type: str,
-    ):
-        """
-        When I'm @mentioned
-
-        Triggers when a new message that @mentions the current user is added to
-        a specified chat or channel.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/beta"
-            f"/subscriptions"
-            f"/atmentiontrigger"
-            f"/threadType"
-            f"/{str(thread_type)}"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def webhook_message_reaction_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-        thread_type: str,
-        reaction_key: Optional[str],
-        frequency: Optional[str],
-        running_policy: Optional[str],
-    ):
-        """
-        When someone reacted to a message in chat
-
-        Triggers when someone reacts to a message in a specified chat or
-        channel.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/beta"
-            f"/subscriptions"
-            f"/messagereactiontrigger"
-            f"/threadType"
-            f"/{str(thread_type)}"
-        )
-        query_params = []
-        if reaction_key is not None:
-            value = str(reaction_key)
-            if isinstance(reaction_key, bool):
-                value = value.lower()
-            query_params.append(f"reactionKey={quote(value)}")
-        if frequency is not None:
-            value = str(frequency)
-            if isinstance(frequency, bool):
-                value = value.lower()
-            query_params.append(f"frequency={quote(value)}")
-        if running_policy is not None:
-            value = str(running_policy)
-            if isinstance(running_policy, bool):
-                value = value.lower()
-            query_params.append(f"runningPolicy={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def transcript_trigger_async(
-        self,
-        input: DynamicTranscriptTriggerRequest,
-        scope_type: Optional[str],
-    ):
-        """
-        When a transcript is available
-
-        Triggers when a transcript becomes available for a meeting or ad-hoc
-        call.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/beta/subscriptions/transcripttrigger"
-        )
-        query_params = []
-        if scope_type is not None:
-            value = str(scope_type)
-            if isinstance(scope_type, bool):
-                value = value.lower()
-            query_params.append(f"scopeType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def recording_trigger_async(
-        self,
-        input: DynamicRecordingTriggerRequest,
-        scope_type: Optional[str],
-    ):
-        """
-        When a recording is available
-
-        Triggers when a recording becomes available for a meeting or ad-hoc
-        call.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/beta/subscriptions/recordingtrigger"
-        )
-        query_params = []
-        if scope_type is not None:
-            value = str(scope_type)
-            if isinstance(scope_type, bool):
-                value = value.lower()
-            query_params.append(f"scopeType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def webhook_chat_message_trigger_async(
-        self,
-        input: WebhookChatMessageTriggerInput,
-    ):
-        """
-        When a new chat message is added
-
-        Triggers when a new message is posted in any chat the user is a part
-        of.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/beta/subscriptions/chatmessagetrigger"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def webhook_keyword_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-        thread_type: str,
-        search: Optional[str],
-    ):
-        """
-        When keywords are mentioned
-
-        Triggers when a keyword is mentioned in a specified chat or channel.
-        Does not trigger if a message is edited.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/beta/subscriptions/keywordtrigger/threadType/{str(thread_type)}"
-        )
-        query_params = []
-        if search is not None:
-            value = str(search)
-            if isinstance(search, bool):
-                value = value.lower()
-            query_params.append(f"$search={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def webhook_new_message_trigger_async(
-        self,
-        input: DynamicWebhookTriggerRequestSchema,
-        thread_type: str,
-    ):
-        """
-        When a new message is added to a chat or channel
-
-        Triggers when a new message is posted in a specified chat or channel.
-        Does not trigger if a message is edited.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/beta"
-            f"/subscriptions"
-            f"/newmessagetrigger"
-            f"/threadType"
-            f"/{str(thread_type)}"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
 
     async def subscribe_user_message_with_options_async(
         self,
         input: DynamicUserMessageWithOptionsSubscriptionRequest,
-    ):
+    ) -> None:
         """
         Post a choice of options as the Flow bot to a user
 
@@ -2811,7 +3697,7 @@ class TeamsClient(ConnectorClientBase):
         to before the flow will continue. This action will pause the flow until
         the user response to the options
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/flowbot"
             f"/actions"
@@ -2821,12 +3707,14 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2834,20 +3722,25 @@ class TeamsClient(ConnectorClientBase):
     async def get_team_async(
         self,
         team_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a team
 
         Gets the details for a team in Microsoft Teams.
         """
-        path = f"{self._connection_runtime_url}/beta/teams/{str(team_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/beta/teams/{quote(str(team_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2860,101 +3753,26 @@ class TeamsClient(ConnectorClientBase):
     async def at_mention_user_async(
         self,
         user_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get an @mention token for a user
 
         Creates a token that can be inserted into a message or adaptive card to
         @mention a user.
         """
-        path = f"{self._connection_runtime_url}/v1.0/users/{str(user_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/users/{quote(str(user_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_group_membership_removal_async(
-        self,
-        group_id: Optional[str],
-        select: Optional[str] = None,
-    ):
-        """
-        When a new team member is removed
-
-        Triggers when a member is removed from the specified team
-        """
-        path = f"{self._connection_runtime_url}/trigger/v1.0/groups/removal"
-        query_params = []
-        if group_id is not None:
-            value = str(group_id)
-            if isinstance(group_id, bool):
-                value = value.lower()
-            query_params.append(f"groupId={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_group_membership_add_async(
-        self,
-        group_id: Optional[str],
-        select: Optional[str] = None,
-    ):
-        """
-        When a new team member is added
-
-        Triggers when a member is added to the given team
-        """
-        path = f"{self._connection_runtime_url}/trigger/v1.0/groups/delta"
-        query_params = []
-        if group_id is not None:
-            value = str(group_id)
-            if isinstance(group_id, bool):
-                value = value.lower()
-            query_params.append(f"groupId={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2967,20 +3785,22 @@ class TeamsClient(ConnectorClientBase):
     async def create_chat_async(
         self,
         input: NewChat,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a chat
 
         Creates a one on one or group chat
         """
-        path = f"{self._connection_runtime_url}/beta/chats"
+        request_url = f"{self._connection_runtime_url}/beta/chats"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2996,15 +3816,15 @@ class TeamsClient(ConnectorClientBase):
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get messages in a chat
 
         Retrieves messages from a one on one or group chat
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/chats/{str(chat_id)}/messages"
+            f"/beta/chats/{quote(str(chat_id), safe='')}/messages"
         )
         query_params = []
         if filter is not None:
@@ -3023,14 +3843,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3043,21 +3865,25 @@ class TeamsClient(ConnectorClientBase):
     async def post_message_to_self_async(
         self,
         input: PostMessageToSelfRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Post a message to myself
 
         Sends a message to the signed-in user's own Notes chat in Microsoft
         Teams.
         """
-        path = f"{self._connection_runtime_url}/v1.0/chats/48:notes/messages"
+        request_url = (
+            f"{self._connection_runtime_url}/v1.0/chats/48:notes/messages"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3070,20 +3896,22 @@ class TeamsClient(ConnectorClientBase):
     async def create_a_team_async(
         self,
         input: CreateATeamInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a team
 
         Creates a new team in Microsoft Teams
         """
-        path = f"{self._connection_runtime_url}/beta/teams"
+        request_url = f"{self._connection_runtime_url}/beta/teams"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3098,14 +3926,15 @@ class TeamsClient(ConnectorClientBase):
         team_id: str,
         filter: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List team members
 
         Lists the members of a team in Microsoft Teams
         """
-        path = (
-            f"{self._connection_runtime_url}/v1.0/teams/{str(team_id)}/members"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/members"
         )
         query_params = []
         if filter is not None:
@@ -3119,14 +3948,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3140,22 +3971,25 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: AddMemberToTeamInput,
         team_id: str,
-    ):
+    ) -> None:
         """
         Add a member to a team
 
         Adds a member to a team in Microsoft Teams
         """
-        path = (
-            f"{self._connection_runtime_url}/v1.0/teams/{str(team_id)}/members"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3164,23 +3998,29 @@ class TeamsClient(ConnectorClientBase):
         self,
         team_id: str,
         membership_id: str,
-    ):
+    ) -> None:
         """
         Remove a member from a team
 
         Removes a member from a team in Microsoft Teams
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/members/{str(membership_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/members"
+            f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3190,24 +4030,31 @@ class TeamsClient(ConnectorClientBase):
         input: AddMemberToChannelInput,
         group_id: str,
         channel_id: str,
-    ):
+    ) -> None:
         """
         Add a member to a channel
 
         Adds a member to a channel in Microsoft Teams. The channel must be a
         private or shared channel.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(group_id)}/channels/{str(channel_id)}/members"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/channels"
+            f"/{quote(str(channel_id), safe='')}"
+            f"/members"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3217,30 +4064,32 @@ class TeamsClient(ConnectorClientBase):
         group_id: str,
         channel_id: str,
         membership_id: str,
-    ):
+    ) -> None:
         """
         Remove a direct member from a channel
 
         Removes a direct member from a channel in Microsoft Teams. The channel
         must be a private or shared channel.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/channels"
-            f"/{str(channel_id)}"
+            f"/{quote(str(channel_id), safe='')}"
             f"/members"
-            f"/{str(membership_id)}"
+            f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3250,39 +4099,32 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicPostMessageRequest,
         poster: str,
         location: str,
-        customization_modified_time: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Post message in a chat or channel
 
         Posts a message to a chat or a channel
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
             f"/teams"
             f"/conversation"
             f"/message"
             f"/poster"
-            f"/{str(poster)}"
+            f"/{quote(str(poster), safe='')}"
             f"/location"
-            f"/{str(location)}"
+            f"/{quote(str(location), safe='')}"
         )
-        query_params = []
-        if customization_modified_time is not None:
-            value = str(customization_modified_time)
-            if isinstance(customization_modified_time, bool):
-                value = value.lower()
-            query_params.append(f"customizationModifiedTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3297,39 +4139,32 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicReplyMessageRequest,
         poster: str,
         location: str,
-        customization_modified_time: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Reply with a message in a channel
 
         Replies with a message to a channel's message
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
             f"/conversation"
             f"/replyWithMessage"
             f"/poster"
-            f"/{str(poster)}"
+            f"/{quote(str(poster), safe='')}"
             f"/location"
-            f"/{str(location)}"
+            f"/{quote(str(location), safe='')}"
         )
-        query_params = []
-        if customization_modified_time is not None:
-            value = str(customization_modified_time)
-            if isinstance(customization_modified_time, bool):
-                value = value.lower()
-            query_params.append(f"customizationModifiedTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3344,39 +4179,32 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicPostCardRequest,
         poster: str,
         location: str,
-        customization_modified_time: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Post card in a chat or channel
 
         Posts a card to a chat or a channel
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
             f"/conversation"
             f"/adaptivecard"
             f"/poster"
-            f"/{str(poster)}"
+            f"/{quote(str(poster), safe='')}"
             f"/location"
-            f"/{str(location)}"
+            f"/{quote(str(location), safe='')}"
         )
-        query_params = []
-        if customization_modified_time is not None:
-            value = str(customization_modified_time)
-            if isinstance(customization_modified_time, bool):
-                value = value.lower()
-            query_params.append(f"customizationModifiedTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3391,41 +4219,34 @@ class TeamsClient(ConnectorClientBase):
         input: PostCardAndWaitForResponseInput,
         poster: str,
         location: str,
-        customization_modified_time: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Post adaptive card and wait for a response
 
         Posts an adaptive card to a chat or a channel and waits for a response
         from any user. This will pause the flow until any user responds.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
             f"/conversation"
             f"/gatherinput"
             f"/poster"
-            f"/{str(poster)}"
+            f"/{quote(str(poster), safe='')}"
             f"/location"
-            f"/{str(location)}"
+            f"/{quote(str(location), safe='')}"
             f"/$subscriptions"
         )
-        query_params = []
-        if customization_modified_time is not None:
-            value = str(customization_modified_time)
-            if isinstance(customization_modified_time, bool):
-                value = value.lower()
-            query_params.append(f"customizationModifiedTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3440,39 +4261,32 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicReplyCardRequest,
         poster: str,
         location: str,
-        customization_modified_time: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Reply with an adaptive card in a channel
 
         Replies with an adaptive card to a channel's message
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
             f"/conversation"
             f"/replyWithAdaptivecard"
             f"/poster"
-            f"/{str(poster)}"
+            f"/{quote(str(poster), safe='')}"
             f"/location"
-            f"/{str(location)}"
+            f"/{quote(str(location), safe='')}"
         )
-        query_params = []
-        if customization_modified_time is not None:
-            value = str(customization_modified_time)
-            if isinstance(customization_modified_time, bool):
-                value = value.lower()
-            query_params.append(f"customizationModifiedTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3487,39 +4301,32 @@ class TeamsClient(ConnectorClientBase):
         input: DynamicUpdateCardRequest,
         poster: str,
         location: str,
-        customization_modified_time: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update an adaptive card in a chat or channel
 
         Updates an existing adaptive card
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
             f"/conversation"
             f"/updateAdaptivecard"
             f"/poster"
-            f"/{str(poster)}"
+            f"/{quote(str(poster), safe='')}"
             f"/location"
-            f"/{str(location)}"
+            f"/{quote(str(location), safe='')}"
         )
-        query_params = []
-        if customization_modified_time is not None:
-            value = str(customization_modified_time)
-            if isinstance(customization_modified_time, bool):
-                value = value.lower()
-            query_params.append(f"customizationModifiedTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3531,8 +4338,8 @@ class TeamsClient(ConnectorClientBase):
 
     async def http_request_async(
         self,
-        input: HttpRequestInput,
-    ):
+        input: bytes,
+    ) -> dict[str, Any] | None:
         """
         Send a Microsoft Graph HTTP request
 
@@ -3542,14 +4349,19 @@ class TeamsClient(ConnectorClientBase):
         messages, pinnedMessages, onlineMeetings. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api
         """
-        path = f"{self._connection_runtime_url}/httprequest"
+        request_url = f"{self._connection_runtime_url}/httprequest"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3563,58 +4375,95 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: AddMemberToChatInput,
         chat_id: str,
-    ):
+    ) -> None:
         """
         Add a user to a chat
 
         Adds a user to a chat in Microsoft Teams.
         """
-        path = (
-            f"{self._connection_runtime_url}/v1.0/chats/{str(chat_id)}/members"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/chats/{quote(str(chat_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def remove_member_from_chat_async(
+        self,
+        chat_id: str,
+        membership_id: str,
+    ) -> None:
+        """
+        Remove a member from a chat
+
+        Removes a member from a chat in Microsoft Teams. Only group chats
+        support member removal.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/chats"
+            f"/{quote(str(chat_id), safe='')}"
+            f"/members"
+            f"/{quote(str(membership_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def get_online_meeting_async(
         self,
-        lookup_type: Optional[str],
-        lookup_value: Optional[str],
-    ):
+        lookup_type: str,
+        lookup_value: str,
+    ) -> dict[str, Any] | None:
         """
         Get an online meeting
 
         Retrieves the properties and relationships of an online meeting. You
         can look up a meeting by meeting ID, join web URL, or join meeting ID.
         """
-        path = f"{self._connection_runtime_url}/v1.0/me/onlineMeetings/lookup"
+        request_url = (
+            f"{self._connection_runtime_url}/v1.0/me/onlineMeetings/lookup"
+        )
         query_params = []
-        if lookup_type is not None:
-            value = str(lookup_type)
-            if isinstance(lookup_type, bool):
-                value = value.lower()
-            query_params.append(f"lookupType={quote(value)}")
-        if lookup_value is not None:
-            value = str(lookup_value)
-            if isinstance(lookup_value, bool):
-                value = value.lower()
-            query_params.append(f"lookupValue={quote(value)}")
+        value = str(lookup_type)
+        if isinstance(lookup_type, bool):
+            value = value.lower()
+        query_params.append(f"lookupType={quote(value)}")
+        value = str(lookup_value)
+        if isinstance(lookup_value, bool):
+            value = value.lower()
+        query_params.append(f"lookupValue={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3627,23 +4476,29 @@ class TeamsClient(ConnectorClientBase):
     async def list_meeting_transcripts_async(
         self,
         meeting_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List meeting transcripts
 
         Lists all transcripts for an online meeting
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/me/onlineMeetings/{str(meeting_id)}/transcripts"
+            f"/v1.0"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{quote(str(meeting_id), safe='')}"
+            f"/transcripts"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3657,28 +4512,30 @@ class TeamsClient(ConnectorClientBase):
         self,
         meeting_id: str,
         transcript_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get meeting transcript
 
         Gets a specific transcript for an online meeting
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/onlineMeetings"
-            f"/{str(meeting_id)}"
+            f"/{quote(str(meeting_id), safe='')}"
             f"/transcripts"
-            f"/{str(transcript_id)}"
+            f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3692,29 +4549,31 @@ class TeamsClient(ConnectorClientBase):
         self,
         meeting_id: str,
         transcript_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get meeting transcript content
 
         Gets the content of a meeting transcript
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/onlineMeetings"
-            f"/{str(meeting_id)}"
+            f"/{quote(str(meeting_id), safe='')}"
             f"/transcripts"
-            f"/{str(transcript_id)}"
+            f"/{quote(str(transcript_id), safe='')}"
             f"/content"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3727,23 +4586,29 @@ class TeamsClient(ConnectorClientBase):
     async def list_meeting_recordings_async(
         self,
         meeting_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List meeting recordings
 
         Lists all recordings for an online meeting
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/me/onlineMeetings/{str(meeting_id)}/recordings"
+            f"/v1.0"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{quote(str(meeting_id), safe='')}"
+            f"/recordings"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3757,28 +4622,30 @@ class TeamsClient(ConnectorClientBase):
         self,
         meeting_id: str,
         recording_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get meeting recording
 
         Gets a specific recording for an online meeting
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/onlineMeetings"
-            f"/{str(meeting_id)}"
+            f"/{quote(str(meeting_id), safe='')}"
             f"/recordings"
-            f"/{str(recording_id)}"
+            f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3792,29 +4659,31 @@ class TeamsClient(ConnectorClientBase):
         self,
         meeting_id: str,
         recording_id: str,
-    ):
+    ) -> bytes:
         """
         Get meeting recording content
 
         Gets the content stream of a meeting recording
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/onlineMeetings"
-            f"/{str(meeting_id)}"
+            f"/{quote(str(meeting_id), safe='')}"
             f"/recordings"
-            f"/{str(recording_id)}"
+            f"/{quote(str(recording_id), safe='')}"
             f"/content"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3823,20 +4692,24 @@ class TeamsClient(ConnectorClientBase):
 
     async def list_sections_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List sections
 
         Lists the current user's teamwork sections
         """
-        path = f"{self._connection_runtime_url}/beta/me/teamwork/sections"
+        request_url = (
+            f"{self._connection_runtime_url}/beta/me/teamwork/sections"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3849,20 +4722,24 @@ class TeamsClient(ConnectorClientBase):
     async def create_section_async(
         self,
         input: CreateSectionInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a section
 
         Creates a new teamwork section for the current user
         """
-        path = f"{self._connection_runtime_url}/beta/me/teamwork/sections"
+        request_url = (
+            f"{self._connection_runtime_url}/beta/me/teamwork/sections"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3875,23 +4752,25 @@ class TeamsClient(ConnectorClientBase):
     async def get_section_async(
         self,
         section_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a section
 
         Gets a specific teamwork section by ID
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/me/teamwork/sections/{str(section_id)}"
+            f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3905,23 +4784,25 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: UpdateSectionInput,
         section_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a section
 
         Updates a teamwork section for the current user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/me/teamwork/sections/{str(section_id)}"
+            f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3934,23 +4815,25 @@ class TeamsClient(ConnectorClientBase):
     async def delete_section_async(
         self,
         section_id: str,
-    ):
+    ) -> None:
         """
         Delete a section
 
         Deletes a teamwork section for the current user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/me/teamwork/sections/{str(section_id)}"
+            f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3958,24 +4841,31 @@ class TeamsClient(ConnectorClientBase):
     async def list_section_items_async(
         self,
         section_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List section items
 
         Lists the items (chats, channels, meetings, communities) in a teamwork
         section. Each item belongs to exactly one section at a time.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/me/teamwork/sections/{str(section_id)}/items"
+            f"/beta"
+            f"/me"
+            f"/teamwork"
+            f"/sections"
+            f"/{quote(str(section_id), safe='')}"
+            f"/items"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3989,7 +4879,7 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: AddSectionItemInput,
         section_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add an item to a section
 
@@ -3997,17 +4887,24 @@ class TeamsClient(ConnectorClientBase):
         system-defined section to a user-defined teamwork section. Use Move
         Section Item to relocate items already in another user-defined section.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/beta/me/teamwork/sections/{str(section_id)}/items"
+            f"/beta"
+            f"/me"
+            f"/teamwork"
+            f"/sections"
+            f"/{quote(str(section_id), safe='')}"
+            f"/items"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4021,7 +4918,7 @@ class TeamsClient(ConnectorClientBase):
         self,
         section_id: str,
         section_item_id: str,
-    ):
+    ) -> None:
         """
         Remove an item from a section
 
@@ -4029,23 +4926,25 @@ class TeamsClient(ConnectorClientBase):
         chat, channel, meeting, or community is not deleted; the item returns
         to its default system-defined section.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
             f"/me"
             f"/teamwork"
             f"/sections"
-            f"/{str(section_id)}"
+            f"/{quote(str(section_id), safe='')}"
             f"/items"
-            f"/{str(section_item_id)}"
+            f"/{quote(str(section_item_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4055,7 +4954,7 @@ class TeamsClient(ConnectorClientBase):
         input: MoveSectionItemInput,
         section_id: str,
         section_item_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Move a section item
 
@@ -4064,24 +4963,26 @@ class TeamsClient(ConnectorClientBase):
         at a time. This action removes the item from its current section and
         adds it to the target section.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
             f"/me"
             f"/teamwork"
             f"/sections"
-            f"/{str(section_id)}"
+            f"/{quote(str(section_id), safe='')}"
             f"/items"
-            f"/{str(section_item_id)}"
+            f"/{quote(str(section_item_id), safe='')}"
             f"/move"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4094,22 +4995,25 @@ class TeamsClient(ConnectorClientBase):
     async def get_tags_async(
         self,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all tags for a team
 
         Lists the team's tags
         """
-        path = (
-            f"{self._connection_runtime_url}/v1.0/teams/{str(group_id)}/tags"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{quote(str(group_id), safe='')}/tags"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4123,22 +5027,25 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: CreateTagInput,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a tag for a team
 
         Creates a tag in a team
         """
-        path = (
-            f"{self._connection_runtime_url}/v1.0/teams/{str(group_id)}/tags"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/teams/{quote(str(group_id), safe='')}/tags"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4152,23 +5059,29 @@ class TeamsClient(ConnectorClientBase):
         self,
         group_id: str,
         tag_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a team tag
 
         Gets a specific tag by ID from a team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/tags"
+            f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4183,23 +5096,29 @@ class TeamsClient(ConnectorClientBase):
         input: UpdateTagInput,
         group_id: str,
         tag_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a team tag
 
         Updates the display name of a tag in a team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/tags"
+            f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4213,23 +5132,29 @@ class TeamsClient(ConnectorClientBase):
         self,
         group_id: str,
         tag_id: str,
-    ):
+    ) -> None:
         """
         Delete a team tag
 
         Deletes a tag from a team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/tags"
+            f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4239,23 +5164,30 @@ class TeamsClient(ConnectorClientBase):
         input: AddMemberToTagInput,
         group_id: str,
         tag_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add a member to a team tag
 
         Adds a user to a team tag
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}/members"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/tags"
+            f"/{quote(str(tag_id), safe='')}"
+            f"/members"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4269,23 +5201,30 @@ class TeamsClient(ConnectorClientBase):
         self,
         group_id: str,
         tag_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the members of a team tag
 
         Lists the members of a team tag
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(group_id)}/tags/{str(tag_id)}/members"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/tags"
+            f"/{quote(str(tag_id), safe='')}"
+            f"/members"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4300,29 +5239,31 @@ class TeamsClient(ConnectorClientBase):
         group_id: str,
         tag_id: str,
         tag_member_id: str,
-    ):
+    ) -> None:
         """
         Delete a member from a team tag
 
         Deletes a member from a team tag
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/tags"
-            f"/{str(tag_id)}"
+            f"/{quote(str(tag_id), safe='')}"
             f"/members"
-            f"/{str(tag_member_id)}"
+            f"/{quote(str(tag_member_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4330,23 +5271,25 @@ class TeamsClient(ConnectorClientBase):
     async def list_call_recordings_async(
         self,
         call_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List call recordings
 
         Lists all recordings for an ad-hoc call
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/me/adhocCalls/{str(call_id)}/recordings"
+            f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/recordings"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4360,28 +5303,30 @@ class TeamsClient(ConnectorClientBase):
         self,
         call_id: str,
         recording_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get call recording
 
         Gets a specific recording for an ad-hoc call
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/adhocCalls"
-            f"/{str(call_id)}"
+            f"/{quote(str(call_id), safe='')}"
             f"/recordings"
-            f"/{str(recording_id)}"
+            f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4395,29 +5340,31 @@ class TeamsClient(ConnectorClientBase):
         self,
         call_id: str,
         recording_id: str,
-    ):
+    ) -> bytes:
         """
         Get call recording content
 
         Gets the content of a call recording
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/adhocCalls"
-            f"/{str(call_id)}"
+            f"/{quote(str(call_id), safe='')}"
             f"/recordings"
-            f"/{str(recording_id)}"
+            f"/{quote(str(recording_id), safe='')}"
             f"/content"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4427,23 +5374,25 @@ class TeamsClient(ConnectorClientBase):
     async def list_call_transcripts_async(
         self,
         call_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List call transcripts
 
         Lists all transcripts for an ad-hoc call
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/me/adhocCalls/{str(call_id)}/transcripts"
+            f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/transcripts"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4457,28 +5406,30 @@ class TeamsClient(ConnectorClientBase):
         self,
         call_id: str,
         transcript_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get call transcript
 
         Gets a specific transcript for an ad-hoc call
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/adhocCalls"
-            f"/{str(call_id)}"
+            f"/{quote(str(call_id), safe='')}"
             f"/transcripts"
-            f"/{str(transcript_id)}"
+            f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4492,29 +5443,31 @@ class TeamsClient(ConnectorClientBase):
         self,
         call_id: str,
         transcript_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get call transcript content
 
         Gets the content of a call transcript
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/me"
             f"/adhocCalls"
-            f"/{str(call_id)}"
+            f"/{quote(str(call_id), safe='')}"
             f"/transcripts"
-            f"/{str(transcript_id)}"
+            f"/{quote(str(transcript_id), safe='')}"
             f"/content"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4531,13 +5484,13 @@ class TeamsClient(ConnectorClientBase):
         top: Optional[str] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get all ad-hoc call recordings
 
         Gets all recordings from ad-hoc calls for the signed-in user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/adhocCalls/getAllRecordings"
         )
@@ -4568,14 +5521,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$deltatoken={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4592,13 +5547,13 @@ class TeamsClient(ConnectorClientBase):
         top: Optional[str] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get all ad-hoc call transcripts
 
         Gets all transcripts from ad-hoc calls for the signed-in user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/adhocCalls/getAllTranscripts"
         )
@@ -4629,14 +5584,16 @@ class TeamsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$deltatoken={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4649,24 +5606,31 @@ class TeamsClient(ConnectorClientBase):
     async def list_ai_insights_async(
         self,
         meeting_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List AI insights
 
         Lists AI-generated insights for an online meeting. Requires Microsoft
         365 Copilot license.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/copilot/me/onlineMeetings/{str(meeting_id)}/aiInsights"
+            f"/v1.0"
+            f"/copilot"
+            f"/me"
+            f"/onlineMeetings"
+            f"/{quote(str(meeting_id), safe='')}"
+            f"/aiInsights"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4680,30 +5644,32 @@ class TeamsClient(ConnectorClientBase):
         self,
         meeting_id: str,
         ai_insight_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get AI insight
 
         Gets a specific AI-generated insight for an online meeting. Requires
         Microsoft 365 Copilot license.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/copilot"
             f"/me"
             f"/onlineMeetings"
-            f"/{str(meeting_id)}"
+            f"/{quote(str(meeting_id), safe='')}"
             f"/aiInsights"
-            f"/{str(ai_insight_id)}"
+            f"/{quote(str(ai_insight_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4712,3 +5678,528 @@ class TeamsClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def get_message_locations_async(
+        self,
+        message_type: str,
+        poster: str,
+    ) -> dict[str, Any] | None:
+        """
+        Conversation location for where to post
+
+        Returns a list of locations to post a message or reply based on who the
+        user is posting as
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/messageType"
+            f"/{quote(str(message_type), safe='')}"
+            f"/poster"
+            f"/{quote(str(poster), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_message_details_input_schema_async(
+        self,
+        thread_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get message details response schema
+
+        Get the schema information for get message details response
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/getmessagedetailsinputschema"
+            f"/threadType"
+            f"/{quote(str(thread_type), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_message_details_response_schema_async(
+        self,
+        thread_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get message details input metadata
+
+        Get the schema information for message inputs
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/getmessagedetailsresponseschema"
+            f"/threadType"
+            f"/{quote(str(thread_type), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_members_input_schema_async(
+        self,
+        thread_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        List members input schema
+
+        Get the schema information for list members input based on thread type
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/listmembersinputschema"
+            f"/threadType"
+            f"/{quote(str(thread_type), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_feed_notification_input_schema_async(
+        self,
+        poster: str,
+        notification_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get feed notification input metadata
+
+        Get the schema information for feed notification
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/getfeednotificationinputschema"
+            f"/poster"
+            f"/{quote(str(poster), safe='')}"
+            f"/notificationType"
+            f"/{quote(str(notification_type), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_unified_action_schema_async(
+        self,
+        action_type: str,
+        poster: str,
+        recipient_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get unified action input metadata
+
+        Get the schema information for unified actions
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/actions"
+            f"/{quote(str(action_type), safe='')}"
+            f"/posters"
+            f"/{quote(str(poster), safe='')}"
+            f"/recipienttypes"
+            f"/{quote(str(recipient_type), safe='')}"
+            f"/schema"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_message_with_options_subscription_input_metadata_async(
+        self,
+        recipient_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get message with options subscription input metadata
+
+        Get the schema information for the message with options subscription
+        inputs
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/actions"
+            f"/messagewithoptions"
+            f"/recipienttypes"
+            f"/{quote(str(recipient_type), safe='')}"
+            f"/$metadata.json"
+            f"/subscriptioninputs"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_message_with_options_subscription_output_metadata_async(
+        self,
+        recipient_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get message with options subscription output metadata
+
+        Get the schema information for the message with options subscription
+        outputs
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/actions"
+            f"/messagewithoptions"
+            f"/recipienttypes"
+            f"/{quote(str(recipient_type), safe='')}"
+            f"/$metadata.json"
+            f"/subscriptionoutputs"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_webhook_trigger_request_schema_async(
+        self,
+        thread_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Input schema for webhook trigger
+
+        Gets the input schema for webhook trigger
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/webhookTrigger"
+            f"/inputSchema"
+            f"/threadType"
+            f"/{quote(str(thread_type), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_webhook_trigger_response_schema_async(
+        self,
+        trigger_type: str,
+        thread_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Response schema for webhook trigger
+
+        Gets the response schema for webhook trigger
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/webhookTrigger"
+            f"/triggerType"
+            f"/{quote(str(trigger_type), safe='')}"
+            f"/responseSchema"
+            f"/threadType"
+            f"/{quote(str(thread_type), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_post_to_conversation_response_schema_async(
+        self,
+        action_type: str,
+        poster: str,
+        recipient_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get response schema
+
+        Get the schema information for unified action responses
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/actions"
+            f"/{quote(str(action_type), safe='')}"
+            f"/posters"
+            f"/{quote(str(poster), safe='')}"
+            f"/recipienttypes"
+            f"/{quote(str(recipient_type), safe='')}"
+            f"/response"
+            f"/schema"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_flow_continuation_subscription_with_poster_output_metadata_async(
+        self,
+        input: GetFlowContinuationSubscriptionWithPosterOutputMetadataInput,
+        poster: str,
+        recipient_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get flow continuation subscription output metadata
+
+        Get the schema information for the flow continuation subscription
+        outputs
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flowbot"
+            f"/actions"
+            f"/flowcontinuation"
+            f"/posters"
+            f"/{quote(str(poster), safe='')}"
+            f"/recipienttypes"
+            f"/{quote(str(recipient_type), safe='')}"
+            f"/$metadata.json"
+            f"/subscriptionoutputs"
+        )
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewChannelMessage": {
+        "operation_id": "OnNewChannelMessage",
+        "path": "/{connectionId}/trigger/beta/teams/{groupId}/channels/{channelId}/messages",
+        "method": "get",
+        "required_parameters": ["groupId", "channelId"],
+        "callback_payload_type": "ChatMessageList",
+    },
+    "OnNewChannelMessageMentioningMe": {
+        "operation_id": "OnNewChannelMessageMentioningMe",
+        "path": (
+            "/{connectionId}/trigger/beta/teams/{groupId}/channels/{channelId}"
+            "/messages_mentioningme"
+        ),
+        "method": "get",
+        "required_parameters": ["groupId", "channelId"],
+        "callback_payload_type": "ChatMessageList",
+    },
+    "WebhookAtMentionTrigger": {
+        "operation_id": "WebhookAtMentionTrigger",
+        "path": "/{connectionId}/beta/subscriptions/atmentiontrigger/threadType/{threadType}",
+        "method": "post",
+        "required_parameters": ["threadType"],
+        "callback_payload_type": None,
+    },
+    "WebhookMessageReactionTrigger": {
+        "operation_id": "WebhookMessageReactionTrigger",
+        "path": "/{connectionId}/beta/subscriptions/messagereactiontrigger/threadType/{threadType}",
+        "method": "post",
+        "required_parameters": ["reactionKey", "frequency", "runningPolicy", "threadType"],
+        "callback_payload_type": None,
+    },
+    "WebhookChatMessageTrigger": {
+        "operation_id": "WebhookChatMessageTrigger",
+        "path": "/{connectionId}/beta/subscriptions/chatmessagetrigger",
+        "method": "post",
+        "required_parameters": ["ChatMessageSubscriptionRequest"],
+        "callback_payload_type": None,
+    },
+    "WebhookKeywordTrigger": {
+        "operation_id": "WebhookKeywordTrigger",
+        "path": "/{connectionId}/beta/subscriptions/keywordtrigger/threadType/{threadType}",
+        "method": "post",
+        "required_parameters": ["threadType", "$search"],
+        "callback_payload_type": None,
+    },
+    "WebhookNewMessageTrigger": {
+        "operation_id": "WebhookNewMessageTrigger",
+        "path": "/{connectionId}/beta/subscriptions/newmessagetrigger/threadType/{threadType}",
+        "method": "post",
+        "required_parameters": ["threadType"],
+        "callback_payload_type": None,
+    },
+    "OnGroupMembershipRemoval": {
+        "operation_id": "OnGroupMembershipRemoval",
+        "path": "/{connectionId}/trigger/v1.0/groups/removal",
+        "method": "get",
+        "required_parameters": ["groupId"],
+        "callback_payload_type": "OnGroupMemberChangeResponse",
+    },
+    "OnGroupMembershipAdd": {
+        "operation_id": "OnGroupMembershipAdd",
+        "path": "/{connectionId}/trigger/v1.0/groups/delta",
+        "method": "get",
+        "required_parameters": ["groupId"],
+        "callback_payload_type": "OnGroupMemberChangeResponse",
+    },
+}

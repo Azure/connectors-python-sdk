@@ -23,19 +23,26 @@ from azure.connectors.sdk import (
 
 @dataclass
 class PostDocumentsResponse:
-    """Response for Create or update document (V3)"""
+    """
+    Response for Create or update document
+    """
 
-    rid: Optional[str] = None
-    ts: Optional[int] = None
-    self: Optional[str] = None
-    etag: Optional[str] = None
-    attachments: Optional[str] = None
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
+    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
+    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
+    attachments: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "_attachments"},
+    )
     id: Optional[str] = None
 
 
 @dataclass
 class CreateStoredProcedureInput:
-    """Create stored procedure (V2)"""
+    """
+    Create stored procedure
+    """
 
     body: Optional[str] = None
     """
@@ -47,15 +54,17 @@ class CreateStoredProcedureInput:
 
 @dataclass
 class CreateStoredProcedureResponse:
-    """Response for Create stored procedure (V2)"""
+    """
+    Response for Create stored procedure
+    """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
     """_etag"""
-    rid: Optional[str] = None
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
     """_rid"""
-    self: Optional[str] = None
+    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
     """_self"""
-    ts: Optional[int] = None
+    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
     """_ts"""
     body: Optional[str] = None
     """body"""
@@ -65,7 +74,9 @@ class CreateStoredProcedureResponse:
 
 @dataclass
 class ExecuteStoredProcedureInput:
-    """Execute stored procedure (V2)"""
+    """
+    Execute stored procedure
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -76,7 +87,9 @@ class ExecuteStoredProcedureInput:
 
 @dataclass
 class ObjectWithoutType:
-    """Response for Execute stored procedure (V2)"""
+    """
+    Response for Execute stored procedure
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -87,61 +100,101 @@ class ObjectWithoutType:
 
 @dataclass
 class GetDocumentResponse:
-    """Response for Get a document (V2)"""
+    """
+    Response for Get a document
+    """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = None
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+        default=None,
+        metadata={"wire_name": "@metadata"},
+    )
     """List of columns along with their Sensitivity Labels"""
 
 
 @dataclass
 class GetDocumentsResponse:
-    """Response for Get all documents (V3)"""
+    """
+    Response for Get all documents
+    """
 
-    rid: Optional[str] = None
-    documents: Optional[List[Dict[str, Any]]] = None
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = None
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    documents: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Documents"},
+    )
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+        default=None,
+        metadata={"wire_name": "@metadata"},
+    )
     """List of columns along with their Sensitivity Labels"""
 
 
 @dataclass
 class GetStoredProceduresResponse:
-    """Response for Get stored procedures (V2)"""
+    """
+    Response for Get stored procedures
+    """
 
-    count: Optional[int] = None
+    count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "_count"},
+    )
     """_count"""
-    rid: Optional[str] = None
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
     """_rid"""
-    stored_procedures: Optional[List[Dict[str, Any]]] = None
+    stored_procedures: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "StoredProcedures"},
+    )
     """StoredProcedures"""
 
 
 @dataclass
 class QueryDocumentsResponse:
-    """Response for Query documents V5"""
+    """
+    Response for Query documents V5
+    """
 
     value: Optional[List[ObjectWithoutType]] = None
-    continuation_token: Optional[str] = None
-    count: Optional[int] = None
-    request_charge: Optional[float] = None
-    session_token: Optional[str] = None
-    activity_id: Optional[str] = None
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContinuationToken"},
+    )
+    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
+    request_charge: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "RequestCharge"},
+    )
+    session_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SessionToken"},
+    )
+    activity_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ActivityId"},
+    )
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+        default=None,
+        metadata={"wire_name": "@metadata"},
+    )
     """List of columns along with their Sensitivity Labels"""
-    additional_properties: Optional[Any] = None
-    """Dynamic document properties returned by the service."""
 
 
 @dataclass
 class PutDocumentResponse:
-    """Response for Replace a document (V2)"""
+    """
+    Response for Replace a document
+    """
 
-    rid: Optional[str] = None
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
     id: Optional[str] = None
 
 
 @dataclass
 class ReplaceStoredProcedureInput:
-    """Replace stored procedure (V2)"""
+    """
+    Replace stored procedure
+    """
 
     body: Optional[str] = None
     """
@@ -152,16 +205,67 @@ class ReplaceStoredProcedureInput:
 
 
 @dataclass
-class DocumentsQuery:
-    """Definition: DocumentsQuery"""
+class CosmosDbAccountList:
+    """
+    Response for Get Cosmos DB accounts
+    """
 
-    query_text: Optional[str] = None
+    value: Optional[List[CosmosDbAccount]] = None
+    """List of Azure Cosmos DB account names"""
+
+
+@dataclass
+class GetDatabasesResponse:
+    """
+    Response for Get all databases
+    """
+
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    databases: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Databases"},
+    )
+    count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "_count"},
+    )
+
+
+@dataclass
+class GetCollectionsResponse:
+    """
+    Response for Get all collections
+    """
+
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    document_collections: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "DocumentCollections"},
+    )
+    count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "_count"},
+    )
+
+
+@dataclass
+class DocumentsQuery:
+    """
+    Definition: DocumentsQuery
+    """
+
+    query_text: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "QueryText"},
+    )
     """SQL Syntax Query over documents"""
 
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -172,59 +276,67 @@ class ObjectEntity:
 
 @dataclass
 class DocumentsCollection:
-    """Definition: DocumentsCollection"""
+    """
+    Definition: DocumentsCollection
+    """
 
     value: Optional[List[ObjectWithoutType]] = None
-    continuation_token: Optional[str] = None
-    count: Optional[int] = None
-    request_charge: Optional[float] = None
-    session_token: Optional[str] = None
-    activity_id: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContinuationToken"},
+    )
+    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
+    request_charge: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "RequestCharge"},
+    )
+    session_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SessionToken"},
+    )
+    activity_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ActivityId"},
+    )
 
 
 @dataclass
 class GetAccountResponse:
-    """Definition: getAccountResponse"""
+    """
+    Definition: getAccountResponse
+    """
 
-    self: Optional[str] = None
-    rid: Optional[str] = None
+    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
     id: Optional[str] = None
-
-
-@dataclass
-class GetDatabasesResponse:
-    """Definition: getDatabasesResponse"""
-
-    rid: Optional[str] = None
-    databases: Optional[List[Dict[str, Any]]] = None
-    count: Optional[int] = None
 
 
 @dataclass
 class GetDatabaseResponse:
-    """Definition: getDatabaseResponse"""
+    """
+    Definition: getDatabaseResponse
+    """
 
     id: Optional[str] = None
-    rid: Optional[str] = None
-    self: Optional[str] = None
-    etag: Optional[str] = None
-    colls: Optional[str] = None
-    users: Optional[str] = None
-    ts: Optional[int] = None
-
-
-@dataclass
-class GetCollectionsResponse:
-    """Definition: getCollectionsResponse"""
-
-    rid: Optional[str] = None
-    document_collections: Optional[List[Dict[str, Any]]] = None
-    count: Optional[int] = None
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
+    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
+    colls: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "_colls"},
+    )
+    users: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "_users"},
+    )
+    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
 
 
 @dataclass
 class GetCollectionResponse:
-    """Definition: getCollectionResponse"""
+    """
+    Definition: getCollectionResponse
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -235,7 +347,9 @@ class GetCollectionResponse:
 
 @dataclass
 class PostDocumentsRequest:
-    """Definition: postDocumentsRequest"""
+    """
+    Definition: postDocumentsRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -246,7 +360,9 @@ class PostDocumentsRequest:
 
 @dataclass
 class PutDocumentRequest:
-    """Definition: putDocumentRequest"""
+    """
+    Definition: putDocumentRequest
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -257,39 +373,62 @@ class PutDocumentRequest:
 
 @dataclass
 class QueryRequest:
-    """Definition: queryRequest"""
+    """
+    Definition: queryRequest
+    """
 
     query: Optional[str] = None
 
 
 @dataclass
 class QueryResponse:
-    """Definition: queryResponse"""
+    """
+    Definition: queryResponse
+    """
 
-    rid: Optional[str] = None
-    count: Optional[float] = None
-    documents: Optional[List[Any]] = None
+    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    count: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "_count"},
+    )
+    documents: Optional[List[Any]] = field(
+        default=None,
+        metadata={"wire_name": "Documents"},
+    )
 
 
 @dataclass
 class DataWithSensitivityLabelInfo:
-    """Definition: DataWithSensitivityLabelInfo"""
+    """
+    Definition: DataWithSensitivityLabelInfo
+    """
 
     name: Optional[str] = None
     """Name"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
     """List of Sensitivity Label Information"""
 
 
 @dataclass
 class SensitivityLabelMetadata:
-    """Definition: SensitivityLabelMetadata"""
+    """
+    Definition: SensitivityLabelMetadata
+    """
 
-    sensitivity_label_id: Optional[str] = None
+    sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelId"},
+    )
     """SensitivityLabel Id."""
     name: Optional[str] = None
     """SensitivityLabel name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """SensitivityLabel displayName info"""
     tooltip: Optional[str] = None
     """SensitivityLabel details on tooltip."""
@@ -297,31 +436,40 @@ class SensitivityLabelMetadata:
     """SensitivityLabel priority."""
     color: Optional[str] = None
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = None
+    is_encrypted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEncrypted"},
+    )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = None
+    is_parent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isParent"},
+    )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = None
+    parent_sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentSensitivityLabelId"},
+    )
     """Parent  SensitivityLabel Id."""
 
 
 @dataclass
-class CosmosDbAccountList:
-    """Definition: CosmosDbAccountList"""
-
-    value: Optional[List[CosmosDbAccount]] = None
-    """List of Azure Cosmos DB account names"""
-
-
-@dataclass
 class CosmosDbAccount:
-    """Definition: CosmosDbAccount"""
+    """
+    Definition: CosmosDbAccount
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the Azure Cosmos DB account."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the Azure Cosmos DB account."""
 
 
@@ -359,6 +507,363 @@ class DocumentdbClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "documentdb"
 
+    async def create_document_async(
+        self,
+        input: PostDocumentsRequest,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Create or update document
+
+        Create or update document. When creating a document in DocumentDB, the
+        body must include an id property.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/docs"
+        )
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def create_stored_procedure_async(
+        self,
+        input: CreateStoredProcedureInput,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Create stored procedure
+
+        Create stored procedure (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/sprocs"
+        )
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def delete_document_async(
+        self,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+        document_id: str,
+    ) -> None:
+        """
+        Delete a document
+
+        Delete a document (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/docs"
+            f"/{quote(str(document_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def delete_stored_procedure_async(
+        self,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+        sproc_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Delete stored procedure
+
+        Delete stored procedure (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/sprocs"
+            f"/{quote(str(sproc_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def execute_stored_procedure_async(
+        self,
+        input: ExecuteStoredProcedureInput,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+        sproc_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Execute stored procedure
+
+        Execute stored procedure in specified collection (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/sprocs"
+            f"/{quote(str(sproc_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_document_async(
+        self,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+        document_id: str,
+        extract_sensitivity_label: Optional[str] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get a document
+
+        Get a document (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/docs"
+            f"/{quote(str(document_id), safe='')}"
+        )
+        query_params = []
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
+                value = value.lower()
+            query_params.append(f"purviewAccountName={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_documents_async(
+        self,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+        extract_sensitivity_label: Optional[str] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get all documents
+
+        Get all documents (V3).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/docs"
+        )
+        query_params = []
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
+                value = value.lower()
+            query_params.append(f"purviewAccountName={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_stored_procedures_async(
+        self,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get stored procedures
+
+        Get stored procedures in the specified collection (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/sprocs"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def query_documents_async(
         self,
         cosmos_db_account_name: str,
@@ -370,21 +875,23 @@ class DocumentdbClient(ConnectorClientBase):
         continuation_token: Optional[str] = None,
         consistency_level: Optional[str] = None,
         session_token: Optional[str] = None,
-    ):
+        extract_sensitivity_label: Optional[str] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> dict[str, Any] | None:
         """
         Query documents V5
 
         Query documents (V5).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v5"
             f"/cosmosdb"
-            f"/{str(cosmos_db_account_name)}"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
             f"/dbs"
-            f"/{str(database_id)}"
+            f"/{quote(str(database_id), safe='')}"
             f"/colls"
-            f"/{str(container_id)}"
+            f"/{quote(str(container_id), safe='')}"
             f"/query"
         )
         query_params = []
@@ -418,15 +925,208 @@ class DocumentdbClient(ConnectorClientBase):
             if isinstance(session_token, bool):
                 value = value.lower()
             query_params.append(f"sessionToken={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
+                value = value.lower()
+            query_params.append(f"purviewAccountName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def replace_document_async(
+        self,
+        input: PutDocumentRequest,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+        document_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Replace a document
+
+        Replace a document (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/docs"
+            f"/{quote(str(document_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PUT",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def replace_stored_procedure_async(
+        self,
+        input: ReplaceStoredProcedureInput,
+        cosmos_db_account_name: str,
+        database_id: str,
+        collection_id: str,
+        sproc_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Replace stored procedure
+
+        Replace stored procedure (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+            f"/{quote(str(collection_id), safe='')}"
+            f"/sprocs"
+            f"/{quote(str(sproc_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "PUT",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_cosmos_db_accounts_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get Cosmos DB accounts
+
+        This operation list the user's Azure Cosmos DB accounts.
+        """
+        request_url = f"{self._connection_runtime_url}/cosmosdbaccounts"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_databases_async(
+        self,
+        cosmos_db_account_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get all databases
+
+        Get all databases (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/cosmosdb/{quote(str(cosmos_db_account_name), safe='')}/dbs"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_collections_async(
+        self,
+        cosmos_db_account_name: str,
+        database_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get all collections
+
+        Get all collections (V2).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/cosmosdb"
+            f"/{quote(str(cosmos_db_account_name), safe='')}"
+            f"/dbs"
+            f"/{quote(str(database_id), safe='')}"
+            f"/colls"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )

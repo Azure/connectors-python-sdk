@@ -159,7 +159,8 @@ async def example_3_send_batch_events():
 
             await client.send_events_async(
                 input=batch_input,
-                event_hub_name=EVENT_HUB_NAME
+                event_hub_name=EVENT_HUB_NAME,
+                partition_key=os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
             )
 
             events = batch_input.additional_properties.get("events", [])
@@ -173,40 +174,16 @@ async def example_3_send_batch_events():
             print(f"Error: {ex}")
 
 
-async def example_4_receive_events():
-    """Example 4: Receive events from Event Hub."""
-    print("\n=== Example 4: Receive Events ===")
-
-    if not EVENT_HUB_NAME:
-        print("Set EVENTHUBS_HUB_NAME environment variable.")
-        return
+async def example_4_list_event_hubs():
+    """Example 4: List Event Hubs in the namespace."""
+    print("\n=== Example 4: List Event Hubs ===")
 
     credential = DefaultAzureCredential()
 
     async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            # Receive up to 10 events
-            result = await client.on_new_events_async(
-                event_hub_name=EVENT_HUB_NAME,
-                maximum_events_count="10"
-            )
-
-            if result:
-                events = result if isinstance(result, list) else [result]
-                print(f"Received {len(events)} event(s) from '{EVENT_HUB_NAME}':")
-                for i, event in enumerate(events[:5], 1):
-                    if isinstance(event, dict):
-                        content = event.get("contentData", event.get("content_data", "N/A"))
-                        sys_props = event.get("systemProperties", {})
-                        seq_num = sys_props.get("sequenceNumber", "N/A")
-                        print(f"  {i}. Sequence: {seq_num}")
-                        if content:
-                            content_str = str(content)[:50]
-                            print(f"     Content: {content_str}...")
-                if len(events) > 5:
-                    print(f"  ... and {len(events) - 5} more events")
-            else:
-                print("No events available in Event Hub.")
+            result = await client.get_event_hubs_async()
+            print(f"Event Hubs: {result}")
 
         except ConnectorException as ex:
             print(f"Connector error (status {ex.status_code}): {ex}")
@@ -214,37 +191,22 @@ async def example_4_receive_events():
             print(f"Error: {ex}")
 
 
-async def example_5_receive_with_consumer_group():
-    """Example 5: Receive events using a specific consumer group."""
-    print("\n=== Example 5: Receive with Consumer Group ===")
+async def example_5_list_consumer_groups():
+    """Example 5: List consumer groups for an Event Hub."""
+    print("\n=== Example 5: List Consumer Groups ===")
 
     if not EVENT_HUB_NAME:
         print("Set EVENTHUBS_HUB_NAME environment variable.")
         return
 
-    consumer_group = os.environ.get("EVENTHUBS_CONSUMER_GROUP", "$Default")
     credential = DefaultAzureCredential()
 
     async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.on_new_events_async(
-                event_hub_name=EVENT_HUB_NAME,
-                consumer_group_name=consumer_group,
-                maximum_events_count="5",
-                content_type="application/json"
+            result = await client.get_consumer_groups_async(
+                event_hub_name=EVENT_HUB_NAME
             )
-
-            if result:
-                events = result if isinstance(result, list) else [result]
-                print(f"Consumer group '{consumer_group}': {len(events)} event(s)")
-                for i, event in enumerate(events, 1):
-                    if isinstance(event, dict):
-                        sys_props = event.get("systemProperties", {})
-                        enqueued = sys_props.get("enqueuedTimeUtc", "N/A")
-                        partition = sys_props.get("partitionKey", "N/A")
-                        print(f"  {i}. Enqueued: {enqueued}, Partition: {partition}")
-            else:
-                print(f"No events in consumer group '{consumer_group}'.")
+            print(f"Consumer groups for '{EVENT_HUB_NAME}': {result}")
 
         except ConnectorException as ex:
             print(f"Connector error (status {ex.status_code}): {ex}")
@@ -266,8 +228,8 @@ async def main():
     await example_1_send_event()
     await example_2_send_event_with_partition_key()
     await example_3_send_batch_events()
-    await example_4_receive_events()
-    await example_5_receive_with_consumer_group()
+    await example_4_list_event_hubs()
+    await example_5_list_consumer_groups()
 
     print("\n" + "=" * 60)
     print("Sample completed!")

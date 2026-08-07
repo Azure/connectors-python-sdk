@@ -218,8 +218,9 @@ The following connectors have been generated and validated with comprehensive te
 | **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
 | **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated |
+| **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 64 connectors supported
+**Total:** 65 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

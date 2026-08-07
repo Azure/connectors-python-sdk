@@ -447,7 +447,7 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(file_cabinet)}/Search"
+            f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Search"
         )
         query_params = []
         value = str(search_dialog_id)
@@ -549,9 +549,9 @@ class DocuwareClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets"
-            f"/{str(file_cabinet_id)}"
+            f"/{quote(str(file_cabinet_id), safe='')}"
             f"/Documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -584,9 +584,9 @@ class DocuwareClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets"
-            f"/{str(file_cabinet_id)}"
+            f"/{quote(str(file_cabinet_id), safe='')}"
             f"/Documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -617,11 +617,11 @@ class DocuwareClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets"
-            f"/{str(file_cabinet_id)}"
+            f"/{quote(str(file_cabinet_id), safe='')}"
             f"/Documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/Sections"
-            f"/{str(file_number)}"
+            f"/{quote(str(file_number), safe='')}"
             f"/Download"
         )
         query_params = []
@@ -660,9 +660,9 @@ class DocuwareClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets"
-            f"/{str(file_cabinet_id)}"
+            f"/{quote(str(file_cabinet_id), safe='')}"
             f"/Documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/Download"
         )
         query_params = []
@@ -701,9 +701,9 @@ class DocuwareClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets"
-            f"/{str(file_cabinet_id)}"
+            f"/{quote(str(file_cabinet_id), safe='')}"
             f"/Documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/Fields"
         )
 
@@ -738,7 +738,10 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(destination_file_cabinet_id)}/Task/Transfer"
+            f"/FileCabinets"
+            f"/{quote(str(destination_file_cabinet_id), safe='')}"
+            f"/Task"
+            f"/Transfer"
         )
         query_params = []
         if store_dialog_id is not None:
@@ -780,9 +783,9 @@ class DocuwareClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets"
-            f"/{str(file_cabinet_id)}"
+            f"/{quote(str(file_cabinet_id), safe='')}"
             f"/Documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/Annotation"
         )
 
@@ -815,7 +818,7 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(file_cabinet)}/Dialogs"
+            f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Dialogs"
         )
         query_params = []
         if dialog_type is not None:
@@ -854,7 +857,7 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(file_cabinet)}/Stamps"
+            f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Stamps"
         )
 
         response = await self.http_client.send_async(
@@ -886,7 +889,11 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(file_cabinet)}/Stamps/{str(stamp)}/Fields"
+            f"/FileCabinets"
+            f"/{quote(str(file_cabinet), safe='')}"
+            f"/Stamps"
+            f"/{quote(str(stamp), safe='')}"
+            f"/Fields"
         )
 
         response = await self.http_client.send_async(
@@ -918,7 +925,7 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/FileCabinets/{str(file_cabinet)}/Fields"
+            f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Fields"
         )
         query_params = []
         if field_type is not None:
@@ -959,9 +966,9 @@ class DocuwareClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets"
-            f"/{str(file_cabinet)}"
+            f"/{quote(str(file_cabinet), safe='')}"
             f"/Dialogs"
-            f"/{str(dialog_id)}"
+            f"/{quote(str(dialog_id), safe='')}"
             f"/Fields"
         )
 
@@ -993,7 +1000,7 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/DocumentTrays/{str(document_tray)}/Search"
+            f"/DocumentTrays/{quote(str(document_tray), safe='')}/Search"
         )
 
         response = await self.http_client.send_async(

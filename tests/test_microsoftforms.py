@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from azure.connectors.microsoftforms import MicrosoftformsClient, WebhookRequestBody
+from azure.connectors.microsoftforms import MicrosoftformsClient, TRIGGER_OPERATIONS
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
@@ -102,55 +102,13 @@ class TestMicrosoftformsClientLifecycle:
             mock_close.assert_called_once()
 
 
-class TestCreateFormWebhookAsync:
-    """Tests for create_form_webhook_async method."""
+class TestTriggerOperations:
+    """Tests for trigger registration contracts."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful webhook creation."""
-        client = MicrosoftformsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        payload = WebhookRequestBody(
-            event_type="newResponse",
-            notification_url="https://contoso.example/callback",
-            source="flow",
-        )
-        mock_response = MockResponse(status=201, text="")
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.create_form_webhook_async(input=payload, form_id="form-123")
-
-            assert result is None
-            mock_send.assert_called_once()
-            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
-            assert method == "POST"
-            assert "/formapi/api/forms/form-123/webhooks" in path
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = MicrosoftformsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        payload = WebhookRequestBody(event_type="newResponse")
-        mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ):
-            with pytest.raises(ConnectorException):
-                await client.create_form_webhook_async(input=payload, form_id="form-123")
+    def test_form_webhook_is_registered_without_callable_method(self):
+        """Test the form webhook is a metadata-only trigger."""
+        assert "CreateFormWebhook" in TRIGGER_OPERATIONS
+        assert not hasattr(MicrosoftformsClient, "create_form_webhook_async")
 
 
 class TestListFormsAsync:
@@ -272,8 +230,7 @@ class TestGetQuestionsAsync:
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/formapi/api/forms('form-123')/questions" in path
-            assert result is not None
-            assert "value" in result
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):

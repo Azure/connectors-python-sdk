@@ -93,6 +93,34 @@ class TestSigninghubClientLifecycle:
             await client.close()
             mock_close.assert_called_once()
 
+
+class TestDocumentsUploadStreamAsync:
+    """Tests for raw document upload transport."""
+
+    @pytest.mark.asyncio
+    async def test_forwards_exact_bytes_and_media_type(self, mock_token_provider):
+        """Test document upload forwards bytes without transformation."""
+        client = SigninghubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        document = b"\x00\xffPDF\r\n"
+        mock_response = MockResponse(status=201, text='{"documentId": "doc-1"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.documents_upload_stream_async(
+                input=document,
+                package_id="package-1",
+            )
+
+            assert mock_send.call_args.kwargs["body"] is document
+            assert mock_send.call_args.kwargs["content_type"] == "application/octet-stream"
+
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_token_provider):
         """Test async context manager functionality."""

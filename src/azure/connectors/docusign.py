@@ -23,13 +23,30 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateOrgHookEnvelopeInput:
-    """When a Docusign Connect event occurs (Organization-level)"""
+    """
+    When a Docusign Connect event occurs (Organization-level)
+    """
 
-    all_users: Optional[str] = None
-    allow_envelope_publish: Optional[str] = None
-    include_document_fields: Optional[str] = None
-    requires_acknowledgement: Optional[str] = None
-    url_to_publish_to: Optional[str] = None
+    all_users: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allUsers"},
+    )
+    allow_envelope_publish: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allowEnvelopePublish"},
+    )
+    include_document_fields: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "includeDocumentFields"},
+    )
+    requires_acknowledgement: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "requiresAcknowledgement"},
+    )
+    url_to_publish_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlToPublishTo"},
+    )
     name: Optional[str] = None
     """Name your Connect configuration (for example, \"Envelope Events\")."""
     events: Optional[List[str]] = None
@@ -51,15 +68,22 @@ class CreateOrgHookEnvelopeResponse:
 
 @dataclass
 class DocGenFormFieldsResponse:
-    """Response for Get document generation form fields from envelope"""
+    """
+    Response for Get document generation form fields from envelope
+    """
 
-    docgen_fields: Optional[List[DocGenFormField]] = None
+    docgen_fields: Optional[List[DocGenFormField]] = field(
+        default=None,
+        metadata={"wire_name": "docgenFields"},
+    )
     """Docgen Fields"""
 
 
 @dataclass
 class UpdateDocgenFormFieldsInput:
-    """Update document generation form fields from envelope"""
+    """
+    Update document generation form fields from envelope
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -71,8 +95,7 @@ class UpdateDocgenFormFieldsInput:
 @dataclass
 class GetDocGenTemplateTabsResponse:
     """
-    Response for Get document generation form fields from template (bulk send
-    templates only)
+    Response for Get document generation form fields from template (bulk send templates only)
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -84,7 +107,9 @@ class GetDocGenTemplateTabsResponse:
 
 @dataclass
 class EnvelopeVoidResponse:
-    """Response for Void the envelope"""
+    """
+    Response for Void the envelope
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -95,7 +120,9 @@ class EnvelopeVoidResponse:
 
 @dataclass
 class EnvelopeResendResponse:
-    """Response for Resend the envelope"""
+    """
+    Response for Resend the envelope
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -106,15 +133,22 @@ class EnvelopeResendResponse:
 
 @dataclass
 class AddRemindersResponse:
-    """Response for Add reminders for an envelope"""
+    """
+    Response for Add reminders for an envelope
+    """
 
-    reminder_enabled: Optional[str] = None
+    reminder_enabled: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "reminderEnabled"},
+    )
     """Reminder enabled"""
 
 
 @dataclass
 class ListTabsResponse:
-    """Response for Get document tabs from envelope"""
+    """
+    Response for Get document tabs from envelope
+    """
 
     tabs: Optional[List[Tab]] = None
     """Tabs"""
@@ -122,7 +156,9 @@ class ListTabsResponse:
 
 @dataclass
 class UpdateEnvelopePrefillTabsInput:
-    """Update envelope prefill tabs"""
+    """
+    Update envelope prefill tabs
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -133,69 +169,51 @@ class UpdateEnvelopePrefillTabsInput:
 
 @dataclass
 class ListEnvelopeDocumentFieldsResponse:
-    """Response for Get document custom fields from envelope"""
+    """
+    Response for Get document custom fields from envelope
+    """
 
-    envelope_document_fields: Optional[List[EnvelopeDocumentField]] = None
+    envelope_document_fields: Optional[List[EnvelopeDocumentField]] = field(
+        default=None,
+        metadata={"wire_name": "envelopeDocumentFields"},
+    )
     """Document Custom Fields"""
 
 
 @dataclass
 class CompositeTemplatesResponse:
-    """Response for Create envelope using composite templates"""
+    """
+    Response for Create envelope using composite templates
+    """
 
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     """The id of the envelope."""
     status: Optional[str] = None
     """The status of the envelope."""
-    status_date_time: Optional[str] = None
+    status_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "statusDateTime"},
+    )
     """The datetime the status was set."""
     uri: Optional[str] = None
     """The URI for the envelope in DocuSign."""
 
 
 @dataclass
-class ActivityListResponseEnvelope:
-    """Response for Copilot: Get related activities"""
-
-    value: Optional[List[Activity]] = None
-    """Related activies"""
-    has_more_results: Optional[bool] = None
-
-
-@dataclass
-class DocumentRecordListResponseEnvelope:
-    """Response for Copilot: Get related records"""
-
-    value: Optional[List[DocumentRecord]] = None
-    """Related records"""
-    has_more_results: Optional[bool] = None
-
-
-@dataclass
-class KeySalesResponse:
-    """Response for Copilot for Sales: Get key sales"""
-
-    value: Optional[List[KeySales]] = None
-    """Key Sales"""
-    has_more_results: Optional[bool] = None
-
-
-@dataclass
-class EmailSummaryResponse:
-    """Response for Copilot for Sales: Get email summary"""
-
-    value: Optional[List[EmailSummary]] = None
-    """Key Sales"""
-    has_more_results: Optional[bool] = None
-
-
-@dataclass
 class FilteredEnvelopeListResponse:
-    """Response for Copilot: List envelopes"""
+    """
+    Response for List envelopes
+    """
 
     value: Optional[List[FilteredEnvelopes]] = None
     """Filtered envelopes"""
-    has_more_results: Optional[bool] = None
+    has_more_results: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasMoreResults"},
+    )
     """
     Shows if envelopes exceed the specified number in the Return envelopes
     field
@@ -203,25 +221,27 @@ class FilteredEnvelopeListResponse:
 
 
 @dataclass
-class FilteredSalesCopilotEnvelopeListResponse:
-    """Response for Copilot for Sales: List envelopes"""
-
-    value: Optional[List[SalesCopilotFilteredEnvelopes]] = None
-    """Filtered envelopes"""
-    has_more_results: Optional[bool] = None
-
-
-@dataclass
 class CreateEnvelopeResponse:
-    """Response for DEPRECATED: Create envelope using template (deprecated)"""
+    """
+    Response for Create envelope using template
+    """
 
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     """The id of the envelope."""
-    template_id: Optional[str] = None
+    template_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "templateId"},
+    )
     """The id of the template."""
     status: Optional[str] = None
     """The status of the envelope."""
-    status_date_time: Optional[str] = None
+    status_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "statusDateTime"},
+    )
     """The datetime the status was set."""
     uri: Optional[str] = None
     """The URI for the envelope in DocuSign."""
@@ -229,7 +249,9 @@ class CreateEnvelopeResponse:
 
 @dataclass
 class SendDraftEnvelopeResponse:
-    """Response for Send envelope"""
+    """
+    Response for Send envelope
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -240,11 +262,19 @@ class SendDraftEnvelopeResponse:
 
 @dataclass
 class EnvelopeCustomFieldResponse:
-    """Response for Get envelope custom field info"""
+    """
+    Response for Get envelope custom field info
+    """
 
-    field_id: Optional[str] = None
+    field_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fieldId"},
+    )
     """The id of the envelope custom field."""
-    field_type: Optional[str] = None
+    field_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fieldType"},
+    )
     """The type of the envelope custom field."""
     name: Optional[str] = None
     """The name of the envelope custom field."""
@@ -254,11 +284,19 @@ class EnvelopeCustomFieldResponse:
 
 @dataclass
 class UpdateEnvelopeCustomFieldResponse:
-    """Response for Update envelope custom field"""
+    """
+    Response for Update envelope custom field
+    """
 
-    field_id: Optional[str] = None
+    field_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fieldId"},
+    )
     """The id of the envelope custom field."""
-    field_type: Optional[str] = None
+    field_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fieldType"},
+    )
     """The type of the envelope custom field."""
     name: Optional[str] = None
     """The name of the envelope custom field."""
@@ -268,7 +306,9 @@ class UpdateEnvelopeCustomFieldResponse:
 
 @dataclass
 class EmbeddedSenderResponse:
-    """Response for Generate Embedded Sender URL"""
+    """
+    Response for Generate Embedded Sender URL
+    """
 
     url: Optional[str] = None
     """The url of embedded sender view."""
@@ -276,38 +316,65 @@ class EmbeddedSenderResponse:
 
 @dataclass
 class ListRecipientsResponse:
-    """Response for List recipients from an envelope"""
+    """
+    Response for List recipients from an envelope
+    """
 
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     signers: Optional[List[Signer]] = None
     """Signers"""
 
 
 @dataclass
 class Signer:
-    """Response for Get recipient info from envelope"""
+    """
+    Response for Get recipient info from envelope
+    """
 
-    routing_order: Optional[str] = None
+    routing_order: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "routingOrder"},
+    )
     """The signing order of the recipient in the document."""
-    role_name: Optional[str] = None
+    role_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "roleName"},
+    )
     """The role of the signer."""
-    recipient_id: Optional[str] = None
+    recipient_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientId"},
+    )
     """The id the recipient."""
     name: Optional[str] = None
     """The name of the recipient."""
     email: Optional[str] = None
     """The email of the recipient."""
-    recipient_type: Optional[str] = None
+    recipient_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientType"},
+    )
     """The type the recipient."""
-    verification_type: Optional[str] = None
+    verification_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "verificationType"},
+    )
     """The type of verification."""
-    recipient_id_guid: Optional[str] = None
+    recipient_id_guid: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientIdGuid"},
+    )
     """The recipient GUID."""
 
 
 @dataclass
 class AuditResponse:
-    """Response for Get audit event list"""
+    """
+    Response for Get audit event list
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -318,7 +385,9 @@ class AuditResponse:
 
 @dataclass
 class AddVerificationToRecipientResponse:
-    """Response for Add verification type to a recipient"""
+    """
+    Response for Add verification type to a recipient
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -329,172 +398,183 @@ class AddVerificationToRecipientResponse:
 
 @dataclass
 class ApplyTemplatesToDocumentsInput:
-    """Apply a template to documents"""
+    """
+    Apply a template to documents
+    """
 
-    document_templates: Optional[List[Dict[str, Any]]] = None
+    document_templates: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "documentTemplates"},
+    )
     """Document Templates"""
 
 
 @dataclass
 class CreateBulkSendListInput:
-    """Create bulk send list"""
+    """
+    Create bulk send list
+    """
 
     csv: Optional[str] = None
     """Upload CSV File"""
-    raw_output: Optional[Dict[str, Any]] = None
+    raw_output: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "rawOutput"},
+    )
     """Document generation fields"""
 
 
 @dataclass
 class BulkSendListGuid:
-    """Response for Create bulk send list"""
+    """
+    Response for Create bulk send list
+    """
 
-    list_id: Optional[str] = None
+    list_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "listId"},
+    )
     """Bulk send list guid"""
 
 
 @dataclass
-class GetOrganizationsResponse:
-    """Response for Get organizations"""
-
-    organizations: Optional[List[Organization]] = None
-    """list of organizations"""
-
-
-@dataclass
 class GetLoginAccountsResponse:
-    """Response for Login"""
+    """
+    Response for Login
+    """
 
-    login_accounts: Optional[List[LoginAccount]] = None
+    login_accounts: Optional[List[LoginAccount]] = field(
+        default=None,
+        metadata={"wire_name": "loginAccounts"},
+    )
     """Login accounts"""
 
 
 @dataclass
-class GetWorkFlowIdsResponse:
-    """Response for Get All Workflow Ids"""
-
-    workflow_ids: Optional[List[WorkflowId]] = None
-    """Workflow ID"""
-
-
-@dataclass
 class ListTemplatesResponse:
-    """Response for List templates"""
+    """
+    Response for List templates
+    """
 
-    envelope_templates: Optional[List[EnvelopeTemplate]] = None
+    envelope_templates: Optional[List[EnvelopeTemplate]] = field(
+        default=None,
+        metadata={"wire_name": "envelopeTemplates"},
+    )
     """The available envelope templates."""
 
 
 @dataclass
-class ListSigningGroupResponse:
-    """Response for GetSigningGroups"""
-
-    signing_groups: Optional[List[SigningGroup]] = None
-    """List of all signing groups"""
-
-
-@dataclass
-class ListFoldersResponse:
-    """Response for List folders"""
-
-    folders: Optional[List[Folder]] = None
-    """Folders"""
-
-
-@dataclass
-class ListEnvelopesResponse:
-    """Response for List envelopes"""
-
-    folder_items: Optional[List[FolderItem]] = None
-    """The envelopes within a folder."""
-
-
-@dataclass
 class AddDocumentsToEnvelopeInput:
-    """Add documents to an envelope"""
+    """
+    Add documents to an envelope
+    """
 
     documents: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class AddDocumentsResponse:
-    """Response for Add documents to an envelope"""
+    """
+    Response for Add documents to an envelope
+    """
 
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     """The id of the envelope."""
-    envelope_documents: Optional[List[EnvelopeDocument]] = None
+    envelope_documents: Optional[List[EnvelopeDocument]] = field(
+        default=None,
+        metadata={"wire_name": "envelopeDocuments"},
+    )
     """The documents attached to the envelope."""
 
 
 @dataclass
 class ListTemplateDocumentsResponse:
-    """Response for List documents from a template"""
+    """
+    Response for List documents from a template
+    """
 
-    template_documents: Optional[List[EnvelopeDocument]] = None
+    template_documents: Optional[List[EnvelopeDocument]] = field(
+        default=None,
+        metadata={"wire_name": "templateDocuments"},
+    )
     """Documents attached to a template."""
 
 
 @dataclass
 class ListDocumentsResponse:
-    """Response for List documents from an envelope"""
+    """
+    Response for List documents from an envelope
+    """
 
-    envelope_documents: Optional[List[EnvelopeDocument]] = None
+    envelope_documents: Optional[List[EnvelopeDocument]] = field(
+        default=None,
+        metadata={"wire_name": "envelopeDocuments"},
+    )
     """The documents attached to the envelope."""
 
 
 @dataclass
 class EnvelopeDocument:
-    """Response for Get document info from envelope"""
+    """
+    Response for Get document info from envelope
+    """
 
     name: Optional[str] = None
     """The name of the document."""
-    document_id: Optional[str] = None
+    document_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "documentId"},
+    )
     """The id of the document."""
-    document_id_guid: Optional[str] = None
+    document_id_guid: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "documentIdGuid"},
+    )
     """The guid of the document."""
-    error_details: Optional[Dict[str, Any]] = None
+    error_details: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "errorDetails"},
+    )
     """The error details of the document."""
 
 
 @dataclass
-class GetDynamicSignersResponse:
-    """Response for Get the signers of a template in dynamic schema format"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class GetDynamicRecipientsResponse:
-    """Response for Get the signers of a template in dynamic schema format"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class Tab:
-    """Response for Get info for recipient tab"""
+    """
+    Response for Get info for recipient tab
+    """
 
     name: Optional[str] = None
     """The name of the tab."""
-    tab_type: Optional[str] = None
+    tab_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tabType"},
+    )
     """The type of the tab."""
-    tab_label: Optional[str] = None
+    tab_label: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tabLabel"},
+    )
     """The label of the tab."""
     value: Optional[str] = None
     """The value of the tab."""
-    tab_id: Optional[str] = None
+    tab_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tabId"},
+    )
     """The id of the tab."""
-    document_id: Optional[str] = None
+    document_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "documentId"},
+    )
     """The id of the document."""
-    recipient_id: Optional[str] = None
+    recipient_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientId"},
+    )
     """The id of the recipient."""
     prefill: Optional[bool] = None
     """Indicates whether the tab is of prefill type."""
@@ -504,15 +584,22 @@ class Tab:
 
 @dataclass
 class AddRecipientTabsResponse:
-    """Response for Add tabs for a recipient on an envelope"""
+    """
+    Response for Add tabs for a recipient on an envelope
+    """
 
-    recipient_tabs: Optional[List[RecipientTab]] = None
+    recipient_tabs: Optional[List[RecipientTab]] = field(
+        default=None,
+        metadata={"wire_name": "recipientTabs"},
+    )
     """The tabs added to a recipient."""
 
 
 @dataclass
 class UpdateRecipientTabsValuesInput:
-    """Update recipient tab values on an envelope"""
+    """
+    Update recipient tab values on an envelope
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -523,113 +610,22 @@ class UpdateRecipientTabsValuesInput:
 
 @dataclass
 class RecipientTabsResponse:
-    """Response for Get recipient tabs from envelope"""
+    """
+    Response for Get recipient tabs from envelope
+    """
 
-    recipient_tabs: Optional[List[Tab]] = None
+    recipient_tabs: Optional[List[Tab]] = field(
+        default=None,
+        metadata={"wire_name": "recipientTabs"},
+    )
     """Recipient tab"""
 
 
 @dataclass
-class WorkflowDefinitionsResponse:
-    """Response for Get Maestro Workflow Definitions"""
-
-    workflow_definitions: Optional[List[WorkflowDefinition]] = None
-    """WorkflowDefinitions"""
-
-
-@dataclass
-class WorkflowDefinitionResponse:
-    """Response for Get Maestro Workflow Definition"""
-
-    id: Optional[str] = None
-    """Id"""
-    name: Optional[str] = None
-    """Name"""
-    payload_schema: Optional[List[WorkflowDefPayloadSchema]] = None
-
-
-@dataclass
 class TriggerMaestroFlowResponse:
-    """Response for Start Docusign workflow"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    Response for Start Docusign workflow
     """
-
-
-@dataclass
-class TabTypesResponse:
-    """Response for StaticResponseForTabTypes"""
-
-    tab_types: Optional[List[TabType]] = None
-    """Tab types"""
-
-
-@dataclass
-class RecipientTypesResponse:
-    """Response for StaticResponseForRecipientTypes"""
-
-    tab_types: Optional[List[RecipientType]] = None
-    """Recipient types"""
-
-
-@dataclass
-class SignatureTypesResponse:
-    """Response for StaticResponseForSignatureTypes"""
-
-    tab_types: Optional[List[SignatureType]] = None
-    """Signature types"""
-
-
-@dataclass
-class StaticResponseForAnchorTabSchemaResponse:
-    """Response for StaticResponseForAnchorTabSchema"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class StaticResponseForCompositeTemplatesResponse:
-    """Response for StaticResponseForCompositeTemplates"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class StaticResponseForRecipientTypeSchemaResponse:
-    """Response for StaticResponseForRecipientTypeSchema"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class StaticResponseForEmbeddedSenderSchemaResponse:
-    """Response for StaticResponseForEmbeddedSenderSchema"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class StaticResponseForVerificationTypeSchemaResponse:
-    """Response for StaticResponseForVerificationTypeSchema"""
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -641,8 +637,280 @@ class StaticResponseForVerificationTypeSchemaResponse:
 @dataclass
 class BuildNumberResponse:
     """
-    Response for Show build Number (For reference only. Do not include in a
-    flow for execution)
+    Response for Show build Number (For reference only. Do not include in a flow for execution)
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class CreateHookEnvelopeInput:
+    """
+    When a Docusign Connect event occurs (Account-level)
+    """
+
+    all_users: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allUsers"},
+    )
+    allow_envelope_publish: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allowEnvelopePublish"},
+    )
+    include_document_fields: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "includeDocumentFields"},
+    )
+    requires_acknowledgement: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "requiresAcknowledgement"},
+    )
+    url_to_publish_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlToPublishTo"},
+    )
+    name: Optional[str] = None
+    """Name your Connect configuration (for example, \"Envelope Events\")."""
+    events: Optional[List[str]] = None
+    """Select an event. To include another event, select \"Add new item.\""""
+
+
+@dataclass
+class CreateHookEnvelopeResponse:
+    """
+    Response for When a Docusign Connect event occurs (Account-level)
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class EmbeddedSigningResponse:
+    """
+    Response for Generate Embedded Signing URL
+    """
+
+    url: Optional[str] = None
+    """The url of embedded signing view."""
+
+
+@dataclass
+class GetDocumentsResponse:
+    """
+    Response for Get documents from an envelope
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class GetOrganizationsResponse:
+    """
+    Response for Get organizations
+    """
+
+    organizations: Optional[List[Organization]] = None
+    """list of organizations"""
+
+
+@dataclass
+class ListFoldersResponse:
+    """
+    Response for List folders
+    """
+
+    folders: Optional[List[Folder]] = None
+    """Folders"""
+
+
+@dataclass
+class ListEnvelopesResponse:
+    """
+    Response for List envelopes
+    """
+
+    folder_items: Optional[List[FolderItem]] = field(
+        default=None,
+        metadata={"wire_name": "folderItems"},
+    )
+    """The envelopes within a folder."""
+
+
+@dataclass
+class RecipientTypesResponse:
+    """
+    Response for StaticResponseForRecipientTypes
+    """
+
+    tab_types: Optional[List[RecipientType]] = field(
+        default=None,
+        metadata={"wire_name": "tabTypes"},
+    )
+    """Recipient types"""
+
+
+@dataclass
+class SignatureTypesResponse:
+    """
+    Response for StaticResponseForSignatureTypes
+    """
+
+    tab_types: Optional[List[SignatureType]] = field(
+        default=None,
+        metadata={"wire_name": "tabTypes"},
+    )
+    """Signature types"""
+
+
+@dataclass
+class ListSigningGroupResponse:
+    """
+    Response for GetSigningGroups
+    """
+
+    signing_groups: Optional[List[SigningGroup]] = field(
+        default=None,
+        metadata={"wire_name": "signingGroups"},
+    )
+    """List of all signing groups"""
+
+
+@dataclass
+class TabTypesResponse:
+    """
+    Response for StaticResponseForTabTypes
+    """
+
+    tab_types: Optional[List[TabType]] = field(
+        default=None,
+        metadata={"wire_name": "tabTypes"},
+    )
+    """Tab types"""
+
+
+@dataclass
+class WorkflowDefinitionsResponse:
+    """
+    Response for Get Maestro Workflow Definitions
+    """
+
+    workflow_definitions: Optional[List[WorkflowDefinition]] = field(
+        default=None,
+        metadata={"wire_name": "WorkflowDefinitions"},
+    )
+    """WorkflowDefinitions"""
+
+
+@dataclass
+class GetWorkFlowIdsResponse:
+    """
+    Response for Get All Workflow Ids
+    """
+
+    workflow_ids: Optional[List[WorkflowId]] = field(
+        default=None,
+        metadata={"wire_name": "workflowIds"},
+    )
+    """Workflow ID"""
+
+
+@dataclass
+class WorkflowDefinitionResponse:
+    """
+    Response for Get Maestro Workflow Definition
+    """
+
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    """Id"""
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    """Name"""
+    payload_schema: Optional[List[WorkflowDefPayloadSchema]] = field(
+        default=None,
+        metadata={"wire_name": "PayloadSchema"},
+    )
+
+
+@dataclass
+class GetDynamicSignersResponse:
+    """
+    Response for Get the signers of a template in dynamic schema format
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class GetDynamicRecipientsResponse:
+    """
+    Response for Get the signers of a template in dynamic schema format
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class StaticResponseForRecipientTypeSchemaResponse:
+    """
+    Response for StaticResponseForRecipientTypeSchema
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class StaticResponseForVerificationTypeSchemaResponse:
+    """
+    Response for StaticResponseForVerificationTypeSchema
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class StaticResponseForEmbeddedSenderSchemaResponse:
+    """
+    Response for StaticResponseForEmbeddedSenderSchema
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class StaticResponseForEmbeddedSigningSchemaResponse:
+    """
+    Response for StaticResponseForEmbeddedSigningSchemaV2
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -654,7 +922,9 @@ class BuildNumberResponse:
 
 @dataclass
 class StaticResponseForBuildNumberSchemaResponse:
-    """Response for StaticResponseForBuildNumberSchema"""
+    """
+    Response for StaticResponseForBuildNumberSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -664,167 +934,114 @@ class StaticResponseForBuildNumberSchemaResponse:
 
 
 @dataclass
-class CreateHookEnvelopeInput:
-    """When a Docusign Connect event occurs (Account-level)"""
+class StaticResponseForAnchorTabSchemaResponse:
+    """
+    Response for StaticResponseForAnchorTabSchema
+    """
 
-    all_users: Optional[str] = None
-    allow_envelope_publish: Optional[str] = None
-    include_document_fields: Optional[str] = None
-    requires_acknowledgement: Optional[str] = None
-    url_to_publish_to: Optional[str] = None
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class StaticResponseForCompositeTemplatesResponse:
+    """
+    Response for StaticResponseForCompositeTemplates
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class WebhookRequest:
+    """
+    Definition: WebhookRequestV2
+    """
+
+    all_users: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allUsers"},
+    )
+    allow_envelope_publish: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "allowEnvelopePublish"},
+    )
+    include_document_fields: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "includeDocumentFields"},
+    )
+    requires_acknowledgement: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "requiresAcknowledgement"},
+    )
+    url_to_publish_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlToPublishTo"},
+    )
     name: Optional[str] = None
-    """Name your Connect configuration (for example, \"Envelope Events\")."""
-    events: Optional[List[str]] = None
-    """Select an event. To include another event, select \"Add new item.\""""
+    envelope_events: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeEvents"},
+    )
 
 
 @dataclass
-class CreateHookEnvelopeResponse:
-    """Response for When a Docusign Connect event occurs (Account-level)"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+class WebhookEnvelopeResponse:
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    Definition: WebhookEnvelopeResponseV2
     """
-
-
-@dataclass
-class EmbeddedSigningResponse:
-    """Response for Generate Embedded Signing URL (V2)"""
-
-    url: Optional[str] = None
-    """The url of embedded signing view."""
-
-
-@dataclass
-class GetDocumentsResponse:
-    """Response for Get documents from an envelope"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class StaticResponseForEmbeddedSigningSchemaResponse:
-    """Response for StaticResponseForEmbeddedSigningSchemaV2"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class WebhookRequestV2:
-    """Definition: WebhookRequestV2"""
-
-    all_users: Optional[str] = None
-    allow_envelope_publish: Optional[str] = None
-    include_document_fields: Optional[str] = None
-    requires_acknowledgement: Optional[str] = None
-    url_to_publish_to: Optional[str] = None
-    name: Optional[str] = None
-    envelope_events: Optional[str] = None
-
-
-@dataclass
-class WebhookEnvelopeResponseV2:
-    """Definition: WebhookEnvelopeResponseV2"""
 
     data: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class WebhookOrganizationResponse:
-    """Definition: WebhookOrganizationResponse"""
+    """
+    Definition: WebhookOrganizationResponse
+    """
 
     data: Optional[Dict[str, Any]] = None
 
 
 @dataclass
-class WebhookRequestV4:
-    """Definition: WebhookRequestV4"""
-
-    all_users: Optional[str] = None
-    allow_envelope_publish: Optional[str] = None
-    include_document_fields: Optional[str] = None
-    requires_acknowledgement: Optional[str] = None
-    url_to_publish_to: Optional[str] = None
-    name: Optional[str] = None
-    """Name your Connect configuration (for example, \"Envelope Events\")."""
-    events: Optional[List[str]] = None
-    """Select an event. To include another event, select \"Add new item.\""""
-
-
-@dataclass
-class WebhookRequestV3:
-    """Definition: WebhookRequestV3"""
-
-    all_users: Optional[str] = None
-    allow_envelope_publish: Optional[str] = None
-    include_document_fields: Optional[str] = None
-    requires_acknowledgement: Optional[str] = None
-    url_to_publish_to: Optional[str] = None
-    name: Optional[str] = None
-    envelope_events: Optional[str] = None
-
-
-@dataclass
-class WebhookRequest:
-    """Definition: WebhookRequest"""
-
-    all_users: Optional[str] = None
-    allow_envelope_publish: Optional[str] = None
-    include_document_fields: Optional[str] = None
-    include_envelope_void_reason: Optional[str] = None
-    include_time_zone_information: Optional[str] = None
-    requires_acknowledgement: Optional[str] = None
-    url_to_publish_to: Optional[str] = None
-    name: Optional[str] = None
-    envelope_events: Optional[str] = None
-    include_sender_accountas_custom_field: Optional[str] = None
-
-
-@dataclass
-class WebhookEnvelopeResponse:
-    """Definition: WebhookEnvelopeResponse"""
-
-    custom_fields: Optional[Dict[str, Any]] = None
-    """
-    Key-value pairs representing the custom fields for this envelope (where key
-    is the field name, and value is the field value).
-    """
-    docu_sign_envelope_information: Optional[Dict[str, Any]] = None
-
-
-@dataclass
 class WorkflowDefinition:
-    """Definition: WorkflowDefinition"""
+    """
+    Definition: WorkflowDefinition
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Id"""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Name"""
 
 
 @dataclass
 class WorkflowDefPayloadSchema:
-    """Definition: WorkflowDefPayloadSchema"""
+    """
+    Definition: WorkflowDefPayloadSchema
+    """
 
-    property_name: Optional[str] = None
+    property_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PropertyName"},
+    )
     """Name"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
     """Type"""
 
 
 @dataclass
 class MaestroInputVariables:
-    """Definition: MaestroInputVariables"""
+    """
+    Definition: MaestroInputVariables
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -835,7 +1052,9 @@ class MaestroInputVariables:
 
 @dataclass
 class DynamicSigners:
-    """Definition: DynamicSigners"""
+    """
+    Definition: DynamicSigners
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -846,7 +1065,9 @@ class DynamicSigners:
 
 @dataclass
 class DynamicRecipients:
-    """Definition: DynamicRecipients"""
+    """
+    Definition: DynamicRecipients
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -857,7 +1078,9 @@ class DynamicRecipients:
 
 @dataclass
 class AdditionalRecipientParamsSchema:
-    """Definition: AdditionalRecipientParamsSchema"""
+    """
+    Definition: AdditionalRecipientParamsSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -868,7 +1091,9 @@ class AdditionalRecipientParamsSchema:
 
 @dataclass
 class AdditionalRecipientData:
-    """Definition: AdditionalRecipientData"""
+    """
+    Definition: AdditionalRecipientData
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -879,7 +1104,9 @@ class AdditionalRecipientData:
 
 @dataclass
 class AdditionalURLForSenderView:
-    """Definition: AdditionalURLForSenderView"""
+    """
+    Definition: AdditionalURLForSenderView
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -890,7 +1117,9 @@ class AdditionalURLForSenderView:
 
 @dataclass
 class AdditionalURL:
-    """Definition: AdditionalURL"""
+    """
+    Definition: AdditionalURL
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -901,7 +1130,9 @@ class AdditionalURL:
 
 @dataclass
 class DynamicSigningUrlFields:
-    """Definition: DynamicSigningUrlFields"""
+    """
+    Definition: DynamicSigningUrlFields
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -912,7 +1143,9 @@ class DynamicSigningUrlFields:
 
 @dataclass
 class BuildNumberSchema:
-    """Definition: BuildNumberSchema"""
+    """
+    Definition: BuildNumberSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -923,7 +1156,9 @@ class BuildNumberSchema:
 
 @dataclass
 class AccountCustomFields:
-    """Definition: AccountCustomFields"""
+    """
+    Definition: AccountCustomFields
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -934,7 +1169,9 @@ class AccountCustomFields:
 
 @dataclass
 class AnchorTabSchema:
-    """Definition: AnchorTabSchema"""
+    """
+    Definition: AnchorTabSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -945,7 +1182,9 @@ class AnchorTabSchema:
 
 @dataclass
 class CompositeTemplateSchema:
-    """Definition: CompositeTemplateSchema"""
+    """
+    Definition: CompositeTemplateSchema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -956,24 +1195,36 @@ class CompositeTemplateSchema:
 
 @dataclass
 class AddRecipientToEnvelopeRequest:
-    """Definition: AddRecipientToEnvelopeRequest"""
+    """
+    Definition: AddRecipientToEnvelopeRequest
+    """
 
     signers: Optional[List[SignerRequest]] = None
 
 
 @dataclass
 class SignerRequest:
-    """Definition: SignerRequest"""
+    """
+    Definition: SignerRequest
+    """
 
-    routing_order: Optional[str] = None
+    routing_order: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "routingOrder"},
+    )
     """The signing order of the recipient in the document."""
-    role_name: Optional[str] = None
+    role_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "roleName"},
+    )
     """The role of the signer."""
 
 
 @dataclass
 class OnEnvelopeStatusChangesResponse:
-    """Definition: OnEnvelopeStatusChangesResponse"""
+    """
+    Definition: OnEnvelopeStatusChangesResponse
+    """
 
     envelopes: Optional[List[Envelope]] = None
     """Envelopes"""
@@ -981,23 +1232,36 @@ class OnEnvelopeStatusChangesResponse:
 
 @dataclass
 class EnvelopeIds:
-    """Definition: EnvelopeIds"""
+    """
+    Definition: EnvelopeIds
+    """
 
-    email_subject: Optional[str] = None
+    email_subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emailSubject"},
+    )
     """Title of the envelope"""
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     """Envelope ID"""
 
 
 @dataclass
 class FilteredEnvelopes:
-    """Definition: FilteredEnvelopes"""
+    """
+    Definition: FilteredEnvelopes
+    """
 
     title: Optional[str] = None
     """Title of the envelope"""
     description: Optional[str] = None
     """Description of the envelope activity"""
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     """Envelope ID"""
     documents: Optional[str] = None
     """List of document names"""
@@ -1007,9 +1271,15 @@ class FilteredEnvelopes:
     """Sender name"""
     status: Optional[str] = None
     """Status of the envelope"""
-    status_date: Optional[str] = None
+    status_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "statusDate"},
+    )
     """Last status update of the activity"""
-    date_sent: Optional[str] = None
+    date_sent: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dateSent"},
+    )
     """Envelope sent date"""
     url: Optional[str] = None
     """URL of the envelope"""
@@ -1017,31 +1287,47 @@ class FilteredEnvelopes:
 
 @dataclass
 class SalesCopilotFilteredEnvelopes:
-    """Definition: SalesCopilotFilteredEnvelopes"""
+    """
+    Definition: SalesCopilotFilteredEnvelopes
+    """
 
     title: Optional[str] = None
     """Title of the envelope"""
-    sub_title: Optional[str] = None
+    sub_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subTitle"},
+    )
     """SubTitle of the envelope"""
     url: Optional[str] = None
     """URL of the envelope"""
-    additional_properties_for_sales_envelope: Optional[Dict[str, Any]] = None
+    additional_properties_for_sales_envelope: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "additionalPropertiesForSalesEnvelope"},
+    )
     """Additional Properties"""
 
 
 @dataclass
 class Activity:
-    """Definition: Activity"""
+    """
+    Definition: Activity
+    """
 
     title: Optional[str] = None
     """This output indicates the title of the activity in the citation card."""
     description: Optional[str] = None
     """This output indicates the description of the insight."""
-    date_time: Optional[str] = None
+    date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dateTime"},
+    )
     """This output indicates the time associated with the insight."""
     url: Optional[str] = None
     """This output indicates the URL to open insight."""
-    additional_properties: Optional[Dict[str, Any]] = None
+    additional_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "additionalProperties"},
+    )
     """
     This output indicates additional properties displayed in the detailed view
     of the insight.
@@ -1050,14 +1336,19 @@ class Activity:
 
 @dataclass
 class EmailSummary:
-    """Definition: EmailSummary"""
+    """
+    Definition: EmailSummary
+    """
 
-    title: Optional[str] = None
+    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
     """
     This output indicates the title of the partner section and should include
     only the partner's name.
     """
-    description: Optional[str] = None
+    description: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Description"},
+    )
     """
     This output indicates the text you would like to be included in the email
     summary.
@@ -1066,9 +1357,11 @@ class EmailSummary:
 
 @dataclass
 class KeySales:
-    """Definition: KeySales"""
+    """
+    Definition: KeySales
+    """
 
-    title: Optional[str] = None
+    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
     """This output indicates the title of citation card for the insight."""
     description: Optional[str] = None
     """
@@ -1077,9 +1370,15 @@ class KeySales:
     """
     url: Optional[str] = None
     """This output indicates the URL to learn more about the insight."""
-    date_time: Optional[str] = None
+    date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dateTime"},
+    )
     """This output indicates the time associated with the insight."""
-    additional_properties: Optional[Dict[str, Any]] = None
+    additional_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "additionalProperties"},
+    )
     """
     This output indicates additional properties as name-value pairs of each
     related insight returned by the action.
@@ -1088,28 +1387,45 @@ class KeySales:
 
 @dataclass
 class DocumentRecord:
-    """Definition: DocumentRecord"""
+    """
+    Definition: DocumentRecord
+    """
 
-    record_id: Optional[str] = None
+    record_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recordId"},
+    )
     """
     This output uniquely identifies each related record returned by the action.
     """
-    record_type_display_name: Optional[str] = None
+    record_type_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recordTypeDisplayName"},
+    )
     """
     This output indicates the display name of record type of each related
     record returned by the action.
     """
-    record_type_plural_display_name: Optional[str] = None
+    record_type_plural_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recordTypePluralDisplayName"},
+    )
     """
     This output indicates the plural display name of the record type of each
     related record returned by the action.
     """
-    record_type: Optional[str] = None
+    record_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recordType"},
+    )
     """
     This output indicates the type of each related record returned by the
     action.
     """
-    record_title: Optional[str] = None
+    record_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recordTitle"},
+    )
     """
     This output indicates the title of each related record returned by the
     action.
@@ -1119,60 +1435,176 @@ class DocumentRecord:
     This output indicates the URL of each related record returned by the
     action.
     """
-    additional_properties: Optional[Dict[str, Any]] = None
+    additional_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "additionalProperties"},
+    )
     """Additional Properties"""
 
 
 @dataclass
 class Envelope:
-    """Definition: Envelope"""
+    """
+    Definition: Envelope
+    """
 
-    documents_uri: Optional[str] = None
+    documents_uri: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "documentsUri"},
+    )
     """The URI for the document in DocuSign."""
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     """The id of the envelope."""
-    envelope_uri: Optional[str] = None
+    envelope_uri: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeUri"},
+    )
     """The URI for the envelope in DocuSign."""
-    notification_uri: Optional[str] = None
+    notification_uri: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUri"},
+    )
     """The URI for the notifications."""
-    recipients_uri: Optional[str] = None
+    recipients_uri: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientsUri"},
+    )
     """The URI for the recipients of the envelope in DocuSign."""
     status: Optional[str] = None
     """The status of the envelope."""
-    status_changed_date_time: Optional[str] = None
+    status_changed_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "statusChangedDateTime"},
+    )
     """The datetime the status changed."""
 
 
 @dataclass
 class CombinedEmailBodyAndCustomFields:
-    """Definition: CombinedEmailBodyAndCustomFields"""
+    """
+    Definition: CombinedEmailBodyAndCustomFields
+    """
 
-    email_blurb: Optional[str] = None
+    email_blurb: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emailBlurb"},
+    )
     """Body of the email."""
-    account_custom_fields: Optional[AccountCustomFields] = None
+    account_custom_fields: Optional[AccountCustomFields] = field(
+        default=None,
+        metadata={"wire_name": "AccountCustomFields"},
+    )
 
 
 @dataclass
 class EnvelopeIDsResponse:
-    """Definition: EnvelopeIDsResponse"""
+    """
+    Definition: EnvelopeIDsResponse
+    """
 
     envelopes: Optional[List[EnvelopeIds]] = None
     """list of envelope ids"""
 
 
 @dataclass
-class ApiError:
-    """Definition: ApiError"""
+class FilteredSalesCopilotEnvelopeListResponse:
+    """
+    Definition: FilteredSalesCopilotEnvelopeListResponse
+    """
 
-    error_code: Optional[str] = None
-    error_message: Optional[str] = None
-    activity_id: Optional[str] = None
+    value: Optional[List[SalesCopilotFilteredEnvelopes]] = None
+    """Filtered envelopes"""
+    has_more_results: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasMoreResults"},
+    )
+
+
+@dataclass
+class ActivityListResponseEnvelope:
+    """
+    Definition: ActivityListResponseEnvelope
+    """
+
+    value: Optional[List[Activity]] = None
+    """Related activies"""
+    has_more_results: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasMoreResults"},
+    )
+
+
+@dataclass
+class EmailSummaryResponse:
+    """
+    Definition: EmailSummaryResponse
+    """
+
+    value: Optional[List[EmailSummary]] = None
+    """Key Sales"""
+    has_more_results: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasMoreResults"},
+    )
+
+
+@dataclass
+class KeySalesResponse:
+    """
+    Definition: KeySalesResponse
+    """
+
+    value: Optional[List[KeySales]] = None
+    """Key Sales"""
+    has_more_results: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasMoreResults"},
+    )
+
+
+@dataclass
+class DocumentRecordListResponseEnvelope:
+    """
+    Definition: DocumentRecordListResponseEnvelope
+    """
+
+    value: Optional[List[DocumentRecord]] = None
+    """Related records"""
+    has_more_results: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasMoreResults"},
+    )
+
+
+@dataclass
+class ApiError:
+    """
+    Definition: ApiError
+    """
+
+    error_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "errorCode"},
+    )
+    error_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "errorMessage"},
+    )
+    activity_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "activityId"},
+    )
     details: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class Organization:
-    """Definition: organization"""
+    """
+    Definition: organization
+    """
 
     id: Optional[str] = None
     """The id of the organization."""
@@ -1182,31 +1614,46 @@ class Organization:
 
 @dataclass
 class LoginAccount:
-    """Definition: LoginAccount"""
+    """
+    Definition: LoginAccount
+    """
 
     name: Optional[str] = None
     """The name of the account. """
-    account_id_guid: Optional[str] = None
+    account_id_guid: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "accountIdGuid"},
+    )
     """The GUID of the account."""
 
 
 @dataclass
 class DocumentTypesResponse:
-    """Definition: DocumentTypesResponse"""
+    """
+    Definition: DocumentTypesResponse
+    """
 
-    document_types: Optional[List[DocumentType]] = None
+    document_types: Optional[List[DocumentType]] = field(
+        default=None,
+        metadata={"wire_name": "documentTypes"},
+    )
     """Document types"""
 
 
 @dataclass
 class DocGenFormField:
-    """Definition: DocGenFormField"""
+    """
+    Definition: DocGenFormField
+    """
 
-    document_id: Optional[str] = None
+    document_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "documentId"},
+    )
     """Document Id."""
     label: Optional[str] = None
     """Label."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type."""
     name: Optional[str] = None
     """Name."""
@@ -1216,15 +1663,22 @@ class DocGenFormField:
 
 @dataclass
 class FontNamesResponse:
-    """Definition: FontNamesResponse"""
+    """
+    Definition: FontNamesResponse
+    """
 
-    font_names: Optional[List[FontName]] = None
+    font_names: Optional[List[FontName]] = field(
+        default=None,
+        metadata={"wire_name": "fontNames"},
+    )
     """Font names"""
 
 
 @dataclass
 class DocumentType:
-    """Definition: DocumentType"""
+    """
+    Definition: DocumentType
+    """
 
     name: Optional[str] = None
     """The type of a document."""
@@ -1232,47 +1686,57 @@ class DocumentType:
 
 @dataclass
 class TabType:
-    """Definition: TabType"""
+    """
+    Definition: TabType
+    """
 
     name: Optional[str] = None
     """Display name of the tab."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the tab."""
 
 
 @dataclass
 class WorkflowId:
-    """Definition: WorkflowID"""
+    """
+    Definition: WorkflowID
+    """
 
     name: Optional[str] = None
     """The name of workflowID"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """The type of workflowID"""
 
 
 @dataclass
 class RecipientType:
-    """Definition: RecipientType"""
+    """
+    Definition: RecipientType
+    """
 
     name: Optional[str] = None
     """Display name of the recipient type."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the recipient."""
 
 
 @dataclass
 class SignatureType:
-    """Definition: SignatureType"""
+    """
+    Definition: SignatureType
+    """
 
     name: Optional[str] = None
     """Display name of the signature type."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of the signature."""
 
 
 @dataclass
 class FontName:
-    """Definition: FontName"""
+    """
+    Definition: FontName
+    """
 
     name: Optional[str] = None
     """The name of a font metadata."""
@@ -1280,19 +1744,32 @@ class FontName:
 
 @dataclass
 class SigningGroup:
-    """Definition: SigningGroup"""
+    """
+    Definition: SigningGroup
+    """
 
-    signing_group_id: Optional[str] = None
+    signing_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "signingGroupId"},
+    )
     """The ID of the signing group."""
-    group_name: Optional[str] = None
+    group_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "groupName"},
+    )
     """The name of the signing group."""
 
 
 @dataclass
 class EnvelopeTemplate:
-    """Definition: EnvelopeTemplate"""
+    """
+    Definition: EnvelopeTemplate
+    """
 
-    template_id: Optional[str] = None
+    template_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "templateId"},
+    )
     """The id of the template."""
     name: Optional[str] = None
     """The name of the template."""
@@ -1300,19 +1777,29 @@ class EnvelopeTemplate:
 
 @dataclass
 class Folder:
-    """Definition: Folder"""
+    """
+    Definition: Folder
+    """
 
     name: Optional[str] = None
     """The name of the folder."""
-    folder_id: Optional[str] = None
+    folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "folderId"},
+    )
     """The id of the folder."""
 
 
 @dataclass
 class FolderItem:
-    """Definition: FolderItem"""
+    """
+    Definition: FolderItem
+    """
 
-    envelope_id: Optional[str] = None
+    envelope_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "envelopeId"},
+    )
     """The id of the envelope."""
     subject: Optional[str] = None
     """The subject of the envelope."""
@@ -1320,17 +1807,27 @@ class FolderItem:
 
 @dataclass
 class RecipientTab:
-    """Definition: RecipientTab"""
+    """
+    Definition: RecipientTab
+    """
 
-    tab_id: Optional[str] = None
+    tab_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tabId"},
+    )
     """The id of the tab."""
-    tab_type: Optional[str] = None
+    tab_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tabType"},
+    )
     """The type of the tab."""
 
 
 @dataclass
 class EnvelopeDocumentField:
-    """Definition: EnvelopeDocumentField"""
+    """
+    Definition: EnvelopeDocumentField
+    """
 
     name: Optional[str] = None
     """The name of the custom field."""
@@ -1340,7 +1837,9 @@ class EnvelopeDocumentField:
 
 @dataclass
 class DeclineReasonWithoutType:
-    """Definition: DeclineReasonWithoutType"""
+    """
+    Definition: DeclineReasonWithoutType
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -1383,61 +1882,33 @@ class DocusignClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "docusign"
 
-    async def create_org_hook_envelope_async(
-        self,
-        input: CreateOrgHookEnvelopeInput,
-        organization_id: str,
-    ):
-        """
-        When a Docusign Connect event occurs (Organization-level)
-
-        Triggers a new flow when an envelope status changes.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/Management/v2/organizations/{str(organization_id)}/connect"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def get_docgen_form_fields_async(
         self,
         account_id: str,
         envelope_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get document generation form fields from envelope
 
         Get document generation form fields from envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/docGenFormFields"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1452,36 +1923,37 @@ class DocusignClient(ConnectorClientBase):
         input: UpdateDocgenFormFieldsInput,
         account_id: str,
         envelope_id: str,
-        document_guid: Optional[str],
-    ):
+        document_guid: str,
+    ) -> None:
         """
         Update document generation form fields from envelope
 
         Update document generation form fields from envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/docGenFormFields"
         )
         query_params = []
-        if document_guid is not None:
-            value = str(document_guid)
-            if isinstance(document_guid, bool):
-                value = value.lower()
-            query_params.append(f"documentGuid={quote(value)}")
+        value = str(document_guid)
+        if isinstance(document_guid, bool):
+            value = value.lower()
+        query_params.append(f"documentGuid={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1490,7 +1962,7 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         template_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get document generation form fields from template (bulk send templates
         only)
@@ -1498,17 +1970,22 @@ class DocusignClient(ConnectorClientBase):
         Get document generation form fields from template (bulk send templates
         only)
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/templates/{str(template_id)}"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/templates"
+            f"/{quote(str(template_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1522,36 +1999,37 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-        voided_reason: Optional[str],
-    ):
+        voided_reason: str,
+    ) -> dict[str, Any] | None:
         """
         Void the envelope
 
         Void the envelope.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/voidEnvelope"
         )
         query_params = []
-        if voided_reason is not None:
-            value = str(voided_reason)
-            if isinstance(voided_reason, bool):
-                value = value.lower()
-            query_params.append(f"voidedReason={quote(value)}")
+        value = str(voided_reason)
+        if isinstance(voided_reason, bool):
+            value = value.lower()
+        query_params.append(f"voidedReason={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1564,7 +2042,7 @@ class DocusignClient(ConnectorClientBase):
     async def resend_envelope_async(
         self,
         envelope_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Resend the envelope
 
@@ -1572,21 +2050,23 @@ class DocusignClient(ConnectorClientBase):
         recipients who need to sign a Docusign agreement based on a provided
         EnvelopeId.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
             f"/copilotAccount"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/resendEnvelope"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1600,54 +2080,53 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-        reminder_enabled: Optional[str],
-        reminder_delay: Optional[str],
-        reminder_frequency: Optional[str],
+        reminder_enabled: str,
+        reminder_delay: str,
+        reminder_frequency: str,
         expire_after: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add reminders for an envelope
 
         Add reminders for an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/notification"
         )
         query_params = []
-        if reminder_enabled is not None:
-            value = str(reminder_enabled)
-            if isinstance(reminder_enabled, bool):
-                value = value.lower()
-            query_params.append(f"reminderEnabled={quote(value)}")
-        if reminder_delay is not None:
-            value = str(reminder_delay)
-            if isinstance(reminder_delay, bool):
-                value = value.lower()
-            query_params.append(f"reminderDelay={quote(value)}")
-        if reminder_frequency is not None:
-            value = str(reminder_frequency)
-            if isinstance(reminder_frequency, bool):
-                value = value.lower()
-            query_params.append(f"reminderFrequency={quote(value)}")
+        value = str(reminder_enabled)
+        if isinstance(reminder_enabled, bool):
+            value = value.lower()
+        query_params.append(f"reminderEnabled={quote(value)}")
+        value = str(reminder_delay)
+        if isinstance(reminder_delay, bool):
+            value = value.lower()
+        query_params.append(f"reminderDelay={quote(value)}")
+        value = str(reminder_frequency)
+        if isinstance(reminder_frequency, bool):
+            value = value.lower()
+        query_params.append(f"reminderFrequency={quote(value)}")
         if expire_after is not None:
             value = str(expire_after)
             if isinstance(expire_after, bool):
                 value = value.lower()
             query_params.append(f"expireAfter={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1662,29 +2141,31 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get document tabs from envelope
 
         Get document tabs from envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/tabs"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1700,29 +2181,31 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_id: str,
-    ):
+    ) -> None:
         """
         Update envelope prefill tabs
 
         Update values for a list of prefill tabs
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/tabs"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1732,29 +2215,31 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         template_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get document tabs from template
 
         Get document tabs from template
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/templates"
-            f"/{str(template_id)}"
+            f"/{quote(str(template_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/tabs"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1769,29 +2254,31 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get document custom fields from envelope
 
         Get document custom fields from envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1805,463 +2292,53 @@ class DocusignClient(ConnectorClientBase):
         self,
         input: CompositeTemplateSchema,
         account_id: str,
-        email_subject: Optional[str],
-        status: Optional[str],
+        email_subject: str,
+        status: str,
         email_body: Optional[str] = None,
         merge_roles_on_draft: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create envelope using composite templates
 
         Create envelope using composite templates
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/envelopes/compositeTemplates"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/envelopes"
+            f"/compositeTemplates"
         )
         query_params = []
-        if email_subject is not None:
-            value = str(email_subject)
-            if isinstance(email_subject, bool):
-                value = value.lower()
-            query_params.append(f"emailSubject={quote(value)}")
+        value = str(email_subject)
+        if isinstance(email_subject, bool):
+            value = value.lower()
+        query_params.append(f"emailSubject={quote(value)}")
         if email_body is not None:
             value = str(email_body)
             if isinstance(email_body, bool):
                 value = value.lower()
             query_params.append(f"emailBody={quote(value)}")
-        if status is not None:
-            value = str(status)
-            if isinstance(status, bool):
-                value = value.lower()
-            query_params.append(f"status={quote(value)}")
+        value = str(status)
+        if isinstance(status, bool):
+            value = value.lower()
+        query_params.append(f"status={quote(value)}")
         if merge_roles_on_draft is not None:
             value = str(merge_roles_on_draft)
             if isinstance(merge_roles_on_draft, bool):
                 value = value.lower()
             query_params.append(f"merge_roles_on_draft={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def scp_get_related_activities_async(
-        self,
-        record_type: Optional[str],
-        record_id: Optional[str],
-        start_date_time: Optional[str] = None,
-        end_date_time: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-        crm_type: Optional[str] = None,
-        crm_org_url: Optional[str] = None,
-    ):
-        """
-        Copilot: Get related activities
-
-        This action gets additional sales insights related to a CRM record that
-        will be shown in the C4S record summary card. The action enhances the
-        existing skills of copilot for sales.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/salesCopilotAccount/envelopes/getRelatedActivities"
-        )
-        query_params = []
-        if record_type is not None:
-            value = str(record_type)
-            if isinstance(record_type, bool):
-                value = value.lower()
-            query_params.append(f"recordType={quote(value)}")
-        if record_id is not None:
-            value = str(record_id)
-            if isinstance(record_id, bool):
-                value = value.lower()
-            query_params.append(f"recordId={quote(value)}")
-        if start_date_time is not None:
-            value = str(start_date_time)
-            if isinstance(start_date_time, bool):
-                value = value.lower()
-            query_params.append(f"startDateTime={quote(value)}")
-        if end_date_time is not None:
-            value = str(end_date_time)
-            if isinstance(end_date_time, bool):
-                value = value.lower()
-            query_params.append(f"endDateTime={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"skip={quote(value)}")
-        if crm_type is not None:
-            value = str(crm_type)
-            if isinstance(crm_type, bool):
-                value = value.lower()
-            query_params.append(f"crmType={quote(value)}")
-        if crm_org_url is not None:
-            value = str(crm_org_url)
-            if isinstance(crm_org_url, bool):
-                value = value.lower()
-            query_params.append(f"crmOrgUrl={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def scp_get_related_records_async(
-        self,
-        record_type: Optional[str],
-        record_id: Optional[str],
-        start_date_time: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-        crm_type: Optional[str] = None,
-        crm_org_url: Optional[str] = None,
-    ):
-        """
-        Copilot: Get related records
-
-        This action gets records related to a CRM record. The action enhances
-        the existing skills of Copilot for Sales.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/salesCopilotAccount/envelopes/getRelatedRecords"
-        )
-        query_params = []
-        if record_type is not None:
-            value = str(record_type)
-            if isinstance(record_type, bool):
-                value = value.lower()
-            query_params.append(f"recordType={quote(value)}")
-        if record_id is not None:
-            value = str(record_id)
-            if isinstance(record_id, bool):
-                value = value.lower()
-            query_params.append(f"recordId={quote(value)}")
-        if start_date_time is not None:
-            value = str(start_date_time)
-            if isinstance(start_date_time, bool):
-                value = value.lower()
-            query_params.append(f"startDateTime={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"skip={quote(value)}")
-        if crm_type is not None:
-            value = str(crm_type)
-            if isinstance(crm_type, bool):
-                value = value.lower()
-            query_params.append(f"crmType={quote(value)}")
-        if crm_org_url is not None:
-            value = str(crm_org_url)
-            if isinstance(crm_org_url, bool):
-                value = value.lower()
-            query_params.append(f"crmOrgUrl={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def scp_get_key_sales_async(
-        self,
-        record_type: Optional[str],
-        record_id: Optional[str],
-        start_date_time: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-        crm_type: Optional[str] = None,
-        crm_org_url: Optional[str] = None,
-    ):
-        """
-        Copilot for Sales: Get key sales
-
-        This action gets additional sales insights that will be shown in C4S
-        key sales info card in outlook sidecar. The action enhances the
-        existing skills of copilot for sales
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/salesCopilotAccount/envelopes/getKeySales"
-        )
-        query_params = []
-        if record_type is not None:
-            value = str(record_type)
-            if isinstance(record_type, bool):
-                value = value.lower()
-            query_params.append(f"recordType={quote(value)}")
-        if record_id is not None:
-            value = str(record_id)
-            if isinstance(record_id, bool):
-                value = value.lower()
-            query_params.append(f"recordId={quote(value)}")
-        if start_date_time is not None:
-            value = str(start_date_time)
-            if isinstance(start_date_time, bool):
-                value = value.lower()
-            query_params.append(f"startDateTime={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"skip={quote(value)}")
-        if crm_type is not None:
-            value = str(crm_type)
-            if isinstance(crm_type, bool):
-                value = value.lower()
-            query_params.append(f"crmType={quote(value)}")
-        if crm_org_url is not None:
-            value = str(crm_org_url)
-            if isinstance(crm_org_url, bool):
-                value = value.lower()
-            query_params.append(f"crmOrgUrl={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def scp_get_email_summary_async(
-        self,
-        email_contacts: Optional[str],
-        record_type: Optional[str] = None,
-        record_id: Optional[str] = None,
-        crm_type: Optional[str] = None,
-        crm_org_url: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-    ):
-        """
-        Copilot for Sales: Get email summary
-
-        This action gets additional sales insights that will be shown in C4S
-        email summary experience inside outlook summary. The action enhances
-        the existing skills of copilot for sales.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/salesCopilotAccount/envelopes/getEmailSummary"
-        )
-        query_params = []
-        if record_type is not None:
-            value = str(record_type)
-            if isinstance(record_type, bool):
-                value = value.lower()
-            query_params.append(f"recordType={quote(value)}")
-        if record_id is not None:
-            value = str(record_id)
-            if isinstance(record_id, bool):
-                value = value.lower()
-            query_params.append(f"recordId={quote(value)}")
-        if crm_type is not None:
-            value = str(crm_type)
-            if isinstance(crm_type, bool):
-                value = value.lower()
-            query_params.append(f"crmType={quote(value)}")
-        if crm_org_url is not None:
-            value = str(crm_org_url)
-            if isinstance(crm_org_url, bool):
-                value = value.lower()
-            query_params.append(f"crmOrgUrl={quote(value)}")
-        if email_contacts is not None:
-            value = str(email_contacts)
-            if isinstance(email_contacts, bool):
-                value = value.lower()
-            query_params.append(f"emailContacts={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"skip={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_envelopes_async(
-        self,
-        recipient_name: Optional[str] = None,
-        recipient_email_id: Optional[str] = None,
-        envelope_title: Optional[str] = None,
-        custom_field_name: Optional[str] = None,
-        custom_field_value: Optional[str] = None,
-        envelope_status: Optional[str] = None,
-        folder_ids: Optional[str] = None,
-        order_by: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-        from_date: Optional[str] = None,
-        to_date: Optional[str] = None,
-    ):
-        """
-        Copilot: List envelopes
-
-        This action brings back relevant Docusign envelopes based on envelope
-        status, date range, recipient name, recipient email address, envelope
-        title, document name, or envelope custom field value. The output is the
-        title, description, Envelope ID, document names, sender names, envelope
-        status, status date, date sent, and a URL of the envelope which can be
-        used as a link to view the envelope in Docusign.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/copilotAccount/envelopes/listEnvelopes"
-        )
-        query_params = []
-        if recipient_name is not None:
-            value = str(recipient_name)
-            if isinstance(recipient_name, bool):
-                value = value.lower()
-            query_params.append(f"recipientName={quote(value)}")
-        if recipient_email_id is not None:
-            value = str(recipient_email_id)
-            if isinstance(recipient_email_id, bool):
-                value = value.lower()
-            query_params.append(f"recipientEmailId={quote(value)}")
-        if envelope_title is not None:
-            value = str(envelope_title)
-            if isinstance(envelope_title, bool):
-                value = value.lower()
-            query_params.append(f"envelopeTitle={quote(value)}")
-        if custom_field_name is not None:
-            value = str(custom_field_name)
-            if isinstance(custom_field_name, bool):
-                value = value.lower()
-            query_params.append(f"customFieldName={quote(value)}")
-        if custom_field_value is not None:
-            value = str(custom_field_value)
-            if isinstance(custom_field_value, bool):
-                value = value.lower()
-            query_params.append(f"customFieldValue={quote(value)}")
-        if envelope_status is not None:
-            value = str(envelope_status)
-            if isinstance(envelope_status, bool):
-                value = value.lower()
-            query_params.append(f"envelopeStatus={quote(value)}")
-        if folder_ids is not None:
-            value = str(folder_ids)
-            if isinstance(folder_ids, bool):
-                value = value.lower()
-            query_params.append(f"folder_ids={quote(value)}")
-        if order_by is not None:
-            value = str(order_by)
-            if isinstance(order_by, bool):
-                value = value.lower()
-            query_params.append(f"order_by={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"skip={quote(value)}")
-        if from_date is not None:
-            value = str(from_date)
-            if isinstance(from_date, bool):
-                value = value.lower()
-            query_params.append(f"from_date={quote(value)}")
-        if to_date is not None:
-            value = str(to_date)
-            if isinstance(to_date, bool):
-                value = value.lower()
-            query_params.append(f"to_date={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2287,7 +2364,7 @@ class DocusignClient(ConnectorClientBase):
         skip: Optional[str] = None,
         from_date: Optional[str] = None,
         to_date: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List envelopes
 
@@ -2298,9 +2375,12 @@ class DocusignClient(ConnectorClientBase):
         status, status date, date sent, and a URL of the envelope which can be
         used as a link to view the envelope in Docusign.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/envelopes/SearchListEnvelopes"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/envelopes"
+            f"/SearchListEnvelopes"
         )
         query_params = []
         if recipient_name is not None:
@@ -2369,166 +2449,16 @@ class DocusignClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"to_date={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def sales_copilot_list_envelopes_async(
-        self,
-        recipient_name: Optional[str] = None,
-        recipient_email_id: Optional[str] = None,
-        envelope_title: Optional[str] = None,
-        custom_field_name: Optional[str] = None,
-        custom_field_value: Optional[str] = None,
-        envelope_status: Optional[str] = None,
-        folder_ids: Optional[str] = None,
-        order_by: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-        start_date_time: Optional[str] = None,
-        end_date_time: Optional[str] = None,
-    ):
-        """
-        Copilot for Sales: List envelopes
-
-        Copilot for Sales: List envelopes returns information on Docusign
-        agreements such as title, documents, recipients, agreement status,
-        sender name and URL of the agreement. The plugin can handle requests
-        like show me all my agreements I need to sign or what is the status of
-        the sales order contract.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/copilotAccount/envelopes/listEnvelopesForSalesCopilot"
-        )
-        query_params = []
-        if recipient_name is not None:
-            value = str(recipient_name)
-            if isinstance(recipient_name, bool):
-                value = value.lower()
-            query_params.append(f"recipientName={quote(value)}")
-        if recipient_email_id is not None:
-            value = str(recipient_email_id)
-            if isinstance(recipient_email_id, bool):
-                value = value.lower()
-            query_params.append(f"recipientEmailId={quote(value)}")
-        if envelope_title is not None:
-            value = str(envelope_title)
-            if isinstance(envelope_title, bool):
-                value = value.lower()
-            query_params.append(f"envelopeTitle={quote(value)}")
-        if custom_field_name is not None:
-            value = str(custom_field_name)
-            if isinstance(custom_field_name, bool):
-                value = value.lower()
-            query_params.append(f"customFieldName={quote(value)}")
-        if custom_field_value is not None:
-            value = str(custom_field_value)
-            if isinstance(custom_field_value, bool):
-                value = value.lower()
-            query_params.append(f"customFieldValue={quote(value)}")
-        if envelope_status is not None:
-            value = str(envelope_status)
-            if isinstance(envelope_status, bool):
-                value = value.lower()
-            query_params.append(f"envelopeStatus={quote(value)}")
-        if folder_ids is not None:
-            value = str(folder_ids)
-            if isinstance(folder_ids, bool):
-                value = value.lower()
-            query_params.append(f"folder_ids={quote(value)}")
-        if order_by is not None:
-            value = str(order_by)
-            if isinstance(order_by, bool):
-                value = value.lower()
-            query_params.append(f"order_by={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"skip={quote(value)}")
-        if start_date_time is not None:
-            value = str(start_date_time)
-            if isinstance(start_date_time, bool):
-                value = value.lower()
-            query_params.append(f"startDateTime={quote(value)}")
-        if end_date_time is not None:
-            value = str(end_date_time)
-            if isinstance(end_date_time, bool):
-                value = value.lower()
-            query_params.append(f"endDateTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def create_envelope_from_template_async(
-        self,
-        input: AccountCustomFields,
-        account_id: str,
-        template_id: Optional[str],
-        status: Optional[str],
-    ):
-        """
-        DEPRECATED: Create envelope using template (deprecated)
-
-        Create a new envelope using a specified template (deprecated).
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/envelopes/createFromTemplate"
-        )
-        query_params = []
-        if template_id is not None:
-            value = str(template_id)
-            if isinstance(template_id, bool):
-                value = value.lower()
-            query_params.append(f"templateId={quote(value)}")
-        if status is not None:
-            value = str(status)
-            if isinstance(status, bool):
-                value = value.lower()
-            query_params.append(f"status={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2541,41 +2471,41 @@ class DocusignClient(ConnectorClientBase):
     async def create_envelope_from_template_no_recipients_async(
         self,
         account_id: str,
-        template_id: Optional[str],
-        status: Optional[str],
-    ):
+        template_id: str,
+        status: str,
+    ) -> dict[str, Any] | None:
         """
         Create envelope using template
 
         Create a new envelope using a specified template.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
             f"/createFromTemplateNoRecipients"
         )
         query_params = []
-        if template_id is not None:
-            value = str(template_id)
-            if isinstance(template_id, bool):
-                value = value.lower()
-            query_params.append(f"templateId={quote(value)}")
-        if status is not None:
-            value = str(status)
-            if isinstance(status, bool):
-                value = value.lower()
-            query_params.append(f"status={quote(value)}")
+        value = str(template_id)
+        if isinstance(template_id, bool):
+            value = value.lower()
+        query_params.append(f"templateId={quote(value)}")
+        value = str(status)
+        if isinstance(status, bool):
+            value = value.lower()
+        query_params.append(f"status={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2589,32 +2519,30 @@ class DocusignClient(ConnectorClientBase):
         self,
         input: DynamicSigners,
         account_id: str,
-        status: Optional[str],
-        template_id: Optional[str],
+        status: str,
+        template_id: str,
         email_subject: Optional[str] = None,
         email_body: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create envelope using template with recipients
 
         Create a new envelope using a specified template and specify
         recipients.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/envelopes"
+            f"/accounts/{quote(str(account_id), safe='')}/envelopes"
         )
         query_params = []
-        if status is not None:
-            value = str(status)
-            if isinstance(status, bool):
-                value = value.lower()
-            query_params.append(f"status={quote(value)}")
-        if template_id is not None:
-            value = str(template_id)
-            if isinstance(template_id, bool):
-                value = value.lower()
-            query_params.append(f"templateId={quote(value)}")
+        value = str(status)
+        if isinstance(status, bool):
+            value = value.lower()
+        query_params.append(f"status={quote(value)}")
+        value = str(template_id)
+        if isinstance(template_id, bool):
+            value = value.lower()
+        query_params.append(f"templateId={quote(value)}")
         if email_subject is not None:
             value = str(email_subject)
             if isinstance(email_subject, bool):
@@ -2626,14 +2554,16 @@ class DocusignClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"emailBody={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2647,25 +2577,27 @@ class DocusignClient(ConnectorClientBase):
         self,
         input: DynamicRecipients,
         account_id: str,
-        template_id: Optional[str],
+        template_id: str,
         merge_roles_on_draft: Optional[str] = None,
         email_subject: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create envelope using template with recipients and tabs
 
         Create envelope using template with recipients and tabs
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/envelopes/createWithRecipientFields"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/envelopes"
+            f"/createWithRecipientFields"
         )
         query_params = []
-        if template_id is not None:
-            value = str(template_id)
-            if isinstance(template_id, bool):
-                value = value.lower()
-            query_params.append(f"templateId={quote(value)}")
+        value = str(template_id)
+        if isinstance(template_id, bool):
+            value = value.lower()
+        query_params.append(f"templateId={quote(value)}")
         if merge_roles_on_draft is not None:
             value = str(merge_roles_on_draft)
             if isinstance(merge_roles_on_draft, bool):
@@ -2677,14 +2609,16 @@ class DocusignClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"emailSubject={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2698,23 +2632,28 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Send envelope
 
         Send an existing envelope.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/envelopes/{str(envelope_id)}"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/envelopes"
+            f"/{quote(str(envelope_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2728,36 +2667,37 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-        field_name: Optional[str],
-    ):
+        field_name: str,
+    ) -> dict[str, Any] | None:
         """
         Get envelope custom field info
 
         Get envelope custom field info.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/custom_fields"
         )
         query_params = []
-        if field_name is not None:
-            value = str(field_name)
-            if isinstance(field_name, bool):
-                value = value.lower()
-            query_params.append(f"fieldName={quote(value)}")
+        value = str(field_name)
+        if isinstance(field_name, bool):
+            value = value.lower()
+        query_params.append(f"fieldName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2771,54 +2711,52 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-        field_id: Optional[str],
-        field_type: Optional[str],
-        name: Optional[str],
-        value: Optional[str],
-    ):
+        field_id: str,
+        field_type: str,
+        name: str,
+        value: str,
+    ) -> dict[str, Any] | None:
         """
         Update envelope custom field
 
         Update value for the specified envelope custom field
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/custom_fields"
         )
         query_params = []
-        if field_id is not None:
-            value = str(field_id)
-            if isinstance(field_id, bool):
-                value = value.lower()
-            query_params.append(f"fieldId={quote(value)}")
-        if field_type is not None:
-            value = str(field_type)
-            if isinstance(field_type, bool):
-                value = value.lower()
-            query_params.append(f"fieldType={quote(value)}")
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
-        if value is not None:
-            value = str(value)
-            if isinstance(value, bool):
-                value = value.lower()
-            query_params.append(f"value={quote(value)}")
+        value = str(field_id)
+        if isinstance(field_id, bool):
+            value = value.lower()
+        query_params.append(f"fieldId={quote(value)}")
+        value = str(field_type)
+        if isinstance(field_type, bool):
+            value = value.lower()
+        query_params.append(f"fieldType={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
+        value = str(value)
+        if isinstance(value, bool):
+            value = value.lower()
+        query_params.append(f"value={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2833,43 +2771,43 @@ class DocusignClient(ConnectorClientBase):
         input: AdditionalURLForSenderView,
         account_id: str,
         envelope_id: str,
-        open_in: Optional[str],
-        return_url: Optional[str],
-    ):
+        open_in: str,
+        return_url: str,
+    ) -> dict[str, Any] | None:
         """
         Generate Embedded Sender URL
 
         Generate Embedded Sender URL
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/views"
             f"/sender"
         )
         query_params = []
-        if open_in is not None:
-            value = str(open_in)
-            if isinstance(open_in, bool):
-                value = value.lower()
-            query_params.append(f"openIn={quote(value)}")
-        if return_url is not None:
-            value = str(return_url)
-            if isinstance(return_url, bool):
-                value = value.lower()
-            query_params.append(f"returnUrl={quote(value)}")
+        value = str(open_in)
+        if isinstance(open_in, bool):
+            value = value.lower()
+        query_params.append(f"openIn={quote(value)}")
+        value = str(return_url)
+        if isinstance(return_url, bool):
+            value = value.lower()
+        query_params.append(f"returnUrl={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2883,27 +2821,29 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List recipients from an envelope
 
         List recipients from an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2917,42 +2857,42 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-        folder_id: Optional[str],
-        remove_recipient_from_envelope_recipient_id: Optional[str],
-    ):
+        folder_id: str,
+        remove_recipient_from_envelope_recipient_id: str,
+    ) -> dict[str, Any] | None:
         """
         Remove recipient from an envelope
 
         Remove recipient from an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
         )
         query_params = []
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if remove_recipient_from_envelope_recipient_id is not None:
-            value = str(remove_recipient_from_envelope_recipient_id)
-            if isinstance(remove_recipient_from_envelope_recipient_id, bool):
-                value = value.lower()
-            query_params.append(f"RemoveRecipientFromEnvelopeRecipientId={quote(value)}")
+        value = str(folder_id)
+        if isinstance(folder_id, bool):
+            value = value.lower()
+        query_params.append(f"folderId={quote(value)}")
+        value = str(remove_recipient_from_envelope_recipient_id)
+        if isinstance(remove_recipient_from_envelope_recipient_id, bool):
+            value = value.lower()
+        query_params.append(f"RemoveRecipientFromEnvelopeRecipientId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2970,18 +2910,18 @@ class DocusignClient(ConnectorClientBase):
         area_code: Optional[str] = None,
         phone_number: Optional[str] = None,
         recipient_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get recipient info from envelope
 
         Get recipient info from envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipientFields"
         )
         query_params = []
@@ -3006,14 +2946,16 @@ class DocusignClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"recipientId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3027,27 +2969,29 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get audit event list
 
         Get audit event list
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/audit_events"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3062,49 +3006,48 @@ class DocusignClient(ConnectorClientBase):
         input: AdditionalRecipientData,
         account_id: str,
         envelope_id: str,
-        recipient_id: Optional[str],
-        recipient_type: Optional[str],
-        verification_type: Optional[str],
-    ):
+        recipient_id: str,
+        recipient_type: str,
+        verification_type: str,
+    ) -> dict[str, Any] | None:
         """
         Add verification type to a recipient
 
         Add verification type to a recipient.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
             f"/addRecipientV2"
         )
         query_params = []
-        if recipient_id is not None:
-            value = str(recipient_id)
-            if isinstance(recipient_id, bool):
-                value = value.lower()
-            query_params.append(f"recipientId={quote(value)}")
-        if recipient_type is not None:
-            value = str(recipient_type)
-            if isinstance(recipient_type, bool):
-                value = value.lower()
-            query_params.append(f"recipientType={quote(value)}")
-        if verification_type is not None:
-            value = str(verification_type)
-            if isinstance(verification_type, bool):
-                value = value.lower()
-            query_params.append(f"verificationType={quote(value)}")
+        value = str(recipient_id)
+        if isinstance(recipient_id, bool):
+            value = value.lower()
+        query_params.append(f"recipientId={quote(value)}")
+        value = str(recipient_type)
+        if isinstance(recipient_type, bool):
+            value = value.lower()
+        query_params.append(f"recipientType={quote(value)}")
+        value = str(verification_type)
+        if isinstance(verification_type, bool):
+            value = value.lower()
+        query_params.append(f"verificationType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3119,8 +3062,8 @@ class DocusignClient(ConnectorClientBase):
         input: AdditionalRecipientParamsSchema,
         account_id: str,
         envelope_id: str,
-        recipient_id: Optional[str],
-        recipient_type: Optional[str],
+        recipient_id: str,
+        recipient_type: str,
         signature_type: Optional[str] = None,
         client_user_id: Optional[str] = None,
         embedded_recipient_start_u_r_l: Optional[str] = None,
@@ -3133,37 +3076,35 @@ class DocusignClient(ConnectorClientBase):
         country_code: Optional[str] = None,
         phone_number: Optional[str] = None,
         signing_group_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update recipient on an envelope
 
         Update recipient on an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
             f"/updateRecipient"
         )
         query_params = []
-        if recipient_id is not None:
-            value = str(recipient_id)
-            if isinstance(recipient_id, bool):
-                value = value.lower()
-            query_params.append(f"recipientId={quote(value)}")
+        value = str(recipient_id)
+        if isinstance(recipient_id, bool):
+            value = value.lower()
+        query_params.append(f"recipientId={quote(value)}")
         if signature_type is not None:
             value = str(signature_type)
             if isinstance(signature_type, bool):
                 value = value.lower()
             query_params.append(f"signatureType={quote(value)}")
-        if recipient_type is not None:
-            value = str(recipient_type)
-            if isinstance(recipient_type, bool):
-                value = value.lower()
-            query_params.append(f"recipientType={quote(value)}")
+        value = str(recipient_type)
+        if isinstance(recipient_type, bool):
+            value = value.lower()
+        query_params.append(f"recipientType={quote(value)}")
         if client_user_id is not None:
             value = str(client_user_id)
             if isinstance(client_user_id, bool):
@@ -3220,14 +3161,16 @@ class DocusignClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"signingGroupId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3242,42 +3185,43 @@ class DocusignClient(ConnectorClientBase):
         input: ApplyTemplatesToDocumentsInput,
         account_id: str,
         envelope_id: str,
-        template_id: Optional[str],
+        template_id: str,
         preserve_template_recipient: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Apply a template to documents
 
         Apply a template to documents
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/templates"
         )
         query_params = []
-        if template_id is not None:
-            value = str(template_id)
-            if isinstance(template_id, bool):
-                value = value.lower()
-            query_params.append(f"templateId={quote(value)}")
+        value = str(template_id)
+        if isinstance(template_id, bool):
+            value = value.lower()
+        query_params.append(f"templateId={quote(value)}")
         if preserve_template_recipient is not None:
             value = str(preserve_template_recipient)
             if isinstance(preserve_template_recipient, bool):
                 value = value.lower()
             query_params.append(f"preserve_template_recipient={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3286,32 +3230,33 @@ class DocusignClient(ConnectorClientBase):
         self,
         input: CreateBulkSendListInput,
         account_id: str,
-        name: Optional[str],
-    ):
+        name: str,
+    ) -> dict[str, Any] | None:
         """
         Create bulk send list
 
         Create bulk send list
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/bulk_send_lists"
+            f"/accounts/{quote(str(account_id), safe='')}/bulk_send_lists"
         )
         query_params = []
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3325,65 +3270,37 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         bulk_send_list_id: str,
-        envelope_or_template_id: Optional[str],
-    ):
+        envelope_or_template_id: str,
+    ) -> dict[str, Any] | None:
         """
         Bulk send envelope using template
 
         Bulk send envelope using template
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/bulk_send_lists"
-            f"/{str(bulk_send_list_id)}"
+            f"/{quote(str(bulk_send_list_id), safe='')}"
             f"/send"
         )
         query_params = []
-        if envelope_or_template_id is not None:
-            value = str(envelope_or_template_id)
-            if isinstance(envelope_or_template_id, bool):
-                value = value.lower()
-            query_params.append(f"envelopeOrTemplateId={quote(value)}")
+        value = str(envelope_or_template_id)
+        if isinstance(envelope_or_template_id, bool):
+            value = value.lower()
+        query_params.append(f"envelopeOrTemplateId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_organizations_async(
-        self,
-    ):
-        """
-        Get organizations
-
-        Get organizations
-        """
-        path = f"{self._connection_runtime_url}/Management/v2/organizations"
-        query_params = []
-        query_params.append(f"mode={quote('org_admin')}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3395,20 +3312,22 @@ class DocusignClient(ConnectorClientBase):
 
     async def get_login_accounts_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Login
 
         Login
         """
-        path = f"{self._connection_runtime_url}/oauth/userinfo"
+        request_url = f"{self._connection_runtime_url}/oauth/userinfo"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3417,192 +3336,29 @@ class DocusignClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
-
-    async def get_all_workflow_i_ds_async(
-        self,
-        account_id: str,
-    ):
-        """
-        Get All Workflow Ids
-
-        Get All workflow ids
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/all_identity_verification"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_custom_fields_async(
-        self,
-        account_id: str,
-    ):
-        """
-        Get custom fields from an account
-
-        Get custom fields from an account
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/custom_fields"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
 
     async def get_envelope_templates_async(
         self,
         account_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List templates
 
         List templates for a specific account.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/templates"
+            f"/accounts/{quote(str(account_id), safe='')}/templates"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_signing_groups_async(
-        self,
-        account_id: str,
-    ):
-        """
-        GetSigningGroups
-
-        List signing groups for a specific account.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/signing_groups"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_account_custom_fields_async(
-        self,
-        account_id: str,
-    ):
-        """
-        Get account custom fields
-
-        Get the custom fields for a specified account.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/account_custom_fields"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def get_folder_list_async(
-        self,
-        account_id: str,
-    ):
-        """
-        List folders
-
-        List folders for a specific account.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/folders"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_folder_envelope_list_async(
-        self,
-        account_id: str,
-        folder_id: str,
-    ):
-        """
-        List envelopes
-
-        List envelopes under a particular folder.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/folders/{str(folder_id)}"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3617,27 +3373,29 @@ class DocusignClient(ConnectorClientBase):
         input: AddDocumentsToEnvelopeInput,
         account_id: str,
         envelope_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add documents to an envelope
 
         Add documents to an envelope.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/documents"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3651,27 +3409,29 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         template_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List documents from a template
 
         List documents from a template
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/templates"
-            f"/{str(template_id)}"
+            f"/{quote(str(template_id), safe='')}"
             f"/documents"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3685,27 +3445,29 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List documents from an envelope
 
         List documents from an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/envelopeDocuments"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3719,101 +3481,37 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
-        document_name: Optional[str],
-    ):
+        document_name: str,
+    ) -> dict[str, Any] | None:
         """
         Get document info from envelope
 
         Get document info from envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/get_document_info"
         )
         query_params = []
-        if document_name is not None:
-            value = str(document_name)
-            if isinstance(document_name, bool):
-                value = value.lower()
-            query_params.append(f"documentName={quote(value)}")
+        value = str(document_name)
+        if isinstance(document_name, bool):
+            value = value.lower()
+        query_params.append(f"documentName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_dynamic_signers_async(
-        self,
-        account_id: str,
-        template_id: str,
-    ):
-        """
-        Get the signers of a template in dynamic schema format
-
-        Get the signers of a template in dynamic schema format.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/signers"
-            f"/accounts"
-            f"/{str(account_id)}"
-            f"/templates"
-            f"/{str(template_id)}"
-            f"/recipients"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_dynamic_recipients_async(
-        self,
-        account_id: str,
-        template_id: str,
-    ):
-        """
-        Get the signers of a template in dynamic schema format
-
-        Get the signers of a template in dynamic schema format.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/signers/accounts/{str(account_id)}/templates/{str(template_id)}"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3828,38 +3526,39 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         recipient_id: str,
-        tab_label: Optional[str],
-    ):
+        tab_label: str,
+    ) -> dict[str, Any] | None:
         """
         Get info for recipient tab
 
         Returns the value of the tab for the given recipient
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
-            f"/{str(recipient_id)}"
+            f"/{quote(str(recipient_id), safe='')}"
             f"/tabs"
         )
         query_params = []
-        if tab_label is not None:
-            value = str(tab_label)
-            if isinstance(tab_label, bool):
-                value = value.lower()
-            query_params.append(f"tabLabel={quote(value)}")
+        value = str(tab_label)
+        if isinstance(tab_label, bool):
+            value = value.lower()
+        query_params.append(f"tabLabel={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3875,38 +3574,39 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         recipient_id: str,
-        tab_type: Optional[str],
-    ):
+        tab_type: str,
+    ) -> dict[str, Any] | None:
         """
         Add tabs for a recipient on an envelope
 
         Add tabs for a recipient on an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
-            f"/{str(recipient_id)}"
+            f"/{quote(str(recipient_id), safe='')}"
             f"/tabs"
         )
         query_params = []
-        if tab_type is not None:
-            value = str(tab_type)
-            if isinstance(tab_type, bool):
-                value = value.lower()
-            query_params.append(f"tabType={quote(value)}")
+        value = str(tab_type)
+        if isinstance(tab_type, bool):
+            value = value.lower()
+        query_params.append(f"tabType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3922,29 +3622,31 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         recipient_id: str,
-    ):
+    ) -> None:
         """
         Update recipient tab values on an envelope
 
         Update recipient tab values on an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
-            f"/{str(recipient_id)}"
+            f"/{quote(str(recipient_id), safe='')}"
             f"/tabs"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3954,88 +3656,31 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         recipient_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get recipient tabs from envelope
 
         Get recipient tabs from envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
-            f"/{str(recipient_id)}"
+            f"/{quote(str(recipient_id), safe='')}"
             f"/recipientTabs"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_maestro_workflow_definitions_async(
-        self,
-        account_id: str,
-    ):
-        """
-        Get Maestro Workflow Definitions
-
-        Get Maestro Workflow Definitions
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/maestro-workflows"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_maestro_workflow_definition_async(
-        self,
-        account_id: str,
-        workflow_id: str,
-    ):
-        """
-        Get Maestro Workflow Definition
-
-        Get Maestro Workflow Definition
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/maestro-workflows/{str(workflow_id)}"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4050,278 +3695,37 @@ class DocusignClient(ConnectorClientBase):
         input: MaestroInputVariables,
         account_id: str,
         workflow_id: str,
-        instance_name: Optional[str],
-    ):
+        instance_name: str,
+    ) -> dict[str, Any] | None:
         """
         Start Docusign workflow
 
         Start Docusign workflow
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/maestro-workflows"
             f"/trigger"
-            f"/{str(workflow_id)}"
+            f"/{quote(str(workflow_id), safe='')}"
         )
         query_params = []
-        if instance_name is not None:
-            value = str(instance_name)
-            if isinstance(instance_name, bool):
-                value = value.lower()
-            query_params.append(f"instanceName={quote(value)}")
+        value = str(instance_name)
+        if isinstance(instance_name, bool):
+            value = value.lower()
+        query_params.append(f"instanceName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_tab_types_async(
-        self,
-    ):
-        """
-        StaticResponseForTabTypes
-
-        Get tab types.
-        """
-        path = f"{self._connection_runtime_url}/tab_types"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_recipient_types_async(
-        self,
-    ):
-        """
-        StaticResponseForRecipientTypes
-
-        Get recipient types.
-        """
-        path = f"{self._connection_runtime_url}/recipient_types"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_signature_types_async(
-        self,
-    ):
-        """
-        StaticResponseForSignatureTypes
-
-        Get signature types.
-        """
-        path = f"{self._connection_runtime_url}/signature_types"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_anchor_tab_schema_async(
-        self,
-        tab_type: Optional[str],
-    ):
-        """
-        StaticResponseForAnchorTabSchema
-
-        Get schema for a specific anchor tab.
-        """
-        path = f"{self._connection_runtime_url}/anchortab_schema"
-        query_params = []
-        if tab_type is not None:
-            value = str(tab_type)
-            if isinstance(tab_type, bool):
-                value = value.lower()
-            query_params.append(f"tabType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_composite_templates_async(
-        self,
-    ):
-        """
-        StaticResponseForCompositeTemplates
-
-        Get schema for a composite templates.
-        """
-        path = f"{self._connection_runtime_url}/composite_templates_schema"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_recipient_type_schema_async(
-        self,
-        recipient_type: Optional[str],
-        signature_type: Optional[str] = None,
-    ):
-        """
-        StaticResponseForRecipientTypeSchema
-
-        Get schema for a specific recipient type.
-        """
-        path = f"{self._connection_runtime_url}/recipienttype_schema"
-        query_params = []
-        if recipient_type is not None:
-            value = str(recipient_type)
-            if isinstance(recipient_type, bool):
-                value = value.lower()
-            query_params.append(f"recipientType={quote(value)}")
-        if signature_type is not None:
-            value = str(signature_type)
-            if isinstance(signature_type, bool):
-                value = value.lower()
-            query_params.append(f"signatureType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_embedded_sender_schema_async(
-        self,
-        return_url: Optional[str],
-    ):
-        """
-        StaticResponseForEmbeddedSenderSchema
-
-        Get schema for return URL.
-        """
-        path = f"{self._connection_runtime_url}/embeddedSender_schema"
-        query_params = []
-        if return_url is not None:
-            value = str(return_url)
-            if isinstance(return_url, bool):
-                value = value.lower()
-            query_params.append(f"returnUrl={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_verification_type_schema_async(
-        self,
-        verification_type: Optional[str],
-    ):
-        """
-        StaticResponseForVerificationTypeSchema
-
-        Get schema for a verification type.
-        """
-        path = f"{self._connection_runtime_url}/verificationtype_schema"
-        query_params = []
-        if verification_type is not None:
-            value = str(verification_type)
-            if isinstance(verification_type, bool):
-                value = value.lower()
-            query_params.append(f"verificationType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4334,46 +3738,23 @@ class DocusignClient(ConnectorClientBase):
     async def build_number_async(
         self,
         input: BuildNumberSchema,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Show build Number (For reference only. Do not include in a flow for
         execution)
 
         Identifier for the currently deployed build.
         """
-        path = f"{self._connection_runtime_url}/build_number"
+        request_url = f"{self._connection_runtime_url}/build_number"
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def static_response_for_build_number_schema_async(
-        self,
-    ):
-        """
-        StaticResponseForBuildNumberSchema
-
-        Get schema for a build number.
-        """
-        path = f"{self._connection_runtime_url}/build_number_schema"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4388,7 +3769,7 @@ class DocusignClient(ConnectorClientBase):
         input: AdditionalRecipientParamsSchema,
         account_id: str,
         envelope_id: str,
-        recipient_type: Optional[str],
+        recipient_type: str,
         client_user_id: Optional[str] = None,
         recipient_id: Optional[str] = None,
         embedded_recipient_start_u_r_l: Optional[str] = None,
@@ -4403,27 +3784,26 @@ class DocusignClient(ConnectorClientBase):
         signing_group_id: Optional[str] = None,
         signature_type: Optional[str] = None,
         workflow_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Add recipient to an envelope (V2)
+        Add recipient to an envelope
 
         Add recipient to an envelope.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/recipients"
             f"/addRecipientV2"
         )
         query_params = []
-        if recipient_type is not None:
-            value = str(recipient_type)
-            if isinstance(recipient_type, bool):
-                value = value.lower()
-            query_params.append(f"recipientType={quote(value)}")
+        value = str(recipient_type)
+        if isinstance(recipient_type, bool):
+            value = value.lower()
+        query_params.append(f"recipientType={quote(value)}")
         if client_user_id is not None:
             value = str(client_user_id)
             if isinstance(client_user_id, bool):
@@ -4495,14 +3875,16 @@ class DocusignClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"workflowId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4516,62 +3898,36 @@ class DocusignClient(ConnectorClientBase):
         self,
         input: CombinedEmailBodyAndCustomFields,
         account_id: str,
-        email_subject: Optional[str],
-    ):
+        email_subject: str,
+    ) -> dict[str, Any] | None:
         """
-        Create envelope (V2)
+        Create envelope
 
         Create a new blank envelope.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/envelopes/createBlankEnvelopeV2"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/envelopes"
+            f"/createBlankEnvelopeV2"
         )
         query_params = []
-        if email_subject is not None:
-            value = str(email_subject)
-            if isinstance(email_subject, bool):
-                value = value.lower()
-            query_params.append(f"emailSubject={quote(value)}")
+        value = str(email_subject)
+        if isinstance(email_subject, bool):
+            value = value.lower()
+        query_params.append(f"emailSubject={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def create_hook_envelope_async(
-        self,
-        input: CreateHookEnvelopeInput,
-        account_id: str,
-    ):
-        """
-        When a Docusign Connect event occurs (Account-level)
-
-        Triggers a new flow when an envelope status changes.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/accounts/{str(account_id)}/connectV4"
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4586,49 +3942,48 @@ class DocusignClient(ConnectorClientBase):
         input: DynamicSigningUrlFields,
         account_id: str,
         envelope_id: str,
-        is_in_person_signer: Optional[str],
-        authentication_method: Optional[str],
-        return_url: Optional[str],
-    ):
+        is_in_person_signer: str,
+        authentication_method: str,
+        return_url: str,
+    ) -> dict[str, Any] | None:
         """
-        Generate Embedded Signing URL (V2)
+        Generate Embedded Signing URL
 
-        Generate Embedded Signing URL (V2)
+        Generate Embedded Signing URL
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/views"
             f"/recipientV2"
         )
         query_params = []
-        if is_in_person_signer is not None:
-            value = str(is_in_person_signer)
-            if isinstance(is_in_person_signer, bool):
-                value = value.lower()
-            query_params.append(f"isInPersonSigner={quote(value)}")
-        if authentication_method is not None:
-            value = str(authentication_method)
-            if isinstance(authentication_method, bool):
-                value = value.lower()
-            query_params.append(f"authenticationMethod={quote(value)}")
-        if return_url is not None:
-            value = str(return_url)
-            if isinstance(return_url, bool):
-                value = value.lower()
-            query_params.append(f"returnUrl={quote(value)}")
+        value = str(is_in_person_signer)
+        if isinstance(is_in_person_signer, bool):
+            value = value.lower()
+        query_params.append(f"isInPersonSigner={quote(value)}")
+        value = str(authentication_method)
+        if isinstance(authentication_method, bool):
+            value = value.lower()
+        query_params.append(f"authenticationMethod={quote(value)}")
+        value = str(return_url)
+        if isinstance(return_url, bool):
+            value = value.lower()
+        query_params.append(f"returnUrl={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4644,20 +3999,20 @@ class DocusignClient(ConnectorClientBase):
         envelope_id: str,
         document_id: str,
         language: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get documents from an envelope
 
         Get documents from an envelope
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts"
-            f"/{str(account_id)}"
+            f"/{quote(str(account_id), safe='')}"
             f"/envelopes"
-            f"/{str(envelope_id)}"
+            f"/{quote(str(envelope_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/documentsDownload"
         )
         query_params = []
@@ -4667,14 +4022,538 @@ class DocusignClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"language={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_organizations_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get organizations
+
+        Get organizations
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/Management/v2/organizations"
+        )
+        query_params = []
+        query_params.append("mode=" + quote("org_admin"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_account_custom_fields_async(
+        self,
+        account_id: str,
+    ) -> None:
+        """
+        Get account custom fields
+
+        Get the custom fields for a specified account.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/account_custom_fields"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def get_folder_list_async(
+        self,
+        account_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        List folders
+
+        List folders for a specific account.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts/{quote(str(account_id), safe='')}/folders"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_folder_envelope_list_async(
+        self,
+        account_id: str,
+        folder_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        List envelopes
+
+        List envelopes under a particular folder.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/folders"
+            f"/{quote(str(folder_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def static_response_for_recipient_types_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForRecipientTypes
+
+        Get recipient types.
+        """
+        request_url = f"{self._connection_runtime_url}/recipient_types"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def static_response_for_signature_types_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForSignatureTypes
+
+        Get signature types.
+        """
+        request_url = f"{self._connection_runtime_url}/signature_types"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_signing_groups_async(
+        self,
+        account_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        GetSigningGroups
+
+        List signing groups for a specific account.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts/{quote(str(account_id), safe='')}/signing_groups"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def static_response_for_tab_types_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForTabTypes
+
+        Get tab types.
+        """
+        request_url = f"{self._connection_runtime_url}/tab_types"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_maestro_workflow_definitions_async(
+        self,
+        account_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get Maestro Workflow Definitions
+
+        Get Maestro Workflow Definitions
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts/{quote(str(account_id), safe='')}/maestro-workflows"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_all_workflow_i_ds_async(
+        self,
+        account_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get All Workflow Ids
+
+        Get All workflow ids
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/all_identity_verification"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_maestro_workflow_definition_async(
+        self,
+        account_id: str,
+        workflow_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get Maestro Workflow Definition
+
+        Get Maestro Workflow Definition
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/maestro-workflows"
+            f"/{quote(str(workflow_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_dynamic_signers_async(
+        self,
+        account_id: str,
+        template_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get the signers of a template in dynamic schema format
+
+        Get the signers of a template in dynamic schema format.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/signers"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/templates"
+            f"/{quote(str(template_id), safe='')}"
+            f"/recipients"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_dynamic_recipients_async(
+        self,
+        account_id: str,
+        template_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get the signers of a template in dynamic schema format
+
+        Get the signers of a template in dynamic schema format.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/signers"
+            f"/accounts"
+            f"/{quote(str(account_id), safe='')}"
+            f"/templates"
+            f"/{quote(str(template_id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def static_response_for_recipient_type_schema_async(
+        self,
+        recipient_type: str,
+        signature_type: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForRecipientTypeSchema
+
+        Get schema for a specific recipient type.
+        """
+        request_url = f"{self._connection_runtime_url}/recipienttype_schema"
+        query_params = []
+        value = str(recipient_type)
+        if isinstance(recipient_type, bool):
+            value = value.lower()
+        query_params.append(f"recipientType={quote(value)}")
+        if signature_type is not None:
+            value = str(signature_type)
+            if isinstance(signature_type, bool):
+                value = value.lower()
+            query_params.append(f"signatureType={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def static_response_for_verification_type_schema_async(
+        self,
+        verification_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForVerificationTypeSchema
+
+        Get schema for a verification type.
+        """
+        request_url = f"{self._connection_runtime_url}/verificationtype_schema"
+        query_params = []
+        value = str(verification_type)
+        if isinstance(verification_type, bool):
+            value = value.lower()
+        query_params.append(f"verificationType={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def static_response_for_embedded_sender_schema_async(
+        self,
+        return_url: str,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForEmbeddedSenderSchema
+
+        Get schema for return URL.
+        """
+        request_url = f"{self._connection_runtime_url}/embeddedSender_schema"
+        query_params = []
+        value = str(return_url)
+        if isinstance(return_url, bool):
+            value = value.lower()
+        query_params.append(f"returnUrl={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4686,35 +4565,37 @@ class DocusignClient(ConnectorClientBase):
 
     async def static_response_for_embedded_signing_schema_async(
         self,
-        return_url: Optional[str],
-        is_in_person_signer: Optional[str],
-    ):
+        return_url: str,
+        is_in_person_signer: str,
+    ) -> dict[str, Any] | None:
         """
         StaticResponseForEmbeddedSigningSchemaV2
 
         Get schema for return URL (V2).
         """
-        path = f"{self._connection_runtime_url}/embeddedSigning_schema_v2"
+        request_url = (
+            f"{self._connection_runtime_url}/embeddedSigning_schema_v2"
+        )
         query_params = []
-        if return_url is not None:
-            value = str(return_url)
-            if isinstance(return_url, bool):
-                value = value.lower()
-            query_params.append(f"returnUrl={quote(value)}")
-        if is_in_person_signer is not None:
-            value = str(is_in_person_signer)
-            if isinstance(is_in_person_signer, bool):
-                value = value.lower()
-            query_params.append(f"isInPersonSigner={quote(value)}")
+        value = str(return_url)
+        if isinstance(return_url, bool):
+            value = value.lower()
+        query_params.append(f"returnUrl={quote(value)}")
+        value = str(is_in_person_signer)
+        if isinstance(is_in_person_signer, bool):
+            value = value.lower()
+        query_params.append(f"isInPersonSigner={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4723,3 +4604,145 @@ class DocusignClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def static_response_for_build_number_schema_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForBuildNumberSchema
+
+        Get schema for a build number.
+        """
+        request_url = f"{self._connection_runtime_url}/build_number_schema"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_custom_fields_async(
+        self,
+        account_id: str,
+    ) -> None:
+        """
+        Get custom fields from an account
+
+        Get custom fields from an account
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/accounts/{quote(str(account_id), safe='')}/custom_fields"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+    async def static_response_for_anchor_tab_schema_async(
+        self,
+        tab_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForAnchorTabSchema
+
+        Get schema for a specific anchor tab.
+        """
+        request_url = f"{self._connection_runtime_url}/anchortab_schema"
+        query_params = []
+        value = str(tab_type)
+        if isinstance(tab_type, bool):
+            value = value.lower()
+        query_params.append(f"tabType={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def static_response_for_composite_templates_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        StaticResponseForCompositeTemplates
+
+        Get schema for a composite templates.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/composite_templates_schema"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "CreateOrgHookEnvelope": {
+        "operation_id": "CreateOrgHookEnvelope",
+        "path": "/{connectionId}/Management/v2/organizations/{organizationId}/connect",
+        "method": "post",
+        "required_parameters": ["organizationId", "body"],
+        "callback_payload_type": "CreateOrgHookEnvelopeResponse",
+    },
+    "CreateHookEnvelopeV4": {
+        "operation_id": "CreateHookEnvelopeV4",
+        "path": "/{connectionId}/accounts/{accountId}/connectV4",
+        "method": "post",
+        "required_parameters": ["accountId", "body"],
+        "callback_payload_type": "CreateHookEnvelopeResponse",
+    },
+}

@@ -5200,11 +5200,11 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
-            f"/{str(attachment_id)}"
+            f"/{quote(str(attachment_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5240,11 +5240,11 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
-            f"/{str(attachment_id)}"
+            f"/{quote(str(attachment_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5279,9 +5279,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
         )
 
@@ -5318,9 +5318,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
         )
 
@@ -5372,9 +5372,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/checkbox"
         )
@@ -5419,9 +5419,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/checkbox"
         )
@@ -5463,7 +5463,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/settings/contacts/{str(record_per_page)}/{str(page_no)}"
+            f"/v4"
+            f"/settings"
+            f"/contacts"
+            f"/{quote(str(record_per_page), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
         )
         query_params = []
         if sort_by is not None:
@@ -5509,7 +5513,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5542,7 +5550,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5577,9 +5589,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/certify"
         )
 
@@ -5615,9 +5627,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/details"
         )
 
@@ -5652,7 +5664,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5688,9 +5704,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/certify"
         )
 
@@ -5730,10 +5746,10 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
             f"/library"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5775,7 +5791,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents"
+            f"/v4/packages/{quote(str(package_id), safe='')}/documents"
         )
 
         response = await self.http_client.send_async(
@@ -5820,9 +5836,9 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4"
             f"/enterprise"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/workflow"
-            f"/{str(order)}"
+            f"/{quote(str(order), safe='')}"
             f"/authentication"
         )
 
@@ -5863,9 +5879,9 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4"
             f"/enterprise"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/workflow"
-            f"/{str(order)}"
+            f"/{quote(str(order), safe='')}"
             f"/authentication"
         )
 
@@ -5910,9 +5926,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/assign"
         )
@@ -5973,9 +5989,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/autoplace"
         )
@@ -6013,9 +6029,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
         )
 
@@ -6052,9 +6068,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
         )
 
@@ -6091,11 +6107,11 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
-            f"/{str(page_no)}"
+            f"/{quote(str(page_no), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -6128,7 +6144,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/move_to"
+            f"/v4/packages/{quote(str(package_id), safe='')}/move_to"
         )
 
         response = await self.http_client.send_async(
@@ -6172,9 +6188,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/initials"
         )
@@ -6212,9 +6228,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/initial"
         )
 
@@ -6257,9 +6273,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/initials"
         )
@@ -6314,9 +6330,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/in_person_signature"
         )
@@ -6361,9 +6377,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/in_person_signature"
         )
@@ -6432,7 +6448,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/approve"
+            f"/v4/packages/{quote(str(package_id), safe='')}/approve"
         )
 
         response = await self.http_client.send_async(
@@ -6465,7 +6481,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/decline"
+            f"/v4/packages/{quote(str(package_id), safe='')}/decline"
         )
 
         response = await self.http_client.send_async(
@@ -6501,7 +6517,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -6539,7 +6555,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
         query_params = []
         if document_ids is not None:
@@ -6596,7 +6612,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/finish"
+            f"/v4/packages/{quote(str(package_id), safe='')}/finish"
         )
 
         response = await self.http_client.send_async(
@@ -6629,7 +6645,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/gatekeeper/approve"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/gatekeeper"
+            f"/approve"
         )
 
         response = await self.http_client.send_async(
@@ -6662,7 +6682,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/gatekeeper/decline"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/gatekeeper"
+            f"/decline"
         )
 
         response = await self.http_client.send_async(
@@ -6718,9 +6742,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(document_status)}"
-            f"/{str(page_no)}"
-            f"/{str(record_per_page)}"
+            f"/{quote(str(document_status), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
+            f"/{quote(str(record_per_page), safe='')}"
         )
         query_params = []
         if package_name is not None:
@@ -6852,7 +6876,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/details"
+            f"/v4/packages/{quote(str(package_id), safe='')}/details"
         )
 
         response = await self.http_client.send_async(
@@ -6885,7 +6909,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -6923,7 +6947,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/submit"
+            f"/v4/packages/{quote(str(package_id), safe='')}/submit"
         )
 
         response = await self.http_client.send_async(
@@ -6959,9 +6983,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/qrcode"
         )
@@ -6999,9 +7023,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/qrcode"
         )
@@ -7051,9 +7075,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/radio"
         )
@@ -7098,9 +7122,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/radio"
         )
@@ -7140,7 +7164,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/settings/templates/{str(record_per_page)}/{str(page_no)}"
+            f"/v4"
+            f"/settings"
+            f"/templates"
+            f"/{quote(str(record_per_page), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
         )
         query_params = []
         if sort_by is not None:
@@ -7198,9 +7226,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/signature"
         )
@@ -7245,9 +7273,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/signature"
         )
@@ -7317,7 +7345,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -7366,7 +7394,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(bulk_action)}/status"
+            f"/v4/packages/{quote(str(bulk_action), safe='')}/status"
         )
 
         response = await self.http_client.send_async(
@@ -7431,7 +7459,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}/sign"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
+            f"/sign"
         )
 
         response = await self.http_client.send_async(
@@ -7470,7 +7503,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/enterprise/templates/{str(record_per_page)}/{str(page_no)}"
+            f"/v4"
+            f"/enterprise"
+            f"/templates"
+            f"/{quote(str(record_per_page), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
         )
         query_params = []
         if sort_by is not None:
@@ -7532,9 +7569,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/text"
         )
@@ -7578,9 +7615,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/text"
         )
@@ -7633,9 +7670,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/template"
         )
 
@@ -7668,7 +7705,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/report"
+            f"/v4/packages/{quote(str(package_id), safe='')}/report"
         )
 
         response = await self.http_client.send_async(
@@ -7700,7 +7737,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -7738,10 +7775,10 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/log"
-            f"/{str(page_no)}"
-            f"/{str(records_per_page)}"
+            f"/{quote(str(page_no), safe='')}"
+            f"/{quote(str(records_per_page), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -7779,7 +7816,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/reminders"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/reminders"
         )
 
         response = await self.http_client.send_async(
@@ -7811,7 +7853,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/users"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
 
         response = await self.http_client.send_async(
@@ -7849,7 +7891,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/complete"
+            f"/v4/packages/{quote(str(package_id), safe='')}/complete"
         )
 
         response = await self.http_client.send_async(
@@ -7883,7 +7925,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/permissions"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/permissions"
         )
 
         response = await self.http_client.send_async(
@@ -7922,7 +7969,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/permissions"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/permissions"
         )
 
         response = await self.http_client.send_async(
@@ -7955,7 +8007,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -7990,7 +8042,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -8026,7 +8078,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -8059,7 +8111,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/post_process"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/post_process"
         )
 
         response = await self.http_client.send_async(
@@ -8098,7 +8154,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/reminders"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/reminders"
         )
 
         response = await self.http_client.send_async(
@@ -8137,7 +8198,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/groups"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow/groups"
         )
 
         response = await self.http_client.send_async(
@@ -8178,7 +8239,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/placeholder"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/placeholder"
         )
 
         response = await self.http_client.send_async(
@@ -8237,7 +8302,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/users"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
 
         response = await self.http_client.send_async(
@@ -8270,7 +8335,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -8310,7 +8379,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/placeholder"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/placeholder"
         )
 
         response = await self.http_client.send_async(
@@ -8351,7 +8425,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/user"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/user"
         )
 
         response = await self.http_client.send_async(
@@ -8385,7 +8464,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/reorder"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/reorder"
         )
 
         response = await self.http_client.send_async(
@@ -8415,10 +8499,11 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to delete shared space.
         The availability of deleting shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
-        enable the `Manage Shared Space' option in Roles>Document Settings.
+        enable the 'Manage Shared Space' option in Roles>Document Settings.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v4/shared_spaces/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -8450,7 +8535,8 @@ class SigninghubClient(ConnectorClientBase):
         collaborator.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v4/shared_spaces/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -8481,10 +8567,11 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to update shared space.
         The availability of updating shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
-        enable the `Manage Shared Space' option in Roles>Document Settings.
+        enable the 'Manage Shared Space' option in Roles>Document Settings.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v4/shared_spaces/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
         response = await self.http_client.send_async(
