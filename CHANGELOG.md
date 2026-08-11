@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- `UploadDocument.document_id` now represents the natural `document_id` wire field. Callers that used it for `documentId` must use `document_id_2` instead.
 - Regenerated Azure Queues, DocuSign, Event Hubs, Microsoft Forms, SharePoint Online, and Microsoft Teams from the current managed connector contracts. Trigger routes are now exposed through `TRIGGER_OPERATIONS` instead of callable client methods, and deprecated DocuSign operations are no longer generated.
 - Azure Event Hubs batch sends now require `partition_key`. Word Online (Business) template and PDF operations now require `source`, `drive`, and `file` identifiers.
 
@@ -16,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Regenerated Azure Queues, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, Microsoft Forms, SharePoint Online, SigningHub, Microsoft Teams, and Word Online (Business) from the merged CodefulSdkGenerator contract updates.
 - Binary request bodies for SharePoint file and attachment uploads, SigningHub document uploads, and Microsoft Teams HTTP requests are forwarded as raw bytes with `application/octet-stream`.
+
+### Fixed
+
+- Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
 
 ### Added
 

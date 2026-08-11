@@ -9,6 +9,7 @@ import pytest
 from azure.connectors.signinghub import (
     SigninghubClient,
     CheckBoxFieldRequest,
+    UploadDocument,
     UpdateCheckBoxFieldRequest,
 )
 from azure.connectors.sdk import (
@@ -16,6 +17,7 @@ from azure.connectors.sdk import (
     ConnectorException,
     ManagedIdentityTokenProvider,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -92,6 +94,24 @@ class TestSigninghubClientLifecycle:
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
+
+
+class TestSigninghubModelSerialization:
+    """Tests for distinct SigningHub wire names that normalize alike."""
+
+    def test_upload_document_preserves_colliding_document_ids(self):
+        """Test that all three document ID wire names survive serialization."""
+        model = UploadDocument(
+            document_id_2=101,
+            documentid=102,
+            document_id=103,
+        )
+
+        payload = to_wire(model)
+
+        assert payload["documentId"] == 101
+        assert payload["documentid"] == 102
+        assert payload["document_id"] == 103
 
 
 class TestDocumentsUploadStreamAsync:

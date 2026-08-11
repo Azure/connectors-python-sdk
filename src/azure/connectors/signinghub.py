@@ -224,7 +224,7 @@ class UploadDocument:
     Response for Upload Document
     """
 
-    document_id: Optional[int] = field(
+    document_id_2: Optional[int] = field(
         default=None,
         metadata={"wire_name": "documentId"},
     )
@@ -236,6 +236,11 @@ class UploadDocument:
     """
     The document ID to be used later to share, download and get status of the
     document. will be removed later document_id will be used
+    """
+    document_id: Optional[int] = None
+    """
+    The document ID to be used later to share, download and get status of the
+    document.
     """
     document_name: Optional[str] = None
     """The name of the document."""
