@@ -243,14 +243,10 @@ class TestSendEvents:
         )
 
         mock_response = MockResponse(status=201, text="")
-        events_input = SendEventsInput(
-            additional_properties={
-                "events": [
-                    {"contentData": '{"msg": "Event 1"}'},
-                    {"contentData": '{"msg": "Event 2"}'}
-                ]
-            }
-        )
+        events_input: SendEventsInput = [
+            SendEvent(content_data='{"msg": "Event 1"}'),
+            SendEvent(content_data='{"msg": "Event 2"}'),
+        ]
 
         with patch.object(
             client._http_client,
@@ -278,7 +274,7 @@ class TestSendEvents:
         )
 
         mock_response = MockResponse(status=201, text="")
-        events_input = SendEventsInput(additional_properties={"events": []})
+        events_input: SendEventsInput = []
 
         with patch.object(
             client._http_client,
@@ -306,7 +302,7 @@ class TestSendEvents:
         )
 
         mock_response = MockResponse(status=413, text='{"error": "Batch too large"}')
-        events_input = SendEventsInput(additional_properties={"events": []})
+        events_input: SendEventsInput = []
 
         with patch.object(
             client._http_client,
@@ -347,18 +343,14 @@ class TestDataClasses:
         assert event.system_properties.sequence_number == 100
 
     def test_send_events_input(self):
-        """Test SendEventsInput dataclass creation."""
-        events_input = SendEventsInput(
-            additional_properties={
-                "events": [
-                    {"contentData": "event1"},
-                    {"contentData": "event2"}
-                ]
-            }
-        )
+        """Test SendEventsInput list creation."""
+        events_input: SendEventsInput = [
+            SendEvent(content_data="event1"),
+            SendEvent(content_data="event2"),
+        ]
 
-        assert events_input.additional_properties["events"] is not None
-        assert len(events_input.additional_properties["events"]) == 2
+        assert events_input[0].content_data == "event1"
+        assert len(events_input) == 2
 
     def test_object_entity(self):
         """Test ObjectEntity dataclass creation."""

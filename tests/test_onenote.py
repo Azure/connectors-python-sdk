@@ -27,6 +27,7 @@ from azure.connectors.onenote import (
     SectionListItem,
     SectionResponse,
     SectionGroupResponse,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -381,9 +382,7 @@ class TestCreatePageInSectionAsync:
             text='{"id": "page-new", "title": "New Page"}'
         )
 
-        page_input = CreatePageInSectionInput(
-            additional_properties={"title": "New Page"}
-        )
+        page_input = CreatePageInSectionInput("<html><body>New Page</body></html>")
 
         with patch.object(
             client._http_client,
@@ -419,9 +418,7 @@ class TestCreatePageInQuickNotesAsync:
             text='{"id": "page-quick", "title": "Quick Note"}'
         )
 
-        page_input = CreatePageInQuickNotesInput(
-            additional_properties={"title": "Quick Note"}
-        )
+        page_input = CreatePageInQuickNotesInput("<html><body>Quick Note</body></html>")
 
         with patch.object(
             client._http_client,
@@ -517,8 +514,7 @@ class TestGetPageContentAsync:
             result = await client.get_page_content_async(
                 notebook_key="nb-123",
                 section_id="sec-123",
-                page_id="page-123",
-                pre_authenticated="true"
+                page_id="page-123"
             )
 
             mock_send.assert_called_once()
@@ -547,8 +543,7 @@ class TestGetPageContentAsync:
                 await client.get_page_content_async(
                     notebook_key="nb-123",
                     section_id="sec-123",
-                    page_id="invalid",
-                    pre_authenticated=None
+                    page_id="invalid"
                 )
 
 
@@ -568,9 +563,9 @@ class TestUpdatePageContentAsync:
             text='{"result": "success"}'
         )
 
-        update_request = UpdatePageContentRequest(
-            additional_properties={"target": "body", "action": "append"}
-        )
+        update_request: UpdatePageContentRequest = [
+            {"target": "body", "action": "append"}
+        ]
 
         with patch.object(
             client._http_client,
@@ -591,114 +586,24 @@ class TestUpdatePageContentAsync:
             assert result is not None
 
 
-class TestOnNewSectionInNotebookAsync:
-    """Tests for on_new_section_in_notebook_async method."""
+class TestTriggerOperations:
+    """Tests for trigger registration metadata."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful trigger registration."""
-        client = OnenoteClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    @pytest.mark.parametrize(
+        ("operation_id", "required_parameters", "payload_type"),
+        [
+            ("OnNewSectionInNotebook", ["notebookKey"], "NewSectionResponse"),
+            ("OnNewSectionGroupInNotebook", ["notebookKey"], "NewSectionGroupResponse"),
+            ("OnNewPageInSection", ["notebookKey", "sectionId"], "NewPageResponse"),
+        ],
+    )
+    def test_registration_metadata(self, operation_id, required_parameters, payload_type):
+        """Test metadata needed to register each polling trigger."""
+        metadata = TRIGGER_OPERATIONS[operation_id]
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "sec-1", "name": "New Section"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_new_section_in_notebook_async(notebook_key="nb-123")
-
-            mock_send.assert_called_once()
-            assert result is not None
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = OnenoteClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=500, text='{"error": "Internal error"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException):
-                await client.on_new_section_in_notebook_async(notebook_key="nb-123")
-
-
-class TestOnNewSectionGroupInNotebookAsync:
-    """Tests for on_new_section_group_in_notebook_async method."""
-
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful trigger registration."""
-        client = OnenoteClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "grp-1", "name": "New Group"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_new_section_group_in_notebook_async(notebook_key="nb-123")
-
-            mock_send.assert_called_once()
-            assert result is not None
-
-
-class TestOnNewPageInSectionAsync:
-    """Tests for on_new_page_in_section_async method."""
-
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful trigger registration."""
-        client = OnenoteClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "page-1", "title": "New Page"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_new_page_in_section_async(
-                notebook_key="nb-123",
-                section_id="sec-123"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            path = call_args[0][1]
-            assert "notebookKey=nb-123" in path
-            assert "sectionId=sec-123" in path
-            assert result is not None
+        assert metadata["method"] == "get"
+        assert metadata["required_parameters"] == required_parameters
+        assert metadata["callback_payload_type"] == payload_type
 
 
 class TestDataclasses:
@@ -727,14 +632,12 @@ class TestDataclasses:
     def test_create_page_in_section_input_defaults(self):
         """Test CreatePageInSectionInput default values."""
         input_obj = CreatePageInSectionInput()
-        assert input_obj.additional_properties == {}
+        assert input_obj == ""
 
     def test_create_page_in_section_input_with_values(self):
         """Test CreatePageInSectionInput with values."""
-        input_obj = CreatePageInSectionInput(
-            additional_properties={"title": "New Page", "content": "<p>Hello</p>"}
-        )
-        assert input_obj.additional_properties["title"] == "New Page"
+        input_obj = CreatePageInSectionInput("<html><body>Hello</body></html>")
+        assert "Hello" in input_obj
 
     def test_page_defaults(self):
         """Test Page default values."""
@@ -762,7 +665,7 @@ class TestDataclasses:
     def test_create_page_in_quick_notes_input_defaults(self):
         """Test CreatePageInQuickNotesInput default values."""
         input_obj = CreatePageInQuickNotesInput()
-        assert input_obj.additional_properties == {}
+        assert input_obj == ""
 
     def test_notebook_defaults(self):
         """Test Notebook default values."""
@@ -808,8 +711,8 @@ class TestDataclasses:
 
     def test_update_page_content_request_defaults(self):
         """Test UpdatePageContentRequest default values."""
-        request = UpdatePageContentRequest()
-        assert request.additional_properties == {}
+        request: UpdatePageContentRequest = []
+        assert request == []
 
     def test_get_page_response_defaults(self):
         """Test GetPageResponse default values."""

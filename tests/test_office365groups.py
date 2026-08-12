@@ -12,11 +12,10 @@ from azure.connectors.office365groups import (
     ListGroupsResponse,
     CreateCalendarEventResponse,
     OnNewEventResponse,
-    HttpRequestInput,
     ObjectWithoutType,
     ListOwnedGroupsResponse,
     SensitivityLabelMetadata,
-    ListOwnedGroupsV2Response,
+    TRIGGER_OPERATIONS,
     UpdateCalendarEventRequest,
     UpdateCalendarEventHTMLRequest,
 )
@@ -572,7 +571,7 @@ class TestHttpRequestAsync:
             text='{"result": "success"}'
         )
 
-        request_input = HttpRequestInput(additional_properties={"method": "GET"})
+        request_input = b'{"method":"GET"}'
 
         with patch.object(
             client._http_client,
@@ -595,7 +594,7 @@ class TestHttpRequestAsync:
 
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
-        request_input = HttpRequestInput()
+        request_input = b"{}"
 
         with patch.object(
             client._http_client,
@@ -608,85 +607,27 @@ class TestHttpRequestAsync:
 
 
 class TestOnGroupMembershipChangeAsync:
-    """Tests for on_group_membership_change_async method."""
+    """Tests for OnGroupMembershipChange trigger metadata."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful trigger registration."""
-        client = Office365groupsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    def test_registration_metadata(self):
+        """Test trigger registration metadata."""
+        metadata = TRIGGER_OPERATIONS["OnGroupMembershipChange"]
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "change-1"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_group_membership_change_async(
-                group_id="group123"
-            )
-
-            mock_send.assert_called_once()
-            assert result is not None
-
-    @pytest.mark.asyncio
-    async def test_with_select_parameter(self, mock_token_provider):
-        """Test trigger with select parameter."""
-        client = Office365groupsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='{"value": []}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_group_membership_change_async(
-                group_id="group123",
-                select="id,displayName"
-            )
-
-            call_args = mock_send.call_args
-            assert "$select=" in call_args[0][1]
+        assert metadata["method"] == "get"
+        assert metadata["required_parameters"] == ["groupId"]
+        assert metadata["callback_payload_type"] == "OnGroupMemberAddedOrRemovedResponse"
 
 
 class TestOnNewEventAsync:
-    """Tests for on_new_event_async method."""
+    """Tests for OnNewEvent trigger metadata."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful new event trigger."""
-        client = Office365groupsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    def test_registration_metadata(self):
+        """Test trigger registration metadata."""
+        metadata = TRIGGER_OPERATIONS["OnNewEvent"]
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "event-1", "subject": "New Event"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_new_event_async(group_id="group-123")
-
-            mock_send.assert_called_once()
-            assert result is not None
+        assert metadata["method"] == "get"
+        assert metadata["required_parameters"] == ["groupId"]
+        assert metadata["callback_payload_type"] == "OnNewEventResponse"
 
 
 class TestListDeletedGroupsByOwnerAsync:
@@ -740,8 +681,8 @@ class TestDataclasses:
 
     def test_on_group_member_added_or_removed_response_defaults(self):
         """Test OnGroupMemberAddedOrRemovedResponse default values."""
-        response = OnGroupMemberAddedOrRemovedResponse()
-        assert response.additional_properties == {}
+        response: OnGroupMemberAddedOrRemovedResponse = []
+        assert response == []
 
     def test_list_groups_response_defaults(self):
         """Test ListGroupsResponse default values."""
@@ -772,21 +713,8 @@ class TestDataclasses:
 
     def test_on_new_event_response_defaults(self):
         """Test OnNewEventResponse default values."""
-        response = OnNewEventResponse()
-        assert response.additional_properties == {}
-
-    def test_http_request_input_defaults(self):
-        """Test HttpRequestInput default values."""
-        request = HttpRequestInput()
-        assert request.additional_properties == {}
-
-    def test_http_request_input_with_values(self):
-        """Test HttpRequestInput with values."""
-        request = HttpRequestInput(
-            additional_properties={"method": "GET", "uri": "/groups"}
-        )
-        assert request.additional_properties["method"] == "GET"
-        assert request.additional_properties["uri"] == "/groups"
+        response: OnNewEventResponse = []
+        assert response == []
 
     def test_object_without_type_defaults(self):
         """Test ObjectWithoutType default values."""
@@ -819,9 +747,9 @@ class TestDataclasses:
         assert metadata.name == "Confidential"
         assert metadata.is_enabled is True
 
-    def test_list_owned_groups_v2_response_defaults(self):
-        """Test ListOwnedGroupsV2Response default values."""
-        response = ListOwnedGroupsV2Response()
+    def test_list_owned_groups_response_versioned_defaults(self):
+        """Test consolidated ListOwnedGroupsResponse default values."""
+        response = ListOwnedGroupsResponse()
         assert response.context is None
         assert response.value is None
 

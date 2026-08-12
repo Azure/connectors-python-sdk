@@ -26,7 +26,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.pipedrive import (
-    AddDealRequestV2,
+    AddDealRequest,
     PipedriveClient,
 )
 
@@ -82,7 +82,7 @@ async def example_3_add_deal():
 
     async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            new_deal = AddDealRequestV2(
+            new_deal = AddDealRequest(
                 title="Sample deal",
             )
 

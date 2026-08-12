@@ -253,7 +253,7 @@ class TestUpdateIndexFieldsAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        request = UpdateIndexFieldsInput()
+        request: UpdateIndexFieldsInput = []
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(

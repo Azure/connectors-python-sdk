@@ -72,17 +72,7 @@ class CreateStoredProcedureResponse:
     """id"""
 
 
-@dataclass
-class ExecuteStoredProcedureInput:
-    """
-    Execute stored procedure
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ExecuteStoredProcedureInput = str
 
 
 @dataclass
@@ -152,7 +142,7 @@ class GetStoredProceduresResponse:
 @dataclass
 class QueryDocumentsResponse:
     """
-    Response for Query documents V5
+    Response for Query documents
     """
 
     value: Optional[List[ObjectWithoutType]] = None
@@ -332,17 +322,7 @@ class GetDatabaseResponse:
     ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
 
 
-@dataclass
-class GetCollectionResponse:
-    """
-    Definition: getCollectionResponse
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+GetCollectionResponse = List[Dict[str, Any]]
 
 
 @dataclass
@@ -559,7 +539,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Create stored procedure
 
-        Create stored procedure (V2).
+        Create stored procedure.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -600,7 +580,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Delete a document
 
-        Delete a document (V2).
+        Delete a document.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -637,7 +617,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Delete stored procedure
 
-        Delete stored procedure (V2).
+        Delete stored procedure.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -680,7 +660,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Execute stored procedure
 
-        Execute stored procedure in specified collection (V2).
+        Execute stored procedure in specified collection.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -724,7 +704,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Get a document
 
-        Get a document (V2).
+        Get a document.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -780,7 +760,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Get all documents
 
-        Get all documents (V3).
+        Get all documents.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -833,7 +813,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Get stored procedures
 
-        Get stored procedures in the specified collection (V2).
+        Get stored procedures in the specified collection.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -879,9 +859,9 @@ class DocumentdbClient(ConnectorClientBase):
         purview_account_name: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
-        Query documents V5
+        Query documents
 
-        Query documents (V5).
+        Query documents.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -966,7 +946,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Replace a document
 
-        Replace a document (V2).
+        Replace a document.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1009,7 +989,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Replace stored procedure
 
-        Replace stored procedure (V2).
+        Replace stored procedure.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1075,7 +1055,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Get all databases
 
-        Get all databases (V2).
+        Get all databases.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1107,7 +1087,7 @@ class DocumentdbClient(ConnectorClientBase):
         """
         Get all collections
 
-        Get all collections (V2).
+        Get all collections.
         """
         request_url = (
             f"{self._connection_runtime_url}"

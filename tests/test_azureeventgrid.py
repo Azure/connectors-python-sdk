@@ -233,7 +233,7 @@ class TestAzureeventgridTypeSerialization:
         event_types = EventTypesResponse()
         resource_names = ResourceNameResponse()
         event_request = EventRequest()
-        event_schema = EventSchema()
+        event_schema: EventSchema = []
         subscription = Subscription()
 
         assert subscription_list.value is None
@@ -241,7 +241,7 @@ class TestAzureeventgridTypeSerialization:
         assert event_types.value is None
         assert resource_names.value is None
         assert event_request.properties is None
-        assert event_schema.additional_properties == {}
+        assert event_schema == []
         assert subscription.subscription_id is None
 
 

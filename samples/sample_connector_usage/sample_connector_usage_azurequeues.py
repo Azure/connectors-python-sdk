@@ -28,10 +28,7 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.azurequeues import (
-    AzurequeuesClient,
-    PutMessageInput,
-)
+from azure.connectors.azurequeues import AzurequeuesClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/azurequeues/[connection-id]
@@ -128,12 +125,7 @@ async def example_3_put_message():
 
     async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            # Create the message input
-            message_input = PutMessageInput(
-                additional_properties={
-                    "message": "Hello from Azure Connectors SDK for Python!"
-                }
-            )
+            message_input = "Hello from Azure Connectors SDK for Python!"
 
             await client.put_message_async(
                 input=message_input,
@@ -142,7 +134,7 @@ async def example_3_put_message():
             )
 
             print(f"Message sent to queue '{QUEUE_NAME}':")
-            print(f"  Content: {message_input.additional_properties.get('message')}")
+            print(f"  Content: {message_input}")
 
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

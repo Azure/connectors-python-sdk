@@ -79,17 +79,7 @@ class DocGenFormFieldsResponse:
     """Docgen Fields"""
 
 
-@dataclass
-class UpdateDocgenFormFieldsInput:
-    """
-    Update document generation form fields from envelope
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+UpdateDocgenFormFieldsInput = List[Dict[str, Any]]
 
 
 @dataclass
@@ -154,17 +144,7 @@ class ListTabsResponse:
     """Tabs"""
 
 
-@dataclass
-class UpdateEnvelopePrefillTabsInput:
-    """
-    Update envelope prefill tabs
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+UpdateEnvelopePrefillTabsInput = List[Dict[str, Any]]
 
 
 @dataclass
@@ -595,17 +575,7 @@ class AddRecipientTabsResponse:
     """The tabs added to a recipient."""
 
 
-@dataclass
-class UpdateRecipientTabsValuesInput:
-    """
-    Update recipient tab values on an envelope
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+UpdateRecipientTabsValuesInput = List[Dict[str, Any]]
 
 
 @dataclass
@@ -702,17 +672,7 @@ class EmbeddedSigningResponse:
     """The url of embedded signing view."""
 
 
-@dataclass
-class GetDocumentsResponse:
-    """
-    Response for Get documents from an envelope
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+GetDocumentsResponse = str
 
 
 @dataclass
@@ -910,7 +870,7 @@ class StaticResponseForEmbeddedSenderSchemaResponse:
 @dataclass
 class StaticResponseForEmbeddedSigningSchemaResponse:
     """
-    Response for StaticResponseForEmbeddedSigningSchemaV2
+    Response for StaticResponseForEmbeddedSigningSchema
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -4569,9 +4529,9 @@ class DocusignClient(ConnectorClientBase):
         is_in_person_signer: str,
     ) -> dict[str, Any] | None:
         """
-        StaticResponseForEmbeddedSigningSchemaV2
+        StaticResponseForEmbeddedSigningSchema
 
-        Get schema for return URL (V2).
+        Get schema for return URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/embeddedSigning_schema_v2"

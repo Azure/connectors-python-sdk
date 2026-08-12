@@ -23,54 +23,80 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateSectionInNotebookResponse:
-    """Response for Create section in a notebook"""
+    """
+    Response for Create section in a notebook
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The OData context."""
-    created_by: Optional[str] = None
+    created_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdBy"},
+    )
     """This section created by name."""
-    created_time: Optional[str] = None
+    created_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdTime"},
+    )
     """This section created time."""
     id: Optional[str] = None
-    is_default: Optional[bool] = None
+    is_default: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isDefault"},
+    )
     """A flag to indication if this is the default section."""
-    last_modified_by: Optional[str] = None
+    last_modified_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedBy"},
+    )
     """Last modified by name."""
-    last_modified_time: Optional[str] = None
+    last_modified_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedTime"},
+    )
     """The time this section was last modified."""
     links: Optional[Dict[str, Any]] = None
     """OneNote client links."""
     name: Optional[str] = None
     """The name of the section."""
-    pages_url: Optional[str] = None
+    pages_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "pagesUrl"},
+    )
     """The url of the pages."""
     self: Optional[str] = None
     """The url to create section in notebook group."""
 
 
-@dataclass
-class CreatePageInSectionInput:
-    """Create page in a section"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+CreatePageInSectionInput = str
 
 
 @dataclass
 class Page:
-    """Response for Create page in a section"""
+    """
+    Response for Create page in a section
+    """
 
     title: Optional[str] = None
     """The title of the page."""
     links: Optional[Link] = None
-    content_url: Optional[str] = None
+    content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentUrl"},
+    )
     """A url to the page content."""
-    last_modified_time: Optional[str] = None
+    last_modified_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedTime"},
+    )
     """The last modified date of the page."""
-    created_time: Optional[str] = None
+    created_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdTime"},
+    )
     """The date the page was created."""
     id: Optional[str] = None
     """The unique identifier of the page."""
@@ -78,43 +104,49 @@ class Page:
 
 @dataclass
 class GetPagesInSectionResponse:
-    """Response for Get pages for a specific section"""
+    """
+    Response for Get pages for a specific section
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The OData context."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
 
-@dataclass
-class CreatePageInQuickNotesInput:
-    """Create a page in Quick Notes"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+CreatePageInQuickNotesInput = str
 
 
 @dataclass
 class Notebook:
-    """Response for Get recent notebooks"""
+    """
+    Response for Get recent notebooks
+    """
 
-    file_name: Optional[str] = None
-    key: Optional[str] = None
+    file_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileName"},
+    )
+    key: Optional[str] = field(default=None, metadata={"wire_name": "Key"})
 
 
 @dataclass
 class GetSectionsInNotebookResponse:
-    """Response for Get sections in notebook"""
+    """
+    Response for Get sections in notebook
+    """
 
     value: Optional[List[SectionListItem]] = None
 
 
 @dataclass
 class NewSectionResponse:
-    """Response for When a new section is created"""
+    """
+    Response for When a new section is created
+    """
 
     value: Optional[List[SectionResponse]] = None
     """An array of objects, each representing a specific section."""
@@ -122,7 +154,9 @@ class NewSectionResponse:
 
 @dataclass
 class NewSectionGroupResponse:
-    """Response for When a new section group is created"""
+    """
+    Response for When a new section group is created
+    """
 
     value: Optional[List[SectionGroupResponse]] = None
     """An array of objects, each representing a specific section group."""
@@ -130,7 +164,9 @@ class NewSectionGroupResponse:
 
 @dataclass
 class NewPageResponse:
-    """Response for When a new page is created in a section"""
+    """
+    Response for When a new page is created in a section
+    """
 
     value: Optional[List[Page]] = None
     """An array of objects, each representing a specific page."""
@@ -138,28 +174,27 @@ class NewPageResponse:
 
 @dataclass
 class CreateSectionRequest:
-    """Definition: CreateSectionRequest"""
+    """
+    Definition: CreateSectionRequest
+    """
 
     name: Optional[str] = None
     """The name of the new section."""
 
 
-@dataclass
-class UpdatePageContentRequest:
-    """Definition: UpdatePageContentRequest"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+UpdatePageContentRequest = List[Dict[str, Any]]
 
 
 @dataclass
 class GetPageResponse:
-    """Definition: GetPageResponse"""
+    """
+    Definition: GetPageResponse
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The OData context."""
     value: Optional[List[Dict[str, Any]]] = None
     """This page response value."""
@@ -167,7 +202,9 @@ class GetPageResponse:
 
 @dataclass
 class ParentNotebook:
-    """Definition: ParentNotebook"""
+    """
+    Definition: ParentNotebook
+    """
 
     id: Optional[str] = None
     """The unique identifier of the parent notebook."""
@@ -179,15 +216,25 @@ class ParentNotebook:
 
 @dataclass
 class Link:
-    """Definition: Link"""
+    """
+    Definition: Link
+    """
 
-    one_note_client_url: Optional[OneNoteClientUrl] = None
-    one_note_web_url: Optional[OneNoteWebUrl] = None
+    one_note_client_url: Optional[OneNoteClientUrl] = field(
+        default=None,
+        metadata={"wire_name": "oneNoteClientUrl"},
+    )
+    one_note_web_url: Optional[OneNoteWebUrl] = field(
+        default=None,
+        metadata={"wire_name": "oneNoteWebUrl"},
+    )
 
 
 @dataclass
 class OneNoteClientUrl:
-    """Definition: OneNoteClientUrl"""
+    """
+    Definition: OneNoteClientUrl
+    """
 
     href: Optional[str] = None
     """A link to the notebook using the OneNote windows client."""
@@ -195,7 +242,9 @@ class OneNoteClientUrl:
 
 @dataclass
 class OneNoteWebUrl:
-    """Definition: OneNoteWebUrl"""
+    """
+    Definition: OneNoteWebUrl
+    """
 
     href: Optional[str] = None
     """A link to the notebook using the OneNote web client."""
@@ -203,11 +252,16 @@ class OneNoteWebUrl:
 
 @dataclass
 class SectionListItem:
-    """Definition: SectionListItem"""
+    """
+    Definition: SectionListItem
+    """
 
     name: Optional[str] = None
     """The name of the section."""
-    pages_url: Optional[str] = None
+    pages_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "pagesUrl"},
+    )
     """The key used to reference this section; also a url to the pages."""
     id: Optional[str] = None
     """Unique identifier of the section."""
@@ -215,46 +269,86 @@ class SectionListItem:
 
 @dataclass
 class SectionResponse:
-    """Definition: SectionResponse"""
+    """
+    Definition: SectionResponse
+    """
 
-    created_by: Optional[str] = None
+    created_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdBy"},
+    )
     """The creator of the section."""
-    created_time: Optional[str] = None
+    created_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdTime"},
+    )
     """The creation date and time of the section."""
     id: Optional[str] = None
     """Unique identifier of the section."""
-    is_default: Optional[bool] = None
+    is_default: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isDefault"},
+    )
     """Indicates whether it is the default section."""
-    last_modified_by: Optional[str] = None
+    last_modified_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedBy"},
+    )
     """The user who last modified the section."""
-    last_modified_time: Optional[str] = None
+    last_modified_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedTime"},
+    )
     """The last modified date and time of the section."""
     name: Optional[str] = None
     """The name of the section."""
-    pages_url: Optional[str] = None
+    pages_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "pagesUrl"},
+    )
     """Url to the pages in this section."""
-    parent_notebook: Optional[ParentNotebook] = None
+    parent_notebook: Optional[ParentNotebook] = field(
+        default=None,
+        metadata={"wire_name": "parentNotebook"},
+    )
     self: Optional[str] = None
     """The url to this section."""
 
 
 @dataclass
 class SectionGroupResponse:
-    """Definition: SectionGroupResponse"""
+    """
+    Definition: SectionGroupResponse
+    """
 
-    created_time: Optional[str] = None
+    created_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdTime"},
+    )
     """The creation date and time of the section group."""
-    created_by: Optional[str] = None
+    created_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdBy"},
+    )
     """The creator of the section group."""
     id: Optional[str] = None
     """Unique identifier of the section group."""
-    last_modified_by: Optional[str] = None
+    last_modified_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedBy"},
+    )
     """The user who last modified the section group."""
-    last_modified_time: Optional[str] = None
+    last_modified_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedTime"},
+    )
     """The last modification date and time of the section group."""
     name: Optional[str] = None
     """The name of the section group."""
-    sections_url: Optional[str] = None
+    sections_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sectionsUrl"},
+    )
     """Url of the sections within this section group."""
     self: Optional[str] = None
     """The url to this section group."""
@@ -297,29 +391,32 @@ class OnenoteClient(ConnectorClientBase):
     async def create_section_in_notebook_async(
         self,
         input: CreateSectionRequest,
-        notebook_key: Optional[str],
-    ):
+        notebook_key: str,
+    ) -> dict[str, Any] | None:
         """
         Create section in a notebook
 
         Create section in a notebook.
         """
-        path = f"{self._connection_runtime_url}/notebooks/Dynamic/sections"
+        request_url = (
+            f"{self._connection_runtime_url}/notebooks/Dynamic/sections"
+        )
         query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
+        value = str(notebook_key)
+        if isinstance(notebook_key, bool):
+            value = value.lower()
+        query_params.append(f"notebookKey={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -332,35 +429,35 @@ class OnenoteClient(ConnectorClientBase):
     async def create_page_in_section_async(
         self,
         input: CreatePageInSectionInput,
-        notebook_key: Optional[str],
-        section_id: Optional[str],
-    ):
+        notebook_key: str,
+        section_id: str,
+    ) -> dict[str, Any] | None:
         """
         Create page in a section
 
         Create new page in a specified section.
         """
-        path = f"{self._connection_runtime_url}/sections/Dynamic/pages"
+        request_url = f"{self._connection_runtime_url}/sections/Dynamic/pages"
         query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if section_id is not None:
-            value = str(section_id)
-            if isinstance(section_id, bool):
-                value = value.lower()
-            query_params.append(f"sectionId={quote(value)}")
+        value = str(notebook_key)
+        if isinstance(notebook_key, bool):
+            value = value.lower()
+        query_params.append(f"notebookKey={quote(value)}")
+        value = str(section_id)
+        if isinstance(section_id, bool):
+            value = value.lower()
+        query_params.append(f"sectionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -372,35 +469,35 @@ class OnenoteClient(ConnectorClientBase):
 
     async def get_pages_in_section_async(
         self,
-        notebook_key: Optional[str],
-        section_id: Optional[str],
-    ):
+        notebook_key: str,
+        section_id: str,
+    ) -> dict[str, Any] | None:
         """
         Get pages for a specific section
 
         Get pages for a specific section.
         """
-        path = f"{self._connection_runtime_url}/sections/Dynamic/pages"
+        request_url = f"{self._connection_runtime_url}/sections/Dynamic/pages"
         query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if section_id is not None:
-            value = str(section_id)
-            if isinstance(section_id, bool):
-                value = value.lower()
-            query_params.append(f"sectionId={quote(value)}")
+        value = str(notebook_key)
+        if isinstance(notebook_key, bool):
+            value = value.lower()
+        query_params.append(f"notebookKey={quote(value)}")
+        value = str(section_id)
+        if isinstance(section_id, bool):
+            value = value.lower()
+        query_params.append(f"sectionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -413,20 +510,22 @@ class OnenoteClient(ConnectorClientBase):
     async def create_page_in_quick_notes_async(
         self,
         input: CreatePageInQuickNotesInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a page in Quick Notes
 
         Create a new page in the Quick Notes section.
         """
-        path = f"{self._connection_runtime_url}/pages"
+        request_url = f"{self._connection_runtime_url}/pages"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -438,88 +537,81 @@ class OnenoteClient(ConnectorClientBase):
 
     async def delete_page_async(
         self,
-        notebook_key: Optional[str],
-        section_id: Optional[str],
-        page_id: Optional[str],
-    ):
+        notebook_key: str,
+        section_id: str,
+        page_id: str,
+    ) -> None:
         """
         Delete a page
 
         Delete a page.
         """
-        path = f"{self._connection_runtime_url}/pages"
+        request_url = f"{self._connection_runtime_url}/pages"
         query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if section_id is not None:
-            value = str(section_id)
-            if isinstance(section_id, bool):
-                value = value.lower()
-            query_params.append(f"sectionId={quote(value)}")
-        if page_id is not None:
-            value = str(page_id)
-            if isinstance(page_id, bool):
-                value = value.lower()
-            query_params.append(f"pageId={quote(value)}")
+        value = str(notebook_key)
+        if isinstance(notebook_key, bool):
+            value = value.lower()
+        query_params.append(f"notebookKey={quote(value)}")
+        value = str(section_id)
+        if isinstance(section_id, bool):
+            value = value.lower()
+        query_params.append(f"sectionId={quote(value)}")
+        value = str(page_id)
+        if isinstance(page_id, bool):
+            value = value.lower()
+        query_params.append(f"pageId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def get_page_content_async(
         self,
-        notebook_key: Optional[str],
-        section_id: Optional[str],
-        page_id: Optional[str],
-        pre_authenticated: Optional[str],
-    ):
+        notebook_key: str,
+        section_id: str,
+        page_id: str,
+    ) -> dict[str, Any] | None:
         """
         Get page content
 
         Get HTML page content.
         """
-        path = f"{self._connection_runtime_url}/pages/Dynamic/content"
+        request_url = f"{self._connection_runtime_url}/pages/Dynamic/content"
         query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if section_id is not None:
-            value = str(section_id)
-            if isinstance(section_id, bool):
-                value = value.lower()
-            query_params.append(f"sectionId={quote(value)}")
-        if page_id is not None:
-            value = str(page_id)
-            if isinstance(page_id, bool):
-                value = value.lower()
-            query_params.append(f"pageId={quote(value)}")
-        if pre_authenticated is not None:
-            value = str(pre_authenticated)
-            if isinstance(pre_authenticated, bool):
-                value = value.lower()
-            query_params.append(f"preAuthenticated={quote(value)}")
+        query_params.append("preAuthenticated=" + quote("true"))
+        value = str(notebook_key)
+        if isinstance(notebook_key, bool):
+            value = value.lower()
+        query_params.append(f"notebookKey={quote(value)}")
+        value = str(section_id)
+        if isinstance(section_id, bool):
+            value = value.lower()
+        query_params.append(f"sectionId={quote(value)}")
+        value = str(page_id)
+        if isinstance(page_id, bool):
+            value = value.lower()
+        query_params.append(f"pageId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -532,41 +624,40 @@ class OnenoteClient(ConnectorClientBase):
     async def update_page_content_async(
         self,
         input: UpdatePageContentRequest,
-        notebook_key: Optional[str],
-        section_id: Optional[str],
-        page_id: Optional[str],
-    ):
+        notebook_key: str,
+        section_id: str,
+        page_id: str,
+    ) -> dict[str, Any] | None:
         """
         Update page content
 
         Update HTML page content.
         """
-        path = f"{self._connection_runtime_url}/pages/Dynamic/content"
+        request_url = f"{self._connection_runtime_url}/pages/Dynamic/content"
         query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if section_id is not None:
-            value = str(section_id)
-            if isinstance(section_id, bool):
-                value = value.lower()
-            query_params.append(f"sectionId={quote(value)}")
-        if page_id is not None:
-            value = str(page_id)
-            if isinstance(page_id, bool):
-                value = value.lower()
-            query_params.append(f"pageId={quote(value)}")
+        value = str(notebook_key)
+        if isinstance(notebook_key, bool):
+            value = value.lower()
+        query_params.append(f"notebookKey={quote(value)}")
+        value = str(section_id)
+        if isinstance(section_id, bool):
+            value = value.lower()
+        query_params.append(f"sectionId={quote(value)}")
+        value = str(page_id)
+        if isinstance(page_id, bool):
+            value = value.lower()
+        query_params.append(f"pageId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -578,20 +669,22 @@ class OnenoteClient(ConnectorClientBase):
 
     async def get_notebooks_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get recent notebooks
 
         Get recent notebooks.
         """
-        path = f"{self._connection_runtime_url}/notebooks"
+        request_url = f"{self._connection_runtime_url}/notebooks"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -603,103 +696,32 @@ class OnenoteClient(ConnectorClientBase):
 
     async def get_sections_in_notebook_async(
         self,
-        notebook_key: Optional[str],
-    ):
+        notebook_key: str,
+    ) -> dict[str, Any] | None:
         """
         Get sections in notebook
 
         Get sections in a specific notebook.
         """
-        path = f"{self._connection_runtime_url}/notebooks/notebookKey/sections"
-        query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_section_in_notebook_async(
-        self,
-        notebook_key: Optional[str],
-    ):
-        """
-        When a new section is created
-
-        Triggers a flow when a new section is added to a notebook.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger1/notebooks/notebookKey/sections"
+        request_url = (
+            f"{self._connection_runtime_url}/notebooks/notebookKey/sections"
         )
         query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
+        value = str(notebook_key)
+        if isinstance(notebook_key, bool):
+            value = value.lower()
+        query_params.append(f"notebookKey={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_section_group_in_notebook_async(
-        self,
-        notebook_key: Optional[str],
-    ):
-        """
-        When a new section group is created
-
-        Triggers a flow when a new section group is added to a notebook.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger2/notebooks/notebookKey/sectiongroups"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-        query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -709,44 +731,34 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def on_new_page_in_section_async(
-        self,
-        notebook_key: Optional[str],
-        section_id: Optional[str],
-    ):
-        """
-        When a new page is created in a section
 
-        Triggers a flow when a new page is added to a section.
-        """
-        path = (
-            f"{self._connection_runtime_url}/trigger3/sections/Dynamic/pages"
-        )
-        query_params = []
-        if notebook_key is not None:
-            value = str(notebook_key)
-            if isinstance(notebook_key, bool):
-                value = value.lower()
-            query_params.append(f"notebookKey={quote(value)}")
-        if section_id is not None:
-            value = str(section_id)
-            if isinstance(section_id, bool):
-                value = value.lower()
-            query_params.append(f"sectionId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewSectionInNotebook": {
+        "operation_id": "OnNewSectionInNotebook",
+        "path": "/{connectionId}/trigger1/notebooks/notebookKey/sections",
+        "method": "get",
+        "required_parameters": ["notebookKey"],
+        "callback_payload_type": "NewSectionResponse",
+    },
+    "OnNewSectionGroupInNotebook": {
+        "operation_id": "OnNewSectionGroupInNotebook",
+        "path": "/{connectionId}/trigger2/notebooks/notebookKey/sectiongroups",
+        "method": "get",
+        "required_parameters": ["notebookKey"],
+        "callback_payload_type": "NewSectionGroupResponse",
+    },
+    "OnNewPageInSection": {
+        "operation_id": "OnNewPageInSection",
+        "path": "/{connectionId}/trigger3/sections/Dynamic/pages",
+        "method": "get",
+        "required_parameters": ["notebookKey", "sectionId"],
+        "callback_payload_type": "NewPageResponse",
+    },
+}

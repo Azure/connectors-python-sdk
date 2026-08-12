@@ -33,30 +33,10 @@ class Messages:
     )
 
 
-@dataclass
-class QueueArray:
-    """
-    Response for List queues
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+QueueArray = List["QueueInfo"]
 
 
-@dataclass
-class PutMessageInput:
-    """
-    Put a message on a queue
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+PutMessageInput = str
 
 
 @dataclass

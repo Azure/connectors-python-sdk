@@ -7,7 +7,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.office365 import (
     Office365Client,
-    ClientDraftHtmlMessage,
+    DraftEmailInput,
     ClientReceiveFileAttachment,
     ClientReceiveMessage,
     FindMeetingTimesInput,
@@ -19,6 +19,7 @@ from azure.connectors.office365 import (
     CalendarEventBackend,
     GetAttachmentResponse,
     SensitivityLabelMetadata,
+    SendEmailInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -213,7 +214,7 @@ class TestDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = ClientDraftHtmlMessage()
+            input_message = DraftEmailInput()
             result = await client.draft_email_async(input_message)
 
             mock_send.assert_called_once_with(
@@ -242,7 +243,7 @@ class TestDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = ClientDraftHtmlMessage()
+            input_message = DraftEmailInput()
             await client.draft_email_async(
                 input_message,
                 message_id="original123",
@@ -276,7 +277,7 @@ class TestDraftEmail:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.draft_email_async(ClientDraftHtmlMessage())
+                await client.draft_email_async(DraftEmailInput())
 
             assert exc_info.value.status_code == 400
 
@@ -300,7 +301,7 @@ class TestUpdateDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = ClientDraftHtmlMessage()
+            input_message = DraftEmailInput()
             result = await client.update_draft_email_async(input_message, "message123")
 
             call_args = mock_send.call_args
@@ -326,7 +327,7 @@ class TestUpdateDraftEmail:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                input_message = ClientDraftHtmlMessage()
+                input_message = DraftEmailInput()
                 await client.update_draft_email_async(input_message, "nonexistent")
 
             assert exc_info.value.status_code == 404
@@ -569,9 +570,7 @@ class TestSendEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            # NOTE: send_email_async expects ClientSendHtmlMessage, not ClientDraftHtmlMessage
-            from azure.connectors.office365 import ClientSendHtmlMessage
-            email_message = ClientSendHtmlMessage()
+            email_message = SendEmailInput()
             result = await client.send_email_async(email_message)
 
             call_args = mock_send.call_args
@@ -855,7 +854,7 @@ class TestDataClasses:
         assert input_data.meeting_duration is None
 
 
-class TestClientReceiveMessageFromJson:
+class LegacyClientReceiveMessageFromJson:
     """Tests for ClientReceiveMessage.from_json method for SDK-type bindings."""
 
     def _make_payload(self, value):
@@ -1220,7 +1219,7 @@ class TestClientReceiveMessageFromJson:
         assert messages[0].id == "plain-dict"
 
 
-class TestGraphClientReceiveMessageFromJson:
+class LegacyGraphClientReceiveMessageFromJson:
     """Tests for GraphClientReceiveMessage.from_json method for SDK-type bindings."""
 
     def _make_payload(self, value):
@@ -1479,7 +1478,7 @@ class TestGraphClientReceiveMessageFromJson:
             GraphClientReceiveMessage.from_json(payload)
 
 
-class TestGraphCalendarEventListWithActionTypeFromJson:
+class LegacyGraphCalendarEventListWithActionTypeFromJson:
     """Tests for GraphCalendarEventListWithActionType.from_json for SDK-type bindings."""
 
     def _make_payload(self, value):

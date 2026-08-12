@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateEntityInput:
-    """Insert Entity (V2)"""
+    """
+    Insert Entity
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -34,68 +36,106 @@ class CreateEntityInput:
 
 @dataclass
 class InsertEntityResponse:
-    """Response for Insert Entity (V2)"""
+    """
+    Response for Insert Entity
+    """
 
-    odata_metadata: Optional[str] = None
+    odata_metadata: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "odata.metadata"},
+    )
     """Entity Metadata location"""
-    partition_key: Optional[str] = None
+    partition_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PartitionKey"},
+    )
     """Partition Key"""
-    row_key: Optional[str] = None
+    row_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RowKey"},
+    )
     """Row Key"""
-    additional_properties: Optional[str] = None
+    additional_properties: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "additionalProperties"},
+    )
     """Dynamic entity columns returned by the service."""
 
 
-@dataclass
-class CreateTableInput:
-    """Create table (V2)"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+CreateTableInput = str
 
 
 @dataclass
 class GetTableResponse:
-    """Response for Create table (V2)"""
+    """
+    Response for Create table
+    """
 
-    odata_id: Optional[str] = None
+    odata_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "odata.id"},
+    )
     """URL to the Table data"""
-    table_name: Optional[str] = None
+    table_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TableName"},
+    )
     """Table Name"""
 
 
 @dataclass
 class GetEntitiesResponse:
-    """Response for Get entities (V2)"""
+    """
+    Response for Get entities
+    """
 
-    odata_metadata: Optional[str] = None
+    odata_metadata: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "odata.metadata"},
+    )
     """Table Metadata location"""
-    value: Optional[List[Item]] = None
+    value: Optional[List[EntityItem]] = None
     """List of Entities"""
 
 
 @dataclass
 class GetEntityResponse:
-    """Response for Get entity (V2)"""
+    """
+    Response for Get entity
+    """
 
-    odata_metadata: Optional[str] = None
+    odata_metadata: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "odata.metadata"},
+    )
     """Table Metadata location"""
-    partition_key: Optional[str] = None
+    partition_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PartitionKey"},
+    )
     """Partition Key"""
-    row_key: Optional[str] = None
+    row_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RowKey"},
+    )
     """Row Key"""
-    additional_properties: Optional[str] = None
+    additional_properties: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "additionalProperties"},
+    )
     """Dynamic entity columns returned by the service."""
 
 
 @dataclass
 class GetTablesResponse:
-    """Response for List tables (V2)"""
+    """
+    Response for List tables
+    """
 
-    odata_metadata: Optional[str] = None
+    odata_metadata: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "odata.metadata"},
+    )
     """URL to the account metadata"""
     value: Optional[List[Dict[str, Any]]] = None
     """List of tables"""
@@ -103,7 +143,9 @@ class GetTablesResponse:
 
 @dataclass
 class InsertMergeEntityInput:
-    """Insert or Merge Entity (V2)"""
+    """
+    Insert or Merge Entity
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -114,7 +156,9 @@ class InsertMergeEntityInput:
 
 @dataclass
 class InsertReplaceEntityInput:
-    """Insert or Replace Entity (V2)"""
+    """
+    Insert or Replace Entity
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -125,7 +169,9 @@ class InsertReplaceEntityInput:
 
 @dataclass
 class MergeEntityInput:
-    """Merge Entity (V2)"""
+    """
+    Merge Entity
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -136,7 +182,9 @@ class MergeEntityInput:
 
 @dataclass
 class ReplaceEntityInput:
-    """Replace Entity (V2)"""
+    """
+    Replace Entity
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -147,7 +195,9 @@ class ReplaceEntityInput:
 
 @dataclass
 class StorageAccountList:
-    """Definition: StorageAccountList"""
+    """
+    Response for Get storage accounts
+    """
 
     value: Optional[List[StorageAccount]] = None
     """List of storage account names"""
@@ -155,23 +205,39 @@ class StorageAccountList:
 
 @dataclass
 class StorageAccount:
-    """Definition: StorageAccount"""
+    """
+    Definition: StorageAccount
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the storage account."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the storage account."""
 
 
 @dataclass
-class Item:
-    """Definition: Item"""
+class EntityItem:
+    """
+    Definition: Item
+    """
 
-    partition_key: Optional[str] = None
+    partition_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PartitionKey"},
+    )
     """Partition Key"""
-    row_key: Optional[str] = None
+    row_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RowKey"},
+    )
     """Row Key"""
-    additional_properties: Optional[str] = None
+    additional_properties: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "additionalProperties"},
+    )
     """Dynamic entity columns returned by the service."""
 
 
@@ -214,28 +280,30 @@ class AzuretablesClient(ConnectorClientBase):
         input: CreateEntityInput,
         storage_account_name: str,
         table_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Insert Entity (V2)
+        Insert Entity
 
         Operation to add an entity to a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
+            f"/{quote(str(table_name), safe='')}"
             f"/entities"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -249,23 +317,28 @@ class AzuretablesClient(ConnectorClientBase):
         self,
         input: CreateTableInput,
         storage_account_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Create table (V2)
+        Create table
 
         This operation adds a table to the storage account.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/storageAccounts/{str(storage_account_name)}/tables"
+            f"/v2"
+            f"/storageAccounts"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
+            f"/tables"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -281,29 +354,35 @@ class AzuretablesClient(ConnectorClientBase):
         table_name: str,
         partition_key: str,
         row_key: str,
-    ):
+    ) -> None:
         """
-        Delete Entity (V2)
+        Delete Entity
 
         Operation to delete an entity.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
+            f"/{quote(str(table_name), safe='')}"
             f"/entities"
-            f"/etag(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
+            f"/etag(PartitionKey='"
+            f"{quote(str(partition_key), safe='')}"
+            f"',RowKey='"
+            f"{quote(str(row_key), safe='')}"
+            f"')"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -312,27 +391,29 @@ class AzuretablesClient(ConnectorClientBase):
         self,
         storage_account_name: str,
         table_name: str,
-    ):
+    ) -> None:
         """
-        Delete a table (V2)
+        Delete a table
 
         Delete a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
+            f"/{quote(str(table_name), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -341,36 +422,24 @@ class AzuretablesClient(ConnectorClientBase):
         self,
         storage_account_name: str,
         table_name: str,
-        next_partition_key: Optional[str] = None,
-        next_row_key: Optional[str] = None,
         filter: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get entities (V2)
+        Get entities
 
         This operation queries the entities in a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
+            f"/{quote(str(table_name), safe='')}"
             f"/entities"
         )
         query_params = []
-        if next_partition_key is not None:
-            value = str(next_partition_key)
-            if isinstance(next_partition_key, bool):
-                value = value.lower()
-            query_params.append(f"NextPartitionKey={quote(value)}")
-        if next_row_key is not None:
-            value = str(next_row_key)
-            if isinstance(next_row_key, bool):
-                value = value.lower()
-            query_params.append(f"NextRowKey={quote(value)}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -382,14 +451,16 @@ class AzuretablesClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -406,21 +477,25 @@ class AzuretablesClient(ConnectorClientBase):
         partition_key: str,
         row_key: str,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get entity (V2)
+        Get entity
 
         This operation gets the entity in a table based on the partition and
         row key.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
-            f"/entities(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
+            f"/{quote(str(table_name), safe='')}"
+            f"/entities(PartitionKey='"
+            f"{quote(str(partition_key), safe='')}"
+            f"',RowKey='"
+            f"{quote(str(row_key), safe='')}"
+            f"')"
         )
         query_params = []
         if select is not None:
@@ -429,14 +504,16 @@ class AzuretablesClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -450,27 +527,29 @@ class AzuretablesClient(ConnectorClientBase):
         self,
         storage_account_name: str,
         table_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get a table (V2)
+        Get a table
 
         This operation gets the metadata of a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
+            f"/{quote(str(table_name), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -483,23 +562,28 @@ class AzuretablesClient(ConnectorClientBase):
     async def get_tables_async(
         self,
         storage_account_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        List tables (V2)
+        List tables
 
         List all the tables for your storage account.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/storageAccounts/{str(storage_account_name)}/tables"
+            f"/v2"
+            f"/storageAccounts"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
+            f"/tables"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -516,29 +600,35 @@ class AzuretablesClient(ConnectorClientBase):
         table_name: str,
         partition_key: str,
         row_key: str,
-    ):
+    ) -> None:
         """
-        Insert or Merge Entity (V2)
+        Insert or Merge Entity
 
         Operation to merge data with an entity in a table, creating a new
         entity if needed.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
-            f"/entities(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
+            f"/{quote(str(table_name), safe='')}"
+            f"/entities(PartitionKey='"
+            f"{quote(str(partition_key), safe='')}"
+            f"',RowKey='"
+            f"{quote(str(row_key), safe='')}"
+            f"')"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -550,29 +640,35 @@ class AzuretablesClient(ConnectorClientBase):
         table_name: str,
         partition_key: str,
         row_key: str,
-    ):
+    ) -> None:
         """
-        Insert or Replace Entity (V2)
+        Insert or Replace Entity
 
         Operation to replace an entity in a table, creating a new entity if
         needed.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
-            f"/entities(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
+            f"/{quote(str(table_name), safe='')}"
+            f"/entities(PartitionKey='"
+            f"{quote(str(partition_key), safe='')}"
+            f"',RowKey='"
+            f"{quote(str(row_key), safe='')}"
+            f"')"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -584,29 +680,35 @@ class AzuretablesClient(ConnectorClientBase):
         table_name: str,
         partition_key: str,
         row_key: str,
-    ):
+    ) -> None:
         """
-        Merge Entity (V2)
+        Merge Entity
 
         Operation to merge data with an entity in a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
+            f"/{quote(str(table_name), safe='')}"
             f"/entities"
-            f"/etag(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
+            f"/etag(PartitionKey='"
+            f"{quote(str(partition_key), safe='')}"
+            f"',RowKey='"
+            f"{quote(str(row_key), safe='')}"
+            f"')"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -618,29 +720,62 @@ class AzuretablesClient(ConnectorClientBase):
         table_name: str,
         partition_key: str,
         row_key: str,
-    ):
+    ) -> None:
         """
-        Replace Entity (V2)
+        Replace Entity
 
         Operation to replace an entity in a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table_name)}"
+            f"/{quote(str(table_name), safe='')}"
             f"/entities"
-            f"/etag(PartitionKey='{str(partition_key)}',RowKey='{str(row_key)}')"
+            f"/etag(PartitionKey='"
+            f"{quote(str(partition_key), safe='')}"
+            f"',RowKey='"
+            f"{quote(str(row_key), safe='')}"
+            f"')"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
+
+    async def get_storage_accounts_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get storage accounts
+
+        This operation list the user's Azure Storage Account.
+        """
+        request_url = f"{self._connection_runtime_url}/v2/GetStorageAccounts"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)

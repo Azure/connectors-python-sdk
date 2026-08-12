@@ -22,38 +22,10 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class SubscriptionListResult:
-    """Response for List subscriptions"""
-
-    value: Optional[List[Subscription]] = None
-    """The subscriptions ."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results. """
-
-
-@dataclass
-class ResourceGroupListResult:
-    """Response for List resource groups"""
-
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups. """
-    next_link: Optional[str] = None
-    """The URL to get the next set of results. """
-
-
-@dataclass
-class ResourceItemListResult:
-    """Response for List resources"""
-
-    value: Optional[List[ResourceItem]] = None
-    """The list of resource items. """
-    next_link: Optional[str] = None
-    """The URL to get the next set of results. """
-
-
-@dataclass
 class QueryDataInput:
-    """Run query and list results V2"""
+    """
+    Run query and list results
+    """
 
     query: Optional[str] = None
     """Specify the query you would like to run. """
@@ -65,36 +37,18 @@ class QueryDataInput:
 
 @dataclass
 class Table:
-    """Response for Run query and list results V2"""
-
-    value: Optional[List[RowV2]] = None
-
-
-@dataclass
-class QuerySchemaInput:
-    """Get query schema"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    Response for Run query and list results
     """
 
-
-@dataclass
-class ObjectEntity:
-    """Response for Get query schema"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Row]] = None
 
 
 @dataclass
 class VisualizeQueryInput:
-    """Run query and visualize results V2"""
+    """
+    Run query and visualize results
+    """
 
     query: Optional[str] = None
     """Specify the query you would like to run. """
@@ -106,23 +60,74 @@ class VisualizeQueryInput:
 
 @dataclass
 class VisualizeResults:
-    """Response for Run query and visualize results V2"""
+    """
+    Response for Run query and visualize results
+    """
 
     body: Optional[str] = None
-    attachment_content: Optional[str] = None
-    attachment_name: Optional[str] = None
+    attachment_content: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "attachmentContent"},
+    )
+    attachment_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "attachmentName"},
+    )
 
 
 @dataclass
-class TableV2:
-    """Definition: TableV2"""
+class SubscriptionListResult:
+    """
+    Response for List subscriptions
+    """
 
-    value: Optional[List[RowV2]] = None
+    value: Optional[List[Subscription]] = None
+    """The subscriptions ."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results. """
 
 
 @dataclass
-class RowV2:
-    """Definition: RowV2"""
+class ResourceGroupListResult:
+    """
+    Response for List resource groups
+    """
+
+    value: Optional[List[ResourceGroup]] = None
+    """The list of resource groups. """
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results. """
+
+
+@dataclass
+class ResourceItemListResult:
+    """
+    Response for List resources
+    """
+
+    value: Optional[List[ResourceItem]] = None
+    """The list of resource items. """
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results. """
+
+
+QuerySchemaInput = str
+
+
+@dataclass
+class ObjectEntity:
+    """
+    Response for Get query schema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -133,7 +138,9 @@ class RowV2:
 
 @dataclass
 class Row:
-    """Definition: Row"""
+    """
+    Definition: RowV2
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -144,16 +151,24 @@ class Row:
 
 @dataclass
 class Subscription:
-    """Definition: Subscription"""
+    """
+    Definition: Subscription
+    """
 
     id: Optional[str] = None
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """The subscription Id. """
-    authorization_source: Optional[str] = None
+    authorization_source: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "authorizationSource"},
+    )
     """
     The authorization source of the request. Valid values are one or more
     combinations of Legacy, RoleBased, Bypassed, Direct and Management. For
@@ -163,7 +178,9 @@ class Subscription:
 
 @dataclass
 class ResourceGroup:
-    """Definition: ResourceGroup"""
+    """
+    Definition: ResourceGroup
+    """
 
     id: Optional[str] = None
     """
@@ -175,7 +192,9 @@ class ResourceGroup:
 
 @dataclass
 class ResourceItem:
-    """Definition: ResourceItem"""
+    """
+    Definition: ResourceItem
+    """
 
     id: Optional[str] = None
     """The ID of the resource. """
@@ -185,27 +204,39 @@ class ResourceItem:
 
 @dataclass
 class TimeRangeTypesListResult:
-    """Definition: TimeRangeTypesListResult"""
+    """
+    Definition: TimeRangeTypesListResult
+    """
 
     value: Optional[List[TimeRangeItem]] = None
-    """The list of time range types (Relative/Absolute/SetInQuery). """
-    next_link: Optional[str] = None
+    """The list of time range types (Relative\\Absolute\\SetInQuery). """
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results. """
 
 
 @dataclass
 class TimeRangeListResult:
-    """Definition: TimeRangeListResult"""
+    """
+    Definition: TimeRangeListResult
+    """
 
     value: Optional[List[TimeRangeItem]] = None
     """The list of time range. """
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results. """
 
 
 @dataclass
 class TimeRangeItem:
-    """Definition: TimeRangeItem"""
+    """
+    Definition: TimeRangeItem
+    """
 
     id: Optional[int] = None
     """The ID of the item. """
@@ -247,209 +278,49 @@ class AzuremonitorlogsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "azuremonitorlogs"
 
-    async def list_subscriptions_async(
-        self,
-    ):
-        """
-        List subscriptions
-
-        Gets a list of all the subscriptions to which the principal has access.
-        """
-        path = f"{self._connection_runtime_url}/listSubscriptions"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_resource_groups_async(
-        self,
-        subscriptions: Optional[str],
-    ):
-        """
-        List resource groups
-
-        Lists all the resource groups within the subscription.
-        """
-        path = f"{self._connection_runtime_url}/listResourceGroups"
-        query_params = []
-        if subscriptions is not None:
-            value = str(subscriptions)
-            if isinstance(subscriptions, bool):
-                value = value.lower()
-            query_params.append(f"subscriptions={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_resources_async(
-        self,
-        subscriptions: Optional[str],
-        resourcegroups: Optional[str],
-        resourcetype: Optional[str],
-    ):
-        """
-        List resources
-
-        Lists all the resource groups within the resource group.
-        """
-        path = f"{self._connection_runtime_url}/listResources"
-        query_params = []
-        if subscriptions is not None:
-            value = str(subscriptions)
-            if isinstance(subscriptions, bool):
-                value = value.lower()
-            query_params.append(f"subscriptions={quote(value)}")
-        if resourcegroups is not None:
-            value = str(resourcegroups)
-            if isinstance(resourcegroups, bool):
-                value = value.lower()
-            query_params.append(f"resourcegroups={quote(value)}")
-        if resourcetype is not None:
-            value = str(resourcetype)
-            if isinstance(resourcetype, bool):
-                value = value.lower()
-            query_params.append(f"resourcetype={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def query_data_async(
         self,
         input: QueryDataInput,
-        subscriptions: Optional[str],
-        resourcegroups: Optional[str],
-        resourcetype: Optional[str],
-        resourcename: Optional[str],
-    ):
+        subscriptions: str,
+        resourcegroups: str,
+        resourcetype: str,
+        resourcename: str,
+    ) -> dict[str, Any] | None:
         """
-        Run query and list results V2
+        Run query and list results
 
         Returns each row as its own object. Use this action when you want to
         work with each row separately in the rest of the workflow.
         """
-        path = f"{self._connection_runtime_url}/queryDataV2"
+        request_url = f"{self._connection_runtime_url}/queryDataV2"
         query_params = []
-        if subscriptions is not None:
-            value = str(subscriptions)
-            if isinstance(subscriptions, bool):
-                value = value.lower()
-            query_params.append(f"subscriptions={quote(value)}")
-        if resourcegroups is not None:
-            value = str(resourcegroups)
-            if isinstance(resourcegroups, bool):
-                value = value.lower()
-            query_params.append(f"resourcegroups={quote(value)}")
-        if resourcetype is not None:
-            value = str(resourcetype)
-            if isinstance(resourcetype, bool):
-                value = value.lower()
-            query_params.append(f"resourcetype={quote(value)}")
-        if resourcename is not None:
-            value = str(resourcename)
-            if isinstance(resourcename, bool):
-                value = value.lower()
-            query_params.append(f"resourcename={quote(value)}")
+        value = str(subscriptions)
+        if isinstance(subscriptions, bool):
+            value = value.lower()
+        query_params.append(f"subscriptions={quote(value)}")
+        value = str(resourcegroups)
+        if isinstance(resourcegroups, bool):
+            value = value.lower()
+        query_params.append(f"resourcegroups={quote(value)}")
+        value = str(resourcetype)
+        if isinstance(resourcetype, bool):
+            value = value.lower()
+        query_params.append(f"resourcetype={quote(value)}")
+        value = str(resourcename)
+        if isinstance(resourcename, bool):
+            value = value.lower()
+        query_params.append(f"resourcename={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def query_schema_async(
-        self,
-        input: QuerySchemaInput,
-        subscriptions: Optional[str],
-        resourcegroups: Optional[str],
-        resourcetype: Optional[str],
-        resourcename: Optional[str],
-    ):
-        """
-        Get query schema
-
-        Gets the schema for a specific query.
-        """
-        path = f"{self._connection_runtime_url}/querySchemaV2"
-        query_params = []
-        if subscriptions is not None:
-            value = str(subscriptions)
-            if isinstance(subscriptions, bool):
-                value = value.lower()
-            query_params.append(f"subscriptions={quote(value)}")
-        if resourcegroups is not None:
-            value = str(resourcegroups)
-            if isinstance(resourcegroups, bool):
-                value = value.lower()
-            query_params.append(f"resourcegroups={quote(value)}")
-        if resourcetype is not None:
-            value = str(resourcetype)
-            if isinstance(resourcetype, bool):
-                value = value.lower()
-            query_params.append(f"resourcetype={quote(value)}")
-        if resourcename is not None:
-            value = str(resourcename)
-            if isinstance(resourcename, bool):
-                value = value.lower()
-            query_params.append(f"resourcename={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -462,55 +333,247 @@ class AzuremonitorlogsClient(ConnectorClientBase):
     async def visualize_query_async(
         self,
         input: VisualizeQueryInput,
-        subscriptions: Optional[str],
-        resourcegroups: Optional[str],
-        resourcetype: Optional[str],
-        resourcename: Optional[str],
-        vis_type: Optional[str],
-    ):
+        subscriptions: str,
+        resourcegroups: str,
+        resourcetype: str,
+        resourcename: str,
+        vis_type: str,
+    ) -> dict[str, Any] | None:
         """
-        Run query and visualize results V2
+        Run query and visualize results
 
         Returns all rows in the result set as a single formatted object. Use
         this action when you want to use the result set together in the rest of
         the workflow.
         """
-        path = f"{self._connection_runtime_url}/visualizeQueryV2"
+        request_url = f"{self._connection_runtime_url}/visualizeQueryV2"
         query_params = []
-        if subscriptions is not None:
-            value = str(subscriptions)
-            if isinstance(subscriptions, bool):
-                value = value.lower()
-            query_params.append(f"subscriptions={quote(value)}")
-        if resourcegroups is not None:
-            value = str(resourcegroups)
-            if isinstance(resourcegroups, bool):
-                value = value.lower()
-            query_params.append(f"resourcegroups={quote(value)}")
-        if resourcetype is not None:
-            value = str(resourcetype)
-            if isinstance(resourcetype, bool):
-                value = value.lower()
-            query_params.append(f"resourcetype={quote(value)}")
-        if resourcename is not None:
-            value = str(resourcename)
-            if isinstance(resourcename, bool):
-                value = value.lower()
-            query_params.append(f"resourcename={quote(value)}")
-        if vis_type is not None:
-            value = str(vis_type)
-            if isinstance(vis_type, bool):
-                value = value.lower()
-            query_params.append(f"visType={quote(value)}")
+        value = str(subscriptions)
+        if isinstance(subscriptions, bool):
+            value = value.lower()
+        query_params.append(f"subscriptions={quote(value)}")
+        value = str(resourcegroups)
+        if isinstance(resourcegroups, bool):
+            value = value.lower()
+        query_params.append(f"resourcegroups={quote(value)}")
+        value = str(resourcetype)
+        if isinstance(resourcetype, bool):
+            value = value.lower()
+        query_params.append(f"resourcetype={quote(value)}")
+        value = str(resourcename)
+        if isinstance(resourcename, bool):
+            value = value.lower()
+        query_params.append(f"resourcename={quote(value)}")
+        value = str(vis_type)
+        if isinstance(vis_type, bool):
+            value = value.lower()
+        query_params.append(f"visType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_subscriptions_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        List subscriptions
+
+        Gets a list of all the subscriptions to which the principal has access.
+        """
+        request_url = f"{self._connection_runtime_url}/listSubscriptions"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_resource_groups_async(
+        self,
+        subscriptions: str,
+    ) -> dict[str, Any] | None:
+        """
+        List resource groups
+
+        Lists all the resource groups within the subscription.
+        """
+        request_url = f"{self._connection_runtime_url}/listResourceGroups"
+        query_params = []
+        value = str(subscriptions)
+        if isinstance(subscriptions, bool):
+            value = value.lower()
+        query_params.append(f"subscriptions={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_resources_async(
+        self,
+        subscriptions: str,
+        resourcegroups: str,
+        resourcetype: str,
+    ) -> dict[str, Any] | None:
+        """
+        List resources
+
+        Lists all the resource groups within the resource group.
+        """
+        request_url = f"{self._connection_runtime_url}/listResources"
+        query_params = []
+        value = str(subscriptions)
+        if isinstance(subscriptions, bool):
+            value = value.lower()
+        query_params.append(f"subscriptions={quote(value)}")
+        value = str(resourcegroups)
+        if isinstance(resourcegroups, bool):
+            value = value.lower()
+        query_params.append(f"resourcegroups={quote(value)}")
+        value = str(resourcetype)
+        if isinstance(resourcetype, bool):
+            value = value.lower()
+        query_params.append(f"resourcetype={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def query_schema_async(
+        self,
+        input: QuerySchemaInput,
+        subscriptions: str,
+        resourcegroups: str,
+        resourcetype: str,
+        resourcename: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get query schema
+
+        Gets the schema for a specific query.
+        """
+        request_url = f"{self._connection_runtime_url}/querySchemaV2"
+        query_params = []
+        value = str(subscriptions)
+        if isinstance(subscriptions, bool):
+            value = value.lower()
+        query_params.append(f"subscriptions={quote(value)}")
+        value = str(resourcegroups)
+        if isinstance(resourcegroups, bool):
+            value = value.lower()
+        query_params.append(f"resourcegroups={quote(value)}")
+        value = str(resourcetype)
+        if isinstance(resourcetype, bool):
+            value = value.lower()
+        query_params.append(f"resourcetype={quote(value)}")
+        value = str(resourcename)
+        if isinstance(resourcename, bool):
+            value = value.lower()
+        query_params.append(f"resourcename={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_time_range_selection_control_async(
+        self,
+        timerangetype: str,
+    ) -> dict[str, Any] | None:
+        """
+        Returns the control schema according to to the given time range type
+
+        Returns the Relative\\Absolute\\Set in query time range control.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/getTimeRangeSelectionControl"
+        )
+        query_params = []
+        value = str(timerangetype)
+        if isinstance(timerangetype, bool):
+            value = value.lower()
+        query_params.append(f"timerangetype={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )

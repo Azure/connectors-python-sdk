@@ -65,30 +65,10 @@ class GetFileSchemaResponse:
     """
 
 
-@dataclass
-class SensitivityLabelMetadata:
-    """
-    Definition: SensitivityLabelMetadata
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+SensitivityLabelMetadata = List[Dict[str, Any]]
 
 
-@dataclass
-class GetFiles:
-    """
-    Definition: GetFiles
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+GetFiles = List[Dict[str, Any]]
 
 
 @dataclass

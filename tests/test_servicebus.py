@@ -10,6 +10,7 @@ from azure.connectors.servicebus import (
     ServiceBusMessage,
     SendMessagesInput,
     CreateTopicSubscriptionInput,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -167,7 +168,7 @@ class TestSendMessages:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            input_data = SendMessagesInput()
+            input_data: SendMessagesInput = [ServiceBusMessage(content_data="message")]
             await client.send_messages_async(input=input_data, entity_name="myqueue")
 
             mock_send.assert_called_once()
@@ -188,153 +189,35 @@ class TestSendMessages:
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                input_data = SendMessagesInput()
+                input_data: SendMessagesInput = []
                 await client.send_messages_async(input=input_data, entity_name="myqueue")
 
             assert exc_info.value.status_code == 400
 
 
-class TestGetMessageFromQueue:
-    """Tests for get_message_from_queue_async method."""
+class TestTriggerOperations:
+    """Tests for receive trigger registration metadata."""
 
-    @pytest.mark.asyncio
-    async def test_get_message_success(self, mock_token_provider):
-        """Test successful message retrieval from queue."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    @pytest.mark.parametrize(
+        ("operation_id", "required_parameters"),
+        [
+            ("GetMessageFromQueue", ["queueName"]),
+            ("GetNewMessageFromQueueWithPeekLock", ["queueName"]),
+            ("GetMessagesFromQueue", ["queueName"]),
+            ("GetNewMessagesFromQueueWithPeekLock", ["queueName"]),
+            ("GetMessageFromTopic", ["topicName", "subscriptionName"]),
+            ("GetNewMessageFromTopicWithPeekLock", ["topicName", "subscriptionName"]),
+            ("GetMessagesFromTopic", ["topicName", "subscriptionName"]),
+            ("GetNewMessagesFromTopicWithPeekLock", ["topicName", "subscriptionName"]),
+        ],
+    )
+    def test_registration_metadata(self, operation_id, required_parameters):
+        """Test metadata needed to register each receive trigger."""
+        metadata = TRIGGER_OPERATIONS[operation_id]
 
-        response_data = {
-            "contentData": "Test message content",
-            "messageId": "msg-123",
-            "contentType": "application/json"
-        }
-        mock_response = MockResponse(200, json.dumps(response_data))
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            result = await client.get_message_from_queue_async(queue_name="myqueue")
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "myqueue/messages/head" in call_args[0][1]
-            assert result["messageId"] == "msg-123"
-
-    @pytest.mark.asyncio
-    async def test_get_message_with_queue_type(self, mock_token_provider):
-        """Test get message with queue type parameter."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(200, "{}")
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            await client.get_message_from_queue_async(
-                queue_name="myqueue",
-                queue_type="Main"
-            )
-
-            call_args = mock_send.call_args
-            assert "queueType=Main" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_get_message_error_response(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(404, "Queue not found")
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException):
-                await client.get_message_from_queue_async(queue_name="nonexistent")
-
-    @pytest.mark.asyncio
-    async def test_get_message_empty_response(self, mock_token_provider):
-        """Test that empty response returns None."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(200, "")
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ):
-            result = await client.get_message_from_queue_async(queue_name="myqueue")
-            assert result is None
-
-
-class TestGetMessageFromQueueWithPeekLock:
-    """Tests for get_new_message_from_queue_with_peek_lock_async method."""
-
-    @pytest.mark.asyncio
-    async def test_get_message_peek_lock_success(self, mock_token_provider):
-        """Test successful peek-lock message retrieval."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        response_data = {"contentData": "Test", "lockToken": "token-123"}
-        mock_response = MockResponse(200, json.dumps(response_data))
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            result = await client.get_new_message_from_queue_with_peek_lock_async(
-                queue_name="myqueue"
-            )
-
-            call_args = mock_send.call_args
-            assert "myqueue/messages/head/peek" in call_args[0][1]
-            assert result["lockToken"] == "token-123"
-
-    @pytest.mark.asyncio
-    async def test_get_message_peek_lock_with_session(self, mock_token_provider):
-        """Test peek-lock with session ID parameter."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(200, "{}")
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            await client.get_new_message_from_queue_with_peek_lock_async(
-                queue_name="myqueue",
-                session_id="session-abc"
-            )
-
-            call_args = mock_send.call_args
-            assert "sessionId=session-abc" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_peek_lock_error_response(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(404, '{"error": "Queue not found"}')
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_new_message_from_queue_with_peek_lock_async(
-                    queue_name="nonexistent"
-                )
-
-            assert exc_info.value.status_code == 404
+        assert metadata["method"] == "get"
+        assert metadata["required_parameters"] == required_parameters
+        assert metadata["callback_payload_type"] == "ServiceBusMessage"
 
 
 class TestCompleteMessageInQueue:
@@ -595,66 +478,6 @@ class TestRenewLockOnMessageInQueue:
             assert "myqueue/messages/renewlock" in call_args[0][1]
 
 
-class TestGetMessagesFromQueue:
-    """Tests for get_messages_from_queue_async method."""
-
-    @pytest.mark.asyncio
-    async def test_get_messages_batch_success(self, mock_token_provider):
-        """Test successful batch message retrieval."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        response_data = [{"contentData": "Message 1"}, {"contentData": "Message 2"}]
-        mock_response = MockResponse(200, json.dumps(response_data))
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            result = await client.get_messages_from_queue_async(queue_name="myqueue")
-
-            call_args = mock_send.call_args
-            assert "myqueue/messages/batch/head" in call_args[0][1]
-            assert len(result) == 2
-
-    @pytest.mark.asyncio
-    async def test_get_messages_with_max_count(self, mock_token_provider):
-        """Test batch retrieval with max message count."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(200, "[]")
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            await client.get_messages_from_queue_async(
-                queue_name="myqueue",
-                max_message_count="10"
-            )
-
-            call_args = mock_send.call_args
-            assert "maxMessageCount=10" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_get_messages_error_response(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(404, '{"error": "Queue not found"}')
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_messages_from_queue_async(queue_name="nonexistent")
-
-            assert exc_info.value.status_code == 404
-
-
 class TestCloseSessionInQueue:
     """Tests for close_session_in_queue_async method."""
 
@@ -741,52 +564,6 @@ class TestRenewLockOnSessionInQueue:
                 await client.renew_lock_on_session_in_queue_async(
                     queue_name="myqueue",
                     session_id="nonexistent"
-                )
-
-            assert exc_info.value.status_code == 404
-
-
-class TestGetMessageFromTopic:
-    """Tests for get_message_from_topic_async method."""
-
-    @pytest.mark.asyncio
-    async def test_get_topic_message_success(self, mock_token_provider):
-        """Test successful message retrieval from topic subscription."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        response_data = {"contentData": "Topic message", "messageId": "msg-456"}
-        mock_response = MockResponse(200, json.dumps(response_data))
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            result = await client.get_message_from_topic_async(
-                topic_name="mytopic",
-                subscription_name="mysub"
-            )
-
-            call_args = mock_send.call_args
-            assert "mytopic/subscriptions/mysub/messages/head" in call_args[0][1]
-            assert result["messageId"] == "msg-456"
-
-    @pytest.mark.asyncio
-    async def test_get_topic_message_error_response(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(404, '{"error": "Subscription not found"}')
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_message_from_topic_async(
-                    topic_name="mytopic",
-                    subscription_name="nonexistent"
                 )
 
             assert exc_info.value.status_code == 404
@@ -982,32 +759,6 @@ class TestDeleteTopicSubscription:
                 )
 
             assert exc_info.value.status_code == 404
-
-
-class TestGetMessagesFromTopic:
-    """Tests for get_messages_from_topic_async method."""
-
-    @pytest.mark.asyncio
-    async def test_get_topic_messages_batch_success(self, mock_token_provider):
-        """Test successful batch message retrieval from topic."""
-        client = ServicebusClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        response_data = [{"contentData": "Msg 1"}, {"contentData": "Msg 2"}]
-        mock_response = MockResponse(200, json.dumps(response_data))
-        with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
-        ) as mock_send:
-            result = await client.get_messages_from_topic_async(
-                topic_name="mytopic",
-                subscription_name="mysub"
-            )
-
-            call_args = mock_send.call_args
-            assert "mytopic/subscriptions/mysub/messages/batch/head" in call_args[0][1]
-            assert len(result) == 2
 
 
 class TestDeadLetterMessageInTopic:

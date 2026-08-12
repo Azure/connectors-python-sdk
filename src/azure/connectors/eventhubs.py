@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
@@ -42,23 +42,13 @@ class Event:
     )
 
 
-@dataclass
-class SendEventsInput:
-    """
-    Send one or more events to the Event Hub partition
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+SendEventsInput = List["SendEvent"]
 
 
 @dataclass
 class ObjectEntity:
     """
-    Response for Generate event schema V2
+    Response for Generate event schema
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -349,7 +339,7 @@ class EventhubsClient(ConnectorClientBase):
         content_schema: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
-        Generate event schema V2
+        Generate event schema
 
         Generate event schema V2.
         """

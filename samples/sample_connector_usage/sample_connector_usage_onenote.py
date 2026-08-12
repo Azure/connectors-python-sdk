@@ -28,7 +28,6 @@ from azure.connectors import ConnectorException
 from azure.connectors.onenote import (
     OnenoteClient,
     CreateSectionRequest,
-    CreatePageInQuickNotesInput,
 )
 
 # Connection runtime URL format:
@@ -162,12 +161,9 @@ async def example_5_create_quick_note():
 
     async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            page_input = CreatePageInQuickNotesInput(
-                additional_properties={
-                    "title": "SDK Quick Note",
-                    "content": "<html><head><title>Quick Note</title></head>"
-                               "<body><p>Created via Azure Connectors Python SDK</p></body></html>"
-                }
+            page_input = (
+                "<html><head><title>Quick Note</title></head>"
+                "<body><p>Created via Azure Connectors Python SDK</p></body></html>"
             )
 
             result = await client.create_page_in_quick_notes_async(input=page_input)

@@ -61,17 +61,7 @@ class GetFormDetailsByIdResult:
     """User who created the form."""
 
 
-@dataclass
-class FormsList:
-    """
-    Response for List forms
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FormsList = List[Dict[str, Any]]
 
 
 @dataclass
@@ -103,17 +93,7 @@ class WebhookPayload:
     value: Optional[List[Dict[str, Any]]] = None
 
 
-@dataclass
-class NewResponses:
-    """
-    Definition: NewResponses
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+NewResponses = List[Dict[str, Any]]
 
 
 # Client Class

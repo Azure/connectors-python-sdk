@@ -17,6 +17,7 @@ from azure.connectors.microsoftbookings import (
     CustomerData,
     StaffMemberData,
     CustomQuestion,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -133,165 +134,24 @@ class TestMicrosoftbookingsClientLifecycle:
             mock_close.assert_called_once()
 
 
-class TestCreateAppointmentAsync:
-    """Tests for create_appointment_async method."""
+class TestTriggerOperations:
+    """Tests for appointment trigger registration metadata."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful webhook creation."""
-        response_json = '{"webhook_id": "wh-12345"}'
-        mock_response = MockResponse(status=200, text=response_json)
+    @pytest.mark.parametrize(
+        ("operation_id", "payload_type"),
+        [
+            ("CreateAppointment", "WebhookResponse"),
+            ("UpdateAppointment", None),
+            ("CancelAppointment", None),
+        ],
+    )
+    def test_registration_metadata(self, operation_id, payload_type):
+        """Test metadata needed to register each appointment trigger."""
+        metadata = TRIGGER_OPERATIONS[operation_id]
 
-        client = MicrosoftbookingsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        webhook_input = CreateAppointmentInput(
-            webhook={"callbackUrl": "https://example.com/callback"}
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.create_appointment_async(
-                input=webhook_input,
-                s_m_t_p_address="bookings@contoso.com"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "POST"
-            assert "/bookingBusinesses/bookings@contoso.com" in call_args[0][1]
-            assert "/webhook/AppointmentCreated" in call_args[0][1]
-            assert result is not None
-            assert result["webhook_id"] == "wh-12345"
-
-    @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
-        """Test empty response returns None."""
-        mock_response = MockResponse(status=200, text='')
-
-        client = MicrosoftbookingsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        webhook_input = CreateAppointmentInput(webhook={})
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            result = await client.create_appointment_async(
-                input=webhook_input,
-                s_m_t_p_address="bookings@contoso.com"
-            )
-            assert result is None
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        mock_response = MockResponse(
-            status=403,
-            text='{"error": {"code": "Forbidden", "message": "Access denied"}}'
-        )
-
-        client = MicrosoftbookingsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        webhook_input = CreateAppointmentInput(webhook={})
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.create_appointment_async(
-                    input=webhook_input,
-                    s_m_t_p_address="bookings@contoso.com"
-                )
-
-            assert exc_info.value.status_code == 403
-
-
-class TestUpdateAppointmentAsync:
-    """Tests for update_appointment_async method."""
-
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful update webhook creation."""
-        mock_response = MockResponse(status=200, text='')
-
-        client = MicrosoftbookingsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        webhook_input = UpdateAppointmentInput(
-            webhook={"callbackUrl": "https://example.com/callback"}
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.update_appointment_async(
-                input=webhook_input,
-                s_m_t_p_address="bookings@contoso.com"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "POST"
-            assert "/bookingBusinesses/bookings@contoso.com" in call_args[0][1]
-            assert "/webhook/AppointmentUpdated" in call_args[0][1]
-
-
-class TestCancelAppointmentAsync:
-    """Tests for cancel_appointment_async method."""
-
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful cancel webhook creation."""
-        mock_response = MockResponse(status=200, text='')
-
-        client = MicrosoftbookingsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        webhook_input = CancelAppointmentInput(
-            webhook={"callbackUrl": "https://example.com/callback"}
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.cancel_appointment_async(
-                input=webhook_input,
-                s_m_t_p_address="bookings@contoso.com"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "POST"
-            assert "/bookingBusinesses/bookings@contoso.com" in call_args[0][1]
-            assert "/webhook/AppointmentDeleted" in call_args[0][1]
+        assert metadata["method"] == "post"
+        assert metadata["required_parameters"] == ["SMTPAddress", "body"]
+        assert metadata["callback_payload_type"] == payload_type
 
 
 class TestListBookingsBusinessUserAsAdminAsync:
@@ -422,9 +282,9 @@ class TestDataClasses:
         assert response.mailboxes[0].email == "bookings@contoso.com"
 
     def test_delete_webhook_response_defaults(self):
-        """Test DeleteWebhookResponse dataclass with defaults."""
+        """Test DeleteWebhookResponse string alias."""
         response = DeleteWebhookResponse()
-        assert response.additional_properties == {}
+        assert response == ""
 
     def test_mailbox_entity_defaults(self):
         """Test MailboxEntity dataclass with defaults."""

@@ -22,57 +22,67 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateAppointmentInput:
-    """When an appointment is created"""
+    """
+    When a appointment is Created
+    """
 
     webhook: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class WebhookResponse:
-    """Response for When an appointment is created"""
+    """
+    Response for When a appointment is Created
+    """
 
-    webhook_id: Optional[str] = None
+    webhook_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webhookId"},
+    )
     """Webhook ID."""
 
 
 @dataclass
 class UpdateAppointmentInput:
-    """When an appointment is Updated"""
+    """
+    When an appointment is Updated
+    """
 
     webhook: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class CancelAppointmentInput:
-    """When an appointment is Cancelled"""
+    """
+    When an appointment is Cancelled
+    """
 
     webhook: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class ListMailboxResponse:
-    """Response for List Booking Businesses where user is an admin"""
+    """
+    Response for List Booking Businesses where user is an admin
+    """
 
     mailboxes: Optional[List[MailboxEntity]] = None
     """All mailbox entities."""
 
 
-@dataclass
-class DeleteWebhookResponse:
-    """Definition: DeleteWebhookResponse"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+DeleteWebhookResponse = str
 
 
 @dataclass
 class MailboxEntity:
-    """Definition: MailboxEntity"""
+    """
+    Definition: MailboxEntity
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Mailbox Display name."""
     email: Optional[str] = None
     """SMTP of the Booking mailbox."""
@@ -80,110 +90,223 @@ class MailboxEntity:
 
 @dataclass
 class AppointmentData:
-    """Definition: AppointmentData"""
+    """
+    Definition: AppointmentData
+    """
 
-    additional_info: Optional[str] = None
+    additional_info: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "AdditionalInfo"},
+    )
     """Additional Info about the booking."""
-    customer_email: Optional[str] = None
+    customer_email: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CustomerEmail"},
+    )
     """Customer Email address in case of 1:1 bookings."""
-    customer_id: Optional[str] = None
+    customer_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CustomerId"},
+    )
     """Customer Id in case of 1:1 bookings."""
-    customer_location: Optional[Dict[str, Any]] = None
+    customer_location: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "CustomerLocation"},
+    )
     """Location of customer in 1:1 booking"""
-    customer_name: Optional[str] = None
+    customer_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CustomerName"},
+    )
     """Customer Name for 1:1 booking."""
-    customer_notes: Optional[str] = None
+    customer_notes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CustomerNotes"},
+    )
     """Customer Notes for 1:1 booking."""
-    custom_question_answers: Optional[List[CustomQuestion]] = None
+    custom_question_answers: Optional[List[CustomQuestion]] = field(
+        default=None,
+        metadata={"wire_name": "CustomQuestionAnswers"},
+    )
     """All the custom questions and answers for 1:1 booking."""
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CustomerPhone"},
+    )
     """Customer phone for 1:1 booking."""
-    customer_time_zone: Optional[str] = None
+    customer_time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CustomerTimeZone"},
+    )
     """Customer Time Zone for 1:1 booking."""
-    customers: Optional[List[CustomerData]] = None
+    customers: Optional[List[CustomerData]] = field(
+        default=None,
+        metadata={"wire_name": "Customers"},
+    )
     """List of customers in the 1:N booking"""
-    duration: Optional[int] = None
+    duration: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Duration"},
+    )
     """Duration of the appointment"""
-    end_time: Optional[str] = None
+    end_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "EndTime"},
+    )
     """End Time of the appointment."""
-    filled_attendees_count: Optional[int] = None
+    filled_attendees_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "FilledAttendeesCount"},
+    )
     """Number of attendees who have booked this appoinment slot."""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """
     [Deprecated] - use selfServiceAppointmentId as unique identifier for the
     bookings appointment.
     """
-    is_s_m_s_notifications_enabled: Optional[bool] = None
+    is_s_m_s_notifications_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsSMSNotificationsEnabled"},
+    )
     """Field to check if SMS notification is enabled for the appointment."""
-    join_web_u_r_l: Optional[str] = None
+    join_web_u_r_l: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "JoinWebURL"},
+    )
     """URL for joining this online appointment."""
-    max_attendees_count: Optional[int] = None
+    max_attendees_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "MaxAttendeesCount"},
+    )
     """Max number of attendees allowed in this appoinment."""
-    self_service_appointment_id: Optional[str] = None
+    self_service_appointment_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SelfServiceAppointmentId"},
+    )
     """Appointment id for the booking appointment."""
-    service_id: Optional[str] = None
+    service_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ServiceId"},
+    )
     """Unique Service Identifier."""
-    service_name: Optional[str] = None
+    service_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ServiceName"},
+    )
     """Name of the bookings service."""
-    service_notes: Optional[str] = None
+    service_notes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ServiceNotes"},
+    )
     """Service level notes for the staff and admin."""
-    staff_members: Optional[List[StaffMemberData]] = None
+    staff_members: Optional[List[StaffMemberData]] = field(
+        default=None,
+        metadata={"wire_name": "StaffMembers"},
+    )
     """List of staff members"""
-    start_time: Optional[str] = None
+    start_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "StartTime"},
+    )
     """Start Time of the appointment."""
-    tracking_data: Optional[str] = None
+    tracking_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TrackingData"},
+    )
     """Campaign tracking Data."""
-    cancel_reason: Optional[str] = None
+    cancel_reason: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CancelReason"},
+    )
     """Reason for cancellation of this booking appointment"""
 
 
 @dataclass
 class CustomerData:
-    """Definition: CustomerData"""
+    """
+    Definition: CustomerData
+    """
 
-    email: Optional[str] = None
+    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
     """Email of the customer in the group booking."""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Unique ID of the customer in the group booking."""
-    location: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Location"},
+    )
     """Location of customer in a group booking."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Display Name of the customer in the group booking."""
-    notes: Optional[str] = None
+    notes: Optional[str] = field(default=None, metadata={"wire_name": "Notes"})
     """Notes of the customer in the group booking."""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeZone"},
+    )
     """Timezone of the customer in the group booking."""
-    answers: Optional[List[CustomQuestion]] = None
+    answers: Optional[List[CustomQuestion]] = field(
+        default=None,
+        metadata={"wire_name": "Answers"},
+    )
     """All the custom questions and answers."""
 
 
 @dataclass
 class StaffMemberData:
-    """Definition: StaffMemberData"""
+    """
+    Definition: StaffMemberData
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Display Name of the staff assigned for this appointment."""
-    email_address: Optional[str] = None
+    email_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "EmailAddress"},
+    )
     """Email Address of the staff assigned to this appointment."""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Unique Staff identifier."""
 
 
 @dataclass
 class CustomQuestion:
-    """Definition: CustomQuestion"""
+    """
+    Definition: CustomQuestion
+    """
 
-    answer: Optional[str] = None
+    answer: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Answer"},
+    )
     """Answer to this custom question."""
-    answer_options: Optional[List[str]] = None
+    answer_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "AnswerOptions"},
+    )
     """All the answer options."""
-    is_required: Optional[bool] = None
+    is_required: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsRequired"},
+    )
     """Tells if answering this question is mandatory."""
-    question: Optional[str] = None
+    question: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Question"},
+    )
     """Question to be answered."""
-    question_id: Optional[str] = None
+    question_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "QuestionID"},
+    )
     """Unique Identifier of the Question to be answered."""
-    selected_options: Optional[List[int]] = None
+    selected_options: Optional[List[int]] = field(
+        default=None,
+        metadata={"wire_name": "SelectedOptions"},
+    )
     """All the selected answer options."""
 
 
@@ -221,130 +344,28 @@ class MicrosoftbookingsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "microsoftbookings"
 
-    async def create_appointment_async(
-        self,
-        input: CreateAppointmentInput,
-        s_m_t_p_address: str,
-    ):
-        """
-        When an appointment is created
-
-        This trigger is used for listening to create of bookings appointments.
-        Select a booking page or enter the SMTP address of the booking page
-        that you are looking forward to listen for create appointment events
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/BookingsService"
-            f"/api"
-            f"/V1"
-            f"/bookingBusinesses"
-            f"/{str(s_m_t_p_address)}"
-            f"/webhook"
-            f"/AppointmentCreated"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def update_appointment_async(
-        self,
-        input: UpdateAppointmentInput,
-        s_m_t_p_address: str,
-    ):
-        """
-        When an appointment is Updated
-
-        This trigger is used for listening to update of bookings appointments.
-        Select a booking page or enter the SMTP address of the booking page
-        that you are looking forward to listen for update appointment events.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/BookingsService"
-            f"/api"
-            f"/V1"
-            f"/bookingBusinesses"
-            f"/{str(s_m_t_p_address)}"
-            f"/webhook"
-            f"/AppointmentUpdated"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def cancel_appointment_async(
-        self,
-        input: CancelAppointmentInput,
-        s_m_t_p_address: str,
-    ):
-        """
-        When an appointment is Cancelled
-
-        This trigger is used for listening to cancel of bookings appointments.
-        Select a booking page or enter the SMTP address of the booking page
-        that you are looking forward to listen for cancel appointment events.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/BookingsService"
-            f"/api"
-            f"/V1"
-            f"/bookingBusinesses"
-            f"/{str(s_m_t_p_address)}"
-            f"/webhook"
-            f"/AppointmentDeleted"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
     async def list_bookings_business_user_as_admin_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Booking Businesses where user is an admin
 
         Operation used to list all mailboxes for which the accessing user is an
         Administrator.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/BookingsService/api/V1/bookingBusinessesUserAsAdmin"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -353,3 +374,44 @@ class MicrosoftbookingsClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "CreateAppointment": {
+        "operation_id": "CreateAppointment",
+        "path": (
+            "/{connectionId}/BookingsService/api/V1/bookingBusinesses/{SMTPAddress}/webhook"
+            "/AppointmentCreated"
+        ),
+        "method": "post",
+        "required_parameters": ["SMTPAddress", "body"],
+        "callback_payload_type": "WebhookResponse",
+    },
+    "UpdateAppointment": {
+        "operation_id": "UpdateAppointment",
+        "path": (
+            "/{connectionId}/BookingsService/api/V1/bookingBusinesses/{SMTPAddress}/webhook"
+            "/AppointmentUpdated"
+        ),
+        "method": "post",
+        "required_parameters": ["SMTPAddress", "body"],
+        "callback_payload_type": None,
+    },
+    "CancelAppointment": {
+        "operation_id": "CancelAppointment",
+        "path": (
+            "/{connectionId}/BookingsService/api/V1/bookingBusinesses/{SMTPAddress}/webhook"
+            "/AppointmentDeleted"
+        ),
+        "method": "post",
+        "required_parameters": ["SMTPAddress", "body"],
+        "callback_payload_type": None,
+    },
+}

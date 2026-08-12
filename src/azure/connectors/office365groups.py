@@ -23,11 +23,19 @@ from azure.connectors.sdk import (
 
 @dataclass
 class ListGroupMembersResponse:
-    """Response for List group members"""
+    """
+    Response for List group members
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The OData context."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """
     Only used in Power Apps Canvas to genereate the `$skipToken` for
     pagination. Power Automate and Logic Apps must use the pagination setting.
@@ -36,24 +44,24 @@ class ListGroupMembersResponse:
     """value"""
 
 
-@dataclass
-class OnGroupMemberAddedOrRemovedResponse:
-    """Response for When a group member is added or removed"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+OnGroupMemberAddedOrRemovedResponse = List[Dict[str, Any]]
 
 
 @dataclass
 class ListGroupsResponse:
-    """Response for List groups"""
+    """
+    Response for List groups
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The OData context."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """
     Only used in Power Apps Canvas to genereate the `$skipToken` for
     pagination. Power Automate and Logic Apps must use the pagination setting.
@@ -64,23 +72,40 @@ class ListGroupsResponse:
 
 @dataclass
 class CreateCalendarEventResponse:
-    """Response for Update a group event"""
+    """
+    Response for Update a group event
+    """
 
     id: Optional[str] = None
     """Unique id of the event."""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """Time in minutes before event starts to remind."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if the event has a reminder."""
     subject: Optional[str] = None
     """Title of the event."""
     importance: Optional[str] = None
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """True if the event is an all day event."""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """True if a response was requested for the event."""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """Status to show during the event."""
     body: Optional[Dict[str, Any]] = None
     """body"""
@@ -92,31 +117,14 @@ class CreateCalendarEventResponse:
     """location"""
 
 
-@dataclass
-class OnNewEventResponse:
-    """Response for When there is a new event"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class HttpRequestInput:
-    """Send an HTTP request V2"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+OnNewEventResponse = List[Dict[str, Any]]
 
 
 @dataclass
 class ObjectWithoutType:
-    """Response for Send an HTTP request V2"""
+    """
+    Response for Send an HTTP request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -127,9 +135,14 @@ class ObjectWithoutType:
 
 @dataclass
 class ListOwnedGroupsResponse:
-    """Response for List groups that I own and belong to"""
+    """
+    Response for List groups that I own and belong to
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The OData context."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -137,13 +150,21 @@ class ListOwnedGroupsResponse:
 
 @dataclass
 class SensitivityLabelMetadata:
-    """Definition: SensitivityLabelMetadata"""
+    """
+    Definition: SensitivityLabelMetadata
+    """
 
-    sensitivity_label_id: Optional[str] = None
+    sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelId"},
+    )
     """SensitivityLabel Id."""
     name: Optional[str] = None
     """SensitivityLabel name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """SensitivityLabel displayName info"""
     tooltip: Optional[str] = None
     """SensitivityLabel details on tooltip."""
@@ -151,29 +172,33 @@ class SensitivityLabelMetadata:
     """SensitivityLabel priority."""
     color: Optional[str] = None
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = None
+    is_encrypted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEncrypted"},
+    )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = None
+    is_parent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isParent"},
+    )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = None
+    parent_sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentSensitivityLabelId"},
+    )
     """Parent  SensitivityLabel Id."""
 
 
 @dataclass
-class ListOwnedGroupsV2Response:
-    """Definition: ListOwnedGroups_V2_Response"""
-
-    context: Optional[str] = None
-    """The OData context."""
-    value: Optional[List[Dict[str, Any]]] = None
-    """value"""
-
-
-@dataclass
 class UpdateCalendarEventRequest:
-    """Definition: UpdateCalendarEvent_Request"""
+    """
+    Definition: UpdateCalendarEvent_Request
+    """
 
     subject: Optional[str] = None
     """Title of the event."""
@@ -183,15 +208,30 @@ class UpdateCalendarEventRequest:
     location: Optional[Dict[str, Any]] = None
     importance: Optional[str] = None
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Set to true if the event lasts all day."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if the event has a reminder."""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """Time in minutes before event start to remind."""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """Status to show during the event."""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined.
@@ -200,7 +240,9 @@ class UpdateCalendarEventRequest:
 
 @dataclass
 class UpdateCalendarEventHTMLRequest:
-    """Definition: UpdateCalendarEvent_HTMLRequest"""
+    """
+    Definition: UpdateCalendarEvent_HTMLRequest
+    """
 
     subject: Optional[str] = None
     """Title of the event."""
@@ -210,15 +252,30 @@ class UpdateCalendarEventHTMLRequest:
     location: Optional[Dict[str, Any]] = None
     importance: Optional[str] = None
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Set to true if the event lasts all day."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if the event has a reminder."""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """Time in minutes before event start to remind."""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """Status to show during the event."""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined.
@@ -263,7 +320,7 @@ class Office365groupsClient(ConnectorClientBase):
         self,
         group_id: str,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List group members
 
@@ -273,9 +330,9 @@ class Office365groupsClient(ConnectorClientBase):
         values please turn on Settings->Pagination feature and provide
         Threshold limit.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/members"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/members"
         )
         query_params = []
         if top is not None:
@@ -284,55 +341,16 @@ class Office365groupsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_group_membership_change_async(
-        self,
-        group_id: Optional[str],
-        select: Optional[str] = None,
-    ):
-        """
-        When a group member is added or removed
-
-        This operation triggers when a member is added to or removed from the
-        given group.
-        """
-        path = f"{self._connection_runtime_url}/trigger/v1.0/groups/delta"
-        query_params = []
-        if group_id is not None:
-            value = str(group_id)
-            if isinstance(group_id, bool):
-                value = value.lower()
-            query_params.append(f"groupId={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -345,32 +363,33 @@ class Office365groupsClient(ConnectorClientBase):
     async def add_member_to_group_async(
         self,
         group_id: str,
-        user_upn: Optional[str],
-    ):
+        user_upn: str,
+    ) -> None:
         """
         Add member to group
 
         This operation is used to add a member to an O365 group, using a UPN.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/members/$ref"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/members/$ref"
         )
         query_params = []
-        if user_upn is not None:
-            value = str(user_upn)
-            if isinstance(user_upn, bool):
-                value = value.lower()
-            query_params.append(f"userUpn={quote(value)}")
+        value = str(user_upn)
+        if isinstance(user_upn, bool):
+            value = value.lower()
+        query_params.append(f"userUpn={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -382,13 +401,13 @@ class Office365groupsClient(ConnectorClientBase):
         filter: Optional[str] = None,
         top: Optional[str] = None,
         skiptoken: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List groups
 
         This operation returns a list of all groups in the organization.
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups"
+        request_url = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
@@ -416,14 +435,16 @@ class Office365groupsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$skiptoken={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -438,23 +459,29 @@ class Office365groupsClient(ConnectorClientBase):
         input: UpdateCalendarEventHTMLRequest,
         group_id: str,
         event: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a group event
 
         This operation is used to update a new event in a group calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/events/{str(event)}"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/events"
+            f"/{quote(quote(str(event), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -467,85 +494,64 @@ class Office365groupsClient(ConnectorClientBase):
     async def remove_member_from_group_async(
         self,
         group_id: str,
-        user_upn: Optional[str],
-    ):
+        user_upn: str,
+    ) -> None:
         """
         Remove member from group
 
         This operation is used to remove a member from an O365 group, using a
         UPN.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/members/memberId/$ref"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/members"
+            f"/memberId"
+            f"/$ref"
         )
         query_params = []
-        if user_upn is not None:
-            value = str(user_upn)
-            if isinstance(user_upn, bool):
-                value = value.lower()
-            query_params.append(f"userUpn={quote(value)}")
+        value = str(user_upn)
+        if isinstance(user_upn, bool):
+            value = value.lower()
+        query_params.append(f"userUpn={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def on_new_event_async(
-        self,
-        group_id: str,
-    ):
-        """
-        When there is a new event
-
-        This operation triggers when a new event is added to a group calendar.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger/v1.0/groups/{str(group_id)}/events"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def list_deleted_groups_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List deleted groups
 
         Lists deleted groups that can be restored.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/directory/deletedItems/microsoft.graph.group"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -558,46 +564,54 @@ class Office365groupsClient(ConnectorClientBase):
     async def restore_deleted_group_async(
         self,
         group_id: str,
-    ):
+    ) -> None:
         """
         Restore a deleted group
 
         Restore a recently deleted group
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/directory/deletedItems/{str(group_id)}/restore"
+            f"/v1.0"
+            f"/directory"
+            f"/deletedItems"
+            f"/{quote(str(group_id), safe='')}"
+            f"/restore"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def list_deleted_groups_by_owner_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List deleted groups by owner
 
         List deleted groups that can be restored by owner
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/directory/deletedItems/getUserOwnedObjects"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -611,23 +625,29 @@ class Office365groupsClient(ConnectorClientBase):
         self,
         group_id: str,
         event: str,
-    ):
+    ) -> None:
         """
-        Delete event (V2)
+        Delete event
 
         This operation deletes an event in a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/events/{str(event)}"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/events"
+            f"/{quote(quote(str(event), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -636,23 +656,25 @@ class Office365groupsClient(ConnectorClientBase):
         self,
         input: UpdateCalendarEventHTMLRequest,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Create a group event (V2)
+        Create a group event
 
         This operation is used to create a new event in a group calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/v1.0/groups/{str(group_id)}/events"
+            f"/v2/v1.0/groups/{quote(str(group_id), safe='')}/events"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -664,23 +686,28 @@ class Office365groupsClient(ConnectorClientBase):
 
     async def http_request_async(
         self,
-        input: HttpRequestInput,
-    ):
+        input: bytes,
+    ) -> dict[str, Any] | None:
         """
-        Send an HTTP request V2
+        Send an HTTP request
 
         Construct a Microsoft Graph REST API request to invoke. There is one
         segment that is supported: /groups. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
         """
-        path = f"{self._connection_runtime_url}/v2/httprequest"
+        request_url = f"{self._connection_runtime_url}/v2/httprequest"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -694,13 +721,13 @@ class Office365groupsClient(ConnectorClientBase):
         self,
         extract_sensitivity_label: Optional[str] = None,
         fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List groups that I own and belong to
 
         This operation returns a list of all groups that you own and belong to.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/me/memberOf/$/microsoft.graph.group"
         )
@@ -716,14 +743,16 @@ class Office365groupsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -732,3 +761,28 @@ class Office365groupsClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnGroupMembershipChange": {
+        "operation_id": "OnGroupMembershipChange",
+        "path": "/{connectionId}/trigger/v1.0/groups/delta",
+        "method": "get",
+        "required_parameters": ["groupId"],
+        "callback_payload_type": "OnGroupMemberAddedOrRemovedResponse",
+    },
+    "OnNewEvent": {
+        "operation_id": "OnNewEvent",
+        "path": "/{connectionId}/trigger/v1.0/groups/{groupId}/events",
+        "method": "get",
+        "required_parameters": ["groupId"],
+        "callback_payload_type": "OnNewEventResponse",
+    },
+}
