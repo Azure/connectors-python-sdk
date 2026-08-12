@@ -20,6 +20,10 @@ from azure.connectors.azuredigitaltwins import (
     QueryTwinsInput,
     QueryResult,
     IncomingRelationship,
+    UpdateComponentInput,
+    UpdateModelInput,
+    UpdateRelationshipInput,
+    UpdateTwinInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -27,6 +31,45 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+
+
+WRITE_OPERATIONS = [
+    (
+        "add_models",
+        [{"@id": "dtmi:example:Room;1"}],
+        {},
+        "POST",
+        "/models?api-version=2020-10-31",
+    ),
+    (
+        "update_model",
+        UpdateModelInput(value='[{"op": "replace"}]'),
+        {"modelid": "dtmi:example:Room;1"},
+        "PATCH",
+        "/models/dtmi%3Aexample%3ARoom%3B1?api-version=2020-10-31",
+    ),
+    (
+        "update_twin",
+        UpdateTwinInput(value='[{"op": "replace"}]'),
+        {"twinid": "room/1"},
+        "PATCH",
+        "/digitaltwins/room%2F1?api-version=2020-10-31",
+    ),
+    (
+        "update_component",
+        UpdateComponentInput(value='[{"op": "replace"}]'),
+        {"twinid": "room-1", "component_path": "hvac/status"},
+        "PATCH",
+        "/digitaltwins/room-1/components/hvac%2Fstatus?api-version=2020-10-31",
+    ),
+    (
+        "update_relationship",
+        UpdateRelationshipInput(value='[{"op": "replace"}]'),
+        {"twinid": "room-1", "relationship_id": "contains/1"},
+        "PATCH",
+        "/digitaltwins/room-1/relationships/contains%2F1?api-version=2020-10-31",
+    ),
+]
 
 
 class TestAzuredigitaltwinsClientInitialization:
@@ -120,6 +163,77 @@ class TestAzuredigitaltwinsClientLifecycle:
         ) as mock_close:
             await client.close()
             mock_close.assert_called_once()
+
+
+class TestWriteOperationSignatures:
+    """Tests for write operations with generated API-version defaults."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "input_value", "operation_args", "http_method", "path"),
+        WRITE_OPERATIONS,
+    )
+    async def test_uses_current_signature_and_internal_api_version(
+        self,
+        mock_token_provider,
+        operation,
+        input_value,
+        operation_args,
+        http_method,
+        path,
+    ):
+        """Test each write operation sends its body to the expected route."""
+        client = AzuredigitaltwinsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=200, text="{}"),
+        ) as mock_send:
+            method = getattr(client, f"{operation}_async")
+            await method(input=input_value, **operation_args)
+
+            mock_send.assert_called_once_with(
+                http_method,
+                f"https://example.azure.com/connections/test{path}",
+                body=input_value,
+            )
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "input_value", "operation_args", "http_method", "path"),
+        WRITE_OPERATIONS,
+    )
+    async def test_error_response_raises_exception(
+        self,
+        mock_token_provider,
+        operation,
+        input_value,
+        operation_args,
+        http_method,
+        path,
+    ):
+        """Test each write operation rejects a non-2xx response."""
+        client = AzuredigitaltwinsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=400, text="Invalid update"),
+        ):
+            method = getattr(client, f"{operation}_async")
+            with pytest.raises(ConnectorException) as exc_info:
+                await method(input=input_value, **operation_args)
+
+            assert exc_info.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_token_provider):

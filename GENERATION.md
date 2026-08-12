@@ -203,7 +203,7 @@ class FileMetadata:
     modified_time: Optional[datetime] = None
 ```
 
-#### 2. Client Inheritance
+#### 3. Client Inheritance
 
 All generated clients extend `ConnectorClientBase`:
 
@@ -221,7 +221,7 @@ This inheritance provides:
 - Lifecycle management (async context manager, close)
 - Error handling with `ConnectorException`
 
-#### 3. Async Method Signatures
+#### 4. Async Method Signatures
 
 All connector actions are generated as async methods:
 
@@ -249,7 +249,7 @@ async def get_items_async(
     """
 ```
 
-#### 4. Type Hints and Docstrings
+#### 5. Type Hints and Docstrings
 
 The generator produces:
 - Full type hints for all parameters and return types

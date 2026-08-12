@@ -20,6 +20,25 @@ from azure.connectors.sdk import (
 from tests.conftest import MockResponse
 
 
+DISCOVERY_OPERATIONS = [
+    ("get_entities", {}, "/entities"),
+    ("get_system_properties", {}, "/systemproperties"),
+    ("get_queues", {}, "/queues"),
+    ("get_session_options", {}, "/sessionoptions"),
+    ("get_topics", {}, "/topics"),
+    (
+        "get_subscriptions",
+        {"topic_name": "topic/one"},
+        "/topics/topic%252Fone/subscriptions",
+    ),
+    (
+        "get_subscription_filter",
+        {"subscription_filter_type": "SQL filter"},
+        "/subscriptionfilterV2?subscriptionFilterType=SQL%20filter",
+    ),
+]
+
+
 class TestServicebusClientInitialization:
     """Tests for ServicebusClient initialization."""
 
@@ -218,6 +237,78 @@ class TestTriggerOperations:
         assert metadata["method"] == "get"
         assert metadata["required_parameters"] == required_parameters
         assert metadata["callback_payload_type"] == "ServiceBusMessage"
+
+
+class TestDiscoveryOperations:
+    """Tests for Service Bus discovery operations."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "operation_args", "expected_path"),
+        DISCOVERY_OPERATIONS,
+    )
+    async def test_success_returns_json(
+        self,
+        mock_token_provider,
+        operation,
+        operation_args,
+        expected_path,
+    ):
+        """Test each discovery operation calls its route and returns JSON."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(
+                status=200,
+                text='{"value": ["item"]}',
+            ),
+        ) as mock_send:
+            method = getattr(client, f"{operation}_async")
+            result = await method(**operation_args)
+
+            mock_send.assert_called_once_with(
+                "GET",
+                f"https://example.azure.com/connections/test{expected_path}",
+                body=None,
+            )
+            assert result == {"value": ["item"]}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "operation_args", "expected_path"),
+        DISCOVERY_OPERATIONS,
+    )
+    async def test_error_response_raises_exception(
+        self,
+        mock_token_provider,
+        operation,
+        operation_args,
+        expected_path,
+    ):
+        """Test each discovery operation rejects a non-2xx response."""
+        client = ServicebusClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=500, text="Server error"),
+        ):
+            method = getattr(client, f"{operation}_async")
+            with pytest.raises(ConnectorException) as exc_info:
+                await method(**operation_args)
+
+            assert expected_path in exc_info.value.operation
+            assert exc_info.value.status_code == 500
 
 
 class TestCompleteMessageInQueue:

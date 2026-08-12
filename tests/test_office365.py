@@ -16,6 +16,7 @@ from azure.connectors.office365 import (
     GraphClientReceiveMessage,
     MarkAsReadInput,
     MCPQueryRequest,
+    ResponseToEventInvite,
     CalendarEventBackend,
     GetAttachmentResponse,
     SensitivityLabelMetadata,
@@ -102,6 +103,61 @@ class TestOffice365ClientLifecycle:
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
+
+
+class TestRespondToEventAsync:
+    """Tests for respond_to_event_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_uses_response_path_parameter(self, mock_token_provider):
+        """Test the response argument is encoded into the request path."""
+        client = Office365Client(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        input_value = ResponseToEventInvite()
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=202, text=""),
+        ) as mock_send:
+            await client.respond_to_event_async(
+                input=input_value,
+                event_id="event/1",
+                response="tentatively accept",
+            )
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/"
+                "codeless/v1.0/me/events/event%2F1/tentatively%20accept",
+                body=input_value,
+            )
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test a non-2xx response raises ConnectorException."""
+        client = Office365Client(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=404, text="Event not found"),
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.respond_to_event_async(
+                    input=ResponseToEventInvite(),
+                    event_id="missing",
+                    response="decline",
+                )
+
+            assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_token_provider):

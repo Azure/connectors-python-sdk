@@ -1121,3 +1121,52 @@ class TestEdgeCases:
 
             call_args = mock_send.call_args
             assert "(PartitionKey='pk-1',RowKey='rk_1')" in call_args[0][1]
+
+
+class TestGetStorageAccounts:
+    """Tests for get_storage_accounts_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_returns_storage_accounts(self, mock_token_provider):
+        """Test successful storage-account discovery."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=MockResponse(
+                status=200,
+                text='{"value": [{"name": "account1"}]}'
+            )
+        ) as mock_send:
+            result = await client.get_storage_accounts_async()
+
+            mock_send.assert_called_once_with(
+                "GET",
+                "https://example.azure.com/connections/test/v2/GetStorageAccounts",
+                body=None
+            )
+            assert result["value"][0]["name"] == "account1"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test a non-2xx response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=500, text="Server error")
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_storage_accounts_async()
+
+            assert exc_info.value.status_code == 500
