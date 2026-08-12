@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **5 new connector clients** with unit tests and samples: Etsy, Jedox OData Hub, monday.com, Starmind, and WordPress
 - **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
 - Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts
 - **DocuWare** (`docuware.py`) connector client with unit tests and samples
@@ -71,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Generated string enums, integer enums, arrays, and `allOf` definitions now retain their Swagger JSON wire shapes instead of being emitted as dynamic object wrappers.
 - **Azure Queues** (`azurequeues.py`): corrected the public `QueueMessage.next_visible_time` property while preserving the `TimeNextVisible` wire name, and added `dequeue_count` plus the nested queue-message response models.
 - **Microsoft Dataverse** (`commondataservice.py`): path parameters are now double URL-encoded so values containing reserved characters (for example the `://` in an environment/organization URL used as the `dataset` segment) survive apihub gateway routing. Previously these segments were single-encoded and could be mis-routed. Fix applied in the CodefulSdkGenerator and regenerated; added regression tests covering encoding of the `dataset`, `table`, and `id` segments.
 - **Microsoft Dataverse** (`commondataservice.py`): regenerated with the corrected CodefulSdkGenerator so curated internal operations are retained. The client now exposes all 22 operations at parity with the .NET SDK (previously 11), adding attachment, association/disassociation, collection-relationship, option-set/multi-select metadata, delete, and pagination methods. Added unit tests covering the new operations.

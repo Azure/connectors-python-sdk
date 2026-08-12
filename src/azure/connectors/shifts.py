@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict, List, Literal
 from urllib.parse import quote
 import json
 
@@ -22,193 +22,351 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class GetAllTeamsResponse:
-    """Response for List teams"""
-
-    context: Optional[str] = None
-    value: Optional[List[Dict[str, Any]]] = None
-    """List of one or more Teams you are a part of."""
-
-
-@dataclass
 class ScheduleResponse:
-    """Response for Get a Schedule's details"""
+    """
+    Response for Get a Schedule's details
+    """
 
     id: Optional[str] = None
     """The unique ID of the Schedule."""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """The Time Zone of the Schedule."""
-    provision_status: Optional[str] = None
+    provision_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisionStatus"},
+    )
     """The Provision Status of the Schedule."""
-    provision_status_code: Optional[str] = None
+    provision_status_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisionStatusCode"},
+    )
     """The Provision Status Code of the Schedule."""
 
 
 @dataclass
 class ListTimesOffResponse:
-    """Response for List all Time Off instances in a team"""
+    """
+    Response for List all Time Off instances in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[TimeOffResponse]] = None
     """List of Time Off instances"""
 
 
 @dataclass
 class TimeOffResponse:
-    """Response for Create a new Time Off instance"""
+    """
+    Response for Create a new Time Off instance
+    """
 
     id: Optional[str] = None
     """The unique ID of the Time Off."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """Assigned To User ID."""
-    user_info: Optional[UserInfo] = None
-    team_info: Optional[TeamInfo] = None
-    shared_time_off: Optional[SharedTimeOff] = None
-    draft_time_off: Optional[DraftTimeOff] = None
+    user_info: Optional[UserInfo] = field(
+        default=None,
+        metadata={"wire_name": "userInfo"},
+    )
+    team_info: Optional[TeamInfo] = field(
+        default=None,
+        metadata={"wire_name": "teamInfo"},
+    )
+    shared_time_off: Optional[SharedTimeOff] = field(
+        default=None,
+        metadata={"wire_name": "sharedTimeOff"},
+    )
+    draft_time_off: Optional[DraftTimeOff] = field(
+        default=None,
+        metadata={"wire_name": "draftTimeOff"},
+    )
 
 
 @dataclass
 class ListShiftsResponse:
-    """Response for List all Shifts in a team"""
+    """
+    Response for List all Shifts in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[ShiftResponse]] = None
     """List of Shifts"""
 
 
 @dataclass
 class ShiftResponse:
-    """Response for Create a new Shift"""
+    """
+    Response for Create a new Shift
+    """
 
     id: Optional[str] = None
     """The unique ID of the Shift."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """Assigned To User ID."""
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """Scheduling Group ID."""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = None
-    user_info: Optional[UserInfo] = None
-    team_info: Optional[TeamInfo] = None
-    shared_shift: Optional[SharedShift] = None
-    draft_shift: Optional[DraftShift] = None
+    scheduling_group_info: Optional[SchedulingGroupInfo] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupInfo"},
+    )
+    user_info: Optional[UserInfo] = field(
+        default=None,
+        metadata={"wire_name": "userInfo"},
+    )
+    team_info: Optional[TeamInfo] = field(
+        default=None,
+        metadata={"wire_name": "teamInfo"},
+    )
+    shared_shift: Optional[SharedShift] = field(
+        default=None,
+        metadata={"wire_name": "sharedShift"},
+    )
+    draft_shift: Optional[DraftShift] = field(
+        default=None,
+        metadata={"wire_name": "draftShift"},
+    )
 
 
 @dataclass
 class ListOpenShiftsResponse:
-    """Response for List all Open Shifts in a team"""
+    """
+    Response for List all Open Shifts in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[OpenShiftResponse]] = None
     """List of Open Shifts"""
 
 
 @dataclass
 class OpenShiftResponse:
-    """Response for Create a new Open Shift"""
+    """
+    Response for Create a new Open Shift
+    """
 
     id: Optional[str] = None
     """The unique ID of the Open Shift."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """Scheduling Group ID"""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = None
-    team_info: Optional[TeamInfo] = None
-    shared_open_shift: Optional[SharedOpenShift] = None
-    draft_open_shift: Optional[DraftOpenShift] = None
+    scheduling_group_info: Optional[SchedulingGroupInfo] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupInfo"},
+    )
+    team_info: Optional[TeamInfo] = field(
+        default=None,
+        metadata={"wire_name": "teamInfo"},
+    )
+    shared_open_shift: Optional[SharedOpenShift] = field(
+        default=None,
+        metadata={"wire_name": "sharedOpenShift"},
+    )
+    draft_open_shift: Optional[DraftOpenShift] = field(
+        default=None,
+        metadata={"wire_name": "draftOpenShift"},
+    )
 
 
 @dataclass
 class GetTimeOffReasonsResponse:
-    """Response for List all Time Off Reasons in a team"""
+    """
+    Response for List all Time Off Reasons in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[Dict[str, Any]]] = None
     """The list of Time Off Reasons."""
 
 
 @dataclass
 class ListSchedulingGroupsResponse:
-    """Response for List all Scheduling Groups in a team"""
+    """
+    Response for List all Scheduling Groups in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[SchedulingGroupResponse]] = None
     """List of Scheduling Groups."""
 
 
 @dataclass
 class SchedulingGroupResponse:
-    """Response for Get a Scheduling Group"""
+    """
+    Response for Get a Scheduling Group
+    """
 
     id: Optional[str] = None
     """The unique ID of the Scheduling Group."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name for the Scheduling Group."""
-    is_active: Optional[bool] = None
+    is_active: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isActive"},
+    )
     """
     Indicates whether the Scheduling Group can be used when creating new
     entities or updating existing ones.
     """
-    user_ids: Optional[List[str]] = None
+    user_ids: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "userIds"},
+    )
     """List of IDs of users in the Scheduling Group."""
 
 
 @dataclass
 class ListTimeOffRequestsResponse:
-    """Response for List all Time Off requests in a team"""
+    """
+    Response for List all Time Off requests in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[TimeOffRequestResponse]] = None
     """List of Time Off requests."""
 
 
 @dataclass
 class TimeOffRequestResponse:
-    """Response for Get a Time Off request"""
+    """
+    Response for Get a Time Off request
+    """
 
     id: Optional[str] = None
     """The unique ID of the Time Off request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """Start of time requested off"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """End of time requested off"""
-    time_off_reason_id: Optional[str] = None
+    time_off_reason_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeOffReasonId"},
+    )
     """The ID of the Time Off Reason"""
 
 
 @dataclass
 class TimeOffRequestApproveInput:
-    """Approve a Time Off request"""
+    """
+    Approve a Time Off request
+    """
 
     message: Optional[str] = None
     """
@@ -219,7 +377,9 @@ class TimeOffRequestApproveInput:
 
 @dataclass
 class TimeOffRequestApproveResponse:
-    """Response for Approve a Time Off request"""
+    """
+    Response for Approve a Time Off request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -230,7 +390,9 @@ class TimeOffRequestApproveResponse:
 
 @dataclass
 class TimeOffRequestDeclineInput:
-    """Decline a Time Off request"""
+    """
+    Decline a Time Off request
+    """
 
     message: Optional[str] = None
     """
@@ -241,7 +403,9 @@ class TimeOffRequestDeclineInput:
 
 @dataclass
 class TimeOffRequestDeclineResponse:
-    """Response for Decline a Time Off request"""
+    """
+    Response for Decline a Time Off request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -252,52 +416,100 @@ class TimeOffRequestDeclineResponse:
 
 @dataclass
 class ListOfferShiftRequestsResponse:
-    """Response for List all Offer Shift requests in a team"""
+    """
+    Response for List all Offer Shift requests in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[OfferShiftRequestResponse]] = None
     """List of Offer Shift requests."""
 
 
 @dataclass
 class OfferShiftRequestResponse:
-    """Response for Get an Offer Shift request"""
+    """
+    Response for Get an Offer Shift request
+    """
 
     id: Optional[str] = None
     """The unique ID of the Offer Shift request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = None
+    sender_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderShiftId"},
+    )
     """The ID of the Shift from the sender"""
-    recipient_action_date_time: Optional[str] = None
+    recipient_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionDateTime"},
+    )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = None
+    recipient_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionMessage"},
+    )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = None
+    recipient_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientUserId"},
+    )
     """The ID of the recipient of the request"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
 
 
 @dataclass
 class OfferShiftRequestApproveInput:
-    """Approve an Offer Shift request"""
+    """
+    Approve an Offer Shift request
+    """
 
     message: Optional[str] = None
     """A message when a request is accepted."""
@@ -305,7 +517,9 @@ class OfferShiftRequestApproveInput:
 
 @dataclass
 class OfferShiftRequestApproveResponse:
-    """Response for Approve an Offer Shift request"""
+    """
+    Response for Approve an Offer Shift request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -316,7 +530,9 @@ class OfferShiftRequestApproveResponse:
 
 @dataclass
 class OfferShiftRequestDeclineInput:
-    """Decline an Offer Shift request"""
+    """
+    Decline an Offer Shift request
+    """
 
     message: Optional[str] = None
     """A message when a request is declined."""
@@ -324,7 +540,9 @@ class OfferShiftRequestDeclineInput:
 
 @dataclass
 class OfferShiftRequestDeclineResponse:
-    """Response for Decline an Offer Shift request"""
+    """
+    Response for Decline an Offer Shift request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -335,54 +553,105 @@ class OfferShiftRequestDeclineResponse:
 
 @dataclass
 class ListSwapShiftsChangeRequestsResponse:
-    """Response for List all Swap Shifts requests in a team"""
+    """
+    Response for List all Swap Shifts requests in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[SwapShiftsChangeRequestResponse]] = None
     """List of Swap Shifts Change Requests."""
 
 
 @dataclass
 class SwapShiftsChangeRequestResponse:
-    """Response for Get a Swap Shifts request"""
+    """
+    Response for Get a Swap Shifts request
+    """
 
     id: Optional[str] = None
     """The unique ID of the Swap Shift request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = None
+    sender_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderShiftId"},
+    )
     """The ID of the Shift from the sender"""
-    recipient_action_date_time: Optional[str] = None
+    recipient_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionDateTime"},
+    )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = None
+    recipient_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientActionMessage"},
+    )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = None
+    recipient_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientUserId"},
+    )
     """The ID of the recipient of the request"""
-    recipient_shift_id: Optional[str] = None
+    recipient_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recipientShiftId"},
+    )
     """The ID of the Shift from the recipient"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
 
 
 @dataclass
 class SwapShiftsChangeRequestApproveInput:
-    """Approve a Swap Shifts request"""
+    """
+    Approve a Swap Shifts request
+    """
 
     message: Optional[str] = None
     """A message when a request is accepted."""
@@ -390,7 +659,9 @@ class SwapShiftsChangeRequestApproveInput:
 
 @dataclass
 class SwapShiftsChangeRequestApproveResponse:
-    """Response for Approve a Swap Shifts request"""
+    """
+    Response for Approve a Swap Shifts request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -401,7 +672,9 @@ class SwapShiftsChangeRequestApproveResponse:
 
 @dataclass
 class SwapShiftsChangeRequestDeclineInput:
-    """Decline a Swap Shifts request"""
+    """
+    Decline a Swap Shifts request
+    """
 
     message: Optional[str] = None
     """A message when a request is declined."""
@@ -409,7 +682,9 @@ class SwapShiftsChangeRequestDeclineInput:
 
 @dataclass
 class SwapShiftsChangeRequestDeclineResponse:
-    """Response for Decline a Swap Shifts request"""
+    """
+    Response for Decline a Swap Shifts request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -420,46 +695,85 @@ class SwapShiftsChangeRequestDeclineResponse:
 
 @dataclass
 class ListOpenShiftChangeRequestsResponse:
-    """Response for List all Open Shift requests in a team"""
+    """
+    Response for List all Open Shift requests in a team
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[OpenShiftChangeRequestResponse]] = None
     """List of Open Shift Change Requests."""
 
 
 @dataclass
 class OpenShiftChangeRequestResponse:
-    """Response for Get an Open Shift request"""
+    """
+    Response for Get an Open Shift request
+    """
 
     id: Optional[str] = None
     """The unique ID of the Open Shift Change request."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """The person the request is assigned to: 'manager' or 'recipient'"""
     state: Optional[str] = None
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = None
+    sender_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderDateTime"},
+    )
     """Time when the request was sent"""
-    sender_message: Optional[str] = None
+    sender_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderMessage"},
+    )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = None
+    sender_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "senderUserId"},
+    )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = None
+    manager_action_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionDateTime"},
+    )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = None
+    manager_action_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerActionMessage"},
+    )
     """The message from the manager"""
-    manager_user_id: Optional[str] = None
+    manager_user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managerUserId"},
+    )
     """The ID of the manager that responded"""
-    open_shift_id: Optional[str] = None
+    open_shift_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "openShiftId"},
+    )
     """The ID of the Open Shift being requested"""
 
 
 @dataclass
 class OpenShiftChangeRequestApproveInput:
-    """Approve an Open Shift request"""
+    """
+    Approve an Open Shift request
+    """
 
     message: Optional[str] = None
     """
@@ -470,7 +784,9 @@ class OpenShiftChangeRequestApproveInput:
 
 @dataclass
 class OpenShiftChangeRequestApproveResponse:
-    """Response for Approve an Open Shift request"""
+    """
+    Response for Approve an Open Shift request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -481,7 +797,9 @@ class OpenShiftChangeRequestApproveResponse:
 
 @dataclass
 class OpenShiftChangeRequestDeclineInput:
-    """Decline an Open Shift request"""
+    """
+    Decline an Open Shift request
+    """
 
     message: Optional[str] = None
     """
@@ -492,7 +810,9 @@ class OpenShiftChangeRequestDeclineInput:
 
 @dataclass
 class OpenShiftChangeRequestDeclineResponse:
-    """Response for Decline an Open Shift request"""
+    """
+    Response for Decline an Open Shift request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -503,36 +823,70 @@ class OpenShiftChangeRequestDeclineResponse:
 
 @dataclass
 class ListOpenShiftsCrossTeamResponse:
-    """Response for List all Open Shifts from my teams"""
+    """
+    Response for List all Open Shifts from my teams
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[OpenShiftResponse]] = None
     """List of Open Shifts"""
 
 
 @dataclass
 class ListShiftsCrossTeamResponse:
-    """Response for List all Shifts from my teams"""
+    """
+    Response for List all Shifts from my teams
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[ShiftResponse]] = None
     """List of Shifts"""
 
 
 @dataclass
 class ListTimesOffCrossTeamResponse:
-    """Response for List all Times Off from my teams"""
+    """
+    Response for List all Times Off from my teams
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     value: Optional[List[TimeOffResponse]] = None
     """List of Times off"""
 
 
 @dataclass
-class WebHookRequest:
-    """Definition: WebHookRequest"""
+class GetAllTeamsResponse:
+    """
+    Response for List teams
+    """
 
-    notification_url: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
+    value: Optional[List[Dict[str, Any]]] = None
+    """List of one or more Teams you are a part of."""
+
+
+@dataclass
+class WebHookRequest:
+    """
+    Definition: WebHookRequest
+    """
+
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """
     Specify a well-formed URL of the endpoint that will receive notifications.
     """
@@ -540,7 +894,9 @@ class WebHookRequest:
 
 @dataclass
 class WebhookPushResponse:
-    """Definition: WebhookPushResponse"""
+    """
+    Definition: WebhookPushResponse
+    """
 
     value: Optional[List[WebhookNotificationEntity]] = None
     """List of values"""
@@ -548,45 +904,83 @@ class WebhookPushResponse:
 
 @dataclass
 class WebhookNotificationEntity:
-    """Definition: WebhookNotificationEntity"""
+    """
+    Definition: WebhookNotificationEntity
+    """
 
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """WebHook Subscription Id"""
-    expiration_date_time: Optional[str] = None
+    expiration_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "expirationDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    change_type: Optional[str] = None
+    change_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeType"},
+    )
     """Resource change type (created/updated/deleted)."""
-    resource_data: Optional[WebhookPushResponseResourceEntity] = None
+    resource_data: Optional[WebhookPushResponseResourceEntity] = field(
+        default=None,
+        metadata={"wire_name": "resourceData"},
+    )
 
 
 @dataclass
 class WebhookPushResponseResourceEntity:
-    """Definition: WebhookPushResponseResourceEntity"""
+    """
+    Definition: WebhookPushResponseResourceEntity
+    """
 
-    id: Optional[str] = None
+    id_2: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
     """Full resource path."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.type"},
+    )
     """Resoure Type."""
-    team_id: Optional[str] = None
+    id: Optional[str] = None
+    """ID of the resource that is updated."""
+    team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "teamId"},
+    )
     """ID of team where the update happened."""
 
 
 @dataclass
 class Subscription:
-    """Definition: Subscription"""
+    """
+    Definition: Subscription
+    """
 
     id: Optional[str] = None
     """Unique identifier for the subscription."""
     resource: Optional[str] = None
     """Specifies the resource that will be monitored for changes."""
-    application_id: Optional[str] = None
+    application_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "applicationId"},
+    )
     """Identifier of the application used to create the subscription."""
-    change_type: Optional[str] = None
+    change_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeType"},
+    )
     """
     Indicates the type of change in the subscribed resource that will raise a
     notification.
     """
-    client_state: Optional[str] = None
+    client_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "clientState"},
+    )
     """
     Specifies the value of the clientState property sent by the service in each
     notification. The maximum length is 128 characters. The client can check
@@ -594,16 +988,25 @@ class Subscription:
     clientState property sent with the subscription with the value of the
     clientState property received with each notification.
     """
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """
     The URL of the endpoint that will receive the notifications. This URL must
     make use of the HTTPS protocol.
     """
-    expiration_date_time: Optional[str] = None
+    expiration_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "expirationDateTime"},
+    )
     """
     Specifies the date and time when the webhook subscription expires (UTC).
     """
-    creator_id: Optional[str] = None
+    creator_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "creatorId"},
+    )
     """
     Identifier of the user or service principal that created the subscription.
     If the app used delegated permissions to create the subscription, this
@@ -615,41 +1018,74 @@ class Subscription:
 
 @dataclass
 class SharedTimeOff:
-    """Definition: SharedTimeOff"""
+    """
+    Definition: SharedTimeOff
+    """
 
-    time_off_reason_id: Optional[str] = None
+    time_off_reason_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeOffReasonId"},
+    )
     """Time Off Reason ID."""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[Theme] = None
 
 
 @dataclass
 class DraftTimeOff:
-    """Definition: DraftTimeOff"""
+    """
+    Definition: DraftTimeOff
+    """
 
-    time_off_reason_id: Optional[str] = None
+    time_off_reason_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeOffReasonId"},
+    )
     """Time Off Reason ID."""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[Theme] = None
 
 
 @dataclass
 class SharedShift:
-    """Definition: SharedShift"""
+    """
+    Definition: SharedShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Shift Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[Theme] = None
     activities: Optional[Activities] = None
@@ -657,49 +1093,65 @@ class SharedShift:
 
 @dataclass
 class DraftShift:
-    """Definition: DraftShift"""
+    """
+    Definition: DraftShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[Theme] = None
     activities: Optional[Activities] = None
 
 
-@dataclass
-class Theme:
-    """Definition: Theme"""
+Theme = Literal[
+    "white",
+    "blue",
+    "green",
+    "purple",
+    "pink",
+    "yellow",
+    "gray",
+    "darkBlue",
+    "darkGreen",
+    "darkPurple",
+    "darkPink",
+    "darkYellow",
+]
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
-
-@dataclass
-class Activities:
-    """Definition: Activities"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+Activities = List[Dict[str, Any]]
 
 
 @dataclass
 class SchedulingGroupInfo:
-    """Definition: SchedulingGroupInfo"""
+    """
+    Definition: SchedulingGroupInfo
+    """
 
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """The unique ID of the Scheduling Group."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name for the Scheduling Group."""
     code: Optional[str] = None
     """The scheduling group code."""
@@ -707,88 +1159,159 @@ class SchedulingGroupInfo:
 
 @dataclass
 class UserInfo:
-    """Definition: UserInfo"""
+    """
+    Definition: UserInfo
+    """
 
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """The ID of the user."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name of the user."""
 
 
 @dataclass
 class TeamInfo:
-    """Definition: TeamInfo"""
+    """
+    Definition: TeamInfo
+    """
 
-    team_id: Optional[str] = None
+    team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "teamId"},
+    )
     """The ID of the team."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name for the team."""
 
 
 @dataclass
 class EditOpenShiftRequest:
-    """Definition: EditOpenShiftRequest"""
+    """
+    Definition: EditOpenShiftRequest
+    """
 
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """Scheduling Group ID"""
-    shared_open_shift: Optional[Dict[str, Any]] = None
+    shared_open_shift: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "sharedOpenShift"},
+    )
 
 
 @dataclass
 class SharedOpenShift:
-    """Definition: SharedOpenShift"""
+    """
+    Definition: SharedOpenShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[Theme] = None
-    open_slot_count: Optional[int] = None
+    open_slot_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "openSlotCount"},
+    )
     """Open Slot Count"""
     activities: Optional[Activities] = None
 
 
 @dataclass
 class DraftOpenShift:
-    """Definition: DraftOpenShift"""
+    """
+    Definition: DraftOpenShift
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
     notes: Optional[str] = None
     """Notes"""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endDateTime"},
+    )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
     theme: Optional[Theme] = None
-    open_slot_count: Optional[int] = None
+    open_slot_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "openSlotCount"},
+    )
     """Open Slot Count"""
     activities: Optional[Activities] = None
 
 
 @dataclass
 class CreateShiftRequest:
-    """Definition: CreateShiftRequest"""
+    """
+    Definition: CreateShiftRequest
+    """
 
-    scheduling_group_id: Optional[str] = None
+    scheduling_group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "schedulingGroupId"},
+    )
     """Scheduling Group ID"""
-    shared_shift: Optional[Dict[str, Any]] = None
+    shared_shift: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "sharedShift"},
+    )
     """Shared version of the Shift."""
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """Assigned to User ID"""
 
 
 @dataclass
 class CreateTimeOffRequest:
-    """Definition: CreateTimeOffRequest"""
+    """
+    Definition: CreateTimeOffRequest
+    """
 
-    shared_time_off: Optional[Dict[str, Any]] = None
+    shared_time_off: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "sharedTimeOff"},
+    )
     """Shared version of a TimeOff."""
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
     """Assigned to User ID"""
 
 
@@ -826,53 +1349,29 @@ class ShiftsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "shifts"
 
-    async def get_all_teams_async(
-        self,
-    ):
-        """
-        List teams
-
-        This operation retrieves a list of all the Teams (Office 365 Groups)
-        you are a member of.
-        """
-        path = f"{self._connection_runtime_url}/v1.0/me/joinedTeams"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def get_schedule_async(
         self,
         team_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a Schedule's details
 
         This operation returns details of a Schedule using the Schedule's
         unique ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -888,15 +1387,15 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Time Off instances in a team
 
         This operation returns all Time Off instances in a Schedule
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/timesoff"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/timesoff"
         )
         query_params = []
         if start_time is not None:
@@ -915,14 +1414,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -936,24 +1437,26 @@ class ShiftsClient(ConnectorClientBase):
         self,
         input: CreateTimeOffRequest,
         team_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a new Time Off instance
 
         This operation creates a new Time Off instance and assigns it to a
         member of the team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/timesoff"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/timesoff"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -967,23 +1470,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         time_off_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a Time Off instance
 
         This operation returns details for a Time Off using its unique ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/timesoff/{str(time_off_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/timesoff"
+            f"/{quote(str(time_off_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -997,23 +1507,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         time_off_id: str,
-    ):
+    ) -> None:
         """
         Delete a Time Off instance
 
         This operation deletes a Time Off using its unique ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/timesoff/{str(time_off_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/timesoff"
+            f"/{quote(str(time_off_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1024,15 +1541,15 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Shifts in a team
 
         This operation returns all Shifts assigned to members of a team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/shifts"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/shifts"
         )
         query_params = []
         if start_time is not None:
@@ -1051,14 +1568,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1072,24 +1591,26 @@ class ShiftsClient(ConnectorClientBase):
         self,
         input: CreateShiftRequest,
         team_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a new Shift
 
         This operation creates a new Shift and assigns it to a member of the
         team
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/shifts"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/shifts"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1103,23 +1624,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         shift_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a Shift
 
         This operation returns details for a Shift using the Shift's unique ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/shifts/{str(shift_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/shifts"
+            f"/{quote(str(shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1133,23 +1661,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         shift_id: str,
-    ):
+    ) -> None:
         """
         Delete a Shift
 
         This operation deletes a Shift using the Shift's unique ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/shifts/{str(shift_id)}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/shifts"
+            f"/{quote(str(shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1160,15 +1695,15 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Open Shifts in a team
 
         This operation returns all Open Shifts in a team.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/openShifts"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/openShifts"
         )
         query_params = []
         if start_time is not None:
@@ -1187,14 +1722,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1208,23 +1745,25 @@ class ShiftsClient(ConnectorClientBase):
         self,
         input: EditOpenShiftRequest,
         team_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a new Open Shift
 
         Create a new Open Shift in a Schedule.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/openShifts"
+            f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/openShifts"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1238,28 +1777,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         open_shift_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get an Open Shift
 
         This operation returns details for an Open Shift.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/openShifts"
-            f"/{str(open_shift_id)}"
+            f"/{quote(str(open_shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1274,28 +1815,30 @@ class ShiftsClient(ConnectorClientBase):
         input: EditOpenShiftRequest,
         team_id: str,
         open_shift_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update an Open Shift
 
         Update an Open Shift in a Schedule.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/openShifts"
-            f"/{str(open_shift_id)}"
+            f"/{quote(str(open_shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1309,28 +1852,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         open_shift_id: str,
-    ):
+    ) -> None:
         """
         Delete an Open Shift
 
         This operation deletes an Open Shift.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/openShifts"
-            f"/{str(open_shift_id)}"
+            f"/{quote(str(open_shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1339,16 +1884,20 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Time Off Reasons in a team
 
         This operation returns the list of Time Off Reasons associated with a
         team.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/timeOffReasons"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/timeOffReasons"
         )
         query_params = []
         if top is not None:
@@ -1357,14 +1906,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1378,15 +1929,19 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Scheduling Groups in a team
 
         This operation returns all Scheduling Groups in a Schedule.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/schedulinggroups"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/schedulinggroups"
         )
         query_params = []
         if top is not None:
@@ -1395,14 +1950,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1416,29 +1973,31 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         scheduling_group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a Scheduling Group
 
         This operation returns details for a Scheduling Group using its unique
         ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/schedulinggroups"
-            f"/{str(scheduling_group_id)}"
+            f"/{quote(str(scheduling_group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1453,15 +2012,19 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[str] = None,
         state: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Time Off requests in a team
 
         This operation returns all Time Off requests in a Schedule.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/timeOffRequests"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/timeOffRequests"
         )
         query_params = []
         if top is not None:
@@ -1475,14 +2038,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"state={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1496,28 +2061,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         time_off_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a Time Off request
 
         This operation returns a Time Off request by ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/timeOffRequests"
-            f"/{str(time_off_request_id)}"
+            f"/{quote(str(time_off_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1532,29 +2099,31 @@ class ShiftsClient(ConnectorClientBase):
         input: TimeOffRequestApproveInput,
         team_id: str,
         time_off_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Approve a Time Off request
 
         This operation allows managers to approve a Time Off request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/timeOffRequests"
-            f"/{str(time_off_request_id)}"
+            f"/{quote(str(time_off_request_id), safe='')}"
             f"/approve"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1569,29 +2138,31 @@ class ShiftsClient(ConnectorClientBase):
         input: TimeOffRequestDeclineInput,
         team_id: str,
         time_off_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Decline a Time Off request
 
         This operation allows managers to decline a Time Off request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/timeOffRequests"
-            f"/{str(time_off_request_id)}"
+            f"/{quote(str(time_off_request_id), safe='')}"
             f"/decline"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1606,15 +2177,19 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[str] = None,
         state: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Offer Shift requests in a team
 
         This operation returns all Offer Shift requests in a Schedule.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/offerShiftRequests"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/offerShiftRequests"
         )
         query_params = []
         if top is not None:
@@ -1628,14 +2203,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"state={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1649,28 +2226,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         offer_shift_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get an Offer Shift request
 
         This operation returns an Offer Shift request by ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/offerShiftRequests"
-            f"/{str(offer_shift_request_id)}"
+            f"/{quote(str(offer_shift_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1685,30 +2264,32 @@ class ShiftsClient(ConnectorClientBase):
         input: OfferShiftRequestApproveInput,
         team_id: str,
         offer_shift_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Approve an Offer Shift request
 
         This operation allows recipients/managers to approve an Offer Shift
         request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/offerShiftRequests"
-            f"/{str(offer_shift_request_id)}"
+            f"/{quote(str(offer_shift_request_id), safe='')}"
             f"/approve"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1723,29 +2304,31 @@ class ShiftsClient(ConnectorClientBase):
         input: OfferShiftRequestDeclineInput,
         team_id: str,
         offer_shift_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Decline an Offer Shift request
 
         This operation allows users to decline an Offer Shift request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/offerShiftRequests"
-            f"/{str(offer_shift_request_id)}"
+            f"/{quote(str(offer_shift_request_id), safe='')}"
             f"/decline"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1760,15 +2343,19 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[str] = None,
         state: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Swap Shifts requests in a team
 
         This operation returns all Swap Shifts requests in a Schedule.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/swapShiftsChangeRequests"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/swapShiftsChangeRequests"
         )
         query_params = []
         if top is not None:
@@ -1782,14 +2369,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"state={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1803,28 +2392,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         swap_shifts_change_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a Swap Shifts request
 
         This operation returns a Swap Shifts request by ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/swapShiftsChangeRequests"
-            f"/{str(swap_shifts_change_request_id)}"
+            f"/{quote(str(swap_shifts_change_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1839,29 +2430,31 @@ class ShiftsClient(ConnectorClientBase):
         input: SwapShiftsChangeRequestApproveInput,
         team_id: str,
         swap_shifts_change_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Approve a Swap Shifts request
 
         This operation allows a user to approve a Swap Shifts request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/swapShiftsChangeRequests"
-            f"/{str(swap_shifts_change_request_id)}"
+            f"/{quote(str(swap_shifts_change_request_id), safe='')}"
             f"/approve"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1876,29 +2469,31 @@ class ShiftsClient(ConnectorClientBase):
         input: SwapShiftsChangeRequestDeclineInput,
         team_id: str,
         swap_shifts_change_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Decline a Swap Shifts request
 
         This operation allows users to decline a Swap Shifts request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/swapShiftsChangeRequests"
-            f"/{str(swap_shifts_change_request_id)}"
+            f"/{quote(str(swap_shifts_change_request_id), safe='')}"
             f"/decline"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1913,15 +2508,19 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[str] = None,
         state: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Open Shift requests in a team
 
         This operation returns all Open Shift change requests in a Schedule.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/teams/{str(team_id)}/schedule/openShiftChangeRequests"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(team_id), safe='')}"
+            f"/schedule"
+            f"/openShiftChangeRequests"
         )
         query_params = []
         if top is not None:
@@ -1935,14 +2534,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"state={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1956,28 +2557,30 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         open_shift_change_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get an Open Shift request
 
         This operation returns an Open Shift change request by ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/openShiftChangeRequests"
-            f"/{str(open_shift_change_request_id)}"
+            f"/{quote(str(open_shift_change_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1992,29 +2595,31 @@ class ShiftsClient(ConnectorClientBase):
         input: OpenShiftChangeRequestApproveInput,
         team_id: str,
         open_shift_change_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Approve an Open Shift request
 
         This operation allows managers to approve an Open Shift request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/openShiftChangeRequests"
-            f"/{str(open_shift_change_request_id)}"
+            f"/{quote(str(open_shift_change_request_id), safe='')}"
             f"/approve"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2029,29 +2634,31 @@ class ShiftsClient(ConnectorClientBase):
         input: OpenShiftChangeRequestDeclineInput,
         team_id: str,
         open_shift_change_request_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Decline an Open Shift request
 
         This operation allows managers to decline an Open Shift request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/teams"
-            f"/{str(team_id)}"
+            f"/{quote(str(team_id), safe='')}"
             f"/schedule"
             f"/openShiftChangeRequests"
-            f"/{str(open_shift_change_request_id)}"
+            f"/{quote(str(open_shift_change_request_id), safe='')}"
             f"/decline"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2066,14 +2673,14 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Open Shifts from my teams
 
         This operation returns Open Shifts that need to be filled from all your
         teams.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getOpenShifts"
         )
         query_params = []
@@ -2093,14 +2700,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2116,13 +2725,15 @@ class ShiftsClient(ConnectorClientBase):
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Shifts from my teams
 
         This operation returns assigned Shifts from all your teams.
         """
-        path = f"{self._connection_runtime_url}/beta/me/joinedTeams/getShifts"
+        request_url = (
+            f"{self._connection_runtime_url}/beta/me/joinedTeams/getShifts"
+        )
         query_params = []
         if start_time is not None:
             value = str(start_time)
@@ -2145,14 +2756,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2168,13 +2781,13 @@ class ShiftsClient(ConnectorClientBase):
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all Times Off from my teams
 
         This operation returns times when people are off from all your teams.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getTimesOff"
         )
         query_params = []
@@ -2199,14 +2812,16 @@ class ShiftsClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2216,131 +2831,76 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def trigger_for_open_shift_change_requests_async(
+    async def get_all_teams_async(
         self,
-        input: WebHookRequest,
-        team_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        When an Open Shift request is created, updated or deleted
+        List teams
 
-        This operation triggers when an Open Shift request is created, updated
-        or deleted.
+        This operation retrieves a list of all the Teams (Office 365 Groups)
+        you are a member of.
         """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger/teams/{str(team_id)}/openshiftchangerequests"
+        request_url = f"{self._connection_runtime_url}/v1.0/me/joinedTeams"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-
-        response = await self.http_client.send_async("POST", path, body=input)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                "POST",
-                path,
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )
 
-    async def trigger_for_swap_shifts_change_requests_async(
-        self,
-        input: WebHookRequest,
-        team_id: str,
-    ):
-        """
-        When a Swap Shifts request is created, updated or deleted
+        if not response.text:
+            return None
 
-        This operation triggers when a Swap Shifts request is created, updated
-        or deleted.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger/teams/{str(team_id)}/swapshiftschangerequests"
-        )
+        return json.loads(response.text)
 
-        response = await self.http_client.send_async("POST", path, body=input)
 
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def trigger_for_offer_shift_requests_async(
-        self,
-        input: WebHookRequest,
-        team_id: str,
-    ):
-        """
-        When an Offer Shift request is created, updated or deleted
-
-        This operation triggers when an Offer Shift request is created, updated
-        or deleted.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger/teams/{str(team_id)}/offershiftrequests"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def trigger_for_time_off_requests_async(
-        self,
-        input: WebHookRequest,
-        team_id: str,
-    ):
-        """
-        When a Time Off request is created, updated or deleted
-
-        This operation triggers when a Time Off request is created, updated or
-        deleted.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger/teams/{str(team_id)}/timeoffrequests"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-    async def trigger_for_shifts_async(
-        self,
-        input: WebHookRequest,
-        team_id: str,
-    ):
-        """
-        When a Shift is created, updated or deleted
-
-        This operation triggers when a Shift is created, updated or deleted.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/trigger/teams/{str(team_id)}/shifts"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "TriggerForOpenShiftChangeRequests": {
+        "operation_id": "TriggerForOpenShiftChangeRequests",
+        "path": "/{connectionId}/trigger/teams/{teamId}/openshiftchangerequests",
+        "method": "post",
+        "required_parameters": ["teamId", "request"],
+        "callback_payload_type": None,
+    },
+    "TriggerForSwapShiftsChangeRequests": {
+        "operation_id": "TriggerForSwapShiftsChangeRequests",
+        "path": "/{connectionId}/trigger/teams/{teamId}/swapshiftschangerequests",
+        "method": "post",
+        "required_parameters": ["teamId", "request"],
+        "callback_payload_type": None,
+    },
+    "TriggerForOfferShiftRequests": {
+        "operation_id": "TriggerForOfferShiftRequests",
+        "path": "/{connectionId}/trigger/teams/{teamId}/offershiftrequests",
+        "method": "post",
+        "required_parameters": ["teamId", "request"],
+        "callback_payload_type": None,
+    },
+    "TriggerForTimeOffRequests": {
+        "operation_id": "TriggerForTimeOffRequests",
+        "path": "/{connectionId}/trigger/teams/{teamId}/timeoffrequests",
+        "method": "post",
+        "required_parameters": ["teamId", "request"],
+        "callback_payload_type": None,
+    },
+    "TriggerForShifts": {
+        "operation_id": "TriggerForShifts",
+        "path": "/{connectionId}/trigger/teams/{teamId}/shifts",
+        "method": "post",
+        "required_parameters": ["teamId", "request"],
+        "callback_payload_type": None,
+    },
+}

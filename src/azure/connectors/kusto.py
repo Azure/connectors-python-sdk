@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict, List, Literal
 from urllib.parse import quote
 import json
 
@@ -23,42 +23,65 @@ from azure.connectors.sdk import (
 
 @dataclass
 class Table:
-    """Response for Run KQL query"""
+    """
+    Response for Run KQL query
+    """
 
     value: Optional[List[Row]] = None
 
 
 @dataclass
 class VisualizeResults:
-    """Response for Run KQL query and render a chart"""
+    """
+    Response for Run KQL query and render a chart
+    """
 
     body: Optional[str] = None
     """The body of the result in base64 encoding."""
-    body_html: Optional[str] = None
+    body_html: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bodyHtml"},
+    )
     """The body of the result in html encoding."""
-    attachment_content: Optional[str] = None
+    attachment_content: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "attachmentContent"},
+    )
     """The content of the attachment."""
-    attachment_name: Optional[str] = None
+    attachment_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "attachmentName"},
+    )
     """The name of the attachment file."""
-    kusto_deep_link: Optional[str] = None
+    kusto_deep_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "kustoDeepLink"},
+    )
     """Links to run the query in Kusto tools, for instance in KustoExplorer."""
 
 
 @dataclass
 class AsyncCommandResult:
-    """Response for Run async control command"""
+    """
+    Response for Run async control command
+    """
 
     state: Optional[str] = None
     """The state of the command."""
     status: Optional[str] = None
     """The status of the command."""
-    operation_id: Optional[str] = None
+    operation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "operationId"},
+    )
     """The operation ID of the control command"""
 
 
 @dataclass
 class MCPQueryResponse:
-    """Response for Kusto Query MCP Server"""
+    """
+    Response for Kusto Query MCP Server
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -70,7 +93,9 @@ class MCPQueryResponse:
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Response for Query schema
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -81,7 +106,9 @@ class ObjectEntity:
 
 @dataclass
 class Row:
-    """Definition: Row"""
+    """
+    Definition: Row
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -92,28 +119,40 @@ class Row:
 
 @dataclass
 class QueryAndVisualizeSchema:
-    """Definition: QueryAndVisualizeSchema"""
+    """
+    Definition: QueryAndVisualizeSchema
+    """
 
     cluster: Optional[ClusterName] = None
     db: Optional[DatabaseName] = None
     csl: Optional[Query] = None
-    chart_type: Optional[ChartType] = None
+    chart_type: Optional[ChartType] = field(
+        default=None,
+        metadata={"wire_name": "chartType"},
+    )
 
 
 @dataclass
 class CommandAndVisualizeSchema:
-    """Definition: CommandAndVisualizeSchema"""
+    """
+    Definition: CommandAndVisualizeSchema
+    """
 
     cluster: Optional[ClusterName] = None
     db: Optional[DatabaseName] = None
     csl: Optional[str] = None
     """Specify the control command you would like to run"""
-    chart_type: Optional[ChartType] = None
+    chart_type: Optional[ChartType] = field(
+        default=None,
+        metadata={"wire_name": "chartType"},
+    )
 
 
 @dataclass
 class QueryAndListSchema:
-    """Definition: QueryAndListSchema"""
+    """
+    Definition: QueryAndListSchema
+    """
 
     cluster: Optional[ClusterName] = None
     db: Optional[DatabaseName] = None
@@ -122,7 +161,9 @@ class QueryAndListSchema:
 
 @dataclass
 class ControlCommandAndListSchema:
-    """Definition: ControlCommandAndListSchema"""
+    """
+    Definition: ControlCommandAndListSchema
+    """
 
     cluster: Optional[ClusterName] = None
     db: Optional[DatabaseName] = None
@@ -130,53 +171,23 @@ class ControlCommandAndListSchema:
     """Specify the show control command you would like to run"""
 
 
-@dataclass
-class ClusterName:
-    """Definition: ClusterName"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ClusterName = str
 
 
-@dataclass
-class DatabaseName:
-    """Definition: DatabaseName"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+DatabaseName = str
 
 
-@dataclass
-class Query:
-    """Definition: Query"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+Query = str
 
 
-@dataclass
-class ChartType:
-    """Definition: ChartType"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ChartType = Literal["Html Table", "Pie Chart", "Time Chart", "Bar Chart"]
 
 
 @dataclass
 class MCPQueryRequest:
-    """Definition: MCPQueryRequest"""
+    """
+    Definition: MCPQueryRequest
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -184,7 +195,10 @@ class MCPQueryRequest:
     params: Optional[Dict[str, Any]] = None
     result: Optional[Dict[str, Any]] = None
     error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = None
+    callback_endpoint: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callbackEndpoint"},
+    )
 
 
 # Client Class
@@ -224,21 +238,23 @@ class KustoClient(ConnectorClientBase):
     async def list_kusto_results_async(
         self,
         input: QueryAndListSchema,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run KQL query
 
         Runs the KQL query and returns the result as a set of rows which can be
         iterated over in the following connectors e.g TableName | take 10.
         """
-        path = f"{self._connection_runtime_url}/ListKustoResults/false"
+        request_url = f"{self._connection_runtime_url}/ListKustoResults/false"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -251,7 +267,7 @@ class KustoClient(ConnectorClientBase):
     async def list_kusto_show_command_results_async(
         self,
         input: ControlCommandAndListSchema,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run show control command
 
@@ -259,14 +275,18 @@ class KustoClient(ConnectorClientBase):
         which can be iterated over in the following connectors e.g .show table
         TableName policy caching.
         """
-        path = f"{self._connection_runtime_url}/ListKustoShowCommandResults"
+        request_url = (
+            f"{self._connection_runtime_url}/ListKustoShowCommandResults"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -279,23 +299,25 @@ class KustoClient(ConnectorClientBase):
     async def run_kusto_query_and_visualize_results_async(
         self,
         input: QueryAndVisualizeSchema,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run KQL query and render a chart
 
         Runs the KQL query and returns result as a chart of your choice e.g
         TableName | where Timestamp > ago(1h) | project timestamp, value.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/false"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -308,23 +330,25 @@ class KustoClient(ConnectorClientBase):
     async def run_kusto_command_and_visualize_results_async(
         self,
         input: CommandAndVisualizeSchema,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run control command and render a chart
 
         Runs the control command and returns the result as a chart of your
         choice e.g .clear table TableName data.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/true"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -337,7 +361,7 @@ class KustoClient(ConnectorClientBase):
     async def run_async_control_command_and_wait_async(
         self,
         input: ControlCommandAndListSchema,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run async control command
 
@@ -345,14 +369,18 @@ class KustoClient(ConnectorClientBase):
         on completion. Command can run for maximum 1 hour. The 'async' keyword
         is mandatory e.g .set-or-append async TargetTable <| SourceTable.
         """
-        path = f"{self._connection_runtime_url}/RunAsyncControlCommandAndWait"
+        request_url = (
+            f"{self._connection_runtime_url}/RunAsyncControlCommandAndWait"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -366,13 +394,15 @@ class KustoClient(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Kusto Query MCP Server
 
         This MCP server runs Kusto queries and manages the results.
         """
-        path = f"{self._connection_runtime_url}/mcp/KustoQueryManagement"
+        request_url = (
+            f"{self._connection_runtime_url}/mcp/KustoQueryManagement"
+        )
         query_params = []
         if session_id is not None:
             value = str(session_id)
@@ -380,14 +410,44 @@ class KustoClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_kusto_results_schema_async(
+        self,
+        input: QueryAndListSchema,
+    ) -> dict[str, Any] | None:
+        """
+        Query schema
+
+        Gets the schema for a query
+        """
+        request_url = f"{self._connection_runtime_url}/ListKustoResultsSchema"
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
                 response.status,
                 response.text,
             )

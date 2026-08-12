@@ -35,6 +35,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_docusign.py` | DocuSign | `DOCUSIGN_CONNECTION_URL` |
 | `sample_connector_usage_kusto.py` | Azure Data Explorer | `KUSTO_CONNECTION_URL` |
 | `sample_connector_usage_eventhubs.py` | Azure Event Hubs | `EVENTHUBS_CONNECTION_URL` |
+| `sample_connector_usage_etsy.py` | Etsy | `ETSY_CONNECTION_URL` |
 | `sample_connector_usage_excelonline.py` | Excel Online | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_ftp.py` | FTP | `FTP_CONNECTION_URL` |
 | `sample_connector_usage_github.py` | GitHub | `GITHUB_CONNECTION_URL` |
@@ -42,11 +43,13 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_googletasks.py` | Google Tasks | `GOOGLETASKS_CONNECTION_URL` |
 | `sample_connector_usage_googledrive.py` | Google Drive | `GOOGLEDRIVE_CONNECTION_URL` |
 | `sample_connector_usage_keyvault.py` | Azure Key Vault | `KEYVAULT_CONNECTION_URL` |
+| `sample_connector_usage_jedoxodatahub.py` | Jedox OData Hub | `JEDOXODATAHUB_CONNECTION_URL` |
 | `sample_connector_usage_jira.py` | Jira | `JIRA_CONNECTION_URL` |
 | `sample_connector_usage_excelonlinebusiness.py` | Excel Online (Business) | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_mq.py` | IBM MQ | `MQ_CONNECTION_URL` |
 | `sample_connector_usage_microsoftbookings.py` | Microsoft Bookings | `MICROSOFTBOOKINGS_CONNECTION_URL` |
 | `sample_connector_usage_microsoftforms.py` | Microsoft Forms | `MICROSOFTFORMS_CONNECTION_URL` |
+| `sample_connector_usage_monday.py` | monday.com | `MONDAY_CONNECTION_URL` |
 | `sample_connector_usage_msgraph.py` | MS Graph Groups & Users | `MSGRAPH_CONNECTION_URL` |
 | `sample_connector_usage_office365.py` | Office 365 Outlook | `OFFICE365_CONNECTION_URL` |
 | `sample_connector_usage_office365groups.py` | Office 365 Groups | `OFFICE365GROUPS_CONNECTION_URL` |
@@ -65,11 +68,13 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_shifts.py` | Shifts | `SHIFTS_CONNECTION_URL` |
 | `sample_connector_usage_slack.py` | Slack | `SLACK_CONNECTION_URL` |
 | `sample_connector_usage_smtp.py` | SMTP | `SMTP_CONNECTION_URL` |
+| `sample_connector_usage_starmind.py` | Starmind | `STARMIND_CONNECTION_URL` |
 | `sample_connector_usage_teams.py` | Microsoft Teams | `TEAMS_CONNECTION_URL` |
 | `sample_connector_usage_todo.py` | Microsoft To Do | `TODO_CONNECTION_URL` |
 | `sample_connector_usage_universalprint.py` | Universal Print | `UNIVERSALPRINT_CONNECTION_URL` |
 | `sample_connector_usage_wdatp.py` | Windows Defender ATP | `WDATP_CONNECTION_URL` |
 | `sample_connector_usage_wordonlinebusiness.py` | Word Online (Business) | `WORDONLINEBUSINESS_CONNECTION_URL` |
+| `sample_connector_usage_wordpress.py` | WordPress | `WORDPRESS_CONNECTION_URL` |
 | `sample_connector_usage_yammer.py` | Yammer (Viva Engage) | `YAMMER_CONNECTION_URL` |
 | `sample_connector_usage_azureeventgrid.py` | Azure Event Grid | `AZUREEVENTGRID_CONNECTION_URL` |
 | `sample_connector_usage_azureiotcentral.py` | Azure IoT Central | `AZUREIOTCENTRAL_CONNECTION_URL` |

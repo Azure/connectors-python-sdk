@@ -167,6 +167,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated |
 | **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
 | **Azure Event Hubs** | `azure.connectors.eventhubs` | ✅ Complete | 🔄 SDK Generated |
+| **Etsy** | `azure.connectors.etsy` | ✅ Complete | 🔄 SDK Generated |
 | **FTP** | `azure.connectors.ftp` | ✅ Complete | 🔄 SDK Generated |
 | **GitHub** | `azure.connectors.github` | ✅ Complete | 🔄 SDK Generated |
 | **Google Calendar** | `azure.connectors.googlecalendar` | ✅ Complete | 🔄 SDK Generated |
@@ -179,6 +180,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated |
 | **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated |
+| **Jedox OData Hub** | `azure.connectors.jedoxodatahub` | ✅ Complete | 🔄 SDK Generated |
 | **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated |
 | **Microsoft Bookings** | `azure.connectors.microsoftbookings` | ✅ Complete | 🔄 SDK Generated |
 | **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated |
@@ -187,6 +189,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated |
 | **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | ✅ E2E Validated |
 | **Microsoft To Do** | `azure.connectors.todo` | ✅ Complete | 🔄 SDK Generated |
+| **monday.com** | `azure.connectors.monday` | ✅ Complete | 🔄 SDK Generated |
 | **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated |
 | **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated |
 | **Office 365 Groups** | `azure.connectors.office365groups` | ✅ Complete | 🔄 SDK Generated |
@@ -204,6 +207,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated |
+| **Starmind** | `azure.connectors.starmind` | ✅ Complete | 🔄 SDK Generated |
 | **Universal Print** | `azure.connectors.universalprint` | ✅ Complete | 🔄 SDK Generated |
 | **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated |
 | **Azure IoT Central** | `azure.connectors.azureiotcentral` | ✅ Complete | 🔄 SDK Generated |
@@ -213,6 +217,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated |
 | **SQL Server** | `azure.connectors.sql` | ✅ Complete | 🔄 SDK Generated |
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
+| **WordPress** | `azure.connectors.wordpress` | ✅ Complete | 🔄 SDK Generated |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated |
 | **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated |
 | **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated |
@@ -220,7 +225,7 @@ The following connectors have been generated and validated with comprehensive te
 | **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated |
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 65 connectors supported
+**Total:** 70 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

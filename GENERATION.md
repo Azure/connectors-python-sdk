@@ -174,9 +174,21 @@ class Office365Client(ConnectorClientBase):
 
 ### Key Patterns in Generated Code
 
-#### 1. Dataclass Models
+#### 1. Root Schema Aliases
 
-All connector types are generated as dataclasses with optional fields:
+Root schemas retain their Swagger wire shape instead of being wrapped in a dataclass:
+
+```python
+Theme = Literal["white", "blue"]
+HandSignature = Literal[0, 1, 2, 3, 4]
+ChatMessageList = List["ChatMessage"]
+```
+
+String and integer enums become `Literal` aliases, and array roots become typed `List` aliases. Composed `allOf` object roots remain dataclasses with referenced and inline properties flattened into the same model.
+
+#### 2. Dataclass Models
+
+Connector object schemas are generated as dataclasses with optional fields:
 
 ```python
 @dataclass

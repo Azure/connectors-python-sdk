@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict, List, Literal
 from urllib.parse import quote
 import json
 
@@ -402,17 +402,7 @@ class ListMembersResponseSchema:
     """List members response"""
 
 
-@dataclass
-class ChatMessageList:
-    """
-    Response for When a new channel message is added
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ChatMessageList = List["ChatMessage"]
 
 
 @dataclass
@@ -494,17 +484,7 @@ class AtMentionUser:
     """
 
 
-@dataclass
-class OnGroupMemberChangeResponse:
-    """
-    Response for When a new team member is removed
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+OnGroupMemberChangeResponse = List[Dict[str, Any]]
 
 
 @dataclass
@@ -1345,17 +1325,7 @@ class DynamicResponseSchema:
     schema: Optional[ObjectEntity] = None
 
 
-@dataclass
-class GetFlowContinuationSubscriptionWithPosterOutputMetadataInput:
-    """
-    Get flow continuation subscription output metadata
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+GetFlowContinuationSubscriptionWithPosterOutputMetadataInput = str
 
 
 @dataclass
@@ -1719,6 +1689,11 @@ class CallEventWebhookResponseSchema:
 
     id: Optional[str] = None
     """Event identifier"""
+    id_2: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
+    """OData identifier"""
     type_: Optional[str] = field(
         default=None,
         metadata={"wire_name": "@odata.type"},
@@ -1789,6 +1764,11 @@ class TranscriptWebhookResponseSchema:
 
     id: Optional[str] = None
     """Transcript identifier"""
+    id_2: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
+    """OData identifier"""
     meeting_id: Optional[str] = field(
         default=None,
         metadata={"wire_name": "meetingId"},
@@ -1833,6 +1813,11 @@ class RecordingWebhookResponseSchema:
 
     id: Optional[str] = None
     """Recording identifier"""
+    id_2: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
+    """OData identifier"""
     meeting_id: Optional[str] = field(
         default=None,
         metadata={"wire_name": "meetingId"},
@@ -2019,11 +2004,47 @@ class ChannelWithOwnerTeamId:
     Definition: ChannelWithOwnerTeamId
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[str] = None
+    """The unique identifier of the channel"""
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """The name of the channel"""
+    description: Optional[str] = None
+    """The description of the channel, optional"""
+    email: Optional[str] = None
+    """The email address for sending messages to the channel"""
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
+    """The ID of the Microsoft Entra tenant."""
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
+    """A hyperlink for the channel in Microsoft Teams"""
+    files_folder_web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "filesFolderWebUrl"},
+    )
+    """The SharePoint folder URL of the channel"""
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
+    """Timestamp at which the channel was created. Read only"""
+    membership_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "membershipType"},
+    )
+    """The channel membership type"""
+    owner_team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ownerTeamId"},
+    )
+    """The ID of the team that owns the channel"""
 
 
 @dataclass
@@ -2600,30 +2621,23 @@ class PostMessageToSelfRequest:
     body: Optional[Dict[str, Any]] = None
 
 
-@dataclass
-class ThemeEditor:
-    """
-    Definition: ThemeEditor
-    """
+ThemeEditor = Literal[
+    "white",
+    "blue",
+    "green",
+    "purple",
+    "pink",
+    "yellow",
+    "gray",
+    "darkblue",
+    "darkgreen",
+    "darkpurple",
+    "darkpink",
+    "darkyellow",
+]
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
-
-@dataclass
-class Activities:
-    """
-    Definition: Activities
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+Activities = List[Dict[str, Any]]
 
 
 @dataclass
@@ -2690,17 +2704,7 @@ class AtMentionBotResponse:
     """
 
 
-@dataclass
-class ChannelIdForTeam:
-    """
-    Definition: ChannelIdForTeam
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ChannelIdForTeam = str
 
 
 @dataclass
@@ -2712,30 +2716,10 @@ class ChannelIds:
     channel: Optional[ChannelIdForTeam] = None
 
 
-@dataclass
-class ChatId:
-    """
-    Definition: ChatId
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ChatId = str
 
 
-@dataclass
-class BotIdForChat:
-    """
-    Definition: BotIdForChat
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+BotIdForChat = str
 
 
 @dataclass
