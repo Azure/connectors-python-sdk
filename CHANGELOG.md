@@ -24,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **5 new connector clients** with unit tests and samples: Etsy, Jedox OData Hub, monday.com, Starmind, and WordPress
 - **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
 - Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts
 - **DocuWare** (`docuware.py`) connector client with unit tests and samples

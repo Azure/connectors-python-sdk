@@ -108,26 +108,6 @@ try:
 except (ImportError, NameError):
     AzureadClient = None  # type: ignore[assignment,misc]
 try:
-    from .etsy import EtsyClient
-except (ImportError, NameError):
-    EtsyClient = None  # type: ignore[assignment,misc]
-try:
-    from .jedoxodatahub import JedoxodatahubClient
-except (ImportError, NameError):
-    JedoxodatahubClient = None  # type: ignore[assignment,misc]
-try:
-    from .monday import MondayClient
-except (ImportError, NameError):
-    MondayClient = None  # type: ignore[assignment,misc]
-try:
-    from .starmind import StarmindClient
-except (ImportError, NameError):
-    StarmindClient = None  # type: ignore[assignment,misc]
-try:
-    from .wordpress import WordpressClient
-except (ImportError, NameError):
-    WordpressClient = None  # type: ignore[assignment,misc]
-try:
     from .smtp import SmtpClient
 except (ImportError, NameError):
     SmtpClient = None  # type: ignore[assignment,misc]
@@ -364,11 +344,6 @@ __all__ = [
     'OnenoteClient',
     'PlannerClient',
     'AzureadClient',
-    'EtsyClient',
-    'JedoxodatahubClient',
-    'MondayClient',
-    'StarmindClient',
-    'WordpressClient',
     'SmtpClient',
     'ExcelonlineClient',
     'ExcelonlinebusinessClient',
