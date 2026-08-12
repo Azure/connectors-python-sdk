@@ -3804,7 +3804,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_templates_list_2_async(
+    async def device_templates_list_async(
         self,
         application: str,
     ) -> dict[str, Any] | None:
@@ -4174,7 +4174,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_templates_list_async(
+    async def device_templates_list_2_async(
         self,
         application: str,
     ) -> dict[str, Any] | None:
