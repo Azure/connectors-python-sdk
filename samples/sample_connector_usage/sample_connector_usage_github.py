@@ -24,7 +24,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.github import GithubClient, IssueDetailsModel
+from azure.connectors.github import GithubClient, IssueBasicDetailsModel
 
 
 # Connection runtime URL format:
@@ -67,7 +67,7 @@ async def example_3_create_issue(repository_owner: str, repository_name: str) ->
 
     credential = DefaultAzureCredential()
     async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = IssueDetailsModel(
+        request = IssueBasicDetailsModel(
             title="SDK sample issue",
             body="Created from github Python SDK sample.",
         )
