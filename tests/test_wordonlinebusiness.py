@@ -513,10 +513,10 @@ class TestDataclasses:
 
     def test_sensitivity_label_metadata_defaults(self):
         """Test SensitivityLabelMetadata default values."""
-        metadata = SensitivityLabelMetadata()
-        assert metadata.additional_properties == {}
+        metadata: SensitivityLabelMetadata = []
+        assert metadata == []
 
     def test_get_files_defaults(self):
         """Test GetFiles default values."""
-        files = GetFiles()
-        assert files.additional_properties == {}
+        files: GetFiles = []
+        assert files == []

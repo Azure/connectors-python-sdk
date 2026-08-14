@@ -49,17 +49,7 @@ class EventRequest:
     properties: Optional[Dict[str, Any]] = None
 
 
-@dataclass
-class EventSchema:
-    """
-    Definition: EventSchema
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+EventSchema = List[Dict[str, Any]]
 
 
 @dataclass

@@ -373,9 +373,7 @@ class TestPutMessage:
         )
 
         mock_response = MockResponse(status=201, text="")
-        message_input = PutMessageInput(
-            additional_properties={"message": "Hello, Queue!"}
-        )
+        message_input = PutMessageInput("Hello, Queue!")
 
         with patch.object(
             client._http_client,
@@ -407,7 +405,7 @@ class TestPutMessage:
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid message format"}')
-        message_input = PutMessageInput(additional_properties={})
+        message_input = PutMessageInput("")
 
         with patch.object(
             client._http_client,
@@ -499,21 +497,16 @@ class TestDataClasses:
         assert messages.queue_messages_list.queue_message[0].message_id == "msg1"
 
     def test_queue_array(self):
-        """Test QueueArray dataclass creation."""
-        queue_array = QueueArray(
-            additional_properties={"queues": ["queue1", "queue2"]}
-        )
+        """Test QueueArray list creation."""
+        queue_array: QueueArray = [QueueInfo(name="queue1"), QueueInfo(name="queue2")]
 
-        assert queue_array.additional_properties["queues"][0] == "queue1"
+        assert queue_array[0].name == "queue1"
 
     def test_put_message_input(self):
-        """Test PutMessageInput dataclass creation."""
-        put_input = PutMessageInput(
-            additional_properties={"message": "Test message", "ttl": 3600}
-        )
+        """Test PutMessageInput string creation."""
+        put_input = PutMessageInput("Test message")
 
-        assert put_input.additional_properties["message"] == "Test message"
-        assert put_input.additional_properties["ttl"] == 3600
+        assert put_input == "Test message"
 
     def test_storage_account_list(self):
         """Test StorageAccountList dataclass creation."""

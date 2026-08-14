@@ -175,7 +175,7 @@ class TestListIssuesAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_issues_async()
+            result = await client.list_issues_async(jql="created >= -3650d")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]

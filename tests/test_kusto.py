@@ -782,3 +782,59 @@ class TestEdgeCases:
 
         assert client.http_client is not None
         assert client.http_client is client._http_client
+
+
+class TestListKustoResultsSchema:
+    """Tests for list_kusto_results_schema_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_returns_schema(self, mock_token_provider):
+        """Test successful query-schema retrieval."""
+        client = KustoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+        input_schema = QueryAndListSchema(
+            cluster="testcluster",
+            db="testdb",
+            csl="TestTable | take 10"
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=MockResponse(
+                status=200,
+                text='{"columns": [{"name": "Timestamp"}]}'
+            )
+        ) as mock_send:
+            result = await client.list_kusto_results_schema_async(input_schema)
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/ListKustoResultsSchema",
+                body=input_schema
+            )
+            assert result["columns"][0]["name"] == "Timestamp"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test a non-2xx response raises ConnectorException."""
+        client = KustoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=400, text="Invalid query")
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.list_kusto_results_schema_async(
+                    QueryAndListSchema()
+                )
+
+            assert exc_info.value.status_code == 400

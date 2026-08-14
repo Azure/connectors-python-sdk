@@ -130,17 +130,7 @@ class GetDocumentInformationResponse:
     """DocumentFlags"""
 
 
-@dataclass
-class UpdateIndexFieldsInput:
-    """
-    Update index fields
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+UpdateIndexFieldsInput = List[Dict[str, Any]]
 
 
 @dataclass

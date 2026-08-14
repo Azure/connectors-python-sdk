@@ -12,11 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UploadDocument.document_id` now represents the natural `document_id` wire field. Callers that used it for `documentId` must use `document_id_2` instead.
 - Regenerated Azure Queues, DocuSign, Event Hubs, Microsoft Forms, SharePoint Online, and Microsoft Teams from the current managed connector contracts. Trigger routes are now exposed through `TRIGGER_OPERATIONS` instead of callable client methods, and deprecated DocuSign operations are no longer generated.
 - Azure Event Hubs batch sends now require `partition_key`. Word Online (Business) template and PDF operations now require `source`, `drive`, and `file` identifiers.
+- Regenerated contracts move trigger routes from callable methods to `TRIGGER_OPERATIONS` for GitHub, Jira, Office 365 Outlook, Office 365 Groups, Power BI, Service Bus, and Shifts. Microsoft Bookings no longer exposes the deprecated `create_appointment_async`, `update_appointment_async`, or `cancel_appointment_async` methods.
+- Azure Digital Twins now supplies API version `2020-10-31` internally instead of accepting `api_version` on its public methods. Azure IoT Central schema methods now accept template and module identifiers; Azure Tables entity listing no longer accepts continuation-key parameters; Jira issue listing now accepts JQL and a next-page token; Office 365 Outlook and OneNote signatures now follow their current managed connector contracts.
 
 ### Changed
 
 - Regenerated Azure Queues, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, Microsoft Forms, SharePoint Online, SigningHub, Microsoft Teams, and Word Online (Business) from the merged CodefulSdkGenerator contract updates.
 - Binary request bodies for SharePoint file and attachment uploads, SigningHub document uploads, and Microsoft Teams HTTP requests are forwarded as raw bytes with `application/octet-stream`.
+- Regenerated Azure AD, Azure Digital Twins, Azure Event Grid, Azure IoT Central, Azure Monitor Logs, Azure Queues, Azure Tables, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, GitHub, Jira, Azure Data Explorer, Microsoft Bookings, Microsoft Forms, Office 365 Outlook, Office 365 Groups, OneNote, Pipedrive, Power BI, Service Bus, Shifts, SigningHub, Microsoft Teams, and Word Online (Business) with corrected root-schema handling.
 
 ### Fixed
 
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added current managed connector discovery operations for Azure IoT Central device templates, Azure Monitor Logs time ranges, Azure Tables storage accounts, Azure Data Explorer query schemas, and Service Bus entities, system properties, queues, session options, topics, subscriptions, and subscription filters.
 - **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
 - Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts
 - **DocuWare** (`docuware.py`) connector client with unit tests and samples
@@ -71,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Generated string enums, integer enums, arrays, and `allOf` definitions now retain their Swagger JSON wire shapes instead of being emitted as dynamic object wrappers.
 - **Azure Queues** (`azurequeues.py`): corrected the public `QueueMessage.next_visible_time` property while preserving the `TimeNextVisible` wire name, and added `dequeue_count` plus the nested queue-message response models.
 - **Microsoft Dataverse** (`commondataservice.py`): path parameters are now double URL-encoded so values containing reserved characters (for example the `://` in an environment/organization URL used as the `dataset` segment) survive apihub gateway routing. Previously these segments were single-encoded and could be mis-routed. Fix applied in the CodefulSdkGenerator and regenerated; added regression tests covering encoding of the `dataset`, `table`, and `id` segments.
 - **Microsoft Dataverse** (`commondataservice.py`): regenerated with the corrected CodefulSdkGenerator so curated internal operations are retained. The client now exposes all 22 operations at parity with the .NET SDK (previously 11), adding attachment, association/disassociation, collection-relationship, option-set/multi-select metadata, delete, and pagination methods. Added unit tests covering the new operations.

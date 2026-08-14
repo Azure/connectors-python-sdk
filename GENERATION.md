@@ -174,9 +174,21 @@ class Office365Client(ConnectorClientBase):
 
 ### Key Patterns in Generated Code
 
-#### 1. Dataclass Models
+#### 1. Root Schema Aliases
 
-All connector types are generated as dataclasses with optional fields:
+Root schemas retain their Swagger wire shape instead of being wrapped in a dataclass:
+
+```python
+Theme = Literal["white", "blue"]
+HandSignature = Literal[0, 1, 2, 3, 4]
+ChatMessageList = List["ChatMessage"]
+```
+
+String and integer enums become `Literal` aliases, and array roots become typed `List` aliases. Composed `allOf` object roots remain dataclasses with referenced and inline properties flattened into the same model.
+
+#### 2. Dataclass Models
+
+Connector object schemas are generated as dataclasses with optional fields:
 
 ```python
 @dataclass
@@ -191,7 +203,7 @@ class FileMetadata:
     modified_time: Optional[datetime] = None
 ```
 
-#### 2. Client Inheritance
+#### 3. Client Inheritance
 
 All generated clients extend `ConnectorClientBase`:
 
@@ -209,7 +221,7 @@ This inheritance provides:
 - Lifecycle management (async context manager, close)
 - Error handling with `ConnectorException`
 
-#### 3. Async Method Signatures
+#### 4. Async Method Signatures
 
 All connector actions are generated as async methods:
 
@@ -237,7 +249,7 @@ async def get_items_async(
     """
 ```
 
-#### 4. Type Hints and Docstrings
+#### 5. Type Hints and Docstrings
 
 The generator produces:
 - Full type hints for all parameters and return types

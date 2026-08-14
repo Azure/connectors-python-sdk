@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -23,59 +23,117 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateOffice365GroupInput:
-    """Create Office 365 group"""
+    """
+    Create Office 365 group
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the new group."""
     description: Optional[str] = None
     """Description of the new group."""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """The mail alias of the new group."""
-    group_types: Optional[List[str]] = None
+    group_types: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "groupTypes"},
+    )
     """For Office 365, group type is 'Unified'."""
-    security_enabled: Optional[bool] = None
+    security_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabled"},
+    )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = None
+    mail_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "mailEnabled"},
+    )
     """True if the new group is a mailing group."""
 
 
 @dataclass
 class CreateGroupResponse:
-    """Response for Create Office 365 group"""
+    """
+    Response for Create Office 365 group
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """@odata.context"""
     id: Optional[str] = None
     """id"""
-    deleted_date_time: Optional[str] = None
+    deleted_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "deletedDateTime"},
+    )
     """deletedDateTime"""
     classification: Optional[str] = None
     """classification"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """createdDateTime"""
     description: Optional[str] = None
     """description"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """displayName"""
-    group_types: Optional[List[str]] = None
+    group_types: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "groupTypes"},
+    )
     """groupTypes"""
     mail: Optional[str] = None
     """mail"""
-    mail_enabled: Optional[bool] = None
+    mail_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "mailEnabled"},
+    )
     """mailEnabled"""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """mailNickname"""
-    on_premises_last_sync_date_time: Optional[str] = None
+    on_premises_last_sync_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesLastSyncDateTime"},
+    )
     """onPremisesLastSyncDateTime"""
-    on_premises_security_identifier: Optional[str] = None
+    on_premises_security_identifier: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesSecurityIdentifier"},
+    )
     """onPremisesSecurityIdentifier"""
-    on_premises_sync_enabled: Optional[bool] = None
+    on_premises_sync_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesSyncEnabled"},
+    )
     """onPremisesSyncEnabled"""
-    proxy_addresses: Optional[List[str]] = None
+    proxy_addresses: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "proxyAddresses"},
+    )
     """proxyAddresses"""
-    renewed_date_time: Optional[str] = None
+    renewed_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "renewedDateTime"},
+    )
     """renewedDateTime"""
-    security_enabled: Optional[bool] = None
+    security_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabled"},
+    )
     """securityEnabled"""
     visibility: Optional[str] = None
     """visibility"""
@@ -83,46 +141,83 @@ class CreateGroupResponse:
 
 @dataclass
 class CreateSecurityGroupInput:
-    """Create security group"""
+    """
+    Create security group
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the new group."""
     description: Optional[str] = None
     """Description of the new group."""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """The mail alias of the new group."""
-    security_enabled: Optional[bool] = None
+    security_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabled"},
+    )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = None
+    mail_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "mailEnabled"},
+    )
     """True if the new group is a mailing group."""
 
 
 @dataclass
 class GetGroupResponse:
-    """Response for Get group"""
+    """
+    Response for Get group
+    """
 
     id: Optional[str] = None
     """The unique identifier for the group."""
-    deleted_date_time: Optional[str] = None
+    deleted_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "deletedDateTime"},
+    )
     """Date-time the group was deleted."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """Date-time the group was created."""
     description: Optional[str] = None
     """An optional description for the group."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name for the group."""
     mail: Optional[str] = None
     """The SMTP address for the group."""
-    mail_enabled: Optional[bool] = None
+    mail_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "mailEnabled"},
+    )
     """True if the group is mail-enabled."""
-    on_premises_last_sync_date_time: Optional[str] = None
+    on_premises_last_sync_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesLastSyncDateTime"},
+    )
     """
     A date-time indicating the last time at which the group was synced with the
     on-premises directory.
     """
-    on_premises_sync_enabled: Optional[bool] = None
+    on_premises_sync_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesSyncEnabled"},
+    )
     """True if this group is synced from an on-premises directory."""
-    security_enabled: Optional[bool] = None
+    security_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabled"},
+    )
     """True if the group is a security group."""
     visibility: Optional[str] = None
     """Visibility of the group (public or private)."""
@@ -130,39 +225,70 @@ class GetGroupResponse:
 
 @dataclass
 class GetUserResponse:
-    """Response for Get user"""
+    """
+    Response for Get user
+    """
 
     id: Optional[str] = None
     """A unique identifier for the user."""
-    business_phones: Optional[List[str]] = None
-    display_name: Optional[str] = None
+    business_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "businessPhones"},
+    )
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name displayed in the address book for the user."""
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "givenName"},
+    )
     """The given name (first name) of the user."""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobTitle"},
+    )
     """The user's job title."""
     mail: Optional[str] = None
     """The SMTP address for the user."""
-    mobile_phone: Optional[str] = None
+    mobile_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mobilePhone"},
+    )
     """The primary cellular telephone number for the user."""
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "officeLocation"},
+    )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = None
+    preferred_language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "preferredLanguage"},
+    )
     """
     The preferred language for the user. Should follow ISO 639-1 Code; for
     example 'en-US'.
     """
     surname: Optional[str] = None
     """The user's surname (family name or last name)."""
-    user_principal_name: Optional[str] = None
+    user_principal_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userPrincipalName"},
+    )
     """The user principal name (UPN) of the user."""
 
 
 @dataclass
 class GetGroupMembersResponse:
-    """Response for Get group members"""
+    """
+    Response for Get group members
+    """
 
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
     value: Optional[List[GetUserResponse]] = None
     """Array of users that are members of the group."""
@@ -170,36 +296,60 @@ class GetGroupMembersResponse:
 
 @dataclass
 class CreateGroupInput:
-    """Create group"""
+    """
+    Create group
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the new group."""
     description: Optional[str] = None
     """Description of the new group."""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """The mail alias of the new group."""
-    group_types: Optional[List[str]] = None
+    group_types: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "groupTypes"},
+    )
     """
     Choose 'Unified' for an O365 group. Choose 'None' for a security group.
     """
-    security_enabled: Optional[bool] = None
+    security_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabled"},
+    )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = None
+    mail_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "mailEnabled"},
+    )
     """True if the new group is a mailing group."""
 
 
 @dataclass
-class GetMemberGroupsResponse:
-    """Response for Check group membership (V2)"""
+class GetMemberGroupsResponseV2:
+    """
+    Response for Check group membership (V2)
+    """
 
     value: Optional[GetMemberGroupsResponse] = None
 
 
 @dataclass
 class GetGroupRequest:
-    """Definition: GetGroup_Request"""
+    """
+    Definition: GetGroup_Request
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
     """
     Unique identifier of a user (Ex. '5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b').
     """
@@ -207,9 +357,14 @@ class GetGroupRequest:
 
 @dataclass
 class AssignManagerRequest:
-    """Definition: AssignManager_Request"""
+    """
+    Definition: AssignManager_Request
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
     """
     Unique identifier of a manager (Ex.
     '5f6cf5c7-a561-4842-9aae-3e6d8ce5e95b').
@@ -218,89 +373,166 @@ class AssignManagerRequest:
 
 @dataclass
 class UpdateUserRequest:
-    """Definition: UpdateUser_Request"""
+    """
+    Definition: UpdateUser_Request
+    """
 
-    user_principal_name: Optional[str] = None
+    user_principal_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userPrincipalName"},
+    )
     """The user principal name (UPN) of the user."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name displayed in the address book for the user."""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """The mail alias for the user."""
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "givenName"},
+    )
     """The given name (first name) of the user."""
     surname: Optional[str] = None
     """The user's surname (family name or last name)."""
-    account_enabled: Optional[bool] = None
+    account_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "accountEnabled"},
+    )
     """True if the new account should be enabled."""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobTitle"},
+    )
     """The user's job title."""
     department: Optional[str] = None
     """The name for the department in which the user works."""
-    mobile_phone: Optional[str] = None
+    mobile_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mobilePhone"},
+    )
     """
     The mobile phone number for the user in any format such as '1 (234)
     567-8910'.
     """
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "officeLocation"},
+    )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = None
+    preferred_language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "preferredLanguage"},
+    )
     """
     The preferred language for the user. Should follow ISO 639-1 Code; for
     example 'en-US'.
     """
-    business_phones: Optional[List[str]] = None
-    other_mails: Optional[List[str]] = None
-    custom_properties: Optional[Dict[str, Any]] = None
+    business_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "businessPhones"},
+    )
+    other_mails: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "otherMails"},
+    )
+    custom_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "customProperties"},
+    )
     """Free form property name and value for this user."""
-    on_premises_extension_attributes: Optional[Dict[str, Any]] = None
+    on_premises_extension_attributes: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesExtensionAttributes"},
+    )
 
 
 @dataclass
 class GetMemberGroupsRequest:
-    """Definition: GetMemberGroups_Request"""
+    """
+    Definition: GetMemberGroups_Request
+    """
 
-    security_enabled_only: Optional[bool] = None
+    security_enabled_only: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabledOnly"},
+    )
     """Determines if only security enabled groups should be fetched."""
 
 
-@dataclass
-class GetMemberGroupsResponseV2:
-    """Definition: GetMemberGroups_Response_V2"""
-
-    value: Optional[GetMemberGroupsResponse] = None
+GetMemberGroupsResponse = List[str]
 
 
 @dataclass
 class CreateUserRequest:
-    """Definition: CreateUser_Request"""
+    """
+    Definition: CreateUser_Request
+    """
 
-    account_enabled: Optional[bool] = None
+    account_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "accountEnabled"},
+    )
     """True if the new account should be enabled when it is created."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name displayed in the address book for the user."""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """The mail alias for the user."""
-    password_profile: Optional[Dict[str, Any]] = None
+    password_profile: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "passwordProfile"},
+    )
     """passwordProfile"""
-    user_principal_name: Optional[str] = None
+    user_principal_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userPrincipalName"},
+    )
     """The user principal name (UPN) of the user."""
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "givenName"},
+    )
     """The user's given name (first name)."""
     surname: Optional[str] = None
     """The user's surname (family name or last name)."""
-    business_phones: Optional[List[str]] = None
+    business_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "businessPhones"},
+    )
     department: Optional[str] = None
     """The name for the department in which the user works."""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobTitle"},
+    )
     """The user's job title."""
-    mobile_phone: Optional[str] = None
+    mobile_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mobilePhone"},
+    )
     """
     The mobile phone number for the user in any format such as '1 (234)
     567-8910'.
     """
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "officeLocation"},
+    )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = None
+    preferred_language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "preferredLanguage"},
+    )
     """
     The preferred language for the user. Should follow ISO 639-1 Code; for
     example 'en-US'.
@@ -309,9 +541,14 @@ class CreateUserRequest:
 
 @dataclass
 class CheckMemberGroupsRequest:
-    """Definition: CheckMemberGroups_Request"""
+    """
+    Definition: CheckMemberGroups_Request
+    """
 
-    group_ids: Optional[List[str]] = None
+    group_ids: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "groupIds"},
+    )
 
 
 # Client Class
@@ -351,20 +588,22 @@ class AzureadClient(ConnectorClientBase):
     async def create_office365_group_async(
         self,
         input: CreateOffice365GroupInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create Office 365 group
 
         Create an Office 365 group in your Microsoft Entra ID tenant.
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups/office365"
+        request_url = f"{self._connection_runtime_url}/v1.0/groups/office365"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -377,20 +616,24 @@ class AzureadClient(ConnectorClientBase):
     async def create_security_group_async(
         self,
         input: CreateSecurityGroupInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create security group
 
         Create a security group in your Microsoft Entra ID tenant.
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups/securityGroup"
+        request_url = (
+            f"{self._connection_runtime_url}/v1.0/groups/securityGroup"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -403,20 +646,25 @@ class AzureadClient(ConnectorClientBase):
     async def get_group_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get group
 
         Get details for a group.
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/groups/{quote(str(id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -429,20 +677,25 @@ class AzureadClient(ConnectorClientBase):
     async def get_user_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get user
 
         Get details for a user.
         """
-        path = f"{self._connection_runtime_url}/v1.0/users/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/users/{quote(str(id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -456,20 +709,25 @@ class AzureadClient(ConnectorClientBase):
         self,
         input: UpdateUserRequest,
         id: str,
-    ):
+    ) -> None:
         """
         Update user
 
         Update the info for a user.
         """
-        path = f"{self._connection_runtime_url}/v1.0/users/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/users/{quote(str(id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -477,23 +735,25 @@ class AzureadClient(ConnectorClientBase):
     async def refresh_tokens_async(
         self,
         id: str,
-    ):
+    ) -> None:
         """
         Refresh tokens
 
         Invalidate all refresh tokens for a user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/users/{str(id)}/revokeSignInSessions"
+            f"/v1.0/users/{quote(str(id), safe='')}/revokeSignInSessions"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -501,20 +761,22 @@ class AzureadClient(ConnectorClientBase):
     async def create_user_async(
         self,
         input: CreateUserRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create user
 
         Create a new user in your Microsoft Entra ID tenant.
         """
-        path = f"{self._connection_runtime_url}/v1.0/users"
+        request_url = f"{self._connection_runtime_url}/v1.0/users"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -528,7 +790,7 @@ class AzureadClient(ConnectorClientBase):
         self,
         id: str,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get group members
 
@@ -537,7 +799,10 @@ class AzureadClient(ConnectorClientBase):
         values, please turn on the Settings->Pagination feature and provide a
         Threshold limit.
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups/{str(id)}/members"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/groups/{quote(str(id), safe='')}/members"
+        )
         query_params = []
         if top is not None:
             value = str(top)
@@ -545,14 +810,16 @@ class AzureadClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -566,23 +833,30 @@ class AzureadClient(ConnectorClientBase):
         self,
         group_id: str,
         member_id: str,
-    ):
+    ) -> None:
         """
         Remove Member From Group
 
         Remove Member From Group
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/members/{str(member_id)}/$ref"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/members"
+            f"/{quote(str(member_id), safe='')}"
+            f"/$ref"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -591,23 +865,25 @@ class AzureadClient(ConnectorClientBase):
         self,
         input: GetGroupRequest,
         id: str,
-    ):
+    ) -> None:
         """
         Add user to group
 
         Add a user to a group in this Microsoft Entra ID tenant.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(id)}/members/$ref"
+            f"/v1.0/groups/{quote(str(id), safe='')}/members/$ref"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -616,22 +892,25 @@ class AzureadClient(ConnectorClientBase):
         self,
         input: AssignManagerRequest,
         id: str,
-    ):
+    ) -> None:
         """
         Assign manager
 
         Assign a manager for a user.
         """
-        path = (
-            f"{self._connection_runtime_url}/v1.0/users/{str(id)}/manager/$ref"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/users/{quote(str(id), safe='')}/manager/$ref"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -639,20 +918,22 @@ class AzureadClient(ConnectorClientBase):
     async def create_group_async(
         self,
         input: CreateGroupInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create group
 
         Create a group in your Microsoft Entra ID tenant.
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups"
+        request_url = f"{self._connection_runtime_url}/v1.0/groups"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -666,24 +947,26 @@ class AzureadClient(ConnectorClientBase):
         self,
         input: CheckMemberGroupsRequest,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Check group membership (V2)
+        Check group membership
 
         If the user is a member of the given group, the result will contain the
         given id. Otherwise the result will be empty.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/v1.0/users/{str(id)}/checkMemberGroups"
+            f"/v2/v1.0/users/{quote(str(id), safe='')}/checkMemberGroups"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -697,23 +980,25 @@ class AzureadClient(ConnectorClientBase):
         self,
         input: GetMemberGroupsRequest,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get groups of a user (V2)
+        Get groups of a user
 
         Get the groups a user is a member of.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/v1.0/users/{str(id)}/getMemberGroups"
+            f"/v2/v1.0/users/{quote(str(id), safe='')}/getMemberGroups"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

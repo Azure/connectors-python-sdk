@@ -19,7 +19,7 @@ from azure.connectors.azuretables import (
     ReplaceEntityInput,
     StorageAccountList,
     StorageAccount,
-    Item,
+    EntityItem,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -195,7 +195,7 @@ class TestCreateTable:
             status=201,
             text='{"odata.id": "https://storage/Tables(\'newtable\')", "TableName": "newtable"}'
         )
-        table_input = CreateTableInput(additional_properties={"TableName": "newtable"})
+        table_input: CreateTableInput = "newtable"
 
         with patch.object(
             client._http_client,
@@ -223,7 +223,7 @@ class TestCreateTable:
         )
 
         mock_response = MockResponse(status=409, text='{"error": "Table already exists"}')
-        table_input = CreateTableInput(additional_properties={"TableName": "existingtable"})
+        table_input: CreateTableInput = "existingtable"
 
         with patch.object(
             client._http_client,
@@ -407,16 +407,12 @@ class TestGetEntities:
             await client.get_entities_async(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
-                next_partition_key="pk2",
-                next_row_key="rk5",
                 filter="PartitionKey eq 'pk1'",
                 select="Name,Value"
             )
 
             call_args = mock_send.call_args
             url = call_args[0][1]
-            assert "NextPartitionKey=pk2" in url
-            assert "NextRowKey=rk5" in url
             assert "$filter=" in url
             assert "$select=" in url
 
@@ -952,12 +948,10 @@ class TestDataClasses:
         assert response.row_key == "rk1"
 
     def test_create_table_input(self):
-        """Test CreateTableInput dataclass creation."""
-        table_input = CreateTableInput(
-            additional_properties={"TableName": "newtable"}
-        )
+        """Test CreateTableInput string alias."""
+        table_input: CreateTableInput = "newtable"
 
-        assert table_input.additional_properties["TableName"] == "newtable"
+        assert table_input == "newtable"
 
     def test_get_table_response(self):
         """Test GetTableResponse dataclass creation."""
@@ -971,8 +965,8 @@ class TestDataClasses:
 
     def test_get_entities_response(self):
         """Test GetEntitiesResponse dataclass creation."""
-        item1 = Item(partition_key="pk1", row_key="rk1")
-        item2 = Item(partition_key="pk1", row_key="rk2")
+        item1 = EntityItem(partition_key="pk1", row_key="rk1")
+        item2 = EntityItem(partition_key="pk1", row_key="rk2")
         response = GetEntitiesResponse(
             odata_metadata="https://storage/$metadata",
             value=[item1, item2]
@@ -1054,9 +1048,9 @@ class TestDataClasses:
         assert account.name == "mystorageaccount"
         assert account.display_name == "My Storage Account"
 
-    def test_item(self):
-        """Test Item dataclass creation."""
-        item = Item(
+    def test_entity_item(self):
+        """Test EntityItem dataclass creation."""
+        item = EntityItem(
             partition_key="partition1",
             row_key="row1",
             additional_properties='{"Name": "Item1", "Value": 42}'
@@ -1127,3 +1121,52 @@ class TestEdgeCases:
 
             call_args = mock_send.call_args
             assert "(PartitionKey='pk-1',RowKey='rk_1')" in call_args[0][1]
+
+
+class TestGetStorageAccounts:
+    """Tests for get_storage_accounts_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_returns_storage_accounts(self, mock_token_provider):
+        """Test successful storage-account discovery."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=MockResponse(
+                status=200,
+                text='{"value": [{"name": "account1"}]}'
+            )
+        ) as mock_send:
+            result = await client.get_storage_accounts_async()
+
+            mock_send.assert_called_once_with(
+                "GET",
+                "https://example.azure.com/connections/test/v2/GetStorageAccounts",
+                body=None
+            )
+            assert result["value"][0]["name"] == "account1"
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test a non-2xx response raises ConnectorException."""
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=500, text="Server error")
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_storage_accounts_async()
+
+            assert exc_info.value.status_code == 500

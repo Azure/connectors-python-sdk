@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.connectors.shifts import (
+    TRIGGER_OPERATIONS,
     ShiftsClient,
     CreateShiftRequest,
-    WebHookRequest,
     EditOpenShiftRequest,
 )
 from azure.connectors.sdk import (
@@ -302,32 +302,17 @@ class TestCreateShiftAsync:
                 await client.create_shift_async(input=payload, team_id="team-123")
 
 
-class TestTriggerForShiftsAsync:
-    """Tests for trigger_for_shifts_async method."""
+class TestTriggerForShifts:
+    """Tests for the TriggerForShifts registration metadata."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful shifts webhook registration."""
-        client = ShiftsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        payload = WebHookRequest(notification_url="https://example.com/callback")
-        mock_response = MockResponse(status=202, text="")
+    def test_registration_metadata(self):
+        """Test that the trigger is metadata rather than a callable client action."""
+        trigger = TRIGGER_OPERATIONS["TriggerForShifts"]
 
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.trigger_for_shifts_async(input=payload, team_id="team-123")
-
-            mock_send.assert_called_once()
-            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
-            assert method == "POST"
-            assert "/trigger/teams/team-123/shifts" in path
-            assert result is None
+        assert trigger["method"] == "post"
+        assert trigger["path"] == "/{connectionId}/trigger/teams/{teamId}/shifts"
+        assert trigger["required_parameters"] == ["teamId", "request"]
+        assert not hasattr(ShiftsClient, "trigger_for_shifts_async")
 
 
 class TestDeleteTimeOffAsync:

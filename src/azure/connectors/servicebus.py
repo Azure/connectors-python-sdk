@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
@@ -21,51 +21,81 @@ from azure.connectors.sdk import (
 
 # Type Definitions
 
-@dataclass
-class SendMessagesInput:
-    """Send one or more messages"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+SendMessagesInput = List["ServiceBusMessage"]
 
 
 @dataclass
 class ServiceBusMessage:
-    """Response for When a message is received in a queue (auto-complete)"""
+    """
+    Response for When a message is received in a queue (auto-complete)
+    """
 
-    content_data: Optional[str] = None
+    content_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentData"},
+    )
     """Content of the message"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
     """Content type of the message content"""
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Properties"},
+    )
     """Key-value pairs for each brokered property"""
-    message_id: Optional[str] = None
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
     """
     This is a user-defined value that Service Bus can use to identify duplicate
     messages, if enabled.
     """
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """Send to address"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """Address of the queue to reply to"""
-    reply_to_session_id: Optional[str] = None
+    reply_to_session_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyToSessionId"},
+    )
     """Identifier of the session to reply to"""
-    label: Optional[str] = None
+    label: Optional[str] = field(default=None, metadata={"wire_name": "Label"})
     """Application specific label"""
-    scheduled_enqueue_time_utc: Optional[str] = None
+    scheduled_enqueue_time_utc: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ScheduledEnqueueTimeUtc"},
+    )
     """Date and time, in UTC, when the message will be added to the queue"""
-    session_id: Optional[str] = None
+    session_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SessionId"},
+    )
     """Identifier of the session"""
-    correlation_id: Optional[str] = None
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationId"},
+    )
     """Identifier of the correlation"""
-    sequence_number: Optional[int] = None
+    sequence_number: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "SequenceNumber"},
+    )
     """Identifier of the sequence number"""
-    lock_token: Optional[str] = None
+    lock_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LockToken"},
+    )
     """The lock token of the message as a string."""
-    time_to_live: Optional[str] = None
+    time_to_live: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeToLive"},
+    )
     """
     This is the duration, in ticks, that a message is valid. The duration
     starts from when the message is sent to the Service Bus.
@@ -74,7 +104,9 @@ class ServiceBusMessage:
 
 @dataclass
 class CreateTopicSubscriptionInput:
-    """Create a topic subscription"""
+    """
+    Create a topic subscription
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -85,65 +117,105 @@ class CreateTopicSubscriptionInput:
 
 @dataclass
 class Subscription:
-    """Response for Create a topic subscription"""
+    """
+    Response for Create a topic subscription
+    """
 
-    subscription_name: Optional[str] = None
+    subscription_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SubscriptionName"},
+    )
     """Subscription name."""
 
 
 @dataclass
 class ServiceBusEntity:
-    """Definition: ServiceBusEntity"""
+    """
+    Response for Get all entities
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The entity name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name for the entity"""
 
 
 @dataclass
-class SubscriptionFilter:
-    """Definition: SubscriptionFilter"""
-
-    correlation_filter: Optional[SubscriptionCorrelationFilter] = None
-
-
-@dataclass
-class SubscriptionCorrelationFilter:
-    """Definition: SubscriptionCorrelationFilter"""
-
-    correlation_id: Optional[str] = None
-    """Identifier of the correlation"""
-    label: Optional[str] = None
-    """Application specific label"""
-    message_id: Optional[str] = None
-    """
-    This is a user-defined value that Service Bus can use to identify duplicate
-    messages, if enabled.
-    """
-    properties: Optional[Dict[str, Any]] = None
-    """Key-value pairs for each brokered property"""
-    reply_to: Optional[str] = None
-    """Address of the queue to reply to"""
-    reply_to_session_id: Optional[str] = None
-    """Identifier of the session to reply to"""
-    session_id: Optional[str] = None
-    """Identifier of the session"""
-    to: Optional[str] = None
-    """Send to address"""
-    content_type: Optional[str] = None
-    """Content type of the message content"""
-
-
-@dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Response for Get metadata of a filter
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
+
+
+@dataclass
+class SubscriptionFilter:
+    """
+    Definition: SubscriptionFilter
+    """
+
+    correlation_filter: Optional[SubscriptionCorrelationFilter] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationFilter"},
+    )
+
+
+@dataclass
+class SubscriptionCorrelationFilter:
+    """
+    Definition: SubscriptionCorrelationFilter
+    """
+
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationId"},
+    )
+    """Identifier of the correlation"""
+    label: Optional[str] = field(default=None, metadata={"wire_name": "Label"})
+    """Application specific label"""
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
+    """
+    This is a user-defined value that Service Bus can use to identify duplicate
+    messages, if enabled.
+    """
+    properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Properties"},
+    )
+    """Key-value pairs for each brokered property"""
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
+    """Address of the queue to reply to"""
+    reply_to_session_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyToSessionId"},
+    )
+    """Identifier of the session to reply to"""
+    session_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SessionId"},
+    )
+    """Identifier of the session"""
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
+    """Send to address"""
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
+    """Content type of the message content"""
 
 
 # Client Class
@@ -185,13 +257,16 @@ class ServicebusClient(ConnectorClientBase):
         input: ServiceBusMessage,
         entity_name: str,
         system_properties: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Send message
 
         This operation sends a message to a queue or topic.
         """
-        path = f"{self._connection_runtime_url}/{str(entity_name)}/messages"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/{quote(quote(str(entity_name), safe=''), safe='')}/messages"
+        )
         query_params = []
         if system_properties is not None:
             value = str(system_properties)
@@ -199,14 +274,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"systemProperties={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -216,14 +293,17 @@ class ServicebusClient(ConnectorClientBase):
         input: SendMessagesInput,
         entity_name: str,
         system_properties: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Send one or more messages
 
         This operation sends one or more messages to a queue or topic.
         """
-        path = (
-            f"{self._connection_runtime_url}/{str(entity_name)}/messages/batch"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/{quote(quote(str(entity_name), safe=''), safe='')}"
+            f"/messages"
+            f"/batch"
         )
         query_params = []
         if system_properties is not None:
@@ -232,123 +312,43 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"systemProperties={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def get_message_from_queue_async(
-        self,
-        queue_name: str,
-        queue_type: Optional[str] = None,
-    ):
-        """
-        When a message is received in a queue (auto-complete)
-
-        This operation triggers a flow when a message is received in a queue
-        and auto completes the message.
-        """
-        path = (
-            f"{self._connection_runtime_url}/{str(queue_name)}/messages/head"
-        )
-        query_params = []
-        if queue_type is not None:
-            value = str(queue_type)
-            if isinstance(queue_type, bool):
-                value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_new_message_from_queue_with_peek_lock_async(
-        self,
-        queue_name: str,
-        queue_type: Optional[str] = None,
-        session_id: Optional[str] = None,
-    ):
-        """
-        When a message is received in a queue (peek-lock)
-
-        The operation triggers a flow when a message received in a queue with
-        peek-lock mode.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/head/peek"
-        )
-        query_params = []
-        if queue_type is not None:
-            value = str(queue_type)
-            if isinstance(queue_type, bool):
-                value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
-        if session_id is not None:
-            value = str(session_id)
-            if isinstance(session_id, bool):
-                value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def complete_message_in_queue_async(
         self,
         queue_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Complete the message in a queue
 
         The operation completes a message in a queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/complete"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/messages"
+            f"/complete"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
@@ -360,14 +360,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -375,25 +377,26 @@ class ServicebusClient(ConnectorClientBase):
     async def abandon_message_in_queue_async(
         self,
         queue_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Abandon the message in a queue
 
         The operation abandons a message in a queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/abandon"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/messages"
+            f"/abandon"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
@@ -405,14 +408,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -420,24 +425,26 @@ class ServicebusClient(ConnectorClientBase):
     async def get_deferred_message_from_queue_async(
         self,
         queue_name: str,
-        sequence_number: Optional[str],
+        sequence_number: str,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get deferred message from a queue
 
         The operation gets a deferred message from a queue.
         """
-        path = (
-            f"{self._connection_runtime_url}/{str(queue_name)}/messages/defer"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/messages"
+            f"/defer"
         )
         query_params = []
-        if sequence_number is not None:
-            value = str(sequence_number)
-            if isinstance(sequence_number, bool):
-                value = value.lower()
-            query_params.append(f"sequenceNumber={quote(value)}")
+        value = str(sequence_number)
+        if isinstance(sequence_number, bool):
+            value = value.lower()
+        query_params.append(f"sequenceNumber={quote(value)}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
@@ -449,14 +456,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -469,24 +478,26 @@ class ServicebusClient(ConnectorClientBase):
     async def defer_message_in_queue_async(
         self,
         queue_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Defer the message in a queue
 
         The operation defers a message in a queue.
         """
-        path = (
-            f"{self._connection_runtime_url}/{str(queue_name)}/messages/defer"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/messages"
+            f"/defer"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
@@ -498,14 +509,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -513,26 +526,27 @@ class ServicebusClient(ConnectorClientBase):
     async def dead_letter_message_in_queue_async(
         self,
         queue_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         session_id: Optional[str] = None,
         dead_letter_reason: Optional[str] = None,
         dead_letter_error_description: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Dead-letter the message in a queue
 
         The operation moves the message to the Dead-Letter Queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/deadletter"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/messages"
+            f"/deadletter"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
@@ -549,14 +563,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"deadLetterErrorDescription={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -564,138 +580,44 @@ class ServicebusClient(ConnectorClientBase):
     async def renew_lock_on_message_in_queue_async(
         self,
         queue_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         queue_type: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Renew lock on the message in a queue
 
         The operation renews lock on a message in a queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/renewlock"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/messages"
+            f"/renewlock"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
                 value = value.lower()
             query_params.append(f"queueType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def get_messages_from_queue_async(
-        self,
-        queue_name: str,
-        max_message_count: Optional[str] = None,
-        queue_type: Optional[str] = None,
-    ):
-        """
-        When one or more messages arrive in a queue (auto-complete)
-
-        The operation receives one or more messages from a queue. If maximum
-        message count is not provided, it reads 20 messages.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/batch/head"
-        )
-        query_params = []
-        if max_message_count is not None:
-            value = str(max_message_count)
-            if isinstance(max_message_count, bool):
-                value = value.lower()
-            query_params.append(f"maxMessageCount={quote(value)}")
-        if queue_type is not None:
-            value = str(queue_type)
-            if isinstance(queue_type, bool):
-                value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_new_messages_from_queue_with_peek_lock_async(
-        self,
-        queue_name: str,
-        max_message_count: Optional[str] = None,
-        queue_type: Optional[str] = None,
-        session_id: Optional[str] = None,
-    ):
-        """
-        When one or more messages arrive in a queue (peek-lock)
-
-        The operation receives one or more messages from a queue with
-        peek-lock. If maximum message count is not provided, it reads 20
-        messages.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/batch/head/peek"
-        )
-        query_params = []
-        if max_message_count is not None:
-            value = str(max_message_count)
-            if isinstance(max_message_count, bool):
-                value = value.lower()
-            query_params.append(f"maxMessageCount={quote(value)}")
-        if queue_type is not None:
-            value = str(queue_type)
-            if isinstance(queue_type, bool):
-                value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
-        if session_id is not None:
-            value = str(session_id)
-            if isinstance(session_id, bool):
-                value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def get_messages_from_queue_with_peek_lock_async(
         self,
@@ -703,16 +625,19 @@ class ServicebusClient(ConnectorClientBase):
         max_message_count: Optional[str] = None,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get messages from a queue (peek-lock)
 
         The operation receives messages from a queue with peek-lock. If maximum
         message count is not provided, it reads 20 messages.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/messages/batch/peek"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/messages"
+            f"/batch"
+            f"/peek"
         )
         query_params = []
         if max_message_count is not None:
@@ -731,14 +656,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -752,23 +679,28 @@ class ServicebusClient(ConnectorClientBase):
         self,
         queue_name: str,
         session_id: str,
-    ):
+    ) -> None:
         """
         Close a session in a queue
 
         The operation closes a session in a queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/sessions/{str(session_id)}/close"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/sessions"
+            f"/{quote(str(session_id), safe='')}"
+            f"/close"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -777,149 +709,58 @@ class ServicebusClient(ConnectorClientBase):
         self,
         queue_name: str,
         session_id: str,
-    ):
+    ) -> None:
         """
         Renew lock on the session in a queue
 
         The operation renews a session in a queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(queue_name)}/sessions/{str(session_id)}/renewlock"
+            f"/{quote(quote(str(queue_name), safe=''), safe='')}"
+            f"/sessions"
+            f"/{quote(str(session_id), safe='')}"
+            f"/renewlock"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def get_message_from_topic_async(
-        self,
-        topic_name: str,
-        subscription_name: str,
-        subscription_type: Optional[str] = None,
-    ):
-        """
-        When a message is received in a topic subscription (auto-complete)
-
-        This operation triggers a flow when a message is received in a topic
-        subscription and auto completes the message.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
-            f"/subscriptions"
-            f"/{str(subscription_name)}"
-            f"/messages"
-            f"/head"
-        )
-        query_params = []
-        if subscription_type is not None:
-            value = str(subscription_type)
-            if isinstance(subscription_type, bool):
-                value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_new_message_from_topic_with_peek_lock_async(
-        self,
-        topic_name: str,
-        subscription_name: str,
-        subscription_type: Optional[str] = None,
-        session_id: Optional[str] = None,
-    ):
-        """
-        When a message is received in a topic subscription (peek-lock)
-
-        The operation triggers a flow when a message received in a topic
-        subscription with peek-lock mode.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
-            f"/subscriptions"
-            f"/{str(subscription_name)}"
-            f"/messages"
-            f"/head"
-            f"/peek"
-        )
-        query_params = []
-        if subscription_type is not None:
-            value = str(subscription_type)
-            if isinstance(subscription_type, bool):
-                value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
-        if session_id is not None:
-            value = str(session_id)
-            if isinstance(session_id, bool):
-                value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def complete_message_in_topic_async(
         self,
         topic_name: str,
         subscription_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Complete the message in a topic subscription
 
         The operation completes a message in a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/messages"
             f"/complete"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
@@ -931,14 +772,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -947,29 +790,28 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Abandon the message in a topic subscription
 
         The operation abandons a message in a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/messages"
             f"/abandon"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
@@ -981,14 +823,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -997,29 +841,28 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-        sequence_number: Optional[str],
+        sequence_number: str,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get deferred message from a topic subscription
 
         The operation gets a deferred message from a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/messages"
             f"/defer"
         )
         query_params = []
-        if sequence_number is not None:
-            value = str(sequence_number)
-            if isinstance(sequence_number, bool):
-                value = value.lower()
-            query_params.append(f"sequenceNumber={quote(value)}")
+        value = str(sequence_number)
+        if isinstance(sequence_number, bool):
+            value = value.lower()
+        query_params.append(f"sequenceNumber={quote(value)}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
@@ -1031,14 +874,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1052,29 +897,28 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Defer the message in a topic subscription
 
         The operation defers a message in a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/messages"
             f"/defer"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
@@ -1086,14 +930,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1102,30 +948,29 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         session_id: Optional[str] = None,
         dead_letter_reason: Optional[str] = None,
         dead_letter_error_description: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Dead-letter the message in a topic subscription
 
         The operation moves the message to the topic Dead-Letter Queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/messages"
             f"/deadletter"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
@@ -1142,14 +987,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"deadLetterErrorDescription={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1158,42 +1005,43 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-        lock_token: Optional[str],
+        lock_token: str,
         subscription_type: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Renew lock on the message in a topic subscription
 
         The operation renews lock on a message in a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/messages"
             f"/renewlock"
         )
         query_params = []
-        if lock_token is not None:
-            value = str(lock_token)
-            if isinstance(lock_token, bool):
-                value = value.lower()
-            query_params.append(f"lockToken={quote(value)}")
+        value = str(lock_token)
+        if isinstance(lock_token, bool):
+            value = value.lower()
+        query_params.append(f"lockToken={quote(value)}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
                 value = value.lower()
             query_params.append(f"subscriptionType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1204,15 +1052,17 @@ class ServicebusClient(ConnectorClientBase):
         topic_name: str,
         subscription_name: str,
         subscription_filter_type: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a topic subscription
 
         The operation creates a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}/subscriptions/{str(subscription_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_name), safe='')}"
         )
         query_params = []
         if subscription_filter_type is not None:
@@ -1221,14 +1071,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"subscriptionFilterType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1242,136 +1094,30 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-    ):
+    ) -> None:
         """
         Delete a topic subscription
 
         The operation deletes a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}/subscriptions/{str(subscription_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_name), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def get_messages_from_topic_async(
-        self,
-        topic_name: str,
-        subscription_name: str,
-        max_message_count: Optional[str] = None,
-        subscription_type: Optional[str] = None,
-    ):
-        """
-        When one or more messages arrive in a topic (auto-complete)
-
-        The operation receives one or more messages from a topic. If maximum
-        message count is not provided, it reads 20 messages.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
-            f"/subscriptions"
-            f"/{str(subscription_name)}"
-            f"/messages"
-            f"/batch"
-            f"/head"
-        )
-        query_params = []
-        if max_message_count is not None:
-            value = str(max_message_count)
-            if isinstance(max_message_count, bool):
-                value = value.lower()
-            query_params.append(f"maxMessageCount={quote(value)}")
-        if subscription_type is not None:
-            value = str(subscription_type)
-            if isinstance(subscription_type, bool):
-                value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_new_messages_from_topic_with_peek_lock_async(
-        self,
-        topic_name: str,
-        subscription_name: str,
-        max_message_count: Optional[str] = None,
-        subscription_type: Optional[str] = None,
-        session_id: Optional[str] = None,
-    ):
-        """
-        When one or more messages arrive in a topic (peek-lock)
-
-        The operation receives one or more messages from a topic with
-        peek-lock. If maximum message count is not provided, it reads 20
-        messages.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
-            f"/subscriptions"
-            f"/{str(subscription_name)}"
-            f"/messages"
-            f"/batch"
-            f"/head"
-            f"/peek"
-        )
-        query_params = []
-        if max_message_count is not None:
-            value = str(max_message_count)
-            if isinstance(max_message_count, bool):
-                value = value.lower()
-            query_params.append(f"maxMessageCount={quote(value)}")
-        if subscription_type is not None:
-            value = str(subscription_type)
-            if isinstance(subscription_type, bool):
-                value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
-        if session_id is not None:
-            value = str(session_id)
-            if isinstance(session_id, bool):
-                value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def get_messages_from_topic_with_peek_lock_async(
         self,
@@ -1380,7 +1126,7 @@ class ServicebusClient(ConnectorClientBase):
         max_message_count: Optional[str] = None,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get messages from a topic subscription (peek-lock)
 
@@ -1388,11 +1134,11 @@ class ServicebusClient(ConnectorClientBase):
         peek-lock. If maximum message count is not provided, it reads 20
         messages.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/messages"
             f"/batch"
             f"/peek"
@@ -1414,14 +1160,16 @@ class ServicebusClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1436,28 +1184,30 @@ class ServicebusClient(ConnectorClientBase):
         topic_name: str,
         subscription_name: str,
         session_id: str,
-    ):
+    ) -> None:
         """
         Close a session in the topic
 
         The operation closes a session in the topic.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/sessions"
-            f"/{str(session_id)}"
+            f"/{quote(str(session_id), safe='')}"
             f"/close"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1467,28 +1217,304 @@ class ServicebusClient(ConnectorClientBase):
         topic_name: str,
         subscription_name: str,
         session_id: str,
-    ):
+    ) -> None:
         """
         Renew lock on the session in a topic subscription
 
         The operation renews a session in a topic subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/{str(topic_name)}"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
-            f"/{str(subscription_name)}"
+            f"/{quote(str(subscription_name), safe='')}"
             f"/sessions"
-            f"/{str(session_id)}"
+            f"/{quote(str(session_id), safe='')}"
             f"/renewlock"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
+
+    async def get_entities_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get all entities
+
+        This operation gets all queues and topics in the Service Bus namespace.
+        """
+        request_url = f"{self._connection_runtime_url}/entities"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_system_properties_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get the list of system properties
+
+        This operation gets list of properties.
+        """
+        request_url = f"{self._connection_runtime_url}/systemproperties"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_queues_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get all queues
+
+        This operation gets all queues in the Service Bus namespace.
+        """
+        request_url = f"{self._connection_runtime_url}/queues"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_session_options_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get session options
+
+        This operation gets the list of options for session handling - None,
+        Next available.
+        """
+        request_url = f"{self._connection_runtime_url}/sessionoptions"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_topics_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get all topics
+
+        This operation gets all topics in the Service Bus namespace.
+        """
+        request_url = f"{self._connection_runtime_url}/topics"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_subscriptions_async(
+        self,
+        topic_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get the subscriptions for a topic
+
+        This operation gets the list of subscriptions for a topic in the
+        Service Bus namespace.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/topics"
+            f"/{quote(quote(str(topic_name), safe=''), safe='')}"
+            f"/subscriptions"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_subscription_filter_async(
+        self,
+        subscription_filter_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get metadata of a filter
+
+        Get metadata of a filter.
+        """
+        request_url = f"{self._connection_runtime_url}/subscriptionfilterV2"
+        query_params = []
+        value = str(subscription_filter_type)
+        if isinstance(subscription_filter_type, bool):
+            value = value.lower()
+        query_params.append(f"subscriptionFilterType={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "GetMessageFromQueue": {
+        "operation_id": "GetMessageFromQueue",
+        "path": "/{connectionId}/{queueName}/messages/head",
+        "method": "get",
+        "required_parameters": ["queueName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+    "GetNewMessageFromQueueWithPeekLock": {
+        "operation_id": "GetNewMessageFromQueueWithPeekLock",
+        "path": "/{connectionId}/{queueName}/messages/head/peek",
+        "method": "get",
+        "required_parameters": ["queueName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+    "GetMessagesFromQueue": {
+        "operation_id": "GetMessagesFromQueue",
+        "path": "/{connectionId}/{queueName}/messages/batch/head",
+        "method": "get",
+        "required_parameters": ["queueName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+    "GetNewMessagesFromQueueWithPeekLock": {
+        "operation_id": "GetNewMessagesFromQueueWithPeekLock",
+        "path": "/{connectionId}/{queueName}/messages/batch/head/peek",
+        "method": "get",
+        "required_parameters": ["queueName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+    "GetMessageFromTopic": {
+        "operation_id": "GetMessageFromTopic",
+        "path": "/{connectionId}/{topicName}/subscriptions/{subscriptionName}/messages/head",
+        "method": "get",
+        "required_parameters": ["topicName", "subscriptionName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+    "GetNewMessageFromTopicWithPeekLock": {
+        "operation_id": "GetNewMessageFromTopicWithPeekLock",
+        "path": "/{connectionId}/{topicName}/subscriptions/{subscriptionName}/messages/head/peek",
+        "method": "get",
+        "required_parameters": ["topicName", "subscriptionName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+    "GetMessagesFromTopic": {
+        "operation_id": "GetMessagesFromTopic",
+        "path": "/{connectionId}/{topicName}/subscriptions/{subscriptionName}/messages/batch/head",
+        "method": "get",
+        "required_parameters": ["topicName", "subscriptionName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+    "GetNewMessagesFromTopicWithPeekLock": {
+        "operation_id": "GetNewMessagesFromTopicWithPeekLock",
+        "path": (
+            "/{connectionId}/{topicName}/subscriptions/{subscriptionName}/messages/batch/head/peek"
+        ),
+        "method": "get",
+        "required_parameters": ["topicName", "subscriptionName"],
+        "callback_payload_type": "ServiceBusMessage",
+    },
+}

@@ -359,7 +359,7 @@ class TestUpdateDocgenFormFieldsAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = UpdateDocgenFormFieldsInput()
+        payload: UpdateDocgenFormFieldsInput = []
         mock_response = MockResponse(status=200, text='{"docgenFields": []}')
 
         with patch.object(
@@ -389,7 +389,7 @@ class TestUpdateDocgenFormFieldsAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = UpdateDocgenFormFieldsInput()
+        payload: UpdateDocgenFormFieldsInput = []
         mock_response = MockResponse(status=422, text='{"error": "Invalid fields"}')
 
         with patch.object(

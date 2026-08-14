@@ -23,72 +23,130 @@ from azure.connectors.sdk import (
 
 @dataclass
 class GraphOutlookCategory:
-    """Response for Get Outlook category names"""
+    """
+    Response for Get Outlook category names
+    """
 
     id: Optional[str] = None
     """The ID of the Outlook Category."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name of the Outlook Category."""
 
 
 @dataclass
 class OutlookReceiveMessage:
-    """Response for Draft an email message"""
+    """
+    Response for Draft an email message
+    """
 
-    internet_message_id: Optional[str] = None
+    internet_message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "InternetMessageId"},
+    )
     """Internet Message Id"""
-    body_preview: Optional[str] = None
+    body_preview: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "BodyPreview"},
+    )
     """Body preview"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Id"""
-    conversation_id: Optional[str] = None
+    conversation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ConversationId"},
+    )
     """Conversation Id"""
-    has_attachments: Optional[bool] = None
+    has_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HasAttachments"},
+    )
     """Has attachments"""
-    is_read: Optional[bool] = None
+    is_read: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsRead"},
+    )
     """Is read"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CreatedDateTime"},
+    )
     """Created date and time"""
-    received_date_time: Optional[str] = None
+    received_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReceivedDateTime"},
+    )
     """Received date and time"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModifiedDateTime"},
+    )
     """Last modified date and time"""
-    attachments: Optional[List[OutlookReceiveAttachment]] = None
+    attachments: Optional[List[OutlookReceiveAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    to_recipients: Optional[List[Recipient]] = None
+    to_recipients: Optional[List[Recipient]] = field(
+        default=None,
+        metadata={"wire_name": "ToRecipients"},
+    )
     """To Recipient"""
-    cc_recipients: Optional[List[Recipient]] = None
+    cc_recipients: Optional[List[Recipient]] = field(
+        default=None,
+        metadata={"wire_name": "CcRecipients"},
+    )
     """Cc Recipients"""
-    bcc_recipients: Optional[List[Recipient]] = None
+    bcc_recipients: Optional[List[Recipient]] = field(
+        default=None,
+        metadata={"wire_name": "BccRecipients"},
+    )
     """Bcc Recipients"""
-    reply_to: Optional[List[Recipient]] = None
+    reply_to: Optional[List[Recipient]] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Subject"""
-    body: Optional[ItemBody] = None
-    from_: Optional[Recipient] = None
-    importance: Optional[str] = None
+    body: Optional[ItemBody] = field(
+        default=None,
+        metadata={"wire_name": "Body"},
+    )
+    from_: Optional[Recipient] = field(
+        default=None,
+        metadata={"wire_name": "From"},
+    )
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
-    internet_message_headers: Optional[List[InternetMessageHeader]] = None
+    internet_message_headers: Optional[List[InternetMessageHeader]] = field(
+        default=None,
+        metadata={"wire_name": "InternetMessageHeaders"},
+    )
     """Internet message headers"""
 
 
-@dataclass
-class AssignCategoryBulkInput:
-    """Assign a category to multiple emails"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+AssignCategoryBulkInput = List[str]
 
 
 @dataclass
 class BatchOperationResult:
-    """Response for Assign a category to multiple emails"""
+    """
+    Response for Assign a category to multiple emails
+    """
 
-    success_count: Optional[int] = None
+    success_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "successCount"},
+    )
     """The count of messages processed successfully."""
     failures: Optional[List[BatchItemFailureResult]] = None
     """The list of failed messages with errors."""
@@ -96,43 +154,31 @@ class BatchOperationResult:
 
 @dataclass
 class SubscriptionResponse:
-    """Response for Send email with options"""
+    """
+    Response for Send email with options
+    """
 
     id: Optional[str] = None
     """Id of the subscription"""
     resource: Optional[str] = None
     """Resource of the subscription request"""
-    notification_type: Optional[str] = None
+    notification_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationType"},
+    )
     """Notification Type"""
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
     """Notification Url"""
 
 
 @dataclass
-class UpdateMyContactPhotoInput:
-    """Update my contact's photo"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class HttpRequestInput:
-    """Send an HTTP request"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class ObjectWithoutType:
-    """Response for Send an HTTP request"""
+    """
+    Response for Send an HTTP request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -143,7 +189,9 @@ class ObjectWithoutType:
 
 @dataclass
 class MCPQueryResponse:
-    """Response for Email Management MCP Server (deprecated)"""
+    """
+    Response for Email Management MCP Server (deprecated)
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -155,7 +203,9 @@ class MCPQueryResponse:
 
 @dataclass
 class GraphCalendarEventClientReceive:
-    """Response for Get event (V3)"""
+    """
+    Response for Get event
+    """
 
     subject: Optional[str] = None
     """Event subject"""
@@ -163,79 +213,142 @@ class GraphCalendarEventClientReceive:
     """Start time of the event (example: '2017-08-29T04:00:00.0000000')"""
     end: Optional[str] = None
     """End time of the event (example: '2017-08-29T05:00:00.0000000')"""
-    start_with_time_zone: Optional[str] = None
+    start_with_time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startWithTimeZone"},
+    )
     """
     Start time of the event with time zone (example:
     '2017-08-29T04:00:00.0000000+00:00')
     """
-    end_with_time_zone: Optional[str] = None
+    end_with_time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endWithTimeZone"},
+    )
     """
     End time of the event with time zone (example:
     '2017-08-29T05:00:00.0000000+00:00')
     """
     body: Optional[str] = None
     """Body of the message associated with the event"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isHtml"},
+    )
     """Set to true if the body is Html"""
-    response_type: Optional[str] = None
+    response_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "responseType"},
+    )
     """
     The response type of the event (none, organizer, tentativelyAccepted,
     accepted, declined or notResponded)
     """
-    response_time: Optional[str] = None
+    response_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "responseTime"},
+    )
     """The response time of the event"""
     id: Optional[str] = None
     """The event's unique identifier"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The date and time that the event was created"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The date and time that the event was last modified"""
     organizer: Optional[str] = None
     """The organizer of the event"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """Time zone of the event"""
-    series_master_id: Optional[str] = None
+    series_master_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "seriesMasterId"},
+    )
     """Unique identifier for Series Master event type"""
-    i_cal_u_id: Optional[str] = None
+    i_cal_u_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "iCalUId"},
+    )
     """
     A unique identifier for an event across calendars. This ID is different for
     each occurrence in a recurring series
     """
     categories: Optional[List[str]] = None
     """The categories associated with the event"""
-    web_link: Optional[str] = None
+    web_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webLink"},
+    )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "requiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "optionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
     location: Optional[str] = None
     """Location of the event"""
     importance: Optional[str] = None
     """The importance of the event: low, normal, or high"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Set to true if the event lasts all day"""
     recurrence: Optional[str] = None
     """
     The recurrence pattern for the event: none, daily, weekly, monthly or
     yearly
     """
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recurrenceEnd"},
+    )
     """End Date of the recurrence"""
-    number_of_occurences: Optional[int] = None
+    number_of_occurences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "numberOfOccurences"},
+    )
     """How many times to repeat the event"""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """Time in minutes before event start to remind"""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if an alert is set to remind the user of the event."""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """
     Status to show during the event: free, tentative, busy, oof,
     workingElsewhere or unknown
     """
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -243,102 +356,12 @@ class GraphCalendarEventClientReceive:
     sensitivity: Optional[str] = None
     """The possible values are: normal, personal, private, confidential"""
 
-    @classmethod
-    def from_json(cls, payload) -> List[GraphCalendarEventClientReceive]:
-        """Parse a JSON payload and return a list of GraphCalendarEventClientReceive objects.
-
-        This method supports SDK-type bindings for Python Function apps, allowing
-        functions to bind to and return rich GraphCalendarEventClientReceive objects
-        instead of raw JSON payloads.
-
-        Args:
-            payload: An object with a .value attribute containing a JSON string or
-                dictionary with the calendar events.
-                Expected structure for batches: {"body": {"value": [...events...]}}
-                Expected structure for single items: {"body": {...event...}}
-
-        Returns:
-            A list of GraphCalendarEventClientReceive objects parsed from the payload.
-
-        Raises:
-            ValueError: If the payload structure is invalid or cannot be parsed.
-        """
-        if not hasattr(payload, "value"):
-            raise ValueError("Payload must have a 'value' attribute.")
-
-        if isinstance(payload.value, str):
-            try:
-                data = json.loads(payload.value)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON payload: {e}.") from e
-        else:
-            data = payload.value
-
-        # NOTE(SDK): Navigate to body to extract event(s).
-        if isinstance(data, dict):
-            body = data.get("body", data)
-            if isinstance(body, dict):
-                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
-                if "value" in body and isinstance(body.get("value"), list):
-                    events_data = body.get("value")
-                else:
-                    # NOTE(SDK): Single item - wrap in list for uniform processing.
-                    events_data = [body]
-            else:
-                events_data = []
-        else:
-            events_data = []
-
-        if not isinstance(events_data, list):
-            raise ValueError("Expected 'body.value' to contain a list of events.")
-
-        events: List[GraphCalendarEventClientReceive] = []
-        for item in events_data:
-            if not isinstance(item, dict):
-                continue
-
-            event = cls(
-                id=item.get("id"),
-                subject=item.get("subject"),
-                start=item.get("start"),
-                end=item.get("end"),
-                start_with_time_zone=item.get("startWithTimeZone"),
-                end_with_time_zone=item.get("endWithTimeZone"),
-                body=item.get("body"),
-                is_html=item.get("isHtml"),
-                response_type=item.get("responseType"),
-                response_time=item.get("responseTime"),
-                created_date_time=item.get("createdDateTime"),
-                last_modified_date_time=item.get("lastModifiedDateTime"),
-                organizer=item.get("organizer"),
-                time_zone=item.get("timeZone"),
-                series_master_id=item.get("seriesMasterId"),
-                i_cal_u_id=item.get("iCalUId"),
-                categories=item.get("categories"),
-                web_link=item.get("webLink"),
-                required_attendees=item.get("requiredAttendees"),
-                optional_attendees=item.get("optionalAttendees"),
-                resource_attendees=item.get("resourceAttendees"),
-                location=item.get("location"),
-                importance=item.get("importance"),
-                is_all_day=item.get("isAllDay"),
-                recurrence=item.get("recurrence"),
-                recurrence_end=item.get("recurrenceEnd"),
-                number_of_occurences=item.get("numberOfOccurences"),
-                reminder_minutes_before_start=item.get("reminderMinutesBeforeStart"),
-                is_reminder_on=item.get("isReminderOn"),
-                show_as=item.get("showAs"),
-                response_requested=item.get("responseRequested"),
-                sensitivity=item.get("sensitivity"),
-            )
-            events.append(event)
-
-        return events
-
 
 @dataclass
 class GraphCalendarEventListClientReceive:
-    """Response for Get events (V4)"""
+    """
+    Response for Get events
+    """
 
     value: Optional[List[GraphCalendarEventClientReceive]] = None
     """List of calendar items"""
@@ -346,111 +369,19 @@ class GraphCalendarEventListClientReceive:
 
 @dataclass
 class GraphCalendarEventListWithActionType:
-    """Response for When an event is added, updated or deleted (V3)"""
+    """
+    Response for When an event is added, updated or deleted
+    """
 
     value: Optional[List[GraphCalendarEventClientWithActionType]] = None
     """List of calendar items"""
 
-    @classmethod
-    def from_json(cls, payload) -> GraphCalendarEventListWithActionType:
-        """Parse a JSON payload and return a list with a single event wrapper.
-
-        This method supports SDK-type bindings for Python Function apps, allowing
-        functions to bind to and return rich GraphCalendarEventListWithActionType
-        objects instead of raw JSON payloads.
-
-        Args:
-            payload: An object with a .value attribute containing a JSON string or
-                dictionary with the calendar events.
-                Expected structure for batches: {"body": {"value": [...events...]}}
-                Expected structure for single items: {"body": {...event...}}
-
-        Returns:
-            A GraphCalendarEventListWithActionType object with the parsed events
-            in its value property.
-
-        Raises:
-            ValueError: If the payload structure is invalid or cannot be parsed.
-        """
-        if not hasattr(payload, "value"):
-            raise ValueError("Payload must have a 'value' attribute.")
-
-        if isinstance(payload.value, str):
-            try:
-                data = json.loads(payload.value)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON payload: {e}.") from e
-        else:
-            data = payload.value
-
-        # NOTE(SDK): Navigate to body to extract event(s).
-        if isinstance(data, dict):
-            body = data.get("body", data)
-            if isinstance(body, dict):
-                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
-                if "value" in body and isinstance(body.get("value"), list):
-                    events_data = body.get("value")
-                else:
-                    # NOTE(SDK): Single item - wrap in list for uniform processing.
-                    events_data = [body]
-            else:
-                events_data = []
-        else:
-            events_data = []
-
-        if not isinstance(events_data, list):
-            raise ValueError("Expected 'body.value' to contain a list of events.")
-
-        events: List[GraphCalendarEventClientWithActionType] = []
-        for item in events_data:
-            if not isinstance(item, dict):
-                continue
-
-            event = GraphCalendarEventClientWithActionType(
-                id=item.get("id"),
-                action_type=item.get("actionType"),
-                is_added=item.get("isAdded"),
-                is_updated=item.get("isUpdated"),
-                subject=item.get("subject"),
-                start=item.get("start"),
-                end=item.get("end"),
-                start_with_time_zone=item.get("startWithTimeZone"),
-                end_with_time_zone=item.get("endWithTimeZone"),
-                body=item.get("body"),
-                is_html=item.get("isHtml"),
-                response_type=item.get("responseType"),
-                response_time=item.get("responseTime"),
-                created_date_time=item.get("createdDateTime"),
-                last_modified_date_time=item.get("lastModifiedDateTime"),
-                organizer=item.get("organizer"),
-                time_zone=item.get("timeZone"),
-                series_master_id=item.get("seriesMasterId"),
-                i_cal_u_id=item.get("iCalUId"),
-                categories=item.get("categories"),
-                web_link=item.get("webLink"),
-                required_attendees=item.get("requiredAttendees"),
-                optional_attendees=item.get("optionalAttendees"),
-                resource_attendees=item.get("resourceAttendees"),
-                location=item.get("location"),
-                importance=item.get("importance"),
-                is_all_day=item.get("isAllDay"),
-                recurrence=item.get("recurrence"),
-                recurrence_end=item.get("recurrenceEnd"),
-                number_of_occurences=item.get("numberOfOccurences"),
-                reminder_minutes_before_start=item.get("reminderMinutesBeforeStart"),
-                is_reminder_on=item.get("isReminderOn"),
-                show_as=item.get("showAs"),
-                response_requested=item.get("responseRequested"),
-                sensitivity=item.get("sensitivity"),
-            )
-            events.append(event)
-
-        return cls(value=events)
-
 
 @dataclass
 class CalendarGetTablesResponse:
-    """Response for Get calendars (V2)"""
+    """
+    Response for Get calendars
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -458,25 +389,45 @@ class CalendarGetTablesResponse:
 
 @dataclass
 class ContactResponse:
-    """Response for Get contact (V2)"""
+    """
+    Response for Get contact
+    """
 
     id: Optional[str] = None
     """The contact's unique identifier."""
-    parent_folder_id: Optional[str] = None
+    parent_folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentFolderId"},
+    )
     """The ID of the contact's parent folder"""
     birthday: Optional[str] = None
     """The contact's birthday"""
-    file_as: Optional[str] = None
+    file_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fileAs"},
+    )
     """The name the contact is filed under"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The contact's display name"""
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "givenName"},
+    )
     """The contact's given name"""
     initials: Optional[str] = None
     """The contact's initials"""
-    middle_name: Optional[str] = None
+    middle_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "middleName"},
+    )
     """The contact's middle name"""
-    nick_name: Optional[str] = None
+    nick_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nickName"},
+    )
     """The contact's nickname"""
     surname: Optional[str] = None
     """The contact's surname"""
@@ -484,62 +435,123 @@ class ContactResponse:
     """The contact's title"""
     generation: Optional[str] = None
     """The contact's generation"""
-    email_addresses: Optional[List[EmailAddressV2]] = None
+    email_addresses: Optional[List[EmailAddressV2]] = field(
+        default=None,
+        metadata={"wire_name": "emailAddresses"},
+    )
     """The contact's email addresses"""
-    im_addresses: Optional[List[str]] = None
+    im_addresses: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "imAddresses"},
+    )
     """The contact's instant messaging (IM) addresses"""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobTitle"},
+    )
     """The contact's job title"""
-    company_name: Optional[str] = None
+    company_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "companyName"},
+    )
     """The name of the contact's company"""
     department: Optional[str] = None
     """The contact's department"""
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "officeLocation"},
+    )
     """The location of the contact's office"""
     profession: Optional[str] = None
     """The contact's profession"""
-    business_home_page: Optional[str] = None
+    business_home_page: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "businessHomePage"},
+    )
     """The business home page of the contact"""
-    assistant_name: Optional[str] = None
+    assistant_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assistantName"},
+    )
     """The name of the contact's assistant"""
     manager: Optional[str] = None
     """The name of the contact's manager"""
-    home_phones: Optional[List[str]] = None
+    home_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "homePhones"},
+    )
     """The contact's home phone numbers"""
-    business_phones: Optional[List[str]] = None
+    business_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "businessPhones"},
+    )
     """The contact's business phone numbers"""
-    mobile_phone: Optional[str] = None
+    mobile_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mobilePhone"},
+    )
     """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddressV2] = None
-    business_address: Optional[PhysicalAddressV2] = None
-    other_address: Optional[PhysicalAddressV2] = None
-    yomi_company_name: Optional[str] = None
+    home_address: Optional[PhysicalAddress] = field(
+        default=None,
+        metadata={"wire_name": "homeAddress"},
+    )
+    business_address: Optional[PhysicalAddress] = field(
+        default=None,
+        metadata={"wire_name": "businessAddress"},
+    )
+    other_address: Optional[PhysicalAddress] = field(
+        default=None,
+        metadata={"wire_name": "otherAddress"},
+    )
+    yomi_company_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "yomiCompanyName"},
+    )
     """The phonetic Japanese company name of the contact"""
-    yomi_given_name: Optional[str] = None
+    yomi_given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "yomiGivenName"},
+    )
     """The phonetic Japanese given name (first name) of the contact"""
-    yomi_surname: Optional[str] = None
+    yomi_surname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "yomiSurname"},
+    )
     """The phonetic Japanese surname (last name) of the contact"""
     categories: Optional[List[str]] = None
     """The categories associated with the contact"""
-    change_key: Optional[str] = None
+    change_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeKey"},
+    )
     """Identifies the version of the event object"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The time the contact was created"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The time the contact was modified"""
 
 
 @dataclass
 class EntityListResponseContactResponse:
-    """Response for Get contacts (V2)"""
+    """
+    Response for Get contacts
+    """
 
-    value: Optional[List[ContactResponseV2]] = None
+    value: Optional[List[ContactResponse]] = None
     """List of values"""
 
 
 @dataclass
 class EntityListResponseGraphContactFolder:
-    """Response for Get contact folders (V2)"""
+    """
+    Response for Get contact folders
+    """
 
     value: Optional[List[GraphContactFolder]] = None
     """List of values"""
@@ -547,78 +559,146 @@ class EntityListResponseGraphContactFolder:
 
 @dataclass
 class FindMeetingTimesInput:
-    """Find meeting times (V2)"""
+    """
+    Find meeting times
+    """
 
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequiredAttendees"},
+    )
     """List of semicolon separated email addresses"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OptionalAttendees"},
+    )
     """List of semicolon separated email addresses"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
-    meeting_duration: Optional[int] = None
+    meeting_duration: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "MeetingDuration"},
+    )
     """Duration of the meeting in minutes"""
-    start: Optional[str] = None
+    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
     """Start time for meeting time suggestions"""
-    end: Optional[str] = None
+    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
     """End time for meeting time suggestions"""
-    max_candidates: Optional[int] = None
+    max_candidates: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "MaxCandidates"},
+    )
     """The maximum number of meeting suggestions to return in the response"""
-    minimum_attendee_percentage: Optional[str] = None
+    minimum_attendee_percentage: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MinimumAttendeePercentage"},
+    )
     """
     The minimum required confidence for a time slot to be returned in the
     response
     """
-    is_organizer_optional: Optional[bool] = None
+    is_organizer_optional: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsOrganizerOptional"},
+    )
     """true if the organizer doesn't have to attend. The default is false"""
-    activity_domain: Optional[str] = None
+    activity_domain: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ActivityDomain"},
+    )
     """Work, Personal, Unrestricted, or Unknown"""
 
 
 @dataclass
 class FindMeetingTimesResponse:
-    """Response for Find meeting times (V2)"""
+    """
+    Response for Find meeting times
+    """
 
-    empty_suggestions_reason: Optional[str] = None
+    empty_suggestions_reason: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emptySuggestionsReason"},
+    )
     """Empty Suggestions Reason"""
-    meeting_time_suggestions: Optional[MeetingTimeSuggestionsV2] = None
+    meeting_time_suggestions: Optional[MeetingTimeSuggestions] = field(
+        default=None,
+        metadata={"wire_name": "meetingTimeSuggestions"},
+    )
 
 
 @dataclass
 class GetAttachmentResponse:
-    """Response for Get Attachment (V2)"""
+    """
+    Response for Get Attachment
+    """
 
     id: Optional[str] = None
     """Id of the attachment."""
     name: Optional[str] = None
     """Name of attachment."""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Content type of attachment."""
     size: Optional[int] = None
     """Size of attachment."""
-    content_bytes: Optional[str] = None
+    content_bytes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentBytes"},
+    )
     """Content of attachment."""
-    is_inline: Optional[bool] = None
+    is_inline: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isInline"},
+    )
     """Set to true if this is an inline attachment."""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The date and time when the attachment was last modified."""
-    content_id: Optional[str] = None
+    content_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentId"},
+    )
     """Content Id"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
 
 
 @dataclass
 class GraphClientReceiveMessage:
-    """Response for Get email (V2)"""
+    """
+    Response for Get email
+    """
 
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
     """The mailbox owner and sender of the message"""
-    to_recipients: Optional[str] = None
+    to_recipients: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "toRecipients"},
+    )
     """The recipients for the message"""
-    cc_recipients: Optional[str] = None
+    cc_recipients: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ccRecipients"},
+    )
     """The Cc recipients for the message"""
-    bcc_recipients: Optional[str] = None
+    bcc_recipients: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bccRecipients"},
+    )
     """The Bcc recipients for the message"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "replyTo"},
+    )
     """The email addresses to use when replying"""
     subject: Optional[str] = None
     """The subject of the message"""
@@ -626,154 +706,56 @@ class GraphClientReceiveMessage:
     """The body of the message"""
     importance: Optional[str] = None
     """The importance of the message (low, normal, high)"""
-    body_preview: Optional[str] = None
+    body_preview: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bodyPreview"},
+    )
     """The preview of the message"""
-    has_attachments: Optional[bool] = None
+    has_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasAttachments"},
+    )
     """Indicates whether the message has attachments"""
     id: Optional[str] = None
     """The unique identifier of the message"""
-    internet_message_id: Optional[str] = None
+    internet_message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "internetMessageId"},
+    )
     """The message ID in the format specified by RFC2822"""
-    conversation_id: Optional[str] = None
+    conversation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "conversationId"},
+    )
     """The Id of the conversation the email belongs to"""
-    received_date_time: Optional[str] = None
+    received_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "receivedDateTime"},
+    )
     """The date and time the message was received"""
-    is_read: Optional[bool] = None
+    is_read: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isRead"},
+    )
     """Indicates whether the message has been read"""
     attachments: Optional[List[GraphClientReceiveFileAttachment]] = None
     """The file attachments for the message"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isHtml"},
+    )
     """Is Html?"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
-
-    @classmethod
-    def from_json(cls, payload) -> List[GraphClientReceiveMessage]:
-        """Parse a JSON payload and return a list of GraphClientReceiveMessage objects.
-
-        This method supports SDK-type bindings for Python Function apps, allowing
-        functions to bind to and return rich GraphClientReceiveMessage objects instead
-        of raw JSON payloads.
-
-        Args:
-            payload: An object with a .value attribute containing a JSON string or
-                dictionary with the email messages.
-                Expected structure for batches: {"body": {"value": [...messages...]}}
-                Expected structure for single items: {"body": {...message...}}
-
-        Returns:
-            A list of GraphClientReceiveMessage objects parsed from the payload.
-
-        Raises:
-            ValueError: If the payload structure is invalid or cannot be parsed.
-        """
-        if not hasattr(payload, "value"):
-            raise ValueError("Payload must have a 'value' attribute.")
-
-        if isinstance(payload.value, str):
-            try:
-                data = json.loads(payload.value)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON payload: {e}.") from e
-        else:
-            data = payload.value
-
-        # NOTE(SDK): Navigate to body to extract message(s).
-        if isinstance(data, dict):
-            body = data.get("body", data)
-            if isinstance(body, dict):
-                # NOTE(SDK): Check if it's a batch (has "value" list) or single item.
-                if "value" in body and isinstance(body.get("value"), list):
-                    messages_data = body.get("value")
-                else:
-                    # NOTE(SDK): Single item - wrap in list for uniform processing.
-                    messages_data = [body]
-            else:
-                messages_data = []
-        else:
-            messages_data = []
-
-        if not isinstance(messages_data, list):
-            raise ValueError("Expected 'body.value' to contain a list of messages.")
-
-        messages: List[GraphClientReceiveMessage] = []
-        for item in messages_data:
-            if not isinstance(item, dict):
-                continue
-
-            # NOTE(SDK): Parse attachments if present.
-            attachments_data = item.get("attachments")
-            attachments_list: Optional[List[GraphClientReceiveFileAttachment]] = None
-            if attachments_data and isinstance(attachments_data, list):
-                attachments_list = []
-                for attachment in attachments_data:
-                    if isinstance(attachment, dict):
-                        attachments_list.append(
-                            GraphClientReceiveFileAttachment(
-                                id=attachment.get("id"),
-                                name=attachment.get("name"),
-                                content_bytes=attachment.get("contentBytes"),
-                                content_type=attachment.get("contentType"),
-                                size=attachment.get("size"),
-                                is_inline=attachment.get("isInline"),
-                                last_modified_date_time=attachment.get(
-                                    "lastModifiedDateTime"
-                                ),
-                                content_id=attachment.get("contentId"),
-                            )
-                        )
-
-            # NOTE(SDK): Parse sensitivity label info if present.
-            sensitivity_data = item.get("sensitivityLabelInfo")
-            sensitivity_list: Optional[List[SensitivityLabelMetadata]] = None
-            if sensitivity_data and isinstance(sensitivity_data, list):
-                sensitivity_list = []
-                for label in sensitivity_data:
-                    if isinstance(label, dict):
-                        sensitivity_list.append(
-                            SensitivityLabelMetadata(
-                                sensitivity_label_id=label.get("sensitivityLabelId"),
-                                name=label.get("name"),
-                                display_name=label.get("displayName"),
-                                tooltip=label.get("tooltip"),
-                                priority=label.get("priority"),
-                                color=label.get("color"),
-                                is_encrypted=label.get("isEncrypted"),
-                                is_enabled=label.get("isEnabled"),
-                                is_parent=label.get("isParent"),
-                                parent_sensitivity_label_id=label.get(
-                                    "parentSensitivityLabelId"
-                                ),
-                            )
-                        )
-
-            message = cls(
-                id=item.get("id"),
-                from_=item.get("from"),
-                to_recipients=item.get("toRecipients"),
-                cc_recipients=item.get("ccRecipients"),
-                bcc_recipients=item.get("bccRecipients"),
-                reply_to=item.get("replyTo"),
-                subject=item.get("subject"),
-                body=item.get("body"),
-                importance=item.get("importance"),
-                body_preview=item.get("bodyPreview"),
-                has_attachments=item.get("hasAttachments"),
-                internet_message_id=item.get("internetMessageId"),
-                conversation_id=item.get("conversationId"),
-                received_date_time=item.get("receivedDateTime"),
-                is_read=item.get("isRead"),
-                attachments=attachments_list,
-                is_html=item.get("isHtml"),
-                sensitivity_label_info=sensitivity_list,
-            )
-            messages.append(message)
-
-        return messages
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
 
 
 @dataclass
 class BatchResponseGraphClientReceiveMessage:
-    """Response for Get emails (V3)"""
+    """
+    Response for Get emails
+    """
 
     value: Optional[List[GraphClientReceiveMessage]] = None
     """A list of the response objects"""
@@ -781,7 +763,9 @@ class BatchResponseGraphClientReceiveMessage:
 
 @dataclass
 class EntityListResponseGraphCalendarEventClientReceive:
-    """Response for Get calendar view of events (V3)"""
+    """
+    Response for Get calendar view of events
+    """
 
     value: Optional[List[GraphCalendarEventClientReceive]] = None
     """List of values"""
@@ -789,24 +773,36 @@ class EntityListResponseGraphCalendarEventClientReceive:
 
 @dataclass
 class GetMailTipsInput:
-    """Get mail tips for a mailbox (V2)"""
+    """
+    Get mail tips for a mailbox
+    """
 
-    mail_tips_options: Optional[str] = None
+    mail_tips_options: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MailTipsOptions"},
+    )
     """Flags that represents the mailtips."""
-    email_addresses: Optional[List[str]] = None
+    email_addresses: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "EmailAddresses"},
+    )
     """Address of the mailbox to get mail tips for."""
 
 
 @dataclass
 class GetMailTipsResponse:
-    """Response for Get mail tips for a mailbox (V2)"""
+    """
+    Response for Get mail tips for a mailbox
+    """
 
-    value: Optional[List[MailTipsClientReceiveV2]] = None
+    value: Optional[List[MailTipsClientReceive]] = None
 
 
 @dataclass
 class GetRoomListsResponse:
-    """Response for Get room lists (V2)"""
+    """
+    Response for Get room lists
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -814,7 +810,9 @@ class GetRoomListsResponse:
 
 @dataclass
 class GetRoomsResponse:
-    """Response for Get rooms (V2)"""
+    """
+    Response for Get rooms
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -822,7 +820,9 @@ class GetRoomsResponse:
 
 @dataclass
 class GetRoomsInRoomListResponse:
-    """Response for Get rooms in room list (V2)"""
+    """
+    Response for Get rooms in room list
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -830,15 +830,22 @@ class GetRoomsInRoomListResponse:
 
 @dataclass
 class MarkAsReadInput:
-    """Mark as read or unread (V3)"""
+    """
+    Mark as read or unread
+    """
 
-    is_read: Optional[bool] = None
+    is_read: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isRead"},
+    )
     """Mark as read/unread."""
 
 
 @dataclass
 class TriggerBatchResponseGraphClientReceiveMessage:
-    """Response for When an email is flagged (V4)"""
+    """
+    Response for When an email is flagged
+    """
 
     value: Optional[List[GraphClientReceiveMessage]] = None
     """A list of the response objects"""
@@ -846,53 +853,99 @@ class TriggerBatchResponseGraphClientReceiveMessage:
 
 @dataclass
 class SetAutomaticRepliesSettingInput:
-    """Set up automatic replies (V2)"""
+    """
+    Set up automatic replies
+    """
 
-    automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
+    automatic_replies_setting: Optional[AutomaticRepliesSettingClient] = field(
+        default=None,
+        metadata={"wire_name": "automaticRepliesSetting"},
+    )
 
 
 @dataclass
 class SetAutomaticRepliesSettingResponse:
-    """Response for Set up automatic replies (V2)"""
+    """
+    Response for Set up automatic replies
+    """
 
-    automatic_replies_setting: Optional[AutomaticRepliesSettingClientV2] = None
+    automatic_replies_setting: Optional[AutomaticRepliesSettingClient] = field(
+        default=None,
+        metadata={"wire_name": "automaticRepliesSetting"},
+    )
 
 
 @dataclass
 class TableMetadata:
-    """Definition: TableMetadata"""
+    """
+    Definition: TableMetadata
+    """
 
     name: Optional[str] = None
     """Table name"""
     title: Optional[str] = None
     """Table title"""
-    x_ms_permission: Optional[str] = None
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
     schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """Url link"""
 
 
 @dataclass
 class TableCapabilitiesMetadata:
-    """Definition: TableCapabilitiesMetadata"""
+    """
+    Definition: TableCapabilitiesMetadata
+    """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -903,31 +956,49 @@ class ObjectEntity:
 
 @dataclass
 class TableSortRestrictionsMetadata:
-    """Definition: TableSortRestrictionsMetadata"""
+    """
+    Definition: TableSortRestrictionsMetadata
+    """
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
 @dataclass
 class TableFilterRestrictionsMetadata:
-    """Definition: TableFilterRestrictionsMetadata"""
+    """
+    Definition: TableFilterRestrictionsMetadata
+    """
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
 @dataclass
 class TableSelectRestrictionsMetadata:
-    """Definition: TableSelectRestrictionsMetadata"""
+    """
+    Definition: TableSelectRestrictionsMetadata
+    """
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
@@ -935,7 +1006,9 @@ class TableSelectRestrictionsMetadata:
 
 @dataclass
 class CalendarEventList:
-    """Definition: CalendarEventList"""
+    """
+    Definition: CalendarEventList
+    """
 
     value: Optional[List[CalendarEventBackend]] = None
     """List of calendar items"""
@@ -943,79 +1016,159 @@ class CalendarEventList:
 
 @dataclass
 class CalendarEventBackend:
-    """Definition: CalendarEventBackend"""
+    """
+    Definition: CalendarEventBackend
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The Event's unique identifier"""
-    attendees: Optional[List[Attendee]] = None
+    attendees: Optional[List[Attendee]] = field(
+        default=None,
+        metadata={"wire_name": "Attendees"},
+    )
     """List of attendees for the event"""
-    body: Optional[ItemBody] = None
-    body_preview: Optional[str] = None
+    body: Optional[ItemBody] = field(
+        default=None,
+        metadata={"wire_name": "Body"},
+    )
+    body_preview: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "BodyPreview"},
+    )
     """The preview of the message associated with the event"""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Categories"},
+    )
     """The categories associated with the event"""
-    change_key: Optional[str] = None
+    change_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ChangeKey"},
+    )
     """
     This property identifies the version of the event object. Every time the
     event is changed, ChangeKey changes as well.
     """
-    date_time_created: Optional[str] = None
+    date_time_created: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeCreated"},
+    )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = None
+    date_time_last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeLastModified"},
+    )
     """The date and time that the event was last modified"""
-    end: Optional[str] = None
+    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
     """The end time of the event"""
-    end_time_zone: Optional[str] = None
+    end_time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "EndTimeZone"},
+    )
     """
     This property specifies the time zone of the meeting end time. The value
     must be as defined in Windows (example: 'Pacific Standard Time').
     """
-    has_attachments: Optional[bool] = None
+    has_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HasAttachments"},
+    )
     """Set to true if the event has attachments"""
-    i_cal_u_id: Optional[str] = None
+    i_cal_u_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ICalUId"},
+    )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the event: Low, Normal, or High"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    is_cancelled: Optional[bool] = None
+    is_cancelled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsCancelled"},
+    )
     """Set to true if the event has been canceled"""
-    is_organizer: Optional[bool] = None
+    is_organizer: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsOrganizer"},
+    )
     """Set to true if the message sender is also the organizer"""
-    location: Optional[Location] = None
-    organizer: Optional[Recipient] = None
-    recurrence: Optional[PatternedRecurrence] = None
-    reminder: Optional[int] = None
+    location: Optional[Location] = field(
+        default=None,
+        metadata={"wire_name": "Location"},
+    )
+    organizer: Optional[Recipient] = field(
+        default=None,
+        metadata={"wire_name": "Organizer"},
+    )
+    recurrence: Optional[PatternedRecurrence] = field(
+        default=None,
+        metadata={"wire_name": "Recurrence"},
+    )
+    reminder: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Reminder"},
+    )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ResponseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
     """
-    response_status: Optional[ResponseStatus] = None
-    series_master_id: Optional[str] = None
+    response_status: Optional[ResponseStatus] = field(
+        default=None,
+        metadata={"wire_name": "ResponseStatus"},
+    )
+    series_master_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SeriesMasterId"},
+    )
     """Unique identifier for Series Master event type"""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ShowAs"},
+    )
     """Shows as free or busy"""
-    start: Optional[str] = None
+    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
     """The start time of the event"""
-    start_time_zone: Optional[str] = None
+    start_time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "StartTimeZone"},
+    )
     """
     This property specifies the time zone of the meeting start time. The value
     must be as defined in Windows (example: 'Pacific Standard Time').
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Event subject"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
     """
     The event type: Single Instance, Occurrence, Exception, or Series Master
     """
-    web_link: Optional[str] = None
+    web_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "WebLink"},
+    )
     """The preview of the message associated with the event"""
-    reason: Optional[str] = None
+    reason: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Reason"},
+    )
     """
     The reason property used by O365 sync events protocol, will be 'deleted' if
     its a deleted event.
@@ -1024,109 +1177,192 @@ class CalendarEventBackend:
 
 @dataclass
 class Attendee:
-    """Definition: Attendee"""
+    """
+    Definition: Attendee
+    """
 
-    status: Optional[ResponseStatus] = None
-    type_: Optional[str] = None
-    email_address: Optional[EmailAddress] = None
+    status: Optional[ResponseStatus] = field(
+        default=None,
+        metadata={"wire_name": "Status"},
+    )
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    email_address: Optional[EmailAddress] = field(
+        default=None,
+        metadata={"wire_name": "EmailAddress"},
+    )
 
 
 @dataclass
 class ItemBody:
-    """Definition: ItemBody"""
+    """
+    Definition: ItemBody
+    """
 
-    content_type: Optional[str] = None
-    content: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
+    content: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Content"},
+    )
 
 
 @dataclass
 class Location:
-    """Definition: Location"""
+    """
+    Definition: Location
+    """
 
-    display_name: Optional[str] = None
-    address: Optional[PhysicalAddress] = None
-    coordinates: Optional[GeoCoordinates] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
+    address: Optional[PhysicalAddress] = field(
+        default=None,
+        metadata={"wire_name": "Address"},
+    )
+    coordinates: Optional[GeoCoordinates] = field(
+        default=None,
+        metadata={"wire_name": "Coordinates"},
+    )
 
 
 @dataclass
 class Recipient:
-    """Definition: Recipient"""
+    """
+    Definition: Recipient
+    """
 
-    email_address: Optional[EmailAddress] = None
+    email_address: Optional[EmailAddress] = field(
+        default=None,
+        metadata={"wire_name": "EmailAddress"},
+    )
 
 
 @dataclass
 class PatternedRecurrence:
-    """Definition: PatternedRecurrence"""
+    """
+    Definition: PatternedRecurrence
+    """
 
-    pattern: Optional[RecurrencePattern] = None
-    range: Optional[RecurrenceRange] = None
+    pattern: Optional[RecurrencePattern] = field(
+        default=None,
+        metadata={"wire_name": "Pattern"},
+    )
+    range: Optional[RecurrenceRange] = field(
+        default=None,
+        metadata={"wire_name": "Range"},
+    )
 
 
 @dataclass
 class ResponseStatus:
-    """Definition: ResponseStatus"""
+    """
+    Definition: ResponseStatus
+    """
 
-    response: Optional[str] = None
-    time: Optional[str] = None
+    response: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Response"},
+    )
+    time: Optional[str] = field(default=None, metadata={"wire_name": "Time"})
 
 
 @dataclass
 class EmailAddress:
-    """Definition: EmailAddress"""
+    """
+    Definition: EmailAddress
+    """
 
-    name: Optional[str] = None
-    address: Optional[str] = None
-
-
-@dataclass
-class PhysicalAddress:
-    """Definition: PhysicalAddress"""
-
-    street: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    country_or_region: Optional[str] = None
-    postal_code: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Address"},
+    )
 
 
 @dataclass
 class GeoCoordinates:
-    """Definition: GeoCoordinates"""
+    """
+    Definition: GeoCoordinates
+    """
 
-    altitude: Optional[float] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    accuracy: Optional[float] = None
-    altitude_accuracy: Optional[float] = None
+    altitude: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "Altitude"},
+    )
+    latitude: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "Latitude"},
+    )
+    longitude: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "Longitude"},
+    )
+    accuracy: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "Accuracy"},
+    )
+    altitude_accuracy: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "AltitudeAccuracy"},
+    )
 
 
 @dataclass
 class RecurrencePattern:
-    """Definition: RecurrencePattern"""
+    """
+    Definition: RecurrencePattern
+    """
 
-    type_: Optional[str] = None
-    interval: Optional[int] = None
-    month: Optional[int] = None
-    day_of_month: Optional[int] = None
-    days_of_week: Optional[List[str]] = None
-    first_day_of_week: Optional[str] = None
-    index: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    interval: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Interval"},
+    )
+    month: Optional[int] = field(default=None, metadata={"wire_name": "Month"})
+    day_of_month: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "DayOfMonth"},
+    )
+    days_of_week: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "DaysOfWeek"},
+    )
+    first_day_of_week: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FirstDayOfWeek"},
+    )
+    index: Optional[str] = field(default=None, metadata={"wire_name": "Index"})
 
 
 @dataclass
 class RecurrenceRange:
-    """Definition: RecurrenceRange"""
+    """
+    Definition: RecurrenceRange
+    """
 
-    type_: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    number_of_occurrences: Optional[int] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    start_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "StartDate"},
+    )
+    end_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "EndDate"},
+    )
+    number_of_occurrences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "NumberOfOccurrences"},
+    )
 
 
 @dataclass
 class CalendarEventListClientReceive:
-    """Definition: CalendarEventListClientReceive"""
+    """
+    Definition: CalendarEventListClientReceive
+    """
 
     value: Optional[List[CalendarEventClientReceive]] = None
     """List of calendar items"""
@@ -1134,75 +1370,149 @@ class CalendarEventListClientReceive:
 
 @dataclass
 class CalendarEventClientReceive:
-    """Definition: CalendarEventClientReceive"""
+    """
+    Definition: CalendarEventClientReceive
+    """
 
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Event subject"""
-    start: Optional[str] = None
+    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
     """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = None
+    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    show_as: Optional[int] = None
+    show_as: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "ShowAs"},
+    )
     """
     Status to show during the event (Unknown - -1, Free - 0, Tentative - 1,
     Busy - 2, Oof - 3, WorkingElsewhere - 4)
     """
-    recurrence: Optional[int] = None
+    recurrence: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Recurrence"},
+    )
     """
     The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2,
     Monthly - 3, Yearly - 4)
     """
-    response_type: Optional[int] = None
+    response_type: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "ResponseType"},
+    )
     """
     The response type of the event (None - 0, Organizer - 1,
     TentativelyAccepted - 2, Accepted - 3, Declined - 4, NotResponded - 5)
     """
-    response_time: Optional[str] = None
+    response_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResponseTime"},
+    )
     """The response time of the event"""
-    i_cal_u_id: Optional[str] = None
+    i_cal_u_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ICalUId"},
+    )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    importance: Optional[int] = None
+    importance: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the event (0 - Low, 1 - Normal, 2 - High)"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The event's unique identifier"""
-    date_time_created: Optional[str] = None
+    date_time_created: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeCreated"},
+    )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = None
+    date_time_last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeLastModified"},
+    )
     """The date and time that the event was last modified"""
-    organizer: Optional[str] = None
+    organizer: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Organizer"},
+    )
     """The organizer of the event"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeZone"},
+    )
     """Time zone of the event"""
-    series_master_id: Optional[str] = None
+    series_master_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SeriesMasterId"},
+    )
     """Unique identifier for Series Master event type"""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Categories"},
+    )
     """The categories associated with the event"""
-    web_link: Optional[str] = None
+    web_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "WebLink"},
+    )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OptionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Body of the message associated with the event"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Set to true if the body is Html"""
-    location: Optional[str] = None
+    location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Location"},
+    )
     """Location of the event"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RecurrenceEnd"},
+    )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = None
+    number_of_occurrences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "NumberOfOccurrences"},
+    )
     """How many times to repeat the event"""
-    reminder: Optional[int] = None
+    reminder: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Reminder"},
+    )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ResponseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -1215,75 +1525,152 @@ class PaginatedListResponseCalendarEventClientReceiveStringEnums:
     Definition: PaginatedListResponse[CalendarEventClientReceiveStringEnums]
     """
 
-    values: Optional[List[CalendarEventClientReceiveStringEnums]] = None
+    values: Optional[List[CalendarEventClientReceiveStringEnums]] = field(
+        default=None,
+        metadata={"wire_name": "Values"},
+    )
     """Values"""
 
 
 @dataclass
 class CalendarEventClientReceiveStringEnums:
-    """Definition: CalendarEventClientReceiveStringEnums"""
+    """
+    Definition: CalendarEventClientReceiveStringEnums
+    """
 
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the event: Low, Normal, or High"""
-    response_type: Optional[str] = None
+    response_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResponseType"},
+    )
     """
     The response type of the event: None, Organizer, TentativelyAccepted,
     Accepted, Declined or NotResponded
     """
-    recurrence: Optional[str] = None
+    recurrence: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Recurrence"},
+    )
     """The recurrence pattern for the event"""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ShowAs"},
+    )
     """Status to show during the event"""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Event subject"""
-    start: Optional[str] = None
+    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
     """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = None
+    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    response_time: Optional[str] = None
+    response_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResponseTime"},
+    )
     """The response time of the event"""
-    i_cal_u_id: Optional[str] = None
+    i_cal_u_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ICalUId"},
+    )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The event's unique identifier"""
-    date_time_created: Optional[str] = None
+    date_time_created: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeCreated"},
+    )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = None
+    date_time_last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeLastModified"},
+    )
     """The date and time that the event was last modified"""
-    organizer: Optional[str] = None
+    organizer: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Organizer"},
+    )
     """The organizer of the event"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeZone"},
+    )
     """Time zone of the event"""
-    series_master_id: Optional[str] = None
+    series_master_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SeriesMasterId"},
+    )
     """Unique identifier for Series Master event type"""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Categories"},
+    )
     """The categories associated with the event"""
-    web_link: Optional[str] = None
+    web_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "WebLink"},
+    )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OptionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Body of the message associated with the event"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Set to true if the body is Html"""
-    location: Optional[str] = None
+    location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Location"},
+    )
     """Location of the event"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RecurrenceEnd"},
+    )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = None
+    number_of_occurrences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "NumberOfOccurrences"},
+    )
     """How many times to repeat the event"""
-    reminder: Optional[int] = None
+    reminder: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Reminder"},
+    )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ResponseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -1292,9 +1679,14 @@ class CalendarEventClientReceiveStringEnums:
 
 @dataclass
 class ClientSubscription:
-    """Definition: ClientSubscription"""
+    """
+    Definition: ClientSubscription
+    """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "NotificationUrl"},
+    )
     """
     Callback url to the flow engine. Expected as part of the request and
     provided by Flow.
@@ -1303,7 +1695,9 @@ class ClientSubscription:
 
 @dataclass
 class EntityListResponseFilePickerFile:
-    """Definition: EntityListResponse[FilePickerFile]"""
+    """
+    Definition: EntityListResponse[FilePickerFile]
+    """
 
     value: Optional[List[FilePickerFile]] = None
     """List of values"""
@@ -1311,216 +1705,342 @@ class EntityListResponseFilePickerFile:
 
 @dataclass
 class FilePickerFile:
-    """Definition: FilePickerFile"""
+    """
+    Definition: FilePickerFile
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Uniquely identifies the file"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Display name for the file"""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """Set to true if the file is a folder"""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """Path of the file"""
 
 
 @dataclass
 class ClientSendMessage:
-    """Definition: ClientSendMessage"""
+    """
+    Definition: ClientSendMessage
+    """
 
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
     """
     Email address to send mail from (requires \"Send as\" or \"Send on behalf
     of\" permission for that mailbox). For more info on granting permissions
     please refer
     https://docs.microsoft.com/office365/admin/manage/send-email-as-distribution-list
     """
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Specify the subject of the mail"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Specify the body of the mail"""
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Sensitivity"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Is Html?"""
 
 
 @dataclass
 class ClientSendAttachment:
-    """Definition: ClientSendAttachment"""
+    """
+    Definition: ClientSendAttachment
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Attachment name"""
-    content_bytes: Optional[str] = None
+    content_bytes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentBytes"},
+    )
     """Attachment content"""
 
 
 @dataclass
 class ClientReceiveMessageStringEnums:
-    """Definition: ClientReceiveMessageStringEnums"""
+    """
+    Definition: ClientReceiveMessageStringEnums
+    """
 
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the message"""
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
     """The mailbox owner and sender of the message"""
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """The recipients for the message"""
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """The Cc recipients for the message"""
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """The Bcc recipients for the message"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """The subject of the message"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """The body of the message"""
-    body_preview: Optional[str] = None
+    body_preview: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "BodyPreview"},
+    )
     """The preview of the message"""
-    has_attachment: Optional[bool] = None
+    has_attachment: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HasAttachment"},
+    )
     """Indicates whether the message has attachments"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique identifier of the message"""
-    internet_message_id: Optional[str] = None
+    internet_message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "InternetMessageId"},
+    )
     """The message ID in the format specified by RFC2822"""
-    conversation_id: Optional[str] = None
+    conversation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ConversationId"},
+    )
     """The Id of the conversation the email belongs to"""
-    date_time_received: Optional[str] = None
+    date_time_received: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeReceived"},
+    )
     """The date and time the message was received"""
-    is_read: Optional[bool] = None
+    is_read: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsRead"},
+    )
     """Indicates whether the message has been read"""
-    attachments: Optional[List[ClientReceiveFileAttachment]] = None
+    attachments: Optional[List[ClientReceiveFileAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """The file attachments for the message"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Is Html?"""
 
 
 @dataclass
 class ClientReceiveFileAttachment:
-    """Definition: ClientReceiveFileAttachment"""
+    """
+    Definition: ClientReceiveFileAttachment
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Attachment Id"""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Attachment name"""
-    content_bytes: Optional[str] = None
+    content_bytes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentBytes"},
+    )
     """Attachment content"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
     """Attachment content type"""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size in bytes of the attachment"""
-    is_inline: Optional[bool] = None
+    is_inline: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsInline"},
+    )
     """Set to true if this is an inline attachment"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModifiedDateTime"},
+    )
     """The date and time when the attachment was last modified"""
-    content_id: Optional[str] = None
+    content_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentId"},
+    )
     """Content Id"""
 
 
 @dataclass
-class ClientSendHtmlMessage:
-    """Definition: ClientSendHtmlMessage"""
+class SendEmailInput:
+    """
+    Definition: ClientSendHtmlMessage
+    """
 
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Specify the subject of the mail"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Specify the body of the mail"""
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
     """
     Email address to send mail from (requires \"Send as\" or \"Send on behalf
     of\" permission for that mailbox). For more info on granting permissions
     please refer
     https://docs.microsoft.com/office365/admin/manage/send-email-as-distribution-list
     """
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Sensitivity"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
 
 
 @dataclass
-class ClientDraftHtmlMessage:
-    """Definition: ClientDraftHtmlMessage"""
+class DraftEmailInput:
+    """
+    Definition: ClientDraftHtmlMessage
+    """
 
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Specify the subject of the mail"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Specify the body of the mail"""
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
     """
     Email address to send mail from (requires \"Send as\" or \"Send on behalf
     of\" permission for that mailbox). For more info on granting permissions
     please refer
     https://docs.microsoft.com/office365/admin/manage/send-email-as-distribution-list
     """
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Sensitivity"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
 
 
 @dataclass
 class BatchItemFailureResult:
-    """Definition: BatchItemFailureResult"""
+    """
+    Definition: BatchItemFailureResult
+    """
 
-    message_id: Optional[str] = None
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
     """The ID of the failed message."""
-    error: Optional[str] = None
+    error: Optional[str] = field(default=None, metadata={"wire_name": "Error"})
     """The error message of the failure."""
 
 
 @dataclass
 class BatchResponseClientReceiveMessage:
-    """Definition: BatchResponse[ClientReceiveMessage]"""
+    """
+    Definition: BatchResponse[ClientReceiveMessage]
+    """
 
     value: Optional[List[ClientReceiveMessage]] = None
     """A list of the response objects"""
@@ -1528,314 +2048,210 @@ class BatchResponseClientReceiveMessage:
 
 @dataclass
 class ClientReceiveMessage:
-    """Definition: ClientReceiveMessage"""
+    """
+    Definition: ClientReceiveMessage
+    """
 
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
     """The mailbox owner and sender of the message"""
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """The recipients for the message"""
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """The Cc recipients for the message"""
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """The Bcc recipients for the message"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """The subject of the message"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """The body of the message"""
-    importance: Optional[int] = None
+    importance: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the message (0 - Low, 1 - Normal, 2 - High)"""
-    body_preview: Optional[str] = None
+    body_preview: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "BodyPreview"},
+    )
     """The preview of the message"""
-    has_attachment: Optional[bool] = None
+    has_attachment: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HasAttachment"},
+    )
     """Indicates whether the message has attachments"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique identifier of the message"""
-    internet_message_id: Optional[str] = None
+    internet_message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "InternetMessageId"},
+    )
     """The message ID in the format specified by RFC2822"""
-    conversation_id: Optional[str] = None
+    conversation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ConversationId"},
+    )
     """The Id of the conversation the email belongs to"""
-    date_time_received: Optional[str] = None
+    date_time_received: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeReceived"},
+    )
     """The date and time the message was received"""
-    is_read: Optional[bool] = None
+    is_read: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsRead"},
+    )
     """Indicates whether the message has been read"""
-    attachments: Optional[List[ClientReceiveFileAttachment]] = None
+    attachments: Optional[List[ClientReceiveFileAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """The file attachments for the message"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Is Html?"""
-
-    @classmethod
-    def _parse_item(cls, item: Dict[str, Any]) -> ClientReceiveMessage:
-        """Parse a single message dictionary into a ClientReceiveMessage.
-
-        Args:
-            item: A dictionary containing the message properties.
-
-        Returns:
-            A ClientReceiveMessage object.
-        """
-        importance_map = {"low": 0, "normal": 1, "high": 2}
-
-        # NOTE(SDK): Parse attachments if present.
-        attachments_data = item.get("attachments")
-        attachments_list: Optional[List[ClientReceiveFileAttachment]] = None
-        if attachments_data and isinstance(attachments_data, list):
-            attachments_list = []
-            for attachment in attachments_data:
-                if isinstance(attachment, dict):
-                    attachments_list.append(
-                        ClientReceiveFileAttachment(
-                            id=attachment.get("id"),
-                            name=attachment.get("name"),
-                            content_bytes=attachment.get("contentBytes"),
-                            content_type=attachment.get("contentType"),
-                            size=attachment.get("size"),
-                            is_inline=attachment.get("isInline"),
-                            last_modified_date_time=attachment.get(
-                                "lastModifiedDateTime"
-                            ),
-                            content_id=attachment.get("contentId"),
-                        )
-                    )
-
-        # NOTE(SDK): Convert importance from string to int.
-        importance_value = item.get("importance")
-        importance_int: Optional[int] = None
-        if importance_value is not None:
-            if isinstance(importance_value, int):
-                importance_int = importance_value
-            elif isinstance(importance_value, str):
-                importance_int = importance_map.get(importance_value.lower())
-
-        return cls(
-            id=item.get("id"),
-            from_=item.get("from"),
-            to=item.get("toRecipients"),
-            cc=item.get("ccRecipients"),
-            bcc=item.get("bccRecipients"),
-            reply_to=item.get("replyTo"),
-            subject=item.get("subject"),
-            body=item.get("body"),
-            importance=importance_int,
-            body_preview=item.get("bodyPreview"),
-            has_attachment=item.get("hasAttachments"),
-            internet_message_id=item.get("internetMessageId"),
-            conversation_id=item.get("conversationId"),
-            date_time_received=item.get("receivedDateTime"),
-            is_read=item.get("isRead"),
-            attachments=attachments_list,
-            is_html=item.get("isHtml"),
-        )
-
-    @classmethod
-    def from_json(cls, payload: Any) -> List[ClientReceiveMessage]:
-        """Parse a JSON payload and return a list of ClientReceiveMessage objects.
-
-        This method supports SDK-type bindings for Python Function apps, allowing
-        functions to bind to and return rich ClientReceiveMessage objects instead
-        of raw JSON payloads.
-
-        Handles both batch and single-item trigger callback shapes:
-        - Batch (splitOn disabled): ``{"body": {"value": [...messages...]}}``
-        - Single-item (splitOn enabled): ``{"body": {...message...}}``
-
-        Both shapes are normalized to return a list, making it easier for callers
-        to process messages uniformly without checking the return type.
-
-        Args:
-            payload: A JSON string, dictionary, or object with a ``value``
-                attribute containing the email message(s).
-
-        Returns:
-            A list of ClientReceiveMessage objects. Single-item payloads return
-            a list with one element.
-
-        Raises:
-            ValueError: If the payload structure is invalid or cannot be parsed.
-
-        Example:
-            >>> # Single-item payload (OnNewEmailV3 trigger) - returns list of 1
-            >>> payload = {"body": {"id": "AAMk...", "subject": "Test"}}
-            >>> messages = ClientReceiveMessage.from_json(payload)
-            >>> len(messages)
-            1
-
-            >>> # Batch payload - returns list of N
-            >>> payload = {"body": {"value": [{"id": "1"}, {"id": "2"}]}}
-            >>> messages = ClientReceiveMessage.from_json(payload)
-            >>> len(messages)
-            2
-        """
-        from azure.connectors.sdk.trigger_payload import _is_batch_shape
-
-        # NOTE(SDK): Handle object with .value attribute (e.g., func.HttpRequest).
-        if hasattr(payload, "value"):
-            if isinstance(payload.value, str):
-                try:
-                    data = json.loads(payload.value)
-                except json.JSONDecodeError as e:
-                    raise ValueError(f"Invalid JSON payload: {e}.") from e
-            else:
-                data = payload.value
-        elif isinstance(payload, str):
-            try:
-                data = json.loads(payload)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON payload: {e}.") from e
-        elif isinstance(payload, dict):
-            data = payload
-        else:
-            raise ValueError(
-                "Payload must be a JSON string, dictionary, or have a 'value' attribute."
-            )
-
-        # NOTE(SDK): Extract the body content.
-        if "body" in data:
-            body_data = data.get("body")
-        else:
-            body_data = data
-
-        if body_data is None:
-            return []
-
-        # NOTE(SDK): Detect shape and normalize to list:
-        # - Batch shape: {"value": [...]} -> returns List[ClientReceiveMessage]
-        # - Single-item shape: {...item...} -> returns [ClientReceiveMessage]
-        if _is_batch_shape(body_data):
-            raw_items = body_data.get("value")
-            if raw_items is None:
-                return []
-            return [cls._parse_item(item) for item in raw_items]
-
-        # NOTE(SDK): Single-item shape - wrap in list for uniform return type.
-        return [cls._parse_item(body_data)]
 
 
 @dataclass
 class GraphClientReceiveFileAttachment:
-    """Definition: GraphClientReceiveFileAttachment"""
+    """
+    Definition: GraphClientReceiveFileAttachment
+    """
 
     id: Optional[str] = None
     """Attachment Id"""
     name: Optional[str] = None
     """Attachment name"""
-    content_bytes: Optional[str] = None
+    content_bytes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentBytes"},
+    )
     """Attachment content"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Attachment content type"""
     size: Optional[int] = None
     """The size in bytes of the attachment"""
-    is_inline: Optional[bool] = None
+    is_inline: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isInline"},
+    )
     """Set to true if this is an inline attachment"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The date and time when the attachment was last modified"""
-    content_id: Optional[str] = None
+    content_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentId"},
+    )
     """Content Id"""
 
 
 @dataclass
 class ReplyMessage:
-    """Definition: ReplyMessage"""
+    """
+    Definition: ReplyMessage
+    """
 
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """Example: recipient1@domain.com; recipient2@domain.com"""
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """Example: recipient1@domain.com; recipient2@domain.com"""
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """Example: recipient1@domain.com; recipient2@domain.com"""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Email subject (if empty, the original subject used)."""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Content of the email."""
-    reply_all: Optional[bool] = None
+    reply_all: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ReplyAll"},
+    )
     """True to reply to all recipients. (default: False)"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """True to send the reply as HTML. (default: True)"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Pick an importance. (default: Low)"""
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Details of attachments to be sent along with the reply."""
 
 
 @dataclass
-class ReplyHtmlMessage:
-    """Definition: ReplyHtmlMessage"""
+class ReplyEmailInput:
+    """
+    Definition: ReplyHtmlMessage
+    """
 
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """Example: recipient1@domain.com; recipient2@domain.com"""
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """Example: recipient1@domain.com; recipient2@domain.com"""
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """Example: recipient1@domain.com; recipient2@domain.com"""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Email subject (if empty, the original subject used)."""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Content of the email."""
-    reply_all: Optional[bool] = None
+    reply_all: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ReplyAll"},
+    )
     """True to reply to all recipients. (default: False)"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Pick an importance. (default: Low)"""
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Details of attachments to be sent along with the reply."""
 
 
 @dataclass
 class TriggerBatchResponseClientReceiveMessage:
-    """Definition: TriggerBatchResponse[ClientReceiveMessage]"""
+    """
+    Definition: TriggerBatchResponse[ClientReceiveMessage]
+    """
 
     value: Optional[List[ClientReceiveMessage]] = None
     """A list of the response objects"""
 
 
 @dataclass
-class AutomaticRepliesSettingClient:
-    """Definition: AutomaticRepliesSettingClient"""
-
-    status: Optional[str] = None
-    """Automatic reply setting status"""
-    external_audience: Optional[str] = None
-    """The audience that will see the external reply message"""
-    scheduled_start_date_time_offset: Optional[str] = None
-    """Scheduled start time (example: '2016-11-01T15:30:00-00:00Z')"""
-    scheduled_end_date_time_offset: Optional[str] = None
-    """Scheduled end time (example: '2016-11-01T15:30:00-00:00Z')"""
-    internal_reply_message: Optional[str] = None
-    """Message for people within your organization"""
-    external_reply_message: Optional[str] = None
-    """Message for people outside your organization"""
-
-
-@dataclass
-class MailTipsClientReceive:
-    """Definition: MailTipsClientReceive"""
-
-    automatic_replies: Optional[MailTipsAutomaticReplies] = None
-    delivery_restricted: Optional[bool] = None
-    """Is delivery restricted"""
-    external_member_count: Optional[int] = None
-    """Number of external members"""
-    is_moderated: Optional[bool] = None
-    """Is moderated"""
-    mailbox_full: Optional[bool] = None
-    """Is mailbox full"""
-    max_message_size: Optional[int] = None
-    """Maximum message size"""
-    total_member_count: Optional[int] = None
-    """Total member count"""
-
-
-@dataclass
-class MailTipsAutomaticReplies:
-    """Definition: MailTipsAutomaticReplies"""
-
-    message: Optional[str] = None
-    """Automatic replies message"""
-
-
-@dataclass
 class BatchResponseSensitivityLabel:
-    """Definition: BatchResponse[SensitivityLabel]"""
+    """
+    Definition: BatchResponse[SensitivityLabel]
+    """
 
     value: Optional[List[SensitivityLabel]] = None
     """A list of the response objects"""
@@ -1843,21 +2259,34 @@ class BatchResponseSensitivityLabel:
 
 @dataclass
 class SensitivityLabel:
-    """Definition: SensitivityLabel"""
+    """
+    Definition: SensitivityLabel
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Gets or sets the identifier."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Gets or sets the display name."""
-    applicable_to: Optional[str] = None
+    applicable_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ApplicableTo"},
+    )
     """Gets or sets the applicable to."""
-    sub_labels: Optional[List[SensitivityLabel]] = None
+    sub_labels: Optional[List[SensitivityLabel]] = field(
+        default=None,
+        metadata={"wire_name": "SubLabels"},
+    )
     """Gets or sets sub labels."""
 
 
 @dataclass
 class TriggerBatchResponseReceiveMessageMetadata:
-    """Definition: TriggerBatchResponse[ReceiveMessageMetadata]"""
+    """
+    Definition: TriggerBatchResponse[ReceiveMessageMetadata]
+    """
 
     value: Optional[List[ReceiveMessageMetadata]] = None
     """A list of the response objects"""
@@ -1865,35 +2294,57 @@ class TriggerBatchResponseReceiveMessageMetadata:
 
 @dataclass
 class ReceiveMessageMetadata:
-    """Definition: ReceiveMessageMetadata"""
+    """
+    Definition: ReceiveMessageMetadata
+    """
 
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
     """The mailbox owner and sender of the message"""
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """The recipients for the message"""
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """The Cc recipients for the message"""
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """The Bcc recipients for the message"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """The subject of the message"""
-    importance: Optional[int] = None
+    importance: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the message  (0 - Low, 1 - Normal, 2 - High)"""
-    has_attachment: Optional[bool] = None
+    has_attachment: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HasAttachment"},
+    )
     """Indicates whether the message has attachments"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique identifier of the message"""
-    date_time_received: Optional[str] = None
+    date_time_received: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeReceived"},
+    )
     """The date and time the message was received"""
-    is_read: Optional[bool] = None
+    is_read: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsRead"},
+    )
     """Indicates whether the message has been read"""
 
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -1901,100 +2352,176 @@ class DataSetsMetadata:
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
 @dataclass
 class OptionsEmailSubscription:
-    """Definition: OptionsEmailSubscription"""
+    """
+    Definition: OptionsEmailSubscription
+    """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "NotificationUrl"},
+    )
     """
     Gets or sets callback url to flow engine. It is expected as part of request
     """
-    message: Optional[MessageWithOptions] = None
+    message: Optional[MessageWithOptions] = field(
+        default=None,
+        metadata={"wire_name": "Message"},
+    )
 
 
 @dataclass
 class MessageWithOptions:
-    """Definition: MessageWithOptions"""
+    """
+    Definition: MessageWithOptions
+    """
 
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Subject of the email"""
-    options: Optional[str] = None
+    options: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Options"},
+    )
     """List of comma separated options for the email response"""
-    header_text: Optional[str] = None
+    header_text: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "HeaderText"},
+    )
     """Header text for email body"""
-    selection_text: Optional[str] = None
+    selection_text: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SelectionText"},
+    )
     """Header text for users options selection"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Body of the email"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = None
+    use_only_h_t_m_l_message: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "UseOnlyHTMLMessage"},
+    )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = None
+    hide_h_t_m_l_message: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HideHTMLMessage"},
+    )
     """
     If set to Yes, then the email body is hidden and only message card is
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = None
+    show_h_t_m_l_confirmation_dialog: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ShowHTMLConfirmationDialog"},
+    )
     """
     If set to Yes then a dialog wil be shown to confirm selected option of HTML
     message
     """
-    hide_microsoft_footer: Optional[bool] = None
+    hide_microsoft_footer: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HideMicrosoftFooter"},
+    )
     """If set to Yes, then the Microsoft footer is hidden in the email body."""
 
 
 @dataclass
 class ApprovalEmailResponse:
-    """Definition: ApprovalEmailResponse"""
+    """
+    Definition: ApprovalEmailResponse
+    """
 
-    selected_option: Optional[str] = None
+    selected_option: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SelectedOption"},
+    )
     """User response"""
-    user_email_address: Optional[str] = None
+    user_email_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "UserEmailAddress"},
+    )
     """
     User email address. The value is the user's email address for individual
     users and user ID for the members in Distribution Group or Mail Enabled
     Security Group.
     """
-    user_tenant_id: Optional[str] = None
+    user_tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "UserTenantId"},
+    )
     """
     User tenant ID. The value is the tenant id of the user for both individual
     users and the members in Distribution Group or Mail Enabled Security Group.
     """
-    user_id: Optional[str] = None
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "UserId"},
+    )
     """
     User ID. The value is the user id for both individual users and the members
     in Distribution Group or Mail Enabled Security Group.
@@ -2003,46 +2530,83 @@ class ApprovalEmailResponse:
 
 @dataclass
 class ApprovalEmailSubscription:
-    """Definition: ApprovalEmailSubscription"""
+    """
+    Definition: ApprovalEmailSubscription
+    """
 
-    notification_url: Optional[str] = None
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "NotificationUrl"},
+    )
     """
     Gets or sets callback url to flow engine. It is expected as part of request
     """
-    message: Optional[ApprovalMessage] = None
+    message: Optional[ApprovalMessage] = field(
+        default=None,
+        metadata={"wire_name": "Message"},
+    )
 
 
 @dataclass
 class ApprovalMessage:
-    """Definition: ApprovalMessage"""
+    """
+    Definition: ApprovalMessage
+    """
 
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Subject"""
-    options: Optional[str] = None
+    options: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Options"},
+    )
     """User Options"""
-    header_text: Optional[str] = None
+    header_text: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "HeaderText"},
+    )
     """Header text for email body"""
-    selection_text: Optional[str] = None
+    selection_text: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SelectionText"},
+    )
     """Header text for users options selection"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Body"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = None
+    use_only_h_t_m_l_message: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "UseOnlyHTMLMessage"},
+    )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = None
+    hide_h_t_m_l_message: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HideHTMLMessage"},
+    )
     """
     If set to Yes, then the email body is hidden and only message card is
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = None
+    show_h_t_m_l_confirmation_dialog: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ShowHTMLConfirmationDialog"},
+    )
     """
     If set to Yes then a dialog wil be shown to confirm selected option of HTML
     message
@@ -2051,73 +2615,118 @@ class ApprovalMessage:
 
 @dataclass
 class SharedMailboxClientSendMessage:
-    """Definition: SharedMailboxClientSendMessage"""
+    """
+    Definition: SharedMailboxClientSendMessage
+    """
 
-    mailbox_address: Optional[str] = None
+    mailbox_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MailboxAddress"},
+    )
     """Specify email address of a shared mailbox like someone@contoso.com"""
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Specify the subject of the mail"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Specify the body of the mail"""
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Sensitivity"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Is Html?"""
 
 
 @dataclass
-class SharedMailboxClientSendHtmlMessage:
-    """Definition: SharedMailboxClientSendHtmlMessage"""
+class SharedMailboxSendEmailInput:
+    """
+    Definition: SharedMailboxClientSendHtmlMessage
+    """
 
-    mailbox_address: Optional[str] = None
+    mailbox_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MailboxAddress"},
+    )
     """Specify email address of a shared mailbox like someone@contoso.com"""
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Specify the subject of the mail"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Specify the body of the mail"""
-    cc: Optional[str] = None
+    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments"""
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Sensitivity"""
-    reply_to: Optional[str] = None
+    reply_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyTo"},
+    )
     """The email addresses to use when replying"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance"""
 
 
 @dataclass
 class SubscriptionPayloadOutlookReceiveMessage:
-    """Definition: SubscriptionPayload[OutlookReceiveMessage]"""
+    """
+    Definition: SubscriptionPayload[OutlookReceiveMessage]
+    """
 
     value: Optional[List[SubscriptionPayloadEntityOutlookReceiveMessage]] = None
     """List of values"""
@@ -2125,62 +2734,112 @@ class SubscriptionPayloadOutlookReceiveMessage:
 
 @dataclass
 class SubscriptionPayloadEntityOutlookReceiveMessage:
-    """Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]"""
+    """
+    Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]
+    """
 
-    sequence_number: Optional[int] = None
+    sequence_number: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "SequenceNumber"},
+    )
     """Sequence number"""
-    change_type: Optional[str] = None
+    change_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ChangeType"},
+    )
     """Change type"""
-    client_state: Optional[str] = None
+    client_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ClientState"},
+    )
     """Client state"""
-    resource: Optional[str] = None
+    resource: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Resource"},
+    )
     """Resource"""
-    resource_data: Optional[OutlookReceiveMessage] = None
+    resource_data: Optional[OutlookReceiveMessage] = field(
+        default=None,
+        metadata={"wire_name": "ResourceData"},
+    )
 
 
 @dataclass
 class OutlookReceiveAttachment:
-    """Definition: OutlookReceiveAttachment"""
+    """
+    Definition: OutlookReceiveAttachment
+    """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.type"},
+    )
     """OData type"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Attachment Id"""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Attachment name"""
-    content_bytes: Optional[str] = None
+    content_bytes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentBytes"},
+    )
     """Attachment content"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
     """Attachment content type"""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """Attachment size in bytes"""
-    permission: Optional[str] = None
+    permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Permission"},
+    )
     """Permission associated with a reference attachment"""
-    provider_type: Optional[str] = None
+    provider_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ProviderType"},
+    )
     """Provider for the reference attachment"""
-    source_url: Optional[str] = None
+    source_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SourceUrl"},
+    )
     """Reference attachment source url"""
-    is_inline: Optional[bool] = None
+    is_inline: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsInline"},
+    )
     """Set to true if this is an inline attachment"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModifiedDateTime"},
+    )
     """The date and time when the attachment was last modified"""
-    content_id: Optional[str] = None
+    content_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentId"},
+    )
     """Content Id"""
 
 
 @dataclass
 class InternetMessageHeader:
-    """Definition: InternetMessageHeader"""
+    """
+    Definition: InternetMessageHeader
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Header name"""
-    value: Optional[str] = None
+    value: Optional[str] = field(default=None, metadata={"wire_name": "Value"})
     """Header value"""
 
 
 @dataclass
 class SubscriptionPayloadSubscriptionEvent:
-    """Definition: SubscriptionPayload[SubscriptionEvent]"""
+    """
+    Definition: SubscriptionPayload[SubscriptionEvent]
+    """
 
     value: Optional[List[SubscriptionPayloadEntitySubscriptionEvent]] = None
     """List of values"""
@@ -2188,30 +2847,51 @@ class SubscriptionPayloadSubscriptionEvent:
 
 @dataclass
 class SubscriptionPayloadEntitySubscriptionEvent:
-    """Definition: SubscriptionPayloadEntity[SubscriptionEvent]"""
+    """
+    Definition: SubscriptionPayloadEntity[SubscriptionEvent]
+    """
 
-    sequence_number: Optional[int] = None
+    sequence_number: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "SequenceNumber"},
+    )
     """Sequence number"""
-    change_type: Optional[str] = None
+    change_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ChangeType"},
+    )
     """Change type"""
-    client_state: Optional[str] = None
+    client_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ClientState"},
+    )
     """Client state"""
-    resource: Optional[str] = None
+    resource: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Resource"},
+    )
     """Resource"""
-    resource_data: Optional[SubscriptionEvent] = None
+    resource_data: Optional[SubscriptionEvent] = field(
+        default=None,
+        metadata={"wire_name": "ResourceData"},
+    )
 
 
 @dataclass
 class SubscriptionEvent:
-    """Definition: SubscriptionEvent"""
+    """
+    Definition: SubscriptionEvent
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The Event's unique identifier"""
 
 
 @dataclass
 class EntityListResponseTable:
-    """Definition: EntityListResponse[Table]"""
+    """
+    Definition: EntityListResponse[Table]
+    """
 
     value: Optional[List[Table]] = None
     """List of values"""
@@ -2219,19 +2899,29 @@ class EntityListResponseTable:
 
 @dataclass
 class Table:
-    """Definition: Table"""
+    """
+    Definition: Table
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
 @dataclass
 class EntityListResponseCalendarEventBackend:
-    """Definition: EntityListResponse[CalendarEventBackend]"""
+    """
+    Definition: EntityListResponse[CalendarEventBackend]
+    """
 
     value: Optional[List[CalendarEventBackend]] = None
     """List of values"""
@@ -2239,7 +2929,9 @@ class EntityListResponseCalendarEventBackend:
 
 @dataclass
 class EntityListResponseCalendarEventClientReceiveStringEnums:
-    """Definition: EntityListResponse[CalendarEventClientReceiveStringEnums]"""
+    """
+    Definition: EntityListResponse[CalendarEventClientReceiveStringEnums]
+    """
 
     value: Optional[List[CalendarEventClientReceiveStringEnums]] = None
     """List of values"""
@@ -2247,43 +2939,90 @@ class EntityListResponseCalendarEventClientReceiveStringEnums:
 
 @dataclass
 class CalendarEventClient:
-    """Definition: CalendarEventClient"""
+    """
+    Definition: CalendarEventClient
+    """
 
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Event subject"""
-    start: Optional[str] = None
+    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
     """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = None
+    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeZone"},
+    )
     """Time zone of the event"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OptionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Body of the message associated with the event"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Set to true if the body is Html"""
-    location: Optional[str] = None
+    location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Location"},
+    )
     """Location of the event"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the event: Low, Normal, or High"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    recurrence: Optional[str] = None
+    recurrence: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Recurrence"},
+    )
     """The recurrence pattern for the event"""
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RecurrenceEnd"},
+    )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = None
+    number_of_occurrences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "NumberOfOccurrences"},
+    )
     """How many times to repeat the event"""
-    reminder: Optional[int] = None
+    reminder: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Reminder"},
+    )
     """Time in minutes before event start to remind"""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ShowAs"},
+    )
     """Status to show during the event"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ResponseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -2292,41 +3031,85 @@ class CalendarEventClient:
 
 @dataclass
 class CalendarEventHtmlClient:
-    """Definition: CalendarEventHtmlClient"""
+    """
+    Definition: CalendarEventHtmlClient
+    """
 
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Event subject"""
-    start: Optional[str] = None
+    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
     """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = None
+    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeZone"},
+    )
     """Time zone of the event"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OptionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Body of the message associated with the event"""
-    location: Optional[str] = None
+    location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Location"},
+    )
     """Location of the event"""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the event: Low, Normal, or High"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    recurrence: Optional[str] = None
+    recurrence: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Recurrence"},
+    )
     """The recurrence pattern for the event"""
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RecurrenceEnd"},
+    )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = None
+    number_of_occurrences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "NumberOfOccurrences"},
+    )
     """How many times to repeat the event"""
-    reminder: Optional[int] = None
+    reminder: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Reminder"},
+    )
     """Time in minutes before event start to remind"""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ShowAs"},
+    )
     """Status to show during the event"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ResponseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -2335,7 +3118,9 @@ class CalendarEventHtmlClient:
 
 @dataclass
 class GraphCalendarEventClient:
-    """Definition: GraphCalendarEventClient"""
+    """
+    Definition: GraphCalendarEventClient
+    """
 
     subject: Optional[str] = None
     """Event subject"""
@@ -2343,13 +3128,25 @@ class GraphCalendarEventClient:
     """Start time of the event (example: '2017-08-29T04:00:00')"""
     end: Optional[str] = None
     """End time of the event (example: '2017-08-29T05:00:00')"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """Time zone of the event"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "requiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "optionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
     body: Optional[str] = None
     """Body of the message associated with the event"""
@@ -2359,29 +3156,53 @@ class GraphCalendarEventClient:
     """Location of the event"""
     importance: Optional[str] = None
     """The importance of the event: low, normal, or high"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Set to true if the event lasts all day"""
     recurrence: Optional[str] = None
     """
     The recurrence pattern for the event: none, daily, weekly, monthly or
     yearly
     """
-    selected_days_of_week: Optional[List[str]] = None
+    selected_days_of_week: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "selectedDaysOfWeek"},
+    )
     """Days of week for weekly recurrence"""
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recurrenceEnd"},
+    )
     """End Date of the recurrence"""
-    number_of_occurences: Optional[int] = None
+    number_of_occurences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "numberOfOccurences"},
+    )
     """How many times to repeat the event"""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """Time in minutes before event start to remind"""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if an alert is set to remind the user of the event."""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """
     Status to show during the event: free, tentative, busy, oof,
     workingElsewhere or unknown
     """
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -2392,7 +3213,9 @@ class GraphCalendarEventClient:
 
 @dataclass
 class CalendarEventListWithActionType:
-    """Definition: CalendarEventListWithActionType"""
+    """
+    Definition: CalendarEventListWithActionType
+    """
 
     value: Optional[List[CalendarEventClientWithActionType]] = None
     """List of calendar items"""
@@ -2400,87 +3223,170 @@ class CalendarEventListWithActionType:
 
 @dataclass
 class CalendarEventClientWithActionType:
-    """Definition: CalendarEventClientWithActionType"""
+    """
+    Definition: CalendarEventClientWithActionType
+    """
 
-    action_type: Optional[str] = None
+    action_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ActionType"},
+    )
     """Changed action type of the event - added, updated or deleted."""
-    is_added: Optional[bool] = None
+    is_added: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAdded"},
+    )
     """
     Flag that indicates whether the event was added since the last poll of the
     trigger.
     """
-    is_updated: Optional[bool] = None
+    is_updated: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsUpdated"},
+    )
     """
     Flag that indicates whether the event was updated since the last poll of
     the trigger.
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Event subject"""
-    start: Optional[str] = None
+    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
     """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = None
+    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    show_as: Optional[int] = None
+    show_as: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "ShowAs"},
+    )
     """
     Status to show during the event (Unknown - -1, Free - 0, Tentative - 1,
     Busy - 2, Oof - 3, WorkingElsewhere - 4)
     """
-    recurrence: Optional[int] = None
+    recurrence: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Recurrence"},
+    )
     """
     The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2,
     Monthly - 3, Yearly - 4)
     """
-    response_type: Optional[int] = None
+    response_type: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "ResponseType"},
+    )
     """
     The response type of the event (None - 0, Organizer - 1,
     TentativelyAccepted - 2, Accepted - 3, Declined - 4, NotResponded - 5)
     """
-    response_time: Optional[str] = None
+    response_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResponseTime"},
+    )
     """The response time of the event"""
-    i_cal_u_id: Optional[str] = None
+    i_cal_u_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ICalUId"},
+    )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    importance: Optional[int] = None
+    importance: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """The importance of the event (0 - Low, 1 - Normal, 2 - High)"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The event's unique identifier"""
-    date_time_created: Optional[str] = None
+    date_time_created: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeCreated"},
+    )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = None
+    date_time_last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DateTimeLastModified"},
+    )
     """The date and time that the event was last modified"""
-    organizer: Optional[str] = None
+    organizer: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Organizer"},
+    )
     """The organizer of the event"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeZone"},
+    )
     """Time zone of the event"""
-    series_master_id: Optional[str] = None
+    series_master_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "SeriesMasterId"},
+    )
     """Unique identifier for Series Master event type"""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Categories"},
+    )
     """The categories associated with the event"""
-    web_link: Optional[str] = None
+    web_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "WebLink"},
+    )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OptionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ResourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Body of the message associated with the event"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsHtml"},
+    )
     """Set to true if the body is Html"""
-    location: Optional[str] = None
+    location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Location"},
+    )
     """Location of the event"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAllDay"},
+    )
     """Set to true if the event lasts all day"""
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RecurrenceEnd"},
+    )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = None
+    number_of_occurrences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "NumberOfOccurrences"},
+    )
     """How many times to repeat the event"""
-    reminder: Optional[int] = None
+    reminder: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Reminder"},
+    )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "ResponseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -2489,16 +3395,27 @@ class CalendarEventClientWithActionType:
 
 @dataclass
 class GraphCalendarEventClientWithActionType:
-    """Definition: GraphCalendarEventClientWithActionType"""
+    """
+    Definition: GraphCalendarEventClientWithActionType
+    """
 
-    action_type: Optional[str] = None
+    action_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ActionType"},
+    )
     """Changed action type of the event - added, updated or deleted."""
-    is_added: Optional[bool] = None
+    is_added: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsAdded"},
+    )
     """
     Flag that indicates whether the event was added since the last poll of the
     trigger.
     """
-    is_updated: Optional[bool] = None
+    is_updated: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsUpdated"},
+    )
     """
     Flag that indicates whether the event was updated since the last poll of
     the trigger.
@@ -2509,79 +3426,142 @@ class GraphCalendarEventClientWithActionType:
     """Start time of the event (example: '2017-08-29T04:00:00.0000000')"""
     end: Optional[str] = None
     """End time of the event (example: '2017-08-29T05:00:00.0000000')"""
-    start_with_time_zone: Optional[str] = None
+    start_with_time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startWithTimeZone"},
+    )
     """
     Start time of the event with time zone (example:
     '2017-08-29T04:00:00.0000000+00:00')
     """
-    end_with_time_zone: Optional[str] = None
+    end_with_time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "endWithTimeZone"},
+    )
     """
     End time of the event with time zone (example:
     '2017-08-29T05:00:00.0000000+00:00')
     """
     body: Optional[str] = None
     """Body of the message associated with the event"""
-    is_html: Optional[bool] = None
+    is_html: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isHtml"},
+    )
     """Set to true if the body is Html"""
-    response_type: Optional[str] = None
+    response_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "responseType"},
+    )
     """
     The response type of the event (none, organizer, tentativelyAccepted,
     accepted, declined or notResponded)
     """
-    response_time: Optional[str] = None
+    response_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "responseTime"},
+    )
     """The response time of the event"""
     id: Optional[str] = None
     """The event's unique identifier"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The date and time that the event was created"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The date and time that the event was last modified"""
     organizer: Optional[str] = None
     """The organizer of the event"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """Time zone of the event"""
-    series_master_id: Optional[str] = None
+    series_master_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "seriesMasterId"},
+    )
     """Unique identifier for Series Master event type"""
-    i_cal_u_id: Optional[str] = None
+    i_cal_u_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "iCalUId"},
+    )
     """
     A unique identifier for an event across calendars. This ID is different for
     each occurrence in a recurring series
     """
     categories: Optional[List[str]] = None
     """The categories associated with the event"""
-    web_link: Optional[str] = None
+    web_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webLink"},
+    )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = None
+    required_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "requiredAttendees"},
+    )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = None
+    optional_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "optionalAttendees"},
+    )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = None
+    resource_attendees: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceAttendees"},
+    )
     """Resource attendees for the event separated by semicolons"""
     location: Optional[str] = None
     """Location of the event"""
     importance: Optional[str] = None
     """The importance of the event: low, normal, or high"""
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Set to true if the event lasts all day"""
     recurrence: Optional[str] = None
     """
     The recurrence pattern for the event: none, daily, weekly, monthly or
     yearly
     """
-    recurrence_end: Optional[str] = None
+    recurrence_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "recurrenceEnd"},
+    )
     """End Date of the recurrence"""
-    number_of_occurences: Optional[int] = None
+    number_of_occurences: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "numberOfOccurences"},
+    )
     """How many times to repeat the event"""
-    reminder_minutes_before_start: Optional[int] = None
+    reminder_minutes_before_start: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "reminderMinutesBeforeStart"},
+    )
     """Time in minutes before event start to remind"""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """Set to true if an alert is set to remind the user of the event."""
-    show_as: Optional[str] = None
+    show_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "showAs"},
+    )
     """
     Status to show during the event: free, tentative, busy, oof,
     workingElsewhere or unknown
     """
-    response_requested: Optional[bool] = None
+    response_requested: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "responseRequested"},
+    )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
@@ -2592,92 +3572,29 @@ class GraphCalendarEventClientWithActionType:
 
 @dataclass
 class GraphContactFolder:
-    """Definition: GraphContactFolder"""
+    """
+    Definition: GraphContactFolder
+    """
 
     id: Optional[str] = None
     """The ID of the contacts folder"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The name of the contacts folder"""
-    parent_folder_id: Optional[str] = None
+    parent_folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentFolderId"},
+    )
     """The ID of the parent folder"""
 
 
 @dataclass
-class Contact:
-    """Definition: Contact"""
-
-    id: Optional[str] = None
-    """The contact's unique identifier."""
-    parent_folder_id: Optional[str] = None
-    """The ID of the contact's parent folder"""
-    birthday: Optional[str] = None
-    """The contact's birthday"""
-    file_as: Optional[str] = None
-    """The name the contact is filed under"""
-    display_name: Optional[str] = None
-    """The contact's display name"""
-    given_name: Optional[str] = None
-    """The contact's given name"""
-    initials: Optional[str] = None
-    """The contact's initials"""
-    middle_name: Optional[str] = None
-    """The contact's middle name"""
-    nick_name: Optional[str] = None
-    """The contact's nickname"""
-    surname: Optional[str] = None
-    """The contact's surname"""
-    title: Optional[str] = None
-    """The contact's title"""
-    generation: Optional[str] = None
-    """The contact's generation"""
-    email_addresses: Optional[List[EmailAddress]] = None
-    """The contact's email addresses"""
-    im_addresses: Optional[List[str]] = None
-    """The contact's instant messaging (IM) addresses"""
-    job_title: Optional[str] = None
-    """The contact's job title"""
-    company_name: Optional[str] = None
-    """The name of the contact's company"""
-    department: Optional[str] = None
-    """The contact's department"""
-    office_location: Optional[str] = None
-    """The location of the contact's office"""
-    profession: Optional[str] = None
-    """The contact's profession"""
-    business_home_page: Optional[str] = None
-    """The business home page of the contact"""
-    assistant_name: Optional[str] = None
-    """The name of the contact's assistant"""
-    manager: Optional[str] = None
-    """The name of the contact's manager"""
-    home_phones: Optional[List[str]] = None
-    """The contact's home phone numbers"""
-    business_phones: Optional[List[str]] = None
-    """The contact's business phone numbers"""
-    mobile_phone1: Optional[str] = None
-    """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddress] = None
-    business_address: Optional[PhysicalAddress] = None
-    other_address: Optional[PhysicalAddress] = None
-    yomi_company_name: Optional[str] = None
-    """The phonetic Japanese company name of the contact"""
-    yomi_given_name: Optional[str] = None
-    """The phonetic Japanese given name (first name) of the contact"""
-    yomi_surname: Optional[str] = None
-    """The phonetic Japanese surname (last name) of the contact"""
-    categories: Optional[List[str]] = None
-    """The categories associated with the contact"""
-    change_key: Optional[str] = None
-    """Identifies the version of the event object"""
-    date_time_created: Optional[str] = None
-    """The time the contact was created"""
-    date_time_last_modified: Optional[str] = None
-    """The time the contact was modified"""
-
-
-@dataclass
 class DataSetsList:
-    """Definition: DataSetsList"""
+    """
+    Definition: DataSetsList
+    """
 
     value: Optional[List[DataSet]] = None
     """List of datasets"""
@@ -2685,11 +3602,16 @@ class DataSetsList:
 
 @dataclass
 class DataSet:
-    """Definition: DataSet"""
+    """
+    Definition: DataSet
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Dataset name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Dataset display name"""
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
@@ -2697,62 +3619,114 @@ class DataSet:
 
 @dataclass
 class Procedure:
-    """Definition: Procedure"""
+    """
+    Definition: Procedure
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Procedure name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Procedure display name"""
 
 
 @dataclass
 class PassThroughNativeQuery:
-    """Definition: PassThroughNativeQuery"""
+    """
+    Definition: PassThroughNativeQuery
+    """
 
-    language: Optional[str] = None
+    language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Language"},
+    )
     """Query language"""
 
 
 @dataclass
-class AutomaticRepliesSettingClientV2:
-    """Definition: AutomaticRepliesSettingClient_V2"""
+class AutomaticRepliesSettingClient:
+    """
+    Definition: AutomaticRepliesSettingClient_V2
+    """
 
     status: Optional[str] = None
     """Automatic reply setting status"""
-    external_audience: Optional[str] = None
+    external_audience: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "externalAudience"},
+    )
     """The audience that will see the external reply message"""
-    scheduled_start_date_time: Optional[Dict[str, Any]] = None
+    scheduled_start_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "scheduledStartDateTime"},
+    )
     """Scheduled start time (example: '2017-08-29T04:00:00.0000000')"""
-    scheduled_end_date_time: Optional[Dict[str, Any]] = None
+    scheduled_end_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "scheduledEndDateTime"},
+    )
     """Scheduled end time (example: '2017-08-29T05:00:00.0000000')"""
-    internal_reply_message: Optional[str] = None
+    internal_reply_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "internalReplyMessage"},
+    )
     """Message for people within your organization"""
-    external_reply_message: Optional[str] = None
+    external_reply_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "externalReplyMessage"},
+    )
     """Message for people outside your organization"""
 
 
 @dataclass
-class MailTipsClientReceiveV2:
-    """Definition: MailTipsClientReceive_V2"""
+class MailTipsClientReceive:
+    """
+    Definition: MailTipsClientReceive_V2
+    """
 
-    automatic_replies: Optional[MailTipsAutomaticRepliesV2] = None
-    delivery_restricted: Optional[bool] = None
+    automatic_replies: Optional[MailTipsAutomaticReplies] = field(
+        default=None,
+        metadata={"wire_name": "automaticReplies"},
+    )
+    delivery_restricted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "deliveryRestricted"},
+    )
     """Is delivery restricted"""
-    external_member_count: Optional[int] = None
+    external_member_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "externalMemberCount"},
+    )
     """Number of external members"""
-    is_moderated: Optional[bool] = None
+    is_moderated: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isModerated"},
+    )
     """Is moderated"""
-    mailbox_full: Optional[bool] = None
+    mailbox_full: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "mailboxFull"},
+    )
     """Is mailbox full"""
-    max_message_size: Optional[int] = None
+    max_message_size: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "maxMessageSize"},
+    )
     """Maximum message size"""
-    total_member_count: Optional[int] = None
+    total_member_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "totalMemberCount"},
+    )
     """Total member count"""
 
 
 @dataclass
-class MailTipsAutomaticRepliesV2:
-    """Definition: MailTipsAutomaticReplies_V2"""
+class MailTipsAutomaticReplies:
+    """
+    Definition: MailTipsAutomaticReplies_V2
+    """
 
     message: Optional[str] = None
     """Automatic replies message"""
@@ -2760,7 +3734,9 @@ class MailTipsAutomaticRepliesV2:
 
 @dataclass
 class UpdateEmailFlag:
-    """Definition: UpdateEmailFlag"""
+    """
+    Definition: UpdateEmailFlag
+    """
 
     flag: Optional[Dict[str, Any]] = None
     """Flag status"""
@@ -2768,97 +3744,99 @@ class UpdateEmailFlag:
 
 @dataclass
 class ResponseToEventInvite:
-    """Definition: ResponseToEventInvite"""
+    """
+    Definition: ResponseToEventInvite
+    """
 
-    comment: Optional[str] = None
+    comment: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Comment"},
+    )
     """Comment"""
-    send_response: Optional[bool] = None
+    send_response: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "SendResponse"},
+    )
     """Send response to organizer?"""
 
 
 @dataclass
 class DirectForwardMessage:
-    """Definition: DirectForwardMessage"""
+    """
+    Definition: DirectForwardMessage
+    """
 
-    comment: Optional[str] = None
+    comment: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Comment"},
+    )
     """Comment"""
-    to_recipients: Optional[str] = None
+    to_recipients: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ToRecipients"},
+    )
     """Semicolon separated list of recipients to forward the message to"""
 
 
-@dataclass
-class MeetingTimeSuggestions:
-    """Definition: MeetingTimeSuggestions"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class MeetingTimeSuggestionsV2:
-    """Definition: MeetingTimeSuggestions_V2"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+MeetingTimeSuggestions = List[Dict[str, Any]]
 
 
 @dataclass
 class LocationConstraint:
-    """Definition: LocationConstraint"""
+    """
+    Definition: LocationConstraint
+    """
 
-    is_required: Optional[bool] = None
+    is_required: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsRequired"},
+    )
     """Should a meeting location be returned for the meeting?"""
-    suggest_location: Optional[bool] = None
+    suggest_location: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "SuggestLocation"},
+    )
     """Should the response provide one or more meeting location suggestions?"""
-    locations: Optional[List[Dict[str, Any]]] = None
+    locations: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "Locations"},
+    )
     """Locations"""
 
 
 @dataclass
 class DateTimeTimeZone:
-    """Definition: DateTimeTimeZone"""
+    """
+    Definition: DateTimeTimeZone_V2
+    """
 
-    date_time: Optional[str] = None
-    """DateTime"""
-    time_zone: Optional[str] = None
-    """TimeZone"""
-
-
-@dataclass
-class DateTimeTimeZoneV2:
-    """Definition: DateTimeTimeZone_V2"""
-
-    date_time: Optional[str] = None
+    date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dateTime"},
+    )
     """DateTime (example: '2017-08-29T04:00:00.0000000')"""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """TimeZone (example: 'Pacific Standard Time')"""
 
 
 @dataclass
-class EntityListResponseContactResponseV2:
-    """Definition: EntityListResponse[ContactResponse]_V2"""
-
-    value: Optional[List[ContactResponseV2]] = None
-    """List of values"""
-
-
-@dataclass
 class EmailAddressV2:
-    """Definition: EmailAddress_V2"""
+    """
+    Definition: EmailAddress_V2
+    """
 
     name: Optional[str] = None
     address: Optional[str] = None
 
 
 @dataclass
-class PhysicalAddressV2:
-    """Definition: PhysicalAddress_V2"""
+class PhysicalAddress:
+    """
+    Definition: PhysicalAddress_V2
+    """
 
     street: Optional[str] = None
     """The contact's street address."""
@@ -2866,33 +3844,59 @@ class PhysicalAddressV2:
     """The contact's city."""
     state: Optional[str] = None
     """The contact's state."""
-    country_or_region: Optional[str] = None
+    country_or_region: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "countryOrRegion"},
+    )
     """The contact's country of region."""
-    postal_code: Optional[str] = None
+    postal_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "postalCode"},
+    )
     """The contact's postal code."""
 
 
 @dataclass
-class ContactV2:
-    """Definition: Contact_V2"""
+class Contact:
+    """
+    Definition: Contact_V2
+    """
 
     id: Optional[str] = None
     """The contact's unique identifier."""
-    parent_folder_id: Optional[str] = None
+    parent_folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentFolderId"},
+    )
     """The ID of the contact's parent folder"""
     birthday: Optional[str] = None
     """The contact's birthday"""
-    file_as: Optional[str] = None
+    file_as: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fileAs"},
+    )
     """The name the contact is filed under"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The contact's display name"""
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "givenName"},
+    )
     """The contact's given name"""
     initials: Optional[str] = None
     """The contact's initials"""
-    middle_name: Optional[str] = None
+    middle_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "middleName"},
+    )
     """The contact's middle name"""
-    nick_name: Optional[str] = None
+    nick_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nickName"},
+    )
     """The contact's nickname"""
     surname: Optional[str] = None
     """The contact's surname"""
@@ -2900,133 +3904,125 @@ class ContactV2:
     """The contact's title"""
     generation: Optional[str] = None
     """The contact's generation"""
-    email_addresses: Optional[List[EmailAddressV2]] = None
+    email_addresses: Optional[List[EmailAddressV2]] = field(
+        default=None,
+        metadata={"wire_name": "emailAddresses"},
+    )
     """The contact's email addresses"""
-    im_addresses: Optional[List[str]] = None
+    im_addresses: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "imAddresses"},
+    )
     """The contact's instant messaging (IM) addresses"""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobTitle"},
+    )
     """The contact's job title"""
-    company_name: Optional[str] = None
+    company_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "companyName"},
+    )
     """The name of the contact's company"""
     department: Optional[str] = None
     """The contact's department"""
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "officeLocation"},
+    )
     """The location of the contact's office"""
     profession: Optional[str] = None
     """The contact's profession"""
-    business_home_page: Optional[str] = None
+    business_home_page: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "businessHomePage"},
+    )
     """The business home page of the contact"""
-    assistant_name: Optional[str] = None
+    assistant_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assistantName"},
+    )
     """The name of the contact's assistant"""
     manager: Optional[str] = None
     """The name of the contact's manager"""
-    home_phones: Optional[List[str]] = None
+    home_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "homePhones"},
+    )
     """The contact's home phone numbers"""
-    business_phones: Optional[List[str]] = None
+    business_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "businessPhones"},
+    )
     """The contact's business phone numbers"""
-    mobile_phone: Optional[str] = None
+    mobile_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mobilePhone"},
+    )
     """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddressV2] = None
-    business_address: Optional[PhysicalAddressV2] = None
-    other_address: Optional[PhysicalAddressV2] = None
-    yomi_company_name: Optional[str] = None
+    home_address: Optional[PhysicalAddress] = field(
+        default=None,
+        metadata={"wire_name": "homeAddress"},
+    )
+    business_address: Optional[PhysicalAddress] = field(
+        default=None,
+        metadata={"wire_name": "businessAddress"},
+    )
+    other_address: Optional[PhysicalAddress] = field(
+        default=None,
+        metadata={"wire_name": "otherAddress"},
+    )
+    yomi_company_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "yomiCompanyName"},
+    )
     """The phonetic Japanese company name of the contact"""
-    yomi_given_name: Optional[str] = None
+    yomi_given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "yomiGivenName"},
+    )
     """The phonetic Japanese given name (first name) of the contact"""
-    yomi_surname: Optional[str] = None
+    yomi_surname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "yomiSurname"},
+    )
     """The phonetic Japanese surname (last name) of the contact"""
     categories: Optional[List[str]] = None
     """The categories associated with the contact"""
-    change_key: Optional[str] = None
+    change_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeKey"},
+    )
     """Identifies the version of the event object"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The time the contact was created"""
-    last_modified_date_time: Optional[str] = None
-    """The time the contact was modified"""
-
-
-@dataclass
-class ContactResponseV2:
-    """Definition: ContactResponse_V2"""
-
-    id: Optional[str] = None
-    """The contact's unique identifier."""
-    parent_folder_id: Optional[str] = None
-    """The ID of the contact's parent folder"""
-    birthday: Optional[str] = None
-    """The contact's birthday"""
-    file_as: Optional[str] = None
-    """The name the contact is filed under"""
-    display_name: Optional[str] = None
-    """The contact's display name"""
-    given_name: Optional[str] = None
-    """The contact's given name"""
-    initials: Optional[str] = None
-    """The contact's initials"""
-    middle_name: Optional[str] = None
-    """The contact's middle name"""
-    nick_name: Optional[str] = None
-    """The contact's nickname"""
-    surname: Optional[str] = None
-    """The contact's surname"""
-    title: Optional[str] = None
-    """The contact's title"""
-    generation: Optional[str] = None
-    """The contact's generation"""
-    email_addresses: Optional[List[EmailAddressV2]] = None
-    """The contact's email addresses"""
-    im_addresses: Optional[List[str]] = None
-    """The contact's instant messaging (IM) addresses"""
-    job_title: Optional[str] = None
-    """The contact's job title"""
-    company_name: Optional[str] = None
-    """The name of the contact's company"""
-    department: Optional[str] = None
-    """The contact's department"""
-    office_location: Optional[str] = None
-    """The location of the contact's office"""
-    profession: Optional[str] = None
-    """The contact's profession"""
-    business_home_page: Optional[str] = None
-    """The business home page of the contact"""
-    assistant_name: Optional[str] = None
-    """The name of the contact's assistant"""
-    manager: Optional[str] = None
-    """The name of the contact's manager"""
-    home_phones: Optional[List[str]] = None
-    """The contact's home phone numbers"""
-    business_phones: Optional[List[str]] = None
-    """The contact's business phone numbers"""
-    mobile_phone: Optional[str] = None
-    """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddressV2] = None
-    business_address: Optional[PhysicalAddressV2] = None
-    other_address: Optional[PhysicalAddressV2] = None
-    yomi_company_name: Optional[str] = None
-    """The phonetic Japanese company name of the contact"""
-    yomi_given_name: Optional[str] = None
-    """The phonetic Japanese given name (first name) of the contact"""
-    yomi_surname: Optional[str] = None
-    """The phonetic Japanese surname (last name) of the contact"""
-    categories: Optional[List[str]] = None
-    """The categories associated with the contact"""
-    change_key: Optional[str] = None
-    """Identifies the version of the event object"""
-    created_date_time: Optional[str] = None
-    """The time the contact was created"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """The time the contact was modified"""
 
 
 @dataclass
 class SensitivityLabelMetadata:
-    """Definition: sensitivityLabelMetadata"""
+    """
+    Definition: sensitivityLabelMetadata
+    """
 
-    sensitivity_label_id: Optional[str] = None
+    sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelId"},
+    )
     """SensitivityLabel Id."""
     name: Optional[str] = None
     """SensitivityLabel name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """SensitivityLabel displayName info"""
     tooltip: Optional[str] = None
     """SensitivityLabel details on tooltip."""
@@ -3034,19 +4030,33 @@ class SensitivityLabelMetadata:
     """SensitivityLabel priority."""
     color: Optional[str] = None
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = None
+    is_encrypted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEncrypted"},
+    )
     """ is SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """Whether SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = None
+    is_parent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isParent"},
+    )
     """Whether SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = None
+    parent_sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentSensitivityLabelId"},
+    )
     """Parent SensitivityLabel Id."""
 
 
 @dataclass
 class MCPQueryRequest:
-    """Definition: MCPQueryRequest"""
+    """
+    Definition: MCPQueryRequest
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -3054,7 +4064,10 @@ class MCPQueryRequest:
     params: Optional[Dict[str, Any]] = None
     result: Optional[Dict[str, Any]] = None
     error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = None
+    callback_endpoint: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callbackEndpoint"},
+    )
 
 
 # Client Class
@@ -3093,20 +4106,22 @@ class Office365Client(ConnectorClientBase):
 
     async def get_outlook_category_names_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Outlook category names
 
         This operation gets Outlook category display names.
         """
-        path = f"{self._connection_runtime_url}/Categories"
+        request_url = f"{self._connection_runtime_url}/Categories"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3118,17 +4133,17 @@ class Office365Client(ConnectorClientBase):
 
     async def draft_email_async(
         self,
-        input: ClientDraftHtmlMessage,
+        input: DraftEmailInput,
         message_id: Optional[str] = None,
         draft_type: Optional[str] = None,
         comment: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Draft an email message
 
         This operation drafts an email message.
         """
-        path = f"{self._connection_runtime_url}/Draft"
+        request_url = f"{self._connection_runtime_url}/Draft"
         query_params = []
         if message_id is not None:
             value = str(message_id)
@@ -3146,14 +4161,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"comment={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3165,30 +4182,31 @@ class Office365Client(ConnectorClientBase):
 
     async def update_draft_email_async(
         self,
-        input: ClientDraftHtmlMessage,
-        message_id: Optional[str],
-    ):
+        input: DraftEmailInput,
+        message_id: str,
+    ) -> None:
         """
         Updates an email Draft message
 
         This operation updates an an email Draft message.
         """
-        path = f"{self._connection_runtime_url}/Draft"
+        request_url = f"{self._connection_runtime_url}/Draft"
         query_params = []
-        if message_id is not None:
-            value = str(message_id)
-            if isinstance(message_id, bool):
-                value = value.lower()
-            query_params.append(f"messageId={quote(value)}")
+        value = str(message_id)
+        if isinstance(message_id, bool):
+            value = value.lower()
+        query_params.append(f"messageId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3196,55 +4214,60 @@ class Office365Client(ConnectorClientBase):
     async def send_draft_email_async(
         self,
         message_id: str,
-    ):
+    ) -> None:
         """
         Send a Draft message
 
         This operation sends a Draft message.
         """
-        path = f"{self._connection_runtime_url}/Draft/Send/{str(message_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/Draft/Send/{quote(str(message_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def assign_category_async(
         self,
-        message_id: Optional[str],
-        category: Optional[str],
-    ):
+        message_id: str,
+        category: str,
+    ) -> None:
         """
         Assigns an Outlook category
 
         This operation assigns an Outlook category to an email.
         """
-        path = f"{self._connection_runtime_url}/Mail/Category"
+        request_url = f"{self._connection_runtime_url}/Mail/Category"
         query_params = []
-        if message_id is not None:
-            value = str(message_id)
-            if isinstance(message_id, bool):
-                value = value.lower()
-            query_params.append(f"messageId={quote(value)}")
-        if category is not None:
-            value = str(category)
-            if isinstance(category, bool):
-                value = value.lower()
-            query_params.append(f"category={quote(value)}")
+        value = str(message_id)
+        if isinstance(message_id, bool):
+            value = value.lower()
+        query_params.append(f"messageId={quote(value)}")
+        value = str(category)
+        if isinstance(category, bool):
+            value = value.lower()
+        query_params.append(f"category={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3253,23 +4276,25 @@ class Office365Client(ConnectorClientBase):
         self,
         input: AssignCategoryBulkInput,
         category_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Assign a category to multiple emails
 
         This operation assigns an Outlook category to multiple emails.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/Mail/Category/Bulk/{str(category_name)}"
+            f"/Mail/Category/Bulk/{quote(str(category_name), safe='')}"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3282,7 +4307,7 @@ class Office365Client(ConnectorClientBase):
     async def send_mail_with_options_async(
         self,
         input: OptionsEmailSubscription,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Send email with options
 
@@ -3292,14 +4317,18 @@ class Office365Client(ConnectorClientBase):
         different mail clients:
         https://docs.microsoft.com/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages.
         """
-        path = f"{self._connection_runtime_url}/mailwithoptions/$subscriptions"
+        request_url = (
+            f"{self._connection_runtime_url}/mailwithoptions/$subscriptions"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3312,7 +4341,7 @@ class Office365Client(ConnectorClientBase):
     async def send_approval_mail_async(
         self,
         input: ApprovalEmailSubscription,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Send approval email
 
@@ -3321,14 +4350,18 @@ class Office365Client(ConnectorClientBase):
         of actionable messages in different mail clients:
         https://docs.microsoft.com/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages.
         """
-        path = f"{self._connection_runtime_url}/approvalmail/$subscriptions"
+        request_url = (
+            f"{self._connection_runtime_url}/approvalmail/$subscriptions"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3340,43 +4373,48 @@ class Office365Client(ConnectorClientBase):
 
     async def update_my_contact_photo_async(
         self,
-        input: UpdateMyContactPhotoInput,
+        input: bytes,
         folder: str,
         id: str,
-    ):
+    ) -> None:
         """
         Update my contact's photo
 
         Updates the photo of the specified contact of the current user. The
         size of the photo must be less than 4 MB.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/me"
             f"/contactFolders"
-            f"/{str(folder)}"
+            f"/{quote(quote(str(folder), safe=''), safe='')}"
             f"/contacts"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/photo"
             f"/$value"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def http_request_async(
         self,
-        input: HttpRequestInput,
-    ):
+        input: bytes,
+    ) -> dict[str, Any] | None:
         """
         Send an HTTP request
 
@@ -3386,14 +4424,19 @@ class Office365Client(ConnectorClientBase):
         inferenceClassification. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
         """
-        path = f"{self._connection_runtime_url}/codeless/httprequest"
+        request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3407,13 +4450,13 @@ class Office365Client(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Email Management MCP Server (deprecated)
 
         This MCP server manages email messages from your Office 365 account
         """
-        path = f"{self._connection_runtime_url}/mcp/EmailsManagement"
+        request_url = f"{self._connection_runtime_url}/mcp/EmailsManagement"
         query_params = []
         if session_id is not None:
             value = str(session_id)
@@ -3421,14 +4464,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3442,13 +4487,13 @@ class Office365Client(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Meeting Management MCP Server (deprecated)
 
         This MCP server manages events, calendars and meetings
         """
-        path = f"{self._connection_runtime_url}/mcp/MeetingManagement"
+        request_url = f"{self._connection_runtime_url}/mcp/MeetingManagement"
         query_params = []
         if session_id is not None:
             value = str(session_id)
@@ -3456,14 +4501,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3477,13 +4524,13 @@ class Office365Client(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Contact Management MCP Server
 
         This MCP server manages contacts
         """
-        path = f"{self._connection_runtime_url}/mcp/ContactsManagement"
+        request_url = f"{self._connection_runtime_url}/mcp/ContactsManagement"
         query_params = []
         if session_id is not None:
             value = str(session_id)
@@ -3491,14 +4538,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3512,23 +4561,31 @@ class Office365Client(ConnectorClientBase):
         self,
         calendar: str,
         event: str,
-    ):
+    ) -> None:
         """
-        Delete event (V2)
+        Delete event
 
         This operation deletes an event in a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/calendars/{str(calendar)}/events/{str(event)}"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/calendars"
+            f"/{quote(quote(str(calendar), safe=''), safe='')}"
+            f"/events"
+            f"/{quote(quote(str(event), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3537,24 +4594,31 @@ class Office365Client(ConnectorClientBase):
         self,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get event (V3)
+        Get event
 
         This operation gets a specific event from a calendar using Graph API.
-        (V3)
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/calendars/v3/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/calendars"
+            f"/v3"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3571,15 +4635,20 @@ class Office365Client(ConnectorClientBase):
         orderby: Optional[str] = None,
         top: Optional[str] = None,
         skip: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get events (V4)
+        Get events
 
-        This operation gets events from a calendar using Graph API. (V4)
+        This operation gets events from a calendar using Graph API.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/calendars/v4/tables/{str(table)}/items"
+            f"/datasets"
+            f"/calendars"
+            f"/v4"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
         )
         query_params = []
         if filter is not None:
@@ -3603,173 +4672,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$skip={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def calendar_get_on_changed_items_async(
-        self,
-        table: str,
-        incoming_days: Optional[str] = None,
-        past_days: Optional[str] = None,
-    ):
-        """
-        When an event is added, updated or deleted (V3)
-
-        This operation triggers a flow when an event is added, updated or
-        deleted in a calendar. (V3) This is not available in Mooncake.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/calendars/v3/tables/{str(table)}/onchangeditems"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-        query_params = []
-        if incoming_days is not None:
-            value = str(incoming_days)
-            if isinstance(incoming_days, bool):
-                value = value.lower()
-            query_params.append(f"incomingDays={quote(value)}")
-        if past_days is not None:
-            value = str(past_days)
-            if isinstance(past_days, bool):
-                value = value.lower()
-            query_params.append(f"pastDays={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def calendar_get_on_new_items_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-    ):
-        """
-        When a new event is created (V3)
-
-        This operation triggers a flow when a new event is created in a
-        calendar. (V3)
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/calendars/v3/tables/{str(table)}/onnewitems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def calendar_get_on_updated_items_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
-    ):
-        """
-        When an event is modified (V3)
-
-        This operation triggers a flow when an event is modified in a calendar.
-        (V3)
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/calendars/v3/tables/{str(table)}/onupdateditems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"$top={quote(value)}")
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3781,41 +4693,30 @@ class Office365Client(ConnectorClientBase):
 
     async def calendar_get_tables_async(
         self,
-        skip: Optional[str] = None,
-        top: Optional[str] = None,
-        order_by: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get calendars (V2)
+        Get calendars
 
         This operation lists available calendars.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
+        request_url = (
+            f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
+        )
         query_params = []
-        if skip is not None:
-            value = str(skip)
-            if isinstance(skip, bool):
-                value = value.lower()
-            query_params.append(f"skip={quote(value)}")
-        if top is not None:
-            value = str(top)
-            if isinstance(top, bool):
-                value = value.lower()
-            query_params.append(f"top={quote(value)}")
-        if order_by is not None:
-            value = str(order_by)
-            if isinstance(order_by, bool):
-                value = value.lower()
-            query_params.append(f"orderBy={quote(value)}")
+        query_params.append("skip=" + quote("0"))
+        query_params.append("top=" + quote("256"))
+        query_params.append("orderBy=" + quote("name"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3830,23 +4731,31 @@ class Office365Client(ConnectorClientBase):
         input: GraphCalendarEventClient,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Update event (V4)
+        Update event
 
         This operation updates an event in a calendar using Graph API.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/calendars/v4/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/calendars"
+            f"/v4"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3860,23 +4769,30 @@ class Office365Client(ConnectorClientBase):
         self,
         input: GraphCalendarEventClient,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Create event (V4)
+        Create event
 
         This operation creates a new event in a calendar.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/calendars/v4/tables/{str(table)}/items"
+            f"/datasets"
+            f"/calendars"
+            f"/v4"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3890,29 +4806,31 @@ class Office365Client(ConnectorClientBase):
         self,
         folder: str,
         id: str,
-    ):
+    ) -> None:
         """
-        Delete contact (V2)
+        Delete contact
 
         This operation deletes a contact from a contacts folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/me"
             f"/contactFolders"
-            f"/{str(folder)}"
+            f"/{quote(quote(str(folder), safe=''), safe='')}"
             f"/contacts"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3921,29 +4839,31 @@ class Office365Client(ConnectorClientBase):
         self,
         folder: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get contact (V2)
+        Get contact
 
         This operation gets a specific contact from a contacts folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/me"
             f"/contactFolders"
-            f"/{str(folder)}"
+            f"/{quote(quote(str(folder), safe=''), safe='')}"
             f"/contacts"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3960,15 +4880,20 @@ class Office365Client(ConnectorClientBase):
         orderby: Optional[str] = None,
         top: Optional[str] = None,
         skip: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get contacts (V2)
+        Get contacts
 
         This operation gets contacts from a contacts folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/contactFolders"
+            f"/{quote(quote(str(folder), safe=''), safe='')}"
+            f"/contacts"
         )
         query_params = []
         if filter is not None:
@@ -3992,14 +4917,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$skip={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4011,20 +4938,24 @@ class Office365Client(ConnectorClientBase):
 
     async def contact_get_tables_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get contact folders (V2)
+        Get contact folders
 
         This operation lists available contacts folders using Graph API
         """
-        path = f"{self._connection_runtime_url}/v2/datasets/contacts/tables"
+        request_url = (
+            f"{self._connection_runtime_url}/v2/datasets/contacts/tables"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4036,32 +4967,34 @@ class Office365Client(ConnectorClientBase):
 
     async def contact_patch_item_async(
         self,
-        input: ContactV2,
+        input: Contact,
         folder: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Update contact (V2)
+        Update contact
 
         This operation updates a contact in a contacts folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/me"
             f"/contactFolders"
-            f"/{str(folder)}"
+            f"/{quote(quote(str(folder), safe=''), safe='')}"
             f"/contacts"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4073,25 +5006,32 @@ class Office365Client(ConnectorClientBase):
 
     async def contact_post_item_async(
         self,
-        input: ContactV2,
+        input: Contact,
         folder: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Create contact (V2)
+        Create contact
 
         This operation creates a new contact in a contacts folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/contactFolders/{str(folder)}/contacts"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/contactFolders"
+            f"/{quote(quote(str(folder), safe=''), safe='')}"
+            f"/contacts"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4105,15 +5045,15 @@ class Office365Client(ConnectorClientBase):
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
-    ):
+    ) -> None:
         """
-        Delete email (V2)
+        Delete email
 
         This operation deletes an email by id.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/messages/{str(message_id)}"
+            f"/codeless/v1.0/me/messages/{quote(str(message_id), safe='')}"
         )
         query_params = []
         if mailbox_address is not None:
@@ -4122,14 +5062,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4138,15 +5080,20 @@ class Office365Client(ConnectorClientBase):
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
-    ):
+    ) -> bytes:
         """
-        Export email (V2)
+        Export email
 
         Export the content of the email in the EML file format.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/beta/me/messages/{str(message_id)}/$value"
+            f"/codeless"
+            f"/beta"
+            f"/me"
+            f"/messages"
+            f"/{quote(str(message_id), safe='')}"
+            f"/$value"
         )
         query_params = []
         if mailbox_address is not None:
@@ -4155,14 +5102,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4172,23 +5121,25 @@ class Office365Client(ConnectorClientBase):
     async def find_meeting_times_async(
         self,
         input: FindMeetingTimesInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Find meeting times (V2)
+        Find meeting times
 
         Find meeting time suggestions based on organizer, attendee
         availability, and time or location constraints
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/codeless/beta/me/findMeetingTimes"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4203,15 +5154,20 @@ class Office365Client(ConnectorClientBase):
         input: UpdateEmailFlag,
         message_id: str,
         mailbox_address: Optional[str] = None,
-    ):
+    ) -> None:
         """
-        Flag email (V2)
+        Flag email
 
         This operation updates an email flag.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/messages/{str(message_id)}/flag"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/messages"
+            f"/{quote(str(message_id), safe='')}"
+            f"/flag"
         )
         query_params = []
         if mailbox_address is not None:
@@ -4220,14 +5176,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4239,15 +5197,20 @@ class Office365Client(ConnectorClientBase):
         mailbox_address: Optional[str] = None,
         extract_sensitivity_label: Optional[str] = None,
         fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+    ) -> None:
         """
-        Forward an email (V2)
+        Forward an email
 
         Forward an email.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/messages/{str(message_id)}/forward"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/messages"
+            f"/{quote(str(message_id), safe='')}"
+            f"/forward"
         )
         query_params = []
         if mailbox_address is not None:
@@ -4266,14 +5229,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4285,21 +5250,21 @@ class Office365Client(ConnectorClientBase):
         mailbox_address: Optional[str] = None,
         extract_sensitivity_label: Optional[str] = None,
         fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get Attachment (V2)
+        Get Attachment
 
         This operation gets an email attachment by id.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/me"
             f"/messages"
-            f"/{str(message_id)}"
+            f"/{quote(str(message_id), safe='')}"
             f"/attachments"
-            f"/{str(attachment_id)}"
+            f"/{quote(str(attachment_id), safe='')}"
         )
         query_params = []
         if mailbox_address is not None:
@@ -4318,14 +5283,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4343,13 +5310,16 @@ class Office365Client(ConnectorClientBase):
         internet_message_id: Optional[str] = None,
         extract_sensitivity_label: Optional[str] = None,
         fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get email (V2)
+        Get email
 
         This operation gets an email by id.
         """
-        path = f"{self._connection_runtime_url}/v2/Mail/{str(message_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/Mail/{quote(str(message_id), safe='')}"
+        )
         query_params = []
         if mailbox_address is not None:
             value = str(mailbox_address)
@@ -4377,14 +5347,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4405,14 +5377,13 @@ class Office365Client(ConnectorClientBase):
         fetch_only_with_attachment: Optional[str] = None,
         subject_filter: Optional[str] = None,
         fetch_only_unread: Optional[str] = None,
-        fetch_only_flagged: Optional[str] = None,
         mailbox_address: Optional[str] = None,
         include_attachments: Optional[str] = None,
         search_query: Optional[str] = None,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get emails (V3)
+        Get emails
 
         This operation gets emails from a folder via graph apis. Please note
         that filtering related to these fields: To, Cc, To Or Cc, From,
@@ -4420,8 +5391,9 @@ class Office365Client(ConnectorClientBase):
         using first 250 items in a given mail folder. To avoid that limitation
         you can use 'Search Query' field.
         """
-        path = f"{self._connection_runtime_url}/v3/Mail"
+        request_url = f"{self._connection_runtime_url}/v3/Mail"
         query_params = []
+        query_params.append("fetchOnlyFlagged=" + quote("false"))
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
@@ -4467,11 +5439,6 @@ class Office365Client(ConnectorClientBase):
             if isinstance(fetch_only_unread, bool):
                 value = value.lower()
             query_params.append(f"fetchOnlyUnread={quote(value)}")
-        if fetch_only_flagged is not None:
-            value = str(fetch_only_flagged)
-            if isinstance(fetch_only_flagged, bool):
-                value = value.lower()
-            query_params.append(f"fetchOnlyFlagged={quote(value)}")
         if mailbox_address is not None:
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
@@ -4493,14 +5460,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4512,41 +5481,38 @@ class Office365Client(ConnectorClientBase):
 
     async def get_events_calendar_view_async(
         self,
-        calendar_id: Optional[str],
-        start_date_time_utc: Optional[str],
-        end_date_time_utc: Optional[str],
+        calendar_id: str,
+        start_date_time_utc: str,
+        end_date_time_utc: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[str] = None,
         skip: Optional[str] = None,
         search: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get calendar view of events (V3)
+        Get calendar view of events
 
         This operation gets all events (including instances of recurrences) in
         a calendar using Graph API. Recurrence property is null in this case.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/calendars/v3/tables/items/calendarview"
         )
         query_params = []
-        if calendar_id is not None:
-            value = str(calendar_id)
-            if isinstance(calendar_id, bool):
-                value = value.lower()
-            query_params.append(f"calendarId={quote(value)}")
-        if start_date_time_utc is not None:
-            value = str(start_date_time_utc)
-            if isinstance(start_date_time_utc, bool):
-                value = value.lower()
-            query_params.append(f"startDateTimeUtc={quote(value)}")
-        if end_date_time_utc is not None:
-            value = str(end_date_time_utc)
-            if isinstance(end_date_time_utc, bool):
-                value = value.lower()
-            query_params.append(f"endDateTimeUtc={quote(value)}")
+        value = str(calendar_id)
+        if isinstance(calendar_id, bool):
+            value = value.lower()
+        query_params.append(f"calendarId={quote(value)}")
+        value = str(start_date_time_utc)
+        if isinstance(start_date_time_utc, bool):
+            value = value.lower()
+        query_params.append(f"startDateTimeUtc={quote(value)}")
+        value = str(end_date_time_utc)
+        if isinstance(end_date_time_utc, bool):
+            value = value.lower()
+        query_params.append(f"endDateTimeUtc={quote(value)}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -4573,14 +5539,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"search={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4593,21 +5561,25 @@ class Office365Client(ConnectorClientBase):
     async def get_mail_tips_async(
         self,
         input: GetMailTipsInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get mail tips for a mailbox (V2)
+        Get mail tips for a mailbox
 
         Get mail tips for a mailbox such as automatic replies / OOF message or
         if the mailbox is full. This is not available in GccHigh and Mooncake.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/getMailTips"
+        request_url = (
+            f"{self._connection_runtime_url}/codeless/v1.0/me/getMailTips"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4619,20 +5591,24 @@ class Office365Client(ConnectorClientBase):
 
     async def get_room_lists_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get room lists (V2)
+        Get room lists
 
         Get all the room lists defined in the user's tenant
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findRoomLists"
+        request_url = (
+            f"{self._connection_runtime_url}/codeless/beta/me/findRoomLists"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4644,20 +5620,24 @@ class Office365Client(ConnectorClientBase):
 
     async def get_rooms_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get rooms (V2)
+        Get rooms
 
         Get all the meeting rooms defined in the user's tenant
         """
-        path = f"{self._connection_runtime_url}/codeless/beta/me/findRooms"
+        request_url = (
+            f"{self._connection_runtime_url}/codeless/beta/me/findRooms"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4670,23 +5650,28 @@ class Office365Client(ConnectorClientBase):
     async def get_rooms_in_room_list_async(
         self,
         room_list: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get rooms in room list (V2)
+        Get rooms in room list
 
         Get the meeting rooms in a specific room list
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/beta/me/findRooms(RoomList='{str(room_list)}')"
+            f"/codeless"
+            f"/beta"
+            f"/me"
+            f"/findRooms(RoomList='{quote(str(room_list), safe='')}')"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4701,15 +5686,21 @@ class Office365Client(ConnectorClientBase):
         input: MarkAsReadInput,
         message_id: str,
         mailbox_address: Optional[str] = None,
-    ):
+    ) -> None:
         """
-        Mark as read or unread (V3)
+        Mark as read or unread
 
         This operation marks an email as read/unread.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v3/v1.0/me/messages/{str(message_id)}/markAsRead"
+            f"/codeless"
+            f"/v3"
+            f"/v1.0"
+            f"/me"
+            f"/messages"
+            f"/{quote(str(message_id), safe='')}"
+            f"/markAsRead"
         )
         query_params = []
         if mailbox_address is not None:
@@ -4718,14 +5709,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -4733,335 +5726,40 @@ class Office365Client(ConnectorClientBase):
     async def move_async(
         self,
         message_id: str,
-        folder_path: Optional[str],
+        folder_path: str,
         mailbox_address: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Move email (V2)
+        Move email
 
         This operation moves an email to the specified folder within the same
         mailbox.
         """
-        path = f"{self._connection_runtime_url}/v2/Mail/Move/{str(message_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/Mail/Move/{quote(str(message_id), safe='')}"
+        )
         query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
+        value = str(folder_path)
+        if isinstance(folder_path, bool):
+            value = value.lower()
+        query_params.append(f"folderPath={quote(value)}")
         if mailbox_address is not None:
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
             query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_flagged_email_async(
-        self,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When an email is flagged (V4)
-
-        This operation triggers a flow when an email is flagged.
-        """
-        path = f"{self._connection_runtime_url}/v4/Mail/OnFlaggedEmail"
-        query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if to is not None:
-            value = str(to)
-            if isinstance(to, bool):
-                value = value.lower()
-            query_params.append(f"to={quote(value)}")
-        if cc is not None:
-            value = str(cc)
-            if isinstance(cc, bool):
-                value = value.lower()
-            query_params.append(f"cc={quote(value)}")
-        if to_or_cc is not None:
-            value = str(to_or_cc)
-            if isinstance(to_or_cc, bool):
-                value = value.lower()
-            query_params.append(f"toOrCc={quote(value)}")
-        if from_ is not None:
-            value = str(from_)
-            if isinstance(from_, bool):
-                value = value.lower()
-            query_params.append(f"from={quote(value)}")
-        if importance is not None:
-            value = str(importance)
-            if isinstance(importance, bool):
-                value = value.lower()
-            query_params.append(f"importance={quote(value)}")
-        if fetch_only_with_attachment is not None:
-            value = str(fetch_only_with_attachment)
-            if isinstance(fetch_only_with_attachment, bool):
-                value = value.lower()
-            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
-        if include_attachments is not None:
-            value = str(include_attachments)
-            if isinstance(include_attachments, bool):
-                value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
-        if subject_filter is not None:
-            value = str(subject_filter)
-            if isinstance(subject_filter, bool):
-                value = value.lower()
-            query_params.append(f"subjectFilter={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_email_async(
-        self,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When a new email arrives (V3)
-
-        This operation triggers a flow when a new email arrives. It will skip
-        any email that has a total message size greater than the limit put by
-        your Exchange Admin or 50 MB, whichever is less. It may also skip
-        protected emails and emails with invalid body or attachments.
-        """
-        path = f"{self._connection_runtime_url}/v3/Mail/OnNewEmail"
-        query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if to is not None:
-            value = str(to)
-            if isinstance(to, bool):
-                value = value.lower()
-            query_params.append(f"to={quote(value)}")
-        if cc is not None:
-            value = str(cc)
-            if isinstance(cc, bool):
-                value = value.lower()
-            query_params.append(f"cc={quote(value)}")
-        if to_or_cc is not None:
-            value = str(to_or_cc)
-            if isinstance(to_or_cc, bool):
-                value = value.lower()
-            query_params.append(f"toOrCc={quote(value)}")
-        if from_ is not None:
-            value = str(from_)
-            if isinstance(from_, bool):
-                value = value.lower()
-            query_params.append(f"from={quote(value)}")
-        if importance is not None:
-            value = str(importance)
-            if isinstance(importance, bool):
-                value = value.lower()
-            query_params.append(f"importance={quote(value)}")
-        if fetch_only_with_attachment is not None:
-            value = str(fetch_only_with_attachment)
-            if isinstance(fetch_only_with_attachment, bool):
-                value = value.lower()
-            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
-        if include_attachments is not None:
-            value = str(include_attachments)
-            if isinstance(include_attachments, bool):
-                value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
-        if subject_filter is not None:
-            value = str(subject_filter)
-            if isinstance(subject_filter, bool):
-                value = value.lower()
-            query_params.append(f"subjectFilter={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_mention_me_email_async(
-        self,
-        message_id_to_fire_on_first_trigger_run: Optional[str] = None,
-        folder_path: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When a new email mentioning me arrives (V3)
-
-        This operation triggers a flow when a new email mentioning me arrives.
-        It will skip any email that has a total message size greater than the
-        limit put by your Exchange Admin or 50 MB, whichever is less. It may
-        also skip protected emails and emails with invalid body or attachments.
-        """
-        path = f"{self._connection_runtime_url}/v3/Mail/OnNewMentionMeEmail"
-        query_params = []
-        if message_id_to_fire_on_first_trigger_run is not None:
-            value = str(message_id_to_fire_on_first_trigger_run)
-            if isinstance(message_id_to_fire_on_first_trigger_run, bool):
-                value = value.lower()
-            query_params.append(f"messageIdToFireOnFirstTriggerRun={quote(value)}")
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if to is not None:
-            value = str(to)
-            if isinstance(to, bool):
-                value = value.lower()
-            query_params.append(f"to={quote(value)}")
-        if cc is not None:
-            value = str(cc)
-            if isinstance(cc, bool):
-                value = value.lower()
-            query_params.append(f"cc={quote(value)}")
-        if to_or_cc is not None:
-            value = str(to_or_cc)
-            if isinstance(to_or_cc, bool):
-                value = value.lower()
-            query_params.append(f"toOrCc={quote(value)}")
-        if from_ is not None:
-            value = str(from_)
-            if isinstance(from_, bool):
-                value = value.lower()
-            query_params.append(f"from={quote(value)}")
-        if importance is not None:
-            value = str(importance)
-            if isinstance(importance, bool):
-                value = value.lower()
-            query_params.append(f"importance={quote(value)}")
-        if fetch_only_with_attachment is not None:
-            value = str(fetch_only_with_attachment)
-            if isinstance(fetch_only_with_attachment, bool):
-                value = value.lower()
-            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
-        if include_attachments is not None:
-            value = str(include_attachments)
-            if isinstance(include_attachments, bool):
-                value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
-        if subject_filter is not None:
-            value = str(subject_filter)
-            if isinstance(subject_filter, bool):
-                value = value.lower()
-            query_params.append(f"subjectFilter={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_upcoming_events_async(
-        self,
-        table: Optional[str],
-        look_ahead_time_in_minutes: Optional[str] = None,
-    ):
-        """
-        When an upcoming event is starting soon (V3)
-
-        This operation triggers a flow when an upcoming calendar event is
-        starting.
-        """
-        path = f"{self._connection_runtime_url}/v3/Events/OnUpcomingEvents"
-        query_params = []
-        if table is not None:
-            value = str(table)
-            if isinstance(table, bool):
-                value = value.lower()
-            query_params.append(f"table={quote(value)}")
-        if look_ahead_time_in_minutes is not None:
-            value = str(look_ahead_time_in_minutes)
-            if isinstance(look_ahead_time_in_minutes, bool):
-                value = value.lower()
-            query_params.append(f"lookAheadTimeInMinutes={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -5073,17 +5771,18 @@ class Office365Client(ConnectorClientBase):
 
     async def reply_to_async(
         self,
-        input: ReplyHtmlMessage,
+        input: ReplyEmailInput,
         message_id: str,
         mailbox_address: Optional[str] = None,
-    ):
+    ) -> None:
         """
-        Reply to email (V3)
+        Reply to email
 
         This operation replies to an email.
         """
-        path = (
-            f"{self._connection_runtime_url}/v3/Mail/ReplyTo/{str(message_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v3/Mail/ReplyTo/{quote(str(message_id), safe='')}"
         )
         query_params = []
         if mailbox_address is not None:
@@ -5092,14 +5791,16 @@ class Office365Client(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"mailboxAddress={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -5108,45 +5809,54 @@ class Office365Client(ConnectorClientBase):
         self,
         input: ResponseToEventInvite,
         event_id: str,
-        response_type: str,
-    ):
+        response: str,
+    ) -> None:
         """
-        Respond to an event invite (V2)
+        Respond to an event invite
 
         Respond to an event invite.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/me/events/{str(event_id)}/{str(response_type)}"
+            f"/codeless"
+            f"/v1.0"
+            f"/me"
+            f"/events"
+            f"/{quote(str(event_id), safe='')}"
+            f"/{quote(str(response), safe='')}"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        http_response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
-        if not (200 <= response.status < 300):
+        if not (200 <= http_response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
-                response.status,
-                response.text,
+                request_url,
+                http_response.status,
+                http_response.text,
             )
 
     async def send_email_async(
         self,
-        input: ClientSendHtmlMessage,
-    ):
+        input: SendEmailInput,
+    ) -> None:
         """
-        Send an email (V2)
+        Send an email
 
         This operation sends an email message.
         """
-        path = f"{self._connection_runtime_url}/v2/Mail"
+        request_url = f"{self._connection_runtime_url}/v2/Mail"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -5154,117 +5864,24 @@ class Office365Client(ConnectorClientBase):
     async def set_automatic_replies_setting_async(
         self,
         input: SetAutomaticRepliesSettingInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Set up automatic replies (V2)
+        Set up automatic replies
 
         Set the automatic replies setting for your mailbox.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/codeless/v1.0/me/mailboxSettings"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def shared_mailbox_on_new_email_async(
-        self,
-        mailbox_address: Optional[str],
-        folder_id: Optional[str] = None,
-        to: Optional[str] = None,
-        cc: Optional[str] = None,
-        to_or_cc: Optional[str] = None,
-        from_: Optional[str] = None,
-        importance: Optional[str] = None,
-        has_attachments: Optional[str] = None,
-        include_attachments: Optional[str] = None,
-        subject_filter: Optional[str] = None,
-    ):
-        """
-        When a new email arrives in a shared mailbox (V2)
-
-        This operation triggers a flow when a new email arrives in a shared
-        mailbox. Your account should have permission to access the mailbox for
-        this operation to succeed. It will skip any email that has a total
-        message size greater than the limit put by your Exchange Admin or 50
-        MB, whichever is less. It may also skip protected emails and emails
-        with invalid body or attachments.
-        """
-        path = (
-            f"{self._connection_runtime_url}/v2/SharedMailbox/Mail/OnNewEmail"
-        )
-        query_params = []
-        if mailbox_address is not None:
-            value = str(mailbox_address)
-            if isinstance(mailbox_address, bool):
-                value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if to is not None:
-            value = str(to)
-            if isinstance(to, bool):
-                value = value.lower()
-            query_params.append(f"to={quote(value)}")
-        if cc is not None:
-            value = str(cc)
-            if isinstance(cc, bool):
-                value = value.lower()
-            query_params.append(f"cc={quote(value)}")
-        if to_or_cc is not None:
-            value = str(to_or_cc)
-            if isinstance(to_or_cc, bool):
-                value = value.lower()
-            query_params.append(f"toOrCc={quote(value)}")
-        if from_ is not None:
-            value = str(from_)
-            if isinstance(from_, bool):
-                value = value.lower()
-            query_params.append(f"from={quote(value)}")
-        if importance is not None:
-            value = str(importance)
-            if isinstance(importance, bool):
-                value = value.lower()
-            query_params.append(f"importance={quote(value)}")
-        if has_attachments is not None:
-            value = str(has_attachments)
-            if isinstance(has_attachments, bool):
-                value = value.lower()
-            query_params.append(f"hasAttachments={quote(value)}")
-        if include_attachments is not None:
-            value = str(include_attachments)
-            if isinstance(include_attachments, bool):
-                value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
-        if subject_filter is not None:
-            value = str(subject_filter)
-            if isinstance(subject_filter, bool):
-                value = value.lower()
-            query_params.append(f"subjectFilter={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -5276,23 +5893,92 @@ class Office365Client(ConnectorClientBase):
 
     async def shared_mailbox_send_email_async(
         self,
-        input: SharedMailboxClientSendHtmlMessage,
-    ):
+        input: SharedMailboxSendEmailInput,
+    ) -> None:
         """
-        Send an email from a shared mailbox (V2)
+        Send an email from a shared mailbox
 
         This operation sends an email from a shared mailbox. Your account
         should have permission to access the mailbox for this operation to
         succeed.
         """
-        path = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
+        request_url = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "CalendarGetOnChangedItemsV3": {
+        "operation_id": "CalendarGetOnChangedItemsV3",
+        "path": "/{connectionId}/datasets/calendars/v3/tables/{table}/onchangeditems",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "GraphCalendarEventListWithActionType",
+    },
+    "CalendarGetOnNewItemsV3": {
+        "operation_id": "CalendarGetOnNewItemsV3",
+        "path": "/{connectionId}/datasets/calendars/v3/tables/{table}/onnewitems",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "GraphCalendarEventListClientReceive",
+    },
+    "CalendarGetOnUpdatedItemsV3": {
+        "operation_id": "CalendarGetOnUpdatedItemsV3",
+        "path": "/{connectionId}/datasets/calendars/v3/tables/{table}/onupdateditems",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "GraphCalendarEventListClientReceive",
+    },
+    "OnFlaggedEmailV4": {
+        "operation_id": "OnFlaggedEmailV4",
+        "path": "/{connectionId}/v4/Mail/OnFlaggedEmail",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "TriggerBatchResponseGraphClientReceiveMessage",
+    },
+    "OnNewEmailV3": {
+        "operation_id": "OnNewEmailV3",
+        "path": "/{connectionId}/v3/Mail/OnNewEmail",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "TriggerBatchResponseGraphClientReceiveMessage",
+    },
+    "OnNewMentionMeEmailV3": {
+        "operation_id": "OnNewMentionMeEmailV3",
+        "path": "/{connectionId}/v3/Mail/OnNewMentionMeEmail",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "TriggerBatchResponseGraphClientReceiveMessage",
+    },
+    "OnUpcomingEventsV3": {
+        "operation_id": "OnUpcomingEventsV3",
+        "path": "/{connectionId}/v3/Events/OnUpcomingEvents",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "GraphCalendarEventListClientReceive",
+    },
+    "SharedMailboxOnNewEmailV2": {
+        "operation_id": "SharedMailboxOnNewEmailV2",
+        "path": "/{connectionId}/v2/SharedMailbox/Mail/OnNewEmail",
+        "method": "get",
+        "required_parameters": ["mailboxAddress"],
+        "callback_payload_type": "TriggerBatchResponseGraphClientReceiveMessage",
+    },
+}
