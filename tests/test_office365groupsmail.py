@@ -19,6 +19,7 @@ from azure.connectors.sdk import (
     ConnectorException,
     ManagedIdentityTokenProvider,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -344,7 +345,7 @@ class TestOnNewEmailInGroupTrigger:
 
 
 class TestOffice365groupsmailTypeSerialization:
-    """Tests for generated dataclass defaults."""
+    """Tests for generated dataclass defaults and wire names."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
@@ -354,3 +355,9 @@ class TestOffice365groupsmailTypeSerialization:
         assert list_response.next_link is None
         assert list_response.value is None
         assert conversation.id is None
+
+    def test_forward_post_body_uses_swagger_wire_names(self):
+        """Test the current forward-post request preserves Swagger casing."""
+        request = ForwardPostBody(comment="Please review")
+
+        assert to_wire(request) == {"Comment": "Please review"}

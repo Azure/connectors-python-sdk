@@ -27,7 +27,7 @@ from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.yammer import (
     YammerClient,
-    PostOperationRequestV2,
+    PostOperationRequest,
 )
 
 # Connection runtime URL format:
@@ -146,7 +146,7 @@ async def example_5_post_message():
     async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Create message request (group_id=0 posts to All Company)
-            message = PostOperationRequestV2(
+            message = PostOperationRequest(
                 group_id=0,
                 body="Hello from the Azure Connectors Python SDK!",
                 title="SDK Test Message"

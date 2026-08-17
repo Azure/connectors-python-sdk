@@ -32,6 +32,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -730,6 +731,28 @@ class TestDataclasses:
         """Test UnassignUsersInput default values."""
         input_obj = UnassignUsersInput()
         assert input_obj.assignments is None
+
+    def test_current_task_requests_use_swagger_wire_names(self):
+        """Test current create and update requests preserve Swagger keys."""
+        create_request = CreateTaskRequest(
+            group_id="group-123",
+            plan_id="plan-123",
+            bucket_id="bucket-123",
+        )
+        update_request = UpdateTaskRequest(
+            percent_complete=50,
+            bucket_id="bucket-456",
+        )
+
+        assert to_wire(create_request) == {
+            "groupId": "group-123",
+            "planId": "plan-123",
+            "bucketId": "bucket-123",
+        }
+        assert to_wire(update_request) == {
+            "percentComplete": 50,
+            "bucketId": "bucket-456",
+        }
 
     def test_unassign_users_input_with_values(self):
         """Test UnassignUsersInput with values."""

@@ -14,6 +14,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -337,6 +338,22 @@ class TestDataClasses:
         assert "recipient1@contoso.com" in email.to
         assert email.importance == "High"
         assert email.read_receipt == "sender@contoso.com"
+
+    def test_current_email_model_uses_swagger_wire_names(self):
+        """Test the current email and attachment models preserve Swagger keys."""
+        email = Email(
+            from_="sender@contoso.com",
+            to="recipient@contoso.com",
+            c_c="copy@contoso.com",
+            attachments=[Attachment(content_data="filedata")],
+        )
+
+        assert to_wire(email) == {
+            "From": "sender@contoso.com",
+            "To": "recipient@contoso.com",
+            "CC": "copy@contoso.com",
+            "Attachments": [{"ContentData": "filedata"}],
+        }
 
     def test_email_with_defaults(self):
         """Test Email dataclass with default values."""

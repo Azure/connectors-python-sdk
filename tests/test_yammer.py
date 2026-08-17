@@ -21,6 +21,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -655,6 +656,20 @@ class TestDataClasses:
         assert request.group_id == 123
         assert request.body == "Hello Yammer!"
         assert request.broadcast is True
+
+    def test_current_post_request_uses_swagger_wire_names(self):
+        """Test the current post request preserves its Swagger keys."""
+        request = PostOperationRequest(
+            group_id=123,
+            body="Hello Yammer!",
+            replied_to_id=456,
+        )
+
+        assert to_wire(request) == {
+            "group_id": 123,
+            "body": "Hello Yammer!",
+            "replied_to_id": 456,
+        }
 
 
 class TestEdgeCases:

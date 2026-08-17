@@ -23,9 +23,9 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors.planner import (
     PlannerClient,
-    CreateTaskRequestV4,
+    CreateTaskRequest,
     CreateBucketInput,
-    UpdateTaskRequestV3,
+    UpdateTaskRequest,
 )
 
 # Connection runtime URL format:
@@ -134,7 +134,7 @@ async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_i
 
     try:
         # Create a new task
-        task_input = CreateTaskRequestV4(
+        task_input = CreateTaskRequest(
             group_id=group_id,
             plan_id=plan_id,
             bucket_id=bucket_id,
@@ -149,7 +149,7 @@ async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_i
             print(f"Created task: {task.get('title')} ({task_id})")
 
             # Update the task
-            update_input = UpdateTaskRequestV3(
+            update_input = UpdateTaskRequest(
                 title="Updated Sample Task",
                 percent_complete=50
             )
