@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Regenerated Freshservice, Mailchimp, Office 365 Outlook, Office 365 Groups Mail, Pipedrive, Planner, Plumsail Documents, SendGrid, SharePoint Online, SMTP, Trello, and Yammer from pinned managed connector contracts using the current CodefulSdkGenerator.
+- Regenerated Office 365 Outlook, Office 365 Groups Mail, Pipedrive, Planner, Plumsail Documents, SharePoint Online, SMTP, and Yammer from pinned managed connector contracts using the current CodefulSdkGenerator.
 - Regenerated Azure Queues, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, Microsoft Forms, SharePoint Online, SigningHub, Microsoft Teams, and Word Online (Business) from the merged CodefulSdkGenerator contract updates.
 - Binary request bodies for SharePoint file and attachment uploads, SigningHub document uploads, and Microsoft Teams HTTP requests are forwarded as raw bytes with `application/octet-stream`.
 - Regenerated Azure AD, Azure Digital Twins, Azure Event Grid, Azure IoT Central, Azure Monitor Logs, Azure Queues, Azure Tables, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, GitHub, Jira, Azure Data Explorer, Microsoft Bookings, Microsoft Forms, Office 365 Outlook, Office 365 Groups, OneNote, Pipedrive, Power BI, Service Bus, Shifts, SigningHub, Microsoft Teams, and Word Online (Business) with corrected root-schema handling.
@@ -30,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Freshservice**, **Mailchimp**, **SendGrid**, and **Trello** connector clients with 119 focused unit tests and runnable samples
 - Added current managed connector discovery operations for Azure IoT Central device templates, Azure Monitor Logs time ranges, Azure Tables storage accounts, Azure Data Explorer query schemas, and Service Bus entities, system properties, queues, session options, topics, subscriptions, and subscription filters.
 - **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
 - Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts
