@@ -311,6 +311,26 @@ try:
 except (ImportError, NameError):
     ZohosignClient = None  # type: ignore[assignment,misc]
 
+try:
+    from .freshservice import FreshserviceClient
+except (ImportError, NameError):
+    FreshserviceClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .mailchimp import MailchimpClient
+except (ImportError, NameError):
+    MailchimpClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .sendgrid import SendgridClient
+except (ImportError, NameError):
+    SendgridClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .trello import TrelloClient
+except (ImportError, NameError):
+    TrelloClient = None  # type: ignore[assignment,misc]
+
 __version__ = '0.4.0b1'
 
 __all__ = [
@@ -388,4 +408,8 @@ __all__ = [
     "DocuwareClient",
     "SigninghubClient",
     "ZohosignClient",
+    "FreshserviceClient",
+    "MailchimpClient",
+    "SendgridClient",
+    "TrelloClient",
 ]

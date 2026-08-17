@@ -241,8 +241,6 @@ class Any2PdfRequest:
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""
-    filename: Optional[str] = None
-    """Full name of the file to be converted. Including file extension"""
 
 
 @dataclass
@@ -763,8 +761,11 @@ class MergeAny2PdfRequest:
     Definition: MergeAny2PdfRequest
     """
 
-    files: Optional[List[MergeAny2PdfFileData]] = None
-    """Array of files to merge into a single PDF"""
+    documents_contents: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "documentsContents"},
+    )
+    """The array of raw contents of files to merge"""
     generate_bookmarks: Optional[bool] = field(
         default=None,
         metadata={"wire_name": "generateBookmarks"},
@@ -881,6 +882,14 @@ class Pdf2ImageRequest:
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
+    filename_prefix: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "filenamePrefix"},
+    )
+    """
+    Optional. Output files will have this prefix followed by an index number
+    for name
+    """
     start_page: Optional[int] = field(
         default=None,
         metadata={"wire_name": "startPage"},
@@ -2613,7 +2622,12 @@ class PlumsailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/flow/v1/ProcessesFlow/triggers/{str(process_id)}/schema"
+            f"/flow"
+            f"/v1"
+            f"/ProcessesFlow"
+            f"/triggers"
+            f"/{quote(str(process_id), safe='')}"
+            f"/schema"
         )
 
         response = await self.http_client.send_async(

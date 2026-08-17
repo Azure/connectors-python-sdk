@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Regenerated Office 365 Groups Mail, Planner, SMTP, and Yammer now expose current request and response model names instead of deprecated version-family sibling names. Their polling triggers are available through `TRIGGER_OPERATIONS`, not callable client methods.
 - `UploadDocument.document_id` now represents the natural `document_id` wire field. Callers that used it for `documentId` must use `document_id_2` instead.
 - Regenerated Azure Queues, DocuSign, Event Hubs, Microsoft Forms, SharePoint Online, and Microsoft Teams from the current managed connector contracts. Trigger routes are now exposed through `TRIGGER_OPERATIONS` instead of callable client methods, and deprecated DocuSign operations are no longer generated.
 - Azure Event Hubs batch sends now require `partition_key`. Word Online (Business) template and PDF operations now require `source`, `drive`, and `file` identifiers.
@@ -17,16 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Regenerated Freshservice, Mailchimp, Office 365 Outlook, Office 365 Groups Mail, Pipedrive, Planner, Plumsail Documents, SendGrid, SharePoint Online, SMTP, Trello, and Yammer from pinned managed connector contracts using the current CodefulSdkGenerator.
 - Regenerated Azure Queues, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, Microsoft Forms, SharePoint Online, SigningHub, Microsoft Teams, and Word Online (Business) from the merged CodefulSdkGenerator contract updates.
 - Binary request bodies for SharePoint file and attachment uploads, SigningHub document uploads, and Microsoft Teams HTTP requests are forwarded as raw bytes with `application/octet-stream`.
 - Regenerated Azure AD, Azure Digital Twins, Azure Event Grid, Azure IoT Central, Azure Monitor Logs, Azure Queues, Azure Tables, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, GitHub, Jira, Azure Data Explorer, Microsoft Bookings, Microsoft Forms, Office 365 Outlook, Office 365 Groups, OneNote, Pipedrive, Power BI, Service Bus, Shifts, SigningHub, Microsoft Teams, and Word Online (Business) with corrected root-schema handling.
 
 ### Fixed
 
+- Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
 - Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
 
 ### Added
 
+- **Freshservice**, **Mailchimp**, **SendGrid**, and **Trello** connector clients with 119 focused unit tests and runnable samples
 - Added current managed connector discovery operations for Azure IoT Central device templates, Azure Monitor Logs time ranges, Azure Tables storage accounts, Azure Data Explorer query schemas, and Service Bus entities, system properties, queues, session options, topics, subscriptions, and subscription filters.
 - **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
 - Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts

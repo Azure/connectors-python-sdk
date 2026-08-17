@@ -21,16 +21,11 @@ from azure.connectors.planner import (
     ListGroupsResponse,
     GetTaskResponseV2,
     GetTaskResponseV3,
-    ListTasksResponseV2,
-    UpdateTaskRequestV3,
-    CreateTaskRequestV3,
-    CreateTaskRequestV4,
     AppliedCategories,
     UpdateTaskRequest,
-    UpdateTaskRequestV2,
     CreateTaskRequest,
-    CreateTaskRequestV2,
     ErrorResponse,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -413,7 +408,7 @@ class TestCreateTaskAsync:
             text='{"id": "task-new", "title": "New Task"}'
         )
 
-        task_input = CreateTaskRequestV4(
+        task_input = CreateTaskRequest(
             group_id="group-123",
             plan_id="plan-123",
             title="New Task"
@@ -443,7 +438,7 @@ class TestCreateTaskAsync:
 
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
-        task_input = CreateTaskRequestV4(title="New Task")
+        task_input = CreateTaskRequest(title="New Task")
 
         with patch.object(
             client._http_client,
@@ -508,7 +503,7 @@ class TestUpdateTaskAsync:
             text='{"id": "task-123", "title": "Updated Task"}'
         )
 
-        update_input = UpdateTaskRequestV3(
+        update_input = UpdateTaskRequest(
             title="Updated Task",
             percent_complete=75
         )
@@ -540,7 +535,7 @@ class TestUpdateTaskAsync:
 
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
-        update_input = UpdateTaskRequestV3(title="Updated Task")
+        update_input = UpdateTaskRequest(title="Updated Task")
 
         with patch.object(
             client._http_client,
@@ -711,51 +706,21 @@ class TestUnassignUsersAsync:
             assert result is not None
 
 
-class TestOnTaskAssignedToMeAsync:
-    """Tests for on_task_assigned_to_me_async method."""
+class TestTriggerOperations:
+    """Tests for Planner trigger registration metadata."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful trigger registration."""
-        client = PlannerClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    def test_on_task_assigned_to_me_metadata(self):
+        """Test assigned-task trigger metadata."""
+        trigger = TRIGGER_OPERATIONS["OnTaskAssignedToMe_V2"]
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "task-1", "title": "Assigned Task"}]}'
-        )
+        assert trigger["path"].endswith("/ontaskassignedtome_trigger/tasks")
+        assert trigger["method"] == "get"
+        assert trigger["required_parameters"] == []
+        assert trigger["callback_payload_type"] == "ListTasksResponse"
 
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_task_assigned_to_me_async()
-
-            mock_send.assert_called_once()
-            assert result is not None
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = PlannerClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=500, text='{"error": "Internal error"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException):
-                await client.on_task_assigned_to_me_async()
+    def test_triggers_are_not_client_methods(self):
+        """Test triggers are not exposed as callable client methods."""
+        assert not hasattr(PlannerClient, "on_task_assigned_to_me_async")
 
 
 class TestDataclasses:
@@ -891,21 +856,15 @@ class TestDataclasses:
         )
         assert response.priority == 1
 
-    def test_list_tasks_response_v2_defaults(self):
-        """Test ListTasksResponseV2 default values."""
-        response = ListTasksResponseV2()
-        assert response.value is None
-        assert response.next_link is None
-
-    def test_update_task_request_v3_defaults(self):
-        """Test UpdateTaskRequestV3 default values."""
-        request = UpdateTaskRequestV3()
+    def test_update_task_request_defaults(self):
+        """Test UpdateTaskRequest default values."""
+        request = UpdateTaskRequest()
         assert request.title is None
         assert request.percent_complete is None
 
-    def test_update_task_request_v3_with_values(self):
-        """Test UpdateTaskRequestV3 with values."""
-        request = UpdateTaskRequestV3(
+    def test_update_task_request_with_values(self):
+        """Test UpdateTaskRequest with values."""
+        request = UpdateTaskRequest(
             title="Updated Title",
             percent_complete=100,
             bucket_id="bucket-123"
@@ -913,22 +872,15 @@ class TestDataclasses:
         assert request.title == "Updated Title"
         assert request.percent_complete == 100
 
-    def test_create_task_request_v3_defaults(self):
-        """Test CreateTaskRequestV3 default values."""
-        request = CreateTaskRequestV3()
-        assert request.group_id is None
-        assert request.plan_id is None
-        assert request.title is None
-
-    def test_create_task_request_v4_defaults(self):
-        """Test CreateTaskRequestV4 default values."""
-        request = CreateTaskRequestV4()
+    def test_create_task_request_defaults(self):
+        """Test CreateTaskRequest default values."""
+        request = CreateTaskRequest()
         assert request.priority is None
         assert request.title is None
 
-    def test_create_task_request_v4_with_priority(self):
-        """Test CreateTaskRequestV4 with priority."""
-        request = CreateTaskRequestV4(
+    def test_create_task_request_with_priority(self):
+        """Test CreateTaskRequest with priority."""
+        request = CreateTaskRequest(
             group_id="group-123",
             plan_id="plan-123",
             title="High Priority Task",
@@ -952,28 +904,6 @@ class TestDataclasses:
         assert categories.category1 is True
         assert categories.category2 is False
         assert categories.category3 is True
-
-    def test_update_task_request_defaults(self):
-        """Test UpdateTaskRequest default values."""
-        request = UpdateTaskRequest()
-        assert request.title is None
-        assert request.assignments is None
-
-    def test_update_task_request_v2_defaults(self):
-        """Test UpdateTaskRequestV2 default values."""
-        request = UpdateTaskRequestV2()
-        assert request.unassigned_users is None
-
-    def test_create_task_request_defaults(self):
-        """Test CreateTaskRequest default values."""
-        request = CreateTaskRequest()
-        assert request.plan_id is None
-        assert request.title is None
-
-    def test_create_task_request_v2_defaults(self):
-        """Test CreateTaskRequestV2 default values."""
-        request = CreateTaskRequestV2()
-        assert request.assignments is None
 
     def test_error_response_defaults(self):
         """Test ErrorResponse default values."""

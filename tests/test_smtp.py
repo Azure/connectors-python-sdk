@@ -7,10 +7,7 @@ from unittest.mock import AsyncMock, patch
 from azure.connectors.smtp import (
     SmtpClient,
     Email,
-    EmailV2,
-    EmailV3,
     Attachment,
-    AttachmentV2,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -119,7 +116,7 @@ class TestSendEmail:
         )
 
         mock_response = MockResponse(status=200, text="")
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             subject="Test Email",
@@ -148,7 +145,7 @@ class TestSendEmail:
         )
 
         mock_response = MockResponse(status=200, text="")
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient1@contoso.com;recipient2@contoso.com;recipient3@contoso.com",
             c_c="cc1@contoso.com;cc2@contoso.com",
@@ -180,13 +177,13 @@ class TestSendEmail:
         )
 
         mock_response = MockResponse(status=200, text="")
-        attachment = AttachmentV2(
+        attachment = Attachment(
             file_name="document.pdf",
             content_data="SGVsbG8gV29ybGQ=",
             content_type="application/pdf",
             content_id="doc-123"
         )
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             c_c="cc@contoso.com",
@@ -218,17 +215,17 @@ class TestSendEmail:
         )
 
         mock_response = MockResponse(status=200, text="")
-        attachment1 = AttachmentV2(
+        attachment1 = Attachment(
             file_name="report.pdf",
             content_data="UmVwb3J0IGRhdGE=",
             content_type="application/pdf"
         )
-        attachment2 = AttachmentV2(
+        attachment2 = Attachment(
             file_name="image.png",
             content_data="aW1hZ2UgZGF0YQ==",
             content_type="image/png"
         )
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             subject="Files Attached",
@@ -255,7 +252,7 @@ class TestSendEmail:
         )
 
         mock_response = MockResponse(status=200, text="")
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             subject="Urgent Matter",
@@ -280,7 +277,7 @@ class TestSendEmail:
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid email format"}')
-        email_input = EmailV3(
+        email_input = Email(
             from_="invalid",
             to="recipient@contoso.com",
             subject="Test",
@@ -302,78 +299,9 @@ class TestSendEmail:
 class TestDataClasses:
     """Tests for data class creation and attributes."""
 
-    def test_email_creation(self):
-        """Test Email dataclass creation."""
-        attachment = Attachment(
-            file_name="test.txt",
-            content_data="SGVsbG8=",
-            content_type="text/plain",
-            content_id="attach-1",
-            content_transfer_encoding="base64"
-        )
-        email = Email(
-            from_="sender@contoso.com",
-            to="recipient@contoso.com",
-            c_c="cc@contoso.com",
-            subject="Test Subject",
-            body="Test Body",
-            is_html=False,
-            bcc="bcc@contoso.com",
-            importance="Normal",
-            read_receipt="sender@contoso.com",
-            delivery_receipt="sender@contoso.com",
-            attachments=[attachment]
-        )
-
-        assert email.from_ == "sender@contoso.com"
-        assert email.to == "recipient@contoso.com"
-        assert email.subject == "Test Subject"
-        assert email.is_html is False
-        assert email.importance == "Normal"
-        assert len(email.attachments) == 1
-
     def test_attachment_creation(self):
         """Test Attachment dataclass creation."""
         attachment = Attachment(
-            file_name="document.pdf",
-            content_id="doc-001",
-            content_data="base64encodeddata",
-            content_type="application/pdf",
-            content_transfer_encoding="base64"
-        )
-
-        assert attachment.file_name == "document.pdf"
-        assert attachment.content_id == "doc-001"
-        assert attachment.content_type == "application/pdf"
-        assert attachment.content_transfer_encoding == "base64"
-
-    def test_email_v2_creation(self):
-        """Test EmailV2 dataclass creation."""
-        attachment = AttachmentV2(
-            file_name="image.jpg",
-            content_data="imagedata",
-            content_type="image/jpeg"
-        )
-        email = EmailV2(
-            from_="sender@contoso.com",
-            to="recipient@contoso.com",
-            c_c="cc@contoso.com",
-            subject="V2 Email",
-            body="<p>HTML body</p>",
-            is_html=True,
-            bcc="bcc@contoso.com",
-            importance="Low",
-            attachments=[attachment]
-        )
-
-        assert email.from_ == "sender@contoso.com"
-        assert email.is_html is True
-        assert email.importance == "Low"
-        assert len(email.attachments) == 1
-
-    def test_attachment_v2_creation(self):
-        """Test AttachmentV2 dataclass creation."""
-        attachment = AttachmentV2(
             content_data="filedata",
             content_type="application/octet-stream",
             file_name="data.bin",
@@ -385,14 +313,14 @@ class TestDataClasses:
         assert attachment.file_name == "data.bin"
         assert attachment.content_id == "bin-123"
 
-    def test_email_v3_creation(self):
-        """Test EmailV3 dataclass creation."""
-        attachment = AttachmentV2(
+    def test_email_creation(self):
+        """Test Email dataclass creation."""
+        attachment = Attachment(
             file_name="spreadsheet.xlsx",
             content_data="exceldata",
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        email = EmailV3(
+        email = Email(
             from_="sender@contoso.com",
             to="recipient1@contoso.com;recipient2@contoso.com",
             c_c="cc@contoso.com",
@@ -413,17 +341,6 @@ class TestDataClasses:
     def test_email_with_defaults(self):
         """Test Email dataclass with default values."""
         email = Email()
-
-        assert email.from_ is None
-        assert email.to is None
-        assert email.subject is None
-        assert email.body is None
-        assert email.is_html is None
-        assert email.attachments is None
-
-    def test_email_v3_with_defaults(self):
-        """Test EmailV3 dataclass with default values."""
-        email = EmailV3()
 
         assert email.from_ is None
         assert email.to is None
@@ -456,7 +373,7 @@ class TestEdgeCases:
         )
 
         mock_response = MockResponse(status=200, text="")
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             subject="Empty Body Test",
@@ -480,7 +397,7 @@ class TestEdgeCases:
         )
 
         mock_response = MockResponse(status=200, text="")
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             subject="HTML Email",
@@ -511,7 +428,7 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            email1 = EmailV3(
+            email1 = Email(
                 from_="sender@contoso.com",
                 to="recipient1@contoso.com",
                 subject="First Email",
@@ -519,7 +436,7 @@ class TestEdgeCases:
             )
             await client.send_email_async(input=email1)
 
-            email2 = EmailV3(
+            email2 = Email(
                 from_="sender@contoso.com",
                 to="recipient2@contoso.com",
                 subject="Second Email",
@@ -538,7 +455,7 @@ class TestEdgeCases:
         )
 
         mock_response = MockResponse(status=200, text="")
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             subject="Special chars: äöü ñ 日本語 emoji 🎉",
@@ -563,7 +480,7 @@ class TestEdgeCases:
 
         mock_response = MockResponse(status=200, text="")
         recipients = ";".join([f"user{i}@contoso.com" for i in range(50)])
-        email_input = EmailV3(
+        email_input = Email(
             from_="sender@contoso.com",
             to=recipients,
             subject="Mass Email",

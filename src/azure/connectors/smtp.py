@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, List
 
 from azure.connectors.sdk import (
@@ -20,141 +20,82 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class Email:
-    """Definition: Email"""
-
-    from_: Optional[str] = None
-    """Email address of sender like sender@domain.com"""
-    to: Optional[str] = None
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
-    """
-    c_c: Optional[str] = None
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
-    """
-    subject: Optional[str] = None
-    """Email subject"""
-    body: Optional[str] = None
-    """Email body"""
-    is_html: Optional[bool] = None
-    """Send the email as HTML (true/false)"""
-    bcc: Optional[str] = None
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com.
-    """
-    importance: Optional[str] = None
-    """Importance of the email (High, Normal, or Low)"""
-    read_receipt: Optional[str] = None
-    """Specify email address for Read receipt"""
-    delivery_receipt: Optional[str] = None
-    """Specify email address for Delivery receipt"""
-    attachments: Optional[List[Attachment]] = None
-    """Attachments to be sent along with the email"""
-
-
-@dataclass
 class Attachment:
-    """Definition: Attachment"""
-
-    file_name: Optional[str] = None
-    """File name"""
-    content_id: Optional[str] = None
-    """Content id"""
-    content_data: Optional[str] = None
-    """Content data (base64 encoded for streams and as-is for string)"""
-    content_type: Optional[str] = None
-    """Content type"""
-    content_transfer_encoding: Optional[str] = None
-    """Content Transfer Encoding (base64 or none)"""
-
-
-@dataclass
-class EmailV2:
-    """Definition: EmailV2"""
-
-    from_: Optional[str] = None
-    """Email address of sender like sender@domain.com"""
-    to: Optional[str] = None
     """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
+    Definition: Attachment
     """
-    c_c: Optional[str] = None
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
-    """
-    subject: Optional[str] = None
-    """Email subject"""
-    body: Optional[str] = None
-    """Email body"""
-    is_html: Optional[bool] = None
-    """Send the email as HTML (true/false)"""
-    bcc: Optional[str] = None
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com.
-    """
-    importance: Optional[str] = None
-    """Importance of the email (High, Normal, or Low)"""
-    read_receipt: Optional[str] = None
-    """Specify email address for Read receipt"""
-    delivery_receipt: Optional[str] = None
-    """Specify email address for Delivery receipt"""
-    attachments: Optional[List[AttachmentV2]] = None
-    """Attachments to be sent along with the email"""
 
-
-@dataclass
-class AttachmentV2:
-    """Definition: AttachmentV2"""
-
-    content_data: Optional[str] = None
+    content_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentData"},
+    )
     """Content data"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
     """Content type"""
-    file_name: Optional[str] = None
+    file_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileName"},
+    )
     """File name"""
-    content_id: Optional[str] = None
+    content_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentId"},
+    )
     """Content id"""
 
 
 @dataclass
-class EmailV3:
-    """Definition: EmailV3"""
+class Email:
+    """
+    Definition: Email
+    """
 
-    from_: Optional[str] = None
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
     """Email address of sender like sender@domain.com"""
-    to: Optional[str] = None
+    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like
     recipient1@domain.com;recipient2@domain.com
     """
-    c_c: Optional[str] = None
+    c_c: Optional[str] = field(default=None, metadata={"wire_name": "CC"})
     """
     Specify email addresses separated by semicolons like
     recipient1@domain.com;recipient2@domain.com
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Email subject"""
-    body: Optional[str] = None
+    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
     """Email body"""
-    bcc: Optional[str] = None
+    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
     """
     Specify email addresses separated by semicolons like
     recipient1@domain.com;recipient2@domain.com.
     """
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Importance of the email (High, Normal, or Low)"""
-    read_receipt: Optional[str] = None
+    read_receipt: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReadReceipt"},
+    )
     """Specify email address for Read receipt"""
-    delivery_receipt: Optional[str] = None
+    delivery_receipt: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DeliveryReceipt"},
+    )
     """Specify email address for Delivery receipt"""
-    attachments: Optional[List[AttachmentV2]] = None
+    attachments: Optional[List[Attachment]] = field(
+        default=None,
+        metadata={"wire_name": "Attachments"},
+    )
     """Attachments to be sent along with the email"""
 
 
@@ -194,21 +135,23 @@ class SmtpClient(ConnectorClientBase):
 
     async def send_email_async(
         self,
-        input: EmailV3,
-    ):
+        input: Email,
+    ) -> None:
         """
-        Send Email (V3)
+        Send Email
 
         This operation sends an email to one or more recipients.
         """
-        path = f"{self._connection_runtime_url}/SendEmailV3"
+        request_url = f"{self._connection_runtime_url}/SendEmailV3"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

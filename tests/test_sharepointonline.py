@@ -14,6 +14,7 @@ from azure.connectors.sharepointonline import (
     ItemPermissionCreateLinkBody,
     ItemGrantAccessBody,
     MoveFileParameters,
+    CopyFileParameters,
     CopyFolderParameters,
     MoveFolderParameters,
     PatchFileItemInput,
@@ -946,6 +947,32 @@ class TestCopyMoveOperations:
             assert "source=" in call_args[0][1]
             assert "destination=" in call_args[0][1]
             assert result["Name"] == "document_copy.docx"
+
+    @pytest.mark.asyncio
+    async def test_copy_file_async_route_is_preserved(self, mock_token_provider):
+        """Test the current copy-file route uses its typed request body."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+        input_data = CopyFileParameters(source_file_id="file123")
+        mock_response = MockResponse(status=200, text='{"Name": "copy.docx"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.copy_file_2_async(
+                input=input_data,
+                dataset="https://contoso.sharepoint.com/sites/site1"
+            )
+
+            assert mock_send.call_args[0][0] == "POST"
+            assert "/copyFileAsync" in mock_send.call_args[0][1]
+            assert mock_send.call_args.kwargs["body"] is input_data
+            assert result["Name"] == "copy.docx"
 
     @pytest.mark.asyncio
     async def test_move_file(self, mock_token_provider):
