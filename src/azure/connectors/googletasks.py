@@ -5,8 +5,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, List
+from dataclasses import dataclass, field
+from typing import Optional, Any, Dict, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -40,7 +41,10 @@ class TaskListEntry:
     """The identifier of the task list."""
     title: Optional[str] = None
     """The title of the task list."""
-    self_link: Optional[str] = None
+    self_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "selfLink"},
+    )
     """A link to this task list."""
     updated: Optional[str] = None
     """The time the task list was last updated."""
@@ -68,7 +72,10 @@ class TaskObject:
     """The title of the task."""
     updated: Optional[str] = None
     """The last time the task was updated."""
-    self_link: Optional[str] = None
+    self_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "selfLink"},
+    )
     """A link to the task."""
     parent: Optional[str] = None
     """The parent of the task."""
@@ -144,7 +151,7 @@ class GoogletasksClient(ConnectorClientBase):
 
     async def list_task_lists_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List task lists
 
@@ -172,7 +179,7 @@ class GoogletasksClient(ConnectorClientBase):
     async def create_task_list_async(
         self,
         input: TaskListCreate,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a task list
 
@@ -200,14 +207,15 @@ class GoogletasksClient(ConnectorClientBase):
     async def list_tasks_async(
         self,
         task_list_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists the tasks for a task list
 
         Lists the tasks for a specific task list.
         """
         request_url = (
-            f"{self._connection_runtime_url}/lists/{str(task_list_id)}/tasks"
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(task_list_id), safe='')}/tasks"
         )
 
         response = await self.http_client.send_async(
@@ -227,18 +235,19 @@ class GoogletasksClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_task_async(
+    async def craete_task_async(
         self,
         input: TaskCreate,
         task_list_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a task in a task list
 
         Create a task in a specific task list.
         """
         request_url = (
-            f"{self._connection_runtime_url}/lists/{str(task_list_id)}/tasks"
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(task_list_id), safe='')}/tasks"
         )
 
         response = await self.http_client.send_async(
@@ -262,7 +271,7 @@ class GoogletasksClient(ConnectorClientBase):
         self,
         task_list_id: str,
         task_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a task from a task list
 
@@ -270,7 +279,10 @@ class GoogletasksClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/lists/{str(task_list_id)}/tasks/{str(task_id)}"
+            f"/lists"
+            f"/{quote(str(task_list_id), safe='')}"
+            f"/tasks"
+            f"/{quote(str(task_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -290,124 +302,41 @@ class GoogletasksClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def on_new_task_list_async(
-        self,
-    ):
-        """
-        When a new task list is created
 
-        Trigger when a new task list is created.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}/trigger1/users/@me/lists"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_task_in_list_async(
-        self,
-        task_list_id: str,
-    ):
-        """
-        When a task is added to a task list
-
-        Triggers when a task is added to the specified task list.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger2/lists/{str(task_list_id)}/tasks"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_due_task_in_list_async(
-        self,
-        task_list_id: str,
-    ):
-        """
-        When a task is due in a task list
-
-        Triggers when a task is due in the specified task list.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger4/lists/{str(task_list_id)}/tasks"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_completed_task_in_list_async(
-        self,
-        task_list_id: str,
-    ):
-        """
-        When a task is completed in a task list (V2)
-
-        Triggers when the a task is completed in the specified task list.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger5/lists/{str(task_list_id)}/tasks"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewTaskList": {
+        "operation_id": "OnNewTaskList",
+        "path": "/{connectionId}/trigger1/users/@me/lists",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "TaskListList",
+    },
+    "OnNewTaskInList": {
+        "operation_id": "OnNewTaskInList",
+        "path": "/{connectionId}/trigger2/lists/{taskListId}/tasks",
+        "method": "get",
+        "required_parameters": ["taskListId"],
+        "callback_payload_type": "TaskList",
+    },
+    "OnDueTaskInList": {
+        "operation_id": "OnDueTaskInList",
+        "path": "/{connectionId}/trigger4/lists/{taskListId}/tasks",
+        "method": "get",
+        "required_parameters": ["taskListId"],
+        "callback_payload_type": "TaskList",
+    },
+    "OnCompletedTaskInListV2": {
+        "operation_id": "OnCompletedTaskInListV2",
+        "path": "/{connectionId}/trigger5/lists/{taskListId}/tasks",
+        "method": "get",
+        "required_parameters": ["taskListId"],
+        "callback_payload_type": "TaskList",
+    },
+}

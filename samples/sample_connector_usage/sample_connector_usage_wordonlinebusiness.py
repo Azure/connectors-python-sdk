@@ -151,7 +151,7 @@ async def example_4_convert_word_to_pdf():
 
     async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_file_p_d_f_async(
+            result = await client.get_file_pdf_async(
                 source=SOURCE,
                 drive=DRIVE,
                 file=FILE
@@ -176,7 +176,7 @@ async def example_5_convert_with_sensitivity_labels():
 
     async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_file_p_d_f_async(
+            result = await client.get_file_pdf_async(
                 source=SOURCE,
                 drive=DRIVE,
                 file=FILE,

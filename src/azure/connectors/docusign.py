@@ -922,7 +922,7 @@ class StaticResponseForCompositeTemplatesResponse:
 @dataclass
 class WebhookRequest:
     """
-    Definition: WebhookRequestV2
+    Definition: WebhookRequest
     """
 
     all_users: Optional[str] = field(
@@ -955,7 +955,7 @@ class WebhookRequest:
 @dataclass
 class WebhookEnvelopeResponse:
     """
-    Definition: WebhookEnvelopeResponseV2
+    Definition: WebhookEnvelopeResponse
     """
 
     data: Optional[Dict[str, Any]] = None
@@ -2726,7 +2726,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def generate_embedded_sender_u_r_l_async(
+    async def generate_embedded_sender_url_async(
         self,
         input: AdditionalURLForSenderView,
         account_id: str,
@@ -3897,7 +3897,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def generate_embedded_signing_u_r_l_async(
+    async def generate_embedded_signing_url_async(
         self,
         input: DynamicSigningUrlFields,
         account_id: str,

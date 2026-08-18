@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Generated Python operation names now preserve the exact Swagger `operationId` spelling while grouping acronym runs in snake_case. This renames methods in DocuSign, Google Tasks, PDF.co, SigningHub, Slack, Word Online (Business), and Zoho Sign.
 - Regenerated Office 365 Groups Mail, Planner, SMTP, and Yammer now expose current request and response model names instead of deprecated version-family sibling names. Their polling triggers are available through `TRIGGER_OPERATIONS`, not callable client methods.
 - `UploadDocument.document_id` now represents the natural `document_id` wire field. Callers that used it for `documentId` must use `document_id_2` instead.
 - Regenerated Azure Queues, DocuSign, Event Hubs, Microsoft Forms, SharePoint Online, and Microsoft Teams from the current managed connector contracts. Trigger routes are now exposed through `TRIGGER_OPERATIONS` instead of callable client methods, and deprecated DocuSign operations are no longer generated.

@@ -29,6 +29,7 @@ from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.googletasks import (
     GoogletasksClient,
+    TRIGGER_OPERATIONS,
     TaskCreate,
     TaskListCreate,
 )
@@ -88,33 +89,13 @@ async def example_2_create_task_list_and_task():
             print(f"Connector error: {ex}")
 
 
-async def example_3_poll_triggers():
-    """Example 3: Poll trigger endpoints for task changes."""
-    print("\n=== Example 3: Trigger Poll Calls ===")
+def example_3_list_triggers():
+    """Example 3: List trigger operations available for registration."""
+    print("\n=== Example 3: Trigger Operations ===")
 
-    task_list_id = os.environ.get("GOOGLETASKS_TEST_LIST_ID", "")
-    if not task_list_id:
-        print("Set GOOGLETASKS_TEST_LIST_ID to run trigger examples.")
-        return
-
-    credential = DefaultAzureCredential()
-
-    async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            new_tasks = await client.on_new_task_in_list_async(task_list_id=task_list_id)
-            due_tasks = await client.on_due_task_in_list_async(task_list_id=task_list_id)
-            completed_tasks = await client.on_completed_task_in_list_async(
-                task_list_id=task_list_id,
-            )
-
-            new_count = len((new_tasks or {}).get("items", []))
-            due_count = len((due_tasks or {}).get("items", []))
-            completed_count = len((completed_tasks or {}).get("items", []))
-            print(f"New tasks trigger returned {new_count} task(s).")
-            print(f"Due tasks trigger returned {due_count} task(s).")
-            print(f"Completed tasks trigger returned {completed_count} task(s).")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+    for operation_id, metadata in TRIGGER_OPERATIONS.items():
+        parameters = ", ".join(metadata["required_parameters"]) or "none"
+        print(f"{operation_id}: required parameters: {parameters}")
 
 
 async def main():
@@ -128,7 +109,7 @@ async def main():
 
     await example_1_list_task_lists()
     await example_2_create_task_list_and_task()
-    await example_3_poll_triggers()
+    example_3_list_triggers()
 
     print("\n=== Google Tasks sample completed ===")
 

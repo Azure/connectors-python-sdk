@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, patch
 
 from azure.connectors.googletasks import (
     GoogletasksClient,
+    TRIGGER_OPERATIONS,
     TaskCreate,
     TaskList,
     TaskListCreate,
@@ -30,22 +31,13 @@ async def _invoke_operation(client: GoogletasksClient, operation: str):
         return await client.create_task_list_async(input=TaskListCreate(title="Work"))
     if operation == "list_tasks":
         return await client.list_tasks_async(task_list_id="list123")
-    if operation == "create_task":
-        return await client.create_task_async(
+    if operation == "craete_task":
+        return await client.craete_task_async(
             input=TaskCreate(title="Buy milk"),
             task_list_id="list123",
         )
     if operation == "list_task":
         return await client.list_task_async(task_list_id="list123", task_id="task123")
-    if operation == "on_new_task_list":
-        return await client.on_new_task_list_async()
-    if operation == "on_new_task_in_list":
-        return await client.on_new_task_in_list_async(task_list_id="list123")
-    if operation == "on_due_task_in_list":
-        return await client.on_due_task_in_list_async(task_list_id="list123")
-    if operation == "on_completed_task_in_list":
-        return await client.on_completed_task_in_list_async(task_list_id="list123")
-
     raise ValueError(f"Unsupported operation '{operation}'.")
 
 
@@ -180,8 +172,8 @@ class TestGoogletasksClientMethods:
             assert isinstance(mock_send.call_args.kwargs["body"], TaskListCreate)
 
     @pytest.mark.asyncio
-    async def test_create_task_success(self, mock_token_provider):
-        """Test create_task_async sends body and returns parsed JSON."""
+    async def test_craete_task_success(self, mock_token_provider):
+        """Test craete_task_async preserves its operationId spelling."""
         client = GoogletasksClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
@@ -194,7 +186,7 @@ class TestGoogletasksClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_task_async(
+            result = await client.craete_task_async(
                 input=TaskCreate(title="Buy milk"),
                 task_list_id="list123",
             )
@@ -222,25 +214,6 @@ class TestGoogletasksClientMethods:
             assert result["id"] == "task123"
             assert "/lists/list123/tasks/task123" in mock_send.call_args[0][1]
 
-    @pytest.mark.asyncio
-    async def test_on_completed_task_in_list_success(self, mock_token_provider):
-        """Test completed task trigger endpoint serialization."""
-        client = GoogletasksClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"items":[]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.on_completed_task_in_list_async(task_list_id="list123")
-
-            assert "/trigger5/lists/list123/tasks" in mock_send.call_args[0][1]
-
 
 class TestGoogletasksClientErrorHandling:
     """Error handling tests that ensure all methods raise ConnectorException."""
@@ -252,12 +225,8 @@ class TestGoogletasksClientErrorHandling:
             "list_task_lists",
             "create_task_list",
             "list_tasks",
-            "create_task",
+            "craete_task",
             "list_task",
-            "on_new_task_list",
-            "on_new_task_in_list",
-            "on_due_task_in_list",
-            "on_completed_task_in_list",
         ],
     )
     async def test_error_response_raises_exception_for_all_operations(
@@ -282,6 +251,24 @@ class TestGoogletasksClientErrorHandling:
                 await _invoke_operation(client, operation)
 
             assert exc_info.value.status_code == 500
+
+
+class TestGoogletasksTriggerOperations:
+    """Tests for Google Tasks trigger registration metadata."""
+
+    def test_triggers_are_registered_without_callable_methods(self):
+        """Test polling triggers are metadata-only operations."""
+        assert set(TRIGGER_OPERATIONS) == {
+            "OnNewTaskList",
+            "OnNewTaskInList",
+            "OnDueTaskInList",
+            "OnCompletedTaskInListV2",
+        }
+        assert TRIGGER_OPERATIONS["OnNewTaskInList"]["required_parameters"] == [
+            "taskListId"
+        ]
+        assert not hasattr(GoogletasksClient, "on_new_task_in_list_async")
+        assert not hasattr(GoogletasksClient, "on_completed_task_in_list_async")
 
 
 class TestGoogletasksTypeSerialization:

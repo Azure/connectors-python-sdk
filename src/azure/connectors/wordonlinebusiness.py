@@ -237,7 +237,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_p_d_f_async(
+    async def get_file_pdf_async(
         self,
         source: str,
         drive: str,

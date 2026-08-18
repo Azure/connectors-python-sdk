@@ -696,7 +696,7 @@ class PDFSearchTextInput:
         default=None,
         metadata={"wire_name": "wordMatchingMode"},
     )
-    """Values can be either `SmartMatch', `ExactMatch', or `None'."""
+    """Values can be either 'SmartMatch', 'ExactMatch', or 'None'."""
     password: Optional[str] = None
     """Password of the PDF file"""
     async_: Optional[bool] = field(
@@ -4394,7 +4394,7 @@ class PDFClassifierInput:
     """
     Define custom classification rules in CSV format. Rules are in CSV format
     where each row contains: \"class name, logic (AND or OR (default)), and
-    keywords\" separated by a comma. Each row is separated by the \n symbol.
+    keywords\" separated by a comma. Each row is separated by the \\n symbol.
     """
     rulescsvurl: Optional[str] = None
     """
@@ -5005,7 +5005,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_search_text_async(
+    async def pdf_serarch_text_async(
         self,
         input: PDFSearchTextInput,
     ) -> dict[str, Any] | None:
@@ -5166,7 +5166,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_info_reader_async(
+    async def pdf_info_reader_async(
         self,
         input: PDFInfoReaderInput,
     ) -> dict[str, Any] | None:
@@ -5197,7 +5197,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_forms_info_reader_async(
+    async def pdf_forms_info_reader_async(
         self,
         input: PDFFormsInfoReaderInput,
     ) -> dict[str, Any] | None:
@@ -5228,7 +5228,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_find_table_async(
+    async def pdf_find_table_async(
         self,
         input: PDFFindTableInput,
     ) -> dict[str, Any] | None:
@@ -5358,7 +5358,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_searchable_async(
+    async def pdf_searchable_async(
         self,
         input: PDFSearchableInput,
     ) -> dict[str, Any] | None:
@@ -5389,7 +5389,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_un_searchable_async(
+    async def pdf_un_searchable_async(
         self,
         input: PDFUnSearchableInput,
     ) -> dict[str, Any] | None:
@@ -5420,7 +5420,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_c_s_v_async(
+    async def pdf_to_csv_async(
         self,
         input: PDFToCSVInput,
     ) -> dict[str, Any] | None:
@@ -5451,7 +5451,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_j_s_o_n_async(
+    async def pdf_to_json_async(
         self,
         input: PDFToJSONInput,
     ) -> dict[str, Any] | None:
@@ -5482,7 +5482,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_j_s_o_n_meta_async(
+    async def pdf_to_json_meta_async(
         self,
         input: PDFToJSONMetaInput,
     ) -> dict[str, Any] | None:
@@ -5516,7 +5516,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_text_async(
+    async def pdf_to_text_async(
         self,
         input: PDFToTextInput,
     ) -> dict[str, Any] | None:
@@ -5547,7 +5547,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_text_simple_async(
+    async def pdf_to_text_simple_async(
         self,
         input: PDFToTextSimpleInput,
     ) -> dict[str, Any] | None:
@@ -5580,7 +5580,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_x_l_s_async(
+    async def pdf_to_xls_async(
         self,
         input: PDFToXLSInput,
     ) -> dict[str, Any] | None:
@@ -5611,7 +5611,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_x_l_s_x_async(
+    async def pdf_to_xlsx_async(
         self,
         input: PDFToXLSXInput,
     ) -> dict[str, Any] | None:
@@ -5642,7 +5642,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_x_m_l_async(
+    async def pdf_to_xml_async(
         self,
         input: PDFToXMLInput,
     ) -> dict[str, Any] | None:
@@ -5673,7 +5673,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_j_p_g_async(
+    async def pdf_to_jpg_async(
         self,
         input: PDFToJPGInput,
     ) -> dict[str, Any] | None:
@@ -5704,7 +5704,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_p_n_g_async(
+    async def pdf_to_png_async(
         self,
         input: PDFToPNGInput,
     ) -> dict[str, Any] | None:
@@ -5735,7 +5735,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_w_e_b_p_async(
+    async def pdf_to_webp_async(
         self,
         input: PDFToWEBPInput,
     ) -> dict[str, Any] | None:
@@ -5766,7 +5766,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_to_t_i_f_f_async(
+    async def pdf_to_tiff_async(
         self,
         input: PDFToTIFFInput,
     ) -> dict[str, Any] | None:
@@ -5798,7 +5798,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_from_c_s_v_async(
+    async def pdf_from_csv_async(
         self,
         input: PDFFromCSVInput,
     ) -> dict[str, Any] | None:
@@ -5829,7 +5829,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_from_doc_async(
+    async def pdf_from_doc_async(
         self,
         input: PDFFromDocInput,
     ) -> dict[str, Any] | None:
@@ -5860,7 +5860,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_from_images_async(
+    async def pdf_from_images_async(
         self,
         input: PDFFromImagesInput,
     ) -> dict[str, Any] | None:
@@ -5893,7 +5893,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_from_email_async(
+    async def pdf_from_email_async(
         self,
         input: PDFFromEmailInput,
     ) -> dict[str, Any] | None:
@@ -5927,7 +5927,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_add_security_async(
+    async def pdf_add_security_async(
         self,
         input: PDFAddSecurityInput,
     ) -> dict[str, Any] | None:
@@ -5958,7 +5958,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_security_remove_async(
+    async def pdf_security_remove_async(
         self,
         input: PDFSecurityRemoveInput,
     ) -> dict[str, Any] | None:
@@ -5989,7 +5989,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_from_x_l_s_x_l_s_x_async(
+    async def pdf_from_xlsxlsx_async(
         self,
         input: PDFFromXLSXLSXInput,
     ) -> dict[str, Any] | None:
@@ -6019,7 +6019,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def x_l_sto_c_s_v_async(
+    async def xl_sto_csv_async(
         self,
         input: XLStoCSVInput,
     ) -> dict[str, Any] | None:
@@ -6050,7 +6050,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def x_l_sto_j_s_o_n_async(
+    async def xl_sto_json_async(
         self,
         input: XLStoJSONInput,
     ) -> dict[str, Any] | None:
@@ -6080,7 +6080,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def x_l_sto_h_t_m_l_async(
+    async def xl_sto_html_async(
         self,
         input: XLStoHTMLInput,
     ) -> dict[str, Any] | None:
@@ -6110,7 +6110,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def x_l_sto_t_x_t_async(
+    async def xl_sto_txt_async(
         self,
         input: XLStoTXTInput,
     ) -> dict[str, Any] | None:
@@ -6140,7 +6140,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def x_l_sto_x_m_l_async(
+    async def xl_sto_xml_async(
         self,
         input: XLStoXMLInput,
     ) -> dict[str, Any] | None:
@@ -6170,7 +6170,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_rotate_pages_async(
+    async def pdf_rotate_pages_async(
         self,
         input: PDFRotatePagesInput,
     ) -> dict[str, Any] | None:
@@ -6200,7 +6200,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_auto_rotate_pages_async(
+    async def pdf_auto_rotate_pages_async(
         self,
         input: PDFAutoRotatePagesInput,
     ) -> dict[str, Any] | None:
@@ -6231,7 +6231,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_delete_pages_async(
+    async def pdf_delete_pages_async(
         self,
         input: PDFDeletePagesInput,
     ) -> dict[str, Any] | None:
@@ -6263,7 +6263,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_compress_async(
+    async def pdf_compress_async(
         self,
         input: PDFCompressInput,
     ) -> dict[str, Any] | None:
@@ -6293,7 +6293,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_classifier_async(
+    async def pdf_classifier_async(
         self,
         input: PDFClassifierInput,
     ) -> dict[str, Any] | None:
@@ -6420,7 +6420,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def p_d_f_attachment_extraction_async(
+    async def pdf_attachment_extraction_async(
         self,
         input: PDFAttachmentExtractionInput,
     ) -> dict[str, Any] | None:

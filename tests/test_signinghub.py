@@ -517,12 +517,12 @@ OPERATION_ARGS = {
     "package_get_package_details": {"package_id": "package-1"},
     "package_rename_package": {"input": {}, "package_id_bulk_action": "package-1"},
     "package_submit": {"package_id": "package-1"},
-    "q_r_add_q_r_code": {
+    "qr_add_qr_code": {
         "input": {},
         "package_id": "package-1",
         "document_id": "doc-1",
     },
-    "q_r_update_q_r_code": {
+    "qr_update_qr_code": {
         "input": {},
         "package_id": "package-1",
         "document_id": "doc-1",

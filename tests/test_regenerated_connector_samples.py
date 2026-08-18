@@ -15,7 +15,10 @@ SAMPLE_DIRECTORY = (
 )
 
 
-@pytest.mark.parametrize("connector_name", ["planner", "smtp", "yammer"])
+@pytest.mark.parametrize(
+    "connector_name",
+    ["googletasks", "planner", "smtp", "wordonlinebusiness", "yammer"],
+)
 def test_regenerated_connector_sample_imports(connector_name: str) -> None:
     """Test regenerated connector samples import their current public models."""
     sample_path = SAMPLE_DIRECTORY / f"sample_connector_usage_{connector_name}.py"
