@@ -102,6 +102,35 @@ class TestSlackClientLifecycle:
             mock_close.assert_called_once()
 
 
+class TestSetDndAsync:
+    """Tests for set_dnd_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_uses_acronym_aware_name(self, mock_token_provider):
+        """Test setting DND through the acronym-aware public method name."""
+        client = SlackClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=200, text='{"ok": true}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.set_dnd_async(num_minutes="30")
+
+            mock_send.assert_called_once_with(
+                "GET",
+                "https://example.azure.com/connections/test/dnd.setSnooze?num_minutes=30",
+                body=None,
+            )
+            assert result == {"ok": True}
+            assert not hasattr(SlackClient, "set_d_n_d_async")
+
+
 class TestListChannelsAsync:
     """Tests for list_channels_async method."""
 
