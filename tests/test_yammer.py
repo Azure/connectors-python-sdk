@@ -9,17 +9,19 @@ from azure.connectors.yammer import (
     Network,
     YammerEntity,
     User,
-    MessageV2,
+    Message,
     MessageBody,
     LikedBy,
     Topic,
-    PostOperationRequestV2,
+    PostOperationRequest,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -449,90 +451,23 @@ class TestGetMessagesInThread:
             assert "/v3/messages/in_thread/456.json" in call_args[0][1]
 
 
-class TestOnNewMessagesFollowing:
-    """Tests for on_new_messages_following_async method (trigger)."""
+class TestTriggerOperations:
+    """Tests for Yammer trigger registration metadata."""
 
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful GET trigger request."""
-        client = YammerClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    def test_all_expected_triggers_registered(self):
+        """Test current trigger routes and callback contracts."""
+        following = TRIGGER_OPERATIONS["OnNewMessagesFollowingV2"]
+        in_group = TRIGGER_OPERATIONS["OnNewMessagesInGroupV2"]
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"messages": [{"id": 1, "content_excerpt": "New post"}]}'
-        )
+        assert following["path"].endswith("/v2/trigger/messages/following.json")
+        assert following["callback_payload_type"] == "MessageList"
+        assert in_group["path"].endswith("/v2/trigger/in_group/{group_id}.json")
+        assert in_group["required_parameters"] == ["group_id"]
 
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            _ = await client.on_new_messages_following_async()
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/v2/trigger/messages/following.json" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_with_network_and_triggerstate(self, mock_token_provider):
-        """Test GET trigger with parameters."""
-        client = YammerClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='{"messages": []}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_new_messages_following_async(
-                network_id="net123",
-                triggerstate="state456"
-            )
-
-            call_args = mock_send.call_args
-            url = call_args[0][1]
-            assert "network_id=net123" in url
-            assert "triggerstate=state456" in url
-
-
-class TestOnNewMessagesInGroup:
-    """Tests for on_new_messages_in_group_async method (trigger)."""
-
-    @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
-        """Test successful GET trigger request."""
-        client = YammerClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"messages": [{"id": 1, "group_id": 123}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            _ = await client.on_new_messages_in_group_async(group_id="123")
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/v2/trigger/in_group/123.json" in call_args[0][1]
+    def test_triggers_are_not_client_methods(self):
+        """Test triggers are not exposed as callable client methods."""
+        assert not hasattr(YammerClient, "on_new_messages_following_async")
+        assert not hasattr(YammerClient, "on_new_messages_in_group_async")
 
 
 class TestPostMessage:
@@ -550,7 +485,7 @@ class TestPostMessage:
             status=201,
             text='{"id": 789, "content_excerpt": "New message"}'
         )
-        message_input = PostOperationRequestV2(
+        message_input = PostOperationRequest(
             group_id=123,
             body="Hello Yammer!",
             title="Test Post"
@@ -578,7 +513,7 @@ class TestPostMessage:
         )
 
         mock_response = MockResponse(status=201, text='{"id": 789}')
-        message_input = PostOperationRequestV2(body="Hello!")
+        message_input = PostOperationRequest(body="Hello!")
 
         with patch.object(
             client._http_client,
@@ -606,7 +541,7 @@ class TestPostMessage:
         mock_response = MockResponse(
             status=403, text='{"error": "Not authorized to post"}'
         )
-        message_input = PostOperationRequestV2(body="Test")
+        message_input = PostOperationRequest(body="Test")
 
         with patch.object(
             client._http_client,
@@ -674,10 +609,10 @@ class TestDataClasses:
         assert body.plain == "Hello World"
         assert body.parsed is not None
 
-    def test_message_v2(self):
-        """Test MessageV2 dataclass creation."""
+    def test_message(self):
+        """Test Message dataclass creation."""
         body = MessageBody(plain="Hello")
-        message = MessageV2(
+        message = Message(
             id=123,
             content_excerpt="Hello",
             sender_id=456,
@@ -709,9 +644,9 @@ class TestDataClasses:
         assert liked_by.count == 5
         assert len(liked_by.names) == 2
 
-    def test_post_operation_request_v2(self):
-        """Test PostOperationRequestV2 dataclass creation."""
-        request = PostOperationRequestV2(
+    def test_post_operation_request(self):
+        """Test PostOperationRequest dataclass creation."""
+        request = PostOperationRequest(
             group_id=123,
             body="Hello Yammer!",
             title="Announcement",
@@ -721,6 +656,20 @@ class TestDataClasses:
         assert request.group_id == 123
         assert request.body == "Hello Yammer!"
         assert request.broadcast is True
+
+    def test_current_post_request_uses_swagger_wire_names(self):
+        """Test the current post request preserves its Swagger keys."""
+        request = PostOperationRequest(
+            group_id=123,
+            body="Hello Yammer!",
+            replied_to_id=456,
+        )
+
+        assert to_wire(request) == {
+            "group_id": 123,
+            "body": "Hello Yammer!",
+            "replied_to_id": 456,
+        }
 
 
 class TestEdgeCases:

@@ -299,7 +299,7 @@ class AddActivityRequest:
 @dataclass
 class AddDealRequest:
     """
-    Definition: AddDealRequestV2
+    Definition: AddDealRequest
     """
 
     title: Optional[str] = None
@@ -327,7 +327,7 @@ class AddDealRequest:
 @dataclass
 class UpdateDealStageRequest:
     """
-    Definition: UpdateDealStageRequestV2
+    Definition: UpdateDealStageRequest
     """
 
     pipeline_id: Optional[str] = None

@@ -1835,6 +1835,42 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def copy_file_2_async(
+        self,
+        input: CopyFileParameters,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        Copy file
+
+        Copies a file. Works in a similar way to the \"Copy to\" command in
+        SharePoint libraries. Returns information about the new file after
+        copy.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/copyFileAsync"
+        )
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def copy_folder_async(
         self,
         input: CopyFolderParameters,

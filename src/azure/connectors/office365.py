@@ -3648,7 +3648,7 @@ class PassThroughNativeQuery:
 @dataclass
 class AutomaticRepliesSettingClient:
     """
-    Definition: AutomaticRepliesSettingClient_V2
+    Definition: AutomaticRepliesSettingClient
     """
 
     status: Optional[str] = None
@@ -3683,7 +3683,7 @@ class AutomaticRepliesSettingClient:
 @dataclass
 class MailTipsClientReceive:
     """
-    Definition: MailTipsClientReceive_V2
+    Definition: MailTipsClientReceive
     """
 
     automatic_replies: Optional[MailTipsAutomaticReplies] = field(
@@ -3725,7 +3725,7 @@ class MailTipsClientReceive:
 @dataclass
 class MailTipsAutomaticReplies:
     """
-    Definition: MailTipsAutomaticReplies_V2
+    Definition: MailTipsAutomaticReplies
     """
 
     message: Optional[str] = None
@@ -3807,7 +3807,7 @@ class LocationConstraint:
 @dataclass
 class DateTimeTimeZone:
     """
-    Definition: DateTimeTimeZone_V2
+    Definition: DateTimeTimeZone
     """
 
     date_time: Optional[str] = field(
@@ -3835,7 +3835,7 @@ class EmailAddressV2:
 @dataclass
 class PhysicalAddress:
     """
-    Definition: PhysicalAddress_V2
+    Definition: PhysicalAddress
     """
 
     street: Optional[str] = None
@@ -3859,7 +3859,7 @@ class PhysicalAddress:
 @dataclass
 class Contact:
     """
-    Definition: Contact_V2
+    Definition: Contact
     """
 
     id: Optional[str] = None

@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -23,102 +23,248 @@ from azure.connectors.sdk import (
 
 @dataclass
 class UnassignUsersInput:
-    """Remove assignees from a task"""
+    """
+    Remove assignees from a task
+    """
 
     assignments: Optional[str] = None
     """
-    Semi-colon seperated ids or email addresses of users who should be
+    Semi-colon separated ids or email addresses of users who should be
     unassigned to this task.
     """
 
 
 @dataclass
-class GetTaskResponse:
-    """Response for Remove assignees from a task"""
+class GetTaskResponseV2:
+    """
+    Response for Remove assignees from a task
+    """
 
-    created_by: Optional[Dict[str, Any]] = None
-    plan_id: Optional[str] = None
+    created_by: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "createdBy"},
+    )
+    plan_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "planId"},
+    )
     """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = None
+    bucket_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bucketId"},
+    )
     """The id of the bucket this task belongs to."""
     title: Optional[str] = None
     """The title of the task."""
-    percent_complete: Optional[int] = None
+    percent_complete: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "percentComplete"},
+    )
     """The completion percentage of the task."""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """The start datetime of the task."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """The datetime the task was created."""
-    due_date_time: Optional[str] = None
+    due_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
     """The datetime the task is due."""
-    has_description: Optional[bool] = None
+    has_description: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasDescription"},
+    )
     """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = None
+    completed_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "completedDateTime"},
+    )
     """The datetime the task was completed."""
-    reference_count: Optional[int] = None
+    reference_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "referenceCount"},
+    )
     """The number of external references that exist on the task."""
     id: Optional[str] = None
     """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = None
-    assignments: Optional[List[Dict[str, Any]]] = None
+    applied_categories: Optional[AppliedCategories] = field(
+        default=None,
+        metadata={"wire_name": "appliedCategories"},
+    )
+    assignments: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "_assignments"},
+    )
 
 
 @dataclass
 class AssignUsersInput:
-    """Add assignees to a task"""
+    """
+    Add assignees to a task
+    """
 
     assignments: Optional[str] = None
     """
-    Semi-colon seperated ids or email addresses of users who should be assigned
+    Semi-colon separated ids or email addresses of users who should be assigned
     to this task.
     """
 
 
 @dataclass
 class ListMyPlansResponse:
-    """Response for List plans for a group"""
+    """
+    Response for List plans for a group
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class GetPlanDetailsResponse:
-    """Response for Get plan details"""
+    """
+    Response for Get plan details
+    """
 
-    category_descriptions: Optional[Dict[str, Any]] = None
+    category_descriptions: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "categoryDescriptions"},
+    )
     id: Optional[str] = None
     """The ID of the plan details"""
 
 
 @dataclass
 class CreateBucketInput:
-    """Create a bucket"""
+    """
+    Create a bucket
+    """
 
     name: Optional[str] = None
     """Name of the bucket"""
-    group_id: Optional[str] = None
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "groupId"},
+    )
     """The group to retrieve the plan."""
-    plan_id: Optional[str] = None
+    plan_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "planId"},
+    )
     """The plan for the new bucket."""
 
 
 @dataclass
 class CreateBucketResponse:
-    """Response for Create a bucket"""
+    """
+    Response for Create a bucket
+    """
 
     name: Optional[str] = None
     """Name of the bucket"""
-    plan_id: Optional[str] = None
+    plan_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "planId"},
+    )
     """Plan ID to which the bucket belongs"""
-    order_hint: Optional[str] = None
+    order_hint: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "orderHint"},
+    )
     """Hint used to order items of this type in a list view"""
     id: Optional[str] = None
     """ID of the bucket"""
 
 
 @dataclass
+class GetTaskResponseV3:
+    """
+    Response for Create a task
+    """
+
+    created_by: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "createdBy"},
+    )
+    plan_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "planId"},
+    )
+    """The id of the plan this task belongs to."""
+    bucket_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bucketId"},
+    )
+    """The id of the bucket this task belongs to."""
+    title: Optional[str] = None
+    """The title of the task."""
+    percent_complete: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "percentComplete"},
+    )
+    """The completion percentage of the task."""
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
+    """The start datetime of the task."""
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
+    """The datetime the task was created."""
+    due_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
+    """The datetime the task is due."""
+    has_description: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasDescription"},
+    )
+    """Set to true if the task has a description."""
+    completed_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "completedDateTime"},
+    )
+    """The datetime the task was completed."""
+    reference_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "referenceCount"},
+    )
+    """The number of external references that exist on the task."""
+    id: Optional[str] = None
+    """The id of the task."""
+    applied_categories: Optional[AppliedCategories] = field(
+        default=None,
+        metadata={"wire_name": "appliedCategories"},
+    )
+    priority: Optional[int] = None
+    """
+    Priority of the task. Valid range of values is between 0 and 10
+    (inclusive), with increasing value being lower priority (0 has the highest
+    priority and 10 has the lowest priority). Currently, Planner interprets
+    values 0 and 1 as \"urgent\", 2 and 3 and 4 as \"important\", 5, 6, and 7
+    as \"medium\", and 8, 9, and 10 as \"low\". Currently, Planner sets the
+    value 1 for \"urgent\", 3 for \"important\", 5 for \"medium\", and 9 for
+    \"low\".
+    """
+    assignments: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "_assignments"},
+    )
+
+
+@dataclass
 class GetTaskDetailsResponse:
-    """Response for Get task details"""
+    """
+    Response for Get task details
+    """
 
     description: Optional[str] = None
     """The description of the task."""
@@ -132,23 +278,42 @@ class GetTaskDetailsResponse:
 
 @dataclass
 class ListBucketsResponse:
-    """Response for List buckets"""
+    """
+    Response for List buckets
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class ListTasksResponse:
-    """Response for List my tasks"""
+    """
+    Response for List my tasks
+    """
 
     value: Optional[List[GetTaskResponseV2]] = None
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
 
 
 @dataclass
+class ListGroupsResponse:
+    """
+    Response for List groups that I am member of
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
+    """value"""
+
+
+@dataclass
 class UpdateTaskDetailsRequest:
-    """Definition: UpdateTaskDetails_Request"""
+    """
+    Definition: UpdateTaskDetails_Request
+    """
 
     description: Optional[str] = None
     """The description of the task."""
@@ -159,157 +324,81 @@ class UpdateTaskDetailsRequest:
 
 
 @dataclass
-class ListGroupsResponse:
-    """Definition: ListGroups_Response"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-    """value"""
-
-
-@dataclass
-class GetTaskResponseV2:
-    """Definition: GetTask_Response_V2"""
-
-    created_by: Optional[Dict[str, Any]] = None
-    plan_id: Optional[str] = None
-    """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = None
-    """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
-    """The title of the task."""
-    percent_complete: Optional[int] = None
-    """The completion percentage of the task."""
-    start_date_time: Optional[str] = None
-    """The start datetime of the task."""
-    created_date_time: Optional[str] = None
-    """The datetime the task was created."""
-    due_date_time: Optional[str] = None
-    """The datetime the task is due."""
-    has_description: Optional[bool] = None
-    """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = None
-    """The datetime the task was completed."""
-    reference_count: Optional[int] = None
-    """The number of external references that exist on the task."""
-    id: Optional[str] = None
-    """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = None
-    assignments: Optional[List[Dict[str, Any]]] = None
-
-
-@dataclass
-class GetTaskResponseV3:
-    """Definition: GetTask_Response_V3"""
-
-    created_by: Optional[Dict[str, Any]] = None
-    plan_id: Optional[str] = None
-    """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = None
-    """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
-    """The title of the task."""
-    percent_complete: Optional[int] = None
-    """The completion percentage of the task."""
-    start_date_time: Optional[str] = None
-    """The start datetime of the task."""
-    created_date_time: Optional[str] = None
-    """The datetime the task was created."""
-    due_date_time: Optional[str] = None
-    """The datetime the task is due."""
-    has_description: Optional[bool] = None
-    """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = None
-    """The datetime the task was completed."""
-    reference_count: Optional[int] = None
-    """The number of external references that exist on the task."""
-    id: Optional[str] = None
-    """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = None
-    priority: Optional[int] = None
+class UpdateTaskRequest:
     """
-    Priority of the task. Valid range of values is between 0 and 10
-    (inclusive), with increasing value being lower priority (0 has the highest
-    priority and 10 has the lowest priority). Currently, Planner interprets
-    values 0 and 1 as \"urgent\", 2 and 3 and 4 as \"important\", 5, 6, and 7
-    as \"medium\", and 8, 9, and 10 as \"low\". Currently, Planner sets the
-    value 1 for \"urgent\", 3 for \"important\", 5 for \"medium\", and 9 for
-    \"low\".
+    Definition: UpdateTask_Request
     """
-    assignments: Optional[List[Dict[str, Any]]] = None
-
-
-@dataclass
-class ListTasksResponseV2:
-    """Definition: ListTasks_Response_V2"""
-
-    value: Optional[List[GetTaskResponseV2]] = None
-    next_link: Optional[str] = None
-    """Link to get next page of results"""
-
-
-@dataclass
-class UpdateTaskRequestV3:
-    """Definition: UpdateTask_Request_V3"""
 
     title: Optional[str] = None
     """The title of the plan (maximum of 255 chars)."""
-    due_date_time: Optional[str] = None
+    due_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
     """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    percent_complete: Optional[int] = None
+    percent_complete: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "percentComplete"},
+    )
     """The completion percentage of the task."""
-    bucket_id: Optional[str] = None
+    bucket_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bucketId"},
+    )
     """The bucket to place this task in."""
-    applied_categories: Optional[AppliedCategories] = None
+    applied_categories: Optional[AppliedCategories] = field(
+        default=None,
+        metadata={"wire_name": "appliedCategories"},
+    )
 
 
 @dataclass
-class CreateTaskRequestV3:
-    """Definition: CreateTask_Request_V3"""
+class CreateTaskRequest:
+    """
+    Definition: CreateTask_Request
+    """
 
-    group_id: Optional[str] = None
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "groupId"},
+    )
     """The group to retrieve the plan."""
-    plan_id: Optional[str] = None
+    plan_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "planId"},
+    )
     """The plan for the new task."""
     title: Optional[str] = None
     """The title of the new task (maximum of 255 chars)."""
-    bucket_id: Optional[str] = None
+    bucket_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bucketId"},
+    )
     """The bucket to place this task in."""
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    due_date_time: Optional[str] = None
+    due_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
     """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
     assignments: Optional[str] = None
     """
     Semi-colon separated ids or email addresses of users to assign this task
     to.
     """
-    applied_categories: Optional[AppliedCategories] = None
-
-
-@dataclass
-class CreateTaskRequestV4:
-    """Definition: CreateTask_Request_V4"""
-
-    group_id: Optional[str] = None
-    """The group to retrieve the plan."""
-    plan_id: Optional[str] = None
-    """The plan for the new task."""
-    title: Optional[str] = None
-    """The title of the new task (maximum of 255 chars)."""
-    bucket_id: Optional[str] = None
-    """The bucket to place this task in."""
-    start_date_time: Optional[str] = None
-    """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    due_date_time: Optional[str] = None
-    """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    assignments: Optional[str] = None
-    """
-    Semi-colon separated ids or email addresses of users to assign this task
-    to.
-    """
-    applied_categories: Optional[AppliedCategories] = None
+    applied_categories: Optional[AppliedCategories] = field(
+        default=None,
+        metadata={"wire_name": "appliedCategories"},
+    )
     priority: Optional[int] = None
     """
     Priority of the task. Valid range of values is between 0 and 10
@@ -324,7 +413,9 @@ class CreateTaskRequestV4:
 
 @dataclass
 class AppliedCategories:
-    """Definition: AppliedCategories"""
+    """
+    Definition: AppliedCategories
+    """
 
     category1: Optional[bool] = None
     """True if the task has the Pink category."""
@@ -379,87 +470,71 @@ class AppliedCategories:
 
 
 @dataclass
-class UpdateTaskRequest:
-    """Definition: UpdateTask_Request"""
+class GetTaskResponse:
+    """
+    Definition: GetTask_Response
+    """
 
+    created_by: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "createdBy"},
+    )
+    plan_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "planId"},
+    )
+    """The id of the plan this task belongs to."""
+    bucket_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bucketId"},
+    )
+    """The id of the bucket this task belongs to."""
     title: Optional[str] = None
-    """The title of the plan."""
-    due_date_time: Optional[str] = None
-    """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    start_date_time: Optional[str] = None
-    """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    percent_complete: Optional[str] = None
-    """The progress of the task."""
-    assignments: Optional[str] = None
-    """The id or email address of the user to assign this task to."""
-
-
-@dataclass
-class UpdateTaskRequestV2:
-    """Definition: UpdateTask_Request_V2"""
-
-    title: Optional[str] = None
-    """The title of the plan."""
-    due_date_time: Optional[str] = None
-    """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    start_date_time: Optional[str] = None
-    """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    percent_complete: Optional[str] = None
-    """The progress of the task."""
-    assignments: Optional[str] = None
-    """
-    Semi-colon seperated ids or email addresses of users who should be assigned
-    to this task.
-    """
-    unassigned_users: Optional[str] = None
-    """
-    Semi-colon seperated ids or email addresses of users who should be
-    unassigned from this task.
-    """
-
-
-@dataclass
-class CreateTaskRequest:
-    """Definition: CreateTask_Request"""
-
-    plan_id: Optional[str] = None
-    """The plan for the new task."""
-    title: Optional[str] = None
-    """The title of the new task."""
-    bucket_id: Optional[str] = None
-    """The bucket to place this task in."""
-    start_date_time: Optional[str] = None
-    """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    due_date_time: Optional[str] = None
-    """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    assignments: Optional[str] = None
-    """The id or email address of the user to assign this task to."""
-
-
-@dataclass
-class CreateTaskRequestV2:
-    """Definition: CreateTask_Request_V2"""
-
-    plan_id: Optional[str] = None
-    """The plan for the new task."""
-    title: Optional[str] = None
-    """The title of the new task."""
-    bucket_id: Optional[str] = None
-    """The bucket to place this task in."""
-    start_date_time: Optional[str] = None
-    """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    due_date_time: Optional[str] = None
-    """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    assignments: Optional[str] = None
-    """
-    Semi-colon seperated ids or email addresses of users to assign this task
-    to.
-    """
+    """The title of the task."""
+    percent_complete: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "percentComplete"},
+    )
+    """The completion percentage of the task."""
+    start_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
+    """The start datetime of the task."""
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
+    """The datetime the task was created."""
+    due_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
+    """The datetime the task is due."""
+    has_description: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasDescription"},
+    )
+    """Set to true if the task has a description."""
+    completed_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "completedDateTime"},
+    )
+    """The datetime the task was completed."""
+    reference_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "referenceCount"},
+    )
+    """The number of external references that exist on the task."""
+    id: Optional[str] = None
+    """The id of the task."""
 
 
 @dataclass
 class ErrorResponse:
-    """Definition: ErrorResponse"""
+    """
+    Definition: ErrorResponse
+    """
 
     code: Optional[str] = None
     message: Optional[str] = None
@@ -502,20 +577,25 @@ class PlannerClient(ConnectorClientBase):
     async def delete_task_async(
         self,
         id: str,
-    ):
+    ) -> None:
         """
         Delete a task
 
         Deletes an existing Planner task.
         """
-        path = f"{self._connection_runtime_url}/v1.0/planner/tasks/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/planner/tasks/{quote(str(id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -524,23 +604,25 @@ class PlannerClient(ConnectorClientBase):
         self,
         input: UnassignUsersInput,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Remove assignees from a task
 
         Remove assignees from an existing Planner task.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/planner/tasks/{str(id)}/unassignusers"
+            f"/v1.0/planner/tasks/{quote(str(id), safe='')}/unassignusers"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -554,23 +636,25 @@ class PlannerClient(ConnectorClientBase):
         self,
         input: AssignUsersInput,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add assignees to a task
 
         Add assignees to an existing Planner task.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/planner/tasks/{str(id)}/assignusers"
+            f"/v1.0/planner/tasks/{quote(str(id), safe='')}/assignusers"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -583,23 +667,25 @@ class PlannerClient(ConnectorClientBase):
     async def list_group_plans_async(
         self,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List plans for a group
 
         List plans owned by the group specified.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/planner/plans"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/planner/plans"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -612,23 +698,25 @@ class PlannerClient(ConnectorClientBase):
     async def get_plan_details_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get plan details
 
         Get plan details where the task belongs to
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/planner/plans/{str(id)}/details"
+            f"/v1.0/planner/plans/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -641,20 +729,22 @@ class PlannerClient(ConnectorClientBase):
     async def create_bucket_async(
         self,
         input: CreateBucketInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a bucket
 
         Create a bucket in Planner for the specified plan and group.
         """
-        path = f"{self._connection_runtime_url}/v2/v1.0/planner/buckets"
+        request_url = f"{self._connection_runtime_url}/v2/v1.0/planner/buckets"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -666,21 +756,23 @@ class PlannerClient(ConnectorClientBase):
 
     async def create_task_async(
         self,
-        input: CreateTaskRequestV4,
-    ):
+        input: CreateTaskRequest,
+    ) -> dict[str, Any] | None:
         """
         Create a task
 
         Create a new task in Planner.
         """
-        path = f"{self._connection_runtime_url}/v2/beta/planner/tasks"
+        request_url = f"{self._connection_runtime_url}/v2/beta/planner/tasks"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -693,20 +785,25 @@ class PlannerClient(ConnectorClientBase):
     async def get_task_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a task
 
         Get an existing Planner task.
         """
-        path = f"{self._connection_runtime_url}/v1.0/planner/tasks/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/planner/tasks/{quote(str(id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -719,23 +816,25 @@ class PlannerClient(ConnectorClientBase):
     async def get_task_details_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get task details
 
         Get the task details for an existing task.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/planner/tasks/{str(id)}/details"
+            f"/v1.0/planner/tasks/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -748,32 +847,33 @@ class PlannerClient(ConnectorClientBase):
     async def list_buckets_async(
         self,
         id: str,
-        group_id: Optional[str],
-    ):
+        group_id: str,
+    ) -> dict[str, Any] | None:
         """
         List buckets
 
         List the buckets in a plan.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/v1.0/planner/plans/{str(id)}/buckets"
+            f"/v2/v1.0/planner/plans/{quote(str(id), safe='')}/buckets"
         )
         query_params = []
-        if group_id is not None:
-            value = str(group_id)
-            if isinstance(group_id, bool):
-                value = value.lower()
-            query_params.append(f"groupId={quote(value)}")
+        value = str(group_id)
+        if isinstance(group_id, bool):
+            value = value.lower()
+        query_params.append(f"groupId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -785,20 +885,22 @@ class PlannerClient(ConnectorClientBase):
 
     async def list_my_tasks_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List my tasks
 
         List the tasks assigned to me.
         """
-        path = f"{self._connection_runtime_url}/v1.0/me/planner/tasks"
+        request_url = f"{self._connection_runtime_url}/v1.0/me/planner/tasks"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -811,136 +913,33 @@ class PlannerClient(ConnectorClientBase):
     async def list_tasks_async(
         self,
         id: str,
-        group_id: Optional[str],
-    ):
+        group_id: str,
+    ) -> dict[str, Any] | None:
         """
         List tasks
 
         List the tasks in a plan.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/v1.0/planner/plans/{str(id)}/tasks"
+            f"/v2/v1.0/planner/plans/{quote(str(id), safe='')}/tasks"
         )
         query_params = []
-        if group_id is not None:
-            value = str(group_id)
-            if isinstance(group_id, bool):
-                value = value.lower()
-            query_params.append(f"groupId={quote(value)}")
+        value = str(group_id)
+        if isinstance(group_id, bool):
+            value = value.lower()
+        query_params.append(f"groupId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_complete_task_async(
-        self,
-        id: str,
-        group_id: Optional[str],
-    ):
-        """
-        When a task is completed
-
-        This operation triggers when a task is completed.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2/v1.0/planner/oncompletetask_trigger/plans/{str(id)}/tasks"
-        )
-        query_params = []
-        if group_id is not None:
-            value = str(group_id)
-            if isinstance(group_id, bool):
-                value = value.lower()
-            query_params.append(f"groupId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_task_async(
-        self,
-        id: str,
-        group_id: Optional[str],
-    ):
-        """
-        When a new task is created
-
-        This operation triggers when a new task is created.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2/v1.0/planner/onnewtask_trigger/plans/{str(id)}/tasks"
-        )
-        query_params = []
-        if group_id is not None:
-            value = str(group_id)
-            if isinstance(group_id, bool):
-                value = value.lower()
-            query_params.append(f"groupId={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_task_assigned_to_me_async(
-        self,
-    ):
-        """
-        When a task is assigned to me
-
-        This operation triggers when a task is assigned to me.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v1.0/me/planner/ontaskassignedtome_trigger/tasks"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -952,24 +951,27 @@ class PlannerClient(ConnectorClientBase):
 
     async def update_task_async(
         self,
-        input: UpdateTaskRequestV3,
+        input: UpdateTaskRequest,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Update a task (V2)
+        Update a task
 
         Update an existing Planner task.
         """
-        path = (
-            f"{self._connection_runtime_url}/v2/v1.0/planner/tasks/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/v1.0/planner/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -983,23 +985,25 @@ class PlannerClient(ConnectorClientBase):
         self,
         input: UpdateTaskDetailsRequest,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update task details
 
         Update the task details for an existing task.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/planner/tasks/{str(id)}/details"
+            f"/v1.0/planner/tasks/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1008,3 +1012,62 @@ class PlannerClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def list_groups_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        List groups that I am member of
+
+        Get groups that the user is a direct member of.
+        """
+        request_url = f"{self._connection_runtime_url}/v1.0/me/memberOf"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnCompleteTask_V3": {
+        "operation_id": "OnCompleteTask_V3",
+        "path": "/{connectionId}/v2/v1.0/planner/oncompletetask_trigger/plans/{id}/tasks",
+        "method": "get",
+        "required_parameters": ["groupId", "id"],
+        "callback_payload_type": "ListTasksResponse",
+    },
+    "OnNewTask_V3": {
+        "operation_id": "OnNewTask_V3",
+        "path": "/{connectionId}/v2/v1.0/planner/onnewtask_trigger/plans/{id}/tasks",
+        "method": "get",
+        "required_parameters": ["groupId", "id"],
+        "callback_payload_type": "ListTasksResponse",
+    },
+    "OnTaskAssignedToMe_V2": {
+        "operation_id": "OnTaskAssignedToMe_V2",
+        "path": "/{connectionId}/v1.0/me/planner/ontaskassignedtome_trigger/tasks",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "ListTasksResponse",
+    },
+}

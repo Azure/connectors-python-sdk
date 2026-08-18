@@ -27,7 +27,10 @@ class ListConversationsResponse:
     Response for List the conversations of a group
     """
 
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
     value: Optional[List[Conversation]] = None
 
@@ -38,11 +41,17 @@ class CreateConversationResponse:
     Response for Create a new conversation in a group
     """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The @odata.context link."""
     id: Optional[str] = None
     """New Conversation ID."""
-    threads_odata_context: Optional[str] = None
+    threads_odata_context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "threads@odata.context"},
+    )
     """The threads@odata.context link."""
     threads: Optional[List[Dict[str, Any]]] = None
     """Created conversation thread."""
@@ -58,17 +67,26 @@ class Conversation:
     """The conversations's unique identifier."""
     topic: Optional[str] = None
     """The topic of the conversation."""
-    has_attachments: Optional[bool] = None
+    has_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasAttachments"},
+    )
     """
     Indicates whether any of the posts within this Conversation has at least
     one attachment.
     """
-    last_delivered_date_time: Optional[str] = None
+    last_delivered_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastDeliveredDateTime"},
+    )
     """
     The Timestamp type represents date and time information using ISO 8601
     format and is always in UTC time.
     """
-    unique_senders: Optional[List[str]] = None
+    unique_senders: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "uniqueSenders"},
+    )
     """All the users that sent a message to this Conversation."""
     preview: Optional[str] = None
     """
@@ -83,9 +101,15 @@ class ListConversationThreadsResponse:
     Response for List the conversation threads of a conversation
     """
 
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
     value: Optional[List[ConversationThread]] = None
 
@@ -96,7 +120,10 @@ class NewConversationThreadResponse:
     Response for Create a conversation thread
     """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The @odata.context link."""
     id: Optional[str] = None
     """New conversation thread ID."""
@@ -108,7 +135,10 @@ class ListGroupThreadsResponse:
     Response for List the threads of a group
     """
 
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
     value: Optional[List[ConversationThread]] = None
 
@@ -123,27 +153,45 @@ class ConversationThread:
     """The conversation thread's unique identifier."""
     topic: Optional[str] = None
     """The topic of the conversation."""
-    has_attachments: Optional[bool] = None
+    has_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasAttachments"},
+    )
     """
     Indicates whether any of the posts within this Conversation has at least
     one attachment.
     """
-    last_delivered_date_time: Optional[str] = None
+    last_delivered_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastDeliveredDateTime"},
+    )
     """
     The Timestamp type represents date and time information using ISO 8601
     format and is always in UTC time.
     """
-    unique_senders: Optional[List[str]] = None
+    unique_senders: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "uniqueSenders"},
+    )
     """All the users that sent a message to this Conversation."""
     preview: Optional[str] = None
     """
     A short summary from the body of the latest post in this Conversation.
     """
-    is_locked: Optional[bool] = None
+    is_locked: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isLocked"},
+    )
     """Indicates if the thread is locked."""
-    to_recipients: Optional[List[EmailAddress]] = None
+    to_recipients: Optional[List[EmailAddress]] = field(
+        default=None,
+        metadata={"wire_name": "toRecipients"},
+    )
     """The To: recipients for the thread."""
-    cc_recipients: Optional[List[EmailAddress]] = None
+    cc_recipients: Optional[List[EmailAddress]] = field(
+        default=None,
+        metadata={"wire_name": "ccRecipients"},
+    )
     """The Cc: recipients for the thread."""
     posts: Optional[List[Post]] = None
 
@@ -154,9 +202,15 @@ class ListThreadPostsResponse:
     Response for List the posts of a conversation thread
     """
 
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The @odata.context link."""
     value: Optional[List[Post]] = None
     """Array containing the posts in the specified thread."""
@@ -170,27 +224,54 @@ class Post:
 
     id: Optional[str] = None
     """The post's unique identifier."""
-    created_date_time: Optional[str] = None
-    last_modified_date_time: Optional[str] = None
-    change_key: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
+    change_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeKey"},
+    )
     """Identifies the version of the post."""
-    conversation_id: Optional[str] = None
+    conversation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "conversationId"},
+    )
     """Unique ID of the conversation the post belongs to."""
-    conversation_thread_id: Optional[str] = None
+    conversation_thread_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "conversationThreadId"},
+    )
     """Unique ID of the conversation thread the post belongs to."""
     categories: Optional[List[str]] = None
     """The categories associated with the post."""
-    received_date_time: Optional[str] = None
+    received_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "receivedDateTime"},
+    )
     """Post received timestamp."""
-    has_attachments: Optional[bool] = None
+    has_attachments: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "hasAttachments"},
+    )
     """Indicates whether the post has at least one attachment."""
-    new_participants: Optional[List[EmailAddress]] = None
+    new_participants: Optional[List[EmailAddress]] = field(
+        default=None,
+        metadata={"wire_name": "newParticipants"},
+    )
     """
     Conversation participants that were added to the thread as part of this
     post.
     """
     body: Optional[ItemBody] = None
-    from_: Optional[EmailAddress] = None
+    from_: Optional[EmailAddress] = field(
+        default=None,
+        metadata={"wire_name": "from"},
+    )
     sender: Optional[EmailAddress] = None
     attachments: Optional[List[Attachment]] = None
 
@@ -201,9 +282,15 @@ class GetAttachmentsResponse:
     Response for List the attachments of a post
     """
 
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The @odata.context link."""
     value: Optional[List[Attachment]] = None
     """Array containing the attachments of the post."""
@@ -217,19 +304,6 @@ class OnNewEmailInGroupResponse:
 
     value: Optional[List[ConversationTriggerResponse]] = None
     """Response of the trigger."""
-
-
-@dataclass
-class HttpRequestInput:
-    """
-    Send an HTTP request
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
 
 @dataclass
@@ -265,11 +339,17 @@ class Attachment:
     """Id of the attachment."""
     name: Optional[str] = None
     """Name of attachment."""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Content type of attachment."""
     size: Optional[int] = None
     """Size of attachment."""
-    content_bytes: Optional[str] = None
+    content_bytes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentBytes"},
+    )
     """Content of attachment."""
 
 
@@ -279,7 +359,10 @@ class EmailAddress:
     Definition: EmailAddress
     """
 
-    email_address: Optional[Dict[str, Any]] = None
+    email_address: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "emailAddress"},
+    )
     """
     Represents information about a user in the sending or receiving end of an
     event, message or group post.
@@ -292,7 +375,10 @@ class ItemBody:
     Definition: ItemBody
     """
 
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Content type of the body."""
     content: Optional[str] = None
     """Content of the body."""
@@ -310,24 +396,18 @@ class ReplyConversationThreadBody:
 @dataclass
 class ForwardPostBody:
     """
-    Definition: ForwardPostBody
-    """
-
-    comment: Optional[str] = None
-    """Comment to forward with the post."""
-    to_recipients: Optional[List[GetUsersGraphAction]] = None
-    """The recipients to whom the threaded is forwarded to."""
-
-
-@dataclass
-class ForwardPostV2Body:
-    """
     Definition: ForwardPost_V2Body
     """
 
-    comment: Optional[str] = None
+    comment: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Comment"},
+    )
     """Comment to forward with the post."""
-    to_recipients: Optional[List[GetUsersGraphAction]] = None
+    to_recipients: Optional[List[GetUsersGraphAction]] = field(
+        default=None,
+        metadata={"wire_name": "ToRecipients"},
+    )
     """The recipients to whom the threaded is forwarded to."""
 
 
@@ -352,7 +432,10 @@ class NewPostBody:
     """Body of the new post."""
     categories: Optional[List[str]] = None
     """The categories associated with the post."""
-    new_participants: Optional[List[GetUsersGraphAction]] = None
+    new_participants: Optional[List[GetUsersGraphAction]] = field(
+        default=None,
+        metadata={"wire_name": "newParticipants"},
+    )
     """Add participants to the thread as part of this post."""
     attachments: Optional[List[ClientSendAttachment]] = None
     """File attachments to include."""
@@ -364,7 +447,10 @@ class GetUsersGraphAction:
     Definition: GetUsers__GraphAction
     """
 
-    email_address: Optional[Dict[str, Any]] = None
+    email_address: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "EmailAddress"},
+    )
     """User email address."""
 
 
@@ -374,11 +460,17 @@ class ClientSendAttachment:
     Definition: ClientSendAttachment
     """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.type"},
+    )
     """@odata.type for a file attachment."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Name of the attachment."""
-    content_bytes: Optional[str] = None
+    content_bytes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentBytes"},
+    )
     """Content of the attachment."""
 
 
@@ -390,7 +482,10 @@ class ConversationTriggerResponse:
 
     id: Optional[str] = None
     """The conversation unique identifier."""
-    last_delivered_date_time: Optional[str] = None
+    last_delivered_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastDeliveredDateTime"},
+    )
     """
     The Timestamp type represents date and time information using ISO 8601
     format and is always in UTC time.
@@ -417,8 +512,14 @@ class PostTriggerResponse:
 
     id: Optional[str] = None
     """The post's unique identifier."""
-    last_modified_date_time: Optional[str] = None
-    change_key: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
+    change_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeKey"},
+    )
     """Identifies the version of the post."""
 
 
@@ -459,7 +560,7 @@ class Office365groupsmailClient(ConnectorClientBase):
     async def list_conversations_async(
         self,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the conversations of a group
 
@@ -467,7 +568,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/conversations"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/conversations"
         )
 
         response = await self.http_client.send_async(
@@ -491,7 +592,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         self,
         input: CreateConversationBody,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a new conversation in a group
 
@@ -499,7 +600,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/conversations"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/conversations"
         )
 
         response = await self.http_client.send_async(
@@ -523,7 +624,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         self,
         group_id: str,
         conversation_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a group conversation
 
@@ -533,9 +634,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/conversations"
-            f"/{str(conversation_id)}"
+            f"/{quote(str(conversation_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -559,7 +660,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         self,
         group_id: str,
         conversation_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the conversation threads of a conversation
 
@@ -569,9 +670,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/conversations"
-            f"/{str(conversation_id)}"
+            f"/{quote(str(conversation_id), safe='')}"
             f"/threads"
         )
 
@@ -597,7 +698,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         input: CreateConversationBody,
         group_id: str,
         conversation_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a conversation thread
 
@@ -607,9 +708,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/conversations"
-            f"/{str(conversation_id)}"
+            f"/{quote(str(conversation_id), safe='')}"
             f"/threads"
         )
 
@@ -633,7 +734,7 @@ class Office365groupsmailClient(ConnectorClientBase):
     async def list_group_threads_async(
         self,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the threads of a group
 
@@ -641,7 +742,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/threads"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/threads"
         )
 
         response = await self.http_client.send_async(
@@ -665,7 +766,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         self,
         input: CreateConversationBody,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Start a new group conversation by creating a thread
 
@@ -673,7 +774,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/threads"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/threads"
         )
 
         response = await self.http_client.send_async(
@@ -697,7 +798,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         self,
         group_id: str,
         thread_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a conversation thread
 
@@ -705,7 +806,11 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/threads"
+            f"/{quote(str(thread_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -729,7 +834,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         self,
         group_id: str,
         thread_id: str,
-    ):
+    ) -> None:
         """
         Delete a conversation thread
 
@@ -737,7 +842,11 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/threads"
+            f"/{quote(str(thread_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -756,7 +865,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         self,
         group_id: str,
         thread_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the posts of a conversation thread
 
@@ -764,7 +873,12 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}/posts"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/threads"
+            f"/{quote(str(thread_id), safe='')}"
+            f"/posts"
         )
 
         response = await self.http_client.send_async(
@@ -789,7 +903,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         group_id: str,
         thread_id: str,
         post_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a thread post
 
@@ -799,11 +913,11 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/threads"
-            f"/{str(thread_id)}"
+            f"/{quote(str(thread_id), safe='')}"
             f"/posts"
-            f"/{str(post_id)}"
+            f"/{quote(str(post_id), safe='')}"
         )
         query_params = []
         query_params.append("$expand=" + quote("attachments"))
@@ -832,7 +946,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         group_id: str,
         thread_id: str,
         post_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the attachments of a post
 
@@ -842,52 +956,13 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/threads"
-            f"/{str(thread_id)}"
+            f"/{quote(str(thread_id), safe='')}"
             f"/posts"
-            f"/{str(post_id)}"
+            f"/{quote(str(post_id), safe='')}"
             f"/attachments"
         )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_email_in_group_async(
-        self,
-        group_id: str,
-    ):
-        """
-        When a new email arrives to a group
-
-        When a new email arrives to a group.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger/v1.0/groups/{str(group_id)}/conversations"
-        )
-        query_params = []
-        query_params.append("$select=" + quote("id,lastDeliveredDateTime"))
-        query_params.append(
-            "$expand=" + quote("threads($select=id;$expand=posts($select=id,createdDateTime))")
-        )
-        query_params.append("$orderby=" + quote("lastDeliveredDateTime desc"))
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
             "GET", request_url, body=None
@@ -911,7 +986,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         input: ReplyConversationThreadBody,
         group_id: str,
         thread_id: str,
-    ):
+    ) -> None:
         """
         Reply to a conversation thread
 
@@ -919,7 +994,12 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/threads/{str(thread_id)}/reply"
+            f"/v1.0"
+            f"/groups"
+            f"/{quote(str(group_id), safe='')}"
+            f"/threads"
+            f"/{quote(str(thread_id), safe='')}"
+            f"/reply"
         )
 
         response = await self.http_client.send_async(
@@ -940,7 +1020,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         group_id: str,
         thread_id: str,
         post_id: str,
-    ):
+    ) -> None:
         """
         Reply to a post
 
@@ -951,11 +1031,11 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/groups"
-            f"/{str(group_id)}"
+            f"/{quote(str(group_id), safe='')}"
             f"/threads"
-            f"/{str(thread_id)}"
+            f"/{quote(str(thread_id), safe='')}"
             f"/posts"
-            f"/{str(post_id)}"
+            f"/{quote(str(post_id), safe='')}"
             f"/reply"
         )
 
@@ -973,8 +1053,8 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def http_request_async(
         self,
-        input: HttpRequestInput,
-    ):
+        input: bytes,
+    ) -> dict[str, Any] | None:
         """
         Send an HTTP request
 
@@ -984,7 +1064,10 @@ class Office365groupsmailClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/httprequest"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -1002,12 +1085,12 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def forward_async(
         self,
-        input: ForwardPostV2Body,
+        input: ForwardPostBody,
         group_mail: str,
         conversation_id: str,
         thread_id: str,
         post_id: str,
-    ):
+    ) -> None:
         """
         Forward a post
 
@@ -1017,13 +1100,13 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/beta"
             f"/groups"
-            f"/{str(group_mail)}"
+            f"/{quote(str(group_mail), safe='')}"
             f"/conversations"
-            f"/{str(conversation_id)}"
+            f"/{quote(str(conversation_id), safe='')}"
             f"/threads"
-            f"/{str(thread_id)}"
+            f"/{quote(str(thread_id), safe='')}"
             f"/posts"
-            f"/{str(post_id)}"
+            f"/{quote(str(post_id), safe='')}"
             f"/forward"
         )
 
@@ -1041,7 +1124,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def list_groups_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List user groups
 
@@ -1074,3 +1157,21 @@ class Office365groupsmailClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewEmailInGroup": {
+        "operation_id": "OnNewEmailInGroup",
+        "path": "/{connectionId}/trigger/v1.0/groups/{groupId}/conversations",
+        "method": "get",
+        "required_parameters": ["groupId"],
+        "callback_payload_type": "OnNewEmailInGroupResponse",
+    },
+}

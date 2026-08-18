@@ -27,8 +27,8 @@ from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.smtp import (
     SmtpClient,
-    EmailV3,
-    AttachmentV2,
+    Email,
+    Attachment,
 )
 
 # Connection runtime URL format:
@@ -56,7 +56,7 @@ async def example_1_send_basic_email():
 
     async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            email = EmailV3(
+            email = Email(
                 from_=sender,
                 to=recipient,
                 subject="Test Email from Azure Connectors SDK",
@@ -97,7 +97,7 @@ async def example_2_send_email_with_cc_bcc():
 
     async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            email = EmailV3(
+            email = Email(
                 from_=sender,
                 to=recipient,
                 c_c=cc_recipient if cc_recipient else None,
@@ -162,7 +162,7 @@ async def example_3_send_html_email():
             </html>
             """
 
-            email = EmailV3(
+            email = Email(
                 from_=sender,
                 to=recipient,
                 subject="HTML Email from Azure Connectors SDK",
@@ -203,13 +203,13 @@ async def example_4_send_email_with_attachment():
             file_content = "This is a sample attachment created by Azure Connectors SDK."
             encoded_content = base64.b64encode(file_content.encode()).decode()
 
-            attachment = AttachmentV2(
+            attachment = Attachment(
                 file_name="sample.txt",
                 content_data=encoded_content,
                 content_type="text/plain",
             )
 
-            email = EmailV3(
+            email = Email(
                 from_=sender,
                 to=recipient,
                 subject="Email with Attachment",
@@ -247,7 +247,7 @@ async def example_5_send_email_with_options():
 
     async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            email = EmailV3(
+            email = Email(
                 from_=sender,
                 to=recipient,
                 subject="High Importance Email",

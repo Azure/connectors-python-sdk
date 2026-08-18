@@ -14,6 +14,7 @@ from azure.connectors.sharepointonline import (
     ItemPermissionCreateLinkBody,
     ItemGrantAccessBody,
     MoveFileParameters,
+    CopyFileParameters,
     CopyFolderParameters,
     MoveFolderParameters,
     PatchFileItemInput,
@@ -24,6 +25,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockTokenProvider, MockResponse
 
 
@@ -946,6 +948,78 @@ class TestCopyMoveOperations:
             assert "source=" in call_args[0][1]
             assert "destination=" in call_args[0][1]
             assert result["Name"] == "document_copy.docx"
+
+    @pytest.mark.asyncio
+    async def test_copy_file_async_route_is_preserved(self, mock_token_provider):
+        """Test the current copy-file route uses its typed request body."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+        input_data = CopyFileParameters(source_file_id="file123")
+        mock_response = MockResponse(status=200, text='{"Name": "copy.docx"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.copy_file_2_async(
+                input=input_data,
+                dataset="https://contoso.sharepoint.com/sites/site1"
+            )
+
+            assert mock_send.call_args[0][0] == "POST"
+            assert "/copyFileAsync" in mock_send.call_args[0][1]
+            assert mock_send.call_args.kwargs["body"] is input_data
+            assert result["Name"] == "copy.docx"
+
+    def test_copy_file_async_body_uses_swagger_wire_names(self):
+        """Test the current copy-file request preserves Swagger keys."""
+        input_data = CopyFileParameters(
+            source_file_id="file123",
+            destination_dataset="https://contoso.sharepoint.com/sites/site2",
+            destination_folder_path="/Shared Documents/Backup",
+            name_conflict_behavior=1,
+        )
+
+        assert to_wire(input_data) == {
+            "sourceFileId": "file123",
+            "destinationDataset": "https://contoso.sharepoint.com/sites/site2",
+            "destinationFolderPath": "/Shared Documents/Backup",
+            "nameConflictBehavior": 1,
+        }
+
+    @pytest.mark.asyncio
+    async def test_copy_file_async_error_raises_exception(
+        self,
+        mock_token_provider,
+    ):
+        """Test the current copy-file route raises on a non-success response."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+        input_data = CopyFileParameters(source_file_id="file123")
+        mock_response = MockResponse(
+            status=409,
+            text='{"error": "Destination already exists"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.copy_file_2_async(
+                    input=input_data,
+                    dataset="https://contoso.sharepoint.com/sites/site1"
+                )
+
+            assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
     async def test_move_file(self, mock_token_provider):
