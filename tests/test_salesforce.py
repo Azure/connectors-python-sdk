@@ -462,3 +462,95 @@ class TestCloseJobAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.close_job_async(input=payload, job_id="missing-job")
+
+
+class TestSalesforceDiscoveryOperations:
+    """Tests for Salesforce external ID and table metadata operations."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("method_name", "path_suffix"),
+        [
+            (
+                "get_external_id_fields_async",
+                "/datasets/default/tables/account/externalIdFields",
+            ),
+            (
+                "get_metadata_for_get_item_async",
+                "/$metadata.json/datasets/default/tables/account/getitem",
+            ),
+            (
+                "get_metadata_for_patch_item_async",
+                "/$metadata.json/datasets/default/tables/account/patchitem",
+            ),
+            (
+                "get_metadata_for_post_item_async",
+                "/$metadata.json/datasets/default/tables/account/postitem",
+            ),
+            (
+                "get_table_async",
+                "/$metadata.json/datasets/default/tables/account",
+            ),
+        ],
+    )
+    async def test_success_uses_expected_path(
+        self,
+        mock_token_provider,
+        method_name,
+        path_suffix,
+    ):
+        """Test each discovery operation uses its generated GET route."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=200, text='{"name": "account"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await getattr(client, method_name)(table="account")
+
+            mock_send.assert_called_once_with(
+                "GET",
+                f"https://example.azure.com/connections/test{path_suffix}",
+                body=None,
+            )
+            assert result == {"name": "account"}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "method_name",
+        [
+            "get_external_id_fields_async",
+            "get_metadata_for_get_item_async",
+            "get_metadata_for_patch_item_async",
+            "get_metadata_for_post_item_async",
+            "get_table_async",
+        ],
+    )
+    async def test_error_response_raises_exception(
+        self,
+        mock_token_provider,
+        method_name,
+    ):
+        """Test each discovery operation raises for a non-success response."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await getattr(client, method_name)(table="account")
+
+            assert exc_info.value.status_code == 404
