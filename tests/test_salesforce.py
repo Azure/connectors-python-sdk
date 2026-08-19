@@ -6,7 +6,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from azure.connectors.salesforce import CloseJobRequest, SalesforceClient
+from azure.connectors.salesforce import (
+    CloseJobRequest,
+    SalesforceClient,
+    TRIGGER_OPERATIONS,
+)
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ManagedIdentityTokenProvider,
@@ -369,6 +373,56 @@ class TestUploadJobDataAsync:
                 await client.upload_job_data_async(input=payload, job_id="job-1")
 
 
+class TestHttpRequestAsync:
+    """Tests for http_request_async raw request bodies."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_raw_body(self, mock_token_provider):
+        """Test generic HTTP requests send raw bytes and parse the response."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = b'{"method":"GET","url":"/services/data"}'
+        mock_response = MockResponse(status=200, text='{"status": 200}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.http_request_async(input=payload)
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/codeless/httprequest",
+                body=payload,
+                content_type="application/octet-stream",
+            )
+            assert result == {"status": 200}
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test generic HTTP request errors raise ConnectorException."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.http_request_async(input=b"invalid request")
+
+            assert exc_info.value.status_code == 400
+
+
 class TestExecuteSoslQueryAsync:
     """Tests for execute_sosl_query_async method."""
 
@@ -554,3 +608,32 @@ class TestSalesforceDiscoveryOperations:
                 await getattr(client, method_name)(table="account")
 
             assert exc_info.value.status_code == 404
+
+
+class TestSalesforceTriggerOperations:
+    """Tests for Salesforce trigger registration metadata."""
+
+    def test_triggers_are_registered_without_callable_methods(self):
+        """Test polling triggers are exposed only as registration metadata."""
+        assert TRIGGER_OPERATIONS == {
+            "GetOnNewItems": {
+                "operation_id": "GetOnNewItems",
+                "path": (
+                    "/{connectionId}/datasets/default/tables/{table}/onnewitems"
+                ),
+                "method": "get",
+                "required_parameters": ["table"],
+                "callback_payload_type": "ItemsList",
+            },
+            "GetOnUpdatedItems": {
+                "operation_id": "GetOnUpdatedItems",
+                "path": (
+                    "/{connectionId}/datasets/default/tables/{table}/onupdateditems"
+                ),
+                "method": "get",
+                "required_parameters": ["table"],
+                "callback_payload_type": "ItemsList",
+            },
+        }
+        assert not hasattr(SalesforceClient, "get_on_new_items_async")
+        assert not hasattr(SalesforceClient, "get_on_updated_items_async")

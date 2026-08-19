@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Corrected eight malformed PDF.co method names, including `p_d_f_search_text_async`, `p_d_f_from_x_l_s_x_l_s_x_async`, and the `x_l_sto_*` family.
+- Corrected eight malformed PDF.co method names: `p_d_f_search_text_async` to `pdf_search_text_async`, `p_d_f_from_x_l_s_x_l_s_x_async` to `pdf_from_xls_xlsx_async`, `p_d_f_un_searchable_async` to `pdf_unsearchable_async`, `x_l_sto_c_s_v_async` to `xls_to_csv_async`, `x_l_sto_h_t_m_l_async` to `xls_to_html_async`, `x_l_sto_j_s_o_n_async` to `xls_to_json_async`, `x_l_sto_t_x_t_async` to `xls_to_txt_async`, and `x_l_sto_x_m_l_async` to `xls_to_xml_async`.
 - Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
 - Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
 
