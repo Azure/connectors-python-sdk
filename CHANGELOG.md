@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Corrected `craete_task_async` to `create_task_async` in Google Tasks and eight malformed PDF.co method names, including `pdf_serarch_text_async`, `pdf_from_xlsxlsx_async`, and the `xl_sto_*` family.
+- Corrected eight malformed PDF.co method names, including `p_d_f_search_text_async`, `p_d_f_from_x_l_s_x_l_s_x_async`, and the `x_l_sto_*` family.
 - Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
 - Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
 
