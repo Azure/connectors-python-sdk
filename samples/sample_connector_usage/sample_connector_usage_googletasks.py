@@ -74,7 +74,7 @@ async def example_2_create_task_list_and_task():
                 print("Task list creation returned no id.")
                 return
 
-            task_result = await client.craete_task_async(
+            task_result = await client.create_task_async(
                 input=TaskCreate(
                     title="Follow up sample",
                     notes="Created by azure-connectors sample.",

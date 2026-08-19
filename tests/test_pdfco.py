@@ -295,12 +295,12 @@ OPERATION_ARGS = {
     "pdf_from_doc": {"input": {}},
     "pdf_from_email": {"input": {}},
     "pdf_from_images": {"input": {}},
-    "pdf_from_xlsxlsx": {"input": {}},
+    "pdf_from_xls_xlsx": {"input": {}},
     "pdf_info_reader": {"input": {}},
     "pdf_rotate_pages": {"input": {}},
     "pdf_searchable": {"input": {}},
     "pdf_security_remove": {"input": {}},
-    "pdf_serarch_text": {"input": {}},
+    "pdf_search_text": {"input": {}},
     "pdf_to_csv": {"input": {}},
     "pdf_to_jpg": {"input": {}},
     "pdf_to_json": {"input": {}},
@@ -313,7 +313,7 @@ OPERATION_ARGS = {
     "pdf_to_xls": {"input": {}},
     "pdf_to_xlsx": {"input": {}},
     "pdf_to_xml": {"input": {}},
-    "pdf_un_searchable": {"input": {}},
+    "pdf_unsearchable": {"input": {}},
     "pdf_filler": {"input": {}},
     "search_and_delete_text": {"input": {}},
     "search_and_replace": {"input": {}},
@@ -321,11 +321,11 @@ OPERATION_ARGS = {
     "split_pdf2": {"input": {}},
     "split_pdf": {"input": {}},
     "url_to_pdf": {"input": {}},
-    "xl_sto_csv": {"input": {}},
-    "xl_sto_html": {"input": {}},
-    "xl_sto_json": {"input": {}},
-    "xl_sto_txt": {"input": {}},
-    "xl_sto_xml": {"input": {}},
+    "xls_to_csv": {"input": {}},
+    "xls_to_html": {"input": {}},
+    "xls_to_json": {"input": {}},
+    "xls_to_txt": {"input": {}},
+    "xls_to_xml": {"input": {}},
 }
 
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
@@ -339,6 +339,22 @@ async def _invoke_operation(client: PdfcoClient, operation: str):
 
 class TestPdfcoClientAllOperations:
     """Success path smoke tests covering every generated operation."""
+
+    def test_malformed_operation_names_are_not_generated(self):
+        """Test known malformed Swagger operation names are not public methods."""
+        malformed_method_names = [
+            "pdf_from_xlsxlsx_async",
+            "pdf_serarch_text_async",
+            "pdf_un_searchable_async",
+            "xl_sto_csv_async",
+            "xl_sto_html_async",
+            "xl_sto_json_async",
+            "xl_sto_txt_async",
+            "xl_sto_xml_async",
+        ]
+
+        for method_name in malformed_method_names:
+            assert not hasattr(PdfcoClient, method_name)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)

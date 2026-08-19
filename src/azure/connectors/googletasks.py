@@ -235,7 +235,7 @@ class GoogletasksClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def craete_task_async(
+    async def create_task_async(
         self,
         input: TaskCreate,
         task_list_id: str,

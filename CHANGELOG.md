@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- Generated Python operation names now preserve the exact Swagger `operationId` spelling while grouping acronym runs in snake_case. This renames methods in DocuSign, GitHub, Google Tasks, PDF.co, Salesforce, SigningHub, Slack, Word Online (Business), and Zoho Sign.
+- Generated Python operation names now preserve Swagger `operationId` spelling by default while grouping acronym runs in snake_case. Connector-scoped corrections fix malformed Google Tasks and PDF.co operation names. This renames methods in DocuSign, GitHub, Google Tasks, PDF.co, Salesforce, SigningHub, Slack, Word Online (Business), and Zoho Sign.
 - Regenerated Google Tasks and Slack trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Slack also no longer exposes the deprecated `create_group_async` operation.
 - Regenerated Salesforce trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Salesforce bulk upload and generic HTTP request operations now accept raw `bytes` bodies instead of generated request models.
 - Regenerated Office 365 Groups Mail, Planner, SMTP, and Yammer now expose current request and response model names instead of deprecated version-family sibling names. Their polling triggers are available through `TRIGGER_OPERATIONS`, not callable client methods.
@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Corrected `craete_task_async` to `create_task_async` in Google Tasks and eight malformed PDF.co method names, including `pdf_serarch_text_async`, `pdf_from_xlsxlsx_async`, and the `xl_sto_*` family.
 - Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
 - Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
 

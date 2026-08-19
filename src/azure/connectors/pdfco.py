@@ -5005,7 +5005,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_serarch_text_async(
+    async def pdf_search_text_async(
         self,
         input: PDFSearchTextInput,
     ) -> dict[str, Any] | None:
@@ -5389,7 +5389,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_un_searchable_async(
+    async def pdf_unsearchable_async(
         self,
         input: PDFUnSearchableInput,
     ) -> dict[str, Any] | None:
@@ -5989,7 +5989,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_from_xlsxlsx_async(
+    async def pdf_from_xls_xlsx_async(
         self,
         input: PDFFromXLSXLSXInput,
     ) -> dict[str, Any] | None:
@@ -6019,7 +6019,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xl_sto_csv_async(
+    async def xls_to_csv_async(
         self,
         input: XLStoCSVInput,
     ) -> dict[str, Any] | None:
@@ -6050,7 +6050,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xl_sto_json_async(
+    async def xls_to_json_async(
         self,
         input: XLStoJSONInput,
     ) -> dict[str, Any] | None:
@@ -6080,7 +6080,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xl_sto_html_async(
+    async def xls_to_html_async(
         self,
         input: XLStoHTMLInput,
     ) -> dict[str, Any] | None:
@@ -6110,7 +6110,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xl_sto_txt_async(
+    async def xls_to_txt_async(
         self,
         input: XLStoTXTInput,
     ) -> dict[str, Any] | None:
@@ -6140,7 +6140,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xl_sto_xml_async(
+    async def xls_to_xml_async(
         self,
         input: XLStoXMLInput,
     ) -> dict[str, Any] | None:
