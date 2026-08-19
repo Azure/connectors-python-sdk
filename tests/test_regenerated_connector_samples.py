@@ -17,7 +17,20 @@ SAMPLE_DIRECTORY = (
 
 @pytest.mark.parametrize(
     "connector_name",
-    ["googletasks", "planner", "smtp", "wordonlinebusiness", "yammer"],
+    [
+        "docusign",
+        "github",
+        "googletasks",
+        "pdfco",
+        "planner",
+        "salesforce",
+        "signinghub",
+        "slack",
+        "smtp",
+        "wordonlinebusiness",
+        "yammer",
+        "zohosign",
+    ],
 )
 def test_regenerated_connector_sample_imports(connector_name: str) -> None:
     """Test regenerated connector samples import their current public models."""

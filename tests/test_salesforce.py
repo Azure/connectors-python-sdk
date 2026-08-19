@@ -2,9 +2,11 @@
 
 """Unit tests for SalesforceClient."""
 
-import pytest
 from unittest.mock import AsyncMock, patch
-from azure.connectors.salesforce import SalesforceClient, UploadJobDataInput, CloseJobRequest
+
+import pytest
+
+from azure.connectors.salesforce import CloseJobRequest, SalesforceClient
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ManagedIdentityTokenProvider,
@@ -326,7 +328,7 @@ class TestUploadJobDataAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = UploadJobDataInput()
+        payload = b"Name\r\nContoso\r\n"
         mock_response = MockResponse(status=201, text="")
 
         with patch.object(
@@ -343,6 +345,9 @@ class TestUploadJobDataAsync:
             assert method == "PUT"
             assert "/codeless/jobs/ingest/job-1/batches" in path
             assert body is payload
+            assert mock_send.call_args.kwargs["content_type"] == (
+                "application/octet-stream"
+            )
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -351,7 +356,7 @@ class TestUploadJobDataAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = UploadJobDataInput()
+        payload = b"Name\r\nContoso\r\n"
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
         with patch.object(
@@ -362,6 +367,52 @@ class TestUploadJobDataAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.upload_job_data_async(input=payload, job_id="job-1")
+
+
+class TestExecuteSoslQueryAsync:
+    """Tests for execute_sosl_query_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_uses_acronym_aware_name(self, mock_token_provider):
+        """Test executing SOSL through its acronym-aware method name."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=200, text='{"searchRecords": []}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.execute_sosl_query_async(q="FIND {Contoso}")
+
+            assert mock_send.call_args.args[0] == "GET"
+            assert "/codeless/search?q=FIND%20%7BContoso%7D" in (
+                mock_send.call_args.args[1]
+            )
+            assert result == {"searchRecords": []}
+            assert not hasattr(SalesforceClient, "execute_s_o_s_l_query_async")
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test SOSL errors raise ConnectorException."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=400, text='{"error": "Bad query"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.execute_sosl_query_async(q="FIND")
 
 
 class TestCloseJobAsync:
