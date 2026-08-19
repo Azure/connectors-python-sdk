@@ -44,3 +44,12 @@ samples/generated/*.cs
 **/*.egg-info/
 **/build
 **/.idea
+
+# Local Copilot customizations
+.github/agents/connector-onboarding.agent.md
+.github/agents/connectors-python-sdk-pr-review.agent.md
+.github/skills/connector-generation/SKILL.md
+.github/skills/connector-parity/SKILL.md
+.github/skills/davids-dobby-pr-review/SKILL.md
+.github/skills/manvirs-dobby-pr-review/SKILL.md
+.github/skills/pre-pr-checklist/SKILL.md
