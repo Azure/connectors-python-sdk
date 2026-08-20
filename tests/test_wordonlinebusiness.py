@@ -331,7 +331,7 @@ class TestCreateWordFileWithContent:
 
 
 class TestGetFilePDF:
-    """Tests for get_file_p_d_f_async method."""
+    """Tests for get_file_pdf_async method."""
 
     @pytest.mark.asyncio
     async def test_convert_to_pdf_success(self, mock_token_provider):
@@ -351,7 +351,7 @@ class TestGetFilePDF:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_file_p_d_f_async(
+            result = await client.get_file_pdf_async(
                 source="me",
                 drive="drive-1",
                 file="file-1"
@@ -379,7 +379,7 @@ class TestGetFilePDF:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_file_p_d_f_async(
+            await client.get_file_pdf_async(
                 source="me",
                 drive="drive-1",
                 file="file-1",
@@ -406,7 +406,7 @@ class TestGetFilePDF:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_file_p_d_f_async(
+            result = await client.get_file_pdf_async(
                 source="me",
                 drive="drive-1",
                 file="file-1"
@@ -430,7 +430,7 @@ class TestGetFilePDF:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_p_d_f_async(
+                await client.get_file_pdf_async(
                     source="me",
                     drive="drive-1",
                     file="file-1"

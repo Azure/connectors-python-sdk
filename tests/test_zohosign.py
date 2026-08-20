@@ -75,7 +75,7 @@ class TestZohosignOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.invoke_a_p_i_async(input=payload, url="requests", method="POST")
+            await client.invoke_api_async(input=payload, url="requests", method="POST")
 
             assert mock_send.call_args.kwargs["body"] is payload
             assert "method=POST" in mock_send.call_args.args[1]

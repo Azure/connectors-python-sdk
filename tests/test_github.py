@@ -10,6 +10,7 @@ from azure.connectors.github import (
     GithubClient,
     IssueBasicDetailsModel,
     PullRequestUpdateRequest,
+    QueryRequest,
     RequestReviewersBody,
 )
 from azure.connectors.sdk import (
@@ -105,6 +106,53 @@ class TestGithubClientLifecycle:
                 assert isinstance(client, GithubClient)
 
             mock_close.assert_called_once()
+
+
+class TestInvokeMcpServerAsync:
+    """Tests for invoke_mcp_server_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_uses_acronym_aware_name(self, mock_token_provider):
+        """Test invoking the MCP server through its acronym-aware method name."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = QueryRequest(jsonrpc="2.0", id="request-1", method="tools/list")
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.invoke_mcp_server_async(input=payload)
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/mcp",
+                body=payload,
+            )
+            assert not hasattr(GithubClient, "invoke_m_c_p_server_async")
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test MCP server errors raise ConnectorException."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.invoke_mcp_server_async(input=QueryRequest())
 
 
 class TestGetUserAsync:

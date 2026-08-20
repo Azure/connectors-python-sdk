@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Generated Python operation names now preserve Swagger `operationId` spelling by default while grouping acronym runs in snake_case. Connector-scoped corrections fix malformed Google Tasks and PDF.co operation names. This renames methods in DocuSign, GitHub, Google Tasks, PDF.co, Salesforce, SigningHub, Slack, Word Online (Business), and Zoho Sign.
+- Regenerated Google Tasks and Slack trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Slack also no longer exposes the deprecated `create_group_async` operation.
+- Regenerated Salesforce trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Salesforce bulk upload and generic HTTP request operations now accept raw `bytes` bodies instead of generated request models.
 - Regenerated Office 365 Groups Mail, Planner, SMTP, and Yammer now expose current request and response model names instead of deprecated version-family sibling names. Their polling triggers are available through `TRIGGER_OPERATIONS`, not callable client methods.
 - `UploadDocument.document_id` now represents the natural `document_id` wire field. Callers that used it for `documentId` must use `document_id_2` instead.
 - Regenerated Azure Queues, DocuSign, Event Hubs, Microsoft Forms, SharePoint Online, and Microsoft Teams from the current managed connector contracts. Trigger routes are now exposed through `TRIGGER_OPERATIONS` instead of callable client methods, and deprecated DocuSign operations are no longer generated.
@@ -25,11 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Corrected eight malformed PDF.co method names: `p_d_f_search_text_async` to `pdf_search_text_async`, `p_d_f_from_x_l_s_x_l_s_x_async` to `pdf_from_xls_xlsx_async`, `p_d_f_un_searchable_async` to `pdf_unsearchable_async`, `x_l_sto_c_s_v_async` to `xls_to_csv_async`, `x_l_sto_h_t_m_l_async` to `xls_to_html_async`, `x_l_sto_j_s_o_n_async` to `xls_to_json_async`, `x_l_sto_t_x_t_async` to `xls_to_txt_async`, and `x_l_sto_x_m_l_async` to `xls_to_xml_async`.
 - Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
 - Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
 
 ### Added
 
+- Added current Salesforce external-ID and table metadata discovery operations.
 - Added current managed connector discovery operations for Azure IoT Central device templates, Azure Monitor Logs time ranges, Azure Tables storage accounts, Azure Data Explorer query schemas, and Service Bus entities, system properties, queues, session options, topics, subscriptions, and subscription filters.
 - **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
 - Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts

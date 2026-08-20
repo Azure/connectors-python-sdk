@@ -2753,7 +2753,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def invoke_m_c_p_server_async(
+    async def invoke_mcp_server_async(
         self,
         input: QueryRequest,
     ) -> None:
