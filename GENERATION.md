@@ -485,6 +485,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | `TimeNextVisible` emitted as `time_next_visible` | Fixed in generator | `azurequeues` | Fixed | Connector-specific public-name override emits `next_visible_time` while preserving `TimeNextVisible` as the wire name. |
 | Path parameters under-encoded (missing double-encoding) | Fixed in generator | `commondataservice`, any connector with `x-ms-url-encoding: "double"` path params | Fixed | Python generator ignored `x-ms-url-encoding: "double"` and left most path params bare (`{str(param)}`), causing 404s when values contained slashes (e.g. full Dataverse dataset URLs). C# generator honored it (PR 16445892) but Python was not updated. Shared logic hoisted to `DirectClientGeneratorBase.ShouldDoubleEncodePathParameter`; Python now emits `quote(quote(str(param), safe=''), safe='')` for double-encoded params and `quote(str(param), safe='')` for all others. Regenerate affected connectors. |
 | Operation methods corrected Swagger spelling or split acronym letters | Fixed in generator | `docusign`, `github`, `googletasks`, `pdfco`, `salesforce`, `signinghub`, `slack`, `wordonlinebusiness`, `zohosign` | Fixed | Python applies deterministic acronym-aware snake_case and connector-scoped corrections for known malformed operation IDs. |
+| Colliding wire names dropped after Python normalization | Fixed in generator | `teams`, `shifts`, `todo` | Fixed | Distinct generated fields preserve both `id` and `@odata.id`; serializer tests set both values together. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 
 **Adding a new defect:**
@@ -492,6 +493,18 @@ Track known generator issues here to prevent silent recurrence across releases.
 2. Add a row to this table with connector list
 3. Add `@pytest.mark.skip(reason="Generator defect - see GENERATION.md")` to affected tests
 4. Update status when fixed and connectors regenerated
+
+### Wire-Name Collision Regeneration
+
+The `teams`, `shifts`, and `todo` clients were verified with CodefulSdkGenerator from BPM `master` commit `1b7f7d412f648631f9303528a8af8af798918a57`. Generation used the immutable managed connector Swagger snapshot with these SHA-256 hashes:
+
+| Connector | Swagger SHA-256 |
+|-----------|----------------|
+| `teams` | `181B9B5ECE7CDD9E7C3F37274D388C50F0F02A9E1200F51D9E8A026039A1B164` |
+| `shifts` | `DB4ED2F1AF41C20CF583DE3EBF7351FFA12BAAE52ABB565906C7E46EF7EB86B9` |
+| `todo` | `D500A1028C6E81A051A849C6A6382082363F5BCC0C74D1C132D825210670CA6A` |
+
+Teams and Shifts were byte-identical to the committed generator output. Todo required full regeneration: in addition to restoring `ToDoHtml.id_2` for `@odata.id`, it restores wire-name metadata throughout the client. The generated Todo request models are now named `CreateToDoList`, `CreateToDo`, and `UpdateToDo`; callers using the deprecated `V2`-suffixed names must update their imports. Todo polling triggers also move from callable client methods to `TRIGGER_OPERATIONS` metadata for Connector Namespace registration.
 
 ## Related Documentation
 

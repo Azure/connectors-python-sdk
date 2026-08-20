@@ -6,12 +6,20 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from azure.connectors.todo import TodoClient, CreateToDoListV2, CreateToDoV2, UpdateToDoV2
+from azure.connectors.todo import (
+    CreateToDo,
+    CreateToDoList,
+    TRIGGER_OPERATIONS,
+    TodoClient,
+    ToDoHtml,
+    UpdateToDo,
+)
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
     ManagedIdentityTokenProvider,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -102,6 +110,19 @@ class TestTodoClientLifecycle:
             mock_close.assert_called_once()
 
 
+class TestTodoModelSerialization:
+    """Tests for distinct Todo wire names that normalize alike."""
+
+    def test_todo_html_preserves_colliding_ids(self):
+        """Test that natural and OData IDs survive serialization together."""
+        model = ToDoHtml(id="natural-id", id_2="odata-id")
+
+        payload = to_wire(model)
+
+        assert payload["id"] == "natural-id"
+        assert payload["@odata.id"] == "odata-id"
+
+
 class TestGetAllTodoListsAsync:
     """Tests for get_all_todo_lists_async method."""
 
@@ -158,7 +179,7 @@ class TestCreateTodoListAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = CreateToDoListV2(display_name="Work")
+        payload = CreateToDoList(display_name="Work")
         mock_response = MockResponse(status=201, text='{"id": "list-1", "displayName": "Work"}')
 
         with patch.object(
@@ -184,7 +205,7 @@ class TestCreateTodoListAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = CreateToDoListV2(display_name="Work")
+        payload = CreateToDoList(display_name="Work")
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
         with patch.object(
@@ -197,6 +218,54 @@ class TestCreateTodoListAsync:
                 await client.create_to_do_list_async(input=payload)
 
 
+class TestDeleteTodoListAsync:
+    """Tests for delete_to_do_list_async method (DELETE)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful to-do list deletion."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=204)
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.delete_to_do_list_async(folder_id="list 1")
+
+            mock_send.assert_called_once_with(
+                "DELETE",
+                "https://example.azure.com/connections/test/lists/list%201",
+                body=None,
+            )
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test to-do list deletion raises for a non-success response."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_to_do_list_async(folder_id="missing-list")
+
+            assert exc_info.value.status_code == 404
+
+
 class TestCreateAndUpdateTodoAsync:
     """Tests for create_to_do_async and update_to_do_async methods."""
 
@@ -207,7 +276,7 @@ class TestCreateAndUpdateTodoAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = CreateToDoV2(title="Buy milk", status="notStarted")
+        payload = CreateToDo(title="Buy milk", status="notStarted")
         mock_response = MockResponse(status=201, text='{"id": "task-1", "title": "Buy milk"}')
 
         with patch.object(
@@ -233,7 +302,7 @@ class TestCreateAndUpdateTodoAsync:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
-        payload = UpdateToDoV2(title="Buy milk and eggs", status="inProgress")
+        payload = UpdateToDo(title="Buy milk and eggs", status="inProgress")
         mock_response = MockResponse(
             status=200, text='{"id": "task-1", "title": "Buy milk and eggs"}')
 
@@ -252,6 +321,60 @@ class TestCreateAndUpdateTodoAsync:
             assert "/lists/list-1/tasks/task-1" in path
             assert body is payload
             assert result is not None
+
+
+class TestDeleteTodoAsync:
+    """Tests for delete_to_do_async method (DELETE)."""
+
+    @pytest.mark.asyncio
+    async def test_success(self, mock_token_provider):
+        """Test successful to-do deletion."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=204)
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.delete_to_do_async(
+                folder_id="list 1",
+                id="task 1",
+            )
+
+            mock_send.assert_called_once_with(
+                "DELETE",
+                "https://example.azure.com/connections/test/lists/list%201/tasks/task%201",
+                body=None,
+            )
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test to-do deletion raises for a non-success response."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_to_do_async(
+                    folder_id="list-1",
+                    id="task-1",
+                )
+
+            assert exc_info.value.status_code == 500
 
 
 class TestListTodosByFolderAsync:
@@ -282,46 +405,22 @@ class TestListTodosByFolderAsync:
             assert result is not None
 
 
-class TestTodoTriggersAsync:
-    """Tests for To Do trigger methods."""
+class TestTodoTriggerOperations:
+    """Tests for To Do trigger metadata."""
 
-    @pytest.mark.asyncio
-    async def test_on_new_to_do_in_folder_success(self, mock_token_provider):
-        """Test new to-do trigger method."""
-        client = TodoClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"id": "task-1"}')
+    @pytest.mark.parametrize(
+        ("operation_id", "route"),
+        [
+            ("OnNewToDoInFolderV2", "onNewToDoInFolder"),
+            ("OnUpdateToDoInFolderV2", "onUpdateToDoInFolder"),
+        ],
+    )
+    def test_trigger_operation_metadata(self, operation_id, route):
+        """Test polling triggers expose their registration contract."""
+        trigger = TRIGGER_OPERATIONS[operation_id]
 
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.on_new_to_do_in_folder_async(folder_id="list-1")
-
-            mock_send.assert_called_once()
-            method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
-            assert method == "GET"
-            assert "/v2/trigger/onNewToDoInFolder/list-1" in path
-            assert result is not None
-
-    @pytest.mark.asyncio
-    async def test_on_update_to_do_in_folder_error(self, mock_token_provider):
-        """Test updated to-do trigger error path."""
-        client = TodoClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ):
-            with pytest.raises(ConnectorException):
-                await client.on_update_to_do_in_folder_async(folder_id="list-1")
+        assert trigger["operation_id"] == operation_id
+        assert trigger["path"] == f"/{{connectionId}}/v2/trigger/{route}/{{folderId}}"
+        assert trigger["method"] == "get"
+        assert trigger["required_parameters"] == ["folderId"]
+        assert trigger["callback_payload_type"] == "ToDo"
