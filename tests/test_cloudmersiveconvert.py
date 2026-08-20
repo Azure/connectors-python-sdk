@@ -268,6 +268,12 @@ OPERATION_ARGS = {
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 
+def test_generated_operation_inventory_matches_contract():
+    """Test all 53 supported operations are represented without multipart APIs."""
+    assert len(ALL_OPERATIONS) == 53
+    assert not hasattr(CloudmersiveconvertClient, "create_document_async")
+
+
 async def _invoke_operation(client: CloudmersiveconvertClient, operation: str):
     """Invoke a Cloudmersive Convert operation by name for shared method tests."""
     method = getattr(client, f"{operation}_async")

@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict, List, Literal
 from urllib.parse import quote
 import json
 
@@ -132,8 +132,7 @@ class CertifyPolicyResponse:
     Response for Get Certify Policy for a document
     """
 
-    certify: Optional[Any] = None
-    """Certify signature settings for the document."""
+    certify: Optional[CertifyPermissionResponse] = None
     lock_form_fields: Optional[bool] = None
     """
     True if forms fields are to be locked in the PDF after the last digital
@@ -170,10 +169,8 @@ class DocumentDetailsResponse:
     """The date and time when the document was uploaded."""
     modified_on: Optional[str] = None
     """The date and time when the document was last modified."""
-    certify: Optional[Any] = None
-    """Certified signature settings for the document."""
-    template: Optional[Any] = None
-    """Template details, if the template is applied on the document."""
+    certify: Optional[DocumentCertifyResponse] = None
+    template: Optional[DocumentTemplateResponse] = None
 
 
 @dataclass
@@ -208,14 +205,11 @@ class UploadDocumentLibraryResponse:
     """True if document has form fields."""
     lock_form_fields: Optional[bool] = None
     """True if locking of form fields with the last signature is enabled."""
-    certify: Optional[Any] = None
-    """Certified signature settings for the document."""
-    template: Optional[Any] = None
-    """Template details, if the template is applied on the document."""
+    certify: Optional[UploadDocumentLibraryCertifyResponse] = None
+    template: Optional[UploadDocumentLibraryTemplateResponse] = None
     package_name: Optional[str] = None
     """Package name"""
-    metadata: Optional[Any] = None
-    """Uploaded document pdf meta information"""
+    metadata: Optional[UploadDocumentMetaInfoDetail] = None
 
 
 @dataclass
@@ -224,7 +218,7 @@ class UploadDocument:
     Response for Upload Document
     """
 
-    document_id: Optional[int] = field(
+    document_id_2: Optional[int] = field(
         default=None,
         metadata={"wire_name": "documentId"},
     )
@@ -236,6 +230,11 @@ class UploadDocument:
     """
     The document ID to be used later to share, download and get status of the
     document. will be removed later document_id will be used
+    """
+    document_id: Optional[int] = None
+    """
+    The document ID to be used later to share, download and get status of the
+    document.
     """
     document_name: Optional[str] = None
     """The name of the document."""
@@ -257,12 +256,10 @@ class UploadDocument:
     """The date and time when the document was last modified."""
     lock_form_fields: Optional[bool] = None
     """True if locking of form fields with the last signature is enabled."""
-    certify: Optional[Any] = None
-    """Certified signature settings for the document."""
+    certify: Optional[CertifyPermissionResponse] = None
     document_size: Optional[int] = None
     """Uploaded document size in bytes"""
-    metadata: Optional[Any] = None
-    """Uploaded document pdf meta information"""
+    metadata: Optional[UploadDocumentMetaInfoDetail] = None
     package_name: Optional[str] = None
     """The document package name"""
 
@@ -273,31 +270,12 @@ class EnterpriseAccessResponse:
     Response for Get Workflow User Authentication (Document Opening)  of Enterprise Package
     """
 
-    authentication: Optional[Any] = None
-    """
-    Authentication object with the details of authentication methods applied on
-    the document for the recipient.
-    """
-    authentication_signing: Optional[Any] = None
-    """Authentication Signing for the package"""
-    access_duration: Optional[Any] = None
-    """
-    Access duration object with the details of access securities for the
-    recipient.
-    """
+    authentication: Optional[EnterpriseAuthenticationResponse] = None
+    authentication_signing: Optional[EnterpriseAuthenticationSigningResponse] = None
+    access_duration: Optional[PermissionAccessDurationResponse] = None
 
 
-@dataclass
-class FieldsAutoAssignFieldInput:
-    """
-    Assign Document Field
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FieldsAutoAssignFieldInput = List["AssignFieldRequest"]
 
 
 @dataclass
@@ -411,20 +389,8 @@ class GetPackagesResponse:
     """Date and time when the document was uploaded."""
     modified_on: Optional[str] = None
     """Date and time when the document was last modified."""
-    access_duration: Optional[Any] = None
-    """
-    Specify start and end date/time for a recipient to access the document. The
-    recipient will not be able to access the document beyond this duration. If
-    the document is not processed within the specified time, the document will
-    be considered declined.. This will be provided if \"x-recipient-details\"
-    is passed as true in the header
-    """
-    decline: Optional[Any] = None
-    """
-    Document decline details if its either manually declined or auto via Core.
-    This will be provided if \"x-recipient-details\" is passed as true in the
-    header
-    """
+    access_duration: Optional[RecipientAccessDurationDetails] = None
+    decline: Optional[RecipientDeclineDetails] = None
     size: Optional[int] = None
     """Size of the document in bytes."""
 
@@ -502,8 +468,7 @@ class TemplateResponse:
     enterprise: Optional[bool] = None
     """True, if user belong to an enterprise."""
     documents: Optional[List[TemplateDocumentResponse]] = None
-    smart_form: Optional[Any] = None
-    """Smart form"""
+    smart_form: Optional[TemplateSmartFormResponse] = None
 
 
 @dataclass
@@ -554,8 +519,7 @@ class SignDocumentResponse:
     """
     transaction_id: Optional[str] = None
     """This parameter is used while RAS signing"""
-    verification: Optional[Any] = None
-    """Signature Verification"""
+    verification: Optional[VerificationResponse] = None
     authentication_access_token: Optional[str] = None
     """It will contain the OIDC id_token when user is authenticated via OIDC"""
 
@@ -640,8 +604,7 @@ class WorkflowDetailsResponse:
     """Date and time when the document was uploaded."""
     modified_on: Optional[str] = None
     """Date and time when the document was last modified."""
-    workflow: Optional[Any] = None
-    """Workflow object with the workflow details."""
+    workflow: Optional[WorkflowResponse] = None
     documents: Optional[List[WorkflowDocumentsResponse]] = None
     """List of documents that are uploaded in the package."""
     users: Optional[List[WorkflowUserResponse]] = None
@@ -690,8 +653,7 @@ class ReminderResponse:
     The number of days after which the first reminder would be sent to workflow
     user.
     """
-    repeat: Optional[Any] = None
-    """Repeat object with the details of reminder being repeated or not."""
+    repeat: Optional[ReminderRepeat] = None
 
 
 @dataclass
@@ -772,8 +734,7 @@ class WorkflowRecipient:
     email_language_code: Optional[str] = None
     """email language code"""
     electronic_seal: Optional[ElectronicSealRecipient] = None
-    gatekeepers: Optional[Any] = None
-    """Gatekeepers"""
+    gatekeepers: Optional[WorkflowGatekeeperResponse] = None
 
 
 @dataclass
@@ -795,10 +756,8 @@ class WorkflowPermissionResponse:
     """
     add_attachment: Optional[bool] = None
     """True, if attachments and merging of PDF documents is allowed."""
-    legal_notice: Optional[Any] = None
-    """Legal notice set by the owner for the recipient."""
-    attachment: Optional[Any] = None
-    """Attachments"""
+    legal_notice: Optional[PermissionLegalNoticeResponse] = None
+    attachment: Optional[AttachmentPermissionResponse] = None
 
 
 @dataclass
@@ -817,17 +776,7 @@ class StartWorkflowResponse:
     """Array of document IDs which were part of the package before sharing."""
 
 
-@dataclass
-class WorkflowWorkflowAddGroupInput:
-    """
-    Add Groups to Workflow
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+WorkflowWorkflowAddGroupInput = List["WorflowGroupRequest"]
 
 
 @dataclass
@@ -836,25 +785,13 @@ class CollaboratorGroupResponse:
     Response for Add Groups to Workflow
     """
 
-    permission: Optional[Any] = None
-    """Permissions for the recipient in the document package"""
-    reminder: Optional[Any] = None
-    """Reminder settings of the recipient."""
+    permission: Optional[WorkflowPermissionResponse] = None
+    reminder: Optional[ReminderResponse] = None
     signing_order: Optional[int] = None
     """Signing order"""
 
 
-@dataclass
-class WorkflowWorkflowAddPlaceholderInput:
-    """
-    Add Placeholder to Workflow
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+WorkflowWorkflowAddPlaceholderInput = List["PlaceholderRequest"]
 
 
 @dataclass
@@ -863,25 +800,13 @@ class CollaboratorPlaceholderResponse:
     Response for Add Placeholder to Workflow
     """
 
-    permission: Optional[Any] = None
-    """Permissions for the recipient in the document package"""
-    reminder: Optional[Any] = None
-    """Reminder settings of the recipient."""
+    permission: Optional[WorkflowPermissionResponse] = None
+    reminder: Optional[ReminderResponse] = None
     signing_order: Optional[int] = None
     """Signing order"""
 
 
-@dataclass
-class WorkflowWorkflowAddUserInput:
-    """
-    Add Users to Workflow
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+WorkflowWorkflowAddUserInput = List["WorflowUserRequest"]
 
 
 @dataclass
@@ -898,10 +823,8 @@ class CollaboratorResponse:
     """Is guest user"""
     email_language_code: Optional[str] = None
     """Email language code"""
-    permission: Optional[Any] = None
-    """Permissions for the recipient in the document package"""
-    reminder: Optional[Any] = None
-    """Reminder settings of the recipient."""
+    permission: Optional[WorkflowPermissionResponse] = None
+    reminder: Optional[ReminderResponse] = None
 
 
 @dataclass
@@ -930,8 +853,7 @@ class WorkSpaceResponse:
     """Id of shared space"""
     name: Optional[str] = None
     """Name of shared space"""
-    owner: Optional[Any] = None
-    """Owner of shared space"""
+    owner: Optional[WorkSpaceOwner] = None
     members: Optional[List[WorkSpaceMembers]] = None
     """Members of shared space"""
 
@@ -1032,7 +954,7 @@ class PermissionLegalNoticeResponse:
     List of legal notices allowed to the document owner from which he can
     select one for the recipient.
     """
-    default_notice: Optional[Any] = None
+    default_notice: Optional[List[LegalNoticeResponse]] = None
     """Default or selected legal notice for the recipient."""
 
 
@@ -1055,18 +977,9 @@ class AccessResponse:
     Definition: AccessResponse
     """
 
-    authentication: Optional[Any] = None
-    """
-    Authentication object with the details of authentication methods applied on
-    the document for the recipient.
-    """
-    authentication_signing: Optional[Any] = None
-    """Authentication Signing for the package"""
-    access_duration: Optional[Any] = None
-    """
-    Access duration object with the details of access securities for the
-    recipient.
-    """
+    authentication: Optional[AuthenticationResponse] = None
+    authentication_signing: Optional[AuthenticationSigningResponse] = None
+    access_duration: Optional[PermissionAccessDurationResponse] = None
 
 
 @dataclass
@@ -1077,12 +990,9 @@ class AuthenticationResponse:
 
     enabled: Optional[bool] = None
     """True, if authentication is enabled for the package."""
-    password: Optional[Any] = None
-    """Password authentication object."""
-    sms_otp: Optional[Any] = None
-    """SMS OTP authentication object."""
-    totp: Optional[Any] = None
-    """Totp"""
+    password: Optional[AccessSecurityPasswordResponse] = None
+    sms_otp: Optional[AccessSecuritySmsOtpResponse] = None
+    totp: Optional[TotpPermissionResponse] = None
 
 
 @dataclass
@@ -1134,10 +1044,8 @@ class AuthenticationSigningResponse:
 
     enabled: Optional[bool] = None
     """True, if authentication is enabled for the package."""
-    sms_otp: Optional[Any] = None
-    """SMS OTP authentication object."""
-    totp: Optional[Any] = None
-    """Totp"""
+    sms_otp: Optional[AuthenticationSigningSmsOtpResponse] = None
+    totp: Optional[TotpPermissionResponse] = None
 
 
 @dataclass
@@ -1165,10 +1073,8 @@ class PermissionAccessDurationResponse:
 
     enabled: Optional[bool] = None
     """True, if access duration security is enabled for the package."""
-    duration_by_date: Optional[Any] = None
-    """Duration by date object with the details of duration in dates."""
-    duration_by_days: Optional[Any] = None
-    """Date from where the access is allowed for the recipient."""
+    duration_by_date: Optional[AccessDurationByDateResponse] = None
+    duration_by_days: Optional[AccessDurationByDaysResponse] = None
 
 
 @dataclass
@@ -1180,8 +1086,7 @@ class AccessDurationByDateResponse:
     enabled: Optional[bool] = None
     """True if access security is enabled for a duration by date and time."""
     accessible: Optional[bool] = None
-    duration: Optional[Any] = None
-    """Duration object with the details of duration in to and from dates."""
+    duration: Optional[DurationByDateResponse] = None
 
 
 @dataclass
@@ -1210,8 +1115,7 @@ class AccessDurationByDaysResponse:
     enabled: Optional[bool] = None
     """True, if access security is enabled for a duration by number of days."""
     accessible: Optional[bool] = None
-    duration: Optional[Any] = None
-    """Duration object with the details of total days."""
+    duration: Optional[DurationByDaysResponse] = None
 
 
 @dataclass
@@ -1257,12 +1161,9 @@ class AccessUpdateRequest:
     True, if the access security or authentications are to be applied on all
     the recipients in the workflow.
     """
-    authentication: Optional[Any] = None
-    """It has the access aauthentication data"""
-    authentication_signing: Optional[Any] = None
-    """It has the signing authentication data"""
-    access_duration: Optional[Any] = None
-    """It has the access duration of the workflow"""
+    authentication: Optional[AccessAuthentication] = None
+    authentication_signing: Optional[SigningAuthentication] = None
+    access_duration: Optional[PermissionAccessDuration] = None
 
 
 @dataclass
@@ -1411,20 +1312,16 @@ class QrCodeRequest:
     Name of the provided field that is to be added. If not provided, system
     will assign an unique auto generated name to the field.
     """
-    dimensions: Optional[Any] = None
-    """Field dimensions"""
+    dimensions: Optional[FieldDimension] = None
     data: Optional[str] = None
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[Any] = None
-    """Settings regarding options"""
-    color: Optional[Any] = None
-    """Settings regarding color"""
-    logo: Optional[Any] = None
-    """Settings regarding logo"""
+    options: Optional[QrCodeOptions] = None
+    color: Optional[QrCodeColor] = None
+    logo: Optional[QrCodeLogo] = None
 
 
 @dataclass
@@ -1449,18 +1346,8 @@ class QrCodeOptions:
     Definition: QrCodeOptions
     """
 
-    error_correction_level: Optional[Any] = None
-    """
-    Error Correction Level for the QR code, which determines the amount of data
-    redundancy. Options are: L (Low), M (Medium), Q (Quartile), and H (High).
-    Higher levels offer more error resistance. Default is \"Q\"
-    """
-    encoding: Optional[Any] = None
-    """
-    Specifies the character encoding mode for the QR code content. Supported
-    options are: Default, Iso8859_1, Iso8859_2, and Utf8. Default is
-    \"Default\"
-    """
+    error_correction_level: Optional[ECCLevelAPI] = None
+    encoding: Optional[EciModeAPI] = None
     pixels_per_module: Optional[int] = None
     """
     Specifies the number of pixels per module in the QR code. A higher number
@@ -1475,30 +1362,10 @@ class QrCodeOptions:
     """
 
 
-@dataclass
-class ECCLevelAPI:
-    """
-    Definition: ECCLevelAPI
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ECCLevelAPI = Literal["L", "M", "Q", "H", "Default"]
 
 
-@dataclass
-class EciModeAPI:
-    """
-    Definition: EciModeAPI
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+EciModeAPI = Literal["Default", "Iso8859_1", "Iso8859_2", "Utf8"]
 
 
 @dataclass
@@ -1540,43 +1407,13 @@ class QrCodeLogo:
     """
 
 
-@dataclass
-class ValidationRule:
-    """
-    Definition: ValidationRule
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ValidationRule = Literal["OPTIONAL", "MANDATORY"]
 
 
-@dataclass
-class TextboxType:
-    """
-    Definition: TextboxType
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+TextboxType = Literal["TEXT", "NAME", "EMAIL", "COMPANY", "JOBTITLE", "DATE"]
 
 
-@dataclass
-class FieldType:
-    """
-    Definition: FieldType
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FieldType = Literal["Number", "Text"]
 
 
 @dataclass
@@ -1587,10 +1424,8 @@ class SignatureFieldAuthentication:
 
     enabled: Optional[bool] = None
     """True, if authentication is enabled for the field.  False otherwise."""
-    otp: Optional[Any] = None
-    """Otp"""
-    totp: Optional[Any] = None
-    """Totp"""
+    otp: Optional[SignatureFieldAuthenticationOtp] = None
+    totp: Optional[SignatureFieldAuthenticationTotp] = None
 
 
 @dataclass
@@ -1632,20 +1467,16 @@ class UpdateQrCodeRequest:
     """Updated name of the field if renaming is intended."""
     page_no: Optional[int] = None
     """Page number for which field is need to be updated"""
-    dimensions: Optional[Any] = None
-    """Field dimensions"""
+    dimensions: Optional[FieldDimension] = None
     data: Optional[str] = None
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[Any] = None
-    """Settings regarding options"""
-    color: Optional[Any] = None
-    """Settings regarding color"""
-    logo: Optional[Any] = None
-    """Settings regarding logo"""
+    options: Optional[QrCodeOptions] = None
+    color: Optional[QrCodeColor] = None
+    logo: Optional[QrCodeLogo] = None
 
 
 @dataclass
@@ -1771,30 +1602,10 @@ class AttachmentPermissionResponse:
     """Enabled"""
 
 
-@dataclass
-class DeliveryMethod:
-    """
-    Definition: DeliveryMethod
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+DeliveryMethod = Literal["EMAIL", "SMS", "EMAIL_AND_SMS"]
 
 
-@dataclass
-class WorkflowType:
-    """
-    Definition: WorkflowType
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+WorkflowType = Literal["SERIAL", "INDIVIDUAL", "PARALLEL", "CUSTOM"]
 
 
 @dataclass
@@ -1813,8 +1624,7 @@ class UpdateCertifyPolicyRequest:
     Definition: UpdateCertifyPolicyRequest
     """
 
-    certify: Optional[Any] = None
-    """Certify settings object for the document."""
+    certify: Optional[CertifyPolicyRequest] = None
     lock_form_fields: Optional[bool] = None
     """
     True if form fields are to be locked after the last signature on the
@@ -1830,25 +1640,14 @@ class CertifyPolicyRequest:
 
     enabled: Optional[bool] = None
     """True if certify settings are to be enabled for the document."""
-    permission: Optional[Any] = None
-    """
-    Certify permission level that is to be set for the document. Possible
-    values are \"NO_CHANGES_ALLOWED\", \"FORM_FILLING_ALLOWED\" and
-    \"FORM_FILLING_WITH_ANNOTATIONS_ALLOWED\".
-    """
+    permission: Optional[CertifyPermission] = None
 
 
-@dataclass
-class CertifyPermission:
-    """
-    Definition: CertifyPermission
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+CertifyPermission = Literal[
+    "NO_CHANGES_ALLOWED",
+    "FORM_FILLING_ALLOWED",
+    "FORM_FILLING_WITH_ANNOTATIONS_ALLOWED",
+]
 
 
 @dataclass
@@ -1861,43 +1660,24 @@ class DeleteDocumentFieldRequest:
     """Name of the field to be deleted."""
 
 
-@dataclass
-class DocumentPackageStatus:
-    """
-    Definition: DocumentPackageStatus
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class DocumentType:
-    """
-    Definition: DocumentType
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+DocumentPackageStatus = Literal[
+    "ALL",
+    "DRAFT",
+    "INPROGRESS",
+    "PENDING",
+    "SIGNED",
+    "COMPLETED",
+    "REVIEWED",
+    "DECLINED",
+    "EDITED",
+    "EXPIRING_IN_SEVEN_DAYS",
+]
 
 
-@dataclass
-class DocumentOwnedBy:
-    """
-    Definition: DocumentOwnedBy
-    """
+DocumentType = Literal["ALL", "PDF", "DOCX", "XML"]
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+
+DocumentOwnedBy = Literal["ME_OTHERS", "ME", "OTHERS"]
 
 
 @dataclass
@@ -1924,17 +1704,13 @@ class TemplateDocumentResponse:
     """Name of the template document."""
 
 
-@dataclass
-class TemplateSortBy:
-    """
-    Definition: TemplateSortBy
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+TemplateSortBy = Literal[
+    "CREATED_ON",
+    "NAME",
+    "DESCRIPTION",
+    "READ_ONLY",
+    "IS_PUBLIC",
+]
 
 
 @dataclass
@@ -1976,12 +1752,9 @@ class EnterpriseAuthenticationResponse:
 
     enabled: Optional[bool] = None
     """True, if authentication is enabled for the package."""
-    password: Optional[Any] = None
-    """Password authentication object."""
-    sms_otp: Optional[Any] = None
-    """SMS OTP authentication object."""
-    totp: Optional[Any] = None
-    """Totp"""
+    password: Optional[AccessSecurityPasswordResponse] = None
+    sms_otp: Optional[EnterpriseAccessSecuritySmsOtpResponse] = None
+    totp: Optional[TotpPermissionResponse] = None
 
 
 @dataclass
@@ -2009,10 +1782,8 @@ class EnterpriseAuthenticationSigningResponse:
 
     enabled: Optional[bool] = None
     """True, if authentication is enabled for the package."""
-    sms_otp: Optional[Any] = None
-    """SMS OTP authentication object."""
-    totp: Optional[Any] = None
-    """Totp"""
+    sms_otp: Optional[EnterpriseAuthenticationSigningSmsOtpResponse] = None
+    totp: Optional[TotpPermissionResponse] = None
 
 
 @dataclass
@@ -2138,10 +1909,8 @@ class ServicePlanAutoDeleteDocument:
     """True, If auto deletion of the unused documents is enabled."""
     duration: Optional[int] = None
     """Total number of unused days.             """
-    notify: Optional[Any] = None
-    """Notify             """
-    email_document: Optional[Any] = None
-    """Email Deleted Document as Attachment             """
+    notify: Optional[NotifyUnUsedDeleteDocument] = None
+    email_document: Optional[EmailDeletedDocument] = None
 
 
 @dataclass
@@ -2181,24 +1950,15 @@ class ServicePlanSigningServer:
     """Key location of the signing server, possible values are SERVER, LOCAL"""
     order: Optional[int] = None
     """Signing server order"""
-    signing_profile: Optional[Any] = None
-    """Signing profile of the signing server"""
-    electronic_seal: Optional[Any] = None
-    """Signing server electronic seal capacity"""
-    advanced_electronic_seal: Optional[Any] = None
-    """Signing server advanced electronic seal capacity"""
-    qualified_electronic_seal: Optional[Any] = None
-    """Signing server qualified electronic seal capacity"""
-    advanced_electronic_signature: Optional[Any] = None
-    """signing server advanced electronic signature capacity"""
-    high_trust_advanced_signature: Optional[Any] = None
-    """Signing server high trust advanced signature capacity"""
-    qualified_electronic_signature: Optional[Any] = None
-    """Signing server qualified electronic signature capacity"""
-    signature_appearances: Optional[Any] = None
-    """Signature appearances of the signing server"""
-    csp: Optional[Any] = None
-    """CSP of the signing server"""
+    signing_profile: Optional[ServicePlanProfile] = None
+    electronic_seal: Optional[SigningServerCapacity] = None
+    advanced_electronic_seal: Optional[SigningServerCapacity] = None
+    qualified_electronic_seal: Optional[SigningServerCapacity] = None
+    advanced_electronic_signature: Optional[SigningServerCapacity] = None
+    high_trust_advanced_signature: Optional[SigningServerCapacity] = None
+    qualified_electronic_signature: Optional[SigningServerCapacity] = None
+    signature_appearances: Optional[SigningServerSignatureAppearance] = None
+    csp: Optional[SigningServerCsp] = None
 
 
 @dataclass
@@ -2272,8 +2032,7 @@ class SigningServerCsp:
 
     enabled: Optional[bool] = None
     """True, If to add Push Certificates to CSP."""
-    virtual_profile: Optional[Any] = None
-    """Virtual profile of the csp."""
+    virtual_profile: Optional[ServicePlanProfile] = None
     auto_delete_certificates: Optional[bool] = None
     """
     True, If Automatically delete certificates and users from CSP when user is
@@ -2287,14 +2046,10 @@ class ServicePlanElectronicSealServer:
     Definition: ServicePlanElectronicSealServer
     """
 
-    electronic_seal_profile: Optional[Any] = None
-    """Electronic Seal signing server profile"""
-    electronic_seal: Optional[Any] = None
-    """Signing server electronic seal capacity"""
-    advanced_electronic_seal: Optional[Any] = None
-    """Signing server advanced electronic seal capacity"""
-    qualified_electronic_seal: Optional[Any] = None
-    """Signing server qualified electronic seal capacity"""
+    electronic_seal_profile: Optional[ServicePlanProfile] = None
+    electronic_seal: Optional[SigningServerCapacity] = None
+    advanced_electronic_seal: Optional[SigningServerCapacity] = None
+    qualified_electronic_seal: Optional[SigningServerCapacity] = None
 
 
 @dataclass
@@ -2305,8 +2060,7 @@ class ServicePlanAuthenticationProfile:
 
     allowed: Optional[List[ServicePlanProfile]] = None
     """Allowed authentication profile in service plan"""
-    default: Optional[Any] = None
-    """Default authentication profile in service plan"""
+    default: Optional[ServicePlanProfile] = None
 
 
 @dataclass
@@ -2333,10 +2087,8 @@ class ServicePlanOneTimePassword:
     Definition: ServicePlanOneTimePassword
     """
 
-    email_otp: Optional[Any] = None
-    """Email OTP"""
-    sms_otp: Optional[Any] = None
-    """SMS OTP"""
+    email_otp: Optional[ServicePlanEmailOtp] = None
+    sms_otp: Optional[ServicePlanSmsOtp] = None
     otp_length: Optional[int] = None
     """Character count of OTP to be generated for authentication."""
     otp_expiry: Optional[int] = None
@@ -2407,8 +2159,7 @@ class ServicePlanAutoDeleteUser:
     """True, If auto deletion of the inactive users is enabled."""
     inactive_days: Optional[int] = None
     """Total number of inactive days.             """
-    notify: Optional[Any] = None
-    """Notify             """
+    notify: Optional[NotifyInactiveDeleteUser] = None
 
 
 @dataclass
@@ -2439,17 +2190,8 @@ class WorkflowDetailUpdateRequest:
     Definition: WorkflowDetailUpdateRequest
     """
 
-    workflow_type: Optional[Any] = None
-    """
-    Workflow type for the package e.g (SERIAL,PARALLEL,INDIVIDUAL,CUSTOM). If
-    no value is provided, old value will be retained.
-    """
-    workflow_mode: Optional[Any] = None
-    """
-    Workflow mode of the package e.g (ONLY_ME, ME_AND_OTHERS, ONLY_OTHERS). If
-    workflow mode is set to ONLY_ME then no collaborator can be added to
-    package other then authenticated user itself
-    """
+    workflow_type: Optional[WorkflowType] = None
+    workflow_mode: Optional[WorkflowModes] = None
     continue_on_decline: Optional[bool] = None
     """
     True, if workflow needs to continue even if any recipient declines the
@@ -2465,17 +2207,7 @@ class WorkflowDetailUpdateRequest:
     """Allow comments"""
 
 
-@dataclass
-class WorkflowModes:
-    """
-    Definition: WorkflowModes
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+WorkflowModes = Literal["ME_AND_OTHERS", "ONLY_OTHERS", "ONLY_ME"]
 
 
 @dataclass
@@ -2542,38 +2274,25 @@ class WorflowUserRequest:
     per the document owner and user notification settings. A value of false
     means no notifications will be sent to user throughout the workflow.
     """
-    role: Optional[Any] = None
-    """
-    Role of the recipient in the workflow. Possible values are \"SIGNER\",
-    \"REVIEWER\", \"EDITOR\",\"CARBON_COPY\" or \"INPERSON_HOST\". However,
-    while XML type document preparation, only supported role types are
-    \"SIGNER\", \"REVIEWER\" and \"CARBON_COPY\"
-    """
+    role: Optional[CollaboratorRole] = None
     signing_order: Optional[int] = None
     """
     Order of the recipient in the workflow. This signing order is mandatory
     when workflow type is \"CUSTOM\".
     """
-    delivery_method: Optional[Any] = None
-    """
-    Delivery method of the recipient in the workflow. Possible values are
-    \"EMAIL\", \"SMS\", or \"EMAIL_AND_SMS\". Default value would be EMAIL
-    """
+    delivery_method: Optional[DeliveryMethod] = None
     mobile_number: Optional[str] = None
     """Mobile Number"""
 
 
-@dataclass
-class CollaboratorRole:
-    """
-    Definition: CollaboratorRole
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+CollaboratorRole = Literal[
+    "SIGNER",
+    "REVIEWER",
+    "EDITOR",
+    "INPERSON_HOST",
+    "CARBON_COPY",
+    "ELECTRONIC_SEAL",
+]
 
 
 @dataclass
@@ -2616,8 +2335,7 @@ class WorkflowResponse:
     the end users to make any changes to this workflow in draft state and this
     workflow is to be shared as it is.
     """
-    post_process: Optional[Any] = None
-    """Post process object with all the post process configurations."""
+    post_process: Optional[PostProcessResponse] = None
     comments: Optional[bool] = None
     """Comments"""
 
@@ -2655,11 +2373,7 @@ class WorkflowDocumentsResponse:
     """The date and time on which the document was last modified."""
     form_fields: Optional[bool] = None
     """True, if document has form fields."""
-    template: Optional[Any] = None
-    """
-    Template object which is applied on the document along with the template
-    details.
-    """
+    template: Optional[DocumentsTemplateResponse] = None
     certify: Optional[CertifyResponse] = None
     lock_form_fields: Optional[bool] = None
     """
@@ -2736,8 +2450,7 @@ class WorkflowUserResponse:
     """Email address of the user who is delegator to this recipient."""
     gatekeeper: Optional[str] = None
     """Email address of the user who is gatekeeper to this recipient."""
-    gatekeepers: Optional[Any] = None
-    """Gatekeepers"""
+    gatekeepers: Optional[WorkflowGatekeeperResponse] = None
     role: Optional[str] = None
     """
     Role of the recipient i.e., \"SIGNER\", \"REVIEWER\",
@@ -2765,17 +2478,9 @@ class WorkflowUserResponse:
     """
     placeholder: Optional[str] = None
     """Placeholder text if the recipient is a placeholder."""
-    permission: Optional[Any] = None
-    """
-    Permissions for the recipient set by the owner of the document package.
-    """
-    authentications: Optional[Any] = None
-    """
-    Authentications object with the details of any authentications and access
-    securities configured for the recipient.
-    """
-    reminder: Optional[Any] = None
-    """Reminder object with the details of reminder settings."""
+    permission: Optional[WorkflowPermissionResponse] = None
+    authentications: Optional[AccessResponse] = None
+    reminder: Optional[ReminderResponse] = None
     signing_order: Optional[int] = None
     """
     Order in which the workflow will be signed by the recipients. This signing
@@ -2790,8 +2495,7 @@ class WorkflowUserResponse:
     """Gest user"""
     email_language_code: Optional[str] = None
     """Email language code"""
-    electronic_seal: Optional[Any] = None
-    """electronic seal"""
+    electronic_seal: Optional[ElectronicSealRecipient] = None
 
 
 @dataclass
@@ -2850,12 +2554,7 @@ class AddDocumentPackageRequest:
     The name of the package. Default package name is always \"Untitled\" if the
     package_name is not provided.
     """
-    workflow_mode: Optional[Any] = None
-    """
-    Mode of the workflow, there are three types of workflow modes supported in
-    application. Possible values are \"ONLY_ME\", \"ME_AND_OTHERS\" and
-    \"ONLY_OTHERS\"
-    """
+    workflow_mode: Optional[WorkflowMode] = None
     folder_name: Optional[str] = None
     """
     The name of the folder. It will be used to upload package in any folder of
@@ -2863,17 +2562,7 @@ class AddDocumentPackageRequest:
     """
 
 
-@dataclass
-class WorkflowMode:
-    """
-    Definition: WorkflowMode
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+WorkflowMode = Literal["ME_AND_OTHERS", "ONLY_OTHERS", "ONLY_ME"]
 
 
 @dataclass
@@ -2928,8 +2617,7 @@ class RecipientDeclineDetails:
     """Define reason of document decline"""
     auto_decline: Optional[bool] = None
     """Indication of document is manually/auto declined """
-    declined_by: Optional[Any] = None
-    """Decline By details"""
+    declined_by: Optional[DeclineByDetails] = None
 
 
 @dataclass
@@ -2944,17 +2632,15 @@ class DeclineByDetails:
     """Email of user who have declined the workflow              """
 
 
-@dataclass
-class FolderItemSortBy:
-    """
-    Definition: FolderItemSortBy
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FolderItemSortBy = Literal[
+    "TITLE",
+    "WORKFLOW_TYPE",
+    "DATE_CREATED",
+    "LAST_MODIFIED",
+    "OWNER",
+    "LOCATION",
+    "STATUS",
+]
 
 
 @dataclass
@@ -3011,17 +2697,7 @@ class RenameDocumentRequest:
     """New name of the document."""
 
 
-@dataclass
-class HandSignature:
-    """
-    Definition: HandSignature
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+HandSignature = Literal[0, 1, 2, 3, 4]
 
 
 @dataclass
@@ -3119,12 +2795,7 @@ class BulkSignRequest:
     hand_signature_initials_method: Optional[HandSignature] = None
     hand_signature_image: Optional[str] = None
     """Base64 encoded string image of the visible signature appearance"""
-    hand_signature_method: Optional[Any] = None
-    """
-    Name of the hand signature method by user for signing. In case no hand
-    signature method is provided then default will be DRAW. possible values
-    DRAW,TEXT,UPLOAD,SIGNATURE_PAD
-    """
+    hand_signature_method: Optional[HandSignature] = None
     signing_reason: Optional[str] = None
     """Reason of signing provided by the recipient."""
     signing_location: Optional[str] = None
@@ -3145,11 +2816,7 @@ class BulkSignRequest:
     Name of certification profile/signing capacity using which the document is
     to be signed
     """
-    authentication: Optional[Any] = None
-    """
-    Authentication object is an optional, it contains authentication releated
-    options
-    """
+    authentication: Optional[BulkSignAuthentication] = None
     transaction_id: Optional[str] = None
     """re-initiated signing process transaction id"""
 
@@ -3199,17 +2866,7 @@ class BulkSignAuthentication:
     """Nonce value if it is enabled for the client."""
 
 
-@dataclass
-class ApiBulkSignAction:
-    """
-    Definition: ApiBulkSignAction
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ApiBulkSignAction = Literal["SHARE", "SIGN"]
 
 
 @dataclass
@@ -3277,11 +2934,7 @@ class SignDocumentRequest:
     is binary, so the business application must then Base64 encode it before
     submitting in this API call.)
     """
-    hand_signature_method: Optional[Any] = None
-    """
-    Name of the hand signature method by user for signing. In case no hand
-    signature method is provided then default will be DRAW.
-    """
+    hand_signature_method: Optional[HandSignature] = None
     signing_reason: Optional[str] = None
     """
     Reason of signing provided by the recipient. Note: Commitment type
@@ -3319,11 +2972,7 @@ class SignDocumentRequest:
     """
     signing_server: Optional[str] = None
     """Name of signing server using which the document is to be signed."""
-    authentication: Optional[Any] = None
-    """
-    Authentication object is an optional, it contains authentication releated
-    options
-    """
+    authentication: Optional[Authentication] = None
 
 
 @dataclass
@@ -3407,13 +3056,7 @@ class AutoPlaceFieldRequest:
     \"ADVANCED_ELECTRONIC_SIGNATURE\", \"HIGH_TRUST_ADVANCED\",
     \"QUALIFIED_ELECTRONIC_SIGNATURE\"
     """
-    dimensions: Optional[Any] = None
-    """
-    Dimensions of a field to be created in the document. X and Y location is
-    calculated automatically. API can only configure width and height for the
-    field. If dimensions are not provided default dimensions will be followed.
-    that is 200 x 80 in pixels.
-    """
+    dimensions: Optional[FieldDimension] = None
     placeholder: Optional[str] = None
     """Provide note in the case of Mandatory Attachment"""
     radio_group_name: Optional[str] = None
@@ -3442,10 +3085,8 @@ class AutoPlaceFieldRequest:
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    validation: Optional[Any] = None
-    """Validations"""
-    font: Optional[Any] = None
-    """Font of the fields text             """
+    validation: Optional[FieldValidationValue] = None
+    font: Optional[Font] = None
     multiline: Optional[bool] = None
     """
     This belongs to Text Area field type and If set to true, text area field
@@ -3588,12 +3229,7 @@ class InitialFillingRequest:
     """Unique identifier of the field in the document."""
     image: Optional[str] = None
     """Base64 image used for the filling of the initials."""
-    method: Optional[Any] = None
-    """
-    Name of the hand signature method by user for signing. In case no hand
-    signature method is provided then default will be DRAW. possible values
-    DRAW,TEXT,UPLOAD,SIGNATURE_PAD
-    """
+    method: Optional[HandSignature] = None
     apply_to_all: Optional[bool] = None
     """True if all initials are to be filled."""
 
@@ -3645,8 +3281,7 @@ class InPersonFieldRequest:
     \"ADVANCED_ELECTRONIC_SEAL\", \"QUALIFIED_ELECTRONIC_SEAL\",
     \"ELECTRONIC_SIGNATURE\"
     """
-    authentication_signing: Optional[Any] = None
-    """Field Authentication"""
+    authentication_signing: Optional[SignatureFieldAuthentication] = None
 
 
 @dataclass
@@ -3678,8 +3313,7 @@ class UpdateInPersonFieldRequest:
     \"ADVANCED_ELECTRONIC_SEAL\", \"QUALIFIED_ELECTRONIC_SEAL\",
     \"ELECTRONIC_SIGNATURE\"
     """
-    authentication_signing: Optional[Any] = None
-    """Field Authentication"""
+    authentication_signing: Optional[SignatureFieldAuthentication] = None
 
 
 @dataclass
@@ -3711,8 +3345,7 @@ class DigitalSignatureFieldRequest:
     Visibility of the field that is to be added, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
-    authentication_signing: Optional[Any] = None
-    """Field Authentication"""
+    authentication_signing: Optional[SignatureFieldAuthentication] = None
 
 
 @dataclass
@@ -3741,8 +3374,7 @@ class UpdateDigitalSignatureFieldRequest:
     Visibility of the field that is to be updated, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
-    authentication_signing: Optional[Any] = None
-    """Field Authentication"""
+    authentication_signing: Optional[SignatureFieldAuthentication] = None
 
 
 @dataclass
@@ -3802,12 +3434,10 @@ class TextBoxFieldRequest:
     """The order of the user in workflow for which the field is being added."""
     page_no: Optional[int] = None
     """Page number on which the field is to be created."""
-    type_: Optional[Any] = field(default=None, metadata={"wire_name": "type"})
-    """
-    Type of the field, possible values are \"TEXT\", \"NAME\", \"EMAIL\",
-    \"COMPANY\", \"JOBTITLE\", \"DATE\". All text fields other then TEXT are
-    auto filled in pending mode with the attributes/data of the recipient.
-    """
+    type_: Optional[TextboxType] = field(
+        default=None,
+        metadata={"wire_name": "type"},
+    )
     value: Optional[str] = None
     """
     Value of the field. For type = DATE, the value is expected to follow ISO
@@ -3843,25 +3473,10 @@ class TextBoxFieldRequest:
     Name of the field that is to be added. If not provided, system will assign
     an unique auto generated name to the field.
     """
-    field_locale: Optional[str] = None
-    """
-    Field local. Possible values are ar-AE | en-US. Optional and default will
-    be en-US. This value matters for type \"DATE\".
-    """
-    field_type: Optional[Any] = None
-    """
-    Field type with respect to accepting the type of values, possible values
-    are \"NUMBER\" or \"TEXT\".
-    """
-    validation_rule: Optional[Any] = None
-    """
-    One or more rules for validation of the fields possible values are
-    \"MANDATORY\" or \"OPTIONAL\".
-    """
-    validation: Optional[Any] = None
-    """Validations"""
-    font: Optional[Any] = None
-    """Font of the fields text             """
+    field_type: Optional[FieldType] = None
+    validation_rule: Optional[ValidationRule] = None
+    validation: Optional[FieldValidationValue] = None
+    font: Optional[Font] = None
     dimensions: Optional[FieldDimension] = None
     multiline: Optional[bool] = None
     """If set to true, text area field would be created"""
@@ -3875,11 +3490,6 @@ class UpdateTextBoxFieldRequest:
 
     field_name: Optional[str] = None
     """Current name of the field, that is to be updated."""
-    field_locale: Optional[str] = None
-    """
-    Field local. Possible values are ar-AE | en-US. Optional and default will
-    be en-US. This value matters for type \"DATE\".
-    """
     renamed_as: Optional[str] = None
     """Updated name of the field if renaming is intended."""
     page_no: Optional[int] = None
@@ -3895,18 +3505,9 @@ class UpdateTextBoxFieldRequest:
     """
     Maximum length of the value allowed in the field. Must between 1 - 9999
     """
-    field_type: Optional[Any] = None
-    """
-    Field type with respect to accepting the type of values, possible values
-    are \"NUMBER\" or \"TEXT\".
-    """
-    validation_rule: Optional[Any] = None
-    """
-    One or more rules for validation of the fields possible values are
-    \"MANDATORY\" or \"OPTIONAL\".
-    """
-    font: Optional[Any] = None
-    """Font of the fields text             """
+    field_type: Optional[FieldType] = None
+    validation_rule: Optional[ValidationRule] = None
+    font: Optional[Font] = None
     dimensions: Optional[FieldDimension] = None
     placeholder: Optional[str] = None
     """
@@ -3923,8 +3524,7 @@ class UpdateTextBoxFieldRequest:
     <li>mmm-yyyy</li> <li>mmmm-yy</li> <li>mmmm-yyyy</li> <li>mmmm d, yyyy</li>
     <li>dd/mm/yy</li> <li>ddmmmyyyy</li></ul>
     """
-    validation: Optional[Any] = None
-    """Validations"""
+    validation: Optional[FieldValidationValue] = None
 
 
 @dataclass
@@ -3944,11 +3544,7 @@ class RadioBoxFieldRequest:
     """
     value: Optional[str] = None
     """Value of the field. Possible values are \"true\" or \"false\""""
-    validation_rule: Optional[Any] = None
-    """
-    One or more rules for validation of the fields possible values are
-    \"MANDATORY\" or \"OPTIONAL\".
-    """
+    validation_rule: Optional[ValidationRule] = None
     radio_group_name: Optional[str] = None
     dimensions: Optional[FieldDimension] = None
 
@@ -3967,27 +3563,13 @@ class UpdateRadioBoxFieldRequest:
     """Page number on which the field is to be created."""
     value: Optional[str] = None
     """Value of the field. Possible values are \"true\" or \"false\""""
-    validation_rule: Optional[Any] = None
-    """
-    One or more rules for validation of the fields possible values are
-    \"MANDATORY\" or \"OPTIONAL\".
-    """
+    validation_rule: Optional[ValidationRule] = None
     radio_group_name: Optional[str] = None
     """The group name to which the field belongs."""
     dimensions: Optional[FieldDimension] = None
 
 
-@dataclass
-class ContactSortBy:
-    """
-    Definition: ContactSortBy
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ContactSortBy = Literal["CREATEDON", "NAME", "EMAIL"]
 
 
 @dataclass
@@ -4060,8 +3642,7 @@ class WorkflowPermissionsUpdateRequest:
     True, if the permissions are to be applied on all the recipients in the
     workflow.
     """
-    permissions: Optional[Any] = None
-    """It has all the permissions to be allowed in the workflow"""
+    permissions: Optional[WorkflowPermission] = None
 
 
 @dataclass
@@ -4085,13 +3666,8 @@ class WorkflowPermission:
     It defines whether recipient is allowed to add attachments in the PDF
     document.
     """
-    legal_notice: Optional[Any] = None
-    """
-    The legal notice shown to recipient and agreed by the recipient before
-    recipient signs the document.
-    """
-    attachment: Optional[Any] = None
-    """Attachment"""
+    legal_notice: Optional[PermissionLegalNotice] = None
+    attachment: Optional[AttachmentPermissionRequest] = None
 
 
 @dataclass
@@ -4182,14 +3758,7 @@ class WorkflowUserUpdateRequest:
     """
     mobile_number: Optional[str] = None
     """Mobile number. If no value is provided, old value will be retained."""
-    role: Optional[Any] = None
-    """
-    Role of the recipient to be updated. Possible values are \"SIGNER\",
-    \"REVIEWER\", \"EDITOR\",\"CARBON_COPY\" or \"INPERSON_HOST\". If no value
-    is provided, old value will be retained. However, while XML type document
-    preparation, only supported role types are \"SIGNER\", \"REVIEWER\" and
-    \"CARBON_COPY\"
-    """
+    role: Optional[WorkflowCollaboratorRole] = None
     signing_order: Optional[int] = None
     """
     Order in which the workflow will be signed by the recipients. This signing
@@ -4197,24 +3766,16 @@ class WorkflowUserUpdateRequest:
     """
     email_language_code: Optional[str] = None
     """email language code"""
-    delivery_method: Optional[Any] = None
-    """
-    Delivery method of the recipient in the workflow. Possible values are
-    \"EMAIL\", \"SMS\", or \"EMAIL_AND_SMS\". Default value would be EMAIL
-    """
+    delivery_method: Optional[DeliveryMethod] = None
 
 
-@dataclass
-class WorkflowCollaboratorRole:
-    """
-    Definition: WorkflowCollaboratorRole
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+WorkflowCollaboratorRole = Literal[
+    "SIGNER",
+    "REVIEWER",
+    "EDITOR",
+    "INPERSON_HOST",
+    "CARBON_COPY",
+]
 
 
 @dataclass
@@ -4247,8 +3808,7 @@ class UpdateReminderRequest:
     Required, in case of enabled property will true. The number of days after
     which the first reminder would be sent to workflow user.
     """
-    repeat: Optional[Any] = None
-    """The reminders would be sent to user repeatedly."""
+    repeat: Optional[RepeatRequest] = None
 
 
 @dataclass
@@ -4288,13 +3848,7 @@ class WorflowGroupRequest:
     the email notification to the user on its turn. If no value is provided,
     default value of \"true\" will be set.
     """
-    role: Optional[Any] = None
-    """
-    Role of the group as a recipient in the workflow. Possible value are
-    \"SIGNER\", \"REVIEWER\", \"EDITOR\",\"CARBON_COPY\" and \"INPERSON_HOST\".
-    However, while XML type document preparation, only supported role types are
-    \"SIGNER\", \"REVIEWER\" and \"CARBON_COPY\"
-    """
+    role: Optional[CollaboratorRole] = None
     signing_order: Optional[int] = None
     """
     Order in which the workflow will be signed by the recipients. This signing
@@ -4316,13 +3870,7 @@ class PlaceholderRequest:
     its turn arrives in workflow. Setting its value to \"false\" does not send
     the email notification to the user on its turn.
     """
-    role: Optional[Any] = None
-    """
-    Role of the group as a recipient in the workflow. Possible value are
-    \"SIGNER\", \"REVIEWER\", \"EDITOR\",\"CARBON_COPY\" and \"INPERSON_HOST\".
-    However, while XML type document preparation, only supported role types are
-    \"SIGNER\", \"REVIEWER\" and \"CARBON_COPY\"
-    """
+    role: Optional[CollaboratorRole] = None
     signing_order: Optional[int] = None
     """
     Order in which the workflow will be signed by the recipients. This signing
@@ -4348,14 +3896,7 @@ class WorkflowPlaceholderUpdateRequest:
     the email notification to the user on its turn. If no value is provided,
     old value will be retained.
     """
-    role: Optional[Any] = None
-    """
-    Role of the group as a recipient in the workflow. Possible value are
-    \"SIGNER\", \"REVIEWER\", \"EDITOR\",\"CARBON_COPY\" and \"INPERSON_HOST\".
-    If no value is provided, old value will be retained. However, while XML
-    type document preparation, only supported role types are \"SIGNER\",
-    \"REVIEWER\" and \"CARBON_COPY\"
-    """
+    role: Optional[WorkflowCollaboratorRole] = None
     signing_order: Optional[int] = None
     """
     Order in which the workflow will be signed by the recipients. This signing
@@ -4426,11 +3967,7 @@ class DigitalSignatureFieldResponse:
     processed_by: Optional[str] = None
     """Email address of the user who processed the field."""
     dimensions: Optional[FieldDimenssionResponse] = None
-    verification: Optional[Any] = None
-    """
-    Returns the verification response of signature field. In case of no
-    verification, null is returned.
-    """
+    verification: Optional[VerificationResponse] = None
     nid: Optional[str] = None
     display: Optional[str] = None
     """
@@ -4438,8 +3975,7 @@ class DigitalSignatureFieldResponse:
     values are \"VISIBLE\" and \"INVISIBLE\".
     """
     level_of_assurance: Optional[List[str]] = None
-    authentication: Optional[Any] = None
-    """Authentication"""
+    authentication: Optional[FieldAuthentication] = None
 
 
 @dataclass
@@ -4490,10 +4026,8 @@ class FieldAuthentication:
     """
     True, if authentications are enabled for the electronic signature fields.
     """
-    sms_otp: Optional[Any] = None
-    """OTP """
-    totp: Optional[Any] = None
-    """TOTP"""
+    sms_otp: Optional[AccessSecuritySmsOtpResponse] = None
+    totp: Optional[AccessSecurityTOTPResponse] = None
 
 
 @dataclass
@@ -4591,13 +4125,8 @@ class ElectronicSignatureFieldResponse:
     certificate shared by all the users in the service plan. Possible values
     are WITNESS or NONE.
     """
-    authentication: Optional[Any] = None
-    """Authentication"""
-    verification: Optional[Any] = None
-    """
-    Returns the verification response of the field. In case of no verification,
-    null is returned.
-    """
+    authentication: Optional[FieldAuthentication] = None
+    verification: Optional[VerificationResponse] = None
     nid: Optional[str] = None
     display: Optional[str] = None
     """
@@ -4689,11 +4218,7 @@ class InPersonFieldResponse:
     plan. Possible values are WITNESS or NONE.
     """
     dimensions: Optional[FieldDimenssionResponse] = None
-    verification: Optional[Any] = None
-    """
-    Returns the verification response of inperson field. In case of no
-    verification, null is returned.
-    """
+    verification: Optional[VerificationResponse] = None
     display: Optional[str] = None
     """
     Returns the visibility value of the inperson field, possible values are
@@ -4701,8 +4226,7 @@ class InPersonFieldResponse:
     """
     level_of_assurance: Optional[List[str]] = None
     """In Person selected level of assurances"""
-    authentication: Optional[Any] = None
-    """Authentication"""
+    authentication: Optional[FieldAuthentication] = None
 
 
 @dataclass
@@ -4711,11 +4235,6 @@ class TextFieldResponse:
     Definition: TextFieldResponse
     """
 
-    field_locale: Optional[str] = None
-    """
-    Field local. Possible values are ar-AE | en-US. Optional and default will
-    be en-US. This value matters for type \"DATE\".
-    """
     required: Optional[bool] = None
     """True if field required in pdf"""
     order: Optional[int] = None
@@ -4753,8 +4272,7 @@ class TextFieldResponse:
     One or more rules for validation of the fields, possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    validation: Optional[Any] = None
-    """This object is for required Value to be passed"""
+    validation: Optional[FieldValidationValue] = None
     visible: Optional[bool] = None
     """True, if the field is not hidden in the PDF document."""
     multiline: Optional[bool] = None
@@ -5026,12 +4544,9 @@ class QrCodeResponse:
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[Any] = None
-    """Settings regarding options"""
-    color: Optional[Any] = None
-    """Settings regarding color"""
-    logo: Optional[Any] = None
-    """Settings regarding logo"""
+    options: Optional[QrCodeOptions] = None
+    color: Optional[QrCodeColor] = None
+    logo: Optional[QrCodeLogo] = None
 
 
 @dataclass
@@ -5069,13 +4584,8 @@ class AttachmentFieldResponse:
     """Attachmet ref id"""
     note: Optional[str] = None
     """Attachmet note Only in case of \"MANDATORY\" attachment rule"""
-    validation_rule: Optional[Any] = None
-    """
-    One or more rules for validation of the fields possible values are
-    \"MANDATORY\" or \"OPTIONAL\".
-    """
-    dimensions: Optional[Any] = None
-    """Dimentions"""
+    validation_rule: Optional[ValidationRule] = None
+    dimensions: Optional[FieldDimenssionResponse] = None
 
 
 @dataclass
@@ -5094,8 +4604,7 @@ class CommentFieldResponse:
     """Private"""
     recipients: Optional[List[CommentFieldRecipientResponse]] = None
     """Recipients"""
-    dimensions: Optional[Any] = None
-    """Dimensions"""
+    dimensions: Optional[FieldDimenssionResponse] = None
 
 
 @dataclass
@@ -5200,11 +4709,11 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
-            f"/{str(attachment_id)}"
+            f"/{quote(str(attachment_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5240,11 +4749,11 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
-            f"/{str(attachment_id)}"
+            f"/{quote(str(attachment_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5279,9 +4788,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
         )
 
@@ -5318,9 +4827,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/attachments"
         )
 
@@ -5372,9 +4881,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/checkbox"
         )
@@ -5419,9 +4928,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/checkbox"
         )
@@ -5463,7 +4972,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/settings/contacts/{str(record_per_page)}/{str(page_no)}"
+            f"/v4"
+            f"/settings"
+            f"/contacts"
+            f"/{quote(str(record_per_page), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
         )
         query_params = []
         if sort_by is not None:
@@ -5509,7 +5022,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5542,7 +5059,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5577,9 +5098,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/certify"
         )
 
@@ -5615,9 +5136,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/details"
         )
 
@@ -5652,7 +5173,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5688,9 +5213,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/certify"
         )
 
@@ -5730,10 +5255,10 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
             f"/library"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -5775,7 +5300,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents"
+            f"/v4/packages/{quote(str(package_id), safe='')}/documents"
         )
 
         response = await self.http_client.send_async(
@@ -5820,9 +5345,9 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4"
             f"/enterprise"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/workflow"
-            f"/{str(order)}"
+            f"/{quote(str(order), safe='')}"
             f"/authentication"
         )
 
@@ -5863,9 +5388,9 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4"
             f"/enterprise"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/workflow"
-            f"/{str(order)}"
+            f"/{quote(str(order), safe='')}"
             f"/authentication"
         )
 
@@ -5910,9 +5435,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/assign"
         )
@@ -5973,9 +5498,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/autoplace"
         )
@@ -6013,9 +5538,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
         )
 
@@ -6052,9 +5577,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
         )
 
@@ -6091,11 +5616,11 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
-            f"/{str(page_no)}"
+            f"/{quote(str(page_no), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -6128,7 +5653,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/move_to"
+            f"/v4/packages/{quote(str(package_id), safe='')}/move_to"
         )
 
         response = await self.http_client.send_async(
@@ -6172,9 +5697,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/initials"
         )
@@ -6212,9 +5737,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/initial"
         )
 
@@ -6257,9 +5782,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/initials"
         )
@@ -6314,9 +5839,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/in_person_signature"
         )
@@ -6361,9 +5886,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/in_person_signature"
         )
@@ -6432,7 +5957,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/approve"
+            f"/v4/packages/{quote(str(package_id), safe='')}/approve"
         )
 
         response = await self.http_client.send_async(
@@ -6465,7 +5990,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/decline"
+            f"/v4/packages/{quote(str(package_id), safe='')}/decline"
         )
 
         response = await self.http_client.send_async(
@@ -6501,7 +6026,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -6539,7 +6064,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
         query_params = []
         if document_ids is not None:
@@ -6596,7 +6121,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/finish"
+            f"/v4/packages/{quote(str(package_id), safe='')}/finish"
         )
 
         response = await self.http_client.send_async(
@@ -6629,7 +6154,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/gatekeeper/approve"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/gatekeeper"
+            f"/approve"
         )
 
         response = await self.http_client.send_async(
@@ -6662,7 +6191,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/gatekeeper/decline"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/gatekeeper"
+            f"/decline"
         )
 
         response = await self.http_client.send_async(
@@ -6718,9 +6251,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(document_status)}"
-            f"/{str(page_no)}"
-            f"/{str(record_per_page)}"
+            f"/{quote(str(document_status), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
+            f"/{quote(str(record_per_page), safe='')}"
         )
         query_params = []
         if package_name is not None:
@@ -6852,7 +6385,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/details"
+            f"/v4/packages/{quote(str(package_id), safe='')}/details"
         )
 
         response = await self.http_client.send_async(
@@ -6885,7 +6418,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -6923,7 +6456,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/submit"
+            f"/v4/packages/{quote(str(package_id), safe='')}/submit"
         )
 
         response = await self.http_client.send_async(
@@ -6943,7 +6476,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def q_r_add_q_r_code_async(
+    async def qr_add_qr_code_async(
         self,
         input: QrCodeRequest,
         package_id: str,
@@ -6959,9 +6492,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/qrcode"
         )
@@ -6983,7 +6516,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def q_r_update_q_r_code_async(
+    async def qr_update_qr_code_async(
         self,
         input: UpdateQrCodeRequest,
         package_id: str,
@@ -6999,9 +6532,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/qrcode"
         )
@@ -7051,9 +6584,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/radio"
         )
@@ -7098,9 +6631,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/radio"
         )
@@ -7140,7 +6673,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/settings/templates/{str(record_per_page)}/{str(page_no)}"
+            f"/v4"
+            f"/settings"
+            f"/templates"
+            f"/{quote(str(record_per_page), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
         )
         query_params = []
         if sort_by is not None:
@@ -7198,9 +6735,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/signature"
         )
@@ -7245,9 +6782,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/signature"
         )
@@ -7317,7 +6854,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id_bulk_action)}"
+            f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -7366,7 +6903,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(bulk_action)}/status"
+            f"/v4/packages/{quote(str(bulk_action), safe='')}/status"
         )
 
         response = await self.http_client.send_async(
@@ -7431,7 +6968,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/documents/{str(document_id)}/sign"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/documents"
+            f"/{quote(str(document_id), safe='')}"
+            f"/sign"
         )
 
         response = await self.http_client.send_async(
@@ -7470,7 +7012,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/enterprise/templates/{str(record_per_page)}/{str(page_no)}"
+            f"/v4"
+            f"/enterprise"
+            f"/templates"
+            f"/{quote(str(record_per_page), safe='')}"
+            f"/{quote(str(page_no), safe='')}"
         )
         query_params = []
         if sort_by is not None:
@@ -7532,9 +7078,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/text"
         )
@@ -7578,9 +7124,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/fields"
             f"/text"
         )
@@ -7633,9 +7179,9 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/documents"
-            f"/{str(document_id)}"
+            f"/{quote(str(document_id), safe='')}"
             f"/template"
         )
 
@@ -7668,7 +7214,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/report"
+            f"/v4/packages/{quote(str(package_id), safe='')}/report"
         )
 
         response = await self.http_client.send_async(
@@ -7700,7 +7246,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -7738,10 +7284,10 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4"
             f"/packages"
-            f"/{str(package_id)}"
+            f"/{quote(str(package_id), safe='')}"
             f"/log"
-            f"/{str(page_no)}"
-            f"/{str(records_per_page)}"
+            f"/{quote(str(page_no), safe='')}"
+            f"/{quote(str(records_per_page), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -7779,7 +7325,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/reminders"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/reminders"
         )
 
         response = await self.http_client.send_async(
@@ -7811,7 +7362,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/users"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
 
         response = await self.http_client.send_async(
@@ -7849,7 +7400,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/complete"
+            f"/v4/packages/{quote(str(package_id), safe='')}/complete"
         )
 
         response = await self.http_client.send_async(
@@ -7883,7 +7434,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/permissions"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/permissions"
         )
 
         response = await self.http_client.send_async(
@@ -7922,7 +7478,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/permissions"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/permissions"
         )
 
         response = await self.http_client.send_async(
@@ -7955,7 +7516,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -7990,7 +7551,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -8026,7 +7587,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
         response = await self.http_client.send_async(
@@ -8059,7 +7620,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/post_process"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/post_process"
         )
 
         response = await self.http_client.send_async(
@@ -8098,7 +7663,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/reminders"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/reminders"
         )
 
         response = await self.http_client.send_async(
@@ -8137,7 +7707,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/groups"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow/groups"
         )
 
         response = await self.http_client.send_async(
@@ -8178,7 +7748,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/placeholder"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/placeholder"
         )
 
         response = await self.http_client.send_async(
@@ -8237,7 +7811,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/users"
+            f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
 
         response = await self.http_client.send_async(
@@ -8270,7 +7844,11 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -8310,7 +7888,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/placeholder"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/placeholder"
         )
 
         response = await self.http_client.send_async(
@@ -8351,7 +7934,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/user"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/user"
         )
 
         response = await self.http_client.send_async(
@@ -8385,7 +7973,12 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v4/packages/{str(package_id)}/workflow/{str(order)}/reorder"
+            f"/v4"
+            f"/packages"
+            f"/{quote(str(package_id), safe='')}"
+            f"/workflow"
+            f"/{quote(str(order), safe='')}"
+            f"/reorder"
         )
 
         response = await self.http_client.send_async(
@@ -8415,10 +8008,11 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to delete shared space.
         The availability of deleting shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
-        enable the `Manage Shared Space' option in Roles>Document Settings.
+        enable the 'Manage Shared Space' option in Roles>Document Settings.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v4/shared_spaces/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -8450,7 +8044,8 @@ class SigninghubClient(ConnectorClientBase):
         collaborator.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v4/shared_spaces/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -8481,10 +8076,11 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to update shared space.
         The availability of updating shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
-        enable the `Manage Shared Space' option in Roles>Document Settings.
+        enable the 'Manage Shared Space' option in Roles>Document Settings.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v4/shared_spaces/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
         response = await self.http_client.send_async(

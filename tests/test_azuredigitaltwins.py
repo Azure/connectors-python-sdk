@@ -20,6 +20,10 @@ from azure.connectors.azuredigitaltwins import (
     QueryTwinsInput,
     QueryResult,
     IncomingRelationship,
+    UpdateComponentInput,
+    UpdateModelInput,
+    UpdateRelationshipInput,
+    UpdateTwinInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -27,6 +31,45 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+
+
+WRITE_OPERATIONS = [
+    (
+        "add_models",
+        [{"@id": "dtmi:example:Room;1"}],
+        {},
+        "POST",
+        "/models?api-version=2020-10-31",
+    ),
+    (
+        "update_model",
+        UpdateModelInput(value='[{"op": "replace"}]'),
+        {"modelid": "dtmi:example:Room;1"},
+        "PATCH",
+        "/models/dtmi%3Aexample%3ARoom%3B1?api-version=2020-10-31",
+    ),
+    (
+        "update_twin",
+        UpdateTwinInput(value='[{"op": "replace"}]'),
+        {"twinid": "room/1"},
+        "PATCH",
+        "/digitaltwins/room%2F1?api-version=2020-10-31",
+    ),
+    (
+        "update_component",
+        UpdateComponentInput(value='[{"op": "replace"}]'),
+        {"twinid": "room-1", "component_path": "hvac/status"},
+        "PATCH",
+        "/digitaltwins/room-1/components/hvac%2Fstatus?api-version=2020-10-31",
+    ),
+    (
+        "update_relationship",
+        UpdateRelationshipInput(value='[{"op": "replace"}]'),
+        {"twinid": "room-1", "relationship_id": "contains/1"},
+        "PATCH",
+        "/digitaltwins/room-1/relationships/contains%2F1?api-version=2020-10-31",
+    ),
+]
 
 
 class TestAzuredigitaltwinsClientInitialization:
@@ -121,6 +164,77 @@ class TestAzuredigitaltwinsClientLifecycle:
             await client.close()
             mock_close.assert_called_once()
 
+
+class TestWriteOperationSignatures:
+    """Tests for write operations with generated API-version defaults."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "input_value", "operation_args", "http_method", "path"),
+        WRITE_OPERATIONS,
+    )
+    async def test_uses_current_signature_and_internal_api_version(
+        self,
+        mock_token_provider,
+        operation,
+        input_value,
+        operation_args,
+        http_method,
+        path,
+    ):
+        """Test each write operation sends its body to the expected route."""
+        client = AzuredigitaltwinsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=200, text="{}"),
+        ) as mock_send:
+            method = getattr(client, f"{operation}_async")
+            await method(input=input_value, **operation_args)
+
+            mock_send.assert_called_once_with(
+                http_method,
+                f"https://example.azure.com/connections/test{path}",
+                body=input_value,
+            )
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "input_value", "operation_args", "http_method", "path"),
+        WRITE_OPERATIONS,
+    )
+    async def test_error_response_raises_exception(
+        self,
+        mock_token_provider,
+        operation,
+        input_value,
+        operation_args,
+        http_method,
+        path,
+    ):
+        """Test each write operation rejects a non-2xx response."""
+        client = AzuredigitaltwinsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=400, text="Invalid update"),
+        ):
+            method = getattr(client, f"{operation}_async")
+            with pytest.raises(ConnectorException) as exc_info:
+                await method(input=input_value, **operation_args)
+
+            assert exc_info.value.status_code == 400
+
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_token_provider):
         """Test async context manager functionality."""
@@ -158,7 +272,7 @@ class TestListModelsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_models_async(api_version="2023-02-27-preview")
+            result = await client.list_models_async()
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -183,7 +297,6 @@ class TestListModelsAsync:
             return_value=mock_response
         ) as mock_send:
             await client.list_models_async(
-                api_version="2023-02-27-preview",
                 dependencies_for="dtmi:example:Room;1",
                 include_model_definition="true"
             )
@@ -209,7 +322,7 @@ class TestListModelsAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_models_async(api_version="2023-02-27-preview")
+                await client.list_models_async()
 
             assert exc_info.value.status_code == 401
 
@@ -237,8 +350,7 @@ class TestGetModelByIdAsync:
             return_value=mock_response
         ) as mock_send:
             result = await client.get_model_by_id_async(
-                modelid="dtmi:example:Room;1",
-                api_version="2023-02-27-preview"
+                modelid="dtmi:example:Room;1"
             )
 
             mock_send.assert_called_once()
@@ -262,8 +374,7 @@ class TestGetModelByIdAsync:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_model_by_id_async(
-                    modelid="nonexistent",
-                    api_version="2023-02-27-preview"
+                    modelid="nonexistent"
                 )
 
             assert exc_info.value.status_code == 404
@@ -289,8 +400,7 @@ class TestDeleteModelAsync:
             return_value=mock_response
         ) as mock_send:
             await client.delete_model_async(
-                modelid="dtmi:example:Room;1",
-                api_version="2023-02-27-preview"
+                modelid="dtmi:example:Room;1"
             )
 
             mock_send.assert_called_once()
@@ -321,8 +431,7 @@ class TestGetTwinByIdAsync:
             return_value=mock_response
         ) as mock_send:
             result = await client.get_twin_by_id_async(
-                twinid="room1",
-                api_version="2023-02-27-preview"
+                twinid="room1"
             )
 
             mock_send.assert_called_once()
@@ -346,8 +455,7 @@ class TestGetTwinByIdAsync:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_twin_by_id_async(
-                    twinid="nonexistent",
-                    api_version="2023-02-27-preview"
+                    twinid="nonexistent"
                 )
 
             assert exc_info.value.status_code == 404
@@ -378,8 +486,7 @@ class TestAddTwinAsync:
             input_data = AddTwinInput(value='{"$dtId": "room1"}')
             result = await client.add_twin_async(
                 input=input_data,
-                twinid="room1",
-                api_version="2023-02-27-preview"
+                twinid="room1"
             )
 
             mock_send.assert_called_once()
@@ -408,8 +515,7 @@ class TestDeleteTwinAsync:
             return_value=mock_response
         ) as mock_send:
             await client.delete_twin_async(
-                twinid="room1",
-                api_version="2023-02-27-preview"
+                twinid="room1"
             )
 
             mock_send.assert_called_once()
@@ -441,8 +547,7 @@ class TestGetComponentAsync:
         ) as mock_send:
             result = await client.get_component_async(
                 twinid="room1",
-                component_path="thermostat",
-                api_version="2023-02-27-preview"
+                component_path="thermostat"
             )
 
             mock_send.assert_called_once()
@@ -475,8 +580,7 @@ class TestGetRelationshipByIdAsync:
         ) as mock_send:
             result = await client.get_relationship_by_id_async(
                 twinid="room1",
-                relationship_id="rel1",
-                api_version="2023-02-27-preview"
+                relationship_id="rel1"
             )
 
             mock_send.assert_called_once()
@@ -509,8 +613,7 @@ class TestAddRelationshipAsync:
             result = await client.add_relationship_async(
                 input=input_data,
                 twinid="room1",
-                relationship_id="rel1",
-                api_version="2023-02-27-preview"
+                relationship_id="rel1"
             )
 
             mock_send.assert_called_once()
@@ -540,8 +643,7 @@ class TestDeleteRelationshipAsync:
         ) as mock_send:
             await client.delete_relationship_async(
                 twinid="room1",
-                relationship_id="rel1",
-                api_version="2023-02-27-preview"
+                relationship_id="rel1"
             )
 
             mock_send.assert_called_once()
@@ -572,8 +674,7 @@ class TestListRelationshipsAsync:
             return_value=mock_response
         ) as mock_send:
             result = await client.list_relationships_async(
-                twinid="room1",
-                api_version="2023-02-27-preview"
+                twinid="room1"
             )
 
             mock_send.assert_called_once()
@@ -603,8 +704,7 @@ class TestListIncomingRelationshipsAsync:
             return_value=mock_response
         ) as mock_send:
             result = await client.list_incoming_relationships_async(
-                twinid="room1",
-                api_version="2023-02-27-preview"
+                twinid="room1"
             )
 
             mock_send.assert_called_once()
@@ -638,8 +738,7 @@ class TestQueryTwinsAsync:
                 query="SELECT * FROM digitaltwins WHERE $dtId = 'room1'"
             )
             result = await client.query_twins_async(
-                input=query_input,
-                api_version="2023-02-27-preview"
+                input=query_input
             )
 
             mock_send.assert_called_once()
@@ -668,8 +767,7 @@ class TestQueryTwinsAsync:
 
             with pytest.raises(ConnectorException) as exc_info:
                 await client.query_twins_async(
-                    input=query_input,
-                    api_version="2023-02-27-preview"
+                    input=query_input
                 )
 
             assert exc_info.value.status_code == 400
@@ -697,8 +795,7 @@ class TestSendTelemetryAsync:
             telemetry = SendTelemetryInput(value='{"temperature": 72}')
             await client.send_telemetry_async(
                 input=telemetry,
-                twinid="room1",
-                api_version="2023-02-27-preview"
+                twinid="room1"
             )
 
             mock_send.assert_called_once()
@@ -728,8 +825,7 @@ class TestSendComponentTelemetryAsync:
             await client.send_component_telemetry_async(
                 input=telemetry,
                 twinid="room1",
-                component_path="thermostat",
-                api_version="2023-02-27-preview"
+                component_path="thermostat"
             )
 
             mock_send.assert_called_once()

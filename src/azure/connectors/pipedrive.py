@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -20,17 +21,7 @@ from azure.connectors.sdk import (
 
 # Type Definitions
 
-@dataclass
-class TrigNewActivityResponse:
-    """
-    Response for When a new activity is added
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+TrigNewActivityResponse = List["ActivityResponse"]
 
 
 @dataclass
@@ -184,16 +175,88 @@ class StageResponse:
 
 
 @dataclass
-class TrigNewDealResponse:
+class DealResponseV2:
     """
-    Response for When a new deal is added (V2)
+    Response for Add deal (V2)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    id: Optional[int] = None
+    """Id of the deal."""
+    creator_user_id: Optional[Dict[str, Any]] = None
+    user_id: Optional[Dict[str, Any]] = None
+    person_id: Optional[Dict[str, Any]] = None
+    org_id: Optional[Dict[str, Any]] = None
+    status: Optional[str] = None
+    """Open, won, lost or deleted."""
+    title: Optional[str] = None
+    """Title of the deal."""
+    value: Optional[float] = None
+    """Monetary value of the deal."""
+    currency: Optional[str] = None
+    """Currency associated with the deal value."""
+    add_time: Optional[str] = None
+    """yyyy-MM-ddTHH:mm:ss.fffZ"""
+    update_time: Optional[str] = None
+    """yyyy-MM-ddTHH:mm:ss.fffZ"""
+    stage_id: Optional[int] = None
+    """ID of stage the deal is placed in a pipeline."""
+    stage_change_time: Optional[str] = None
+    """yyyy-MM-ddTHH:mm:ss.fffZ"""
+    active: Optional[bool] = None
+    """True if the deal is active."""
+    deleted: Optional[bool] = None
+    """True if the deal has been deleted."""
+    next_activity_date: Optional[str] = None
+    """yyyy-MM-dd"""
+    next_activity_time: Optional[str] = None
+    """yyyy-MM-ddTHH:mm:ss.fffZ"""
+    next_activity_id: Optional[int] = None
+    """Id of the next activity."""
+    last_activity_id: Optional[int] = None
+    """Id of the last activity."""
+    last_activity_date: Optional[str] = None
+    """yyyy-MM-dd"""
+    lost_reason: Optional[str] = None
+    """Message about why the deal was lost (to be used when status=lost)."""
+    visible_to: Optional[str] = None
+    """Owner, followers or entire company."""
+    close_time: Optional[str] = None
+    """yyyy-MM-ddTHH:mm:ss.fffZ"""
+    pipeline_id: Optional[int] = None
+    """Id of pipeline the deal is associated with."""
+    products_count: Optional[int] = None
+    """Number of products associated with the deal."""
+    files_count: Optional[int] = None
+    """Number of files associated with the deal."""
+    notes_count: Optional[int] = None
+    """Number of notes associated with the deal."""
+    followers_count: Optional[int] = None
+    """Number of followers associated with the deal."""
+    email_messages_count: Optional[int] = None
+    """Number of email messages associated with the deal."""
+    activities_count: Optional[int] = None
+    """Number of activities associated with the deal."""
+    done_activities_count: Optional[int] = None
+    """Number of done activities associated with the deal."""
+    undone_activities_count: Optional[int] = None
+    """Number of undone activities associated with the deals."""
+    reference_activities_count: Optional[int] = None
+    """Number of referenced activities associated with the deal."""
+    participants_count: Optional[int] = None
+    """Number of participants associated with the deal."""
+    expected_close_date: Optional[str] = None
+    """yyyy-MM-dd"""
+    next_activity_subject: Optional[str] = None
+    """Subject of next activity associated with the deal."""
+    next_activity_type: Optional[str] = None
+    """Type of next activity associated with the deal."""
+    next_activity_duration: Optional[str] = None
+    """Duration of next activity associated with the deal."""
+    next_activity_note: Optional[str] = None
+    """Notes for next activity associated with the deal"""
+
+
+TrigNewDealResponse = List["DealResponseV2"]
 
 
 @dataclass
@@ -241,6 +304,8 @@ class AddDealRequest:
 
     title: Optional[str] = None
     """Title of the deal."""
+    pipeline_id: Optional[str] = None
+    """The id of the pipeline to fetch stages from."""
     stage_id: Optional[str] = None
     """Stage of the deal."""
     status: Optional[str] = None
@@ -265,6 +330,8 @@ class UpdateDealStageRequest:
     Definition: UpdateDealStageRequest
     """
 
+    pipeline_id: Optional[str] = None
+    """The id of the pipeline to fetch stages from."""
     stage_id: Optional[str] = None
     """Stage of the deal."""
     expected_close_date: Optional[str] = None
@@ -388,7 +455,10 @@ class PipedriveClient(ConnectorClientBase):
 
         This operation retrieves all details of an existing deal, given its id.
         """
-        request_url = f"{self._connection_runtime_url}/v1/deals/{str(deal_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1/deals/{quote(str(deal_id), safe='')}"
+        )
 
         response = await self.http_client.send_async(
             "GET", request_url, body=None
@@ -420,7 +490,7 @@ class PipedriveClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/update_status_deal/v1/deals/{str(deal_id)}"
+            f"/update_status_deal/v1/deals/{quote(str(deal_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -479,7 +549,8 @@ class PipedriveClient(ConnectorClientBase):
         This operation returns data about a specific stage.
         """
         request_url = (
-            f"{self._connection_runtime_url}/v1/stages/{str(stage_id)}"
+            f"{self._connection_runtime_url}"
+            f"/v1/stages/{quote(str(stage_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -504,7 +575,7 @@ class PipedriveClient(ConnectorClientBase):
         input: AddDealRequest,
     ) -> dict[str, Any] | None:
         """
-        Add deal (V2)
+        Add deal
 
         This operation creates a new deal for the authorized account.
         """
@@ -533,14 +604,18 @@ class PipedriveClient(ConnectorClientBase):
         deal_id: str,
     ) -> dict[str, Any] | None:
         """
-        Update deal stage (V2)
+        Update deal stage
 
         This operation is used to update the stage associated with a deal,
         given its id.
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/connector-v2/update_stage_deal/v1/deals/{str(deal_id)}"
+            f"/connector-v2"
+            f"/update_stage_deal"
+            f"/v1"
+            f"/deals"
+            f"/{quote(str(deal_id), safe='')}"
         )
 
         response = await self.http_client.send_async(

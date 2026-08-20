@@ -28,10 +28,7 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.azurequeues import (
-    AzurequeuesClient,
-    PutMessageInput,
-)
+from azure.connectors.azurequeues import AzurequeuesClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/azurequeues/[connection-id]
@@ -128,12 +125,7 @@ async def example_3_put_message():
 
     async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            # Create the message input
-            message_input = PutMessageInput(
-                additional_properties={
-                    "message": "Hello from Azure Connectors SDK for Python!"
-                }
-            )
+            message_input = "Hello from Azure Connectors SDK for Python!"
 
             await client.put_message_async(
                 input=message_input,
@@ -142,7 +134,7 @@ async def example_3_put_message():
             )
 
             print(f"Message sent to queue '{QUEUE_NAME}':")
-            print(f"  Content: {message_input.additional_properties.get('message')}")
+            print(f"  Content: {message_input}")
 
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
@@ -172,7 +164,8 @@ async def example_4_get_messages():
             )
 
             if result:
-                messages = result.get("QueueMessagesList", result)
+                queue_messages_list = result.get("QueueMessagesList", {})
+                messages = queue_messages_list.get("QueueMessage", [])
                 if isinstance(messages, list):
                     print(f"Retrieved {len(messages)} message(s) from '{QUEUE_NAME}':")
                     for i, msg in enumerate(messages, 1):
@@ -180,6 +173,8 @@ async def example_4_get_messages():
                         print(f"    ID: {msg.get('MessageId', 'N/A')}")
                         print(f"    Text: {msg.get('MessageText', 'N/A')[:50]}...")
                         print(f"    Pop Receipt: {msg.get('PopReceipt', 'N/A')[:20]}...")
+                        print(f"    Dequeue Count: {msg.get('DequeueCount', 'N/A')}")
+                        print(f"    Next Visible: {msg.get('TimeNextVisible', 'N/A')}")
                 else:
                     print(f"Response: {result}")
             else:

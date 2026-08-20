@@ -7,8 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Generated Python operation names now preserve Swagger `operationId` spelling by default while grouping acronym runs in snake_case. Connector-scoped corrections fix malformed Google Tasks and PDF.co operation names. This renames methods in DocuSign, GitHub, Google Tasks, PDF.co, Salesforce, SigningHub, Slack, Word Online (Business), and Zoho Sign.
+- Regenerated Google Tasks and Slack trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Slack also no longer exposes the deprecated `create_group_async` operation.
+- Regenerated Salesforce trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Salesforce bulk upload and generic HTTP request operations now accept raw `bytes` bodies instead of generated request models.
+- Regenerated Office 365 Groups Mail, Planner, SMTP, and Yammer now expose current request and response model names instead of deprecated version-family sibling names. Their polling triggers are available through `TRIGGER_OPERATIONS`, not callable client methods.
+- `UploadDocument.document_id` now represents the natural `document_id` wire field. Callers that used it for `documentId` must use `document_id_2` instead.
+- Regenerated Azure Queues, DocuSign, Event Hubs, Microsoft Forms, SharePoint Online, and Microsoft Teams from the current managed connector contracts. Trigger routes are now exposed through `TRIGGER_OPERATIONS` instead of callable client methods, and deprecated DocuSign operations are no longer generated.
+- Azure Event Hubs batch sends now require `partition_key`. Word Online (Business) template and PDF operations now require `source`, `drive`, and `file` identifiers.
+- Regenerated contracts move trigger routes from callable methods to `TRIGGER_OPERATIONS` for GitHub, Jira, Office 365 Outlook, Office 365 Groups, Power BI, Service Bus, and Shifts. Microsoft Bookings no longer exposes the deprecated `create_appointment_async`, `update_appointment_async`, or `cancel_appointment_async` methods.
+- Azure Digital Twins now supplies API version `2020-10-31` internally instead of accepting `api_version` on its public methods. Azure IoT Central schema methods now accept template and module identifiers; Azure Tables entity listing no longer accepts continuation-key parameters; Jira issue listing now accepts JQL and a next-page token; Office 365 Outlook and OneNote signatures now follow their current managed connector contracts.
+
+### Changed
+
+- Regenerated Office 365 Outlook, Office 365 Groups Mail, Pipedrive, Planner, Plumsail Documents, SharePoint Online, SMTP, and Yammer from pinned managed connector contracts using the current CodefulSdkGenerator.
+- Regenerated Azure Queues, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, Microsoft Forms, SharePoint Online, SigningHub, Microsoft Teams, and Word Online (Business) from the merged CodefulSdkGenerator contract updates.
+- Binary request bodies for SharePoint file and attachment uploads, SigningHub document uploads, and Microsoft Teams HTTP requests are forwarded as raw bytes with `application/octet-stream`.
+- Regenerated Azure AD, Azure Digital Twins, Azure Event Grid, Azure IoT Central, Azure Monitor Logs, Azure Queues, Azure Tables, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, GitHub, Jira, Azure Data Explorer, Microsoft Bookings, Microsoft Forms, Office 365 Outlook, Office 365 Groups, OneNote, Pipedrive, Power BI, Service Bus, Shifts, SigningHub, Microsoft Teams, and Word Online (Business) with corrected root-schema handling.
+
+### Fixed
+
+- Corrected eight malformed PDF.co method names: `p_d_f_search_text_async` to `pdf_search_text_async`, `p_d_f_from_x_l_s_x_l_s_x_async` to `pdf_from_xls_xlsx_async`, `p_d_f_un_searchable_async` to `pdf_unsearchable_async`, `x_l_sto_c_s_v_async` to `xls_to_csv_async`, `x_l_sto_h_t_m_l_async` to `xls_to_html_async`, `x_l_sto_j_s_o_n_async` to `xls_to_json_async`, `x_l_sto_t_x_t_async` to `xls_to_txt_async`, and `x_l_sto_x_m_l_async` to `xls_to_xml_async`.
+- Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
+- Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
+
 ### Added
 
+- Added current Salesforce external-ID and table metadata discovery operations.
+- Added current managed connector discovery operations for Azure IoT Central device templates, Azure Monitor Logs time ranges, Azure Tables storage accounts, Azure Data Explorer query schemas, and Service Bus entities, system properties, queues, session options, topics, subscriptions, and subscription filters.
+- **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
+- Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts
 - **DocuWare** (`docuware.py`) connector client with unit tests and samples
 - **SigningHub** (`signinghub.py`) connector client with unit tests and samples
 - **Pipedrive** (`pipedrive.py`) connector client with unit tests and samples
@@ -65,6 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Generated string enums, integer enums, arrays, and `allOf` definitions now retain their Swagger JSON wire shapes instead of being emitted as dynamic object wrappers.
+- **Azure Queues** (`azurequeues.py`): corrected the public `QueueMessage.next_visible_time` property while preserving the `TimeNextVisible` wire name, and added `dequeue_count` plus the nested queue-message response models.
 - **Microsoft Dataverse** (`commondataservice.py`): path parameters are now double URL-encoded so values containing reserved characters (for example the `://` in an environment/organization URL used as the `dataset` segment) survive apihub gateway routing. Previously these segments were single-encoded and could be mis-routed. Fix applied in the CodefulSdkGenerator and regenerated; added regression tests covering encoding of the `dataset`, `table`, and `id` segments.
 - **Microsoft Dataverse** (`commondataservice.py`): regenerated with the corrected CodefulSdkGenerator so curated internal operations are retained. The client now exposes all 22 operations at parity with the .NET SDK (previously 11), adding attachment, association/disassociation, collection-relationship, option-set/multi-select metadata, delete, and pagination methods. Added unit tests covering the new operations.
 - **Microsoft Dataverse** (`commondataservice.py`): `get_next_page_async` now returns the page payload (`dict[str, Any] | None`) instead of discarding it as `None`, so pagination via `nextLink` is usable and at parity with the .NET `GetNextPageAsync`. Operations whose swagger omits a response schema now honor the per-operation response-type override in the Python generator path. Fix applied in the CodefulSdkGenerator and regenerated; added tests covering the returned payload and the trigger-operation registry.

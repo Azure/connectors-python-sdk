@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class Network:
-    """Response for Get my networks"""
+    """
+    Response for Get my networks
+    """
 
     id: Optional[str] = None
     """Unique identifier of the network."""
@@ -35,9 +37,11 @@ class Network:
 
 @dataclass
 class YammerEntity:
-    """Response for Get groups"""
+    """
+    Response for Get groups
+    """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Details of the Viva Engage entity."""
     id: Optional[int] = None
     """Unique identifier of the group."""
@@ -47,7 +51,9 @@ class YammerEntity:
 
 @dataclass
 class User:
-    """Response for Get user details"""
+    """
+    Response for Get user details
+    """
 
     name: Optional[str] = None
     """Username."""
@@ -73,70 +79,28 @@ class User:
 
 @dataclass
 class PageableMessageList:
-    """Response for Get all messages (V3)"""
+    """
+    Response for Get all messages
+    """
 
-    value: Optional[List[MessageV2]] = None
+    value: Optional[List[Message]] = None
 
 
 @dataclass
 class MessageList:
-    """Response for When there is a new message in my followed feed (V2)"""
+    """
+    Response for When there is a new message in my followed feed
+    """
 
-    messages: Optional[List[MessageV2]] = None
+    messages: Optional[List[Message]] = None
     """messages"""
 
 
 @dataclass
 class Message:
-    """Definition: Message"""
-
-    id: Optional[int] = None
-    """ID associated with the post."""
-    content_excerpt: Optional[str] = None
-    """Text Content of the post."""
-    sender_id: Optional[int] = None
-    """Unique ID of user who posted the message."""
-    replied_to_id: Optional[int] = None
-    """ID of the message to which this message is a reply."""
-    created_at: Optional[str] = None
-    """Time at which the message was created."""
-    network_id: Optional[int] = None
-    """Id of the network message is associated with."""
-    message_type: Optional[str] = None
-    """Description of the message type."""
-    sender_type: Optional[str] = None
-    """Description of the type of sender."""
-    url: Optional[str] = None
-    """API url of the post."""
-    web_url: Optional[str] = None
-    """Web url of the post."""
-    group_id: Optional[int] = None
-    """Unique ID of group who posted the message."""
-    body: Optional[MessageBody] = None
-    thread_id: Optional[int] = None
-    """Unique ID of thread."""
-    direct_message: Optional[bool] = None
-    """Flag to specify if the post is a  a direct message."""
-    client_type: Optional[str] = None
-    """Type of the client."""
-    client_url: Optional[str] = None
-    """Web link of the client."""
-    language: Optional[str] = None
-    """Language used in the message."""
-    notified_user_ids: Optional[List[int]] = None
-    """Details of users notified."""
-    privacy: Optional[str] = None
-    """Details of the privacy associated with the message."""
-    liked_by: Optional[LikedBy] = None
-    system_message: Optional[bool] = None
-    """Flag to specify if the post is a system generated message or not."""
-    topics: Optional[List[Topic]] = None
-    """List of topics."""
-
-
-@dataclass
-class MessageV2:
-    """Definition: MessageV2"""
+    """
+    Definition: Message
+    """
 
     id: Optional[int] = None
     """ID associated with the post."""
@@ -182,7 +146,9 @@ class MessageV2:
 
 @dataclass
 class Topic:
-    """Definition: Topic"""
+    """
+    Definition: Topic
+    """
 
     id: Optional[int] = None
     """Unique identifier of the topic."""
@@ -192,7 +158,9 @@ class Topic:
 
 @dataclass
 class PostOperationRequest:
-    """Definition: PostOperationRequest"""
+    """
+    Definition: PostOperationRequest
+    """
 
     group_id: Optional[int] = None
     """The group to post a message to (0 = All Company/Network)."""
@@ -209,87 +177,13 @@ class PostOperationRequest:
     """Post message as an announcement to all users in a group."""
     title: Optional[str] = None
     """Title of the message to be posted."""
-    topic1: Optional[str] = None
-    """Topic to apply to the message."""
-    topic2: Optional[str] = None
-    """Topic to apply to the message"""
-    topic3: Optional[str] = None
-    """Topic to apply to the message."""
-    topic4: Optional[str] = None
-    """Topic to apply to the message"""
-    topic5: Optional[str] = None
-    """Topic to apply to the message."""
-    topic6: Optional[str] = None
-    """Topic to apply to the message."""
-    topic7: Optional[str] = None
-    """Topic to apply to the message"""
-    topic8: Optional[str] = None
-    """Topic to apply to the message."""
-    topic9: Optional[str] = None
-    """Topic to apply to the message."""
-    topic10: Optional[str] = None
-    """Topic to apply to the message."""
-    topic11: Optional[str] = None
-    """Topic to apply to the message."""
-    topic12: Optional[str] = None
-    """Topic to apply to the message."""
-    topic13: Optional[str] = None
-    """Topic to apply to the message."""
-    topic14: Optional[str] = None
-    """Topic to apply to the message."""
-    topic15: Optional[str] = None
-    """Topic to apply to the message."""
-    topic16: Optional[str] = None
-    """Topic to apply to the message."""
-    topic17: Optional[str] = None
-    """Topic to apply to the message."""
-    topic18: Optional[str] = None
-    """Topic to apply to the message."""
-    topic19: Optional[str] = None
-    """Topic to apply to the message."""
-    topic20: Optional[str] = None
-    """Topic to apply to the message."""
-
-
-@dataclass
-class PostOperationRequestV2:
-    """Definition: PostOperationRequestV2"""
-
-    group_id: Optional[int] = None
-    """The group to post a message to (0 = All Company/Network)."""
-    body: Optional[str] = None
-    """Your message to be posted into your network."""
-    replied_to_id: Optional[int] = None
-    """The message ID this message is in reply to."""
-    direct_to_id: Optional[int] = None
-    """
-    If set, a private message will be sent directly to the user with the
-    indicated ID.
-    """
-    broadcast: Optional[bool] = None
-    """Post message as an announcement to all users in a group."""
-    title: Optional[str] = None
-    """Title of the message to be posted."""
-
-
-@dataclass
-class PageableMessageListV2:
-    """Definition: PageableMessageListV2"""
-
-    value: Optional[List[MessageV2]] = None
-
-
-@dataclass
-class MessageListV2:
-    """Definition: MessageListV2"""
-
-    messages: Optional[List[MessageV2]] = None
-    """messages"""
 
 
 @dataclass
 class MessageBody:
-    """Definition: MessageBody"""
+    """
+    Definition: MessageBody
+    """
 
     parsed: Optional[str] = None
     """Parsed text format."""
@@ -301,7 +195,9 @@ class MessageBody:
 
 @dataclass
 class LikedBy:
-    """Definition: LikedBy"""
+    """
+    Definition: LikedBy
+    """
 
     count: Optional[int] = None
     """Number of distinct likes."""
@@ -345,20 +241,22 @@ class YammerClient(ConnectorClientBase):
 
     async def get_networks_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get my networks
 
         Gets all the networks that the user belongs to.
         """
-        path = f"{self._connection_runtime_url}/networks.json"
+        request_url = f"{self._connection_runtime_url}/networks.json"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -373,13 +271,13 @@ class YammerClient(ConnectorClientBase):
         network_id: Optional[str] = None,
         mine: Optional[str] = None,
         show_all_company_group: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get groups
 
         Gets all groups. If mine = 1, get only groups to which the user belongs
         """
-        path = f"{self._connection_runtime_url}/groups.json"
+        request_url = f"{self._connection_runtime_url}/groups.json"
         query_params = []
         if network_id is not None:
             value = str(network_id)
@@ -397,14 +295,16 @@ class YammerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"showAllCompanyGroup={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -417,20 +317,25 @@ class YammerClient(ConnectorClientBase):
     async def get_user_details_by_id_async(
         self,
         user_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get user details
 
         This operation returns user profile details.
         """
-        path = f"{self._connection_runtime_url}/users/{str(user_id)}.json"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/users/{quote(str(user_id), safe='')}.json"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -442,29 +347,32 @@ class YammerClient(ConnectorClientBase):
 
     async def like_message_async(
         self,
-        message_id: Optional[str],
-    ):
+        message_id: str,
+    ) -> None:
         """
         Like message
 
         This operation is used to like the specified message.
         """
-        path = f"{self._connection_runtime_url}/messages/liked_by/current.json"
+        request_url = (
+            f"{self._connection_runtime_url}/messages/liked_by/current.json"
+        )
         query_params = []
-        if message_id is not None:
-            value = str(message_id)
-            if isinstance(message_id, bool):
-                value = value.lower()
-            query_params.append(f"message_id={quote(value)}")
+        value = str(message_id)
+        if isinstance(message_id, bool):
+            value = value.lower()
+        query_params.append(f"message_id={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -476,15 +384,15 @@ class YammerClient(ConnectorClientBase):
         newer_than: Optional[str] = None,
         threaded: Optional[str] = None,
         limit: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get all messages (V3)
+        Get all messages
 
         This operation returns all public messages in the logged in user's Viva
         Engage network. Corresponds to \"All\" conversations in the Viva Engage
         web interface.
         """
-        path = f"{self._connection_runtime_url}/v3/messages.json"
+        request_url = f"{self._connection_runtime_url}/v3/messages.json"
         query_params = []
         if network_id is not None:
             value = str(network_id)
@@ -512,14 +420,16 @@ class YammerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"limit={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -536,15 +446,17 @@ class YammerClient(ConnectorClientBase):
         newer_than: Optional[str] = None,
         threaded: Optional[str] = None,
         limit: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get the messages from my Following feed (V3)
+        Get the messages from my Following feed
 
         This operation returns the messages from Following feed which is
         conversations involving people, groups and topics that the user is
         following.
         """
-        path = f"{self._connection_runtime_url}/v3/messages/following.json"
+        request_url = (
+            f"{self._connection_runtime_url}/v3/messages/following.json"
+        )
         query_params = []
         if network_id is not None:
             value = str(network_id)
@@ -572,14 +484,16 @@ class YammerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"limit={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -597,15 +511,15 @@ class YammerClient(ConnectorClientBase):
         newer_than: Optional[str] = None,
         threaded: Optional[str] = None,
         limit: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get messages in a group (V3)
+        Get messages in a group
 
         This operation returns the messages posted in a group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v3/messages/in_group/{str(group_id)}.json"
+            f"/v3/messages/in_group/{quote(str(group_id), safe='')}.json"
         )
         query_params = []
         if network_id is not None:
@@ -634,14 +548,16 @@ class YammerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"limit={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -654,111 +570,25 @@ class YammerClient(ConnectorClientBase):
     async def get_messages_in_thread_async(
         self,
         thread_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get messages in a thread (V3)
+        Get messages in a thread
 
         This operation returns the messages posted in a thread.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v3/messages/in_thread/{str(thread_id)}.json"
+            f"/v3/messages/in_thread/{quote(str(thread_id), safe='')}.json"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_messages_following_async(
-        self,
-        network_id: Optional[str] = None,
-        triggerstate: Optional[str] = None,
-    ):
-        """
-        When there is a new message in my followed feed (V2)
-
-        This operation triggers when there is a new message in a network
-        followed by you.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2/trigger/messages/following.json"
-        )
-        query_params = []
-        if network_id is not None:
-            value = str(network_id)
-            if isinstance(network_id, bool):
-                value = value.lower()
-            query_params.append(f"network_id={quote(value)}")
-        if triggerstate is not None:
-            value = str(triggerstate)
-            if isinstance(triggerstate, bool):
-                value = value.lower()
-            query_params.append(f"triggerstate={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_messages_in_group_async(
-        self,
-        group_id: str,
-        network_id: Optional[str] = None,
-        triggerstate: Optional[str] = None,
-    ):
-        """
-        When there is a new message in a group (V2)
-
-        This operation triggers when a new message is posted in a group.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2/trigger/in_group/{str(group_id)}.json"
-        )
-        query_params = []
-        if network_id is not None:
-            value = str(network_id)
-            if isinstance(network_id, bool):
-                value = value.lower()
-            query_params.append(f"network_id={quote(value)}")
-        if triggerstate is not None:
-            value = str(triggerstate)
-            if isinstance(triggerstate, bool):
-                value = value.lower()
-            query_params.append(f"triggerstate={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -770,17 +600,17 @@ class YammerClient(ConnectorClientBase):
 
     async def post_message_async(
         self,
-        input: PostOperationRequestV2,
+        input: PostOperationRequest,
         network_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Post message (V2)
+        Post message
 
         This operation is used to post a Message to a Group or All Company
         Feed. If group ID is provided, message will be posted to the specified
         group else it will be posted in All Company Feed.
         """
-        path = f"{self._connection_runtime_url}/v2/messages.json"
+        request_url = f"{self._connection_runtime_url}/v2/messages.json"
         query_params = []
         if network_id is not None:
             value = str(network_id)
@@ -788,14 +618,16 @@ class YammerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"network_id={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -804,3 +636,28 @@ class YammerClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewMessagesFollowingV2": {
+        "operation_id": "OnNewMessagesFollowingV2",
+        "path": "/{connectionId}/v2/trigger/messages/following.json",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "MessageList",
+    },
+    "OnNewMessagesInGroupV2": {
+        "operation_id": "OnNewMessagesInGroupV2",
+        "path": "/{connectionId}/v2/trigger/in_group/{group_id}.json",
+        "method": "get",
+        "required_parameters": ["group_id"],
+        "callback_payload_type": "MessageList",
+    },
+}

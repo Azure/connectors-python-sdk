@@ -11,6 +11,7 @@ from azure.connectors.eventhubs import (
     ObjectEntity,
     SystemProperties,
     SendEvent,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -107,21 +108,22 @@ class TestEventhubsClientLifecycle:
             mock_close.assert_called_once()
 
 
-class TestOnNewEvents:
-    """Tests for on_new_events_async method."""
+class TestTriggerOperations:
+    """Tests for trigger registration contracts."""
+
+    def test_on_new_events_is_registered_without_callable_method(self):
+        """Test event polling is a metadata-only trigger."""
+        assert "OnNewEvents" in TRIGGER_OPERATIONS
+        assert not hasattr(EventhubsClient, "on_new_events_async")
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
-        """Test successful GET request."""
+    async def test_generate_event_schema(self, mock_token_provider):
+        """Test event schema discovery forwards content metadata."""
         client = EventhubsClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
         )
-
-        mock_response = MockResponse(
-            status=200,
-            text='[{"contentData": {"message": "Hello"}, "systemProperties": {}}]'
-        )
+        mock_response = MockResponse(status=200, text='{"type": "object"}')
 
         with patch.object(
             client._http_client,
@@ -129,145 +131,15 @@ class TestOnNewEvents:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.on_new_events_async(
-                event_hub_name="myeventhub"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/myeventhub/events/batch/head" in call_args[0][1]
-            assert len(result) == 1
-
-    @pytest.mark.asyncio
-    async def test_with_content_type(self, mock_token_provider):
-        """Test GET request with content type parameter."""
-        client = EventhubsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='[]')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_new_events_async(
-                event_hub_name="myeventhub",
-                content_type="application/json"
-            )
-
-            call_args = mock_send.call_args
-            url = call_args[0][1]
-            assert "contentType=application" in url
-            assert "json" in url
-
-    @pytest.mark.asyncio
-    async def test_with_consumer_group(self, mock_token_provider):
-        """Test GET request with consumer group parameter."""
-        client = EventhubsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='[]')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_new_events_async(
-                event_hub_name="myeventhub",
-                consumer_group_name="$Default"
-            )
-
-            call_args = mock_send.call_args
-            url = call_args[0][1]
-            assert "consumerGroupName=" in url
-
-    @pytest.mark.asyncio
-    async def test_with_all_query_parameters(self, mock_token_provider):
-        """Test GET request with all query parameters."""
-        client = EventhubsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='[]')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_new_events_async(
-                event_hub_name="myeventhub",
+            result = await client.generate_event_schema_async(
                 content_type="application/json",
-                content_schema="schema1",
-                consumer_group_name="$Default",
-                minimum_partition_key="0",
-                maximum_partition_key="10",
-                maximum_events_count="100"
+                content_schema="schema-1"
             )
 
-            call_args = mock_send.call_args
-            url = call_args[0][1]
-            assert "contentType=" in url
-            assert "contentSchema=" in url
-            assert "consumerGroupName=" in url
-            assert "minimumPartitionKey=0" in url
-            assert "maximumPartitionKey=10" in url
-            assert "maximumEventsCount=100" in url
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = EventhubsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=404, text='{"error": "Event Hub not found"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.on_new_events_async(
-                    event_hub_name="nonexistent"
-                )
-
-            assert exc_info.value.status_code == 404
-
-    @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
-        """Test that empty response returns None."""
-        client = EventhubsClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text="")
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            result = await client.on_new_events_async(
-                event_hub_name="myeventhub"
-            )
-            assert result is None
+            url = mock_send.call_args[0][1]
+            assert "contentType=application/json" in url
+            assert "contentSchema=schema-1" in url
+            assert result == {"type": "object"}
 
 
 class TestSendEvent:
@@ -371,14 +243,10 @@ class TestSendEvents:
         )
 
         mock_response = MockResponse(status=201, text="")
-        events_input = SendEventsInput(
-            additional_properties={
-                "events": [
-                    {"contentData": '{"msg": "Event 1"}'},
-                    {"contentData": '{"msg": "Event 2"}'}
-                ]
-            }
-        )
+        events_input: SendEventsInput = [
+            SendEvent(content_data='{"msg": "Event 1"}'),
+            SendEvent(content_data='{"msg": "Event 2"}'),
+        ]
 
         with patch.object(
             client._http_client,
@@ -388,7 +256,8 @@ class TestSendEvents:
         ) as mock_send:
             await client.send_events_async(
                 input=events_input,
-                event_hub_name="myeventhub"
+                event_hub_name="myeventhub",
+                partition_key="partition-1"
             )
 
             mock_send.assert_called_once()
@@ -405,7 +274,7 @@ class TestSendEvents:
         )
 
         mock_response = MockResponse(status=201, text="")
-        events_input = SendEventsInput(additional_properties={"events": []})
+        events_input: SendEventsInput = []
 
         with patch.object(
             client._http_client,
@@ -433,7 +302,7 @@ class TestSendEvents:
         )
 
         mock_response = MockResponse(status=413, text='{"error": "Batch too large"}')
-        events_input = SendEventsInput(additional_properties={"events": []})
+        events_input: SendEventsInput = []
 
         with patch.object(
             client._http_client,
@@ -444,7 +313,8 @@ class TestSendEvents:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.send_events_async(
                     input=events_input,
-                    event_hub_name="myeventhub"
+                    event_hub_name="myeventhub",
+                    partition_key="partition-1"
                 )
 
             assert exc_info.value.status_code == 413
@@ -473,18 +343,14 @@ class TestDataClasses:
         assert event.system_properties.sequence_number == 100
 
     def test_send_events_input(self):
-        """Test SendEventsInput dataclass creation."""
-        events_input = SendEventsInput(
-            additional_properties={
-                "events": [
-                    {"contentData": "event1"},
-                    {"contentData": "event2"}
-                ]
-            }
-        )
+        """Test SendEventsInput list creation."""
+        events_input: SendEventsInput = [
+            SendEvent(content_data="event1"),
+            SendEvent(content_data="event2"),
+        ]
 
-        assert events_input.additional_properties["events"] is not None
-        assert len(events_input.additional_properties["events"]) == 2
+        assert events_input[0].content_data == "event1"
+        assert len(events_input) == 2
 
     def test_object_entity(self):
         """Test ObjectEntity dataclass creation."""
@@ -568,8 +434,8 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.on_new_events_async(event_hub_name="hub1")
-            await client.on_new_events_async(event_hub_name="hub2")
+            await client.get_partition_keys_async(event_hub_name="hub1")
+            await client.get_partition_keys_async(event_hub_name="hub2")
 
             assert mock_send.call_count == 2
 
@@ -589,13 +455,13 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.on_new_events_async(
+            await client.get_partition_keys_async(
                 event_hub_name="my-event-hub"
             )
 
             call_args = mock_send.call_args
             url = call_args[0][1]
-            assert "/my-event-hub/events/batch/head" in url
+            assert "eventHubName=my-event-hub" in url
 
     @pytest.mark.asyncio
     async def test_unauthorized_raises_exception(self, mock_token_provider):
@@ -614,8 +480,6 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.on_new_events_async(
-                    event_hub_name="myeventhub"
-                )
+                await client.get_event_hubs_async()
 
             assert exc_info.value.status_code == 401

@@ -229,8 +229,9 @@ The following connectors have been generated and validated with comprehensive te
 | **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated | 10 tests |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 | **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated | 7 tests |
+| **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 
-**Total:** 2023 connector tests + 141 SDK component tests
+**Total:** 2479 connector tests + 141 SDK component tests
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

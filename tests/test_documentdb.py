@@ -377,13 +377,11 @@ class TestDataClasses:
         assert response.id == "mysp"
 
     def test_execute_stored_procedure_input(self):
-        """Test ExecuteStoredProcedureInput dataclass creation."""
-        sp_input = ExecuteStoredProcedureInput(
-            additional_properties={"param1": "value1", "param2": 42}
-        )
+        """Test ExecuteStoredProcedureInput string creation."""
+        sp_input = ExecuteStoredProcedureInput('{"param1": "value1", "param2": 42}')
 
-        assert sp_input.additional_properties["param1"] == "value1"
-        assert sp_input.additional_properties["param2"] == 42
+        assert '"param1": "value1"' in sp_input
+        assert '"param2": 42' in sp_input
 
     def test_object_without_type(self):
         """Test ObjectWithoutType dataclass creation."""
@@ -536,12 +534,12 @@ class TestDataClasses:
         assert len(response.document_collections) == 2
 
     def test_get_collection_response(self):
-        """Test GetCollectionResponse dataclass creation."""
-        response = GetCollectionResponse(
-            additional_properties={"id": "mycollection", "partitionKey": {"paths": ["/pk"]}}
-        )
+        """Test GetCollectionResponse list creation."""
+        response: GetCollectionResponse = [
+            {"id": "mycollection", "partitionKey": {"paths": ["/pk"]}}
+        ]
 
-        assert response.additional_properties["id"] == "mycollection"
+        assert response[0]["id"] == "mycollection"
 
     def test_post_documents_request(self):
         """Test PostDocumentsRequest dataclass creation."""

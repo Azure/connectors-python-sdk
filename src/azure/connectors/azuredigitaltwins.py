@@ -21,36 +21,41 @@ from azure.connectors.sdk import (
 
 # Type Definitions
 
-@dataclass
-class AddModelsInput:
-    """Add Model"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+AddModelsInput = List[Dict[str, Any]]
 
 
 @dataclass
 class ListModelsResponse:
-    """Response for List Models"""
+    """
+    Response for List Models
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """Array values."""
-    continuation_token: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "continuationToken"},
+    )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of Models."""
 
 
 @dataclass
 class GetModelByIdResponse:
-    """Response for Get Model By Id"""
+    """
+    Response for Get Model By Id
+    """
 
     id: Optional[str] = None
     """The id of the model as specified in the model definition."""
-    upload_time: Optional[str] = None
+    upload_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "uploadTime"},
+    )
     """The time the model was uploaded to the service."""
     decommissioned: Optional[bool] = None
     """
@@ -63,7 +68,9 @@ class GetModelByIdResponse:
 
 @dataclass
 class UpdateModelInput:
-    """Update Model's Property"""
+    """
+    Update Model's Property
+    """
 
     value: Optional[str] = None
     """Request for the API."""
@@ -71,7 +78,9 @@ class UpdateModelInput:
 
 @dataclass
 class TwinResult:
-    """Response for Get Twin by Id"""
+    """
+    Response for Get Twin by Id
+    """
 
     result: Optional[str] = None
     """Results From the Twin."""
@@ -79,7 +88,9 @@ class TwinResult:
 
 @dataclass
 class AddTwinInput:
-    """Add Twin"""
+    """
+    Add Twin
+    """
 
     value: Optional[str] = None
     """Request for the API."""
@@ -87,7 +98,9 @@ class AddTwinInput:
 
 @dataclass
 class UpdateTwinInput:
-    """Update Twin"""
+    """
+    Update Twin
+    """
 
     value: Optional[str] = None
     """Request for the API."""
@@ -95,7 +108,9 @@ class UpdateTwinInput:
 
 @dataclass
 class GetComponentResult:
-    """Response for Get Component"""
+    """
+    Response for Get Component
+    """
 
     result: Optional[str] = None
     """Results From the Twin."""
@@ -103,7 +118,9 @@ class GetComponentResult:
 
 @dataclass
 class UpdateComponentInput:
-    """Update Component"""
+    """
+    Update Component
+    """
 
     value: Optional[str] = None
     """Request for the API."""
@@ -111,25 +128,44 @@ class UpdateComponentInput:
 
 @dataclass
 class TwinRelationship:
-    """Response for Get Relationship by Id"""
+    """
+    Response for Get Relationship by Id
+    """
 
-    source_id: Optional[str] = None
+    source_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$sourceId"},
+    )
     """Source Id."""
-    relationship_id: Optional[str] = None
+    relationship_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$relationshipId"},
+    )
     """Relationship Id."""
-    target_id: Optional[str] = None
+    target_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$targetId"},
+    )
     """Target Id."""
-    relationship_name: Optional[str] = None
+    relationship_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$relationshipName"},
+    )
     """Relationship Name."""
-    etag: Optional[str] = None
+    etag: Optional[str] = field(default=None, metadata={"wire_name": "$etag"})
     """E Tag Link."""
-    additional_properties: Optional[str] = None
+    additional_properties: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "additionalProperties"},
+    )
     """Property Values."""
 
 
 @dataclass
 class AddRelationshipInput:
-    """Add Relationship"""
+    """
+    Add Relationship
+    """
 
     value: Optional[str] = None
     """Request for the API."""
@@ -137,7 +173,9 @@ class AddRelationshipInput:
 
 @dataclass
 class UpdateRelationshipInput:
-    """Update Relationship"""
+    """
+    Update Relationship
+    """
 
     value: Optional[str] = None
     """Request for the API."""
@@ -145,19 +183,29 @@ class UpdateRelationshipInput:
 
 @dataclass
 class ListIncomingRelationshipsResponse:
-    """Response for List Incoming Relationships"""
+    """
+    Response for List Incoming Relationships
+    """
 
     value: Optional[List[IncomingRelationship]] = None
     """The collection of Incoming relationships."""
-    continuation_token: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "continuationToken"},
+    )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of Incoming Relationship."""
 
 
 @dataclass
 class SendTelemetryInput:
-    """Send Telemetry"""
+    """
+    Send Telemetry
+    """
 
     value: Optional[str] = None
     """Send Telemetry Inputs."""
@@ -165,7 +213,9 @@ class SendTelemetryInput:
 
 @dataclass
 class SendComponentTelemetryInput:
-    """Send Component Telemetry"""
+    """
+    Send Component Telemetry
+    """
 
     value: Optional[str] = None
     """Send Component Telemetry Inputs."""
@@ -173,47 +223,79 @@ class SendComponentTelemetryInput:
 
 @dataclass
 class ListRelationshipsResponse:
-    """Response for List Relationships"""
+    """
+    Response for List Relationships
+    """
 
     value: Optional[List[TwinRelationship]] = None
     """The collection of twin relationships."""
-    continuation_token: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "continuationToken"},
+    )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """URL to get the next page of Twin Relationship."""
 
 
 @dataclass
 class QueryTwinsInput:
-    """Query API"""
+    """
+    Query API
+    """
 
     query: Optional[str] = None
     """Query the Twins."""
-    continuation_token: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "continuationToken"},
+    )
     """Link to get next set of items."""
 
 
 @dataclass
 class QueryResult:
-    """Response for Query API"""
+    """
+    Response for Query API
+    """
 
     value: Optional[str] = None
     """Results From the Twin."""
-    continuation_token: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "continuationToken"},
+    )
     """Link to get next set of items."""
 
 
 @dataclass
 class IncomingRelationship:
-    """Definition: IncomingRelationship"""
+    """
+    Definition: IncomingRelationship
+    """
 
-    source_id: Optional[str] = None
+    source_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$sourceId"},
+    )
     """Source Id."""
-    relationship_id: Optional[str] = None
+    relationship_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$relationshipId"},
+    )
     """Relationship Id."""
-    relationship_name: Optional[str] = None
+    relationship_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$relationshipName"},
+    )
     """Relationship Name."""
-    relationship_link: Optional[str] = None
+    relationship_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "$relationshipLink"},
+    )
     """Relationship Link."""
 
 
@@ -254,30 +336,27 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def add_models_async(
         self,
         input: AddModelsInput,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Model
 
         Uploads one or more models. When any error occurs, no models are
         uploaded.
         """
-        path = f"{self._connection_runtime_url}/models"
+        request_url = f"{self._connection_runtime_url}/models"
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -289,18 +368,18 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     async def list_models_async(
         self,
-        api_version: Optional[str] = "2020-10-31",
         dependencies_for: Optional[str] = None,
         include_model_definition: Optional[str] = None,
         continuation_token: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Models
 
         Retrieves model metadata and, optionally, model definitions.
         """
-        path = f"{self._connection_runtime_url}/models"
+        request_url = f"{self._connection_runtime_url}/models"
         query_params = []
+        query_params.append("api-version=" + quote("2020-10-31"))
         if dependencies_for is not None:
             value = str(dependencies_for)
             if isinstance(dependencies_for, bool):
@@ -311,25 +390,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             if isinstance(include_model_definition, bool):
                 value = value.lower()
             query_params.append(f"includeModelDefinition={quote(value)}")
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
                 value = value.lower()
             query_params.append(f"continuationToken={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -342,30 +418,30 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def delete_model_async(
         self,
         modelid: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Delete Model
 
         Deletes a model. A model can only be deleted if no other models
         reference it.
         """
-        path = f"{self._connection_runtime_url}/models/{str(modelid)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/models/{quote(str(modelid), safe='')}"
+        )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -373,35 +449,35 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def get_model_by_id_async(
         self,
         modelid: str,
-        api_version: Optional[str] = "2020-10-31",
         include_model_definition: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Model By Id
 
         Retrieves model metadata and, optionally, the model definition.
         """
-        path = f"{self._connection_runtime_url}/models/{str(modelid)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/models/{quote(str(modelid), safe='')}"
+        )
         query_params = []
+        query_params.append("api-version=" + quote("2020-10-31"))
         if include_model_definition is not None:
             value = str(include_model_definition)
             if isinstance(include_model_definition, bool):
                 value = value.lower()
             query_params.append(f"includeModelDefinition={quote(value)}")
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -415,29 +491,29 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: UpdateModelInput,
         modelid: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Update Model's Property
 
         Updates the metadata for a model.
         """
-        path = f"{self._connection_runtime_url}/models/{str(modelid)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/models/{quote(str(modelid), safe='')}"
+        )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -445,29 +521,29 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def get_twin_by_id_async(
         self,
         twinid: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Twin by Id
 
         Retrieves a digital twin and its data.
         """
-        path = f"{self._connection_runtime_url}/digitaltwins/{str(twinid)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/digitaltwins/{quote(str(twinid), safe='')}"
+        )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -480,30 +556,30 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def delete_twin_async(
         self,
         twinid: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Delete Twin
 
         Deletes a digital twin. All relationships referencing the digital twin
         must already be deleted.
         """
-        path = f"{self._connection_runtime_url}/digitaltwins/{str(twinid)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/digitaltwins/{quote(str(twinid), safe='')}"
+        )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -512,29 +588,29 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: AddTwinInput,
         twinid: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Twin
 
         Adds or replaces a digital twin.
         """
-        path = f"{self._connection_runtime_url}/digitaltwins/{str(twinid)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/digitaltwins/{quote(str(twinid), safe='')}"
+        )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -548,29 +624,29 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: UpdateTwinInput,
         twinid: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Update Twin
 
         Updates properties on a twin.
         """
-        path = f"{self._connection_runtime_url}/digitaltwins/{str(twinid)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/digitaltwins/{quote(str(twinid), safe='')}"
+        )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -579,32 +655,32 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         component_path: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Component
 
         Retrieves a component from a digital twin.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/components/{str(component_path)}"
+            f"/digitaltwins"
+            f"/{quote(str(twinid), safe='')}"
+            f"/components"
+            f"/{quote(str(component_path), safe='')}"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -619,32 +695,32 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: UpdateComponentInput,
         twinid: str,
         component_path: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Update Component
 
         Updates integer properties on a component of a twin.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/components/{str(component_path)}"
+            f"/digitaltwins"
+            f"/{quote(str(twinid), safe='')}"
+            f"/components"
+            f"/{quote(str(component_path), safe='')}"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -653,32 +729,32 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Relationship by Id
 
         Retrieves a relationship between two digital twins.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/relationships/{str(relationship_id)}"
+            f"/digitaltwins"
+            f"/{quote(str(twinid), safe='')}"
+            f"/relationships"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -692,32 +768,32 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Delete Relationship
 
         Deletes a relationship between two digital twins.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/relationships/{str(relationship_id)}"
+            f"/digitaltwins"
+            f"/{quote(str(twinid), safe='')}"
+            f"/relationships"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -727,32 +803,32 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: AddRelationshipInput,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add Relationship
 
         Adds a relationship between two digital twins.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/relationships/{str(relationship_id)}"
+            f"/digitaltwins"
+            f"/{quote(str(twinid), safe='')}"
+            f"/relationships"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -767,32 +843,32 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: UpdateRelationshipInput,
         twinid: str,
         relationship_id: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Update Relationship
 
         Updates integer properties on a relationship between two digital twins.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/relationships/{str(relationship_id)}"
+            f"/digitaltwins"
+            f"/{quote(str(twinid), safe='')}"
+            f"/relationships"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -800,38 +876,37 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def list_incoming_relationships_async(
         self,
         twinid: str,
-        api_version: Optional[str] = "2020-10-31",
         continuation_token: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Incoming Relationships
 
         Retrieves all incoming relationships for a digital twin.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/incomingrelationships"
+            f"/digitaltwins"
+            f"/{quote(str(twinid), safe='')}"
+            f"/incomingrelationships"
         )
         query_params = []
+        query_params.append("api-version=" + quote("2020-10-31"))
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
                 value = value.lower()
             query_params.append(f"continuationToken={quote(value)}")
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -845,32 +920,29 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         input: SendTelemetryInput,
         twinid: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Send Telemetry
 
         Sends telemetry on behalf of a digital twin.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/telemetry"
+            f"/digitaltwins/{quote(str(twinid), safe='')}/telemetry"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -880,36 +952,33 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         input: SendComponentTelemetryInput,
         twinid: str,
         component_path: str,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> None:
         """
         Send Component Telemetry
 
         Sends telemetry on behalf of a component in a digital twin.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/digitaltwins"
-            f"/{str(twinid)}"
+            f"/{quote(str(twinid), safe='')}"
             f"/components"
-            f"/{str(component_path)}"
+            f"/{quote(str(component_path), safe='')}"
             f"/telemetry"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -917,38 +986,35 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def list_relationships_async(
         self,
         twinid: str,
-        api_version: Optional[str] = "2020-10-31",
         continuation_token: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Relationships
 
         Retrieves all outgoing relationships from a digital twin.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/digitaltwins/{str(twinid)}/relationships"
+            f"/digitaltwins/{quote(str(twinid), safe='')}/relationships"
         )
         query_params = []
+        query_params.append("api-version=" + quote("2020-10-31"))
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
                 value = value.lower()
             query_params.append(f"continuationToken={quote(value)}")
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -961,30 +1027,27 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     async def query_twins_async(
         self,
         input: QueryTwinsInput,
-        api_version: Optional[str] = "2020-10-31",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Query API
 
         Executes a query that allows traversing relationships and filtering by
         property values.
         """
-        path = f"{self._connection_runtime_url}/query"
+        request_url = f"{self._connection_runtime_url}/query"
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2020-10-31"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

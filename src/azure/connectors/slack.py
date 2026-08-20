@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -23,29 +23,28 @@ from azure.connectors.sdk import (
 
 @dataclass
 class SetDNDResponse:
-    """Response for Set do not disturb"""
+    """
+    Response for Set do not disturb
+    """
 
     snooze_enabled: Optional[bool] = None
     """Whether snooze is enabled."""
 
 
 @dataclass
-class CreateGroupResponse:
-    """Response for Create a group"""
-
-    group: Optional[Dict[str, Any]] = None
-
-
-@dataclass
 class CreateChannelResponse:
-    """Response for Create a channel"""
+    """
+    Response for Create a channel
+    """
 
     channel: Optional[Channel] = None
 
 
 @dataclass
 class JoinChannelResponse:
-    """Response for Join a public channel"""
+    """
+    Response for Join a public channel
+    """
 
     channel: Optional[Channel] = None
     warning: Optional[str] = None
@@ -54,16 +53,23 @@ class JoinChannelResponse:
 
 @dataclass
 class ListChannelsResponse:
-    """Response for List public channels (Pagination support)"""
+    """
+    Response for List public channels (Pagination support)
+    """
 
     value: Optional[List[Channel]] = None
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Link to get next page of results"""
 
 
 @dataclass
 class PostMessageResponse:
-    """Response for Post message (V2)"""
+    """
+    Response for Post message
+    """
 
     ok: Optional[bool] = None
     """Indicates if the operation was successful."""
@@ -79,7 +85,9 @@ class PostMessageResponse:
 
 @dataclass
 class Channel:
-    """Definition: Channel"""
+    """
+    Definition: Channel
+    """
 
     id: Optional[str] = None
     """The id of the channel."""
@@ -88,26 +96,10 @@ class Channel:
 
 
 @dataclass
-class ListChannelsResponseV3:
-    """Definition: ListChannels_ResponseV3"""
-
-    value: Optional[List[Channel]] = None
-    next_link: Optional[str] = None
-    """Link to get next page of results"""
-
-
-@dataclass
-class JoinChannelResponseV2:
-    """Definition: JoinChannel_ResponseV2"""
-
-    channel: Optional[Channel] = None
-    warning: Optional[str] = None
-    """Whether the user is already in the channel or not."""
-
-
-@dataclass
 class PostMessageRequest:
-    """Definition: PostMessageRequest"""
+    """
+    Definition: PostMessageRequest
+    """
 
     channel: Optional[str] = None
     """
@@ -180,16 +172,16 @@ class SlackClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "slack"
 
-    async def set_d_n_d_async(
+    async def set_dnd_async(
         self,
         num_minutes: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Set do not disturb
 
         Set the do not disturb status for the user.
         """
-        path = f"{self._connection_runtime_url}/dnd.setSnooze"
+        request_url = f"{self._connection_runtime_url}/dnd.setSnooze"
         query_params = []
         if num_minutes is not None:
             value = str(num_minutes)
@@ -197,82 +189,16 @@ class SlackClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"num_minutes={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def create_group_async(
-        self,
-        name: Optional[str] = None,
-    ):
-        """
-        Create a group
-
-        Creates a group in slack.
-        """
-        path = f"{self._connection_runtime_url}/groups.create"
-        query_params = []
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_file_async(
-        self,
-        channel: Optional[str],
-    ):
-        """
-        When a file is created
-
-        When a file is created
-        """
-        path = f"{self._connection_runtime_url}/trigger/files.list"
-        query_params = []
-        if channel is not None:
-            value = str(channel)
-            if isinstance(channel, bool):
-                value = value.lower()
-            query_params.append(f"channel={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -286,13 +212,13 @@ class SlackClient(ConnectorClientBase):
         self,
         name: Optional[str] = None,
         is_private: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a channel
 
         Create a channel in slack.
         """
-        path = f"{self._connection_runtime_url}/conversations.create"
+        request_url = f"{self._connection_runtime_url}/conversations.create"
         query_params = []
         if name is not None:
             value = str(name)
@@ -305,14 +231,16 @@ class SlackClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"is_private={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -325,13 +253,13 @@ class SlackClient(ConnectorClientBase):
     async def join_channel_async(
         self,
         channel: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Join a public channel
 
         Join a public channel in slack.
         """
-        path = f"{self._connection_runtime_url}/conversations.join"
+        request_url = f"{self._connection_runtime_url}/conversations.join"
         query_params = []
         if channel is not None:
             value = str(channel)
@@ -339,14 +267,16 @@ class SlackClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"channel={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -358,20 +288,22 @@ class SlackClient(ConnectorClientBase):
 
     async def list_channels_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List public channels (Pagination support)
 
         List the public channels in slack.
         """
-        path = f"{self._connection_runtime_url}/v3/conversations.list"
+        request_url = f"{self._connection_runtime_url}/v3/conversations.list"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -384,20 +316,22 @@ class SlackClient(ConnectorClientBase):
     async def post_message_async(
         self,
         input: PostMessageRequest,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Post message (V2)
+        Post message
 
         This operation is used to post a message to the specified channel.
         """
-        path = f"{self._connection_runtime_url}/v2/chat.postMessage"
+        request_url = f"{self._connection_runtime_url}/v2/chat.postMessage"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -406,3 +340,21 @@ class SlackClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewFile": {
+        "operation_id": "OnNewFile",
+        "path": "/{connectionId}/trigger/files.list",
+        "method": "get",
+        "required_parameters": ["channel"],
+        "callback_payload_type": None,
+    },
+}

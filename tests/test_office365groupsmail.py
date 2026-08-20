@@ -8,17 +8,18 @@ from unittest.mock import AsyncMock, patch
 from azure.connectors.office365groupsmail import (
     Conversation,
     CreateConversationBody,
-    ForwardPostV2Body,
-    HttpRequestInput,
+    ForwardPostBody,
     ListConversationsResponse,
     Office365groupsmailClient,
     ReplyConversationThreadBody,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
     ManagedIdentityTokenProvider,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -81,8 +82,6 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             thread_id="thread123",
             post_id="post123",
         )
-    if operation == "on_new_email_in_group":
-        return await client.on_new_email_in_group_async(group_id="group123")
     if operation == "reply_to_a_thread":
         return await client.reply_to_a_thread_async(
             input=ReplyConversationThreadBody(),
@@ -97,10 +96,10 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             post_id="post123",
         )
     if operation == "http_request":
-        return await client.http_request_async(input=HttpRequestInput())
+        return await client.http_request_async(input=b"request")
     if operation == "forward":
         return await client.forward_async(
-            input=ForwardPostV2Body(comment="Forward this"),
+            input=ForwardPostBody(comment="Forward this"),
             group_mail="group@contoso.com",
             conversation_id="conv123",
             thread_id="thread123",
@@ -301,7 +300,6 @@ class TestOffice365groupsmailClientErrorHandling:
             "list_thread_posts",
             "get_thread",
             "get_attachments",
-            "on_new_email_in_group",
             "reply_to_a_thread",
             "reply",
             "http_request",
@@ -333,8 +331,21 @@ class TestOffice365groupsmailClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
+class TestOnNewEmailInGroupTrigger:
+    """Tests for the new-group-email trigger metadata."""
+
+    def test_registration_metadata(self):
+        """Test trigger metadata and callback contract."""
+        trigger = TRIGGER_OPERATIONS["OnNewEmailInGroup"]
+
+        assert trigger["path"].endswith("/groups/{groupId}/conversations")
+        assert trigger["required_parameters"] == ["groupId"]
+        assert trigger["callback_payload_type"] == "OnNewEmailInGroupResponse"
+        assert not hasattr(Office365groupsmailClient, "on_new_email_in_group_async")
+
+
 class TestOffice365groupsmailTypeSerialization:
-    """Tests for generated dataclass defaults."""
+    """Tests for generated dataclass defaults and wire names."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
@@ -344,3 +355,9 @@ class TestOffice365groupsmailTypeSerialization:
         assert list_response.next_link is None
         assert list_response.value is None
         assert conversation.id is None
+
+    def test_forward_post_body_uses_swagger_wire_names(self):
+        """Test the current forward-post request preserves Swagger casing."""
+        request = ForwardPostBody(comment="Please review")
+
+        assert to_wire(request) == {"Comment": "Please review"}

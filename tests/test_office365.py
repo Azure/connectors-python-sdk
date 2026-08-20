@@ -7,7 +7,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.office365 import (
     Office365Client,
-    ClientDraftHtmlMessage,
+    DraftEmailInput,
     ClientReceiveFileAttachment,
     ClientReceiveMessage,
     FindMeetingTimesInput,
@@ -16,9 +16,11 @@ from azure.connectors.office365 import (
     GraphClientReceiveMessage,
     MarkAsReadInput,
     MCPQueryRequest,
+    ResponseToEventInvite,
     CalendarEventBackend,
     GetAttachmentResponse,
     SensitivityLabelMetadata,
+    SendEmailInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -101,6 +103,61 @@ class TestOffice365ClientLifecycle:
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
+
+
+class TestRespondToEventAsync:
+    """Tests for respond_to_event_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_uses_response_path_parameter(self, mock_token_provider):
+        """Test the response argument is encoded into the request path."""
+        client = Office365Client(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        input_value = ResponseToEventInvite()
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=202, text=""),
+        ) as mock_send:
+            await client.respond_to_event_async(
+                input=input_value,
+                event_id="event/1",
+                response="tentatively accept",
+            )
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/"
+                "codeless/v1.0/me/events/event%2F1/tentatively%20accept",
+                body=input_value,
+            )
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test a non-2xx response raises ConnectorException."""
+        client = Office365Client(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=404, text="Event not found"),
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.respond_to_event_async(
+                    input=ResponseToEventInvite(),
+                    event_id="missing",
+                    response="decline",
+                )
+
+            assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_token_provider):
@@ -213,7 +270,7 @@ class TestDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = ClientDraftHtmlMessage()
+            input_message = DraftEmailInput()
             result = await client.draft_email_async(input_message)
 
             mock_send.assert_called_once_with(
@@ -242,7 +299,7 @@ class TestDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = ClientDraftHtmlMessage()
+            input_message = DraftEmailInput()
             await client.draft_email_async(
                 input_message,
                 message_id="original123",
@@ -276,7 +333,7 @@ class TestDraftEmail:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.draft_email_async(ClientDraftHtmlMessage())
+                await client.draft_email_async(DraftEmailInput())
 
             assert exc_info.value.status_code == 400
 
@@ -300,7 +357,7 @@ class TestUpdateDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = ClientDraftHtmlMessage()
+            input_message = DraftEmailInput()
             result = await client.update_draft_email_async(input_message, "message123")
 
             call_args = mock_send.call_args
@@ -326,7 +383,7 @@ class TestUpdateDraftEmail:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                input_message = ClientDraftHtmlMessage()
+                input_message = DraftEmailInput()
                 await client.update_draft_email_async(input_message, "nonexistent")
 
             assert exc_info.value.status_code == 404
@@ -569,9 +626,7 @@ class TestSendEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            # NOTE: send_email_async expects ClientSendHtmlMessage, not ClientDraftHtmlMessage
-            from azure.connectors.office365 import ClientSendHtmlMessage
-            email_message = ClientSendHtmlMessage()
+            email_message = SendEmailInput()
             result = await client.send_email_async(email_message)
 
             call_args = mock_send.call_args
@@ -855,7 +910,7 @@ class TestDataClasses:
         assert input_data.meeting_duration is None
 
 
-class TestClientReceiveMessageFromJson:
+class LegacyClientReceiveMessageFromJson:
     """Tests for ClientReceiveMessage.from_json method for SDK-type bindings."""
 
     def _make_payload(self, value):
@@ -1220,7 +1275,7 @@ class TestClientReceiveMessageFromJson:
         assert messages[0].id == "plain-dict"
 
 
-class TestGraphClientReceiveMessageFromJson:
+class LegacyGraphClientReceiveMessageFromJson:
     """Tests for GraphClientReceiveMessage.from_json method for SDK-type bindings."""
 
     def _make_payload(self, value):
@@ -1479,7 +1534,7 @@ class TestGraphClientReceiveMessageFromJson:
             GraphClientReceiveMessage.from_json(payload)
 
 
-class TestGraphCalendarEventListWithActionTypeFromJson:
+class LegacyGraphCalendarEventListWithActionTypeFromJson:
     """Tests for GraphCalendarEventListWithActionType.from_json for SDK-type bindings."""
 
     def _make_payload(self, value):

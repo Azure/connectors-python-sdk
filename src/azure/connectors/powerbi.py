@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class ListedScorecards:
-    """Response for Get scorecards"""
+    """
+    Response for Get scorecards
+    """
 
     value: Optional[List[ListedScorecard]] = None
     """The list of scorecards."""
@@ -31,7 +33,9 @@ class ListedScorecards:
 
 @dataclass
 class CreatedScorecard:
-    """Response for Create a scorecard"""
+    """
+    Response for Create a scorecard
+    """
 
     id: Optional[str] = None
     """The unique identifier of the scorecard."""
@@ -39,7 +43,9 @@ class CreatedScorecard:
 
 @dataclass
 class FetchedGoals:
-    """Response for Get multiple goals"""
+    """
+    Response for Get multiple goals
+    """
 
     value: Optional[List[FetchedGoal]] = None
     """The list of the goals."""
@@ -47,7 +53,9 @@ class FetchedGoals:
 
 @dataclass
 class CreateGoalResponse:
-    """Response for Create a goal"""
+    """
+    Response for Create a goal
+    """
 
     id: Optional[str] = None
     """The unique identifier of the goal."""
@@ -55,7 +63,9 @@ class CreateGoalResponse:
 
 @dataclass
 class FetchedGoal:
-    """Response for Get a goal"""
+    """
+    Response for Get a goal
+    """
 
     id: Optional[str] = None
     """The unique identifier of the goal."""
@@ -63,115 +73,230 @@ class FetchedGoal:
     """The name of the goal."""
     owner: Optional[str] = None
     """The email address of the goal's owner."""
-    start_date: Optional[str] = None
+    start_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDate"},
+    )
     """The start date for the goal. Example: 2021-07-15."""
-    completion_date: Optional[str] = None
+    completion_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "completionDate"},
+    )
     """The due date for the goal to be completed by. Example: 2021-07-29."""
-    parent_id: Optional[str] = None
+    parent_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentId"},
+    )
     """If this goal is a subgoal, the unique id of its parent goal."""
-    current_value: Optional[float] = None
+    current_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "currentValue"},
+    )
     """The current value of the goal being tracked."""
-    current_value_timestamp: Optional[str] = None
+    current_value_timestamp: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "currentValueTimestamp"},
+    )
     """The timestamp when the current value of the goal was set."""
-    target_value: Optional[float] = None
+    target_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "targetValue"},
+    )
     """The target value of the goal."""
-    target_value_timestamp: Optional[str] = None
+    target_value_timestamp: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "targetValueTimestamp"},
+    )
     """The timestamp when the target value of the goal was set."""
     status: Optional[str] = None
     """The status of the goal."""
-    status_timestamp: Optional[str] = None
+    status_timestamp: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "statusTimestamp"},
+    )
     """The timestamp when the status of the goal was set."""
     cycle: Optional[str] = None
     """Tracking cycle frequency interval shown on this goal's visuals."""
-    cycle_period: Optional[str] = None
+    cycle_period: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "cyclePeriod"},
+    )
     """Date to find out extra properties of tracking cycle."""
 
 
 @dataclass
 class GoalsAssigned:
-    """Response for When someone assigns a new owner to a goal"""
+    """
+    Response for When someone assigns a new owner to a goal
+    """
 
-    assigned_goals: Optional[List[Dict[str, Any]]] = None
+    assigned_goals: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "assignedGoals"},
+    )
     """The list of goals that were assigned to the new owner."""
 
 
 @dataclass
 class GoalChanged:
-    """Response for When a goal changes"""
+    """
+    Response for When a goal changes
+    """
 
     id: Optional[str] = None
     """The unique identifier of the goal."""
-    old_name: Optional[str] = None
+    old_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldName"},
+    )
     """The name of the goal."""
-    old_owner: Optional[str] = None
+    old_owner: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldOwner"},
+    )
     """The email address of the goal's owner."""
-    old_start_date: Optional[str] = None
+    old_start_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldStartDate"},
+    )
     """The start date for the goal. Example: 2021-07-15."""
-    old_completion_date: Optional[str] = None
+    old_completion_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldCompletionDate"},
+    )
     """The due date for the goal to be completed by. Example: 2021-07-29."""
-    old_parent_id: Optional[str] = None
+    old_parent_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldParentId"},
+    )
     """If this goal is a subgoal, the unique id of its parent goal."""
-    old_current_value: Optional[float] = None
+    old_current_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "oldCurrentValue"},
+    )
     """The current value of the goal being tracked."""
-    old_target_value: Optional[float] = None
+    old_target_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "oldTargetValue"},
+    )
     """The target value of the goal."""
-    old_status: Optional[str] = None
+    old_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldStatus"},
+    )
     """The status of the goal."""
-    old_cycle: Optional[str] = None
+    old_cycle: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldCycle"},
+    )
     """Old tracking cycle frequency interval shown on this goal's visuals."""
-    old_cycle_period: Optional[str] = None
+    old_cycle_period: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldCyclePeriod"},
+    )
     """Old date to find out extra properties of tracking cycle."""
-    new_name: Optional[str] = None
+    new_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newName"},
+    )
     """The name of the goal."""
-    new_owner: Optional[str] = None
+    new_owner: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newOwner"},
+    )
     """The email address of the goal's owner."""
-    new_start_date: Optional[str] = None
+    new_start_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newStartDate"},
+    )
     """The start date for the goal."""
-    new_completion_date: Optional[str] = None
+    new_completion_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newCompletionDate"},
+    )
     """The due date for the goal to be completed by."""
-    new_parent_id: Optional[str] = None
+    new_parent_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newParentId"},
+    )
     """If this goal is a subgoal, the unique id of its parent goal."""
-    new_current_value: Optional[float] = None
+    new_current_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "newCurrentValue"},
+    )
     """The current value of the goal being tracked."""
-    new_target_value: Optional[float] = None
+    new_target_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "newTargetValue"},
+    )
     """The target value of the goal."""
-    new_status: Optional[str] = None
+    new_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newStatus"},
+    )
     """The status of the goal."""
-    new_cycle: Optional[str] = None
+    new_cycle: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newCycle"},
+    )
     """New tracking cycle interval shown on this goal's visuals."""
-    new_cycle_period: Optional[str] = None
+    new_cycle_period: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newCyclePeriod"},
+    )
     """New date to find out extra properties of tracking cycle."""
-    change_list: Optional[str] = None
+    change_list: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeList"},
+    )
     """Comma separated list of changes. Example: 'status,currentValue'."""
 
 
 @dataclass
 class GoalStatusChanged:
-    """Response for When status of a goal changes"""
+    """
+    Response for When status of a goal changes
+    """
 
     id: Optional[str] = None
     """The unique identifier of the goal."""
-    old_status: Optional[str] = None
+    old_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "oldStatus"},
+    )
     """The status of the goal."""
-    new_status: Optional[str] = None
+    new_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "newStatus"},
+    )
     """The status of the goal."""
 
 
 @dataclass
 class GoalValueChanged:
-    """Response for When current value of a goal changes"""
+    """
+    Response for When current value of a goal changes
+    """
 
     id: Optional[str] = None
     """The unique identifier of the goal."""
-    old_current_value: Optional[float] = None
+    old_current_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "oldCurrentValue"},
+    )
     """The current value of the goal being tracked."""
-    new_current_value: Optional[float] = None
+    new_current_value: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "newCurrentValue"},
+    )
     """The current value of the goal being tracked."""
 
 
 @dataclass
 class GoalRefreshIssues:
-    """Response for When a data refresh for a goal fails"""
+    """
+    Response for When a data refresh for a goal fails
+    """
 
     issues: Optional[List[GoalRefreshIssue]] = None
     """Goal refresh issues."""
@@ -179,7 +304,9 @@ class GoalRefreshIssues:
 
 @dataclass
 class GoalValueOrNoteUpserted:
-    """Response for When someone adds or edits a goal check-in"""
+    """
+    Response for When someone adds or edits a goal check-in
+    """
 
     values: Optional[List[Dict[str, Any]]] = None
     """Added or updated check-ins."""
@@ -188,47 +315,59 @@ class GoalValueOrNoteUpserted:
 
 
 @dataclass
-class Alert:
-    """Response for Get alerts from Power BI"""
-
-    alert_id: Optional[str] = None
-    """The ID of the alert."""
-    alert_title: Optional[str] = None
-    """The title of the alert."""
-    group_id: Optional[str] = None
-    """The ID of the group."""
-
-
-@dataclass
 class EvaluatedAlert:
-    """Response for When a data driven alert is triggered"""
+    """
+    Response for When a data driven alert is triggered
+    """
 
-    alert_title: Optional[str] = None
+    alert_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "alertTitle"},
+    )
     """The title of the alert."""
-    alert_threshold: Optional[float] = None
+    alert_threshold: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "alertThreshold"},
+    )
     """The threshold at which the alert is triggered."""
-    is_alert_triggered: Optional[bool] = None
+    is_alert_triggered: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAlertTriggered"},
+    )
     """
     A boolean value (true, false) determining Whether or not the alert was
     triggered.
     """
-    tile_url: Optional[str] = None
+    tile_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tileUrl"},
+    )
     """URL linking to the dashboard tile where the alert is set up."""
-    tile_value: Optional[Any] = None
+    tile_value: Optional[Any] = field(
+        default=None,
+        metadata={"wire_name": "tileValue"},
+    )
     """The value of the tile."""
 
 
 @dataclass
 class QueryExecutionResults:
-    """Response for Run a query against a dataset"""
+    """
+    Response for Run a query against a dataset
+    """
 
-    first_table_rows: Optional[List[Dict[str, Any]]] = None
+    first_table_rows: Optional[List[Dict[str, Any]]] = field(
+        default=None,
+        metadata={"wire_name": "firstTableRows"},
+    )
     """Query results as an array of rows."""
 
 
 @dataclass
 class ExecuteDatasetQueriesJsonInput:
-    """Run a json query against a dataset"""
+    """
+    Run a json query against a dataset
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -239,7 +378,9 @@ class ExecuteDatasetQueriesJsonInput:
 
 @dataclass
 class ExecuteDatasetQueriesJsonResponse:
-    """Response for Run a json query against a dataset"""
+    """
+    Response for Run a json query against a dataset
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -248,48 +389,14 @@ class ExecuteDatasetQueriesJsonResponse:
     """
 
 
-@dataclass
-class Groups:
-    """Response for ListGroups"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-
-
-@dataclass
-class Datasets:
-    """Response for ListDatasets"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-
-
-@dataclass
-class Tables:
-    """Response for ListTables"""
-
-    value: Optional[List[Dict[str, Any]]] = None
-
-
-@dataclass
-class Columns:
-    """Response for GetColumns"""
-
-    schema: Optional[Dict[str, Any]] = None
-
-
-@dataclass
-class GoalValueCheckinNoteInput:
-    """Add a note to a check-in"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+GoalValueCheckinNoteInput = str
 
 
 @dataclass
 class GetGoalCheckinsResponse:
-    """Response for Get goal check-ins"""
+    """
+    Response for Get goal check-ins
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """List of check-ins."""
@@ -297,7 +404,9 @@ class GetGoalCheckinsResponse:
 
 @dataclass
 class GetGoalCheckinResponse:
-    """Response for Get a goal check-in"""
+    """
+    Response for Get a goal check-in
+    """
 
     timestamp: Optional[str] = None
     """The date that the check-in was made."""
@@ -309,47 +418,103 @@ class GetGoalCheckinResponse:
 
 
 @dataclass
-class GetPowerBiButtonClickedOutputsInput:
-    """Get PowerBi Button Clicked hybrid trigger output"""
+class Groups:
+    """
+    Response for ListGroups
+    """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
-class PowerBiButtonClickedOutputs:
-    """Response for Get PowerBi Button Clicked hybrid trigger output"""
+class Alert:
+    """
+    Response for Get alerts from Power BI
+    """
 
-    power_bi_inputs: Optional[Dict[str, Any]] = None
+    alert_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "alertId"},
+    )
+    """The ID of the alert."""
+    alert_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "alertTitle"},
+    )
+    """The title of the alert."""
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "groupId"},
+    )
+    """The ID of the group."""
+
+
+@dataclass
+class Datasets:
+    """
+    Response for ListDatasets
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class Tables:
+    """
+    Response for ListTables
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class Reports:
-    """Response for Get Reports in Group"""
+    """
+    Response for Get Reports in Group
+    """
 
-    odata_context: Optional[str] = None
+    odata_context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "odata.context"},
+    )
     """OData context"""
     value: Optional[List[Any]] = None
     """The report collection"""
 
 
 @dataclass
+class Columns:
+    """
+    Response for GetColumns
+    """
+
+    schema: Optional[Dict[str, Any]] = None
+
+
+@dataclass
 class QuerySpecification:
-    """Definition: QuerySpecification"""
+    """
+    Definition: QuerySpecification
+    """
 
     query: Optional[str] = None
     """The text of the query. Can be multiline text."""
-    serializer_settings: Optional[Dict[str, Any]] = None
-    impersonated_user_name: Optional[str] = None
+    serializer_settings: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "serializerSettings"},
+    )
+    impersonated_user_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "impersonatedUserName"},
+    )
     """A user identity in UPN format to run the query as another user."""
 
 
 @dataclass
 class CreateScorecardRequest:
-    """Definition: CreateScorecardRequest"""
+    """
+    Definition: CreateScorecardRequest
+    """
 
     name: Optional[str] = None
     """Scorecard name"""
@@ -359,7 +524,9 @@ class CreateScorecardRequest:
 
 @dataclass
 class ListedScorecard:
-    """Definition: ListedScorecard"""
+    """
+    Definition: ListedScorecard
+    """
 
     id: Optional[str] = None
     """The unique identifier of the scorecard."""
@@ -371,7 +538,9 @@ class ListedScorecard:
 
 @dataclass
 class CreateGoalRequest:
-    """Definition: CreateGoalRequest"""
+    """
+    Definition: CreateGoalRequest
+    """
 
     name: Optional[str] = None
     """The name of the goal."""
@@ -383,22 +552,33 @@ class CreateGoalRequest:
     """The target value of the goal."""
     status: Optional[str] = None
     """The current status the goal."""
-    start_date: Optional[str] = None
+    start_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDate"},
+    )
     """The start date for the goal. Example: 2021-07-15."""
-    completion_date: Optional[str] = None
+    completion_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "completionDate"},
+    )
     """The date for the goal to be completed by. Example: 2021-07-29."""
     note: Optional[str] = None
     """
     Note to attach to the initial check-in on goal creation. Can be multiline
     text
     """
-    parent_id: Optional[str] = None
+    parent_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentId"},
+    )
     """If this goal is a subgoal, the unique id of its parent goal."""
 
 
 @dataclass
 class UpdateGoalRequest:
-    """Definition: UpdateGoalRequest"""
+    """
+    Definition: UpdateGoalRequest
+    """
 
     name: Optional[str] = None
     """If provided, the new name of the goal."""
@@ -410,9 +590,15 @@ class UpdateGoalRequest:
     """If provided, sets the new goal target."""
     status: Optional[str] = None
     """If provided, sets the new status of the goal."""
-    start_date: Optional[str] = None
+    start_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "startDate"},
+    )
     """If provided, the new start date for the goal. Example: 2021-07-15."""
-    completion_date: Optional[str] = None
+    completion_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "completionDate"},
+    )
     """
     If provided, the new date for the goal to be completed by. Example:
     2021-07-29.
@@ -421,9 +607,14 @@ class UpdateGoalRequest:
 
 @dataclass
 class GoalRefreshIssue:
-    """Definition: GoalRefreshIssue"""
+    """
+    Definition: GoalRefreshIssue
+    """
 
-    connection_type: Optional[str] = None
+    connection_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "connectionType"},
+    )
     """The connection type, either Current or Target."""
     timestamp: Optional[str] = None
     """The timestamp of when the failed refresh happened."""
@@ -433,7 +624,9 @@ class GoalRefreshIssue:
 
 @dataclass
 class GoalValueCheckinRequest:
-    """Definition: GoalValueCheckinRequest"""
+    """
+    Definition: GoalValueCheckinRequest
+    """
 
     timestamp: Optional[str] = None
     """Check-in date. Example: 2021-07-21"""
@@ -446,27 +639,23 @@ class GoalValueCheckinRequest:
 
 @dataclass
 class GoalValueCheckinUpdateRequest:
-    """Definition: GoalValueCheckinUpdateRequest"""
+    """
+    Definition: GoalValueCheckinUpdateRequest
+    """
 
     value: Optional[float] = None
     status: Optional[str] = None
     """Status of the goal."""
 
 
-@dataclass
-class GoalNotes:
-    """Definition: GoalNotes"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+GoalNotes = List[Dict[str, Any]]
 
 
 @dataclass
 class Payload:
-    """Definition: Payload"""
+    """
+    Definition: Payload
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -477,20 +666,27 @@ class Payload:
 
 @dataclass
 class ExportPayloadPowerBIReport:
-    """Definition: ExportPayloadPowerBIReport"""
+    """
+    Definition: ExportPayloadPowerBIReport
+    """
 
     format: Optional[str] = None
     """
     The export format for the Power BI report. The supported formats are: PPTX
     (PowerPoint), PDF, and PNG
     """
-    power_b_i_report_export_configuration: Optional[Dict[str, Any]] = None
+    power_b_i_report_export_configuration: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "PowerBIReportExportConfiguration"},
+    )
     """Power BI report Export to file configuration"""
 
 
 @dataclass
 class ExportPayloadPaginatedReport:
-    """Definition: ExportPayloadPaginatedReport"""
+    """
+    Definition: ExportPayloadPaginatedReport
+    """
 
     format: Optional[str] = None
     """
@@ -498,17 +694,25 @@ class ExportPayloadPaginatedReport:
     (PowerPoint), PDF, ACCESSIBLEPDF (Accessible PDF), XLSX (Excel), DOCX
     (Word), CSV, XML, MHTML, and Image (BMP, EMF, GIF, JPEG, PNG, or TIFF).
     """
-    paginated_report_configuration: Optional[Dict[str, Any]] = None
+    paginated_report_configuration: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "paginatedReportConfiguration"},
+    )
     """paginatedReportConfiguration"""
 
 
 @dataclass
 class ExportReportSettings:
-    """Definition: ExportReportSettings"""
+    """
+    Definition: ExportReportSettings
+    """
 
     locale: Optional[str] = None
     """The locale to apply"""
-    include_hidden_pages: Optional[bool] = None
+    include_hidden_pages: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "includeHiddenPages"},
+    )
     """
     A flag indicating whether to include hidden pages when exporting the entire
     report (when passing specific pages this property will be ignored). If not
@@ -518,7 +722,9 @@ class ExportReportSettings:
 
 @dataclass
 class PageBookmark:
-    """Definition: PageBookmark"""
+    """
+    Definition: PageBookmark
+    """
 
     name: Optional[str] = None
     """The bookmark name"""
@@ -528,7 +734,9 @@ class PageBookmark:
 
 @dataclass
 class ExportFilter:
-    """Definition: ExportFilter"""
+    """
+    Definition: ExportFilter
+    """
 
     filter: Optional[str] = None
     """The filter to apply"""
@@ -536,11 +744,19 @@ class ExportFilter:
 
 @dataclass
 class ExportReportPage:
-    """Definition: ExportReportPage"""
+    """
+    Definition: ExportReportPage
+    """
 
-    page_name: Optional[str] = None
+    page_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "pageName"},
+    )
     """The page name"""
-    visual_name: Optional[str] = None
+    visual_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "visualName"},
+    )
     """(Optional) Visual name to be exported"""
     bookmark: Optional[PageBookmark] = None
     """(Optional) The bookmark to be applied on the page"""
@@ -548,13 +764,15 @@ class ExportReportPage:
 
 @dataclass
 class EffectiveIdentity:
-    """Definition: EffectiveIdentity"""
+    """
+    Definition: EffectiveIdentity
+    """
 
     username: Optional[str] = None
     """
     The effective username reflected by a token for applying RLS rules (For
     OnPrem model, username can be composed of alpha-numerical characters or any
-    of the following characters '.', '-', '_', '!', '#', '^', '~', '\\', '@',
+    of the following characters '.', '-', '_', '!', '#', '^', '~', '\\\\', '@',
     also username cannot contain spaces. For Cloud model, username can be
     composed of all ASCII characters. username must be up to 256 characters)
     """
@@ -566,12 +784,18 @@ class EffectiveIdentity:
     (identity can contain up to 50 roles, role can be composed of any character
     besides ',' and must be up to 50 characters)
     """
-    custom_data: Optional[str] = None
+    custom_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "customData"},
+    )
     """
     The value of customdata to be used for applying RLS rules. Only supported
     for live connections to Azure Analysis Services.
     """
-    identity_blob: Optional[IdentityBlob] = None
+    identity_blob: Optional[IdentityBlob] = field(
+        default=None,
+        metadata={"wire_name": "identityBlob"},
+    )
     """
     A blob for specifying the identity. Only supported for datasets with Direct
     Query connection to SQL Azure
@@ -585,7 +809,9 @@ class EffectiveIdentity:
 
 @dataclass
 class IdentityBlob:
-    """Definition: IdentityBlob"""
+    """
+    Definition: IdentityBlob
+    """
 
     value: Optional[str] = None
     """OAuth2 access token for SQL Azure"""
@@ -593,13 +819,27 @@ class IdentityBlob:
 
 @dataclass
 class DynamicPowerBiButtonClickedTriggerResult:
-    """Definition: DynamicPowerBiButtonClickedTriggerResult"""
+    """
+    Definition: DynamicPowerBiButtonClickedTriggerResult
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
+
+
+@dataclass
+class PowerBiButtonClickedOutputs:
+    """
+    Definition: PowerBiButtonClickedOutputs
+    """
+
+    power_bi_inputs: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "PowerBiInputs"},
+    )
 
 
 # Client Class
@@ -639,27 +879,33 @@ class PowerbiClient(ConnectorClientBase):
     async def get_scorecards_async(
         self,
         groupid: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get scorecards
 
         Gets a list of Power BI scorecards in the specified workspace.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/myOrg/groups/{str(groupid)}/internalScorecards"
+            f"/v1.0"
+            f"/myOrg"
+            f"/groups"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -673,27 +919,33 @@ class PowerbiClient(ConnectorClientBase):
         self,
         input: CreateScorecardRequest,
         groupid: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a scorecard
 
         Creates a scorecard for Power BI goals.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/myOrg/groups/{str(groupid)}/internalScorecards"
+            f"/v1.0"
+            f"/myOrg"
+            f"/groups"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -707,33 +959,35 @@ class PowerbiClient(ConnectorClientBase):
         self,
         groupid: str,
         scorecard_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get multiple goals
 
         Get a list of Power BI goals in the specified scorecard.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myOrg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
             f"/goals"
         )
         query_params = []
-        query_params.append(f"$expand={quote('aggregations')}")
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("$expand=" + quote("aggregations"))
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -748,32 +1002,34 @@ class PowerbiClient(ConnectorClientBase):
         input: CreateGoalRequest,
         groupid: str,
         scorecard_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a goal
 
         Creates a Power BI goal on the specified scorecard.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myOrg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
             f"/goals"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -788,33 +1044,35 @@ class PowerbiClient(ConnectorClientBase):
         groupid: str,
         scorecard_id: str,
         goal_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a goal
 
         Gets the specified Power BI goal on a scorecard.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myOrg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
+            f"/goals({quote(str(goal_id), safe='')})"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        query_params.append(f"$expand={quote('aggregations')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("$expand=" + quote("aggregations"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -830,434 +1088,72 @@ class PowerbiClient(ConnectorClientBase):
         groupid: str,
         scorecard_id: str,
         goal_id: str,
-    ):
+    ) -> None:
         """
         Update a goal
 
         Updates the Power BI goal's state.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myOrg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
+            f"/goals({quote(str(goal_id), safe='')})"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def goals_assigned_trigger_async(
-        self,
-        groupid: str,
-        scorecard_id: str,
-        polling_interval: Optional[str],
-        owner: Optional[str] = None,
-    ):
-        """
-        When someone assigns a new owner to a goal
-
-        When someone assigns a new owner to a Power BI goal.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/internalFlowTriggerGoalChange"
-            f"/v1.0"
-            f"/myOrg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if owner is not None:
-            value = str(owner)
-            if isinstance(owner, bool):
-                value = value.lower()
-            query_params.append(f"owner={quote(value)}")
-        if polling_interval is not None:
-            value = str(polling_interval)
-            if isinstance(polling_interval, bool):
-                value = value.lower()
-            query_params.append(f"pollingInterval={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def goal_change_trigger_async(
-        self,
-        groupid: str,
-        scorecard_id: str,
-        goal_id: str,
-        polling_interval: Optional[str],
-    ):
-        """
-        When a goal changes
-
-        When a property of some Power BI goal changes.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/internalFlowTriggerGoalChange"
-            f"/v1.0"
-            f"/myOrg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if polling_interval is not None:
-            value = str(polling_interval)
-            if isinstance(polling_interval, bool):
-                value = value.lower()
-            query_params.append(f"pollingInterval={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def goal_status_change_trigger_async(
-        self,
-        groupid: str,
-        scorecard_id: str,
-        goal_id: str,
-        polling_interval: Optional[str],
-    ):
-        """
-        When status of a goal changes
-
-        When status of some Power BI goal changes.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/internalFlowTriggerGoalChange"
-            f"/v1.0"
-            f"/myOrg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-            f"/GetFlowTriggerStatus"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if polling_interval is not None:
-            value = str(polling_interval)
-            if isinstance(polling_interval, bool):
-                value = value.lower()
-            query_params.append(f"pollingInterval={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def goal_value_change_trigger_async(
-        self,
-        groupid: str,
-        scorecard_id: str,
-        goal_id: str,
-        polling_interval: Optional[str],
-    ):
-        """
-        When current value of a goal changes
-
-        When current value of some Power BI goal changes.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/internalFlowTriggerGoalChange"
-            f"/v1.0"
-            f"/myOrg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-            f"/GetFlowTriggerValue"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if polling_interval is not None:
-            value = str(polling_interval)
-            if isinstance(polling_interval, bool):
-                value = value.lower()
-            query_params.append(f"pollingInterval={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def goal_refresh_failed_trigger_async(
-        self,
-        groupid: str,
-        scorecard_id: str,
-        goal_id: str,
-        track_target_source: Optional[str],
-        track_value_source: Optional[str],
-        polling_interval: Optional[str],
-    ):
-        """
-        When a data refresh for a goal fails
-
-        When a data refresh for a Power BI goal fails.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/internalFlowTriggerGoalChange"
-            f"/v1.0"
-            f"/myOrg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-            f"/GetRefreshHistory"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if track_target_source is not None:
-            value = str(track_target_source)
-            if isinstance(track_target_source, bool):
-                value = value.lower()
-            query_params.append(f"trackTargetSource={quote(value)}")
-        if track_value_source is not None:
-            value = str(track_value_source)
-            if isinstance(track_value_source, bool):
-                value = value.lower()
-            query_params.append(f"trackValueSource={quote(value)}")
-        if polling_interval is not None:
-            value = str(polling_interval)
-            if isinstance(polling_interval, bool):
-                value = value.lower()
-            query_params.append(f"pollingInterval={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def goal_value_or_note_upsert_trigger_async(
-        self,
-        groupid: str,
-        scorecard_id: str,
-        goal_id: str,
-        polling_interval: Optional[str],
-    ):
-        """
-        When someone adds or edits a goal check-in
-
-        Trigger for some Power BI goal check-in or note changes.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/internalFlowTriggerGoalChange"
-            f"/v1.0"
-            f"/myOrg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-            f"/goalValues"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if polling_interval is not None:
-            value = str(polling_interval)
-            if isinstance(polling_interval, bool):
-                value = value.lower()
-            query_params.append(f"pollingInterval={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_alerts_async(
-        self,
-    ):
-        """
-        Get alerts from Power BI
-
-        Return a list of alerts for a signed in user.
-        """
-        path = f"{self._connection_runtime_url}/metadata/v201606/alerts"
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def check_alert_status_async(
-        self,
-        alert_id: str,
-    ):
-        """
-        When a data driven alert is triggered
-
-        Return the details of the specified data driven alert from Power BI
-        when the alert triggered.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/metadata/v201606/alerts/{str(alert_id)}/status"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def execute_dataset_query_async(
         self,
         input: QuerySpecification,
         groupid: str,
         datasetid: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run a query against a dataset
 
         Use the Power BI REST API to run a query.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
+            f"/{quote(str(groupid), safe='')}"
             f"/datasets"
-            f"/{str(datasetid)}"
+            f"/{quote(str(datasetid), safe='')}"
             f"/executeQueries"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1272,34 +1168,36 @@ class PowerbiClient(ConnectorClientBase):
         input: ExecuteDatasetQueriesJsonInput,
         groupid: str,
         datasetid: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Run a json query against a dataset
 
         Use the Power BI REST API to run a query in json format.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/internalFlowActionOverloadAsJson"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
+            f"/{quote(str(groupid), safe='')}"
             f"/datasets"
-            f"/{str(datasetid)}"
+            f"/{quote(str(datasetid), safe='')}"
             f"/executeQueries"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1315,183 +1213,40 @@ class PowerbiClient(ConnectorClientBase):
         groupid: str,
         datasetid: str,
         tablename: str,
-    ):
+    ) -> None:
         """
         Add rows to a dataset
 
         Use Power BI REST API to add rows to a dataset.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
+            f"/{quote(str(groupid), safe='')}"
             f"/datasets"
-            f"/{str(datasetid)}"
+            f"/{quote(str(datasetid), safe='')}"
             f"/tables"
-            f"/{str(tablename)}"
+            f"/{quote(str(tablename), safe='')}"
             f"/rows"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def list_groups_async(
-        self,
-    ):
-        """
-        ListGroups
-
-        Get Groups for Power BI.
-        """
-        path = f"{self._connection_runtime_url}/v1.0/myorg/groups"
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_datasets_async(
-        self,
-        groupid: str,
-    ):
-        """
-        ListDatasets
-
-        Get datasets for Power BI group.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v1.0/myorg/groups/{str(groupid)}/datasets"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_tables_async(
-        self,
-        groupid: str,
-        datasetid: str,
-    ):
-        """
-        ListTables
-
-        Get tables for Power BI dataset.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v1.0"
-            f"/myorg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/datasets"
-            f"/{str(datasetid)}"
-            f"/tables"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_columns_async(
-        self,
-        groupid: str,
-        datasetid: str,
-        tablename: str,
-    ):
-        """
-        GetColumns
-
-        Get columns for Power BI dataset table.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v1.0"
-            f"/myorg"
-            f"/groups"
-            f"/{str(groupid)}"
-            f"/datasets"
-            f"/{str(datasetid)}"
-            f"/tables"
-            f"/{str(tablename)}"
-            f"/columns"
-        )
-        query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def goal_value_checkin_note_async(
         self,
@@ -1500,34 +1255,36 @@ class PowerbiClient(ConnectorClientBase):
         scorecard_id: str,
         goal_id: str,
         goal_checkin: str,
-    ):
+    ) -> None:
         """
         Add a note to a check-in
 
         Appends a new note to a check-in of a Power BI goal.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-            f"/goalValues({str(goal_checkin)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
+            f"/goals({quote(str(goal_id), safe='')})"
+            f"/goalValues({quote(str(goal_checkin), safe='')})"
             f"/notes"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1538,33 +1295,35 @@ class PowerbiClient(ConnectorClientBase):
         groupid: str,
         scorecard_id: str,
         goal_id: str,
-    ):
+    ) -> None:
         """
         Create a check-in
 
         Creates a Power BI goal check-in.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
+            f"/goals({quote(str(goal_id), safe='')})"
             f"/goalValues"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1574,34 +1333,36 @@ class PowerbiClient(ConnectorClientBase):
         groupid: str,
         scorecard_id: str,
         goal_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get goal check-ins
 
         Get all check-ins on a Power BI goal.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
+            f"/goals({quote(str(goal_id), safe='')})"
             f"/goalValues"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        query_params.append(f"$expand={quote('notes')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("$expand=" + quote("notes"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1618,33 +1379,35 @@ class PowerbiClient(ConnectorClientBase):
         scorecard_id: str,
         goal_id: str,
         goal_checkin: str,
-    ):
+    ) -> None:
         """
         Update a check-in
 
         Updates a Power BI goal check-in.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-            f"/goalValues({str(goal_checkin)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
+            f"/goals({quote(str(goal_id), safe='')})"
+            f"/goalValues({quote(str(goal_checkin), safe='')})"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1655,67 +1418,36 @@ class PowerbiClient(ConnectorClientBase):
         scorecard_id: str,
         goal_id: str,
         goal_checkin: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a goal check-in
 
         Get a check-in on a Power BI goal.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
-            f"/internalScorecards({str(scorecard_id)})"
-            f"/goals({str(goal_id)})"
-            f"/goalValues({str(goal_checkin)})"
+            f"/{quote(str(groupid), safe='')}"
+            f"/internalScorecards({quote(str(scorecard_id), safe='')})"
+            f"/goals({quote(str(goal_id), safe='')})"
+            f"/goalValues({quote(str(goal_checkin), safe='')})"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
-        query_params.append(f"$expand={quote('notes')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("$expand=" + quote("notes"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_power_bi_button_clicked_outputs_async(
-        self,
-        input: GetPowerBiButtonClickedOutputsInput,
-    ):
-        """
-        Get PowerBi Button Clicked hybrid trigger output
-
-        Get the schema information for the PowerBi Button Clicked hybrid
-        trigger output.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/powerbihybridtriggeroutput"
-            f"/triggers"
-            f"/PowerBiButtonClicked"
-            f"/PowerBiButtonClickedOutputs"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1729,33 +1461,35 @@ class PowerbiClient(ConnectorClientBase):
         self,
         groupid: str,
         datasetid: str,
-    ):
+    ) -> None:
         """
         Refresh a dataset
 
         Use Power BI REST API to refresh a powerbi dataset.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
+            f"/{quote(str(groupid), safe='')}"
             f"/datasets"
-            f"/{str(datasetid)}"
+            f"/{quote(str(datasetid), safe='')}"
             f"/refreshes"
         )
         query_params = []
-        query_params.append(f"pbi_source={quote('powerAutomate')}")
+        query_params.append("pbi_source=" + quote("powerAutomate"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1765,29 +1499,31 @@ class PowerbiClient(ConnectorClientBase):
         input: ExportPayloadPowerBIReport,
         groupid: str,
         reportid: str,
-    ):
+    ) -> bytes:
         """
         Export To File for Power BI Reports
 
         Use Power BI Rest API to inititate export for Power BI reports
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
+            f"/{quote(str(groupid), safe='')}"
             f"/reports"
-            f"/{str(reportid)}"
+            f"/{quote(str(reportid), safe='')}"
             f"/ExportTo"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1799,55 +1535,59 @@ class PowerbiClient(ConnectorClientBase):
         input: ExportPayloadPaginatedReport,
         groupid: str,
         reportid: str,
-    ):
+    ) -> bytes:
         """
         Export To File for Paginated Reports
 
         Use Power BI Rest API to inititate export for paginated reports
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0"
             f"/myorg"
             f"/groups"
-            f"/{str(groupid)}"
+            f"/{quote(str(groupid), safe='')}"
             f"/reports"
-            f"/{str(reportid)}"
+            f"/{quote(str(reportid), safe='')}"
             f"/ExportToPaginatedReports"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
         return response.content
 
-    async def get_reports_in_group_async(
+    async def list_groups_async(
         self,
-        groupid: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get Reports in Group
+        ListGroups
 
-        Returns a list of reports from the specified workspace.
+        Get Groups for Power BI.
         """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v1.0/myorg/groups/{str(groupid)}/reports"
+        request_url = f"{self._connection_runtime_url}/v1.0/myorg/groups"
+        query_params = []
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-
-        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1856,3 +1596,272 @@ class PowerbiClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def get_alerts_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get alerts from Power BI
+
+        Return a list of alerts for a signed in user.
+        """
+        request_url = f"{self._connection_runtime_url}/metadata/v201606/alerts"
+        query_params = []
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_datasets_async(
+        self,
+        groupid: str,
+    ) -> dict[str, Any] | None:
+        """
+        ListDatasets
+
+        Get datasets for Power BI group.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/myorg/groups/{quote(str(groupid), safe='')}/datasets"
+        )
+        query_params = []
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_tables_async(
+        self,
+        groupid: str,
+        datasetid: str,
+    ) -> dict[str, Any] | None:
+        """
+        ListTables
+
+        Get tables for Power BI dataset.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/myorg"
+            f"/groups"
+            f"/{quote(str(groupid), safe='')}"
+            f"/datasets"
+            f"/{quote(str(datasetid), safe='')}"
+            f"/tables"
+        )
+        query_params = []
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_reports_in_group_async(
+        self,
+        groupid: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get Reports in Group
+
+        Returns a list of reports from the specified workspace.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/myorg/groups/{quote(str(groupid), safe='')}/reports"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_columns_async(
+        self,
+        groupid: str,
+        datasetid: str,
+        tablename: str,
+    ) -> dict[str, Any] | None:
+        """
+        GetColumns
+
+        Get columns for Power BI dataset table.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/myorg"
+            f"/groups"
+            f"/{quote(str(groupid), safe='')}"
+            f"/datasets"
+            f"/{quote(str(datasetid), safe='')}"
+            f"/tables"
+            f"/{quote(str(tablename), safe='')}"
+            f"/columns"
+        )
+        query_params = []
+        query_params.append("pbi_source=" + quote("powerAutomate"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "GoalsAssignedTrigger": {
+        "operation_id": "GoalsAssignedTrigger",
+        "path": (
+            "/{connectionId}/internalFlowTriggerGoalChange/v1.0/myOrg/groups/{groupid}"
+            "/internalScorecards({scorecardId})/goals"
+        ),
+        "method": "get",
+        "required_parameters": ["groupid", "scorecardId", "pollingInterval"],
+        "callback_payload_type": "GoalsAssigned",
+    },
+    "GoalChangeTrigger": {
+        "operation_id": "GoalChangeTrigger",
+        "path": (
+            "/{connectionId}/internalFlowTriggerGoalChange/v1.0/myOrg/groups/{groupid}"
+            "/internalScorecards({scorecardId})/goals({goalId})"
+        ),
+        "method": "get",
+        "required_parameters": ["groupid", "scorecardId", "goalId", "pollingInterval"],
+        "callback_payload_type": "GoalChanged",
+    },
+    "GoalStatusChangeTrigger": {
+        "operation_id": "GoalStatusChangeTrigger",
+        "path": (
+            "/{connectionId}/internalFlowTriggerGoalChange/v1.0/myOrg/groups/{groupid}"
+            "/internalScorecards({scorecardId})/goals({goalId})/GetFlowTriggerStatus"
+        ),
+        "method": "get",
+        "required_parameters": ["groupid", "scorecardId", "goalId", "pollingInterval"],
+        "callback_payload_type": "GoalStatusChanged",
+    },
+    "GoalValueChangeTrigger": {
+        "operation_id": "GoalValueChangeTrigger",
+        "path": (
+            "/{connectionId}/internalFlowTriggerGoalChange/v1.0/myOrg/groups/{groupid}"
+            "/internalScorecards({scorecardId})/goals({goalId})/GetFlowTriggerValue"
+        ),
+        "method": "get",
+        "required_parameters": ["groupid", "scorecardId", "goalId", "pollingInterval"],
+        "callback_payload_type": "GoalValueChanged",
+    },
+    "GoalRefreshFailedTrigger": {
+        "operation_id": "GoalRefreshFailedTrigger",
+        "path": (
+            "/{connectionId}/internalFlowTriggerGoalChange/v1.0/myOrg/groups/{groupid}"
+            "/internalScorecards({scorecardId})/goals({goalId})/GetRefreshHistory"
+        ),
+        "method": "get",
+        "required_parameters": [
+            "groupid",
+            "scorecardId",
+            "goalId",
+            "trackTargetSource",
+            "trackValueSource",
+            "pollingInterval",
+        ],
+        "callback_payload_type": "GoalRefreshIssues",
+    },
+    "GoalValueOrNoteUpsertTrigger": {
+        "operation_id": "GoalValueOrNoteUpsertTrigger",
+        "path": (
+            "/{connectionId}/internalFlowTriggerGoalChange/v1.0/myOrg/groups/{groupid}"
+            "/internalScorecards({scorecardId})/goals({goalId})/goalValues"
+        ),
+        "method": "get",
+        "required_parameters": ["groupid", "scorecardId", "goalId", "pollingInterval"],
+        "callback_payload_type": "GoalValueOrNoteUpserted",
+    },
+    "CheckAlertStatus": {
+        "operation_id": "CheckAlertStatus",
+        "path": "/{connectionId}/metadata/v201606/alerts/{alertId}/status",
+        "method": "get",
+        "required_parameters": ["alertId"],
+        "callback_payload_type": "EvaluatedAlert",
+    },
+}

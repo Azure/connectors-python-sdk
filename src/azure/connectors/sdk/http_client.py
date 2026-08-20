@@ -4,8 +4,7 @@
 
 import asyncio
 import json
-from dataclasses import is_dataclass
-from typing import Any, Dict, List, NamedTuple, Optional, TypeVar, Generic, cast
+from typing import Any, Dict, List, NamedTuple, Optional, TypeVar, Generic
 import aiohttp
 from aiohttp import ClientTimeout
 
@@ -141,17 +140,12 @@ class ConnectorHttpClient:
         if body is not None:
             if is_binary_body:
                 request_body = bytes(body)
-            elif is_dataclass(body) and not isinstance(body, type):
+            else:
                 # NOTE(victoriahall): Generated connector models expose
                 # idiomatic snake_case attributes, but the connector service
-                # contract is the Swagger JSON property name. Serialize through
-                # the shared wire serializer so each field is emitted under its
-                # Swagger property name (from field metadata), None values are
-                # omitted, and additional_properties are merged like the .NET
-                # [JsonExtensionData] behavior.
-                request_body = json.dumps(to_wire(cast(Any, body)))
-            else:
-                request_body = json.dumps(body)
+                # contract is the Swagger JSON property name. Normalize every
+                # JSON body so top-level collections of models are converted too.
+                request_body = json.dumps(to_wire(body))
 
         return await self._send_with_retry(
             session, method, url, headers, request_body

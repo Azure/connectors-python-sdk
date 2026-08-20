@@ -24,8 +24,7 @@ from azure.connectors.sdk import (
 @dataclass
 class CreateAgreementsSolutionDocumentInput:
     """
-    Agreements Solution - Generate document within Agreements Solution
-    workspace
+    Agreements Solution - Generate document within Agreements Solution workspace
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -38,42 +37,61 @@ class CreateAgreementsSolutionDocumentInput:
 @dataclass
 class SPBlobMetadataResponse:
     """
-    Response for Agreements Solution - Generate document within Agreements
-    Solution workspace
+    Response for Agreements Solution - Generate document within Agreements Solution workspace
     """
 
-    item_id: Optional[int] = None
+    item_id: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "ItemId"},
+    )
     """
     The value that can be used to Get or Update file properties in libraries.
     """
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
 
 
 @dataclass
 class TablesList:
-    """Response for Get all lists and libraries"""
+    """
+    Response for Get all lists and libraries
+    """
 
     value: Optional[List[Table]] = None
     """List of Tables"""
@@ -81,102 +99,123 @@ class TablesList:
 
 @dataclass
 class ApproveHubSiteJoinResponse:
-    """Response for Approve hub site join request"""
+    """
+    Response for Approve hub site join request
+    """
 
-    approval_token: Optional[str] = None
+    approval_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ApprovalToken"},
+    )
     """Approval Token"""
 
 
 @dataclass
 class SharingLinkPermission:
-    """Response for Create sharing link for a file or folder"""
+    """
+    Response for Create sharing link for a file or folder
+    """
 
     link: Optional[SharingLink] = None
 
 
 @dataclass
 class BlobMetadata:
-    """Response for Copy file (deprecated)"""
+    """
+    Response for Copy file (deprecated)
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
 
 
 @dataclass
-class CreateFileInput:
-    """Create file"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class UpdateFileInput:
-    """Update file"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class BlobMetadataResponse:
-    """Response for Update file"""
+    """
+    Response for Update file
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
 
 
 @dataclass
 class CreateNewDocumentSetResponse:
-    """Response for Create new document set"""
+    """
+    Response for Create new document set
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -187,7 +226,9 @@ class CreateNewDocumentSetResponse:
 
 @dataclass
 class CreateNewFolderResponse:
-    """Response for Create new folder"""
+    """
+    Response for Create new folder
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -198,55 +239,103 @@ class CreateNewFolderResponse:
 
 @dataclass
 class SPListExpandedUser:
-    """Response for Resolve person"""
+    """
+    Response for Resolve person
+    """
 
-    claims: Optional[str] = None
+    claims: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Claims"},
+    )
     """user claims"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """user title"""
-    email: Optional[str] = None
+    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
     """user email"""
-    picture: Optional[str] = None
+    picture: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Picture"},
+    )
     """user picture"""
-    department: Optional[str] = None
+    department: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Department"},
+    )
     """user department"""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "JobTitle"},
+    )
     """user job title"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.type"},
+    )
 
 
 @dataclass
 class TableForm:
-    """Response for Get form metadata (preview)"""
+    """
+    Response for Get form metadata (preview)
+    """
 
-    form_id: Optional[str] = None
+    form_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FormID"},
+    )
     """Gets or sets the form ID"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Gets or sets the form display name"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
     """Gets or sets the form type"""
-    link: Optional[str] = None
+    link: Optional[str] = field(default=None, metadata={"wire_name": "Link"})
     """Gets or sets the form link/URL"""
-    created_by: Optional[str] = None
+    created_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CreatedBy"},
+    )
     """Gets or sets the user who created the form"""
-    created: Optional[str] = None
+    created: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Created"},
+    )
     """Gets or sets the date the form was created"""
-    modified: Optional[str] = None
+    modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Modified"},
+    )
     """Gets or sets the date the form was last modified"""
-    modified_by: Optional[str] = None
+    modified_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ModifiedBy"},
+    )
     """Gets or sets the user who last modified the form"""
-    output_format: Optional[str] = None
+    output_format: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OutputFormat"},
+    )
     """
     Gets or sets the output format (e.g. \"Word document\", \"PDF document\",
     \"None\")
     """
-    fields_metadata: Optional[List[FormFieldMetadata]] = None
+    fields_metadata: Optional[List[FormFieldMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "FieldsMetadata"},
+    )
     """Gets or sets Form Fields"""
 
 
 @dataclass
 class SubmitDocGenFormInput:
-    """Generate a document from a form (preview)"""
+    """
+    Generate a document from a form (preview)
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -257,7 +346,9 @@ class SubmitDocGenFormInput:
 
 @dataclass
 class ItemsList:
-    """Response for Get files (properties only)"""
+    """
+    Response for Get files (properties only)
+    """
 
     value: Optional[List[Item]] = None
     """List of Items"""
@@ -265,7 +356,9 @@ class ItemsList:
 
 @dataclass
 class PostItemInput:
-    """Create item"""
+    """
+    Create item
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -276,7 +369,9 @@ class PostItemInput:
 
 @dataclass
 class PostItemResponse:
-    """Response for Create item"""
+    """
+    Response for Create item
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -287,7 +382,9 @@ class PostItemResponse:
 
 @dataclass
 class GetItemResponse:
-    """Response for Get item"""
+    """
+    Response for Get item
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -298,7 +395,9 @@ class GetItemResponse:
 
 @dataclass
 class PatchItemInput:
-    """Update item"""
+    """
+    Update item
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -309,7 +408,9 @@ class PatchItemInput:
 
 @dataclass
 class PatchItemResponse:
-    """Response for Update item"""
+    """
+    Response for Update item
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -320,7 +421,9 @@ class PatchItemResponse:
 
 @dataclass
 class CreateApprovalRequestInput:
-    """Create an approval request for an item or file"""
+    """
+    Create an approval request for an item or file
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -331,15 +434,22 @@ class CreateApprovalRequestInput:
 
 @dataclass
 class ApprovalData:
-    """Response for Create an approval request for an item or file"""
+    """
+    Response for Create an approval request for an item or file
+    """
 
-    approval_id: Optional[str] = None
+    approval_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ApprovalId"},
+    )
     """The ID of the approval request created"""
 
 
 @dataclass
 class GetItemChangesResponse:
-    """Response for Get changes for an item or a file (properties only)"""
+    """
+    Response for Get changes for an item or a file (properties only)
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -350,14 +460,21 @@ class GetItemChangesResponse:
 
 @dataclass
 class Item:
-    """Response for Get file properties"""
+    """
+    Response for Get file properties
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
 class PatchFileItemInput:
-    """Update file properties"""
+    """
+    Update file properties
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -368,7 +485,9 @@ class PatchFileItemInput:
 
 @dataclass
 class PatchFileItemResponse:
-    """Response for Update file properties"""
+    """
+    Response for Update file properties
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -379,46 +498,59 @@ class PatchFileItemResponse:
 
 @dataclass
 class SetApprovalStatusOutput:
-    """Response for Set content approval status"""
+    """
+    Response for Set content approval status
+    """
 
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """ETag of the item after the approval status was set"""
-    approval_link: Optional[str] = None
+    approval_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ApprovalLink"},
+    )
     """A link to the item that needs approval"""
-    publish_start_date: Optional[str] = None
+    publish_start_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PublishStartDate"},
+    )
     """Date time at which the item will be Published"""
-    content_approval_status: Optional[str] = None
+    content_approval_status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentApprovalStatus"},
+    )
     """The content approval status of the list item"""
-    scheduled_version: Optional[str] = None
+    scheduled_version: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ScheduledVersion"},
+    )
     """The version of the item that has been scheduled"""
 
 
 @dataclass
 class SPListItemAttachment:
-    """Response for Get attachments"""
+    """
+    Response for Get attachments
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """File identifier"""
-    absolute_uri: Optional[str] = None
+    absolute_uri: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "AbsoluteUri"},
+    )
     """Link to attachment"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Name"""
 
 
 @dataclass
-class CreateAttachmentInput:
-    """Add attachment"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class DeletedItemList:
-    """Response for When a file is deleted"""
+    """
+    Response for When a file is deleted
+    """
 
     value: Optional[List[DeletedItem]] = None
     """List of Deleted Items"""
@@ -426,7 +558,9 @@ class DeletedItemList:
 
 @dataclass
 class CreateContentAssemblyDocumentInput:
-    """Generate document using Microsoft Syntex (preview)"""
+    """
+    Generate document using Microsoft Syntex (preview)
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -437,39 +571,140 @@ class CreateContentAssemblyDocumentInput:
 
 @dataclass
 class Table:
-    """Response for Get list views"""
+    """
+    Response for Get list views
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
 @dataclass
-class ApplicationPermissionIdentity:
-    """Definition: ApplicationPermissionIdentity"""
+class DataSetsList:
+    """
+    Response for Get datasets
+    """
 
-    display_name: Optional[str] = None
+    value: Optional[List[DataSet]] = None
+    """List of datasets"""
+
+
+@dataclass
+class TableMetadata:
+    """
+    Response for Agreements Solution - Get template fields
+    """
+
+    name: Optional[str] = None
+    """Table name"""
+    title: Optional[str] = None
+    """Table title"""
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
+    """Table permission"""
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
+    schema: Optional[ObjectEntity] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
+    """URL link"""
+
+
+@dataclass
+class SPListEntity:
+    """
+    Response for Returns User fields for a list
+    """
+
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    """The Id of the SPField"""
+    entity_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "EntityType"},
+    )
+    """What type of entity (field) this is"""
+
+
+@dataclass
+class ObjectEntity:
+    """
+    Response for Get SPViewScope options to use for folder querying behavior
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class GetItemChangesMetadataResponse:
+    """
+    Response for Get metadata about the return type of the GetItemChanges operation
+    """
+
+    schema: Optional[ObjectEntity] = None
+
+
+@dataclass
+class ApplicationPermissionIdentity:
+    """
+    Definition: ApplicationPermissionIdentity
+    """
+
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Application display name"""
 
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
 @dataclass
 class BlobMetadataPage:
-    """Definition: BlobMetadataPage"""
+    """
+    Definition: BlobMetadataPage
+    """
 
     value: Optional[List[BlobMetadata]] = None
     """Blob metadata collection."""
@@ -477,46 +712,84 @@ class BlobMetadataPage:
 
 @dataclass
 class CopyFileParameters:
-    """Definition: CopyFileParameters"""
+    """
+    Definition: CopyFileParameters
+    """
 
-    source_file_id: Optional[str] = None
+    source_file_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sourceFileId"},
+    )
     """File Identifier"""
-    destination_dataset: Optional[str] = None
+    destination_dataset: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationDataset"},
+    )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = None
+    destination_folder_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationFolderPath"},
+    )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = None
+    name_conflict_behavior: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "nameConflictBehavior"},
+    )
     """Pick one of the options available"""
 
 
 @dataclass
 class CopyFolderParameters:
-    """Definition: CopyFolderParameters"""
+    """
+    Definition: CopyFolderParameters
+    """
 
-    source_folder_id: Optional[str] = None
+    source_folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sourceFolderId"},
+    )
     """File Identifier"""
-    destination_dataset: Optional[str] = None
+    destination_dataset: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationDataset"},
+    )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = None
+    destination_folder_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationFolderPath"},
+    )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = None
+    name_conflict_behavior: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "nameConflictBehavior"},
+    )
     """Pick one of the options available"""
 
 
 @dataclass
 class CreateNewDocumentSetParameters:
-    """Definition: CreateNewDocumentSetParameters"""
+    """
+    Definition: CreateNewDocumentSetParameters
+    """
 
     path: Optional[str] = None
     """Example: folder1/folder2/dsName"""
-    content_type_id: Optional[str] = None
+    content_type_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentTypeId"},
+    )
     """Example: 0x0120D520"""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
 
 
 @dataclass
 class CreateNewFolderParameters:
-    """Definition: CreateNewFolderParameters"""
+    """
+    Definition: CreateNewFolderParameters
+    """
 
     path: Optional[str] = None
     """Example: folder1/folder2/folder3"""
@@ -524,27 +797,26 @@ class CreateNewFolderParameters:
 
 @dataclass
 class DataSet:
-    """Definition: DataSet"""
+    """
+    Definition: DataSet
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Dataset name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Dataset display name"""
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
 
 
 @dataclass
-class DataSetsList:
-    """Definition: DataSetsList"""
-
-    value: Optional[List[DataSet]] = None
-    """List of datasets"""
-
-
-@dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -552,96 +824,149 @@ class DataSetsMetadata:
 
 @dataclass
 class DeletedItem:
-    """Definition: DeletedItem"""
+    """
+    Definition: DeletedItem
+    """
 
-    id: Optional[int] = None
+    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
     """List item id"""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """
     File name of the item in document libraries, display name of the item in
     lists
     """
-    file_name_with_extension: Optional[str] = None
+    file_name_with_extension: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileNameWithExtension"},
+    )
     """
     File name with extension of the item in document libraries, same as Name of
     the item in lists
     """
-    deleted_by_user_name: Optional[str] = None
+    deleted_by_user_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DeletedByUserName"},
+    )
     """The name of the user who deleted this item"""
-    time_deleted: Optional[str] = None
+    time_deleted: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeDeleted"},
+    )
     """When this item was deleted"""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """A true/false value to indicate if the item is a folder"""
 
 
 @dataclass
 class FileCheckInParameters:
-    """Definition: FileCheckInParameters"""
+    """
+    Definition: FileCheckInParameters
+    """
 
     comment: Optional[str] = None
     """Type comments describing what has changed in this version"""
-    checkin_type: Optional[int] = None
+    checkin_type: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "checkinType"},
+    )
     """Select the type of version you would like to check in"""
 
 
 @dataclass
 class FormFieldMetadata:
-    """Definition: FormFieldMetadata"""
+    """
+    Definition: FormFieldMetadata
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "ID"})
     """Gets or sets the field ID"""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Gets or sets the field Name"""
-    is_required: Optional[bool] = None
+    is_required: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsRequired"},
+    )
     """Gets or sets a value indicating whether the field is required"""
-    data_type: Optional[str] = None
+    data_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DataType"},
+    )
     """Gets or sets the field data type"""
-    default_value: Optional[str] = None
+    default_value: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DefaultValue"},
+    )
     """Gets or sets the default value"""
 
 
 @dataclass
-class GetItemChangesMetadataResponse:
-    """Definition: GetItemChangesMetadataResponse"""
-
-    schema: Optional[ObjectEntity] = None
-
-
-@dataclass
 class GroupPermissionIdentity:
-    """Definition: GroupPermissionIdentity"""
+    """
+    Definition: GroupPermissionIdentity
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Group display name"""
 
 
 @dataclass
 class HubSiteJoinApprovalOutput:
-    """Definition: HubSiteJoinApprovalOutput"""
+    """
+    Definition: HubSiteJoinApprovalOutput
+    """
 
-    requesting_site_url: Optional[str] = None
+    requesting_site_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequestingSiteUrl"},
+    )
     """Requesting Site Url"""
-    requesting_site_id: Optional[str] = None
+    requesting_site_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequestingSiteId"},
+    )
     """Requesting Site Id"""
-    requesting_site_title: Optional[str] = None
+    requesting_site_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "RequestingSiteTitle"},
+    )
     """Requesting Site Title"""
-    approval_correlation_id: Optional[str] = None
+    approval_correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ApprovalCorrelationId"},
+    )
     """Approval Correlation Id"""
 
 
 @dataclass
 class ItemGrantAccessBody:
-    """Definition: ItemGrantAccessBody"""
+    """
+    Definition: ItemGrantAccessBody
+    """
 
     recipients: Optional[str] = None
     """A collection of recipients who will receive the sharing invitation"""
-    role_value: Optional[str] = None
+    role_value: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "roleValue"},
+    )
     """Specify a role that is to be granted to the recipients"""
-    email_body: Optional[str] = None
+    email_body: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emailBody"},
+    )
     """
     A plain text formatted message that is included in the sharing invitation
     """
-    send_email: Optional[bool] = None
+    send_email: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "sendEmail"},
+    )
     """
     Specify whether recipients should receive an email notification message
     """
@@ -649,7 +974,9 @@ class ItemGrantAccessBody:
 
 @dataclass
 class ItemPermissionAddBody:
-    """Definition: ItemPermissionAddBody"""
+    """
+    Definition: ItemPermissionAddBody
+    """
 
     recipients: Optional[List[ItemPermissionRecipient]] = None
     """
@@ -661,12 +988,18 @@ class ItemPermissionAddBody:
     Specify the roles that are be granted to the recipients of the sharing
     invitation.
     """
-    require_sign_in: Optional[bool] = None
+    require_sign_in: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "requireSignIn"},
+    )
     """
     Specifies where the recipient of the invitation is required to sign-in to
     view the shared item.
     """
-    send_invitation: Optional[bool] = None
+    send_invitation: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "sendInvitation"},
+    )
     """
     Specifies if an email or post is generated (true) or if the permission is
     just created (false).
@@ -680,16 +1013,21 @@ class ItemPermissionAddBody:
 
 @dataclass
 class ItemPermissionCreateLinkBody:
-    """Definition: ItemPermissionCreateLinkBody"""
+    """
+    Definition: ItemPermissionCreateLinkBody
+    """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """The type of sharing link to create"""
     scope: Optional[str] = None
     """
     Choose who your sharing link gives access to. \"Anyone\" option will only
     work if your administrator has enabled it.
     """
-    expiration_date_time: Optional[str] = None
+    expiration_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "expirationDateTime"},
+    )
     """
     The date after which the link will expire in yyyy-MM-dd format. Only
     applicable for anonymous links.
@@ -698,7 +1036,9 @@ class ItemPermissionCreateLinkBody:
 
 @dataclass
 class ItemPermissionRecipient:
-    """Definition: ItemPermissionRecipient"""
+    """
+    Definition: ItemPermissionRecipient
+    """
 
     email: Optional[str] = None
     """
@@ -709,7 +1049,9 @@ class ItemPermissionRecipient:
 
 @dataclass
 class ItemPermissionUpdateBody:
-    """Definition: ItemPermissionUpdateBody"""
+    """
+    Definition: ItemPermissionUpdateBody
+    """
 
     roles: Optional[List[str]] = None
     """Specify updated roles for this permission."""
@@ -717,86 +1059,132 @@ class ItemPermissionUpdateBody:
 
 @dataclass
 class ItemReference:
-    """Definition: ItemReference"""
+    """
+    Definition: ItemReference
+    """
 
     name: Optional[str] = None
     """The name of the parent item"""
     path: Optional[str] = None
     """Path that can be used to navigate to the parent item"""
-    sharepoint_ids: Optional[SharePointIds] = None
+    sharepoint_ids: Optional[SharePointIds] = field(
+        default=None,
+        metadata={"wire_name": "sharepointIds"},
+    )
 
 
 @dataclass
 class MoveFileParameters:
-    """Definition: MoveFileParameters"""
+    """
+    Definition: MoveFileParameters
+    """
 
-    source_file_id: Optional[str] = None
+    source_file_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sourceFileId"},
+    )
     """File Identifier"""
-    destination_dataset: Optional[str] = None
+    destination_dataset: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationDataset"},
+    )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = None
+    destination_folder_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationFolderPath"},
+    )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = None
+    name_conflict_behavior: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "nameConflictBehavior"},
+    )
     """Pick one of the options available"""
 
 
 @dataclass
 class MoveFolderParameters:
-    """Definition: MoveFolderParameters"""
+    """
+    Definition: MoveFolderParameters
+    """
 
-    source_folder_id: Optional[str] = None
+    source_folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sourceFolderId"},
+    )
     """File Identifier"""
-    destination_dataset: Optional[str] = None
+    destination_dataset: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationDataset"},
+    )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = None
+    destination_folder_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "destinationFolderPath"},
+    )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = None
+    name_conflict_behavior: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "nameConflictBehavior"},
+    )
     """Pick one of the options available"""
 
 
 @dataclass
-class ObjectEntity:
-    """Definition: Object"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class PassThroughNativeQuery:
-    """Definition: PassThroughNativeQuery"""
+    """
+    Definition: PassThroughNativeQuery
+    """
 
-    language: Optional[str] = None
+    language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Language"},
+    )
     """Query language"""
 
 
 @dataclass
 class PatchFileItemWithPredictedValuesParameters:
-    """Definition: PatchFileItemWithPredictedValuesParameters"""
+    """
+    Definition: PatchFileItemWithPredictedValuesParameters
+    """
 
-    model_id: Optional[str] = None
+    model_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "modelId"},
+    )
     """Enter modelId of the Model which is used for prediction"""
-    predict_result: Optional[str] = None
+    predict_result: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "predictResult"},
+    )
     """Enter request content in JSON"""
 
 
 @dataclass
 class Permission:
-    """Definition: Permission"""
+    """
+    Definition: Permission
+    """
 
     id: Optional[str] = None
     """Permission id"""
-    granted_to: Optional[PermissionIdentitySet] = None
-    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = None
+    granted_to: Optional[PermissionIdentitySet] = field(
+        default=None,
+        metadata={"wire_name": "grantedTo"},
+    )
+    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = field(
+        default=None,
+        metadata={"wire_name": "grantedToIdentities"},
+    )
     """
     For link type permissions, the details of the users to whom permission was
     granted
     """
     invitation: Optional[SharingInvitation] = None
-    inherited_from: Optional[ItemReference] = None
+    inherited_from: Optional[ItemReference] = field(
+        default=None,
+        metadata={"wire_name": "inheritedFrom"},
+    )
     link: Optional[SharingLink] = None
     roles: Optional[List[str]] = None
     """The type of permission - read, write, owner, member"""
@@ -804,7 +1192,9 @@ class Permission:
 
 @dataclass
 class PermissionIdentitySet:
-    """Definition: PermissionIdentitySet"""
+    """
+    Definition: PermissionIdentitySet
+    """
 
     application: Optional[ApplicationPermissionIdentity] = None
     group: Optional[GroupPermissionIdentity] = None
@@ -813,7 +1203,9 @@ class PermissionIdentitySet:
 
 @dataclass
 class PermissionsList:
-    """Definition: PermissionsList"""
+    """
+    Definition: PermissionsList
+    """
 
     value: Optional[List[Permission]] = None
     """List of Permissions"""
@@ -821,19 +1213,29 @@ class PermissionsList:
 
 @dataclass
 class Procedure:
-    """Definition: Procedure"""
+    """
+    Definition: Procedure
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Procedure name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Procedure display name"""
 
 
 @dataclass
 class PublishedResult:
-    """Definition: PublishedResult"""
+    """
+    Definition: PublishedResult
+    """
 
-    is_file_published: Optional[bool] = None
+    is_file_published: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFilePublished"},
+    )
     """
     A boolean value (true, false) to indicate whether the scheduled version of
     the file has been published
@@ -842,7 +1244,9 @@ class PublishedResult:
 
 @dataclass
 class SharePointHttpRequestBodyParameters:
-    """Definition: SharePointHttpRequestBodyParameters"""
+    """
+    Definition: SharePointHttpRequestBodyParameters
+    """
 
     method: Optional[str] = None
     """Http Method"""
@@ -856,36 +1260,64 @@ class SharePointHttpRequestBodyParameters:
 
 @dataclass
 class SharePointIds:
-    """Definition: SharePointIds"""
+    """
+    Definition: SharePointIds
+    """
 
-    list_id: Optional[str] = None
+    list_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "listId"},
+    )
     """The unique identifier (guid) for the item's list in SharePoint"""
-    list_item_id: Optional[str] = None
+    list_item_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "listItemId"},
+    )
     """An integer identifier for the item within the containing list"""
-    list_item_unique_id: Optional[str] = None
+    list_item_unique_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "listItemUniqueId"},
+    )
     """
     The unique identifier (guid) for the item within OneDrive for Business or a
     SharePoint site
     """
-    site_id: Optional[str] = None
+    site_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "siteId"},
+    )
     """The unique identifier (guid) for the item's site collection (SPSite)"""
-    site_url: Optional[str] = None
+    site_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "siteUrl"},
+    )
     """The SharePoint URL for the site that contains the item"""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The unique identifier (guid) for the tenancy"""
-    web_id: Optional[str] = None
+    web_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webId"},
+    )
     """The unique identifier (guid) for the item's site (SPWeb)"""
 
 
 @dataclass
 class SharingInvitation:
-    """Definition: SharingInvitation"""
+    """
+    Definition: SharingInvitation
+    """
 
     email: Optional[str] = None
     """
     The email address provided for the recipient of the sharing invitation
     """
-    sign_in_required: Optional[bool] = None
+    sign_in_required: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "signInRequired"},
+    )
     """
     If true the recipient of the invitation needs to sign in in order to access
     the shared item
@@ -894,24 +1326,36 @@ class SharingInvitation:
 
 @dataclass
 class SharingLink:
-    """Definition: SharingLink"""
+    """
+    Definition: SharingLink
+    """
 
-    web_url: Optional[str] = None
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """A link to the item"""
 
 
 @dataclass
 class SharingLinkPermissionIdentitySet:
-    """Definition: SharingLinkPermissionIdentitySet"""
+    """
+    Definition: SharingLinkPermissionIdentitySet
+    """
 
     user: Optional[SharingLinkUserPermissionIdentity] = None
 
 
 @dataclass
 class SharingLinkUserPermissionIdentity:
-    """Definition: SharingLinkUserPermissionIdentity"""
+    """
+    Definition: SharingLinkUserPermissionIdentity
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """User display name"""
     email: Optional[str] = None
     """User email"""
@@ -919,55 +1363,80 @@ class SharingLinkUserPermissionIdentity:
 
 @dataclass
 class SPContentType:
-    """Definition: SPContentType"""
+    """
+    Definition: SPContentType
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Content type Id"""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Content type name"""
 
 
 @dataclass
 class SPForASelectedFileResponse:
-    """Definition: SPForASelectedFileResponse"""
+    """
+    Definition: SPForASelectedFileResponse
+    """
 
-    id: Optional[int] = None
+    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
     """File Identifier"""
-    item_url: Optional[str] = None
+    item_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "itemUrl"},
+    )
     """File Url"""
-    file_name: Optional[str] = None
+    file_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fileName"},
+    )
     """File Name"""
 
 
 @dataclass
-class SPListEntity:
-    """Definition: SPListEntity"""
-
-    id: Optional[str] = None
-    """The Id of the SPField"""
-    entity_type: Optional[str] = None
-    """What type of entity (field) this is"""
-
-
-@dataclass
 class TableCapabilitiesMetadata:
-    """Definition: TableCapabilitiesMetadata"""
+    """
+    Definition: TableCapabilitiesMetadata
+    """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    count_restrictions: Optional[TableCountRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    count_restrictions: Optional[TableCountRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "countRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
 @dataclass
 class TableCountRestrictionsMetadata:
-    """Definition: TableCountRestrictionsMetadata"""
+    """
+    Definition: TableCountRestrictionsMetadata
+    """
 
     countable: Optional[bool] = None
     """Indicates whether this table has countable columns"""
@@ -975,36 +1444,29 @@ class TableCountRestrictionsMetadata:
 
 @dataclass
 class TableFilterRestrictionsMetadata:
-    """Definition: TableFilterRestrictionsMetadata"""
+    """
+    Definition: TableFilterRestrictionsMetadata
+    """
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
 @dataclass
-class TableMetadata:
-    """Definition: TableMetadata"""
-
-    name: Optional[str] = None
-    """Table name"""
-    title: Optional[str] = None
-    """Table title"""
-    x_ms_permission: Optional[str] = None
-    """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
-    """URL link"""
-
-
-@dataclass
 class TableSelectRestrictionsMetadata:
-    """Definition: TableSelectRestrictionsMetadata"""
+    """
+    Definition: TableSelectRestrictionsMetadata
+    """
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
@@ -1012,37 +1474,64 @@ class TableSelectRestrictionsMetadata:
 
 @dataclass
 class TableSortRestrictionsMetadata:
-    """Definition: TableSortRestrictionsMetadata"""
+    """
+    Definition: TableSortRestrictionsMetadata
+    """
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
 @dataclass
 class UserPermissionIdentity:
-    """Definition: UserPermissionIdentity"""
+    """
+    Definition: UserPermissionIdentity
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """User display name"""
     email: Optional[str] = None
     """User email"""
@@ -1088,7 +1577,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         template: str,
         document_name: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Agreements Solution - Generate document within Agreements Solution
         workspace
@@ -1097,13 +1586,13 @@ class SharepointonlineClient(ConnectorClientBase):
         Agreements Solution workspace. This is behind a payment wall currently
         in planning (either license or PayG).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/agreements"
             f"/templates"
-            f"/{str(template)}"
+            f"/{quote(quote(str(template), safe=''), safe='')}"
             f"/createnewdocument"
         )
         query_params = []
@@ -1113,14 +1602,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"documentName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1133,23 +1624,27 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_all_tables_async(
         self,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get all lists and libraries
 
         Get all lists and libraries.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/alltables"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/alltables"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1162,8 +1657,8 @@ class SharepointonlineClient(ConnectorClientBase):
     async def approve_hub_site_join_async(
         self,
         dataset: str,
-        joining_site_id: Optional[str],
-    ):
+        joining_site_id: str,
+    ) -> dict[str, Any] | None:
         """
         Approve hub site join request
 
@@ -1171,25 +1666,28 @@ class SharepointonlineClient(ConnectorClientBase):
         can be used to complete the join request using the join hub site
         action.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/approvehubsitejoin"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/approvehubsitejoin"
         )
         query_params = []
-        if joining_site_id is not None:
-            value = str(joining_site_id)
-            if isinstance(joining_site_id, bool):
-                value = value.lower()
-            query_params.append(f"joiningSiteId={quote(value)}")
+        value = str(joining_site_id)
+        if isinstance(joining_site_id, bool):
+            value = value.lower()
+        query_params.append(f"joiningSiteId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1203,7 +1701,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         approval_correlation_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Cancel hub site join request
 
@@ -1211,10 +1709,10 @@ class SharepointonlineClient(ConnectorClientBase):
         Approval Correlation Id as used in the \"Set hub site join status to
         pending\" action.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/cancelhubsitejoinapproval"
         )
         query_params = []
@@ -1224,14 +1722,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"approvalCorrelationId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1242,35 +1742,37 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create sharing link for a file or folder
 
         Create sharing link for a file or folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/codeless"
             f"/_api"
             f"/v2.0"
             f"/sites"
             f"/root"
             f"/lists"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/driveItem"
             f"/createLink"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1283,50 +1785,83 @@ class SharepointonlineClient(ConnectorClientBase):
     async def copy_file_async(
         self,
         dataset: str,
-        source: Optional[str],
-        destination: Optional[str],
+        source: str,
+        destination: str,
         overwrite: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Copy file (deprecated)
 
         Copies a file to a SharePoint site.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/copyFile"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/copyFile"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def copy_file_2_async(
+        self,
+        input: CopyFileParameters,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        Copy file
+
+        Copies a file. Works in a similar way to the \"Copy to\" command in
+        SharePoint libraries. Returns information about the new file after
+        copy.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/copyFileAsync"
+        )
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1340,7 +1875,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: CopyFolderParameters,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Copy folder
 
@@ -1348,17 +1883,21 @@ class SharepointonlineClient(ConnectorClientBase):
         SharePoint libraries. Returns information about the new folder after
         copy.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/copyFolderAsync"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/copyFolderAsync"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1370,53 +1909,45 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_file_async(
         self,
-        input: CreateFileInput,
+        input: bytes,
         dataset: str,
-        folder_path: Optional[str],
-        name: Optional[str],
-        overwrite: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        folder_path: str,
+        name: str,
+    ) -> dict[str, Any] | None:
         """
         Create file
 
         Uploads a file to a SharePoint site. Make sure to pick an existing
         library.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/files"
+            f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/files"
         )
         query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
-        if overwrite is not None:
-            value = str(overwrite)
-            if isinstance(overwrite, bool):
-                value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(folder_path)
+        if isinstance(folder_path, bool):
+            value = value.lower()
+        query_params.append(f"folderPath={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1430,7 +1961,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get file metadata
 
@@ -1438,17 +1969,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Uses a file identifier to pick the file. Use \"Get file properties\"
         action to get to the values stored in the columns in the library.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1460,26 +1996,34 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def update_file_async(
         self,
-        input: UpdateFileInput,
+        input: bytes,
         dataset: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update file
 
         Updates the contents of the file specified by the file identifier.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1493,23 +2037,28 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
-    ):
+    ) -> None:
         """
         Delete file
 
         Deletes the file specified by the file identifier.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1519,16 +2068,20 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         id: str,
         infer_content_type: Optional[str] = None,
-    ):
+    ) -> bytes:
         """
         Get file content
 
         Gets file contents using the file identifier. The contents can be
         copied somewhere else, or be used as an attachment.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/files/{str(id)}/content"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(str(id), safe='')}"
+            f"/content"
         )
         query_params = []
         if infer_content_type is not None:
@@ -1537,26 +2090,93 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
         return response.content
 
+    async def list_root_folder_async(
+        self,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        List root folder
+
+        Returns files in the root SharePoint folder.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/folders"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_folder_async(
+        self,
+        dataset: str,
+        id: str,
+    ) -> dict[str, Any] | None:
+        """
+        List folder
+
+        Returns files contained in a SharePoint folder.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/folders"
+            f"/{quote(str(id), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def get_file_metadata_by_path_async(
         self,
         dataset: str,
-        path: Optional[str],
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        path: str,
+    ) -> dict[str, Any] | None:
         """
         Get file metadata using path
 
@@ -1564,30 +2184,29 @@ class SharepointonlineClient(ConnectorClientBase):
         Uses a file path to pick the file. Use \"Get file properties\" action
         to get to the values stored in the columns in the library.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/GetFileByPath"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/GetFileByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1600,44 +2219,42 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_file_content_by_path_async(
         self,
         dataset: str,
-        path: Optional[str],
+        path: str,
         infer_content_type: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+    ) -> bytes:
         """
         Get file content using path
 
         Gets file contents using the file path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/GetFileContentByPath"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/GetFileContentByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1647,33 +2264,36 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_folder_metadata_async(
         self,
         dataset: str,
-        id: Optional[str],
-    ):
+        id: str,
+    ) -> dict[str, Any] | None:
         """
         Get folder metadata
 
         Gets information about the folder. Uses a file identifier to pick the
         folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/GetFolder"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/GetFolder"
         )
         query_params = []
-        if id is not None:
-            value = str(id)
-            if isinstance(id, bool):
-                value = value.lower()
-            query_params.append(f"id={quote(value)}")
+        value = str(id)
+        if isinstance(id, bool):
+            value = value.lower()
+        query_params.append(f"id={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1686,39 +2306,37 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_folder_metadata_by_path_async(
         self,
         dataset: str,
-        path: Optional[str],
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        path: str,
+    ) -> dict[str, Any] | None:
         """
         Get folder metadata using path
 
         Gets information about the folder. Uses a folder path to pick the
         folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/GetFolderByPath"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/GetFolderByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1732,7 +2350,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: SharePointHttpRequestBodyParameters,
         dataset: str,
-    ):
+    ) -> None:
         """
         Send an HTTP request to SharePoint
 
@@ -1740,17 +2358,21 @@ class SharepointonlineClient(ConnectorClientBase):
         execute any SharePoint REST API you have access to. Please proceed with
         caution.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/httprequest"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/httprequest"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1758,10 +2380,10 @@ class SharepointonlineClient(ConnectorClientBase):
     async def join_hub_site_async(
         self,
         dataset: str,
-        hub_site_id: Optional[str],
+        hub_site_id: str,
         approval_token: Optional[str] = None,
         approval_correlation_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Join hub site
 
@@ -1770,16 +2392,17 @@ class SharepointonlineClient(ConnectorClientBase):
         applicable, you should specify the same Approval Correlation Id as used
         in the \"Set hub site join status to pending\" action.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/joinhubsite"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/joinhubsite"
         )
         query_params = []
-        if hub_site_id is not None:
-            value = str(hub_site_id)
-            if isinstance(hub_site_id, bool):
-                value = value.lower()
-            query_params.append(f"hubSiteId={quote(value)}")
+        value = str(hub_site_id)
+        if isinstance(hub_site_id, bool):
+            value = value.lower()
+        query_params.append(f"hubSiteId={quote(value)}")
         if approval_token is not None:
             value = str(approval_token)
             if isinstance(approval_token, bool):
@@ -1791,14 +2414,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"approvalCorrelationId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1807,7 +2432,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: MoveFileParameters,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Move file
 
@@ -1815,17 +2440,21 @@ class SharepointonlineClient(ConnectorClientBase):
         SharePoint libraries. Returns information about the new file after
         move.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/moveFileAsync"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/moveFileAsync"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1839,7 +2468,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: MoveFolderParameters,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Move folder
 
@@ -1847,17 +2476,21 @@ class SharepointonlineClient(ConnectorClientBase):
         SharePoint libraries. Returns information about the new folder after
         move.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/moveFolderAsync"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/moveFolderAsync"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1871,7 +2504,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         approval_correlation_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Set hub site join status to pending
 
@@ -1880,10 +2513,10 @@ class SharepointonlineClient(ConnectorClientBase):
         identify a particular hub join request. The requesting site can only
         have one pending request at a given time.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/notifyhubsitejoinapprovalstarted"
         )
         query_params = []
@@ -1893,14 +2526,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"approvalCorrelationId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1908,23 +2543,25 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_tables_async(
         self,
         dataset: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get lists
 
         Gets SharePoint lists from a site.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables"
+            f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/tables"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1939,27 +2576,29 @@ class SharepointonlineClient(ConnectorClientBase):
         input: CreateNewDocumentSetParameters,
         dataset: str,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create new document set
 
         Creates a new document set list item.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/createnewdocumentset"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1975,18 +2614,18 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create new folder
 
         Creates a new folder or folder path.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/createnewfolder"
         )
         query_params = []
@@ -1996,14 +2635,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2018,9 +2659,9 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         entity_id: str,
-        search_value: Optional[str],
+        search_value: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Resolve person
 
@@ -2028,36 +2669,37 @@ class SharepointonlineClient(ConnectorClientBase):
         of type person. If there are no matches, or multiple matches, this
         action will error out.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/entities"
-            f"/{str(entity_id)}"
+            f"/{quote(quote(str(entity_id), safe=''), safe='')}"
             f"/searchforuser"
         )
         query_params = []
-        if search_value is not None:
-            value = str(search_value)
-            if isinstance(search_value, bool):
-                value = value.lower()
-            query_params.append(f"searchValue={quote(value)}")
+        value = str(search_value)
+        if isinstance(search_value, bool):
+            value = value.lower()
+        query_params.append(f"searchValue={quote(value)}")
         if view is not None:
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2072,7 +2714,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         form: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get form metadata (preview)
 
@@ -2083,22 +2725,24 @@ class SharepointonlineClient(ConnectorClientBase):
         started, see:
         https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/forms"
-            f"/{str(form)}"
+            f"/{quote(quote(str(form), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2115,7 +2759,7 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         form: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Generate a document from a form (preview)
 
@@ -2125,14 +2769,14 @@ class SharepointonlineClient(ConnectorClientBase):
         Public Preview. For more info on getting started, see:
         https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/forms"
-            f"/{str(form)}"
+            f"/{quote(quote(str(form), safe=''), safe='')}"
             f"/submitdocgenform"
         )
         query_params = []
@@ -2142,14 +2786,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2169,7 +2815,7 @@ class SharepointonlineClient(ConnectorClientBase):
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get files (properties only)
 
@@ -2180,12 +2826,12 @@ class SharepointonlineClient(ConnectorClientBase):
         On-Premises Data Gateway, the name of the library to connect to may
         need to be entered manually.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/getfileitems"
         )
         query_params = []
@@ -2220,14 +2866,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2247,18 +2895,18 @@ class SharepointonlineClient(ConnectorClientBase):
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get items
 
         Gets items from a SharePoint list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
         query_params = []
@@ -2293,14 +2941,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2316,18 +2966,18 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create item
 
         Creates a new item in a SharePoint list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
         query_params = []
@@ -2337,14 +2987,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2360,20 +3012,20 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get item
 
         Gets a single item by its id from a SharePoint list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(str(id), safe='')}"
         )
         query_params = []
         if view is not None:
@@ -2382,14 +3034,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2404,28 +3058,30 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Delete item
 
         Deletes an item from a SharePoint list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2437,20 +3093,20 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update item
 
         Updates an item in a SharePoint list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(str(id), safe='')}"
         )
         query_params = []
         if view is not None:
@@ -2459,14 +3115,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2482,38 +3140,39 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-        approval_type: Optional[str],
-    ):
+        approval_type: str,
+    ) -> dict[str, Any] | None:
         """
         Create an approval request for an item or file
 
         Creates an approval request for an item or file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/approval"
         )
         query_params = []
-        if approval_type is not None:
-            value = str(approval_type)
-            if isinstance(approval_type, bool):
-                value = value.lower()
-            query_params.append(f"approvalType={quote(value)}")
+        value = str(approval_type)
+        if isinstance(approval_type, bool):
+            value = value.lower()
+        query_params.append(f"approvalType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2528,33 +3187,32 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-        since: Optional[str],
+        since: str,
         until: Optional[str] = None,
         include_drafts: Optional[str] = None,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get changes for an item or a file (properties only)
 
         Returns information about columns that have changed within a given time
         window. Note: The list must have Versioning turned on.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/changes"
         )
         query_params = []
-        if since is not None:
-            value = str(since)
-            if isinstance(since, bool):
-                value = value.lower()
-            query_params.append(f"since={quote(value)}")
+        value = str(since)
+        if isinstance(since, bool):
+            value = value.lower()
+        query_params.append(f"since={quote(value)}")
         if until is not None:
             value = str(until)
             if isinstance(until, bool):
@@ -2571,14 +3229,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2594,30 +3254,32 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Check in file
 
         Check in a checked out file in a document library, which makes the
         version of the document available to others.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/checkinfile"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2627,7 +3289,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Check out file
 
@@ -2635,23 +3297,25 @@ class SharepointonlineClient(ConnectorClientBase):
         the document, and your changes from being visible until the documented
         is checked in.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/checkoutfile"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2661,7 +3325,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Discard check out
 
@@ -2672,23 +3336,25 @@ class SharepointonlineClient(ConnectorClientBase):
         the library. By discarding the checkout, you can avoid making new
         versions when you haven't made any changes to the file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/discardfilecheckout"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2699,7 +3365,7 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get file properties
 
@@ -2710,14 +3376,14 @@ class SharepointonlineClient(ConnectorClientBase):
         Gateway, the name of the library to connect to may need to be entered
         manually.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(str(id), safe='')}"
             f"/getfileitem"
         )
         query_params = []
@@ -2727,14 +3393,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2750,29 +3418,31 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Grant access to an item or a folder
 
         Grant access to an item or a folder in SharePoint to specific people.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/grantaccess"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2784,7 +3454,7 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: str,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update file properties
 
@@ -2793,14 +3463,14 @@ class SharepointonlineClient(ConnectorClientBase):
         contents. When using this with the On-Premises Data Gateway, the name
         of the library to connect to may need to be entered manually.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(str(id), safe='')}"
             f"/patchfileitem"
         )
         query_params = []
@@ -2810,14 +3480,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2833,30 +3505,32 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update file properties using AI Builder model results
 
         Updates the values stored in library columns for a file analyzed by the
         model specified by the ModelId.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(str(id), safe='')}"
             f"/patchfileitemwithpredictedvalues"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2871,10 +3545,10 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-        approval_action: Optional[str],
+        approval_action: str,
         comments: Optional[str] = None,
         entity_tag: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Set content approval status
 
@@ -2883,22 +3557,21 @@ class SharepointonlineClient(ConnectorClientBase):
         files. You can get the ETag using the Get File Metadata action. This
         action is only available for SharePoint Online and SharePoint 2019.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/setapprovalstatus"
         )
         query_params = []
-        if approval_action is not None:
-            value = str(approval_action)
-            if isinstance(approval_action, bool):
-                value = value.lower()
-            query_params.append(f"approvalAction={quote(value)}")
+        value = str(approval_action)
+        if isinstance(approval_action, bool):
+            value = value.lower()
+        query_params.append(f"approvalAction={quote(value)}")
         if comments is not None:
             value = str(comments)
             if isinstance(comments, bool):
@@ -2910,14 +3583,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"entityTag={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2932,30 +3607,32 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Stop sharing an item or a file
 
         Delete all links giving access to an item or a file and remove all
         people with direct access except for owners.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/unshare"
         )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2965,7 +3642,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         item_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get attachments
 
@@ -2973,23 +3650,25 @@ class SharepointonlineClient(ConnectorClientBase):
         add a \"Get attachment content\" step and use the \"File identifier\"
         property returned by this action to get to the contents of the file.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(item_id)}"
+            f"/{quote(quote(str(item_id), safe=''), safe='')}"
             f"/attachments"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3001,42 +3680,46 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_attachment_async(
         self,
-        input: CreateAttachmentInput,
+        input: bytes,
         dataset: str,
         table: str,
         item_id: str,
-        display_name: Optional[str],
-    ):
+        display_name: str,
+    ) -> dict[str, Any] | None:
         """
         Add attachment
 
         Adds a new attachment to the specified list item.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(item_id)}"
+            f"/{quote(quote(str(item_id), safe=''), safe='')}"
             f"/attachments"
         )
         query_params = []
-        if display_name is not None:
-            value = str(display_name)
-            if isinstance(display_name, bool):
-                value = value.lower()
-            query_params.append(f"displayName={quote(value)}")
+        value = str(display_name)
+        if isinstance(display_name, bool):
+            value = value.lower()
+        query_params.append(f"displayName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3052,30 +3735,32 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         item_id: str,
         attachment_id: str,
-    ):
+    ) -> None:
         """
         Delete attachment
 
         Deletes the specified attachment.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(item_id)}"
+            f"/{quote(quote(str(item_id), safe=''), safe='')}"
             f"/attachments"
-            f"/{str(attachment_id)}"
+            f"/{quote(str(attachment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3086,537 +3771,39 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         item_id: str,
         attachment_id: str,
-    ):
+    ) -> bytes:
         """
         Get attachment content
 
         Returns file contents using the file identifier. The contents can be
         copied somewhere else, or be used as an attachment.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(item_id)}"
+            f"/{quote(quote(str(item_id), safe=''), safe='')}"
             f"/attachments"
-            f"/{str(attachment_id)}"
+            f"/{quote(str(attachment_id), safe='')}"
             f"/$value"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
         return response.content
-
-    async def get_on_changed_items_async(
-        self,
-        dataset: str,
-        table: str,
-        folder_path: Optional[str] = None,
-        view: Optional[str] = None,
-    ):
-        """
-        When an item or a file is modified
-
-        Triggers when an item is modified (but not when it is created).
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onchangeditems"
-        )
-        query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_deleted_file_items_async(
-        self,
-        dataset: str,
-        table: str,
-        folder_path: Optional[str] = None,
-    ):
-        """
-        When a file is deleted
-
-        Triggers when a file is deleted in a library. You can optionally
-        specify a folder to watch as well. When a folder is deleted, the
-        trigger will fire only once for the deleted folder. This can only be
-        used by site collection admins of the site where the list is located.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/ondeletedfileitems"
-        )
-        query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_deleted_items_async(
-        self,
-        dataset: str,
-        table: str,
-    ):
-        """
-        When an item is deleted
-
-        Triggers when an item is deleted in a list. This can only be used by
-        site collection admins of the site where the list is located.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/ondeleteditems"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_new_file_items_async(
-        self,
-        dataset: str,
-        table: str,
-        folder_path: Optional[str] = None,
-        view: Optional[str] = None,
-    ):
-        """
-        When a file is created (properties only)
-
-        Triggers when an item is created in a library. Returns only the
-        properties stored in the library columns. You can add a \"Get file
-        content\" step and use the \"File identifier\" property returned by
-        this action to get to the contents of the file. When using this with
-        the On-Premises Data Gateway, the name of the library to connect to may
-        need to be entered manually.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onnewfileitems"
-        )
-        query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_new_items_async(
-        self,
-        dataset: str,
-        table: str,
-        view: Optional[str] = None,
-    ):
-        """
-        When an item is created
-
-        Triggers when an item is created.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onnewitems"
-        )
-        query_params = []
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_new_items_from_form_async(
-        self,
-        dataset: str,
-        table: str,
-        form: Optional[str],
-        view: Optional[str] = None,
-    ):
-        """
-        When a form is submitted (preview)
-
-        This operation triggers a flow when a list, document generation, or
-        file upload form is submitted. Document generation forms is a part of
-        AI in SharePoint Public Preview. For more info on getting started,
-        see:https://learn.microsoft.com/en-us/sharepoint/ai-in-sharepoint-structured-document-generation
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onnewitemsfromform"
-        )
-        query_params = []
-        if form is not None:
-            value = str(form)
-            if isinstance(form, bool):
-                value = value.lower()
-            query_params.append(f"form={quote(value)}")
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_recurrence_digest_async(
-        self,
-        dataset: str,
-        table: str,
-        update: Optional[str],
-        add: Optional[str],
-        run_schedule: Optional[str],
-        folder_path: Optional[str] = None,
-        view: Optional[str] = None,
-        start_time: Optional[str] = None,
-    ):
-        """
-        Recurring digest of updates (preview)
-
-        Recurring digest of updates for a list or library.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onrecurrencedigest"
-        )
-        query_params = []
-        if update is not None:
-            value = str(update)
-            if isinstance(update, bool):
-                value = value.lower()
-            query_params.append(f"update={quote(value)}")
-        if add is not None:
-            value = str(add)
-            if isinstance(add, bool):
-                value = value.lower()
-            query_params.append(f"add={quote(value)}")
-        if run_schedule is not None:
-            value = str(run_schedule)
-            if isinstance(run_schedule, bool):
-                value = value.lower()
-            query_params.append(f"runSchedule={quote(value)}")
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if start_time is not None:
-            value = str(start_time)
-            if isinstance(start_time, bool):
-                value = value.lower()
-            query_params.append(f"startTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_updated_file_classified_times_async(
-        self,
-        dataset: str,
-        table: str,
-        folder_path: Optional[str] = None,
-        view: Optional[str] = None,
-    ):
-        """
-        When a file is classified by a Microsoft Syntex model
-
-        Triggers a flow when Microsoft Syntex changes the classification date
-        of any file in the library. The date changes when a document processing
-        model classifies or extracts information.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onupdatedfileclassifiedtimes"
-        )
-        query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_updated_file_items_async(
-        self,
-        dataset: str,
-        table: str,
-        folder_path: Optional[str] = None,
-        view: Optional[str] = None,
-    ):
-        """
-        When a file is created or modified (properties only)
-
-        Triggers when an item is created, or modified in a library. Returns
-        only the properties stored in the library columns. You can add a \"Get
-        file content\" step and use the \"File identifier\" property returned
-        by this action to get to the contents of the file. When using this with
-        the On-Premises Data Gateway, the name of the library to connect to may
-        need to be entered manually.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onupdatedfileitems"
-        )
-        query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_updated_items_async(
-        self,
-        dataset: str,
-        table: str,
-        view: Optional[str] = None,
-    ):
-        """
-        When an item is created or modified
-
-        Triggers when an item is created, and also each time it is modified.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
-            f"/onupdateditems"
-        )
-        query_params = []
-        if view is not None:
-            value = str(view)
-            if isinstance(view, bool):
-                value = value.lower()
-            query_params.append(f"view={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def create_content_assembly_document_async(
         self,
@@ -3627,7 +3814,7 @@ class SharepointonlineClient(ConnectorClientBase):
         folder_path: Optional[str] = None,
         file_name: Optional[str] = None,
         view: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Generate document using Microsoft Syntex (preview)
 
@@ -3636,14 +3823,14 @@ class SharepointonlineClient(ConnectorClientBase):
         subject to change. For more info see:
         https://docs.microsoft.com/en-us/microsoft-365/contentunderstanding/content-assembly.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/templates"
-            f"/{str(template)}"
+            f"/{quote(quote(str(template), safe=''), safe='')}"
             f"/createnewdocument"
         )
         query_params = []
@@ -3663,14 +3850,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"view={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3684,27 +3873,29 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get list views
 
         Gets views from a SharePoint list.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/views"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3714,158 +3905,50 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def on_new_file_async(
-        self,
-        dataset: str,
-        folder_id: Optional[str],
-        infer_content_type: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
-        """
-        When a file is created in a folder (deprecated)
-
-        Triggers when a file is created in a SharePoint folder. The trigger
-        does not fire if a file is added/updated in a subfolder. If it is
-        required to trigger on subfolders, multiple triggers should be created.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/triggers/onnewfile"
-        )
-        query_params = []
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if infer_content_type is not None:
-            value = str(infer_content_type)
-            if isinstance(infer_content_type, bool):
-                value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def on_updated_file_async(
-        self,
-        dataset: str,
-        folder_id: Optional[str],
-        include_file_content: Optional[str] = None,
-        infer_content_type: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
-        """
-        When a file is created or modified in a folder (deprecated)
-
-        Triggers when a file is created, and also each time it is modified in a
-        SharePoint folder. The trigger does not fire if a file is added/updated
-        in a subfolder. If it is required to trigger on subfolders, multiple
-        triggers should be created.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/triggers/onupdatedfile"
-        )
-        query_params = []
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if include_file_content is not None:
-            value = str(include_file_content)
-            if isinstance(include_file_content, bool):
-                value = value.lower()
-            query_params.append(f"includeFileContent={quote(value)}")
-        if infer_content_type is not None:
-            value = str(infer_content_type)
-            if isinstance(infer_content_type, bool):
-                value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
     async def extract_folder_async(
         self,
         dataset: str,
-        source: Optional[str],
-        destination: Optional[str],
+        source: str,
+        destination: str,
         overwrite: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Extract folder
 
         Extracts an archive file into a SharePoint folder (example: .zip).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/extractFolderV2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/extractFolderV2"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -3874,3 +3957,773 @@ class SharepointonlineClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def get_data_sets_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get datasets
+
+        Gets the most recently used SharePoint sites.
+        """
+        request_url = f"{self._connection_runtime_url}/datasets"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_agreements_solution_templates_async(
+        self,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        Agreements Solution - Get Templates
+
+        Gets templates from a Agreements Solution workspace.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/agreements"
+            f"/templates"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_agreements_solution_template_fields_async(
+        self,
+        dataset: str,
+        template: str,
+    ) -> dict[str, Any] | None:
+        """
+        Agreements Solution - Get template fields
+
+        Gets fields from template in a Agreements Solution workspace.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/agreements"
+            f"/templates"
+            f"/{quote(quote(str(template), safe=''), safe='')}"
+            f"/fields"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tables_for_libraries_async(
+        self,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get libraries
+
+        Get libraries
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/libraries"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_table_async(
+        self,
+        dataset: str,
+        table: str,
+        view: Optional[str] = None,
+        content_type_id: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get list metadata
+
+        Gets metadata from a SharePoint list.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+        )
+        query_params = []
+        if view is not None:
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
+        if content_type_id is not None:
+            value = str(content_type_id)
+            if isinstance(content_type_id, bool):
+                value = value.lower()
+            query_params.append(f"contentTypeId={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tables_for_lists_and_libraries_async(
+        self,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get lists and libraries
+
+        Get lists and libraries
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/listsandlibraries"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_entities_for_user_async(
+        self,
+        dataset: str,
+        table: str,
+        view: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Returns User fields for a list
+
+        Returns User fields for a list.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/entitiesfor"
+            f"/user"
+        )
+        query_params = []
+        if view is not None:
+            value = str(view)
+            if isinstance(view, bool):
+                value = value.lower()
+            query_params.append(f"view={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_table_forms_async(
+        self,
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get list forms
+
+        Gets forms from a SharePoint list.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/forms"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_doc_gen_forms_async(
+        self,
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get document generation forms
+
+        Gets published document generation forms from a SharePoint document
+        library.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/docgenforms"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_doc_gen_form_fields_async(
+        self,
+        dataset: str,
+        table: str,
+        form: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get document generation form fields
+
+        Gets fields from a document generation form in a SharePoint list.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/docgenforms"
+            f"/{quote(quote(str(form), safe=''), safe='')}"
+            f"/fields"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_view_scope_options_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get SPViewScope options to use for folder querying behavior
+
+        Default - Only query current folder (non-recursive). Return both Files
+        and Folders. RecursiveAll - Recursively query the folder. Return both
+        Files and Folders.
+        """
+        request_url = f"{self._connection_runtime_url}/getViewScopeOptions"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tables_for_lightweight_approval_async(
+        self,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get lists and libraries where lightweight approvals is enabled
+
+        Get lists and libraries where lightweight approvals is enabled
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/lightweightapproval"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_approval_types_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get available approval request types
+
+        Internal operation to get the available approval request types.
+        """
+        request_url = f"{self._connection_runtime_url}/getApprovalTypes"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_approval_schema_async(
+        self,
+        approval_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get the appropriate creation schema for the approval request type
+
+        Internal operation to fetch the schema for approval request creation
+        based on the approval type.
+        """
+        request_url = f"{self._connection_runtime_url}/getApprovalSchema"
+        query_params = []
+        value = str(approval_type)
+        if isinstance(approval_type, bool):
+            value = value.lower()
+        query_params.append(f"approvalType={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_item_changes_metadata_async(
+        self,
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get metadata about the return type of the GetItemChanges operation
+
+        Get metadata about the return type of the GetItemChanges operation.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/changes"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_tables_for_approval_async(
+        self,
+        dataset: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get libraries where Content Approval is supported
+
+        Get libraries where Content Approval is supported
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/approval"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_day_of_week_options_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        When to send updates
+
+        Internal operation to get day of week options.
+        """
+        request_url = f"{self._connection_runtime_url}/getDayOfWeekOptions"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_content_assembly_templates_async(
+        self,
+        dataset: str,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get document library templates
+
+        Gets templates from a SharePoint document library.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/templates"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_content_assembly_placeholders_async(
+        self,
+        dataset: str,
+        table: str,
+        template: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get placeholders from template
+
+        Gets placeholders from template in a SharePoint document library.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/templates"
+            f"/{quote(quote(str(template), safe=''), safe='')}"
+            f"/placeholders"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "GetOnChangedItems": {
+        "operation_id": "GetOnChangedItems",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onchangeditems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnDeletedFileItems": {
+        "operation_id": "GetOnDeletedFileItems",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/ondeletedfileitems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "DeletedItemList",
+    },
+    "GetOnDeletedItems": {
+        "operation_id": "GetOnDeletedItems",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/ondeleteditems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "DeletedItemList",
+    },
+    "GetOnNewFileItems": {
+        "operation_id": "GetOnNewFileItems",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onnewfileitems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnNewItems": {
+        "operation_id": "GetOnNewItems",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onnewitems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnNewItemsFromForm": {
+        "operation_id": "GetOnNewItemsFromForm",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onnewitemsfromform",
+        "method": "get",
+        "required_parameters": ["dataset", "table", "form"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnRecurrenceDigest": {
+        "operation_id": "GetOnRecurrenceDigest",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onrecurrencedigest",
+        "method": "get",
+        "required_parameters": ["dataset", "table", "update", "add", "runSchedule"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnUpdatedFileClassifiedTimes": {
+        "operation_id": "GetOnUpdatedFileClassifiedTimes",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onupdatedfileclassifiedtimes",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnUpdatedFileItems": {
+        "operation_id": "GetOnUpdatedFileItems",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onupdatedfileitems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnUpdatedItems": {
+        "operation_id": "GetOnUpdatedItems",
+        "path": "/{connectionId}/datasets/{dataset}/tables/{table}/onupdateditems",
+        "method": "get",
+        "required_parameters": ["dataset", "table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "OnNewFile": {
+        "operation_id": "OnNewFile",
+        "path": "/{connectionId}/datasets/{dataset}/triggers/onnewfile",
+        "method": "get",
+        "required_parameters": ["dataset", "folderId"],
+        "callback_payload_type": None,
+    },
+    "OnUpdatedFile": {
+        "operation_id": "OnUpdatedFile",
+        "path": "/{connectionId}/datasets/{dataset}/triggers/onupdatedfile",
+        "method": "get",
+        "required_parameters": ["dataset", "folderId"],
+        "callback_payload_type": None,
+    },
+}

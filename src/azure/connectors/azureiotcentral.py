@@ -68,7 +68,7 @@ class DeviceGroupDeviceCollection:
     Response for Get devices by device group ID
     """
 
-    value: Optional[List[Device]] = None
+    value: Optional[List[DeviceV1]] = None
     """The collection of devices belonging to the device group."""
     next_link: Optional[str] = field(
         default=None,
@@ -421,7 +421,7 @@ class WorkflowTrigger:
 
 
 @dataclass
-class Device:
+class DeviceV1:
     """
     Response for Get a device by ID
     """
@@ -443,6 +443,41 @@ class Device:
     """Whether the device connection to IoT Central has been enabled."""
     provisioned: Optional[bool] = None
     """Whether resources have been allocated for the device."""
+
+
+@dataclass
+class DeviceCommandV1:
+    """
+    Response for Get device command response
+    """
+
+    id: Optional[str] = None
+    """The request ID of the device command execution."""
+    request: Optional[Any] = None
+    """The payload for the device command."""
+    response: Optional[Any] = None
+    """The payload of the device command response."""
+    connection_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "connectionTimeout"},
+    )
+    """
+    Connection timeout in seconds to wait for a disconnected device to come
+    online. Defaults to 0 seconds.
+    """
+    response_timeout: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseTimeout"},
+    )
+    """
+    Response timeout in seconds to wait for a command completion on a device.
+    Defaults to 30 seconds.
+    """
+    response_code: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "responseCode"},
+    )
+    """The status code of the device command response."""
 
 
 @dataclass
@@ -642,7 +677,7 @@ class DeviceCollection:
     Response for List devices
     """
 
-    value: Optional[List[Device]] = None
+    value: Optional[List[DeviceV1]] = None
     """The collection of devices."""
     next_link: Optional[str] = field(
         default=None,
@@ -652,7 +687,37 @@ class DeviceCollection:
 
 
 @dataclass
-class DeviceTemplate:
+class DeviceV2:
+    """
+    Response for Create or update a device
+    """
+
+    id: Optional[str] = None
+    """Unique ID of the device."""
+    etag: Optional[str] = None
+    """ETag used to prevent conflict in device updates."""
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """Display name of the device."""
+    template: Optional[str] = None
+    """The device template definition for the device."""
+    simulated: Optional[bool] = None
+    """Whether the device is simulated."""
+    enabled: Optional[bool] = None
+    """Whether the device connection to IoT Central has been enabled."""
+    organizations: Optional[List[str]] = None
+    """
+    List of organizations of the device, only one organization is supported
+    today, multiple organizations will be supported soon.
+    """
+    provisioned: Optional[bool] = None
+    """Whether resources have been allocated for the device."""
+
+
+@dataclass
+class DeviceTemplateV1:
     """
     Response for Get a device template by ID
     """
@@ -681,12 +746,12 @@ class DeviceTemplate:
 
 
 @dataclass
-class DeviceTemplateCollection:
+class DeviceTemplateCollectionV1:
     """
     Response for List device templates
     """
 
-    value: Optional[List[DeviceTemplate]] = None
+    value: Optional[List[DeviceTemplateV1]] = None
     """The collection of device templates."""
     next_link: Optional[str] = field(
         default=None,
@@ -789,16 +854,21 @@ class ApplicationCollection:
 
 
 @dataclass
-class DynamicValues:
+class DeviceTemplateCollection:
     """
-    Response for Workflow_GetComponents
+    Response for List device templates
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[DeviceTemplate]] = None
+    """The collection of device templates."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """URL to get the next page of device templates."""
+
+
+DynamicValues = List[Dict[str, Any]]
 
 
 @dataclass
@@ -882,7 +952,7 @@ class SchemaScheduledJobResponse:
 @dataclass
 class SchemaUserResponse:
     """
-    Response for Schema_User_V1
+    Response for Schema_User
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -1028,6 +1098,34 @@ class Application:
 
 
 @dataclass
+class Device:
+    """
+    Definition: Device
+    """
+
+    id: Optional[str] = None
+    """Unique ID of the device."""
+    etag: Optional[str] = None
+    """ETag used to prevent conflict in device updates."""
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """Display name of the device."""
+    instance_of: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "instanceOf"},
+    )
+    """The device template definition for the device."""
+    simulated: Optional[bool] = None
+    """Whether the device is simulated."""
+    approved: Optional[bool] = None
+    """Whether the device has been approved to connect to IoT Central."""
+    provisioned: Optional[bool] = None
+    """Whether resources have been allocated for the device."""
+
+
+@dataclass
 class DeviceRelationship:
     """
     Definition: DeviceRelationship
@@ -1037,6 +1135,27 @@ class DeviceRelationship:
     """Unique ID of the device relationship."""
     target: Optional[str] = None
     """The device ID of the source (child) device."""
+
+
+@dataclass
+class DeviceTemplate:
+    """
+    Definition: DeviceTemplate
+    """
+
+    id: Optional[str] = None
+    """Unique ID of the device template."""
+    etag: Optional[str] = None
+    """ETag used to prevent conflict in device template updates."""
+    types: Optional[List[str]] = None
+    """The types of device to which this template applies."""
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """Display name of the device template."""
+    description: Optional[str] = None
+    """Detailed description of the device template."""
 
 
 @dataclass
@@ -1136,17 +1255,7 @@ class JobCancellationThreshold:
     """
 
 
-@dataclass
-class OrganizationStatic:
-    """
-    Definition: OrganizationStatic
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+OrganizationStatic = str
 
 
 @dataclass
@@ -1435,7 +1544,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/deviceGroups"
+            f"/{quote(str(device_group_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1475,7 +1587,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/deviceGroups"
+            f"/{quote(str(device_group_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1514,7 +1629,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/deviceGroups"
+            f"/{quote(str(device_group_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1548,7 +1666,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/deviceGroups/{str(device_group_id)}/devices"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/deviceGroups"
+            f"/{quote(str(device_group_id), safe='')}"
+            f"/devices"
         )
         query_params = []
         value = str(application)
@@ -1588,7 +1710,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/preview/devices/{str(device_id)}/cloudProperties"
+            f"/api"
+            f"/preview"
+            f"/devices"
+            f"/{quote(str(device_id), safe='')}"
+            f"/cloudProperties"
         )
         query_params = []
         value = str(application)
@@ -1634,7 +1760,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/preview/devices/{str(device_id)}/cloudProperties"
+            f"/api"
+            f"/preview"
+            f"/devices"
+            f"/{quote(str(device_id), safe='')}"
+            f"/cloudProperties"
         )
         query_params = []
         value = str(application)
@@ -1685,11 +1815,11 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/preview"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/components"
-            f"/{str(component_name)}"
+            f"/{quote(str(component_name), safe='')}"
             f"/commands"
-            f"/{str(command_name)}"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1733,7 +1863,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/devices/{str(device_id)}/relationships"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/devices"
+            f"/{quote(str(device_id), safe='')}"
+            f"/relationships"
         )
         query_params = []
         value = str(application)
@@ -1777,9 +1911,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/ga_2022_07_31"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/relationships"
-            f"/{str(relationship_id)}"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1824,9 +1958,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/ga_2022_07_31"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/relationships"
-            f"/{str(relationship_id)}"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1871,9 +2005,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/ga_2022_07_31"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/relationships"
-            f"/{str(relationship_id)}"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1917,9 +2051,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/ga_2022_07_31"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/relationships"
-            f"/{str(relationship_id)}"
+            f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -1988,7 +2122,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/jobs/{str(job_id)}"
+            f"/api/ga_2022_07_31/jobs/{quote(str(job_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2029,7 +2163,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/jobs/{str(job_id)}"
+            f"/api/ga_2022_07_31/jobs/{quote(str(job_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2073,7 +2207,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/jobs/{str(job_id)}/devices"
+            f"/api/ga_2022_07_31/jobs/{quote(str(job_id), safe='')}/devices"
         )
         query_params = []
         value = str(application)
@@ -2112,7 +2246,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/jobs/{str(job_id)}/stop"
+            f"/api/ga_2022_07_31/jobs/{quote(str(job_id), safe='')}/stop"
         )
         query_params = []
         value = str(application)
@@ -2146,7 +2280,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/jobs/{str(job_id)}/resume"
+            f"/api/ga_2022_07_31/jobs/{quote(str(job_id), safe='')}/resume"
         )
         query_params = []
         value = str(application)
@@ -2181,7 +2315,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/jobs/{str(job_id)}/rerun/{str(rerun_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/jobs"
+            f"/{quote(str(job_id), safe='')}"
+            f"/rerun"
+            f"/{quote(str(rerun_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2257,7 +2396,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/organizations/{str(organization_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/organizations"
+            f"/{quote(str(organization_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2297,7 +2439,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/organizations/{str(organization_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/organizations"
+            f"/{quote(str(organization_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2336,7 +2481,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/organizations/{str(organization_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/organizations"
+            f"/{quote(str(organization_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2407,7 +2555,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/scheduledJobs"
+            f"/{quote(str(scheduled_job_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2449,7 +2600,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/scheduledJobs"
+            f"/{quote(str(scheduled_job_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2500,7 +2654,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/scheduledJobs"
+            f"/{quote(str(scheduled_job_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2544,7 +2701,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/scheduledJobs"
+            f"/{quote(str(scheduled_job_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2578,7 +2738,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/scheduledJobs/{str(scheduled_job_id)}/jobs"
+            f"/api"
+            f"/ga_2022_07_31"
+            f"/scheduledJobs"
+            f"/{quote(str(scheduled_job_id), safe='')}"
+            f"/jobs"
         )
         query_params = []
         value = str(application)
@@ -2616,7 +2780,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get details about an existing device by device ID.
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v1/devices/{str(device_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v1/devices/{quote(str(device_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2657,7 +2822,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v1/devices/{str(device_id)}/commands/{str(command_name)}"
+            f"/api"
+            f"/v1"
+            f"/devices"
+            f"/{quote(str(device_id), safe='')}"
+            f"/commands"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2707,11 +2877,11 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/components"
-            f"/{str(component_name)}"
+            f"/{quote(str(component_name), safe='')}"
             f"/commands"
-            f"/{str(command_name)}"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2761,11 +2931,11 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/components"
-            f"/{str(component_name)}"
+            f"/{quote(str(component_name), safe='')}"
             f"/telemetry"
-            f"/{str(telemetry_name)}"
+            f"/{quote(str(telemetry_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2815,11 +2985,11 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/commands"
-            f"/{str(command_name)}"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2870,13 +3040,13 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/components"
-            f"/{str(component_name)}"
+            f"/{quote(str(component_name), safe='')}"
             f"/commands"
-            f"/{str(command_name)}"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2927,13 +3097,13 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/components"
-            f"/{str(component_name)}"
+            f"/{quote(str(component_name), safe='')}"
             f"/telemetry"
-            f"/{str(telemetry_name)}"
+            f"/{quote(str(telemetry_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -2982,9 +3152,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/properties"
         )
         query_params = []
@@ -3035,11 +3205,11 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/telemetry"
-            f"/{str(telemetry_name)}"
+            f"/{quote(str(telemetry_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3084,7 +3254,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v1/devices/{str(device_id)}/properties"
+            f"/api/v1/devices/{quote(str(device_id), safe='')}/properties"
         )
         query_params = []
         value = str(application)
@@ -3130,7 +3300,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v1/devices/{str(device_id)}/telemetry/{str(telemetry_name)}"
+            f"/api"
+            f"/v1"
+            f"/devices"
+            f"/{quote(str(device_id), safe='')}"
+            f"/telemetry"
+            f"/{quote(str(telemetry_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3208,7 +3383,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete an existing device by device ID.
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v1/devices/{str(device_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v1/devices/{quote(str(device_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3232,7 +3408,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_command_async(
         self,
-        input: DeviceCommand,
+        input: DeviceCommandV1,
         device_id: str,
         command_name: str,
         application: str,
@@ -3245,7 +3421,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v1/devices/{str(device_id)}/commands/{str(command_name)}"
+            f"/api"
+            f"/v1"
+            f"/devices"
+            f"/{quote(str(device_id), safe='')}"
+            f"/commands"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3296,11 +3477,11 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/components"
-            f"/{str(component_name)}"
+            f"/{quote(str(component_name), safe='')}"
             f"/commands"
-            f"/{str(command_name)}"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3351,11 +3532,11 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/commands"
-            f"/{str(command_name)}"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3407,13 +3588,13 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/components"
-            f"/{str(component_name)}"
+            f"/{quote(str(component_name), safe='')}"
             f"/commands"
-            f"/{str(command_name)}"
+            f"/{quote(str(command_name), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3447,7 +3628,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_set_async(
         self,
-        input: Device,
+        input: DeviceV2,
         device_id: str,
         application: str,
     ) -> dict[str, Any] | None:
@@ -3458,7 +3639,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/ga_2022_07_31/devices/{str(device_id)}"
+            f"/api/ga_2022_07_31/devices/{quote(str(device_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3503,9 +3684,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             f"/api"
             f"/v1"
             f"/devices"
-            f"/{str(device_id)}"
+            f"/{quote(str(device_id), safe='')}"
             f"/modules"
-            f"/{str(module)}"
+            f"/{quote(str(module), safe='')}"
             f"/properties"
         )
         query_params = []
@@ -3552,7 +3733,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v1/devices/{str(device_id)}/properties"
+            f"/api/v1/devices/{quote(str(device_id), safe='')}/properties"
         )
         query_params = []
         value = str(application)
@@ -3596,7 +3777,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v1/deviceTemplates/{str(template_id)}"
+            f"/api/v1/deviceTemplates/{quote(str(template_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3670,7 +3851,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/api/v1/deviceTemplates/{str(template_id)}"
+            f"/api/v1/deviceTemplates/{quote(str(template_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3703,7 +3884,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a role by ID.
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v1/roles/{str(role_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v1/roles/{quote(str(role_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3778,7 +3960,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create a user in the application
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v1/users/{quote(str(user_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3821,7 +4004,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a user by ID
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v1/users/{quote(str(user_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3894,7 +4078,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete a user
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v1/users/{quote(str(user_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3929,7 +4114,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update a user in the application via patch
         """
         request_url = (
-            f"{self._connection_runtime_url}/api/v1/users/{str(user_id)}"
+            f"{self._connection_runtime_url}"
+            f"/api/v1/users/{quote(str(user_id), safe='')}"
         )
         query_params = []
         value = str(application)
@@ -3970,6 +4156,43 @@ class AzureiotcentralClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}/api/preview/applications"
         )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def device_templates_list_2_async(
+        self,
+        application: str,
+    ) -> dict[str, Any] | None:
+        """
+        List device templates
+
+        Get the list of device templates in an application.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/api/preview/deviceTemplates"
+        )
+        query_params = []
+        value = str(application)
+        if isinstance(application, bool):
+            value = value.lower()
+        query_params.append(f"application={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
             "GET", request_url, body=None
@@ -4206,7 +4429,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         template: str,
     ) -> dict[str, Any] | None:
         """
-        Workflow_GetModules_V1
+        Workflow_GetModules
         """
         request_url = (
             f"{self._connection_runtime_url}/api/v1/_internal/workflow/modules"
@@ -4399,53 +4622,11 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def schema_device_properties_async(
         self,
         application: str,
-        instance_of: Optional[str] = None,
-    ) -> dict[str, Any] | None:
-        """
-        Schema_DeviceProperties
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/api/preview/_internal/workflow/schema/DeviceProperties"
-        )
-        query_params = []
-        value = str(application)
-        if isinstance(application, bool):
-            value = value.lower()
-        query_params.append(f"application={quote(value)}")
-        if instance_of is not None:
-            value = str(instance_of)
-            if isinstance(instance_of, bool):
-                value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def schema_device_properties_v1_async(
-        self,
-        application: str,
         template: Optional[str] = None,
         module: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
-        Schema_DeviceProperties_V1
+        Schema_DeviceProperties
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4489,67 +4670,13 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def schema_device_telemetry_async(
         self,
         application: str,
-        instance_of: Optional[str] = None,
-        component: Optional[str] = None,
-        capability: Optional[str] = None,
-    ) -> dict[str, Any] | None:
-        """
-        Schema_DeviceTelemetry
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/api/preview/_internal/workflow/schema/DeviceTelemetry"
-        )
-        query_params = []
-        value = str(application)
-        if isinstance(application, bool):
-            value = value.lower()
-        query_params.append(f"application={quote(value)}")
-        if instance_of is not None:
-            value = str(instance_of)
-            if isinstance(instance_of, bool):
-                value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
-        if component is not None:
-            value = str(component)
-            if isinstance(component, bool):
-                value = value.lower()
-            query_params.append(f"component={quote(value)}")
-        if capability is not None:
-            value = str(capability)
-            if isinstance(capability, bool):
-                value = value.lower()
-            query_params.append(f"capability={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def schema_device_telemetry_v1_async(
-        self,
-        application: str,
         template: Optional[str] = None,
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
-        Schema_DeviceTelemetry_V1
+        Schema_DeviceTelemetry
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4703,7 +4830,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         patch: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
-        Schema_User_V1
+        Schema_User
         """
         request_url = (
             f"{self._connection_runtime_url}"

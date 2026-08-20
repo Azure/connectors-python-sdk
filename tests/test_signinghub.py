@@ -9,6 +9,7 @@ import pytest
 from azure.connectors.signinghub import (
     SigninghubClient,
     CheckBoxFieldRequest,
+    UploadDocument,
     UpdateCheckBoxFieldRequest,
 )
 from azure.connectors.sdk import (
@@ -16,6 +17,7 @@ from azure.connectors.sdk import (
     ConnectorException,
     ManagedIdentityTokenProvider,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -92,6 +94,52 @@ class TestSigninghubClientLifecycle:
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
+
+
+class TestSigninghubModelSerialization:
+    """Tests for distinct SigningHub wire names that normalize alike."""
+
+    def test_upload_document_preserves_colliding_document_ids(self):
+        """Test that all three document ID wire names survive serialization."""
+        model = UploadDocument(
+            document_id_2=101,
+            documentid=102,
+            document_id=103,
+        )
+
+        payload = to_wire(model)
+
+        assert payload["documentId"] == 101
+        assert payload["documentid"] == 102
+        assert payload["document_id"] == 103
+
+
+class TestDocumentsUploadStreamAsync:
+    """Tests for raw document upload transport."""
+
+    @pytest.mark.asyncio
+    async def test_forwards_exact_bytes_and_media_type(self, mock_token_provider):
+        """Test document upload forwards bytes without transformation."""
+        client = SigninghubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        document = b"\x00\xffPDF\r\n"
+        mock_response = MockResponse(status=201, text='{"documentId": "doc-1"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.documents_upload_stream_async(
+                input=document,
+                package_id="package-1",
+            )
+
+            assert mock_send.call_args.kwargs["body"] is document
+            assert mock_send.call_args.kwargs["content_type"] == "application/octet-stream"
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_token_provider):
@@ -469,12 +517,12 @@ OPERATION_ARGS = {
     "package_get_package_details": {"package_id": "package-1"},
     "package_rename_package": {"input": {}, "package_id_bulk_action": "package-1"},
     "package_submit": {"package_id": "package-1"},
-    "q_r_add_q_r_code": {
+    "qr_add_qr_code": {
         "input": {},
         "package_id": "package-1",
         "document_id": "doc-1",
     },
-    "q_r_update_q_r_code": {
+    "qr_update_qr_code": {
         "input": {},
         "package_id": "package-1",
         "document_id": "doc-1",

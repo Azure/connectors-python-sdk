@@ -21,47 +21,65 @@ from azure.connectors.sdk import (
 
 # Type Definitions
 
-@dataclass
-class Sites:
-    """Response for Get list of Resources"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+Sites = List[Dict[str, Any]]
 
 
 @dataclass
 class ListIssuesResponse:
-    """Response for Get list of issues"""
+    """
+    Response for Get list of issues
+    """
 
-    max_results: Optional[int] = None
-    """The maximum number of items to return per page"""
+    next_page_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextPageToken"},
+    )
+    """
+    The token used to retrieve the next page of issues. Pass this value into
+    the 'Next page token' input of a subsequent call to fetch the next page.
+    Absent on the last page.
+    """
+    is_last: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isLast"},
+    )
+    """Indicates whether this is the last page of results."""
     issues: Optional[List[FullIssue]] = None
 
 
 @dataclass
 class ListIssuesResponseDatacenter:
-    """Response for Get list of issues (Datacenter)"""
+    """
+    Response for Get list of issues (Datacenter)
+    """
 
-    start_at: Optional[int] = None
+    start_at: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "startAt"},
+    )
     """The index of the first item to return in a page of results"""
-    max_results: Optional[int] = None
+    max_results: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "maxResults"},
+    )
     """The maximum number of items to return per page"""
     issues: Optional[List[FullIssue]] = None
 
 
 @dataclass
 class ListTransitionsResponse:
-    """Response for Get list of Transitions"""
+    """
+    Response for Get list of Transitions
+    """
 
     transitions: Optional[List[Transition]] = None
 
 
 @dataclass
 class UpdateTransitionResponse:
-    """Response for Performs an issue transition"""
+    """
+    Response for Performs an issue transition
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -72,7 +90,9 @@ class UpdateTransitionResponse:
 
 @dataclass
 class GetCurrentUserResponse:
-    """Response for Get current user"""
+    """
+    Response for Get current user
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -83,7 +103,9 @@ class GetCurrentUserResponse:
 
 @dataclass
 class FullIssue:
-    """Response for When a new issue is created (Datacenter)"""
+    """
+    Response for When a new issue is created (Datacenter)
+    """
 
     id: Optional[str] = None
     """Unique id of the issue."""
@@ -96,7 +118,9 @@ class FullIssue:
 
 @dataclass
 class MCPQueryResponse:
-    """Response for Jira MCP Server"""
+    """
+    Response for Jira MCP Server
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -108,7 +132,9 @@ class MCPQueryResponse:
 
 @dataclass
 class CommentResponse:
-    """Response for Add comment (V2)"""
+    """
+    Response for Add comment
+    """
 
     id: Optional[str] = None
     """Unique id of the comment."""
@@ -120,7 +146,9 @@ class CommentResponse:
 
 @dataclass
 class CancelTaskResponse:
-    """Response for Cancel Task (V2)"""
+    """
+    Response for Cancel Task
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -131,7 +159,9 @@ class CancelTaskResponse:
 
 @dataclass
 class CreateIssueInput:
-    """Create a new issue (V3)"""
+    """
+    Create a new issue
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -142,7 +172,9 @@ class CreateIssueInput:
 
 @dataclass
 class CreateIssueResponse:
-    """Response for Create a new issue (V3)"""
+    """
+    Response for Create a new issue
+    """
 
     id: Optional[str] = None
     """Unique identifier of the issue."""
@@ -152,15 +184,23 @@ class CreateIssueResponse:
 
 @dataclass
 class CreateProjectInput:
-    """Create a new project (V2)"""
+    """
+    Create a new project
+    """
 
     key: Optional[str] = None
     """The unique key, starts with a capital letter."""
     name: Optional[str] = None
     """Title of the project."""
-    project_type_key: Optional[str] = None
+    project_type_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "projectTypeKey"},
+    )
     """Project type key."""
-    lead_account_id: Optional[str] = None
+    lead_account_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "leadAccountId"},
+    )
     """Id of Project lead."""
     description: Optional[str] = None
     """Verbose description of the project."""
@@ -168,7 +208,9 @@ class CreateProjectInput:
 
 @dataclass
 class CreateProjectResponse:
-    """Response for Create a new project (V2)"""
+    """
+    Response for Create a new project
+    """
 
     id: Optional[int] = None
     """Unique id of the project."""
@@ -178,7 +220,9 @@ class CreateProjectResponse:
 
 @dataclass
 class CreateProjectCategoryInput:
-    """Create Project Category (V2)"""
+    """
+    Create Project Category
+    """
 
     name: Optional[str] = None
     """Name"""
@@ -188,7 +232,9 @@ class CreateProjectCategoryInput:
 
 @dataclass
 class CreateProjectCategoryResponse:
-    """Response for Create Project Category (V2)"""
+    """
+    Response for Create Project Category
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -199,7 +245,9 @@ class CreateProjectCategoryResponse:
 
 @dataclass
 class EditIssueInput:
-    """Edit Issue (V2)"""
+    """
+    Edit Issue
+    """
 
     transition: Optional[Dict[str, Any]] = None
     """Transition"""
@@ -216,7 +264,10 @@ class EditIssueInput:
     on the issue screen field. Note that fields included in here cannot be
     included in fields.
     """
-    history_metadata: Optional[Dict[str, Any]] = None
+    history_metadata: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "historyMetadata"},
+    )
     """History meta data"""
     properties: Optional[List[Dict[str, Any]]] = None
     """Properties"""
@@ -224,7 +275,9 @@ class EditIssueInput:
 
 @dataclass
 class EditIssueResponse:
-    """Response for Edit Issue (V2)"""
+    """
+    Response for Edit Issue
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -235,7 +288,9 @@ class EditIssueResponse:
 
 @dataclass
 class GetTaskResponse:
-    """Response for Get Task (V2)"""
+    """
+    Response for Get Task
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -246,7 +301,9 @@ class GetTaskResponse:
 
 @dataclass
 class GetUserResponse:
-    """Response for Get User (V2)"""
+    """
+    Response for Get User
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -257,81 +314,103 @@ class GetUserResponse:
 
 @dataclass
 class ListFiltersResponse:
-    """Response for Get list of Filters (V2)"""
+    """
+    Response for Get list of Filters
+    """
 
-    next_page: Optional[str] = None
+    next_page: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextPage"},
+    )
     """Next page of filters"""
     values: Optional[FilterArray] = None
 
 
 @dataclass
-class IssueTypes:
-    """Response for Get issue types (V2)"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class ListProjectsResponse:
-    """Response for Get projects (V2)"""
+    """
+    Response for Get projects
+    """
 
-    next_page: Optional[str] = None
+    next_page: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextPage"},
+    )
     """Next page of projects"""
     values: Optional[ProjectArray] = None
 
 
-@dataclass
-class UserList:
-    """Response for List users by project (V2)"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+UserList = List[Dict[str, Any]]
 
 
 @dataclass
 class UpdateProjectInput:
-    """Update Project (V2)"""
+    """
+    Update Project
+    """
 
     key: Optional[str] = None
     """Key"""
     name: Optional[str] = None
     """Name"""
-    project_type_key: Optional[str] = None
+    project_type_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "projectTypeKey"},
+    )
     """Project Type Key"""
-    project_template_key: Optional[str] = None
+    project_template_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "projectTemplateKey"},
+    )
     """Project Template Key"""
     description: Optional[str] = None
     """Description"""
     lead: Optional[str] = None
     """Lead"""
-    lead_account_id: Optional[str] = None
+    lead_account_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "leadAccountId"},
+    )
     """Lead Account ID"""
     url: Optional[str] = None
     """URL"""
-    assignee_type: Optional[str] = None
+    assignee_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assigneeType"},
+    )
     """Assignee Type"""
-    avatar_id: Optional[str] = None
+    avatar_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "avatarId"},
+    )
     """Avatar ID"""
-    issue_security_scheme: Optional[str] = None
+    issue_security_scheme: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "issueSecurityScheme"},
+    )
     """Issue Security Scheme"""
-    permission_scheme: Optional[str] = None
+    permission_scheme: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "permissionScheme"},
+    )
     """Permission Scheme"""
-    notification_scheme: Optional[str] = None
+    notification_scheme: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationScheme"},
+    )
     """Notification Scheme"""
-    category_id: Optional[str] = None
+    category_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "categoryId"},
+    )
     """Category ID"""
 
 
 @dataclass
 class UpdateProjectResponse:
-    """Response for Update Project (V2)"""
+    """
+    Response for Update Project
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -340,18 +419,14 @@ class UpdateProjectResponse:
     """
 
 
-@dataclass
-class ListProjectsResponseV2:
-    """Definition: ListProjects_ResponseV2"""
-
-    next_page: Optional[str] = None
-    """Next page of projects"""
-    values: Optional[ProjectArray] = None
+IssueTypes = List[Dict[str, Any]]
 
 
 @dataclass
 class Project:
-    """Definition: Project"""
+    """
+    Definition: Project
+    """
 
     id: Optional[str] = None
     """The unique Id of the project."""
@@ -359,24 +434,21 @@ class Project:
     """The unique key of the project."""
     name: Optional[str] = None
     """Name of the project."""
-    project_type_key: Optional[str] = None
+    project_type_key: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "projectTypeKey"},
+    )
     """The unique key of the project type."""
 
 
-@dataclass
-class ProjectArray:
-    """Definition: ProjectArray"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ProjectArray = List[Dict[str, Any]]
 
 
 @dataclass
 class PartialIssue:
-    """Definition: PartialIssue"""
+    """
+    Definition: PartialIssue
+    """
 
     id: Optional[str] = None
     """The unique Id of the Issue."""
@@ -387,110 +459,136 @@ class PartialIssue:
 
 @dataclass
 class Creator:
-    """Definition: Creator"""
+    """
+    Definition: Creator
+    """
 
-    account_id: Optional[str] = None
+    account_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "accountId"},
+    )
     """Person who created the issue."""
     key: Optional[str] = None
     """Unique key of the person who created the issue."""
-    email_address: Optional[str] = None
+    email_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emailAddress"},
+    )
     """Email of the person who created the issue."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the person who created the issue."""
 
 
 @dataclass
 class Assignee:
-    """Definition: Assignee"""
+    """
+    Definition: Assignee
+    """
 
-    account_id: Optional[str] = None
+    account_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "accountId"},
+    )
     """Person whom the issue is assigned to."""
     key: Optional[str] = None
     """Unique key of the person whom the issue is assigned to."""
-    email_address: Optional[str] = None
+    email_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emailAddress"},
+    )
     """Email of the person whom the issue is assigned to."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the person whom the issue is assigned to."""
 
 
 @dataclass
 class User:
-    """Definition: User"""
+    """
+    Definition: User
+    """
 
-    account_id: Optional[str] = None
+    account_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "accountId"},
+    )
     """Id of the Jira user."""
     key: Optional[str] = None
     """Unique key of the Jira user."""
-    email_address: Optional[str] = None
+    email_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emailAddress"},
+    )
     """Email of the Jira user."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the Jira user."""
 
 
 @dataclass
 class Reporter:
-    """Definition: Reporter"""
+    """
+    Definition: Reporter
+    """
 
-    account_id: Optional[str] = None
+    account_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "AccountId"},
+    )
     """Person who reported the issue."""
     key: Optional[str] = None
     """Unique key of the person who reported the issue."""
-    email_address: Optional[str] = None
+    email_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "emailAddress"},
+    )
     """Email of the person who reported the issue."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display name of the person who reported the issue."""
 
 
-@dataclass
-class FilterArray:
-    """Definition: FilterArray"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FilterArray = List[Dict[str, Any]]
 
 
 @dataclass
 class CreateIssueRequest:
-    """Definition: CreateIssueRequest"""
+    """
+    Definition: CreateIssueRequest
+    """
 
     fields: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class UpdateIssueRequest:
-    """Definition: UpdateIssueRequest"""
+    """
+    Definition: UpdateIssueRequest
+    """
 
     fields: Optional[Dict[str, Any]] = None
 
 
-@dataclass
-class StatusList:
-    """Definition: StatusList"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+StatusList = List[Dict[str, Any]]
 
 
-@dataclass
-class PriorityList:
-    """Definition: PriorityList"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+PriorityList = List[Dict[str, Any]]
 
 
 @dataclass
 class Comment:
-    """Definition: Comment"""
+    """
+    Definition: Comment
+    """
 
     body: Optional[str] = None
     """Body of the comment."""
@@ -498,7 +596,9 @@ class Comment:
 
 @dataclass
 class Transition:
-    """Definition: Transition"""
+    """
+    Definition: Transition
+    """
 
     id: Optional[str] = None
     """ID of the transition"""
@@ -511,7 +611,9 @@ class Transition:
 
 @dataclass
 class TransitionStatus:
-    """Definition: TransitionStatus"""
+    """
+    Definition: TransitionStatus
+    """
 
     id: Optional[str] = None
     """ID of the status"""
@@ -521,17 +623,24 @@ class TransitionStatus:
 
 @dataclass
 class TransitionInput:
-    """Definition: TransitionInput"""
+    """
+    Definition: TransitionInput
+    """
 
     fields: Optional[Dict[str, Any]] = None
-    history_metadata: Optional[Dict[str, Any]] = None
+    history_metadata: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "historyMetadata"},
+    )
     transition: Optional[Dict[str, Any]] = None
     update: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class MCPQueryRequest:
-    """Definition: MCPQueryRequest"""
+    """
+    Definition: MCPQueryRequest
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -539,7 +648,10 @@ class MCPQueryRequest:
     params: Optional[Dict[str, Any]] = None
     result: Optional[Dict[str, Any]] = None
     error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = None
+    callback_endpoint: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callbackEndpoint"},
+    )
 
 
 # Client Class
@@ -578,22 +690,24 @@ class JiraClient(ConnectorClientBase):
 
     async def list_resources_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get list of Resources
 
         This operation returns a list of resources accessible to user.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}/oauth/token/accessible-resources"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -605,26 +719,39 @@ class JiraClient(ConnectorClientBase):
 
     async def list_issues_async(
         self,
-    ):
+        jql: Optional[str] = None,
+        next_page_token: Optional[str] = None,
+    ) -> dict[str, Any] | None:
         """
         Get list of issues
 
         This operation returns a list of issues using JQL.
         """
-        path = f"{self._connection_runtime_url}/2/search"
+        request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
-        query_params.append(f"jql={quote('created >= -3650d')}")
-        query_params.append(f"expand={quote('*')}")
-        query_params.append(f"fields={quote('*all')}")
+        query_params.append("expand=" + quote("*"))
+        query_params.append("fields=" + quote("*all"))
+        if jql is not None:
+            value = str(jql)
+            if isinstance(jql, bool):
+                value = value.lower()
+            query_params.append(f"jql={quote(value)}")
+        if next_page_token is not None:
+            value = str(next_page_token)
+            if isinstance(next_page_token, bool):
+                value = value.lower()
+            query_params.append(f"nextPageToken={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -636,20 +763,22 @@ class JiraClient(ConnectorClientBase):
 
     async def list_issues_datacenter_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get list of issues (Datacenter)
 
         This operation returns a list of issues using JQL.
         """
-        path = f"{self._connection_runtime_url}/datacenter/search"
+        request_url = f"{self._connection_runtime_url}/datacenter/search"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -662,24 +791,26 @@ class JiraClient(ConnectorClientBase):
     async def list_transitions_async(
         self,
         issue_id_or_key: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get list of Transitions
 
         Returns a list of the transitions possible for this issue by the
         current user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/3/issue/{str(issue_id_or_key)}/transitions"
+            f"/3/issue/{quote(str(issue_id_or_key), safe='')}/transitions"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -693,23 +824,25 @@ class JiraClient(ConnectorClientBase):
         self,
         input: TransitionInput,
         issue_id_or_key: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Performs an issue transition
 
         Transitions an issue to a new status.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/3/issue/{str(issue_id_or_key)}/transitions"
+            f"/3/issue/{quote(str(issue_id_or_key), safe='')}/transitions"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -722,13 +855,13 @@ class JiraClient(ConnectorClientBase):
     async def get_current_user_async(
         self,
         expand: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get current user
 
         This operation returns details for the current user
         """
-        path = f"{self._connection_runtime_url}/3/myself"
+        request_url = f"{self._connection_runtime_url}/3/myself"
         query_params = []
         if expand is not None:
             value = str(expand)
@@ -736,145 +869,16 @@ class JiraClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"expand={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_issue_datacenter_async(
-        self,
-        project_key: Optional[str],
-        x_request_jirainstance: Optional[str] = None,
-    ):
-        """
-        When a new issue is created (Datacenter)
-
-        This operation triggers when a new issue is added to the given project.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datacenter/new_issue_trigger/search"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-        query_params = []
-        if x_request_jirainstance is not None:
-            value = str(x_request_jirainstance)
-            if isinstance(x_request_jirainstance, bool):
-                value = value.lower()
-            query_params.append(f"X-Request-Jirainstance={quote(value)}")
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_close_issue_datacenter_async(
-        self,
-        project_key: Optional[str],
-        x_request_jirainstance: Optional[str] = None,
-    ):
-        """
-        When an issue is closed (Datacenter)
-
-        This operation triggers when an existing issue is closed in the given
-        project.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datacenter/close_issue_trigger/search"
-        )
-        query_params = []
-        if x_request_jirainstance is not None:
-            value = str(x_request_jirainstance)
-            if isinstance(x_request_jirainstance, bool):
-                value = value.lower()
-            query_params.append(f"X-Request-Jirainstance={quote(value)}")
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_issue_j_q_l_datacenter_async(
-        self,
-        jql: Optional[str],
-        x_request_jirainstance: Optional[str] = None,
-    ):
-        """
-        When a new issue is returned by a JQL query (Datacenter)
-
-        This operation triggers when a new issue appears in the latest 100
-        results of a JQL query.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datacenter/new_issue_jql_trigger/search"
-        )
-        query_params = []
-        if x_request_jirainstance is not None:
-            value = str(x_request_jirainstance)
-            if isinstance(x_request_jirainstance, bool):
-                value = value.lower()
-            query_params.append(f"X-Request-Jirainstance={quote(value)}")
-        if jql is not None:
-            value = str(jql)
-            if isinstance(jql, bool):
-                value = value.lower()
-            query_params.append(f"jql={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -888,13 +892,13 @@ class JiraClient(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Jira MCP Server
 
         Jira MCP Server
         """
-        path = f"{self._connection_runtime_url}/mcp/JiraIssueManagement"
+        request_url = f"{self._connection_runtime_url}/mcp/JiraIssueManagement"
         query_params = []
         if session_id is not None:
             value = str(session_id)
@@ -902,14 +906,16 @@ class JiraClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -923,22 +929,25 @@ class JiraClient(ConnectorClientBase):
         self,
         input: Comment,
         issue_key: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Add comment (V2)
+        Add comment
 
         This operation is used to add a comment to an existing Jira issue.
         """
-        path = (
-            f"{self._connection_runtime_url}/v2/issue/{str(issue_key)}/comment"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/issue/{quote(str(issue_key), safe='')}/comment"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -951,21 +960,26 @@ class JiraClient(ConnectorClientBase):
     async def cancel_task_async(
         self,
         task_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Cancel Task (V2)
+        Cancel Task
 
         Cancels a task. Permissions required: either of: Administer Jira or
         Creator of the task.
         """
-        path = f"{self._connection_runtime_url}/v2/task/{str(task_id)}/cancel"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/task/{quote(str(task_id), safe='')}/cancel"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -978,35 +992,35 @@ class JiraClient(ConnectorClientBase):
     async def create_issue_async(
         self,
         input: CreateIssueInput,
-        project_key: Optional[str],
-        issue_type_ids: Optional[str],
-    ):
+        project_key: str,
+        issue_type_ids: str,
+    ) -> dict[str, Any] | None:
         """
-        Create a new issue (V3)
+        Create a new issue
 
         This operation is used to create a new issue.
         """
-        path = f"{self._connection_runtime_url}/v3/issue"
+        request_url = f"{self._connection_runtime_url}/v3/issue"
         query_params = []
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if issue_type_ids is not None:
-            value = str(issue_type_ids)
-            if isinstance(issue_type_ids, bool):
-                value = value.lower()
-            query_params.append(f"issueTypeIds={quote(value)}")
+        value = str(project_key)
+        if isinstance(project_key, bool):
+            value = value.lower()
+        query_params.append(f"projectKey={quote(value)}")
+        value = str(issue_type_ids)
+        if isinstance(issue_type_ids, bool):
+            value = value.lower()
+        query_params.append(f"issueTypeIds={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1019,20 +1033,22 @@ class JiraClient(ConnectorClientBase):
     async def create_project_async(
         self,
         input: CreateProjectInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Create a new project (V2)
+        Create a new project
 
         This operation is used to create a new Jira project.
         """
-        path = f"{self._connection_runtime_url}/v2/project"
+        request_url = f"{self._connection_runtime_url}/v2/project"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1045,21 +1061,23 @@ class JiraClient(ConnectorClientBase):
     async def create_project_category_async(
         self,
         input: CreateProjectCategoryInput,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Create Project Category (V2)
+        Create Project Category
 
         Creates a project category. Permissions required: Administer Jira
         (global permissions)
         """
-        path = f"{self._connection_runtime_url}/v2/projectCategory"
+        request_url = f"{self._connection_runtime_url}/v2/projectCategory"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1073,16 +1091,16 @@ class JiraClient(ConnectorClientBase):
         self,
         project_id_or_key: str,
         enable_undo: Optional[str] = None,
-    ):
+    ) -> None:
         """
-        Delete Project (V2)
+        Delete Project
 
         Deletes a project. Permissions required: Administer Jira (global
         permissions)
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/project/{str(project_id_or_key)}"
+            f"/v2/project/{quote(str(project_id_or_key), safe='')}"
         )
         query_params = []
         if enable_undo is not None:
@@ -1091,14 +1109,16 @@ class JiraClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"enableUndo={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1110,16 +1130,17 @@ class JiraClient(ConnectorClientBase):
         notify_users: Optional[str] = None,
         override_screen_security: Optional[str] = None,
         override_editable_flag: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Edit Issue (V2)
+        Edit Issue
 
         Edits an issue. A transition may be applied and issue properties
         updated as part of the edit. The edits to the issue's fields are
         defined using update and fields.
         """
-        path = (
-            f"{self._connection_runtime_url}/v2/3/issue/{str(issue_id_or_key)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/3/issue/{quote(str(issue_id_or_key), safe='')}"
         )
         query_params = []
         if notify_users is not None:
@@ -1138,14 +1159,16 @@ class JiraClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"overrideEditableFlag={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1157,20 +1180,22 @@ class JiraClient(ConnectorClientBase):
 
     async def get_all_project_categories_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get All Project Categories (V2)
+        Get All Project Categories
 
         Returns all project categories.
         """
-        path = f"{self._connection_runtime_url}/v2/projectCategory"
+        request_url = f"{self._connection_runtime_url}/v2/projectCategory"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1183,21 +1208,26 @@ class JiraClient(ConnectorClientBase):
     async def get_issue_async(
         self,
         issue_key: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get issue by key (V2)
+        Get issue by key
 
         This operation is used to retrieve the issue object for a given issue
         Key.
         """
-        path = f"{self._connection_runtime_url}/v2/issue/{str(issue_key)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/issue/{quote(str(issue_key), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1210,21 +1240,26 @@ class JiraClient(ConnectorClientBase):
     async def get_task_async(
         self,
         task_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get Task (V2)
+        Get Task
 
         Returns the status of a long-running asynchronous task. When a task has
         finished, this operation returns the JSON blob applicable to the task.
         """
-        path = f"{self._connection_runtime_url}/v2/task/{str(task_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/task/{quote(str(task_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1236,35 +1271,36 @@ class JiraClient(ConnectorClientBase):
 
     async def get_user_async(
         self,
-        account_id: Optional[str],
+        account_id: str,
         expand: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get User (V2)
+        Get User
 
         Returns a user. Permissions required: Browse users and groups.
         """
-        path = f"{self._connection_runtime_url}/v2/user"
+        request_url = f"{self._connection_runtime_url}/v2/user"
         query_params = []
-        if account_id is not None:
-            value = str(account_id)
-            if isinstance(account_id, bool):
-                value = value.lower()
-            query_params.append(f"accountId={quote(value)}")
+        value = str(account_id)
+        if isinstance(account_id, bool):
+            value = value.lower()
+        query_params.append(f"accountId={quote(value)}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
             query_params.append(f"expand={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1276,96 +1312,22 @@ class JiraClient(ConnectorClientBase):
 
     async def list_filters_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get list of Filters (V2)
+        Get list of Filters
 
         This operation returns a list of Filters accessible to user.
         """
-        path = f"{self._connection_runtime_url}/v2/filter/search"
+        request_url = f"{self._connection_runtime_url}/v2/filter/search"
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_issue_types_async(
-        self,
-        project_key: Optional[str],
-    ):
-        """
-        Get issue types (V2)
-
-        This operation is used to retrieve a list of issue types for a given
-        project.
-        """
-        path = f"{self._connection_runtime_url}/v2/types/issue/createmeta"
-        query_params = []
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_issue_types_fields_async(
-        self,
-        project_key: Optional[str],
-        issuetype_ids: Optional[str],
-    ):
-        """
-        Get issue types fields (V2)
-
-        This operation is used to retrieve a list of fields for a specific
-        issue type.
-        """
-        path = f"{self._connection_runtime_url}/v3/issue/createmeta"
-        query_params = []
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if issuetype_ids is not None:
-            value = str(issuetype_ids)
-            if isinstance(issuetype_ids, bool):
-                value = value.lower()
-            query_params.append(f"issuetypeIds={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1377,21 +1339,23 @@ class JiraClient(ConnectorClientBase):
 
     async def list_projects_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get projects (V2)
+        Get projects
 
         This operation is used to retrieve a list of projects for your Jira
         instance.
         """
-        path = f"{self._connection_runtime_url}/v2/project/search"
+        request_url = f"{self._connection_runtime_url}/v2/project/search"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1403,154 +1367,33 @@ class JiraClient(ConnectorClientBase):
 
     async def list_project_users_async(
         self,
-        project_key: Optional[str],
-    ):
+        project_key: str,
+    ) -> dict[str, Any] | None:
         """
-        List users by project (V2)
+        List users by project
 
         This operation is used to retrieve a list of all users associated with
         a project.
         """
-        path = f"{self._connection_runtime_url}/v2/user/permission/search"
-        query_params = []
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_close_issue_async(
-        self,
-        project_key: Optional[str],
-        x_request_jirainstance: Optional[str] = None,
-    ):
-        """
-        When an issue is closed (V2)
-
-        This operation triggers when an existing issue is closed in the given
-        project.
-        """
-        path = f"{self._connection_runtime_url}/v2/close_issue_trigger/search"
-        query_params = []
-        if x_request_jirainstance is not None:
-            value = str(x_request_jirainstance)
-            if isinstance(x_request_jirainstance, bool):
-                value = value.lower()
-            query_params.append(f"X-Request-Jirainstance={quote(value)}")
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_issue_async(
-        self,
-        project_key: Optional[str],
-        x_request_jirainstance: Optional[str] = None,
-    ):
-        """
-        When a new issue is created (V2)
-
-        This operation triggers when a new issue is added to the given project.
-        """
-        path = f"{self._connection_runtime_url}/v2/new_issue_trigger/search"
-        query_params = []
-        if x_request_jirainstance is not None:
-            value = str(x_request_jirainstance)
-            if isinstance(x_request_jirainstance, bool):
-                value = value.lower()
-            query_params.append(f"X-Request-Jirainstance={quote(value)}")
-        if project_key is not None:
-            value = str(project_key)
-            if isinstance(project_key, bool):
-                value = value.lower()
-            query_params.append(f"projectKey={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_issue_j_q_l_async(
-        self,
-        jql: Optional[str],
-        x_request_jirainstance: Optional[str] = None,
-    ):
-        """
-        When a new issue is returned by a JQL query (V2)
-
-        This operation triggers when a new issue appears in the latest 100
-        results of a JQL query.
-        """
-        path = (
-            f"{self._connection_runtime_url}/v2/new_issue_jql_trigger/search"
+        request_url = (
+            f"{self._connection_runtime_url}/v2/user/permission/search"
         )
         query_params = []
-        if x_request_jirainstance is not None:
-            value = str(x_request_jirainstance)
-            if isinstance(x_request_jirainstance, bool):
-                value = value.lower()
-            query_params.append(f"X-Request-Jirainstance={quote(value)}")
-        if jql is not None:
-            value = str(jql)
-            if isinstance(jql, bool):
-                value = value.lower()
-            query_params.append(f"jql={quote(value)}")
+        value = str(project_key)
+        if isinstance(project_key, bool):
+            value = value.lower()
+        query_params.append(f"projectKey={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1563,21 +1406,26 @@ class JiraClient(ConnectorClientBase):
     async def remove_project_category_async(
         self,
         id: str,
-    ):
+    ) -> None:
         """
-        Remove Project Category (V2)
+        Remove Project Category
 
         Deletes a project category. Permissions required: Administer Jira
         (global permissions)
         """
-        path = f"{self._connection_runtime_url}/v2/projectCategory/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/projectCategory/{quote(str(id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1586,23 +1434,25 @@ class JiraClient(ConnectorClientBase):
         self,
         input: UpdateProjectInput,
         project_id_or_key: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Update Project (V2)
+        Update Project
 
         Updates the project details of a project.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/project/{str(project_id_or_key)}"
+            f"/v2/project/{quote(str(project_id_or_key), safe='')}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1611,3 +1461,135 @@ class JiraClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def list_issue_types_async(
+        self,
+        project_key: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get issue types
+
+        This operation is used to retrieve a list of issue types for a given
+        project.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/v2/types/issue/createmeta"
+        )
+        query_params = []
+        value = str(project_key)
+        if isinstance(project_key, bool):
+            value = value.lower()
+        query_params.append(f"projectKey={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_issue_types_fields_async(
+        self,
+        project_key: str,
+        issuetype_ids: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get issue types fields
+
+        This operation is used to retrieve a list of fields for a specific
+        issue type.
+        """
+        request_url = f"{self._connection_runtime_url}/v3/issue/createmeta"
+        query_params = []
+        value = str(project_key)
+        if isinstance(project_key, bool):
+            value = value.lower()
+        query_params.append(f"projectKey={quote(value)}")
+        value = str(issuetype_ids)
+        if isinstance(issuetype_ids, bool):
+            value = value.lower()
+        query_params.append(f"issuetypeIds={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewIssue_Datacenter": {
+        "operation_id": "OnNewIssue_Datacenter",
+        "path": "/{connectionId}/datacenter/new_issue_trigger/search",
+        "method": "get",
+        "required_parameters": ["projectKey"],
+        "callback_payload_type": "FullIssue",
+    },
+    "OnCloseIssue_Datacenter": {
+        "operation_id": "OnCloseIssue_Datacenter",
+        "path": "/{connectionId}/datacenter/close_issue_trigger/search",
+        "method": "get",
+        "required_parameters": ["projectKey"],
+        "callback_payload_type": "FullIssue",
+    },
+    "OnNewIssueJQL_Datacenter": {
+        "operation_id": "OnNewIssueJQL_Datacenter",
+        "path": "/{connectionId}/datacenter/new_issue_jql_trigger/search",
+        "method": "get",
+        "required_parameters": ["jql"],
+        "callback_payload_type": "FullIssue",
+    },
+    "OnCloseIssue_V2": {
+        "operation_id": "OnCloseIssue_V2",
+        "path": "/{connectionId}/v2/close_issue_trigger/search",
+        "method": "get",
+        "required_parameters": ["projectKey"],
+        "callback_payload_type": "FullIssue",
+    },
+    "OnNewIssue_V2": {
+        "operation_id": "OnNewIssue_V2",
+        "path": "/{connectionId}/v2/new_issue_trigger/search",
+        "method": "get",
+        "required_parameters": ["projectKey"],
+        "callback_payload_type": "FullIssue",
+    },
+    "OnNewIssueJQL_V2": {
+        "operation_id": "OnNewIssueJQL_V2",
+        "path": "/{connectionId}/v2/new_issue_jql_trigger/search",
+        "method": "get",
+        "required_parameters": ["jql"],
+        "callback_payload_type": "FullIssue",
+    },
+}

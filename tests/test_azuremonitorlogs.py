@@ -446,3 +446,57 @@ class TestVisualizeQueryAsync:
                 )
 
             assert exc_info.value.status_code == 400
+
+
+class TestGetTimeRangeSelectionControlAsync:
+    """Tests for get_time_range_selection_control_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_returns_control_schema(self, mock_token_provider):
+        """Test the time-range type is encoded and the schema is returned."""
+        client = AzuremonitorlogsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(
+                status=200,
+                text='{"type": "Relative"}',
+            ),
+        ) as mock_send:
+            result = await client.get_time_range_selection_control_async(
+                timerangetype="Relative range",
+            )
+
+            mock_send.assert_called_once_with(
+                "GET",
+                "https://example.azure.com/connections/test/"
+                "getTimeRangeSelectionControl?timerangetype=Relative%20range",
+                body=None,
+            )
+            assert result == {"type": "Relative"}
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test a non-2xx response raises ConnectorException."""
+        client = AzuremonitorlogsClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=400, text="Invalid time range"),
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_time_range_selection_control_async(
+                    timerangetype="invalid",
+                )
+
+            assert exc_info.value.status_code == 400

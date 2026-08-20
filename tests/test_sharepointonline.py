@@ -7,25 +7,25 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.sharepointonline import (
     SharepointonlineClient,
-    CreateFileInput,
-    UpdateFileInput,
     PostItemInput,
     PatchItemInput,
     CreateApprovalRequestInput,
-    CreateAttachmentInput,
     FileCheckInParameters,
     ItemPermissionCreateLinkBody,
     ItemGrantAccessBody,
     MoveFileParameters,
+    CopyFileParameters,
     CopyFolderParameters,
     MoveFolderParameters,
     PatchFileItemInput,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockTokenProvider, MockResponse
 
 
@@ -244,7 +244,7 @@ class TestFileOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_data = CreateFileInput()
+            input_data = b"document content"
             result = await client.create_file_async(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
@@ -304,7 +304,7 @@ class TestFileOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_data = UpdateFileInput()
+            input_data = b"updated document content"
             result = await client.update_file_async(
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123",
@@ -388,7 +388,7 @@ class TestFileOperations:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.create_file_async(
-                    CreateFileInput(),
+                    b"document content",
                     "https://contoso.sharepoint.com/sites/site1",
                     "/Shared Documents",
                     "document.docx"
@@ -950,6 +950,78 @@ class TestCopyMoveOperations:
             assert result["Name"] == "document_copy.docx"
 
     @pytest.mark.asyncio
+    async def test_copy_file_async_route_is_preserved(self, mock_token_provider):
+        """Test the current copy-file route uses its typed request body."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+        input_data = CopyFileParameters(source_file_id="file123")
+        mock_response = MockResponse(status=200, text='{"Name": "copy.docx"}')
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ) as mock_send:
+            result = await client.copy_file_2_async(
+                input=input_data,
+                dataset="https://contoso.sharepoint.com/sites/site1"
+            )
+
+            assert mock_send.call_args[0][0] == "POST"
+            assert "/copyFileAsync" in mock_send.call_args[0][1]
+            assert mock_send.call_args.kwargs["body"] is input_data
+            assert result["Name"] == "copy.docx"
+
+    def test_copy_file_async_body_uses_swagger_wire_names(self):
+        """Test the current copy-file request preserves Swagger keys."""
+        input_data = CopyFileParameters(
+            source_file_id="file123",
+            destination_dataset="https://contoso.sharepoint.com/sites/site2",
+            destination_folder_path="/Shared Documents/Backup",
+            name_conflict_behavior=1,
+        )
+
+        assert to_wire(input_data) == {
+            "sourceFileId": "file123",
+            "destinationDataset": "https://contoso.sharepoint.com/sites/site2",
+            "destinationFolderPath": "/Shared Documents/Backup",
+            "nameConflictBehavior": 1,
+        }
+
+    @pytest.mark.asyncio
+    async def test_copy_file_async_error_raises_exception(
+        self,
+        mock_token_provider,
+    ):
+        """Test the current copy-file route raises on a non-success response."""
+        client = SharepointonlineClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider
+        )
+        input_data = CopyFileParameters(source_file_id="file123")
+        mock_response = MockResponse(
+            status=409,
+            text='{"error": "Destination already exists"}'
+        )
+
+        with patch.object(
+            client._http_client,
+            'send_async',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.copy_file_2_async(
+                    input=input_data,
+                    dataset="https://contoso.sharepoint.com/sites/site1"
+                )
+
+            assert exc_info.value.status_code == 409
+
+    @pytest.mark.asyncio
     async def test_move_file(self, mock_token_provider):
         """Test moving file."""
         client = SharepointonlineClient(
@@ -1177,16 +1249,6 @@ class TestApprovalOperations:
 
 class TestDataClasses:
     """Tests for data classes and type definitions."""
-
-    def test_create_file_input_creation(self):
-        """Test CreateFileInput dataclass creation."""
-        input_data = CreateFileInput()
-        assert input_data is not None
-
-    def test_update_file_input_creation(self):
-        """Test UpdateFileInput dataclass creation."""
-        input_data = UpdateFileInput()
-        assert input_data is not None
 
     def test_post_item_input_creation(self):
         """Test PostItemInput dataclass creation."""
@@ -1474,7 +1536,7 @@ class TestAttachmentOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_data = CreateAttachmentInput()
+            input_data = b"attachment content"
             result = await client.create_attachment_async(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
@@ -1485,6 +1547,8 @@ class TestAttachmentOperations:
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
+            assert call_args.kwargs["body"] == input_data
+            assert call_args.kwargs["content_type"] == "application/octet-stream"
             assert result["id"] == "att123"
 
     @pytest.mark.asyncio
@@ -1563,7 +1627,7 @@ class TestAttachmentOperations:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.create_attachment_async(
-                    CreateAttachmentInput(),
+                    b"attachment content",
                     "https://contoso.sharepoint.com/sites/site1",
                     "CustomList",
                     "1",
@@ -1809,86 +1873,22 @@ class TestMoveFolderOperations:
 
 
 class TestTriggerOperations:
-    """Tests for trigger operations."""
+    """Tests for trigger registration contracts."""
 
-    @pytest.mark.asyncio
-    async def test_get_on_new_items(self, mock_token_provider):
-        """Test getting new items trigger."""
-        client = SharepointonlineClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    def test_polling_triggers_are_registered_without_callable_methods(self):
+        """Test polling triggers are metadata-only operations."""
+        assert "GetOnNewItems" in TRIGGER_OPERATIONS
+        assert "GetOnUpdatedItems" in TRIGGER_OPERATIONS
+        assert not hasattr(SharepointonlineClient, "get_on_new_items_async")
+        assert not hasattr(SharepointonlineClient, "get_on_updated_items_async")
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"Id": 1, "Title": "New Item"}]}'
-        )
 
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            result = await client.get_on_new_items_async(
-                "https://contoso.sharepoint.com/sites/site1",
-                "CustomList"
-            )
+class TestGeneratedContractSurface:
+    """Tests for newly generated discovery operations."""
 
-            assert "value" in result
-
-    @pytest.mark.asyncio
-    async def test_get_on_updated_items(self, mock_token_provider):
-        """Test getting updated items trigger."""
-        client = SharepointonlineClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"Id": 1, "Title": "Updated Item"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            result = await client.get_on_updated_items_async(
-                "https://contoso.sharepoint.com/sites/site1",
-                "CustomList"
-            )
-
-            assert "value" in result
-
-    @pytest.mark.asyncio
-    async def test_get_on_new_items_error_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=404,
-            text='{"error": "List not found"}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_on_new_items_async(
-                    "https://contoso.sharepoint.com/sites/site1",
-                    "MissingList"
-                )
-
-            assert exc_info.value.status_code == 404
+    def test_day_of_week_discovery_is_generated(self):
+        """Test day-of-week option discovery is callable."""
+        assert hasattr(SharepointonlineClient, "get_day_of_week_options_async")
 
 
 class TestByPathOperations:

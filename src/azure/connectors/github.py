@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class IssueDetailsModel:
-    """Response for Create an issue"""
+    """
+    Response for Create an issue
+    """
 
     title: Optional[str] = None
     """Summary of the issue."""
@@ -40,20 +42,14 @@ class IssueDetailsModel:
     """Web link to the repository."""
 
 
-@dataclass
-class MultipleFetchModel:
-    """Response for Get all issues of a repository"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+MultipleFetchModel = List["GeneralAPIModel"]
 
 
 @dataclass
 class ActionsPublicKey:
-    """Response for Get a repository public key"""
+    """
+    Response for Get a repository public key
+    """
 
     key_id: Optional[str] = None
     """The identifier for the key."""
@@ -71,7 +67,9 @@ class ActionsPublicKey:
 
 @dataclass
 class RepositoryDetails:
-    """Response for Create a repository using a template"""
+    """
+    Response for Create a repository using a template
+    """
 
     id: Optional[int] = None
     """Unique identifier of the repository."""
@@ -254,7 +252,9 @@ class RepositoryDetails:
 
 @dataclass
 class GitReference:
-    """Response for Create a reference"""
+    """
+    Response for Create a reference
+    """
 
     ref: Optional[str] = None
     """The name of the fully qualified reference."""
@@ -267,7 +267,9 @@ class GitReference:
 
 @dataclass
 class PullRequestMergeResult:
-    """Response for Merge a pull request"""
+    """
+    Response for Merge a pull request
+    """
 
     sha: Optional[str] = None
     """SHA for the merge commit."""
@@ -279,7 +281,9 @@ class PullRequestMergeResult:
 
 @dataclass
 class PullRequest:
-    """Response for Get a pull request"""
+    """
+    Response for Get a pull request
+    """
 
     url: Optional[str] = None
     """The HTTP URL for this pull request."""
@@ -376,7 +380,9 @@ class PullRequest:
 
 @dataclass
 class PullRequestFile:
-    """Response for Get the list of files from a pull request"""
+    """
+    Response for Get the list of files from a pull request
+    """
 
     sha: Optional[str] = None
     """The sha for the file."""
@@ -402,7 +408,9 @@ class PullRequestFile:
 
 @dataclass
 class CommitComparison:
-    """Response for Compare two commits"""
+    """
+    Response for Compare two commits
+    """
 
     url: Optional[str] = None
     """Url for the comparison"""
@@ -432,9 +440,11 @@ class CommitComparison:
 
 @dataclass
 class WebhookCreationResponse:
-    """Response for When a pull request is created or modified"""
+    """
+    Response for When a pull request is created or modified
+    """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     id: Optional[int] = None
     name: Optional[str] = None
     active: Optional[bool] = None
@@ -450,7 +460,9 @@ class WebhookCreationResponse:
 
 @dataclass
 class Milestone:
-    """Response for Update a milestone"""
+    """
+    Response for Update a milestone
+    """
 
     url: Optional[str] = None
     """The HTTP URL for the milestone."""
@@ -487,7 +499,9 @@ class Milestone:
 
 @dataclass
 class UserDetailsModel:
-    """Response for Get the authenticated user"""
+    """
+    Response for Get the authenticated user
+    """
 
     login: Optional[str] = None
     """User Login."""
@@ -521,7 +535,7 @@ class UserDetailsModel:
     """User Events Url."""
     received_events_url: Optional[str] = None
     """User Received Events Url."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """User Type."""
     site_admin: Optional[bool] = None
     """Is User Site Admin?"""
@@ -555,7 +569,9 @@ class UserDetailsModel:
 
 @dataclass
 class GeneralAPIModel:
-    """Response for Check if a user is a repository collaborator"""
+    """
+    Response for Check if a user is a repository collaborator
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -566,7 +582,9 @@ class GeneralAPIModel:
 
 @dataclass
 class MultipleSearchFetchModel:
-    """Response for Find issues by state and keyword"""
+    """
+    Response for Find issues by state and keyword
+    """
 
     body: Optional[List[GeneralAPIModel]] = None
     """body of result"""
@@ -574,7 +592,9 @@ class MultipleSearchFetchModel:
 
 @dataclass
 class IssueBasicDetailsModel:
-    """Definition: IssueBasicDetailsModel"""
+    """
+    Definition: IssueBasicDetailsModel
+    """
 
     title: Optional[str] = None
     """Summary of the issue."""
@@ -584,7 +604,9 @@ class IssueBasicDetailsModel:
 
 @dataclass
 class SingleSearchFetchModel:
-    """Definition: SingleSearchFetchModel"""
+    """
+    Definition: SingleSearchFetchModel
+    """
 
     body: Optional[List[GeneralAPIModel]] = None
     """body of result"""
@@ -592,7 +614,9 @@ class SingleSearchFetchModel:
 
 @dataclass
 class IssueUpdateModel:
-    """Definition: IssueUpdateModel"""
+    """
+    Definition: IssueUpdateModel
+    """
 
     title: Optional[str] = None
     """Summary of the issue."""
@@ -614,7 +638,9 @@ class IssueUpdateModel:
 
 @dataclass
 class MilestoneUpdateModel:
-    """Definition: MilestoneUpdateModel"""
+    """
+    Definition: MilestoneUpdateModel
+    """
 
     title: Optional[str] = None
     """Summary of the milestone."""
@@ -628,7 +654,9 @@ class MilestoneUpdateModel:
 
 @dataclass
 class Verification:
-    """Definition: Verification"""
+    """
+    Definition: Verification
+    """
 
     verified: Optional[bool] = None
     """
@@ -645,7 +673,9 @@ class Verification:
 
 @dataclass
 class GitUser:
-    """Definition: GitUser"""
+    """
+    Definition: GitUser
+    """
 
     name: Optional[str] = None
     """User Name"""
@@ -657,7 +687,9 @@ class GitUser:
 
 @dataclass
 class GraphQlQuery:
-    """Definition: GraphQlQuery"""
+    """
+    Definition: GraphQlQuery
+    """
 
     query: Optional[str] = None
     """query"""
@@ -665,7 +697,9 @@ class GraphQlQuery:
 
 @dataclass
 class DiffEntry:
-    """Definition: DiffEntry"""
+    """
+    Definition: DiffEntry
+    """
 
     filename: Optional[str] = None
     """Changed File Name."""
@@ -693,7 +727,9 @@ class DiffEntry:
 
 @dataclass
 class Commit:
-    """Definition: Commit"""
+    """
+    Definition: Commit
+    """
 
     url: Optional[str] = None
     """The HTTP URL for the commit."""
@@ -715,7 +751,9 @@ class Commit:
 
 @dataclass
 class RepositoryDispatchEvent:
-    """Definition: RepositoryDispatchEvent"""
+    """
+    Definition: RepositoryDispatchEvent
+    """
 
     event_type: Optional[str] = None
     """A custom webhook event name."""
@@ -728,7 +766,9 @@ class RepositoryDispatchEvent:
 
 @dataclass
 class CreateRepositorySecretRequest:
-    """Definition: CreateRepositorySecretRequest"""
+    """
+    Definition: CreateRepositorySecretRequest
+    """
 
     encrypted_value: Optional[str] = None
     """
@@ -741,7 +781,9 @@ class CreateRepositorySecretRequest:
 
 @dataclass
 class CreateRepositoryUsingTemplateRequest:
-    """Definition: CreateRepositoryUsingTemplateRequest"""
+    """
+    Definition: CreateRepositoryUsingTemplateRequest
+    """
 
     owner: Optional[str] = None
     """
@@ -761,7 +803,9 @@ class CreateRepositoryUsingTemplateRequest:
 
 @dataclass
 class LicenseDetails:
-    """Definition: LicenseDetails"""
+    """
+    Definition: LicenseDetails
+    """
 
     key: Optional[str] = None
     """The lowercased SPDX Id of the license."""
@@ -779,7 +823,9 @@ class LicenseDetails:
 
 @dataclass
 class RepositoryMiniDetails:
-    """Definition: RepositoryMiniDetails"""
+    """
+    Definition: RepositoryMiniDetails
+    """
 
     id: Optional[int] = None
     """Unique identifier of the repository."""
@@ -824,7 +870,9 @@ class RepositoryMiniDetails:
 
 @dataclass
 class CreateReferenceRequest:
-    """Definition: CreateReferenceRequest"""
+    """
+    Definition: CreateReferenceRequest
+    """
 
     ref: Optional[str] = None
     """
@@ -838,7 +886,9 @@ class CreateReferenceRequest:
 
 @dataclass
 class PullRequestCreateRequest:
-    """Definition: PullRequestCreateRequest"""
+    """
+    Definition: PullRequestCreateRequest
+    """
 
     title: Optional[str] = None
     """The title of the new pull request."""
@@ -864,15 +914,26 @@ class PullRequestCreateRequest:
 
 @dataclass
 class PullRequestMergeRequest:
-    """Definition: PullRequestMergeRequest"""
+    """
+    Definition: PullRequestMergeRequest
+    """
 
-    commit_title: Optional[str] = None
+    commit_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "commitTitle"},
+    )
     """Title for the automatic commit message."""
-    commit_message: Optional[str] = None
+    commit_message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "commitMessage"},
+    )
     """Extra detail to append to automatic commit message."""
     sha: Optional[str] = None
     """SHA that pull request head must match to allow merge."""
-    merge_method: Optional[str] = None
+    merge_method: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mergeMethod"},
+    )
     """
     Merge method to use. Possible values are `merge`, `squash` or `rebase`.
     Default is `merge`.
@@ -881,7 +942,9 @@ class PullRequestMergeRequest:
 
 @dataclass
 class PullRequestUpdateRequest:
-    """Definition: PullRequestUpdateRequest"""
+    """
+    Definition: PullRequestUpdateRequest
+    """
 
     title: Optional[str] = None
     """The title of the pull request."""
@@ -901,7 +964,9 @@ class PullRequestUpdateRequest:
 
 @dataclass
 class Label:
-    """Definition: Label"""
+    """
+    Definition: Label
+    """
 
     id: Optional[int] = None
     """The Unique Identifier for the label."""
@@ -921,7 +986,9 @@ class Label:
 
 @dataclass
 class TeamDetails:
-    """Definition: TeamDetails"""
+    """
+    Definition: TeamDetails
+    """
 
     id: Optional[int] = None
     """Unique identifier of the team."""
@@ -951,14 +1018,18 @@ class TeamDetails:
 
 @dataclass
 class Link:
-    """Definition: Link"""
+    """
+    Definition: Link
+    """
 
     href: Optional[str] = None
 
 
 @dataclass
 class WebhookPullRequestResponse:
-    """Definition: WebhookPullRequestResponse"""
+    """
+    Definition: WebhookPullRequestResponse
+    """
 
     action: Optional[str] = None
     """The action that was performed."""
@@ -969,7 +1040,9 @@ class WebhookPullRequestResponse:
 
 @dataclass
 class WebhookRequestBody:
-    """Definition: WebhookRequestBody"""
+    """
+    Definition: WebhookRequestBody
+    """
 
     active: Optional[bool] = None
     """State of the Trigger, always set to true"""
@@ -983,7 +1056,9 @@ class WebhookRequestBody:
 
 @dataclass
 class RequestReviewersBody:
-    """Definition: RequestReviewersBody"""
+    """
+    Definition: RequestReviewersBody
+    """
 
     reviewers: Optional[List[str]] = None
     team_reviewers: Optional[List[str]] = None
@@ -991,7 +1066,9 @@ class RequestReviewersBody:
 
 @dataclass
 class QueryRequest:
-    """Definition: QueryRequest"""
+    """
+    Definition: QueryRequest
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -1040,23 +1117,28 @@ class GithubClient(ConnectorClientBase):
         input: IssueBasicDetailsModel,
         repository_owner: str,
         repository_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create an issue
 
         This operation is used to create a new issue for a specific repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/issues"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/issues"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1081,15 +1163,18 @@ class GithubClient(ConnectorClientBase):
         since: Optional[str] = None,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get all issues of a repository
 
         Get all issues of a repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/issues"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/issues"
         )
         query_params = []
         if milestone is not None:
@@ -1148,14 +1233,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1169,29 +1256,31 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a repository public key
 
         Gets your public key, which you need to encrypt secrets. You need to
         encrypt a secret before you can create or update secrets.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/actions"
             f"/secrets"
             f"/public-key"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1207,29 +1296,31 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         secret_name: str,
-    ):
+    ) -> None:
         """
         Create or update a repository secret
 
         Creates or updates a repository secret with an encrypted value. Encrypt
         your secret using LibSodium.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/actions"
             f"/secrets"
-            f"/{str(secret_name)}"
+            f"/{quote(str(secret_name), safe='')}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1239,7 +1330,7 @@ class GithubClient(ConnectorClientBase):
         input: CreateRepositoryUsingTemplateRequest,
         template_owner: str,
         template_repository: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a repository using a template
 
@@ -1247,17 +1338,22 @@ class GithubClient(ConnectorClientBase):
         user must own or be a member of an organization that owns the
         repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(template_owner)}/{str(template_repository)}/generate"
+            f"/repos"
+            f"/{quote(str(template_owner), safe='')}"
+            f"/{quote(str(template_repository), safe='')}"
+            f"/generate"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1270,22 +1366,25 @@ class GithubClient(ConnectorClientBase):
     async def get_repository_by_id_async(
         self,
         repository_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a repository by Id
 
         Gets a repository by Id.
         """
-        path = (
-            f"{self._connection_runtime_url}/repositories/{str(repository_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/repositories/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1300,7 +1399,7 @@ class GithubClient(ConnectorClientBase):
         input: CreateReferenceRequest,
         repository_owner: str,
         repository_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a reference
 
@@ -1308,17 +1407,23 @@ class GithubClient(ConnectorClientBase):
         references for empty repositories, even if the commit SHA-1 hash used
         exists. Empty repositories are repositories without branches.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/git/refs"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/git"
+            f"/refs"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1333,7 +1438,7 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         reference: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a reference
 
@@ -1342,22 +1447,24 @@ class GithubClient(ConnectorClientBase):
         `tags/<tag name>` for tags. If the `reference` doesn't match an
         existing ref, a `404` is returned.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/git"
             f"/ref"
-            f"/{str(reference)}"
+            f"/{quote(str(reference), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1373,28 +1480,30 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Merge a pull request
 
         This operation is used to merge a pull request for the repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/pulls"
-            f"/{str(pull_number)}"
+            f"/{quote(str(pull_number), safe='')}"
             f"/merge"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1409,27 +1518,29 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a pull request
 
         This operation is used to get a pull request for the repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/pulls"
-            f"/{str(pull_number)}"
+            f"/{quote(str(pull_number), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1445,7 +1556,7 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a pull request
 
@@ -1455,21 +1566,23 @@ class GithubClient(ConnectorClientBase):
         repositories, you must be a member of the organization that owns the
         repository to open or update a pull request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/pulls"
-            f"/{str(pull_number)}"
+            f"/{quote(str(pull_number), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1484,29 +1597,31 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get the list of files from a pull request
 
         This operation is used to get the list of files from a pull request for
         the repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/pulls"
-            f"/{str(pull_number)}"
+            f"/{quote(str(pull_number), safe='')}"
             f"/files"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1522,29 +1637,31 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: str,
-    ):
+    ) -> None:
         """
         Request reviewers for a pull request
 
         Requests reviews for a pull request from a given set of users and/or
         teams.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/pulls"
-            f"/{str(pull_number)}"
+            f"/{quote(str(pull_number), safe='')}"
             f"/requested_reviewers"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1555,29 +1672,31 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: str,
-    ):
+    ) -> None:
         """
         Remove requested reviewers from a pull request
 
         Remove requested reviewers from a pull request from a given set of
         users and/or teams.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/pulls"
-            f"/{str(pull_number)}"
+            f"/{quote(str(pull_number), safe='')}"
             f"/requested_reviewers"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=input)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1587,7 +1706,7 @@ class GithubClient(ConnectorClientBase):
         input: PullRequestCreateRequest,
         repository_owner: str,
         repository_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a pull request
 
@@ -1597,17 +1716,22 @@ class GithubClient(ConnectorClientBase):
         repositories, you must be a member of the organization that owns the
         repository to create a pull request.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/pulls"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/pulls"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1628,15 +1752,18 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get all Pull Requests of A Repository
 
         Get all Pull Requests of A Repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/pulls"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/pulls"
         )
         query_params = []
         if state is not None:
@@ -1675,14 +1802,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1697,7 +1826,7 @@ class GithubClient(ConnectorClientBase):
         input: RepositoryDispatchEvent,
         repository_owner: str,
         repository_name: str,
-    ):
+    ) -> None:
         """
         Create a repository dispatch event
 
@@ -1707,17 +1836,22 @@ class GithubClient(ConnectorClientBase):
         must configure your GitHub Actions workflow or GitHub App to run when
         the `repository_dispatch` event occurs.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/dispatches"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/dispatches"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1728,7 +1862,7 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         base: str,
         head: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Compare two commits
 
@@ -1738,21 +1872,23 @@ class GithubClient(ConnectorClientBase):
         equivalent to running the `git log base..head` command; however,
         commits are returned in chronological order.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/compare"
-            f"/{str(base)}...{str(head)}"
+            f"/{quote(str(base), safe='')}...{quote(str(head), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1767,7 +1903,7 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_id: str,
         secret_name: str,
-    ):
+    ) -> None:
         """
         Add selected repository to an organization secret
 
@@ -1779,23 +1915,25 @@ class GithubClient(ConnectorClientBase):
         to use this endpoint. GitHub Apps must have the `secrets` organization
         permission to use this endpoint.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/orgs"
-            f"/{str(repository_owner)}"
+            f"/{quote(str(repository_owner), safe='')}"
             f"/actions"
             f"/secrets"
-            f"/{str(secret_name)}"
+            f"/{quote(str(secret_name), safe='')}"
             f"/repositories"
-            f"/{str(repository_id)}"
+            f"/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1805,7 +1943,7 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_id: str,
         secret_name: str,
-    ):
+    ) -> None:
         """
         Remove selected repository from an organization secret
 
@@ -1817,192 +1955,89 @@ class GithubClient(ConnectorClientBase):
         to use this endpoint. GitHub Apps must have the `secrets` organization
         permission to use this endpoint.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/orgs"
-            f"/{str(repository_owner)}"
+            f"/{quote(str(repository_owner), safe='')}"
             f"/actions"
             f"/secrets"
-            f"/{str(secret_name)}"
+            f"/{quote(str(secret_name), safe='')}"
             f"/repositories"
-            f"/{str(repository_id)}"
+            f"/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def webhook_pull_request_trigger_async(
-        self,
-        input: WebhookRequestBody,
-        repository_owner: str,
-        repository_name: str,
-    ):
-        """
-        When a pull request is created or modified
-
-        Creates a GitHub Webhook for Pull Requests
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/hooks"
-        )
-
-        response = await self.http_client.send_async("POST", path, body=input)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def delete_webhook_trigger_async(
         self,
         repository_owner: str,
         repository_name: str,
         webhook_id: str,
-    ):
+    ) -> None:
         """
         Deletes a GitHub Webhook
 
         Deletes a GitHub Webhook
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/hooks"
-            f"/{str(webhook_id)}"
+            f"/{quote(str(webhook_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def issue_opened_async(
-        self,
-    ):
-        """
-        When a new issue is opened and assigned to me
-
-        This operation triggers when an issue is opened and assigned to the
-        logged in user.
-        """
-        path = f"{self._connection_runtime_url}/trigger/issueOpened"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def issue_closed_async(
-        self,
-    ):
-        """
-        When an issue assigned to me is closed
-
-        This operation triggers when an issue assigned to the logged in user is
-        closed.
-        """
-        path = f"{self._connection_runtime_url}/trigger/issueClosed"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def issue_assigned_async(
-        self,
-    ):
-        """
-        When an issue is assigned to me
-
-        This operation triggers when an issue is assigned to the logged in
-        user.
-        """
-        path = f"{self._connection_runtime_url}/trigger/issueAssigned"
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def get_issue_num_async(
         self,
         repository_owner: str,
         repository_name: str,
         issue_number: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a particular issue of a repository
 
         Get a particular issue of a repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/issues"
-            f"/{str(issue_number)}"
+            f"/{quote(str(issue_number), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2018,27 +2053,29 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         issue_number: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update an Issue
 
         Update an existing issue given the issue number.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/issues"
-            f"/{str(issue_number)}"
+            f"/{quote(str(issue_number), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2054,27 +2091,29 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         milestone_number: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a milestone
 
         Update an existing milestone.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/milestones"
-            f"/{str(milestone_number)}"
+            f"/{quote(str(milestone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2086,20 +2125,22 @@ class GithubClient(ConnectorClientBase):
 
     async def get_user_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get the authenticated user
 
         Get the authenticated user.
         """
-        path = f"{self._connection_runtime_url}/user"
+        request_url = f"{self._connection_runtime_url}/user"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2112,20 +2153,22 @@ class GithubClient(ConnectorClientBase):
     async def search_github_with_query_async(
         self,
         input: GraphQlQuery,
-    ):
+    ) -> None:
         """
         Search Github using Query
 
         Search Github using Query
         """
-        path = f"{self._connection_runtime_url}/graphql"
+        request_url = f"{self._connection_runtime_url}/graphql"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2136,15 +2179,18 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists the available assignees for issues in a repository
 
         Lists the available assignees for issues in a repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/assignees"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/assignees"
         )
         query_params = []
         if per_page is not None:
@@ -2158,14 +2204,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2181,17 +2229,17 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List repository collaborators
 
         List repository collaborators.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/collaborators"
         )
         query_params = []
@@ -2206,14 +2254,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2228,27 +2278,29 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         user_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Check if a user is a repository collaborator
 
         Check if a user is a repository collaborator.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/collaborators"
-            f"/{str(user_name)}"
+            f"/{quote(str(user_name), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2267,15 +2319,18 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists all milestones of a repository
 
         Lists all milestones of a repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/milestones"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/milestones"
         )
         query_params = []
         if state is not None:
@@ -2304,14 +2359,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2327,15 +2384,18 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists all labels for a repository
 
         Lists all labels for a repository.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/repos/{str(repository_owner)}/{str(repository_name)}/labels"
+            f"/repos"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
+            f"/labels"
         )
         query_params = []
         if per_page is not None:
@@ -2349,14 +2409,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2373,19 +2435,19 @@ class GithubClient(ConnectorClientBase):
         issue_number: str,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists all labels for an issue
 
         Lists all labels for an issue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/repos"
-            f"/{str(repository_owner)}"
-            f"/{str(repository_name)}"
+            f"/{quote(str(repository_owner), safe='')}"
+            f"/{quote(str(repository_name), safe='')}"
             f"/issues"
-            f"/{str(issue_number)}"
+            f"/{quote(str(issue_number), safe='')}"
             f"/labels"
         )
         query_params = []
@@ -2400,14 +2462,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2425,15 +2489,15 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists all public repositories for a user
 
         Lists all public repositories for a user.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/users/{str(repository_owner)}/repos"
+            f"/users/{quote(str(repository_owner), safe='')}/repos"
         )
         query_params = []
         if type_ is not None:
@@ -2462,14 +2526,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2487,15 +2553,15 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists all public repositories for an organization
 
         Lists all public repositories for an organization.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/orgs/{str(repository_owner)}/repos"
+            f"/orgs/{quote(str(repository_owner), safe='')}/repos"
         )
         query_params = []
         if type_ is not None:
@@ -2524,14 +2590,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2552,14 +2620,14 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists all repositories for the authenticated user
 
         Lists all repositories (both public and private) for the authenticated
         user.
         """
-        path = f"{self._connection_runtime_url}/user/repos"
+        request_url = f"{self._connection_runtime_url}/user/repos"
         query_params = []
         if visibility is not None:
             value = str(visibility)
@@ -2607,14 +2675,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2626,24 +2696,23 @@ class GithubClient(ConnectorClientBase):
 
     async def search_issues_async(
         self,
-        q: Optional[str],
+        q: str,
         sort: Optional[str] = None,
         order: Optional[str] = None,
         per_page: Optional[str] = None,
         page: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Find issues by state and keyword
 
         Find issues by state and keyword.
         """
-        path = f"{self._connection_runtime_url}/search/issues"
+        request_url = f"{self._connection_runtime_url}/search/issues"
         query_params = []
-        if q is not None:
-            value = str(q)
-            if isinstance(q, bool):
-                value = value.lower()
-            query_params.append(f"q={quote(value)}")
+        value = str(q)
+        if isinstance(q, bool):
+            value = value.lower()
+        query_params.append(f"q={quote(value)}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
@@ -2665,14 +2734,16 @@ class GithubClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"page={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2682,23 +2753,64 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def invoke_m_c_p_server_async(
+    async def invoke_mcp_server_async(
         self,
         input: QueryRequest,
-    ):
+    ) -> None:
         """
         Github MCP Server
 
         Github MCP Server
         """
-        path = f"{self._connection_runtime_url}/mcp"
+        request_url = f"{self._connection_runtime_url}/mcp"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "WebhookPullRequestTrigger": {
+        "operation_id": "WebhookPullRequestTrigger",
+        "path": "/{connectionId}/repos/{repositoryOwner}/{repositoryName}/hooks",
+        "method": "post",
+        "required_parameters": ["repositoryOwner", "repositoryName"],
+        "callback_payload_type": "WebhookCreationResponse",
+    },
+    "IssueOpened": {
+        "operation_id": "IssueOpened",
+        "path": "/{connectionId}/trigger/issueOpened",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "IssueDetailsModel",
+    },
+    "IssueClosed": {
+        "operation_id": "IssueClosed",
+        "path": "/{connectionId}/trigger/issueClosed",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "IssueDetailsModel",
+    },
+    "IssueAssigned": {
+        "operation_id": "IssueAssigned",
+        "path": "/{connectionId}/trigger/issueAssigned",
+        "method": "get",
+        "required_parameters": [],
+        "callback_payload_type": "IssueDetailsModel",
+    },
+}

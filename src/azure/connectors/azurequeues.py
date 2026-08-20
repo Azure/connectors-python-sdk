@@ -23,36 +23,27 @@ from azure.connectors.sdk import (
 
 @dataclass
 class Messages:
-    """Response for Get messages (V2)"""
-
-    queue_messages_list: Optional[List[QueueMessage]] = None
-
-
-@dataclass
-class QueueArray:
-    """Response for List queues (V2)"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
+    Response for Get messages
     """
 
+    queue_messages_list: Optional[QueueMessagesList] = field(
+        default=None,
+        metadata={"wire_name": "QueueMessagesList"},
+    )
 
-@dataclass
-class PutMessageInput:
-    """Put a message on a queue (V2)"""
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+QueueArray = List["QueueInfo"]
+
+
+PutMessageInput = str
 
 
 @dataclass
 class StorageAccountList:
-    """Definition: StorageAccountList"""
+    """
+    Response for Get storage accounts
+    """
 
     value: Optional[List[StorageAccount]] = None
     """List of storage account names"""
@@ -60,48 +51,95 @@ class StorageAccountList:
 
 @dataclass
 class StorageAccount:
-    """Definition: StorageAccount"""
+    """
+    Definition: StorageAccount
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name or queue endpoint of the storage account."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the storage account."""
 
 
 @dataclass
-class Queue:
-    """Definition: Queue"""
+class QueueInfo:
+    """
+    Definition: Queue
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the queue."""
 
 
 @dataclass
 class MessagePost:
-    """Definition: MessagePost"""
+    """
+    Definition: MessagePost
+    """
 
-    message: Optional[str] = None
+    message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Message"},
+    )
     """The message to put in the queue."""
 
 
 @dataclass
 class QueueMessage:
-    """Definition: QueueMessage"""
+    """
+    Definition: QueueMessage
+    """
 
-    message_id: Optional[str] = None
-    """Message ID"""
-    message_text: Optional[str] = None
-    """Message text"""
-    insertion_time: Optional[str] = None
-    """Insertion time"""
-    expiration_time: Optional[str] = None
-    """Expiration time"""
-    pop_receipt: Optional[str] = None
-    """Pop receipt (required to delete or update the message)"""
-    time_next_visible: Optional[str] = None
-    """Time the message next becomes visible"""
-    dequeue_count: Optional[str] = None
-    """Number of times the message has been dequeued"""
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
+    """The unique identifier of the message."""
+    insertion_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "InsertionTime"},
+    )
+    """The time the message was inserted into the queue."""
+    expiration_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ExpirationTime"},
+    )
+    """The time the message will expire from the queue."""
+    pop_receipt: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PopReceipt"},
+    )
+    """Used to delete the message after popping it off the queue."""
+    next_visible_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TimeNextVisible"},
+    )
+    """The time the message will be visible to other consumers."""
+    message_text: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageText"},
+    )
+    """The text of the message."""
+    dequeue_count: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DequeueCount"},
+    )
+    """The number of times the message has been dequeued."""
+
+
+@dataclass
+class QueueMessagesList:
+    """
+    Definition: QueueMessagesList
+    """
+
+    queue_message: Optional[List[QueueMessage]] = field(
+        default=None,
+        metadata={"wire_name": "QueueMessage"},
+    )
 
 
 # Client Class
@@ -143,38 +181,39 @@ class AzurequeuesClient(ConnectorClientBase):
         storage_account_name: str,
         queue_name: str,
         message_id: str,
-        popreceipt: Optional[str],
-    ):
+        popreceipt: str,
+    ) -> None:
         """
-        Delete message (V2)
+        Delete message
 
         Delete a specific message from the queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/queues"
-            f"/{str(queue_name)}"
+            f"/{quote(str(queue_name), safe='')}"
             f"/messages"
-            f"/{str(message_id)}"
+            f"/{quote(str(message_id), safe='')}"
         )
         query_params = []
-        if popreceipt is not None:
-            value = str(popreceipt)
-            if isinstance(popreceipt, bool):
-                value = value.lower()
-            query_params.append(f"popreceipt={quote(value)}")
+        value = str(popreceipt)
+        if isinstance(popreceipt, bool):
+            value = value.lower()
+        query_params.append(f"popreceipt={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -185,20 +224,20 @@ class AzurequeuesClient(ConnectorClientBase):
         queue_name: str,
         numofmessages: Optional[str] = None,
         visibilitytimeout: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get messages (V2)
+        Get messages
 
         Get a specific set of messages from the queue. The messages will be
         hidden but remain on the queue until the delete action is used.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/queues"
-            f"/{str(queue_name)}"
+            f"/{quote(str(queue_name), safe='')}"
             f"/messages"
         )
         query_params = []
@@ -213,14 +252,16 @@ class AzurequeuesClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"visibilitytimeout={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -233,113 +274,29 @@ class AzurequeuesClient(ConnectorClientBase):
     async def list_queues_async(
         self,
         storage_account_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        List queues (V2)
+        List queues
 
         List all the queues for your storage account.
         """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2/storageAccounts/{str(storage_account_name)}/queues/list"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_messages_async(
-        self,
-        storage_account_name: str,
-        queue_name: str,
-        visibilitytimeout: Optional[str] = None,
-    ):
-        """
-        When there are messages in a queue (V2)
-
-        Triggers any time there are messages in the queue, returning up to 32
-        messages. The messages will be hidden but remain on the queue until the
-        delete action is used.
-        """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/queues"
-            f"/{str(queue_name)}"
-            f"/message_trigger"
+            f"/list"
         )
-        query_params = []
-        if visibilitytimeout is not None:
-            value = str(visibilitytimeout)
-            if isinstance(visibilitytimeout, bool):
-                value = value.lower()
-            query_params.append(f"visibilitytimeout={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_message_threshold_reached_async(
-        self,
-        storage_account_name: str,
-        queue_name: str,
-        threshold: Optional[str],
-    ):
-        """
-        When a specified number of messages are in a given queue (V2)
-
-        Triggers when a specified number of messages are in the given queue.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2"
-            f"/storageAccounts"
-            f"/{str(storage_account_name)}"
-            f"/queues"
-            f"/{str(queue_name)}"
-            f"/count_trigger"
-        )
-        query_params = []
-        if threshold is not None:
-            value = str(threshold)
-            if isinstance(threshold, bool):
-                value = value.lower()
-            query_params.append(f"threshold={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -354,28 +311,30 @@ class AzurequeuesClient(ConnectorClientBase):
         input: PutMessageInput,
         storage_account_name: str,
         queue_name: str,
-    ):
+    ) -> None:
         """
-        Put a message on a queue (V2)
+        Put a message on a queue
 
         Adds a message to the given queue.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/storageAccounts"
-            f"/{str(storage_account_name)}"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/queues"
-            f"/{str(queue_name)}"
+            f"/{quote(str(queue_name), safe='')}"
             f"/messages"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -383,32 +342,37 @@ class AzurequeuesClient(ConnectorClientBase):
     async def put_queue_async(
         self,
         storage_account_name: str,
-        queue_name: Optional[str],
-    ):
+        queue_name: str,
+    ) -> dict[str, Any] | None:
         """
-        Create a new queue (V2)
+        Create a new queue
 
         Adds a queue to your account.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/storageAccounts/{str(storage_account_name)}/queues/putQueue"
+            f"/v2"
+            f"/storageAccounts"
+            f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
+            f"/queues"
+            f"/putQueue"
         )
         query_params = []
-        if queue_name is not None:
-            value = str(queue_name)
-            if isinstance(queue_name, bool):
-                value = value.lower()
-            query_params.append(f"queueName={quote(value)}")
+        value = str(queue_name)
+        if isinstance(queue_name, bool):
+            value = value.lower()
+        query_params.append(f"queueName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -417,3 +381,61 @@ class AzurequeuesClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def get_storage_accounts_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get storage accounts
+
+        This operation list the user's Azure Storage Account.
+        """
+        request_url = f"{self._connection_runtime_url}/v2/GetStorageAccounts"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnMessages_V2": {
+        "operation_id": "OnMessages_V2",
+        "path": (
+            "/{connectionId}/v2/storageAccounts/{storageAccountName}/queues/{queueName}"
+            "/message_trigger"
+        ),
+        "method": "get",
+        "required_parameters": ["storageAccountName", "queueName"],
+        "callback_payload_type": "Messages",
+    },
+    "OnMessageThresholdReached_V2": {
+        "operation_id": "OnMessageThresholdReached_V2",
+        "path": (
+            "/{connectionId}/v2/storageAccounts/{storageAccountName}/queues/{queueName}"
+            "/count_trigger"
+        ),
+        "method": "get",
+        "required_parameters": ["storageAccountName", "queueName", "threshold"],
+        "callback_payload_type": None,
+    },
+}
