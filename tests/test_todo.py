@@ -169,6 +169,57 @@ class TestGetAllTodoListsAsync:
                 await client.get_all_todo_lists_async()
 
 
+class TestGetTodoListAsync:
+    """Tests for get_to_do_list_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_encodes_folder_id(self, mock_token_provider):
+        """Test successful retrieval encodes the to-do list identifier."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "list 1", "displayName": "Work"}',
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.get_to_do_list_async(folder_id="list 1")
+
+            mock_send.assert_called_once_with(
+                "GET",
+                "https://example.azure.com/connections/test/lists/list%201",
+                body=None,
+            )
+            assert result == {"id": "list 1", "displayName": "Work"}
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test retrieval raises for a non-success response."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_to_do_list_async(folder_id="missing-list")
+
+            assert exc_info.value.status_code == 404
+
+
 class TestCreateTodoListAsync:
     """Tests for create_to_do_list_async method."""
 
@@ -218,6 +269,65 @@ class TestCreateTodoListAsync:
                 await client.create_to_do_list_async(input=payload)
 
 
+class TestUpdateTodoListAsync:
+    """Tests for update_to_do_list_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_encodes_folder_id_and_sends_body(self, mock_token_provider):
+        """Test successful update encodes the identifier and sends the body."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = CreateToDoList(display_name="Updated work")
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "list 1", "displayName": "Updated work"}',
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.update_to_do_list_async(
+                input=payload,
+                folder_id="list 1",
+            )
+
+            mock_send.assert_called_once_with(
+                "PATCH",
+                "https://example.azure.com/connections/test/lists/list%201",
+                body=payload,
+            )
+            assert result == {"id": "list 1", "displayName": "Updated work"}
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test update raises for a non-success response."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = CreateToDoList(display_name="Updated work")
+        mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.update_to_do_list_async(
+                    input=payload,
+                    folder_id="missing-list",
+                )
+
+            assert exc_info.value.status_code == 400
+
+
 class TestDeleteTodoListAsync:
     """Tests for delete_to_do_list_async method (DELETE)."""
 
@@ -262,6 +372,63 @@ class TestDeleteTodoListAsync:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.delete_to_do_list_async(folder_id="missing-list")
+
+            assert exc_info.value.status_code == 404
+
+
+class TestGetTodoAsync:
+    """Tests for get_to_do_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_encodes_folder_and_todo_ids(self, mock_token_provider):
+        """Test successful retrieval encodes both route identifiers."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(
+            status=200,
+            text='{"id": "task 1", "title": "Buy milk"}',
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.get_to_do_async(
+                folder_id="list 1",
+                id="task 1",
+            )
+
+            mock_send.assert_called_once_with(
+                "GET",
+                "https://example.azure.com/connections/test/lists/list%201/tasks/task%201",
+                body=None,
+            )
+            assert result == {"id": "task 1", "title": "Buy milk"}
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test retrieval raises for a non-success response."""
+        client = TodoClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.get_to_do_async(
+                    folder_id="list-1",
+                    id="missing-task",
+                )
 
             assert exc_info.value.status_code == 404
 

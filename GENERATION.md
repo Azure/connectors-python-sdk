@@ -496,15 +496,15 @@ Track known generator issues here to prevent silent recurrence across releases.
 
 ### Wire-Name Collision Regeneration
 
-The `teams`, `shifts`, and `todo` clients were verified with CodefulSdkGenerator from BPM `master` commit `1b7f7d412f648631f9303528a8af8af798918a57`. Generation used the immutable managed connector Swagger snapshot with these SHA-256 hashes:
+The `todo` client was generated with CodefulSdkGenerator from BPM `master` commit `1b7f7d412f648631f9303528a8af8af798918a57`, which contains the fix from [AzureUX-BPM PR 16763269](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/16763269). The immutable input and generated output are:
 
-| Connector | Swagger SHA-256 |
-|-----------|----------------|
-| `teams` | `181B9B5ECE7CDD9E7C3F37274D388C50F0F02A9E1200F51D9E8A026039A1B164` |
-| `shifts` | `DB4ED2F1AF41C20CF583DE3EBF7351FFA12BAAE52ABB565906C7E46EF7EB86B9` |
-| `todo` | `D500A1028C6E81A051A849C6A6382082363F5BCC0C74D1C132D825210670CA6A` |
+- Swagger snapshot: [`todo.swagger.json`](https://github.com/Azure/Connectors-NodeJS-SDK/blob/4123e5ac446c9226a431a46139c63158cf68ec75/swagger-cache/todo.swagger.json)
+- Swagger SHA-256: `D500A1028C6E81A051A849C6A6382082363F5BCC0C74D1C132D825210670CA6A`
+- Generated `todo.py` SHA-256: `4AE27DED1312DBBE98375CEDA17181D45F3E74349541C3A6B9140DC704ED9BA5` (UTF-8 with CRLF line endings as emitted on Windows)
 
-Teams and Shifts were byte-identical to the committed generator output. Todo required full regeneration: in addition to restoring `ToDoHtml.id_2` for `@odata.id`, it restores wire-name metadata throughout the client. The generated Todo request models are now named `CreateToDoList`, `CreateToDo`, and `UpdateToDo`; callers using the deprecated `V2`-suffixed names must update their imports. Todo polling triggers also move from callable client methods to `TRIGGER_OPERATIONS` metadata for Connector Namespace registration.
+The regeneration restores `ToDoHtml.id_2` for `@odata.id` and wire-name metadata throughout the Todo client. The generated request models are now named `CreateToDoList`, `CreateToDo`, and `UpdateToDo`; callers using the deprecated `V2`-suffixed names must update their imports. Todo polling triggers also move from callable client methods to `TRIGGER_OPERATIONS` metadata for Connector Namespace registration.
+
+The Teams and Shifts generated clients are unchanged in this regeneration. Their existing collision fields receive serializer regression coverage that preserves both `id` and `@odata.id`.
 
 ## Related Documentation
 
