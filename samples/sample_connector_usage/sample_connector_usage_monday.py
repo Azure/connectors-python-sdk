@@ -27,6 +27,7 @@ from azure.connectors import ConnectorException
 from azure.connectors.monday import (
     CreateBoardInput,
     CreateItemInput,
+    DynamicResponseGetSingleColumnSchema,
     MondayClient,
     UpdateItemColumnInput,
 )
@@ -78,7 +79,15 @@ async def example_3_update_item_column() -> None:
     credential = DefaultAzureCredential()
     async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
         updated = await client.update_item_column_async(
-            input=UpdateItemColumnInput()
+            input=UpdateItemColumnInput(
+                workspace_id="123456",
+                board_id="789012",
+                item_id="345678",
+                column_id="status",
+                column_values=DynamicResponseGetSingleColumnSchema(
+                    additional_properties={"label": "Done"},
+                ),
+            )
         )
         data = updated.get("data", {}) if updated else {}
         print(f"Updated item column: {data}")

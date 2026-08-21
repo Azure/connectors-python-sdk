@@ -4,154 +4,60 @@ This directory contains comprehensive unit tests for the Azure Connectors Python
 
 ## Test Structure
 
-```
-tests/
-├── __init__.py                      # Package initialization
-├── conftest.py                      # Shared pytest fixtures and utilities
-├── test_kusto.py                    # Kusto connector tests (37 tests, 98% coverage)
-├── test_msgraph.py                  # Microsoft Graph connector tests (46 tests)
-├── test_office365.py                # Office365 connector tests (41 tests, 79% coverage)
-├── test_sharepointonline.py         # SharePoint Online connector tests (44 tests, 57% coverage)
-├── test_teams.py                    # Teams connector tests (27 passed, 18 skipped, 73% coverage)
-├── test_sdk_authentication.py       # Authentication module tests (21 tests)
-├── test_sdk_client_base.py          # Client base module tests (14 tests)
-├── test_sdk_exceptions.py           # Exceptions module tests (14 tests)
-├── test_sdk_http_client.py          # HTTP client module tests (30 tests)
-├── test_sdk_options.py              # Options module tests (14 tests)
-├── test_sdk_trigger_payload.py      # Trigger payload module tests (17 tests)
-└── README.md                        # This file
-```
+- `test_<connector>.py` validates a generated connector client and its models.
+- `test_sdk_*.py` validates shared authentication, HTTP, serialization, and trigger infrastructure.
+- `generated_connector_test_utils.py` invokes generated operations with representative required arguments.
+- `conftest.py` provides shared pytest fixtures and mock responses.
 
 ## Running Tests
 
 ### Run all tests
+
 ```bash
-pytest
+python -m pytest tests
 ```
 
 ### Run tests for a specific connector
+
 ```bash
-pytest tests/test_kusto.py
+python -m pytest tests/test_kusto.py
 ```
 
 ### Run tests with verbose output
+
 ```bash
-pytest -v
+python -m pytest tests -v
+```
+
+### Collect tests without running them
+
+```bash
+python -m pytest tests --collect-only -q
 ```
 
 ### Run tests with coverage
+
 ```bash
-pytest --cov=azure.connectors --cov-report=term-missing
+python -m pytest tests --cov=azure.connectors --cov-report=term-missing
 ```
 
 ### Run tests with coverage for a specific module
+
 ```bash
-pytest tests/test_kusto.py --cov=azure.connectors.kusto --cov-report=term-missing
+python -m pytest tests/test_kusto.py --cov=azure.connectors.kusto --cov-report=term-missing
 ```
 
-## Test Coverage
+## Connector Coverage Expectations
 
-Current test coverage by module:
+Generated connector tests should cover:
 
-### Connector Tests (195 passing, 18 skipped)
-
-- **kusto.py**: 98% (37 tests)
-  - Initialization tests (7)
-  - Lifecycle tests (2)
-  - API method tests (16)
-  - Data class tests (7)
-  - Edge case tests (5)
-
-- **msgraph.py**: (46 tests)
-  - Initialization tests (7)
-  - Lifecycle tests (2)
-  - User operation tests (3)
-  - Group operation tests (13)
-  - License operation tests (3)
-  - Subscription operation tests (2)
-  - Data class tests (8)
-  - Edge case tests (8)
-
-- **office365.py**: 79% (41 tests covering 53 methods)
-  - Initialization tests (7)
-  - Lifecycle tests (2)
-  - Email operation tests (13)
-  - Calendar operation tests (3)
-  - Contact operation tests (1)
-  - MCP endpoint tests (2)
-  - Data class tests (4)
-  - Edge case tests (9)
-
-- **sharepointonline.py**: 57% (44 tests)
-  - Initialization tests (7)
-  - Lifecycle tests (2)
-  - Get all tables tests (4)
-  - File operation tests (5)
-  - Folder operation tests (4)
-  - Item operation tests (5)
-  - Sharing operation tests (2)
-  - Copy/move operation tests (3)
-  - Approval operation tests (2)
-  - Data class tests (4)
-  - Edge case tests (6)
-
-- **teams.py**: 73% (27 passed, 18 skipped)
-  - Initialization tests (7)
-  - Lifecycle tests (2)
-  - Meeting operation tests (2)
-  - List operation tests (3)
-  - Channel operation tests (4 skipped - template variable bugs in generated code)
-  - Chat operation tests (1 skipped - template variable bugs in generated code)
-  - Tag operation tests (6 skipped - template variable bugs in generated code)
-  - Message operation tests (4 skipped - template variable bugs in generated code)
-  - Member operation tests (1 skipped - template variable bugs in generated code)
-  - Trigger operation tests (2 skipped - template variable bugs in generated code)
-  - Data class tests (7)
-  - Edge case tests (6)
-
-**Note:** Some Teams connector methods have template variables (e.g., `{groupId}`, `{channelId}`) that are not defined as parameters in the generated code. These tests are skipped with appropriate documentation. Once the code generation issue is fixed, these tests can be enabled.
-
-### SDK Component Tests (110 passing)
-
-- **authentication.py**: (21 tests)
-  - AzureIdentityTokenProvider tests (8)
-  - ManagedIdentityTokenProvider tests (5)
-  - ConnectionStringTokenProvider tests (5)
-  - TokenProvider interface tests (3)
-
-- **client_base.py**: (14 tests)
-  - Abstract class tests (1)
-  - Initialization tests (6)
-  - Lifecycle tests (5)
-  - Credential wrapping tests (2)
-
-- **exceptions.py**: (14 tests)
-  - Initialization and message format tests (5)
-  - Body truncation tests (5)
-  - Status code and attribute tests (4)
-
-- **http_client.py**: (30 tests)
-  - ConnectorResponse tests (9)
-  - Initialization and session tests (7)
-  - Request sending tests (10)
-  - Retry delay tests (2)
-  - GET method tests (2)
-
-- **options.py**: (14 tests)
-  - Default values 305 tests (285 passing, 20 skipped)
-- **Connector Tests**: 195 tests (177
-  - Type verification tests (3)
-
-- **trigger_payload.py**: (17 tests)
-  - TriggerCallbackBody tests (7)
-  - TriggerCallbackPayload tests (10)
-
-### Overall Test Statistics
-
-- **Total Tests**: 259 tests (249 passing, 18 skipped)
-- **Connector Tests**: 149 tests (131 passing, 18 skipped)
-- **SDK Component Tests**: 110 tests (110 passing)
-- **Overall Coverage**: ~75%
+- Initialization, custom options, lifecycle, and connector identity.
+- The complete generated operation surface.
+- Representative request methods, paths, query parameters, and bodies.
+- Non-success responses for every generated operation.
+- Empty successful responses where supported.
+- Trigger metadata without exposing trigger routes as client methods.
+- Request and response model serialization, including wire-name mappings.
 
 ## Writing Tests
 
@@ -252,7 +158,7 @@ pip install -e ".[dev]"
 
 Tests are designed to run in CI/CD pipelines with:
 
-- Fast execution (< 1 second for 37 tests)
+- Fast, isolated execution
 - No external dependencies
 - Comprehensive mocking
 - Clear error messages

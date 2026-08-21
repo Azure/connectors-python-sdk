@@ -33,6 +33,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import get_generated_operations
 
 
 async def _invoke_operation(client: MondayClient, operation: str):
@@ -99,6 +100,14 @@ async def _invoke_operation(client: MondayClient, operation: str):
         return await client.get_schema_for_get_items_action_async()
     if operation == "get_column_names_schema_for_update_webhook":
         return await client.get_column_names_schema_for_update_webhook_async()
+    if operation == "get_column_names_schema_for_item_name_change_webhook":
+        return await client.get_column_names_schema_for_item_name_change_webhook_async()
+    if operation == "get_column_names_schema_for_subitem_name_change_webhook":
+        return await client.get_column_names_schema_for_subitem_name_change_webhook_async(
+            parent_board_id="1"
+        )
+    if operation == "get_column_names_schema_for_column_changes_webhook":
+        return await client.get_column_names_schema_for_column_changes_webhook_async()
     if operation == "get_subitem_column_names":
         return await client.get_subitem_column_names_async(parent_board_id="1")
     if operation == "get_subitem_schema":
@@ -135,6 +144,9 @@ ALL_OPERATIONS = [
     "get_column_names_schema_for_webhook",
     "get_schema_for_get_items_action",
     "get_column_names_schema_for_update_webhook",
+    "get_column_names_schema_for_item_name_change_webhook",
+    "get_column_names_schema_for_subitem_name_change_webhook",
+    "get_column_names_schema_for_column_changes_webhook",
     "get_subitem_column_names",
     "get_subitem_schema",
 ]
@@ -229,6 +241,10 @@ class TestMondayClientLifecycle:
 
 class TestMondayClientOperations:
     """Tests for MondayClient operations against expected HTTP calls."""
+
+    def test_all_generated_operations_are_covered(self):
+        """Test the expected generated operation surface."""
+        assert get_generated_operations(MondayClient) == set(ALL_OPERATIONS)
 
     @pytest.mark.asyncio
     async def test_create_item_success(self, mock_token_provider):
