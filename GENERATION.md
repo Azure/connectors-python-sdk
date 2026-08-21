@@ -496,7 +496,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 
 ### Wire-Name Collision Regeneration
 
-The `todo` client was generated with CodefulSdkGenerator from BPM `master` commit `1b7f7d412f648631f9303528a8af8af798918a57`, which contains the fix from [AzureUX-BPM PR 16763269](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/16763269). The immutable input and generated output are:
+The `todo` client was generated with CodefulSdkGenerator from the internal BPM repository after the wire-name collision fix. The immutable input and generated output are:
 
 - Swagger snapshot: [`todo.swagger.json`](https://github.com/Azure/Connectors-NodeJS-SDK/blob/4123e5ac446c9226a431a46139c63158cf68ec75/swagger-cache/todo.swagger.json)
 - Swagger SHA-256: `D500A1028C6E81A051A849C6A6382082363F5BCC0C74D1C132D825210670CA6A`
