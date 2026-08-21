@@ -11,12 +11,14 @@ from azure.connectors.shifts import (
     ShiftsClient,
     CreateShiftRequest,
     EditOpenShiftRequest,
+    WebhookPushResponseResourceEntity,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
     ConnectorException,
     ManagedIdentityTokenProvider,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -105,6 +107,22 @@ class TestShiftsClientLifecycle:
                 assert isinstance(client, ShiftsClient)
 
             mock_close.assert_called_once()
+
+
+class TestShiftsModelSerialization:
+    """Tests for distinct Shifts wire names that normalize alike."""
+
+    def test_webhook_resource_preserves_colliding_ids(self):
+        """Test that natural and OData IDs survive serialization together."""
+        model = WebhookPushResponseResourceEntity(
+            id="natural-id",
+            id_2="odata-id",
+        )
+
+        payload = to_wire(model)
+
+        assert payload["id"] == "natural-id"
+        assert payload["@odata.id"] == "odata-id"
 
 
 class TestGetAllTeamsAsync:

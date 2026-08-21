@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.connectors.teams import (
+    CallEventWebhookResponseSchema,
     TeamsClient,
     NewMeeting,
     CreateChannelInput,
@@ -16,9 +17,12 @@ from azure.connectors.teams import (
     DynamicUserMessageWithOptionsSubscriptionRequest,
     CreateSectionInput,
     PostMessageToSelfRequest,
+    RecordingWebhookResponseSchema,
     TRIGGER_OPERATIONS,
+    TranscriptWebhookResponseSchema,
 )
 from azure.connectors.sdk import ConnectorClientOptions, ConnectorException
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -111,6 +115,25 @@ class TestTeamsClientLifecycle:
                 assert client is not None
 
             mock_close.assert_called_once()
+
+
+class TestTeamsModelSerialization:
+    """Tests for distinct Teams wire names that normalize alike."""
+
+    @pytest.mark.parametrize(
+        "model_type",
+        [
+            CallEventWebhookResponseSchema,
+            TranscriptWebhookResponseSchema,
+            RecordingWebhookResponseSchema,
+        ],
+    )
+    def test_webhook_response_preserves_colliding_ids(self, model_type):
+        """Test that natural and OData IDs survive serialization together."""
+        payload = to_wire(model_type(id="natural-id", id_2="odata-id"))
+
+        assert payload["id"] == "natural-id"
+        assert payload["@odata.id"] == "odata-id"
 
 
 class TestTeamsMeetingOperations:
