@@ -54,17 +54,7 @@ class ObjectEntity:
     """
 
 
-@dataclass
-class Bounces:
-    """
-    Response for Get bounce for an email
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+Bounces = List["Bounce"]
 
 
 @dataclass
@@ -101,60 +91,6 @@ class Recipients:
 
 
 @dataclass
-class EmailRequest:
-    """
-    Definition: EmailRequest
-    """
-
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
-    """
-    Origination address of your email. Must be a valid email address from your
-    domain
-    """
-    fromname: Optional[str] = None
-    """Origination name of your email"""
-    to: Optional[str] = None
-    """
-    Receiving address of your email. Must include one or more valid comma
-    separated email addresses
-    """
-    toname: Optional[str] = None
-    """
-    Comma separated receiving names of your email. Must match the number of
-    \"to\" email addresses if specified
-    """
-    subject: Optional[str] = None
-    """Subject of your email"""
-    body: Optional[str] = None
-    """Content of your email. Supported formats include plain text and HTML"""
-    ishtml: Optional[bool] = None
-    """Specify whether the content of the email is HTML or plain text"""
-    cc: Optional[str] = None
-    """
-    CC'ed addresses of your email. Must include one or more valid comma
-    separated email addresses
-    """
-    ccname: Optional[str] = None
-    """Comma separated names of the cc'ed recipients"""
-    bcc: Optional[str] = None
-    """
-    Bcc addresses of your email. Must include one or more valid comma separated
-    email addresses
-    """
-    bccname: Optional[str] = None
-    """Comma separated names of the Bcc'ed recipients."""
-    replyto: Optional[str] = None
-    """Reply To address of your email. Must be a valid email address"""
-    date: Optional[str] = None
-    """
-    Specify the date header of your email (Example: \"Thu, 21 Dec 2000 16:01:07
-    +0200\"). Must be a valid date
-    """
-    headers: Optional[str] = None
-    """Custom email headers in json format"""
-
-
-@dataclass
 class EmailResponse:
     """
     Definition: EmailResponse
@@ -174,6 +110,47 @@ class GetGlobalSuppressEmptyResponse:
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class EmailRequest:
+    """
+    Definition: EmailRequest
+    """
+
+    attachments: Optional[List[EmailAttachment]] = None
+    """Attachments"""
+    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
+    """
+    Origination address of your email. Must be a valid email address from your
+    domain
+    """
+    fromname: Optional[str] = None
+    """Origination name of your email"""
+    to: Optional[str] = None
+    """Valid email addresses separated by a semicolon or comma"""
+    toname: Optional[str] = None
+    """
+    A display name for each email address separated by a semicolon or comma
+    """
+    subject: Optional[str] = None
+    """Subject of your email"""
+    text: Optional[str] = None
+    """Content of your email"""
+    ishtml: Optional[bool] = None
+    """Specify whether the content of the email is HTML or plain text"""
+    cc: Optional[str] = None
+    """Valid email addresses separated by a semicolon or comma"""
+    ccname: Optional[str] = None
+    """
+    A display name for each CC email address separated by a semicolon or comma
+    """
+    bcc: Optional[str] = None
+    """Valid email addresses separated by a semicolon or comma"""
+    bccname: Optional[str] = None
+    """
+    A display name for each BCC email address separated by a semicolon or comma
     """
 
 

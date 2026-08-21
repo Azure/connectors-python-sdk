@@ -239,26 +239,6 @@ class CampaignResponseModel:
 
 
 @dataclass
-class NewCampaignRequest:
-    """
-    Definition: NewCampaignRequest
-    """
-
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """
-    There are four types of campaigns you can create in MailChimp. A/B Split
-    campaigns have been deprecated and variate campaigns should be used
-    instead. Possible Values: regular, plaintext, absplit, rss, variate
-    """
-    recipients: Optional[Recipient] = None
-    settings: Optional[Settings] = None
-    variate_settings: Optional[VariateSettings] = None
-    tracking: Optional[Tracking] = None
-    rss_opts: Optional[RSSOpts] = None
-    social_card: Optional[SocialCard] = None
-
-
-@dataclass
 class Recipient:
     """
     Definition: Recipient
@@ -267,46 +247,6 @@ class Recipient:
     list_id: Optional[str] = None
     """The unique list id"""
     segment_opts: Optional[SegmentOpts] = None
-
-
-@dataclass
-class Settings:
-    """
-    Definition: Settings
-    """
-
-    subject_line: Optional[str] = None
-    """The subject line for the campaign"""
-    title: Optional[str] = None
-    """The title of the campaign"""
-    from_name: Optional[str] = None
-    """The 'from' name on the campaign (not an email address)"""
-    reply_to: Optional[str] = None
-    """The reply-to email address for the campaign"""
-    use_conversation: Optional[bool] = None
-    """Use MailChimp Conversation feature to manage out-of-office replies"""
-    to_name: Optional[str] = None
-    """The campaign's custom 'To' name. Typically the first name merge field"""
-    folder_id: Optional[int] = None
-    """If the campaign is listed in a folder, the id for that folder"""
-    authenticate: Optional[bool] = None
-    """Whether MailChimp authenticated the campaign. Defaults to true"""
-    auto_footer: Optional[bool] = None
-    """Automatically append MailChimp's default footer to the campaign"""
-    inline_css: Optional[bool] = None
-    """Automatically inline the CSS included with the campaign content"""
-    auto_tweet: Optional[bool] = None
-    """
-    Automatically tweet a link to the campaign archive page when the campaign
-    is sent
-    """
-    auto_fb_post: Optional[List[int]] = None
-    """An array of Facebook page ids to auto-post to"""
-    fb_comments: Optional[bool] = None
-    """
-    Allows Facebook comments on the campaign (also force-enables the Campaign
-    Archive toolbar). Defaults to true
-    """
 
 
 @dataclass
@@ -528,6 +468,46 @@ class DailySend:
 
 
 @dataclass
+class Settings:
+    """
+    Definition: Settings
+    """
+
+    subject_line: Optional[str] = None
+    """The subject line for the campaign"""
+    title: Optional[str] = None
+    """The title of the campaign"""
+    from_name: Optional[str] = None
+    """The 'from' name on the campaign (not an email address)"""
+    reply_to: Optional[str] = None
+    """The reply-to email address for the campaign"""
+    use_conversation: Optional[bool] = None
+    """Use MailChimp Conversation feature to manage out-of-office replies"""
+    to_name: Optional[str] = None
+    """The campaign's custom 'To' name. Typically the first name merge field"""
+    folder_id: Optional[str] = None
+    """If the campaign is listed in a folder, the id for that folder"""
+    authenticate: Optional[bool] = None
+    """Whether MailChimp authenticated the campaign. Defaults to true"""
+    auto_footer: Optional[bool] = None
+    """Automatically append MailChimp's default footer to the campaign"""
+    inline_css: Optional[bool] = None
+    """Automatically inline the CSS included with the campaign content"""
+    auto_tweet: Optional[bool] = None
+    """
+    Automatically tweet a link to the campaign archive page when the campaign
+    is sent
+    """
+    auto_fb_post: Optional[List[int]] = None
+    """An array of Facebook page ids to auto-post to"""
+    fb_comments: Optional[bool] = None
+    """
+    Allows Facebook comments on the campaign (also force-enables the Campaign
+    Archive toolbar). Defaults to true
+    """
+
+
+@dataclass
 class ABSplitOpts:
     """
     Definition: AB_Split_Opts
@@ -651,6 +631,26 @@ class Link:
     For HTTP methods that can receive bodies (POST and PUT), this is a URL
     representing the schema that the body should conform to
     """
+
+
+@dataclass
+class NewCampaignRequest:
+    """
+    Definition: NewCampaignRequest
+    """
+
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    """
+    There are four types of campaigns you can create in MailChimp. A/B Split
+    campaigns have been deprecated and variate campaigns should be used
+    instead. Possible Values: regular, plaintext, absplit, rss, variate
+    """
+    recipients: Optional[Recipient] = None
+    settings: Optional[Settings] = None
+    variate_settings: Optional[VariateSettings] = None
+    tracking: Optional[Tracking] = None
+    rss_opts: Optional[RSSOpts] = None
+    social_card: Optional[SocialCard] = None
 
 
 @dataclass
@@ -1254,7 +1254,7 @@ class MailchimpClient(ConnectorClientBase):
         New Campaign
 
         Create a new campaign based on a Campaign Type, Recipients list and
-        Campaign Settings (subject line, title, from_name and reply_to) (V2).
+        Campaign Settings (subject line, title, from_name and reply_to).
         """
         request_url = f"{self._connection_runtime_url}/v2/campaigns"
 

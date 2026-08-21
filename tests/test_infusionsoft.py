@@ -2,6 +2,7 @@
 
 """Unit tests for InfusionsoftClient."""
 
+from typing import get_origin
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -285,8 +286,8 @@ class TestInfusionsoftTypeSerialization:
         assert ListTasksResponse().tasks is None
         assert TaskResponse().id is None
         assert TaskResponse().type_ is None
-        assert OnNewTaskResponse().additional_properties == {}
-        assert ListOrdersResponse().additional_properties == {}
+        assert get_origin(OnNewTaskResponse) is list
+        assert get_origin(ListOrdersResponse) is list
 
     def test_request_dataclasses_instantiate(self):
         """Test generated request dataclasses instantiate without arguments."""

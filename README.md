@@ -214,6 +214,7 @@ The following connectors have been generated and validated with comprehensive te
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 80 tests |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 28 tests |
 | **TextRequest** | `azure.connectors.textrequest` | ✅ Complete | 🔄 SDK Generated | 59 tests |
+| **Trello** | `azure.connectors.trello` | ✅ Complete | 🔄 SDK Generated | 45 tests |
 | **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated | 40 tests |
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
@@ -225,13 +226,13 @@ The following connectors have been generated and validated with comprehensive te
 | **PDF.co** | `azure.connectors.pdfco` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 | **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated | 9 tests |
 | **SQL Server** | `azure.connectors.sql` | ✅ Complete | 🔄 SDK Generated | 11 tests |
-| **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated | 13 tests |
-| **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated | 10 tests |
+| **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated | 40 tests |
+| **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated | 27 tests |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 | **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 
-**Total:** 2479 connector tests + 141 SDK component tests
+**Total:** 3584 tests across connector clients, SDK components, generated-code quality, serialization, and samples
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

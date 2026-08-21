@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Regenerated Campfire, ClickSend SMS, Freshservice, Infusionsoft, Insightly, Mailchimp, Monday.com, Projectplace, SendGrid, Text Request, and Webex using the current CodefulSdkGenerator.
+- Regenerated Trello and Zendesk using the current CodefulSdkGenerator.
 - Regenerated Office 365 Outlook, Office 365 Groups Mail, Pipedrive, Planner, Plumsail Documents, SharePoint Online, SMTP, and Yammer from pinned managed connector contracts using the current CodefulSdkGenerator.
 - Regenerated Azure Queues, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, Microsoft Forms, SharePoint Online, SigningHub, Microsoft Teams, and Word Online (Business) from the merged CodefulSdkGenerator contract updates.
 - Binary request bodies for SharePoint file and attachment uploads, SigningHub document uploads, and Microsoft Teams HTTP requests are forwarded as raw bytes with `application/octet-stream`.
@@ -51,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Azure Event Grid** (`azureeventgrid.py`) connector client with unit tests and samples
 - **Universal Print** (`universalprint.py`) connector client with unit tests and samples
 - **TextRequest** (`textrequest.py`) connector client with unit tests and samples
+- **Trello** (`trello.py`) connector client with unit tests and samples
 - **ClickSend SMS** (`clicksendsms.py`) connector client with unit tests and samples
 - **Campfire** (`campfire.py`) connector client with unit tests and samples
 - **Webex** (`webex.py`) connector client with unit tests and samples

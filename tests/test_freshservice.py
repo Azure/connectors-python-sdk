@@ -2,6 +2,7 @@
 
 """Unit tests for FreshserviceClient."""
 
+from typing import get_origin
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -290,10 +291,10 @@ class TestFreshserviceTypeSerialization:
         assert CreateUpdateTicketResponse().ticket is None
         assert UpdateTicketResponse().ticket is None
         assert TicketResponse().id is None
-        assert ListUsersResponse().additional_properties == {}
+        assert get_origin(ListUsersResponse) is list
 
     def test_request_dataclasses_instantiate(self):
         """Test generated request dataclasses instantiate without arguments."""
-        assert CreateTicketRequest().helpdesk_ticket is None
-        assert UpdateTicketRequest().helpdesk_ticket is None
-        assert AddNoteRequest().helpdesk_note is None
+        assert CreateTicketRequest().email is None
+        assert UpdateTicketRequest().priority is None
+        assert AddNoteRequest().body is None

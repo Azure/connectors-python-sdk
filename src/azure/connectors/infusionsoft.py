@@ -48,30 +48,10 @@ class TaskResponse:
     """The datetime the task is due, given as GMT in ISO 8601 format."""
 
 
-@dataclass
-class OnNewTaskResponse:
-    """
-    Response for When a new task is created
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+OnNewTaskResponse = List["TaskResponse"]
 
 
-@dataclass
-class ListOrdersResponse:
-    """
-    Response for When there is a new order
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ListOrdersResponse = List[Dict[str, Any]]
 
 
 @dataclass

@@ -327,17 +327,7 @@ class GetContactsResponse:
     """List of contact entities gotten from Text Request."""
 
 
-@dataclass
-class BulkUpdateContactsInput:
-    """
-    Bulk update contacts
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+BulkUpdateContactsInput = List[Dict[str, Any]]
 
 
 @dataclass

@@ -46,7 +46,7 @@ async def example_1_send_email() -> None:
                 from_="sender@example.com",
                 to="recipient@example.com",
                 subject="Hello from the SDK sample",
-                body="This message was sent via the SendGrid connector SDK.",
+                text="This message was sent via the SendGrid connector SDK.",
             ),
         )
         print(f"Send result: {result}")

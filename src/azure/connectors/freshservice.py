@@ -96,7 +96,40 @@ class CreateTicketRequest:
     Definition: CreateTicket_Request
     """
 
-    helpdesk_ticket: Optional[Dict[str, Any]] = None
+    requester_id: Optional[int] = None
+    """
+    User-id of the requester. One of the Requester ID, Requester Email and
+    Requester Phone is required
+    """
+    email: Optional[str] = None
+    """
+    Email of the requester. One of the Requester ID, Requester Email and
+    Requester Phone is required
+    """
+    phone: Optional[str] = None
+    """
+    Phone number of the requester. One of the Requester ID, Requester Email and
+    Requester Phone is required
+    """
+    name: Optional[str] = None
+    """
+    Name of the requester. This is a required field only if Requester Phone
+    value is provided
+    """
+    subject: Optional[str] = None
+    """The subject of the ticket."""
+    status: Optional[str] = None
+    """Status of the ticket."""
+    priority: Optional[str] = None
+    """The priority of the ticket (such as Low, Medium, or High)."""
+    description: Optional[str] = None
+    """The description of the ticket."""
+    urgency: Optional[str] = None
+    """Urgency of the problem (such as Low, Medium or High)."""
+    impact: Optional[str] = None
+    """Impact of the problem (such as Low, Medium or High)."""
+    source: Optional[str] = None
+    """The channel through which the ticket was created."""
 
 
 @dataclass
@@ -105,7 +138,23 @@ class UpdateTicketRequest:
     Definition: UpdateTicket_Request
     """
 
-    helpdesk_ticket: Optional[Dict[str, Any]] = None
+    requester_id: Optional[int] = None
+    """
+    User-id of the requester. For existing contacts, requester_id can be passed
+    instead of email.
+    """
+    subject: Optional[str] = None
+    """The subject of the ticket."""
+    status: Optional[str] = None
+    """Status of the ticket."""
+    priority: Optional[str] = None
+    """The priority of the ticket (such as Low, Medium, or High)."""
+    urgency: Optional[str] = None
+    """Urgency of the problem (such as Low, Medium or High)."""
+    impact: Optional[str] = None
+    """Impact of the problem (such as Low, Medium or High)."""
+    source: Optional[str] = None
+    """The channel through which the ticket was created."""
 
 
 @dataclass
@@ -114,7 +163,10 @@ class AddNoteRequest:
     Definition: AddNote_Request
     """
 
-    helpdesk_note: Optional[Dict[str, Any]] = None
+    body: Optional[str] = None
+    """The note to be added to the ticket."""
+    private: Optional[bool] = None
+    """Set to true if message is private."""
 
 
 @dataclass
@@ -214,17 +266,7 @@ class UpdateTicketResponse:
     ticket: Optional[Dict[str, Any]] = None
 
 
-@dataclass
-class ListUsersResponse:
-    """
-    Definition: ListUsers_Response
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+ListUsersResponse = List[Dict[str, Any]]
 
 
 # Client Class

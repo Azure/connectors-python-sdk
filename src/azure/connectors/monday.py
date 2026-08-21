@@ -881,6 +881,36 @@ class GetSubitemSchemaResponse:
 
 
 @dataclass
+class GetColumnNamesSchemaForItemNameChangeWebhookResponse:
+    """
+    Response for Get column names schema for column changes
+    """
+
+    schema: Optional[Dict[str, Any]] = None
+    """Schema of the requested schema type"""
+
+
+@dataclass
+class GetColumnNamesSchemaForSubitemNameChangeWebhookResponse:
+    """
+    Response for Get column names schema for column changes
+    """
+
+    schema: Optional[Dict[str, Any]] = None
+    """Schema of the requested schema type"""
+
+
+@dataclass
+class GetColumnNamesSchemaForColumnChangesWebhookResponse:
+    """
+    Response for Get column names schema for column changes
+    """
+
+    schema: Optional[Dict[str, Any]] = None
+    """Schema of the requested schema type"""
+
+
+@dataclass
 class DynamicResponseGetListSchema:
     """
     Definition: DynamicResponseGetListSchema
@@ -945,43 +975,13 @@ class DynamicGetSubitemColumnNamesForWebhook:
     """
 
 
-@dataclass
-class FieldWorkspace:
-    """
-    Definition: FieldWorkspace
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FieldWorkspace = str
 
 
-@dataclass
-class FieldBoard:
-    """
-    Definition: FieldBoard
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FieldBoard = str
 
 
-@dataclass
-class FieldColumnsToUpdateSingleColumn:
-    """
-    Definition: FieldColumnsToUpdateSingleColumn
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+FieldColumnsToUpdateSingleColumn = str
 
 
 # Client Class
@@ -2097,6 +2097,125 @@ class MondayClient(ConnectorClientBase):
         if isinstance(parent_board_id, bool):
             value = value.lower()
         query_params.append(f"parentBoardId={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_column_names_schema_for_item_name_change_webhook_async(
+        self,
+        board_id: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get column names schema for column changes
+
+        This operation gets the column names for a board ID for a webhook when
+        the item's name changes.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/getSchema/getColumnNamesForItemNameChangeWebhook"
+        )
+        query_params = []
+        if board_id is not None:
+            value = str(board_id)
+            if isinstance(board_id, bool):
+                value = value.lower()
+            query_params.append(f"boardId={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_column_names_schema_for_subitem_name_change_webhook_async(
+        self,
+        parent_board_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get column names schema for column changes
+
+        This operation gets the column names for a board ID for a webhook when
+        the subitem's name changes.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/getSchema/getColumnNamesForSubitemNameChangeWebhook"
+        )
+        query_params = []
+        value = str(parent_board_id)
+        if isinstance(parent_board_id, bool):
+            value = value.lower()
+        query_params.append(f"parentBoardId={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_column_names_schema_for_column_changes_webhook_async(
+        self,
+        board_id: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get column names schema for column changes
+
+        This operation gets the column names for a board ID for a webhook
+        (includes itemId).
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/getSchema/getColumnNamesForColumnChangesWebhook"
+        )
+        query_params = []
+        if board_id is not None:
+            value = str(board_id)
+            if isinstance(board_id, bool):
+                value = value.lower()
+            query_params.append(f"boardId={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

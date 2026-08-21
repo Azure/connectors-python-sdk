@@ -285,7 +285,7 @@ class TestSendgridClientOperations:
             return_value=mock_response,
         ) as mock_send:
             result = await client.send_email_async(
-                input=EmailRequest(to="a@b.com", subject="Hi", body="Hello"),
+                input=EmailRequest(to="a@b.com", subject="Hi", text="Hello"),
             )
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]

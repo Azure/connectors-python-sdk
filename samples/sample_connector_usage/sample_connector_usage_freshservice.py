@@ -44,13 +44,11 @@ async def example_1_create_ticket() -> None:
     credential = DefaultAzureCredential()
     async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
         request = CreateTicketRequest(
-            helpdesk_ticket={
-                "subject": "SDK sample ticket",
-                "description": "Created from the freshservice SDK sample.",
-                "email": "requester@example.com",
-                "priority": 1,
-                "status": 2,
-            }
+            subject="SDK sample ticket",
+            description="Created from the freshservice SDK sample.",
+            email="requester@example.com",
+            priority="1",
+            status="2",
         )
 
         created = await client.create_ticket_async(input=request)
@@ -64,9 +62,7 @@ async def example_2_update_ticket() -> None:
 
     credential = DefaultAzureCredential()
     async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = UpdateTicketRequest(
-            helpdesk_ticket={"priority": 3, "status": 3}
-        )
+        request = UpdateTicketRequest(priority="3", status="3")
 
         updated = await client.update_ticket_async(input=request, ticket_id="1")
         ticket = updated.get("ticket", {}) if updated else {}
@@ -80,10 +76,8 @@ async def example_3_add_note() -> None:
     credential = DefaultAzureCredential()
     async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
         request = AddNoteRequest(
-            helpdesk_note={
-                "body": "Note added from the freshservice SDK sample.",
-                "private": True,
-            }
+            body="Note added from the freshservice SDK sample.",
+            private=True,
         )
 
         note = await client.add_note_async(input=request, ticket_id="1")

@@ -349,6 +349,11 @@ except (ImportError, NameError):
     PipedriveClient = None  # type: ignore[assignment,misc]
 
 try:
+    from .trello import TrelloClient
+except (ImportError, NameError):
+    TrelloClient = None  # type: ignore[assignment,misc]
+
+try:
     from .docuware import DocuwareClient
 except (ImportError, NameError):
     DocuwareClient = None  # type: ignore[assignment,misc]
@@ -448,6 +453,7 @@ __all__ = [
     "SqlClient",
     "ZendeskClient",
     "PipedriveClient",
+    "TrelloClient",
     "DocuwareClient",
     "SigninghubClient",
     "ZohosignClient",

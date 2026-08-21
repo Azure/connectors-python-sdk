@@ -352,7 +352,11 @@ class ZendeskClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/items"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
         )
         query_params = []
         if filter is not None:
@@ -412,7 +416,11 @@ class ZendeskClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/items"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
         )
 
         response = await self.http_client.send_async(
@@ -444,7 +452,12 @@ class ZendeskClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -476,7 +489,12 @@ class ZendeskClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -504,7 +522,12 @@ class ZendeskClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -610,7 +633,11 @@ class ZendeskClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/$metadata.json/datasets/default/tables/{str(table)}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
