@@ -245,6 +245,36 @@ class TestCreateJob:
             assert call_args.kwargs["body"] == payload
             assert result["id"] == "750xx0000000001"
 
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test create_job_async raises for a non-success response."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = {
+            "object": "Account",
+            "operation": "insert",
+            "contentType": "CSV",
+        }
+        mock_response = MockResponse(status=400, text='{"error": "Invalid job"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_job_async(input=payload)
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/bulk/createjob",
+                body=payload,
+            )
+            assert exc_info.value.status_code == 400
+
 
 class TestPostItem:
     """Tests for post_item_async method."""

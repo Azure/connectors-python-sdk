@@ -27,6 +27,7 @@ SAMPLE_DIRECTORY = (
         "signinghub",
         "slack",
         "smtp",
+        "todo",
         "wordonlinebusiness",
         "yammer",
         "zohosign",

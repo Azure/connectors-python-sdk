@@ -24,7 +24,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.todo import TodoClient, CreateToDoListV2, CreateToDoV2, UpdateToDoV2
+from azure.connectors.todo import CreateToDo, CreateToDoList, TodoClient, UpdateToDo
 
 
 # Connection runtime URL format:
@@ -54,7 +54,7 @@ async def example_2_create_list() -> str | None:
 
     credential = DefaultAzureCredential()
     async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = CreateToDoListV2(display_name="SDK Sample List")
+        request = CreateToDoList(display_name="SDK Sample List")
         created = await client.create_to_do_list_async(input=request)
 
         if not created:
@@ -72,7 +72,7 @@ async def example_3_create_and_update_todo(list_id: str) -> None:
 
     credential = DefaultAzureCredential()
     async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-        create_request = CreateToDoV2(title="SDK sample task", status="notStarted")
+        create_request = CreateToDo(title="SDK sample task", status="notStarted")
         created_todo = await client.create_to_do_async(input=create_request, folder_id=list_id)
 
         if not created_todo:
@@ -85,7 +85,7 @@ async def example_3_create_and_update_todo(list_id: str) -> None:
         if not todo_id:
             return
 
-        update_request = UpdateToDoV2(title="SDK sample task (updated)", status="inProgress")
+        update_request = UpdateToDo(title="SDK sample task (updated)", status="inProgress")
         updated_todo = await client.update_to_do_async(input=update_request, folder_id=list_id, id=todo_id)
         print(f"Updated title: {updated_todo.get('title') if updated_todo else 'n/a'}")
 

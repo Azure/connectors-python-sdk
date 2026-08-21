@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Regenerated Microsoft To Do request models now use the current contract names `CreateToDoList`, `CreateToDo`, and `UpdateToDo` instead of the deprecated `V2`-suffixed names. Its polling triggers are now available through `TRIGGER_OPERATIONS`, not callable client methods.
 - Generated Python operation names now preserve Swagger `operationId` spelling by default while grouping acronym runs in snake_case. Connector-scoped corrections fix malformed Google Tasks and PDF.co operation names. This renames methods in DocuSign, GitHub, Google Tasks, PDF.co, Salesforce, SigningHub, Slack, Word Online (Business), and Zoho Sign.
 - Regenerated Google Tasks and Slack trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Slack also no longer exposes the deprecated `create_group_async` operation.
 - Regenerated Salesforce trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Salesforce bulk upload and generic HTTP request operations now accept raw `bytes` bodies instead of generated request models.
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Regenerated Microsoft To Do from its pinned managed connector contract using the current CodefulSdkGenerator, restoring Swagger wire-name metadata throughout the client. The unchanged Microsoft Teams and Shifts clients receive collision serializer coverage.
 - Regenerated Office 365 Outlook, Office 365 Groups Mail, Pipedrive, Planner, Plumsail Documents, SharePoint Online, SMTP, and Yammer from pinned managed connector contracts using the current CodefulSdkGenerator.
 - Regenerated Azure Queues, Azure Cosmos DB, DocuSign, DocuWare, Azure Event Hubs, Microsoft Forms, SharePoint Online, SigningHub, Microsoft Teams, and Word Online (Business) from the merged CodefulSdkGenerator contract updates.
 - Binary request bodies for SharePoint file and attachment uploads, SigningHub document uploads, and Microsoft Teams HTTP requests are forwarded as raw bytes with `application/octet-stream`.
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Microsoft Teams, Shifts, and Microsoft To Do models now preserve natural `id` and `@odata.id` properties together during wire serialization.
 - Corrected eight malformed PDF.co method names: `p_d_f_search_text_async` to `pdf_search_text_async`, `p_d_f_from_x_l_s_x_l_s_x_async` to `pdf_from_xls_xlsx_async`, `p_d_f_un_searchable_async` to `pdf_unsearchable_async`, `x_l_sto_c_s_v_async` to `xls_to_csv_async`, `x_l_sto_h_t_m_l_async` to `xls_to_html_async`, `x_l_sto_j_s_o_n_async` to `xls_to_json_async`, `x_l_sto_t_x_t_async` to `xls_to_txt_async`, and `x_l_sto_x_m_l_async` to `xls_to_xml_async`.
 - Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
 - Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
