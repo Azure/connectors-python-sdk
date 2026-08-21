@@ -6476,7 +6476,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def q_r_add_q_r_code_async(
+    async def qr_add_qr_code_async(
         self,
         input: QrCodeRequest,
         package_id: str,
@@ -6516,7 +6516,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def q_r_update_q_r_code_async(
+    async def qr_update_qr_code_async(
         self,
         input: UpdateQrCodeRequest,
         package_id: str,

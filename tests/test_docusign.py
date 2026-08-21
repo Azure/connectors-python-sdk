@@ -7,8 +7,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.connectors.docusign import (
-    DocusignClient,
+    AdditionalURLForSenderView,
     CombinedEmailBodyAndCustomFields,
+    DocusignClient,
+    DynamicSigningUrlFields,
     DynamicSigners,
     UpdateDocgenFormFieldsInput,
 )
@@ -102,6 +104,8 @@ class TestGeneratedContractSurface:
         "method_name",
         [
             "create_org_hook_envelope_async",
+            "generate_embedded_sender_u_r_l_async",
+            "generate_embedded_signing_u_r_l_async",
             "scp_get_related_activities_async",
             "scp_get_related_records_async",
             "scp_get_key_sales_async",
@@ -127,6 +131,76 @@ class TestGeneratedContractSurface:
                 assert isinstance(client, DocusignClient)
 
             mock_close.assert_called_once()
+
+
+class TestEmbeddedUrlOperationNames:
+    """Tests for acronym-aware embedded URL operation names."""
+
+    @pytest.mark.asyncio
+    async def test_generate_embedded_sender_url_success(self, mock_token_provider):
+        """Test the sender URL operation uses its acronym-aware public name."""
+        client = DocusignClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = AdditionalURLForSenderView()
+        mock_response = MockResponse(status=200, text='{"url": "https://example.com/send"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.generate_embedded_sender_url_async(
+                input=payload,
+                account_id="acct-1",
+                envelope_id="env-1",
+                open_in="new window",
+                return_url="callback",
+            )
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/accounts/acct-1/"
+                "envelopes/env-1/views/sender?openIn=new%20window&returnUrl=callback",
+                body=payload,
+            )
+            assert result == {"url": "https://example.com/send"}
+
+    @pytest.mark.asyncio
+    async def test_generate_embedded_signing_url_success(self, mock_token_provider):
+        """Test the signing URL operation uses its acronym-aware public name."""
+        client = DocusignClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = DynamicSigningUrlFields()
+        mock_response = MockResponse(status=200, text='{"url": "https://example.com/sign"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.generate_embedded_signing_url_async(
+                input=payload,
+                account_id="acct-1",
+                envelope_id="env-1",
+                is_in_person_signer="false",
+                authentication_method="none",
+                return_url="callback",
+            )
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/accounts/acct-1/"
+                "envelopes/env-1/views/recipientV2?isInPersonSigner=false&"
+                "authenticationMethod=none&returnUrl=callback",
+                body=payload,
+            )
+            assert result == {"url": "https://example.com/sign"}
 
 
 class TestGetLoginAccountsAsync:

@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -23,50 +23,96 @@ from azure.connectors.sdk import (
 
 @dataclass
 class TodoList:
-    """Response for Update a to-do list"""
+    """
+    Response for Update a to-do list
+    """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.etag"},
+    )
     id: Optional[str] = None
     """Unique identifier of the to-do list."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Name of the to-do list."""
-    wellknown_list_name: Optional[str] = None
+    wellknown_list_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "wellknownListName"},
+    )
     """
     Property indicating the well-known list name if the given list is a
     well-known list. Possible values are: none, defaultList, flaggedEmails,
     unknownFutureValue.
     """
-    is_owner: Optional[bool] = None
+    is_owner: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOwner"},
+    )
     """True if the user is owner of the given task list."""
-    is_shared: Optional[bool] = None
+    is_shared: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isShared"},
+    )
     """True if the task list is shared with other users."""
 
 
 @dataclass
 class ToDo:
-    """Response for Add a to-do (V3)"""
+    """
+    Response for Add a to-do
+    """
 
-    context: Optional[str] = None
-    etag: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
+    etag: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.etag"},
+    )
     id: Optional[str] = None
     """Unique identifier of the to-do."""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
     body: Optional[Dict[str, Any]] = None
     """To-do body that typically contains information about the to-do."""
-    body_last_modified_date_time: Optional[str] = None
+    body_last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "bodyLastModifiedDateTime"},
+    )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    completed_date_time: Optional[Dict[str, Any]] = None
+    completed_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "completedDateTime"},
+    )
     """The date in the specified time zone that the task was finished."""
-    due_date_time: Optional[Dict[str, Any]] = None
+    due_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
     """The date in the specified time zone that the task is to be finished."""
     importance: Optional[str] = None
     """Low, normal or high."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """True if an alert is set to remind the user of the to-do."""
-    reminder_date_time: Optional[Dict[str, Any]] = None
+    reminder_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "reminderDateTime"},
+    )
     """The date and time for a reminder alert of the task to occur."""
     status: Optional[str] = None
     """
@@ -79,38 +125,78 @@ class ToDo:
 
 @dataclass
 class ToDoHtml:
-    """Definition: ToDoHtml"""
+    """
+    Definition: ToDoHtml
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
+    id_2: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.id"},
+    )
+    etag: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.etag"},
+    )
     id: Optional[str] = None
-    etag: Optional[str] = None
-    created_date_time: Optional[str] = None
+    """Unique identifier of the to-do."""
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
+    last_modified_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastModifiedDateTime"},
+    )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
     categories: Optional[List[str]] = None
     """Collection of category names associated with the to-do."""
-    assigned_to: Optional[str] = None
+    assigned_to: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "assignedTo"},
+    )
     """Name of the person who has been assigned the to-do."""
     body: Optional[Dict[str, Any]] = None
     """To-do body that typically contains information about the to-do."""
-    completed_date_time: Optional[Dict[str, Any]] = None
+    completed_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "completedDateTime"},
+    )
     """Date-time in the UTC time zone when the to-do was finished."""
-    due_date_time: Optional[Dict[str, Any]] = None
+    due_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to be finished."""
     importance: Optional[str] = None
     """Low, normal or high."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """True if an alert is set to remind the user of the to-do."""
     owner: Optional[str] = None
     """Name of the person who created the to-do."""
-    parent_folder_id: Optional[str] = None
+    parent_folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentFolderId"},
+    )
     """Unique identifier of the parent folder."""
-    reminder_date_time: Optional[Dict[str, Any]] = None
+    reminder_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "reminderDateTime"},
+    )
     """
     Date-time in the UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = None
+    start_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "startDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to begin."""
     status: Optional[str] = None
     """
@@ -123,171 +209,221 @@ class ToDoHtml:
 
 @dataclass
 class CreateToDoBody:
-    """Definition: CreateToDoBody"""
+    """
+    Definition: CreateToDoBody
+    """
 
-    due_date_time: Optional[Dict[str, Any]] = None
+    due_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DueDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to be finished."""
-    reminder_date_time: Optional[Dict[str, Any]] = None
+    reminder_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "ReminderDateTime"},
+    )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = None
+    start_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "StartDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to begin."""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Low, normal or high."""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Brief description or title of the to-do."""
-    status: Optional[str] = None
+    status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Status"},
+    )
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Indicates the level of privacy for the event."""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Body"},
+    )
     """To-do body that typically contains information about the to-do."""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Categories"},
+    )
     """Collection of category names associated with the to-do."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsReminderOn"},
+    )
     """True if an alert is set to remind the user of the to-do."""
 
 
 @dataclass
 class CreateToDoHtmlBody:
-    """Definition: CreateToDoHtmlBody"""
+    """
+    Definition: CreateToDoHtmlBody
+    """
 
-    due_date_time: Optional[Dict[str, Any]] = None
+    due_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DueDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to be finished."""
-    reminder_date_time: Optional[Dict[str, Any]] = None
+    reminder_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "ReminderDateTime"},
+    )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = None
+    start_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "StartDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to begin."""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Low, normal or high."""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Brief description or title of the to-do."""
-    status: Optional[str] = None
+    status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Status"},
+    )
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Indicates the level of privacy for the event."""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Body"},
+    )
     """To-do body that typically contains information about the to-do."""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Categories"},
+    )
     """Collection of category names associated with the to-do."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsReminderOn"},
+    )
     """True if an alert is set to remind the user of the to-do."""
 
 
 @dataclass
 class UpdateToDoBody:
-    """Definition: UpdateToDoBody"""
+    """
+    Definition: UpdateToDoBody
+    """
 
-    due_date_time: Optional[Dict[str, Any]] = None
+    due_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DueDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to be finished."""
-    reminder_date_time: Optional[Dict[str, Any]] = None
+    reminder_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "ReminderDateTime"},
+    )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = None
+    start_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "StartDateTime"},
+    )
     """Date in the UTC time zone when the to-do is to begin."""
-    importance: Optional[str] = None
+    importance: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Importance"},
+    )
     """Low, normal or high."""
-    subject: Optional[str] = None
+    subject: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Subject"},
+    )
     """Brief description or title of the to-do."""
-    status: Optional[str] = None
+    status: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Status"},
+    )
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Sensitivity"},
+    )
     """Indicates the level of privacy for the event."""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "Body"},
+    )
     """To-do body that typically contains information about the to-do."""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Categories"},
+    )
     """Collection of category names associated with the to-do."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsReminderOn"},
+    )
     """True if an alert is set to remind the user of the to-do."""
 
 
 @dataclass
-class TodoListV2:
-    """Definition: TodoList_V2"""
-
-    etag: Optional[str] = None
-    id: Optional[str] = None
-    """Unique identifier of the to-do list."""
-    display_name: Optional[str] = None
-    """Name of the to-do list."""
-    wellknown_list_name: Optional[str] = None
-    """
-    Property indicating the well-known list name if the given list is a
-    well-known list. Possible values are: none, defaultList, flaggedEmails,
-    unknownFutureValue.
-    """
-    is_owner: Optional[bool] = None
-    """True if the user is owner of the given task list."""
-    is_shared: Optional[bool] = None
-    """True if the task list is shared with other users."""
-
-
-@dataclass
 class CreateToDoListBody:
-    """Definition: CreateToDoListBody"""
+    """
+    Definition: CreateToDoListBody
+    """
 
     name: Optional[str] = None
     """List name"""
 
 
 @dataclass
-class ToDoV2:
-    """Definition: ToDo_V2"""
-
-    context: Optional[str] = None
-    etag: Optional[str] = None
-    id: Optional[str] = None
-    """Unique identifier of the to-do."""
-    created_date_time: Optional[str] = None
-    """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    last_modified_date_time: Optional[str] = None
-    """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    body: Optional[Dict[str, Any]] = None
-    """To-do body that typically contains information about the to-do."""
-    body_last_modified_date_time: Optional[str] = None
-    """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    completed_date_time: Optional[Dict[str, Any]] = None
-    """The date in the specified time zone that the task was finished."""
-    due_date_time: Optional[Dict[str, Any]] = None
-    """The date in the specified time zone that the task is to be finished."""
-    importance: Optional[str] = None
-    """Low, normal or high."""
-    is_reminder_on: Optional[bool] = None
-    """True if an alert is set to remind the user of the to-do."""
-    reminder_date_time: Optional[Dict[str, Any]] = None
-    """The date and time for a reminder alert of the task to occur."""
-    status: Optional[str] = None
+class CreateToDo:
     """
-    Indicates state or progress of the to-do - not started, in progress,
-    completed, waiting on others or deferred.
+    Definition: CreateToDo
     """
-    title: Optional[str] = None
-    """Brief description or title of the to-do."""
 
-
-@dataclass
-class CreateToDoV2:
-    """Definition: CreateToDo_V2"""
-
-    due_date_time: Optional[Dict[str, Any]] = None
+    due_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
     """
     Date in the UTC time zone when the to-do is to be finished (note the time
     portion will be ignored).
     """
-    reminder_date_time: Optional[Dict[str, Any]] = None
+    reminder_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "reminderDateTime"},
+    )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
@@ -302,20 +438,31 @@ class CreateToDoV2:
     """
     body: Optional[Dict[str, Any]] = None
     """To-do body that typically contains information about the to-do."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """True if an alert is set to remind the user of the to-do."""
 
 
 @dataclass
-class UpdateToDoV2:
-    """Definition: UpdateToDo_V2"""
+class UpdateToDo:
+    """
+    Definition: UpdateToDo
+    """
 
-    due_date_time: Optional[Dict[str, Any]] = None
+    due_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dueDateTime"},
+    )
     """
     Date in the UTC time zone when the to-do is to be finished (note the time
     portion will be ignored).
     """
-    reminder_date_time: Optional[Dict[str, Any]] = None
+    reminder_date_time: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "reminderDateTime"},
+    )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
@@ -330,15 +477,23 @@ class UpdateToDoV2:
     """
     body: Optional[Dict[str, Any]] = None
     """To-do body that typically contains information about the to-do."""
-    is_reminder_on: Optional[bool] = None
+    is_reminder_on: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isReminderOn"},
+    )
     """True if an alert is set to remind the user of the to-do."""
 
 
 @dataclass
-class CreateToDoListV2:
-    """Definition: CreateToDoList_V2"""
+class CreateToDoList:
+    """
+    Definition: CreateToDoList
+    """
 
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """List name"""
 
 
@@ -378,22 +533,27 @@ class TodoClient(ConnectorClientBase):
 
     async def update_to_do_list_async(
         self,
-        input: CreateToDoListV2,
+        input: CreateToDoList,
         folder_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a to-do list
 
         This operation is used to update a specific to-do list.
         """
-        path = f"{self._connection_runtime_url}/lists/{str(folder_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(folder_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -406,42 +566,52 @@ class TodoClient(ConnectorClientBase):
     async def delete_to_do_list_async(
         self,
         folder_id: str,
-    ):
+    ) -> None:
         """
         Delete a to-do list
 
         This operation is used to delete a specific to-do list.
         """
-        path = f"{self._connection_runtime_url}/lists/{str(folder_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(folder_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def create_to_do_async(
         self,
-        input: CreateToDoV2,
+        input: CreateToDo,
         folder_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Add a to-do (V3)
+        Add a to-do
 
         This operation is used to create a to-do in the specified to-do list.
         """
-        path = f"{self._connection_runtime_url}/lists/{str(folder_id)}/tasks"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(folder_id), safe='')}/tasks"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -453,21 +623,23 @@ class TodoClient(ConnectorClientBase):
 
     async def create_to_do_list_async(
         self,
-        input: CreateToDoListV2,
-    ):
+        input: CreateToDoList,
+    ) -> dict[str, Any] | None:
         """
-        Create a to-do list (V2)
+        Create a to-do list
 
         This operation is used to create a new to-do list.
         """
-        path = f"{self._connection_runtime_url}/lists"
+        request_url = f"{self._connection_runtime_url}/lists"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -481,43 +653,50 @@ class TodoClient(ConnectorClientBase):
         self,
         folder_id: str,
         id: str,
-    ):
+    ) -> None:
         """
-        Delete to-do (V2)
+        Delete to-do
 
         This operation is used to delete a task.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/lists/{str(folder_id)}/tasks/{str(id)}"
+            f"/lists"
+            f"/{quote(str(folder_id), safe='')}"
+            f"/tasks"
+            f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def get_all_todo_lists_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        List all to-do lists (V2)
+        List all to-do lists
 
         Returns a list of all the to-do lists.
         """
-        path = f"{self._connection_runtime_url}/lists"
+        request_url = f"{self._connection_runtime_url}/lists"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -531,23 +710,28 @@ class TodoClient(ConnectorClientBase):
         self,
         folder_id: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get a to-do (V3)
+        Get a to-do
 
         This operation is used to get the to-do with the given Id.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/lists/{str(folder_id)}/tasks/{str(id)}"
+            f"/lists"
+            f"/{quote(str(folder_id), safe='')}"
+            f"/tasks"
+            f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -560,20 +744,25 @@ class TodoClient(ConnectorClientBase):
     async def get_to_do_list_async(
         self,
         folder_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get a to-do list (V2)
+        Get a to-do list
 
         This operation is used to get a specific to-do list.
         """
-        path = f"{self._connection_runtime_url}/lists/{str(folder_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(folder_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -587,13 +776,16 @@ class TodoClient(ConnectorClientBase):
         self,
         folder_id: str,
         top: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        List to-dos by folder (V2)
+        List to-dos by folder
 
         This operation is used to retrieve all to-dos from a specific list.
         """
-        path = f"{self._connection_runtime_url}/lists/{str(folder_id)}/tasks"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/lists/{quote(str(folder_id), safe='')}/tasks"
+        )
         query_params = []
         if top is not None:
             value = str(top)
@@ -601,72 +793,16 @@ class TodoClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_new_to_do_in_folder_async(
-        self,
-        folder_id: str,
-    ):
-        """
-        When a new to-do in a specific folder is created (V2)
-
-        Triggers when a new to-do in a specific folder is created.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2/trigger/onNewToDoInFolder/{str(folder_id)}"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_update_to_do_in_folder_async(
-        self,
-        folder_id: str,
-    ):
-        """
-        When a to-do in a specific folder is updated (V2)
-
-        Triggers when a to-do in a specific folder is updated.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2/trigger/onUpdateToDoInFolder/{str(folder_id)}"
-        )
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -678,26 +814,31 @@ class TodoClient(ConnectorClientBase):
 
     async def update_to_do_async(
         self,
-        input: UpdateToDoV2,
+        input: UpdateToDo,
         folder_id: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Update to-do (V2)
+        Update to-do
 
         This operation is used to update a specific to-do.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/lists/{str(folder_id)}/tasks/{str(id)}"
+            f"/lists"
+            f"/{quote(str(folder_id), safe='')}"
+            f"/tasks"
+            f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -706,3 +847,28 @@ class TodoClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewToDoInFolderV2": {
+        "operation_id": "OnNewToDoInFolderV2",
+        "path": "/{connectionId}/v2/trigger/onNewToDoInFolder/{folderId}",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": "ToDo",
+    },
+    "OnUpdateToDoInFolderV2": {
+        "operation_id": "OnUpdateToDoInFolderV2",
+        "path": "/{connectionId}/v2/trigger/onUpdateToDoInFolder/{folderId}",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": "ToDo",
+    },
+}

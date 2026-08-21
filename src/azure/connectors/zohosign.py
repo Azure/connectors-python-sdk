@@ -174,7 +174,7 @@ class ZohosignClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "zohosign"
 
-    async def invoke_a_p_i_async(
+    async def invoke_api_async(
         self,
         input: InvokeAPIInput,
         url: str,

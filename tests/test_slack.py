@@ -11,7 +11,7 @@ from azure.connectors.sdk import (
     ConnectorException,
     ManagedIdentityTokenProvider,
 )
-from azure.connectors.slack import PostMessageRequest, SlackClient
+from azure.connectors.slack import PostMessageRequest, SlackClient, TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 
 
@@ -100,6 +100,74 @@ class TestSlackClientLifecycle:
                 assert isinstance(client, SlackClient)
 
             mock_close.assert_called_once()
+
+
+class TestSetDndAsync:
+    """Tests for set_dnd_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_uses_acronym_aware_name(self, mock_token_provider):
+        """Test setting DND through the acronym-aware public method name."""
+        client = SlackClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=200, text='{"ok": true}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.set_dnd_async(num_minutes="30")
+
+            mock_send.assert_called_once_with(
+                "GET",
+                "https://example.azure.com/connections/test/dnd.setSnooze?num_minutes=30",
+                body=None,
+            )
+            assert result == {"ok": True}
+            assert not hasattr(SlackClient, "set_d_n_d_async")
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test DND errors raise ConnectorException."""
+        client = SlackClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.set_dnd_async(num_minutes="invalid")
+
+
+class TestSlackContractSurface:
+    """Tests for Slack trigger metadata and removed operations."""
+
+    def test_trigger_is_metadata_only(self):
+        """Test the file trigger is registered without a callable method."""
+        assert TRIGGER_OPERATIONS == {
+            "OnNewFile": {
+                "operation_id": "OnNewFile",
+                "path": "/{connectionId}/trigger/files.list",
+                "method": "get",
+                "required_parameters": ["channel"],
+                "callback_payload_type": None,
+            }
+        }
+        assert not hasattr(SlackClient, "on_new_file_async")
+
+    def test_deprecated_group_operation_is_not_generated(self):
+        """Test the deprecated group operation is absent."""
+        assert not hasattr(SlackClient, "create_group_async")
 
 
 class TestListChannelsAsync:

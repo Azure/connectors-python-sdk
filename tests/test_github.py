@@ -7,9 +7,11 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.connectors.github import (
+    CreateRepositorySecretRequest,
     GithubClient,
     IssueBasicDetailsModel,
     PullRequestUpdateRequest,
+    QueryRequest,
     RequestReviewersBody,
 )
 from azure.connectors.sdk import (
@@ -105,6 +107,53 @@ class TestGithubClientLifecycle:
                 assert isinstance(client, GithubClient)
 
             mock_close.assert_called_once()
+
+
+class TestInvokeMcpServerAsync:
+    """Tests for invoke_mcp_server_async method."""
+
+    @pytest.mark.asyncio
+    async def test_success_uses_acronym_aware_name(self, mock_token_provider):
+        """Test invoking the MCP server through its acronym-aware method name."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = QueryRequest(jsonrpc="2.0", id="request-1", method="tools/list")
+        mock_response = MockResponse(status=200, text="")
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.invoke_mcp_server_async(input=payload)
+
+            mock_send.assert_called_once_with(
+                "POST",
+                "https://example.azure.com/connections/test/mcp",
+                body=payload,
+            )
+            assert not hasattr(GithubClient, "invoke_m_c_p_server_async")
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test MCP server errors raise ConnectorException."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException):
+                await client.invoke_mcp_server_async(input=QueryRequest())
 
 
 class TestGetUserAsync:
@@ -286,6 +335,73 @@ class TestGetIssuesAsync:
                     repository_owner="octocat",
                     repository_name="hello-world",
                 )
+
+
+class TestCreateUpdateRepositorySecretAsync:
+    """Tests for create_update_repository_secret_async method (PUT)."""
+
+    @pytest.mark.asyncio
+    async def test_success_sends_body(self, mock_token_provider):
+        """Test PUT sends the encrypted secret payload."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = CreateRepositorySecretRequest(
+            encrypted_value="encrypted-value",
+            key_id="key-1",
+        )
+        mock_response = MockResponse(status=204)
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            result = await client.create_update_repository_secret_async(
+                input=payload,
+                repository_owner="octocat",
+                repository_name="hello world",
+                secret_name="API TOKEN",
+            )
+
+            mock_send.assert_called_once_with(
+                "PUT",
+                "https://example.azure.com/connections/test/repos/octocat/"
+                "hello%20world/actions/secrets/API%20TOKEN",
+                body=payload,
+            )
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_error_response_raises_exception(self, mock_token_provider):
+        """Test PUT error path raises ConnectorException."""
+        client = GithubClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+        payload = CreateRepositorySecretRequest(
+            encrypted_value="invalid-value",
+            key_id="key-1",
+        )
+        mock_response = MockResponse(status=422, text='{"message": "Validation Failed"}')
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.create_update_repository_secret_async(
+                    input=payload,
+                    repository_owner="octocat",
+                    repository_name="hello-world",
+                    secret_name="API_TOKEN",
+                )
+
+            assert exc_info.value.status_code == 422
 
 
 class TestUpdatePullRequestAsync:

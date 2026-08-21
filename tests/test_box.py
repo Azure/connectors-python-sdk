@@ -231,10 +231,11 @@ class TestBoxClientMethods:
             "send_async",
             new_callable=AsyncMock,
             return_value=mock_response,
-        ):
+        ) as mock_send:
             result = await client.get_file_content_by_path_async(path="/Documents/file.txt")
 
             assert result == b"box file content"
+            assert "path=/Documents/file.txt" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_create_file_success(self, mock_token_provider):

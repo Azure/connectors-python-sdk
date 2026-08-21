@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class TablesList:
-    """Response for Get object types"""
+    """
+    Response for Get object types
+    """
 
     value: Optional[List[Table]] = None
     """List of Tables"""
@@ -31,7 +33,9 @@ class TablesList:
 
 @dataclass
 class GetItemByExternalIdResponse:
-    """Response for Get a Record by External ID"""
+    """
+    Response for Get a Record by External ID
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -42,7 +46,9 @@ class GetItemByExternalIdResponse:
 
 @dataclass
 class ItemsList:
-    """Response for Get records"""
+    """
+    Response for Get records
+    """
 
     value: Optional[List[Item]] = None
     """List of Items"""
@@ -50,7 +56,9 @@ class ItemsList:
 
 @dataclass
 class ObjectEntity:
-    """Response for Execute a SOQL query"""
+    """
+    Response for Execute a SOQL query
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -61,55 +69,87 @@ class ObjectEntity:
 
 @dataclass
 class GetAllJobsResponse:
-    """Response for Get all jobs"""
+    """
+    Response for Get all jobs
+    """
 
     done: Optional[bool] = None
     """Done"""
     records: Optional[List[JobInfo]] = None
-    next_record_url: Optional[str] = None
+    next_record_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextRecordUrl"},
+    )
     """Next Record URL"""
 
 
 @dataclass
-class UploadJobDataInput:
-    """Upload job data"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class CheckJobResponse:
-    """Response for Get job info"""
+    """
+    Response for Get job info
+    """
 
-    apex_processing_time: Optional[float] = None
+    apex_processing_time: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "apexProcessingTime"},
+    )
     """APEX Processing Time"""
-    api_active_processing_time: Optional[float] = None
+    api_active_processing_time: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "apiActiveProcessingTime"},
+    )
     """API Active Processing Time"""
-    api_version: Optional[float] = None
+    api_version: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "apiVersion"},
+    )
     """API Version"""
-    column_delimiter: Optional[str] = None
+    column_delimiter: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "columnDelimiter"},
+    )
     """Column Delimiter"""
-    concurrency_mode: Optional[str] = None
+    concurrency_mode: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "concurrencyMode"},
+    )
     """Concurrency Mode"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Content Type"""
-    content_url: Optional[str] = None
+    content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentUrl"},
+    )
     """Content URL"""
-    created_by_id: Optional[str] = None
+    created_by_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdById"},
+    )
     """Created By ID"""
-    created_date: Optional[str] = None
+    created_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDate"},
+    )
     """Created Date"""
-    external_field_name: Optional[str] = None
+    external_field_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "externalFieldName"},
+    )
     """External Field Name"""
     id: Optional[str] = None
     """ID"""
-    job_type: Optional[str] = None
+    job_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobType"},
+    )
     """Job Type"""
-    line_ending: Optional[str] = None
+    line_ending: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineEnding"},
+    )
     """Line Ending"""
     object: Optional[str] = None
     """Object"""
@@ -119,36 +159,74 @@ class CheckJobResponse:
     """Retries"""
     state: Optional[str] = None
     """State"""
-    system_mod_stamp: Optional[str] = None
-    total_processing_time: Optional[float] = None
+    system_mod_stamp: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "systemModStamp"},
+    )
+    total_processing_time: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "totalProcessingTime"},
+    )
     """Total Processing Time"""
 
 
 @dataclass
 class JobInfo:
-    """Response for Close or abort a job"""
+    """
+    Response for Close or abort a job
+    """
 
-    api_version: Optional[float] = None
+    api_version: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "apiVersion"},
+    )
     """API Version"""
-    column_delimiter: Optional[str] = None
+    column_delimiter: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "columnDelimiter"},
+    )
     """Column Delimiter"""
-    concurrency_mode: Optional[str] = None
+    concurrency_mode: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "concurrencyMode"},
+    )
     """Concurrency Mode"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Content Type"""
-    content_url: Optional[str] = None
+    content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentUrl"},
+    )
     """Content URL"""
-    created_by_id: Optional[str] = None
+    created_by_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdById"},
+    )
     """Created By ID"""
-    created_date: Optional[str] = None
+    created_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDate"},
+    )
     """Created Date"""
-    external_id_field_name: Optional[str] = None
+    external_id_field_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "externalIdFieldName"},
+    )
     """External ID Field Name"""
     id: Optional[str] = None
     """ID"""
-    job_type: Optional[str] = None
+    job_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobType"},
+    )
     """Job Type"""
-    line_ending: Optional[str] = None
+    line_ending: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineEnding"},
+    )
     """Line Ending"""
     object: Optional[str] = None
     """Object"""
@@ -156,34 +234,33 @@ class JobInfo:
     """Operation"""
     state: Optional[str] = None
     """State"""
-    system_modstamp: Optional[str] = None
+    system_modstamp: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "systemModstamp"},
+    )
     """System Mod Stamp"""
 
 
 @dataclass
 class SOSLSearchQueryResponse:
-    """Response for Execute SOSL search query"""
+    """
+    Response for Execute SOSL search query
+    """
 
-    search_records: Optional[List[SearchRecordObject]] = None
+    search_records: Optional[List[SearchRecordObject]] = field(
+        default=None,
+        metadata={"wire_name": "searchRecords"},
+    )
     """A list of search records returned by an SOSL search query"""
     metadata: Optional[Dict[str, Any]] = None
     """Metadata of the result returned from the query"""
 
 
 @dataclass
-class HttpRequestInput:
-    """Send an HTTP request"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class ObjectWithoutType:
-    """Response for Send an HTTP request"""
+    """
+    Response for Send an HTTP request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -194,7 +271,9 @@ class ObjectWithoutType:
 
 @dataclass
 class MCPQueryResponse:
-    """Response for MCP server for Salesforce"""
+    """
+    Response for MCP server for Salesforce
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -206,49 +285,86 @@ class MCPQueryResponse:
 
 @dataclass
 class CreateJobResponse:
-    """Response for Create a job (V2)"""
+    """
+    Response for Create a job
+    """
 
     object: Optional[str] = None
     """The object type for the data being processed."""
     operation: Optional[str] = None
     """The processing operation for the job."""
-    column_delimiter: Optional[str] = None
+    column_delimiter: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "columnDelimiter"},
+    )
     """The column delimiter used for CSV job data."""
-    external_id_field_name: Optional[str] = None
+    external_id_field_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "externalIdFieldName"},
+    )
     """
     The external ID field in the object being updated. Only needed for upsert
     operations. Field values must also exist in CSV job data.
     """
-    line_ending: Optional[str] = None
+    line_ending: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineEnding"},
+    )
     """The line ending used for CSV job data, marking the end of a data row."""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """The content type for the job."""
-    api_version: Optional[float] = None
+    api_version: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "apiVersion"},
+    )
     """The API version that the job was created in."""
-    concurrency_mode: Optional[str] = None
+    concurrency_mode: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "concurrencyMode"},
+    )
     """The concurrency mode for the job."""
-    content_url: Optional[str] = None
+    content_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentUrl"},
+    )
     """
     The URL to use for Upload Job Data requests for this job. Only valid if the
     job is in 'Open' state.
     """
-    created_by_id: Optional[str] = None
+    created_by_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdById"},
+    )
     """The ID of the user who created the job."""
-    created_date: Optional[str] = None
+    created_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDate"},
+    )
     """The date and time in the UTC time zone when the job was created."""
     id: Optional[str] = None
     """Unique ID for this job."""
-    job_type: Optional[str] = None
+    job_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobType"},
+    )
     """The job's type."""
     state: Optional[str] = None
     """The current state of processing for the job."""
-    system_modstamp: Optional[str] = None
+    system_modstamp: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "systemModstamp"},
+    )
     """Date and time in the UTC time zone when the job finished."""
 
 
 @dataclass
 class GetItemResponse:
-    """Response for Get record"""
+    """
+    Response for Get record
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -259,7 +375,9 @@ class GetItemResponse:
 
 @dataclass
 class PatchItemInput:
-    """Update record (V3)"""
+    """
+    Update record
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -270,7 +388,9 @@ class PatchItemInput:
 
 @dataclass
 class PatchItemResponse:
-    """Response for Update record (V3)"""
+    """
+    Response for Update record
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -281,7 +401,9 @@ class PatchItemResponse:
 
 @dataclass
 class PatchItemByExternalIdInput:
-    """Insert or Update (Upsert) a Record by External ID (V2)"""
+    """
+    Insert or Update (Upsert) a Record by External ID
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -292,7 +414,9 @@ class PatchItemByExternalIdInput:
 
 @dataclass
 class PatchItemByExternalIdResponse:
-    """Response for Insert or Update (Upsert) a Record by External ID (V2)"""
+    """
+    Response for Insert or Update (Upsert) a Record by External ID
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -303,7 +427,9 @@ class PatchItemByExternalIdResponse:
 
 @dataclass
 class PostItemInput:
-    """Create record"""
+    """
+    Create record
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -314,7 +440,9 @@ class PostItemInput:
 
 @dataclass
 class PostItemResponse:
-    """Response for Create record"""
+    """
+    Response for Create record
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -324,45 +452,113 @@ class PostItemResponse:
 
 
 @dataclass
+class ExternalIdFieldsList:
+    """
+    Response for Get External ID Fields
+    """
+
+    value: Optional[List[ExternalIdField]] = None
+    """List of external ID fields."""
+
+
+@dataclass
+class TableMetadata:
+    """
+    Response for GetMetadataForGetItem
+    """
+
+    name: Optional[str] = None
+    """Table name"""
+    title: Optional[str] = None
+    """Table title"""
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
+    """Table permission"""
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
+    schema: Optional[ObjectEntity] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
+    """URL link"""
+
+
+@dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
 @dataclass
 class CreateJobParameters:
-    """Definition: CreateJobParameters"""
+    """
+    Definition: CreateJobParameters
+    """
 
     object: Optional[str] = None
     """The object type for the data being processed."""
     operation: Optional[str] = None
     """The processing operation for the job."""
-    column_delimiter: Optional[str] = None
+    column_delimiter: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "columnDelimiter"},
+    )
     """The column delimiter used for CSV job data."""
-    external_id_field_name: Optional[str] = None
+    external_id_field_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "externalIdFieldName"},
+    )
     """
     The external ID field in the object being updated. Only needed for upsert
     operations. Field values must also exist in CSV job data.
     """
-    line_ending: Optional[str] = None
+    line_ending: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineEnding"},
+    )
     """The line ending used for CSV job data, marking the end of a data row."""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """The content type for the job."""
 
 
 @dataclass
 class DataSet:
-    """Definition: DataSet"""
+    """
+    Definition: DataSet
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Dataset name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Dataset display name"""
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
@@ -370,7 +566,9 @@ class DataSet:
 
 @dataclass
 class DataSetsList:
-    """Definition: DataSetsList"""
+    """
+    Definition: DataSetsList
+    """
 
     value: Optional[List[DataSet]] = None
     """List of datasets"""
@@ -378,7 +576,9 @@ class DataSetsList:
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -386,7 +586,9 @@ class DataSetsMetadata:
 
 @dataclass
 class ExecuteSoqlQueryParameters:
-    """Definition: ExecuteSoqlQueryParameters"""
+    """
+    Definition: ExecuteSoqlQueryParameters
+    """
 
     query: Optional[str] = None
     """
@@ -402,106 +604,139 @@ class ExecuteSoqlQueryParameters:
 
 @dataclass
 class ExternalIdField:
-    """Definition: ExternalIdField"""
+    """
+    Definition: ExternalIdField
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Name of the external ID field, used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Display name of the external ID field."""
 
 
 @dataclass
-class ExternalIdFieldsList:
-    """Definition: ExternalIdFieldsList"""
-
-    value: Optional[List[ExternalIdField]] = None
-    """List of external ID fields."""
-
-
-@dataclass
 class Item:
-    """Definition: Item"""
+    """
+    Definition: Item
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
 class PassThroughNativeQuery:
-    """Definition: PassThroughNativeQuery"""
+    """
+    Definition: PassThroughNativeQuery
+    """
 
-    language: Optional[str] = None
+    language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Language"},
+    )
     """Query language"""
 
 
 @dataclass
 class Procedure:
-    """Definition: Procedure"""
+    """
+    Definition: Procedure
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Procedure name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Procedure display name"""
 
 
 @dataclass
 class Table:
-    """Definition: Table"""
+    """
+    Definition: Table
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
 @dataclass
 class TableCapabilitiesMetadata:
-    """Definition: TableCapabilitiesMetadata"""
+    """
+    Definition: TableCapabilitiesMetadata
+    """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
 @dataclass
 class TableFilterRestrictionsMetadata:
-    """Definition: TableFilterRestrictionsMetadata"""
+    """
+    Definition: TableFilterRestrictionsMetadata
+    """
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
 @dataclass
-class TableMetadata:
-    """Definition: TableMetadata"""
-
-    name: Optional[str] = None
-    """Table name"""
-    title: Optional[str] = None
-    """Table title"""
-    x_ms_permission: Optional[str] = None
-    """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
-    """URL link"""
-
-
-@dataclass
 class TableSelectRestrictionsMetadata:
-    """Definition: TableSelectRestrictionsMetadata"""
+    """
+    Definition: TableSelectRestrictionsMetadata
+    """
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
@@ -509,41 +744,74 @@ class TableSelectRestrictionsMetadata:
 
 @dataclass
 class TableSortRestrictionsMetadata:
-    """Definition: TableSortRestrictionsMetadata"""
+    """
+    Definition: TableSortRestrictionsMetadata
+    """
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
 @dataclass
 class CreateJobRequest:
-    """Definition: CreateJobRequest"""
+    """
+    Definition: CreateJobRequest
+    """
 
-    column_delimiter: Optional[str] = None
+    column_delimiter: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "columnDelimiter"},
+    )
     """Column Delimiter"""
-    external_id_field_name: Optional[str] = None
+    external_id_field_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "externalIdFieldName"},
+    )
     """External ID Field Name"""
-    line_ending: Optional[str] = None
+    line_ending: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lineEnding"},
+    )
     """Line Ending"""
     object: Optional[str] = None
     """Object"""
@@ -553,15 +821,22 @@ class CreateJobRequest:
 
 @dataclass
 class InstanceUrlResponse:
-    """Definition: InstanceUrlResponse"""
+    """
+    Definition: InstanceUrlResponse
+    """
 
-    instance_url: Optional[str] = None
+    instance_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "instanceUrl"},
+    )
     """Instance Url"""
 
 
 @dataclass
 class GetCurrentUserInfoResponse:
-    """Definition: GetCurrentUserInfoResponse"""
+    """
+    Definition: GetCurrentUserInfoResponse
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -572,17 +847,21 @@ class GetCurrentUserInfoResponse:
 
 @dataclass
 class SearchRecordObject:
-    """Definition: SearchRecordObject"""
+    """
+    Definition: SearchRecordObject
+    """
 
     attributes: Optional[Dict[str, Any]] = None
     """Attributes of a search record"""
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """Unique identifier of the record"""
 
 
 @dataclass
 class CloseJobRequest:
-    """Definition: CloseJobRequest"""
+    """
+    Definition: CloseJobRequest
+    """
 
     state: Optional[str] = None
     """state"""
@@ -590,7 +869,9 @@ class CloseJobRequest:
 
 @dataclass
 class MCPQueryRequest:
-    """Definition: MCPQueryRequest"""
+    """
+    Definition: MCPQueryRequest
+    """
 
     jsonrpc: Optional[str] = None
     id: Optional[str] = None
@@ -598,7 +879,10 @@ class MCPQueryRequest:
     params: Optional[Dict[str, Any]] = None
     result: Optional[Dict[str, Any]] = None
     error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = None
+    callback_endpoint: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "callbackEndpoint"},
+    )
 
 
 # Client Class
@@ -637,20 +921,22 @@ class SalesforceClient(ConnectorClientBase):
 
     async def get_tables_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get object types
 
         This operation lists the available Salesforce object types.
         """
-        path = f"{self._connection_runtime_url}/datasets/default/tables"
+        request_url = f"{self._connection_runtime_url}/datasets/default/tables"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -665,29 +951,31 @@ class SalesforceClient(ConnectorClientBase):
         table: str,
         external_id_field: str,
         external_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a Record by External ID
 
         This operation retrieves a record using an external ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
             f"/default"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/externalIdFields"
-            f"/{str(external_id_field)}"
-            f"/{str(external_id)}"
+            f"/{quote(quote(str(external_id_field), safe=''), safe='')}"
+            f"/{quote(quote(str(external_id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -705,16 +993,20 @@ class SalesforceClient(ConnectorClientBase):
         top: Optional[str] = None,
         skip: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get records
 
         This operation gets records of a certain Salesforce object type like
         'Leads'.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/items"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
         )
         query_params = []
         if filter is not None:
@@ -743,14 +1035,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -767,13 +1061,13 @@ class SalesforceClient(ConnectorClientBase):
         top: Optional[str] = None,
         skip: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Account records from Salesforce
 
         This operation gets Account records from Salesforce.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/tables/account/items"
         )
@@ -804,14 +1098,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -828,13 +1124,13 @@ class SalesforceClient(ConnectorClientBase):
         top: Optional[str] = None,
         skip: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get User records from Salesforce
 
         This operation gets User records from Salesforce.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/tables/user/items"
         )
@@ -865,14 +1161,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -889,13 +1187,13 @@ class SalesforceClient(ConnectorClientBase):
         top: Optional[str] = None,
         skip: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Case records from Salesforce
 
         This operation gets Case records from Salesforce.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/tables/case/items"
         )
@@ -926,14 +1224,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -950,13 +1250,13 @@ class SalesforceClient(ConnectorClientBase):
         top: Optional[str] = None,
         skip: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Opportunity records from Salesforce
 
         This operation gets Opportunity records from Salesforce.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/tables/opportunity/items"
         )
@@ -987,14 +1287,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1011,13 +1313,13 @@ class SalesforceClient(ConnectorClientBase):
         top: Optional[str] = None,
         skip: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Product records from Salesforce
 
         This operation gets Product records from Salesforce.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/tables/product2/items"
         )
@@ -1048,14 +1350,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1072,13 +1376,13 @@ class SalesforceClient(ConnectorClientBase):
         top: Optional[str] = None,
         skip: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Contact records from Salesforce
 
         This operation gets Contact records from Salesforce.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/default/tables/contact/items"
         )
@@ -1109,14 +1413,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1130,144 +1436,53 @@ class SalesforceClient(ConnectorClientBase):
         self,
         table: str,
         id: str,
-    ):
+    ) -> None:
         """
         Delete record
 
         This operation deletes a record.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/items/{str(id)}"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
-
-    async def get_on_new_items_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        select: Optional[str] = None,
-    ):
-        """
-        When a record is created
-
-        This operation triggers when there are newly created records.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/onnewitems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_on_updated_items_async(
-        self,
-        table: str,
-        filter: Optional[str] = None,
-        orderby: Optional[str] = None,
-        select: Optional[str] = None,
-    ):
-        """
-        When a record is modified
-
-        This operation triggers when there are newly modified records.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/tables/{str(table)}/onupdateditems"
-        )
-        query_params = []
-        if filter is not None:
-            value = str(filter)
-            if isinstance(filter, bool):
-                value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
-        if orderby is not None:
-            value = str(orderby)
-            if isinstance(orderby, bool):
-                value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def execute_soql_query_async(
         self,
         input: ExecuteSoqlQueryParameters,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Execute a SOQL query
 
         Execute a SOQL query.
         """
-        path = f"{self._connection_runtime_url}/soql/executesoqlquery"
+        request_url = f"{self._connection_runtime_url}/soql/executesoqlquery"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1283,13 +1498,13 @@ class SalesforceClient(ConnectorClientBase):
         is_pk_chunking_enabled: Optional[str] = None,
         job_type: Optional[str] = None,
         query_locator: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get all jobs
 
         Get a list of all jobs
         """
-        path = f"{self._connection_runtime_url}/codeless/jobs/ingest"
+        request_url = f"{self._connection_runtime_url}/codeless/jobs/ingest"
         query_params = []
         if concurreny_mode is not None:
             value = str(concurreny_mode)
@@ -1312,14 +1527,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"queryLocator={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1331,25 +1548,30 @@ class SalesforceClient(ConnectorClientBase):
 
     async def upload_job_data_async(
         self,
-        input: UploadJobDataInput,
+        input: bytes,
         job_id: str,
-    ):
+    ) -> None:
         """
         Upload job data
 
         Uploads data for a job using CSV data.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/jobs/ingest/{str(job_id)}/batches"
+            f"/codeless/jobs/ingest/{quote(str(job_id), safe='')}/batches"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1357,23 +1579,25 @@ class SalesforceClient(ConnectorClientBase):
     async def get_job_info_async(
         self,
         job_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get job info
 
         Retrieves detailed information about a job.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/jobs/ingest/{str(job_id)}"
+            f"/codeless/jobs/ingest/{quote(str(job_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1387,7 +1611,7 @@ class SalesforceClient(ConnectorClientBase):
         self,
         input: CloseJobRequest,
         job_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Close or abort a job
 
@@ -1396,17 +1620,19 @@ class SalesforceClient(ConnectorClientBase):
         uploaded data for processing, and you can't add any additional job
         data. If you abort a job, the job does not get queued or processed.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/jobs/ingest/{str(job_id)}"
+            f"/codeless/jobs/ingest/{quote(str(job_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1419,24 +1645,26 @@ class SalesforceClient(ConnectorClientBase):
     async def delete_job_async(
         self,
         job_id: str,
-    ):
+    ) -> None:
         """
         Delete a job
 
         Deletes a job. To be deleted, a job must have a state of
         UploadComplete, JobComplete, Aborted, or Failed.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/jobs/ingest/{str(job_id)}"
+            f"/codeless/jobs/ingest/{quote(str(job_id), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1444,33 +1672,34 @@ class SalesforceClient(ConnectorClientBase):
     async def get_job_record_results_async(
         self,
         job_id: str,
-        result_type: Optional[str],
-    ):
+        result_type: str,
+    ) -> dict[str, Any] | None:
         """
         Get job results
 
         Retrieves a list of records based on the result type for a completed
         job.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/jobs/ingest/{str(job_id)}/results"
+            f"/codeless/jobs/ingest/{quote(str(job_id), safe='')}/results"
         )
         query_params = []
-        if result_type is not None:
-            value = str(result_type)
-            if isinstance(result_type, bool):
-                value = value.lower()
-            query_params.append(f"resultType={quote(value)}")
+        value = str(result_type)
+        if isinstance(result_type, bool):
+            value = value.lower()
+        query_params.append(f"resultType={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1480,31 +1709,32 @@ class SalesforceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def execute_s_o_s_l_query_async(
+    async def execute_sosl_query_async(
         self,
-        q: Optional[str],
-    ):
+        q: str,
+    ) -> dict[str, Any] | None:
         """
         Execute SOSL search query
 
         Execute the specified SOSL search qyery
         """
-        path = f"{self._connection_runtime_url}/codeless/search"
+        request_url = f"{self._connection_runtime_url}/codeless/search"
         query_params = []
-        if q is not None:
-            value = str(q)
-            if isinstance(q, bool):
-                value = value.lower()
-            query_params.append(f"q={quote(value)}")
+        value = str(q)
+        if isinstance(q, bool):
+            value = value.lower()
+        query_params.append(f"q={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1516,21 +1746,26 @@ class SalesforceClient(ConnectorClientBase):
 
     async def http_request_async(
         self,
-        input: HttpRequestInput,
-    ):
+        input: bytes,
+    ) -> dict[str, Any] | None:
         """
         Send an HTTP request
 
         Construct a Salesforce REST API request to invoke
         """
-        path = f"{self._connection_runtime_url}/codeless/httprequest"
+        request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1544,13 +1779,15 @@ class SalesforceClient(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         MCP server for Salesforce
 
         MCP server for Salesforce
         """
-        path = f"{self._connection_runtime_url}/mcp/SalesforceManagement"
+        request_url = (
+            f"{self._connection_runtime_url}/mcp/SalesforceManagement"
+        )
         query_params = []
         if session_id is not None:
             value = str(session_id)
@@ -1558,14 +1795,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sessionId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1578,22 +1817,24 @@ class SalesforceClient(ConnectorClientBase):
     async def create_job_async(
         self,
         input: CreateJobParameters,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Create a job (V2)
+        Create a job
 
         Creates a job, which represents a bulk operation (and associated data)
         that is sent to Salesforce for asynchronous processing. Provide job
         data via an Upload Job Data request.
         """
-        path = f"{self._connection_runtime_url}/bulk/createjob"
+        request_url = f"{self._connection_runtime_url}/bulk/createjob"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1608,15 +1849,21 @@ class SalesforceClient(ConnectorClientBase):
         table: str,
         id: str,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get record
 
         This operation gets a record.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/default/tables/{str(table)}/items/{str(id)}"
+            f"/v2"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
         if select is not None:
@@ -1625,14 +1872,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1648,15 +1897,21 @@ class SalesforceClient(ConnectorClientBase):
         table: str,
         id: str,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Update record (V3)
+        Update record
 
         This operation updates a record and allows null values.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v3/datasets/default/tables/{str(table)}/items/{str(id)}"
+            f"/v3"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
         if select is not None:
@@ -1665,14 +1920,16 @@ class SalesforceClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1688,31 +1945,33 @@ class SalesforceClient(ConnectorClientBase):
         table: str,
         external_id_field: str,
         external_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Insert or Update (Upsert) a Record by External ID (V2)
+        Insert or Update (Upsert) a Record by External ID
 
         This operation inserts or updates (upserts) a record using an external
         ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
             f"/default"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/externalIdFields"
-            f"/{str(external_id_field)}"
-            f"/{str(external_id)}"
+            f"/{quote(quote(str(external_id_field), safe=''), safe='')}"
+            f"/{quote(quote(str(external_id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1726,23 +1985,30 @@ class SalesforceClient(ConnectorClientBase):
         self,
         input: PostItemInput,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create record
 
         This operation creates a record and allows null values.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/default/tables/{str(table)}/items"
+            f"/v2"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/items"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1751,3 +2017,200 @@ class SalesforceClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def get_external_id_fields_async(
+        self,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get External ID Fields
+
+        This operation retrieves external ID fields of Salesforce object type.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/externalIdFields"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_metadata_for_get_item_async(
+        self,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        GetMetadataForGetItem
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/getitem"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_metadata_for_patch_item_async(
+        self,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        GetMetadataForPatchItem
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/patchitem"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_metadata_for_post_item_async(
+        self,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        GetMetadataForPostItem
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+            f"/postitem"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_table_async(
+        self,
+        table: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get object metadata
+
+        This operation gets the object metadata for a Salesforce object type.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/default"
+            f"/tables"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "GetOnNewItems": {
+        "operation_id": "GetOnNewItems",
+        "path": "/{connectionId}/datasets/default/tables/{table}/onnewitems",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "ItemsList",
+    },
+    "GetOnUpdatedItems": {
+        "operation_id": "GetOnUpdatedItems",
+        "path": "/{connectionId}/datasets/default/tables/{table}/onupdateditems",
+        "method": "get",
+        "required_parameters": ["table"],
+        "callback_payload_type": "ItemsList",
+    },
+}
