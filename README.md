@@ -203,8 +203,10 @@ The following connectors have been generated and validated with comprehensive te
 | **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated | 60 tests |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated | 49 tests |
 | **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated | 66 tests |
+| **Plivo** | `azure.connectors.plivo` | ✅ Complete | 🔄 SDK Generated | 11 tests |
 | **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated | 18 tests |
 | **Projectplace** | `azure.connectors.projectplace` | ✅ Complete | 🔄 SDK Generated | 22 tests |
+| **Rev.ai** | `azure.connectors.revai` | ✅ Complete | 🔄 SDK Generated | 39 tests |
 | **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated | 13 tests |
 | **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated | 14 tests |
 | **SendGrid** | `azure.connectors.sendgrid` | ✅ Complete | 🔄 SDK Generated | 31 tests |
@@ -213,10 +215,14 @@ The following connectors have been generated and validated with comprehensive te
 | **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated | 15 tests |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated | 80 tests |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated | 28 tests |
+| **Starmind** | `azure.connectors.starmind` | ✅ Complete | 🔄 SDK Generated | 12 tests |
+| **Tallyfy** | `azure.connectors.tallyfy` | ✅ Complete | 🔄 SDK Generated | 22 tests |
 | **TextRequest** | `azure.connectors.textrequest` | ✅ Complete | 🔄 SDK Generated | 59 tests |
 | **Trello** | `azure.connectors.trello` | ✅ Complete | 🔄 SDK Generated | 45 tests |
+| **Twitter** | `azure.connectors.twitter` | ✅ Complete | 🔄 SDK Generated | 23 tests |
 | **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated | 40 tests |
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated | 30 tests |
+| **WordPress** | `azure.connectors.wordpress` | ✅ Complete | 🔄 SDK Generated | 12 tests |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated | 38 tests |
 | **Universal Print** | `azure.connectors.universalprint` | ✅ Complete | 🔄 SDK Generated | 10 tests |
 | **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated | 10 tests |
@@ -232,7 +238,7 @@ The following connectors have been generated and validated with comprehensive te
 | **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated | 7 tests |
 
-**Total:** 3584 tests across connector clients, SDK components, generated-code quality, serialization, and samples
+**Total:** 3703 tests across connector clients, SDK components, generated-code quality, serialization, and samples
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

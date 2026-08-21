@@ -299,6 +299,36 @@ except (ImportError, NameError):
     TextrequestClient = None  # type: ignore[assignment,misc]
 
 try:
+    from .twitter import TwitterClient
+except (ImportError, NameError):
+    TwitterClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .wordpress import WordpressClient
+except (ImportError, NameError):
+    WordpressClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .plivo import PlivoClient
+except (ImportError, NameError):
+    PlivoClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .revai import RevaiClient
+except (ImportError, NameError):
+    RevaiClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .starmind import StarmindClient
+except (ImportError, NameError):
+    StarmindClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .tallyfy import TallyfyClient
+except (ImportError, NameError):
+    TallyfyClient = None  # type: ignore[assignment,misc]
+
+try:
     from .universalprint import UniversalprintClient
 except (ImportError, NameError):
     UniversalprintClient = None  # type: ignore[assignment,misc]
@@ -443,6 +473,12 @@ __all__ = [
     "CampfireClient",
     "ClicksendsmsClient",
     "TextrequestClient",
+    "TwitterClient",
+    "WordpressClient",
+    "PlivoClient",
+    "RevaiClient",
+    "StarmindClient",
+    "TallyfyClient",
     "UniversalprintClient",
     "AzureeventgridClient",
     "AzureiotcentralClient",

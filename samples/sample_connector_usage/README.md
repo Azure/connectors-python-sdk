@@ -55,6 +55,12 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_clicksendsms.py` | ClickSend SMS | `CLICKSENDSMS_CONNECTION_URL` |
 | `sample_connector_usage_textrequest.py` | TextRequest | `TEXTREQUEST_CONNECTION_URL` |
 | `sample_connector_usage_trello.py` | Trello | `TRELLO_CONNECTION_URL` |
+| `sample_connector_usage_twitter.py` | Twitter | `TWITTER_CONNECTION_URL` |
+| `sample_connector_usage_wordpress.py` | WordPress | `WORDPRESS_CONNECTION_URL` |
+| `sample_connector_usage_plivo.py` | Plivo | `PLIVO_CONNECTION_URL` |
+| `sample_connector_usage_revai.py` | Rev.ai | `REVAI_CONNECTION_URL` |
+| `sample_connector_usage_starmind.py` | Starmind | `STARMIND_CONNECTION_URL` |
+| `sample_connector_usage_tallyfy.py` | Tallyfy | `TALLYFY_CONNECTION_URL` |
 | `sample_connector_usage_excelonlinebusiness.py` | Excel Online (Business) | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_mq.py` | IBM MQ | `MQ_CONNECTION_URL` |
 | `sample_connector_usage_microsoftbookings.py` | Microsoft Bookings | `MICROSOFTBOOKINGS_CONNECTION_URL` |
