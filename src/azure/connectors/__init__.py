@@ -247,6 +247,88 @@ except (ImportError, NameError):
     TodoClient = None  # type: ignore[assignment,misc]
 
 try:
+    from .insightly import InsightlyClient
+except (ImportError, NameError):
+    InsightlyClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .infusionsoft import InfusionsoftClient
+except (ImportError, NameError):
+    InfusionsoftClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .freshservice import FreshserviceClient
+except (ImportError, NameError):
+    FreshserviceClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .monday import MondayClient
+except (ImportError, NameError):
+    MondayClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .projectplace import ProjectplaceClient
+except (ImportError, NameError):
+    ProjectplaceClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .mailchimp import MailchimpClient
+except (ImportError, NameError):
+    MailchimpClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .sendgrid import SendgridClient
+except (ImportError, NameError):
+    SendgridClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .webex import WebexClient
+except (ImportError, NameError):
+    WebexClient = None  # type: ignore[assignment,misc]
+try:
+    from .campfire import CampfireClient
+except (ImportError, NameError):
+    CampfireClient = None  # type: ignore[assignment,misc]
+try:
+    from .clicksendsms import ClicksendsmsClient
+except (ImportError, NameError):
+    ClicksendsmsClient = None  # type: ignore[assignment,misc]
+try:
+    from .textrequest import TextrequestClient
+except (ImportError, NameError):
+    TextrequestClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .twitter import TwitterClient
+except (ImportError, NameError):
+    TwitterClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .wordpress import WordpressClient
+except (ImportError, NameError):
+    WordpressClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .plivo import PlivoClient
+except (ImportError, NameError):
+    PlivoClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .revai import RevaiClient
+except (ImportError, NameError):
+    RevaiClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .starmind import StarmindClient
+except (ImportError, NameError):
+    StarmindClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .tallyfy import TallyfyClient
+except (ImportError, NameError):
+    TallyfyClient = None  # type: ignore[assignment,misc]
+
+try:
     from .universalprint import UniversalprintClient
 except (ImportError, NameError):
     UniversalprintClient = None  # type: ignore[assignment,misc]
@@ -295,6 +377,11 @@ try:
     from .pipedrive import PipedriveClient
 except (ImportError, NameError):
     PipedriveClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .trello import TrelloClient
+except (ImportError, NameError):
+    TrelloClient = None  # type: ignore[assignment,misc]
 
 try:
     from .docuware import DocuwareClient
@@ -375,6 +462,23 @@ __all__ = [
     "ShiftsClient",
     "SlackClient",
     "TodoClient",
+    "InsightlyClient",
+    "InfusionsoftClient",
+    "FreshserviceClient",
+    "MondayClient",
+    "ProjectplaceClient",
+    "MailchimpClient",
+    "SendgridClient",
+    "WebexClient",
+    "CampfireClient",
+    "ClicksendsmsClient",
+    "TextrequestClient",
+    "TwitterClient",
+    "WordpressClient",
+    "PlivoClient",
+    "RevaiClient",
+    "StarmindClient",
+    "TallyfyClient",
     "UniversalprintClient",
     "AzureeventgridClient",
     "AzureiotcentralClient",
@@ -385,6 +489,7 @@ __all__ = [
     "SqlClient",
     "ZendeskClient",
     "PipedriveClient",
+    "TrelloClient",
     "DocuwareClient",
     "SigninghubClient",
     "ZohosignClient",
