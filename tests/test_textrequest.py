@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+import azure.connectors.textrequest as textrequest_module
 from azure.connectors.textrequest import (
     CreateContactInput,
     CreateDashboardInput,
@@ -25,6 +26,91 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import (
+    get_generated_operations,
+    invoke_generated_operation,
+)
+
+
+SUCCESS_CONTRACTS = {
+    "archive_conversation": (
+        "PUT",
+        "/dashboards/value/contacts/value/conversations/archive",
+        False,
+    ),
+    "bulk_update_contacts": ("POST", "/dashboards/value/contacts", True),
+    "cancel_payment": (
+        "POST",
+        "/dashboards/value/payments/value/cancel",
+        False,
+    ),
+    "create_contact": ("POST", "/dashboards/value/contacts/value", True),
+    "create_dashboard": ("POST", "/dashboards", True),
+    "create_group": ("POST", "/dashboards/value/groups", True),
+    "create_payment": ("POST", "/dashboards/value/payments", True),
+    "delete_contact": ("DELETE", "/dashboards/value/contacts/value", False),
+    "delete_dashboard": ("DELETE", "/dashboards/value", False),
+    "delete_group": ("DELETE", "/dashboards/value/groups/value", False),
+    "get_contact_by_phone_number": (
+        "GET",
+        "/dashboards/value/contacts/value",
+        False,
+    ),
+    "get_contacts": (
+        "GET",
+        "/dashboards/value/contacts?page=value&page_size=value",
+        False,
+    ),
+    "get_conversations": ("GET", "/dashboards/value/conversations", False),
+    "get_custom_fields": ("GET", "/dashboards/value/fields", False),
+    "get_dashboard": ("GET", "/dashboards/value", False),
+    "get_dashboards": ("GET", "/dashboards", False),
+    "get_group_by_id": ("GET", "/dashboards/value/groups/value", False),
+    "get_groups": (
+        "GET",
+        "/dashboards/value/groups?page=value&page_size=value",
+        False,
+    ),
+    "get_messages_by_contact_phone": (
+        "GET",
+        "/dashboards/value/contacts/value/messages?page=value&page_size=value",
+        False,
+    ),
+    "get_payment": ("GET", "/dashboards/value/payments/value", False),
+    "get_payments": (
+        "GET",
+        "/dashboards/value/payments?page=value&page_size=value",
+        False,
+    ),
+    "get_tags": (
+        "GET",
+        "/dashboards/value/tags?page=value&page_size=value",
+        False,
+    ),
+    "mark_payment_paid": (
+        "POST",
+        "/dashboards/value/payments/value/mark_as_paid",
+        False,
+    ),
+    "send_message_by_phone_number": (
+        "POST",
+        "/dashboards/value/contacts/value/messages",
+        True,
+    ),
+    "send_payment_reminder": (
+        "POST",
+        "/dashboards/value/payments/value/resend",
+        False,
+    ),
+    "unarchive_conversation": (
+        "PUT",
+        "/dashboards/value/contacts/value/conversations/unarchive",
+        False,
+    ),
+    "update_dashboards_name": ("PUT", "/dashboards/value", True),
+    "update_group": ("PUT", "/dashboards/value/groups/value", True),
+}
+ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
 
 
 class TestTextrequestClientInitialization:
@@ -122,6 +208,47 @@ class TestTextrequestClientOperations:
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
         )
+
+    def test_all_generated_operations_are_covered(self):
+        """Test the expected generated operation surface."""
+        assert get_generated_operations(TextrequestClient) == set(ALL_OPERATIONS)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "expected_method", "expected_url_suffix", "expects_body"),
+        [
+            (operation, *contract)
+            for operation, contract in SUCCESS_CONTRACTS.items()
+        ],
+    )
+    async def test_generated_operation_success_contract(
+        self,
+        operation,
+        expected_method,
+        expected_url_suffix,
+        expects_body,
+        mock_token_provider,
+    ):
+        """Test every generated operation's successful HTTP contract."""
+        client = self._make_client(mock_token_provider)
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=200, text='{"ok": true}'),
+        ) as mock_send:
+            result = await invoke_generated_operation(
+                client,
+                operation,
+                textrequest_module,
+            )
+
+        method, url = mock_send.call_args.args[:2]
+        assert method == expected_method
+        assert url.endswith(expected_url_suffix)
+        assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
+        assert result == {"ok": True}
 
     @pytest.mark.asyncio
     async def test_get_messages_by_contact_phone_success(self, mock_token_provider):

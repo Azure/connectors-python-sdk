@@ -20,18 +20,19 @@ from tests.generated_connector_test_utils import (
 )
 
 
-ALL_OPERATIONS = [
-    "followers",
-    "following",
-    "home_timeline",
-    "my_followers",
-    "my_following",
-    "retweet",
-    "search_tweet",
-    "tweet",
-    "user",
-    "user_timeline",
-]
+SUCCESS_CONTRACTS = {
+    "followers": ("GET", "/followers?userName=value", False),
+    "following": ("GET", "/friends?userName=value", False),
+    "home_timeline": ("GET", "/hometimeline", False),
+    "my_followers": ("GET", "/myfollowers", False),
+    "my_following": ("GET", "/myfriends", False),
+    "retweet": ("POST", "/retweet?tweetId=value", False),
+    "search_tweet": ("GET", "/searchtweets?searchQuery=value", False),
+    "tweet": ("POST", "/posttweet", True),
+    "user": ("GET", "/user?userName=value", False),
+    "user_timeline": ("GET", "/usertimeline?userName=value", False),
+}
+ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
 
 
 class TestTwitterClientInitialization:
@@ -113,6 +114,42 @@ class TestTwitterClientOperations:
     def test_all_generated_operations_are_covered(self):
         """Test the expected generated operation surface."""
         assert get_generated_operations(TwitterClient) == set(ALL_OPERATIONS)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "expected_method", "expected_url_suffix", "expects_body"),
+        [
+            (operation, *contract)
+            for operation, contract in SUCCESS_CONTRACTS.items()
+        ],
+    )
+    async def test_generated_operation_success_contract(
+        self,
+        operation,
+        expected_method,
+        expected_url_suffix,
+        expects_body,
+        mock_token_provider,
+    ):
+        """Test every generated operation's successful HTTP contract."""
+        client = TwitterClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=200, text='{"ok": true}'),
+        ) as mock_send:
+            result = await invoke_generated_operation(client, operation, twitter_module)
+
+        method, url = mock_send.call_args.args[:2]
+        assert method == expected_method
+        assert url.endswith(expected_url_suffix)
+        assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
+        assert result == {"ok": True}
 
     @pytest.mark.asyncio
     async def test_user_timeline_success(self, mock_token_provider):

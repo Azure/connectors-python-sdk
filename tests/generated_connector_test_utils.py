@@ -7,7 +7,7 @@ from __future__ import annotations
 import dataclasses
 import inspect
 from types import ModuleType
-from typing import Any, get_type_hints
+from typing import Any, get_origin, get_type_hints
 
 
 def get_generated_operations(client_type: type[Any]) -> set[str]:
@@ -43,6 +43,9 @@ def _representative_value(annotation: Any) -> Any:
 
     if annotation is bytes:
         return b"payload"
+
+    if get_origin(annotation) is list:
+        return []
 
     if inspect.isclass(annotation) and dataclasses.is_dataclass(annotation):
         return annotation()

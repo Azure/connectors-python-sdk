@@ -20,7 +20,19 @@ from tests.generated_connector_test_utils import (
 )
 
 
-ALL_OPERATIONS = ["create", "get", "list_sites", "site_stats"]
+SUCCESS_CONTRACTS = {
+    "create": ("POST", "/sites/value/posts/new", True),
+    "get": ("GET", "/sites/value/posts/value", False),
+    "list_sites": (
+        "GET",
+        "/me/sites?fields=ID%2C%20name%2C%20description%2C%20URL%2C%20%20is_multisite%2C"
+        "%20post_count%2Csubscribers_count%2C%20lang%2Cvisible%2Cis_private%2C"
+        "single_user_site%2Cis_vip%2Cis_following",
+        False,
+    ),
+    "site_stats": ("GET", "/sites/value/stats?fields=stats", False),
+}
+ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
 
 
 class TestWordpressClient:
@@ -55,6 +67,42 @@ class TestWordpressClient:
     def test_all_generated_operations_are_covered(self):
         """Test the expected generated operation surface."""
         assert get_generated_operations(WordpressClient) == set(ALL_OPERATIONS)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "expected_method", "expected_url_suffix", "expects_body"),
+        [
+            (operation, *contract)
+            for operation, contract in SUCCESS_CONTRACTS.items()
+        ],
+    )
+    async def test_generated_operation_success_contract(
+        self,
+        operation,
+        expected_method,
+        expected_url_suffix,
+        expects_body,
+        mock_token_provider,
+    ):
+        """Test every generated operation's successful HTTP contract."""
+        client = WordpressClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=200, text='{"ok": true}'),
+        ) as mock_send:
+            result = await invoke_generated_operation(client, operation, wordpress_module)
+
+        method, url = mock_send.call_args.args[:2]
+        assert method == expected_method
+        assert url.endswith(expected_url_suffix)
+        assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
+        assert result == {"ok": True}
 
     @pytest.mark.asyncio
     async def test_create_post_success(self, mock_token_provider):

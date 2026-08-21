@@ -16,39 +16,69 @@ from tests.generated_connector_test_utils import (
 )
 
 
-ALL_OPERATIONS = [
-    "account_get",
-    "alignment",
-    "alignment_delete",
-    "alignment_get",
-    "alignment_transcript_get",
-    "alignments_get",
-    "analysis",
-    "analysis_delete",
-    "analysis_get",
-    "analysis_result_get",
-    "analysises_get",
-    "captions_get",
-    "extraction",
-    "extraction_delete",
-    "extraction_get",
-    "extraction_result_get",
-    "extractions_get",
-    "identification",
-    "identification_delete",
-    "identification_get",
-    "identification_result_get",
-    "identifications_get",
-    "transcript_get",
-    "transcription",
-    "transcription_delete",
-    "transcription_get",
-    "transcriptions_get",
-    "vocabularies_get",
-    "vocabulary",
-    "vocabulary_delete",
-    "vocabulary_get",
-]
+SUCCESS_CONTRACTS = {
+    "account_get": ("GET", "/speechtotext/v1/account", False),
+    "alignment": ("POST", "/alignment/v1/jobs", True),
+    "alignment_delete": ("DELETE", "/alignment/v1/jobs/value", False),
+    "alignment_get": ("GET", "/alignment/v1/jobs/value", False),
+    "alignment_transcript_get": (
+        "GET",
+        "/alignment/v1/jobs/value/transcript",
+        False,
+    ),
+    "alignments_get": ("GET", "/alignment/v1/jobs", False),
+    "analysis": ("POST", "/sentiment_analysis/v1/jobs", True),
+    "analysis_delete": ("DELETE", "/sentiment_analysis/v1/jobs/value", False),
+    "analysis_get": ("GET", "/sentiment_analysis/v1/jobs/value", False),
+    "analysis_result_get": (
+        "GET",
+        "/sentiment_analysis/v1/jobs/value/result",
+        False,
+    ),
+    "analysises_get": ("GET", "/sentiment_analysis/v1/jobs", False),
+    "captions_get": (
+        "GET",
+        "/speechtotext/v1/jobs/value/captions",
+        False,
+    ),
+    "extraction": ("POST", "/topic_extraction/v1/jobs", True),
+    "extraction_delete": ("DELETE", "/topic_extraction/v1/jobs/value", False),
+    "extraction_get": ("GET", "/topic_extraction/v1/jobs/value", False),
+    "extraction_result_get": (
+        "GET",
+        "/topic_extraction/v1/jobs/value/result",
+        False,
+    ),
+    "extractions_get": ("GET", "/topic_extraction/v1/jobs", False),
+    "identification": ("POST", "/languageid/v1/jobs", True),
+    "identification_delete": ("DELETE", "/languageid/v1/jobs/value", False),
+    "identification_get": ("GET", "/languageid/v1/jobs/value", False),
+    "identification_result_get": (
+        "GET",
+        "/languageid/v1/jobs/value/result",
+        False,
+    ),
+    "identifications_get": ("GET", "/languageid/v1/jobs", False),
+    "transcript_get": (
+        "GET",
+        "/speechtotext/v1/jobs/value/transcript",
+        False,
+    ),
+    "transcription": ("POST", "/speechtotext/v1/jobs", True),
+    "transcription_delete": ("DELETE", "/speechtotext/v1/jobs/value", False),
+    "transcription_get": ("GET", "/speechtotext/v1/jobs/value", False),
+    "transcriptions_get": ("GET", "/speechtotext/v1/jobs", False),
+    "vocabularies_get": ("GET", "/speechtotext/v1/vocabularies", False),
+    "vocabulary": ("POST", "/speechtotext/v1/vocabularies", True),
+    "vocabulary_delete": (
+        "DELETE",
+        "/speechtotext/v1/vocabularies/value",
+        False,
+    ),
+    "vocabulary_get": ("GET", "/speechtotext/v1/vocabularies/value", False),
+}
+ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
+NO_RESULT_OPERATIONS = {"analysises_get"}
 
 
 class TestRevaiClient:
@@ -83,6 +113,43 @@ class TestRevaiClient:
     def test_all_generated_operations_are_covered(self):
         """Test the expected generated operation surface."""
         assert get_generated_operations(RevaiClient) == set(ALL_OPERATIONS)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("operation", "expected_method", "expected_url_suffix", "expects_body"),
+        [
+            (operation, *contract)
+            for operation, contract in SUCCESS_CONTRACTS.items()
+        ],
+    )
+    async def test_generated_operation_success_contract(
+        self,
+        operation,
+        expected_method,
+        expected_url_suffix,
+        expects_body,
+        mock_token_provider,
+    ):
+        """Test every generated operation's successful HTTP contract."""
+        client = RevaiClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        )
+
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=200, text='{"ok": true}'),
+        ) as mock_send:
+            result = await invoke_generated_operation(client, operation, revai_module)
+
+        method, url = mock_send.call_args.args[:2]
+        assert method == expected_method
+        assert url.endswith(expected_url_suffix)
+        assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
+        expected_result = None if operation in NO_RESULT_OPERATIONS else {"ok": True}
+        assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_create_transcription_success(self, mock_token_provider):
