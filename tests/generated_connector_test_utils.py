@@ -13,6 +13,11 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.connectors.sdk import ConnectorException, ManagedIdentityTokenProvider
+from azure.connectors.sdk.serialization import (
+    ADDITIONAL_PROPERTIES_FIELD,
+    WIRE_NAME_METADATA_KEY,
+    to_wire,
+)
 from tests.conftest import MockResponse
 
 
@@ -79,6 +84,42 @@ class GeneratedConnectorContractTests:
     def test_all_generated_operations_are_covered(self) -> None:
         """Test the expected generated operation surface."""
         assert get_generated_operations(self.client_type) == set(self.operation_contracts)
+
+    def test_generated_models_serialize_wire_names(self) -> None:
+        """Test every generated model serializes its declared wire names."""
+        model_types = [
+            value
+            for value in vars(self.connector_module).values()
+            if inspect.isclass(value)
+            and dataclasses.is_dataclass(value)
+            and value.__module__ == self.connector_module.__name__
+        ]
+
+        assert model_types
+
+        for model_type in model_types:
+            instance = model_type()
+            expected = {}
+            wire_names = []
+
+            for index, model_field in enumerate(dataclasses.fields(instance)):
+                marker = f"{model_type.__name__}.{model_field.name}"
+                if model_field.name == ADDITIONAL_PROPERTIES_FIELD:
+                    extension_key = f"extension_{index}"
+                    setattr(instance, model_field.name, {extension_key: marker})
+                    expected[extension_key] = marker
+                    continue
+
+                wire_name = model_field.metadata.get(
+                    WIRE_NAME_METADATA_KEY,
+                    model_field.name,
+                )
+                setattr(instance, model_field.name, marker)
+                expected[wire_name] = marker
+                wire_names.append(wire_name)
+
+            assert len(wire_names) == len(set(wire_names)), model_type.__name__
+            assert to_wire(instance) == expected, model_type.__name__
 
     @pytest.mark.asyncio
     async def test_generated_operation_success_contracts(self, mock_token_provider: Any) -> None:

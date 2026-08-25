@@ -21,7 +21,7 @@ async def main() -> None:
     credential = DefaultAzureCredential()
     try:
         async with ImpexiumClient(CONNECTION_RUNTIME_URL, credential) as client:
-            countries = await client.list_all_countries_async(page_number="1")
+            countries = await client.list_all_countries_async(page_number=1)
             print(f"Countries: {countries}")
     except ConnectorException as ex:
         print(f"Connector error: {ex}")

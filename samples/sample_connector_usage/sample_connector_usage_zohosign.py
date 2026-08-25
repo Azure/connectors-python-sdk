@@ -31,7 +31,7 @@ async def get_document() -> None:
 
     credential = DefaultAzureCredential()
     async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
-        document = await client.get_document_async(request_id=REQUEST_ID)
+        document = await client.get_document_async(request_id=int(REQUEST_ID))
         print(f"Document: {document}")
 
 
