@@ -129,6 +129,15 @@ def _representative_value(annotation: Any) -> Any:
     if annotation is bytes:
         return b"payload"
 
+    if annotation is int:
+        return 1
+
+    if annotation is float:
+        return 1.0
+
+    if annotation is bool:
+        return True
+
     if get_origin(annotation) is list:
         return []
 

@@ -337,7 +337,7 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_custom_location_image_async(
         self,
         location_id: str,
-        large: Optional[str] = None,
+        large: Optional[bool] = None,
     ) -> bytes:
         """
         Get image for location
@@ -404,7 +404,7 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_meeting_room_image_async(
         self,
         room_name: str,
-        large: Optional[str] = None,
+        large: Optional[bool] = None,
     ) -> bytes:
         """
         Get image for meeting room
@@ -440,7 +440,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
     async def next_meetings_async(
         self,
-        meeting_count: str,
+        meeting_count: int,
     ) -> None:
         """
         Get next meetings
@@ -587,7 +587,7 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_room_with_persons_details_async(
         self,
         office_location_name: str,
-        inlude_user_info: Optional[str] = None,
+        inlude_user_info: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Get office location details
@@ -631,7 +631,7 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_office_location_image_async(
         self,
         office_location_name: str,
-        large: Optional[str] = None,
+        large: Optional[bool] = None,
     ) -> bytes:
         """
         Get image of office location

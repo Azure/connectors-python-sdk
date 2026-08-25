@@ -853,7 +853,7 @@ class WaywedoClient(ConnectorClientBase):
 
     async def procedures_get_async(
         self,
-        procedure_id: str,
+        procedure_id: int,
     ) -> dict[str, Any] | None:
         """
         Get A Checklist Or Procedure
@@ -884,7 +884,7 @@ class WaywedoClient(ConnectorClientBase):
 
     async def find_checklist_instances_async(
         self,
-        procedure_id: str,
+        procedure_id: int,
         query: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -991,9 +991,9 @@ class WaywedoClient(ConnectorClientBase):
 
     async def get_all_checklist_instances_async(
         self,
-        limit: Optional[str] = None,
-        offset: Optional[str] = None,
-        status: Optional[str] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        status: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get All Checklist Instances

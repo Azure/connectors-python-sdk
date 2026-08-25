@@ -121,7 +121,7 @@ class FormstackformsClient(ConnectorClientBase):
 
     async def get_form_schema_async(
         self,
-        form_id: str,
+        form_id: int,
     ) -> None:
         """
         Returns Form Schema from Webhook API

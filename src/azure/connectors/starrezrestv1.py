@@ -9612,7 +9612,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_entry_async(
         self,
         input: UpdateEntryInput,
-        entry_id: str,
+        entry_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Entry
@@ -9644,7 +9644,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def delete_async(
         self,
         table_name: str,
-        row_id: str,
+        row_id: int,
     ) -> dict[str, Any] | None:
         """
         Delete
@@ -9708,7 +9708,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_entry_custom_field_async(
         self,
         input: UpdateEntryCustomFieldInput,
-        entry_custom_field_id: str,
+        entry_custom_field_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Entry Custom Field
@@ -9800,7 +9800,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_entry_address_async(
         self,
         input: UpdateEntryAddressInput,
-        entry_address_id: str,
+        entry_address_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Entry Address
@@ -9894,7 +9894,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_entry_application_async(
         self,
         input: UpdateEntryApplicationInput,
-        entry_application_id: str,
+        entry_application_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Entry Application
@@ -9984,7 +9984,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_entry_detail_async(
         self,
         input: UpdateEntryDetailInput,
-        entry_detail_id: str,
+        entry_detail_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Entry Detail
@@ -10076,7 +10076,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_entry_enrollment_async(
         self,
         input: UpdateEntryEnrollmentInput,
-        entry_enrollment_id: str,
+        entry_enrollment_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Entry Enrollment
@@ -10166,7 +10166,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_booking_async(
         self,
         input: UpdateBookingInput,
-        booking_id: str,
+        booking_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Booking
@@ -10400,7 +10400,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     async def update_room_space_maintenance_async(
         self,
         input: UpdateRoomSpaceMaintenanceInput,
-        room_space_maintenance_id: str,
+        room_space_maintenance_id: int,
     ) -> dict[str, Any] | None:
         """
         Update Room Space Maintenance

@@ -173,10 +173,13 @@ The following connectors have been generated and validated with comprehensive te
 | **Box** | `azure.connectors.box` | ✅ Complete | 🔄 SDK Generated |
 | **Campfire** | `azure.connectors.campfire` | ✅ Complete | 🔄 SDK Generated |
 | **ClickSend SMS** | `azure.connectors.clicksendsms` | ✅ Complete | 🔄 SDK Generated |
+| **CloudConvert** | `azure.connectors.cloudconvert` | ✅ Complete | 🔄 SDK Generated |
 | **Cloudmersive Document Conversion** | `azure.connectors.cloudmersiveconvert` | ✅ Complete | 🔄 SDK Generated |
 | **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
+| **Elfsquad Data** | `azure.connectors.elfsquaddata` | ✅ Complete | 🔄 SDK Generated |
+| **Etsy** | `azure.connectors.etsy` | ✅ Complete | 🔄 SDK Generated |
 | **Eventbrite** | `azure.connectors.eventbrite` | ✅ Complete | 🔄 SDK Generated |
 | **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated |
 | **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
@@ -189,8 +192,10 @@ The following connectors have been generated and validated with comprehensive te
 | **Google Drive** | `azure.connectors.googledrive` | ✅ Complete | 🔄 SDK Generated |
 | **Google Tasks** | `azure.connectors.googletasks` | ✅ Complete | 🔄 SDK Generated |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated |
+| **Impexium** | `azure.connectors.impexium` | ✅ Complete | 🔄 SDK Generated |
 | **Infusionsoft (Keap)** | `azure.connectors.infusionsoft` | ✅ Complete | 🔄 SDK Generated |
 | **Insightly** | `azure.connectors.insightly` | ✅ Complete | 🔄 SDK Generated |
+| **Jedox OData Hub** | `azure.connectors.jedoxodatahub` | ✅ Complete | 🔄 SDK Generated |
 | **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated |
 | **Mailchimp** | `azure.connectors.mailchimp` | ✅ Complete | 🔄 SDK Generated |
 | **Meeting Room Map** | `azure.connectors.meetingroommap` | ✅ Complete | 🔄 SDK Generated |
@@ -209,6 +214,7 @@ The following connectors have been generated and validated with comprehensive te
 | **OneDrive (Personal)** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated |
 | **OneDrive for Business** | `azure.connectors.onedriveforbusiness` | ✅ Complete | 🔄 SDK Generated |
 | **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated |
+| **Orderful** | `azure.connectors.orderful` | ✅ Complete | 🔄 SDK Generated |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated |
 | **PDF.co** | `azure.connectors.pdfco` | ✅ Complete | 🔄 SDK Generated |
 | **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated |
@@ -247,7 +253,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated |
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 92 connectors supported
+**Total:** 98 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

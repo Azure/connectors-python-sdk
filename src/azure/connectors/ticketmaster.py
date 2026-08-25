@@ -330,7 +330,7 @@ class TicketmasterClient(ConnectorClientBase):
 
     async def events_get_async(
         self,
-        size: Optional[str] = None,
+        size: Optional[int] = None,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
         attraction_id: Optional[str] = None,
@@ -351,32 +351,32 @@ class TicketmasterClient(ConnectorClientBase):
         sort: Optional[str] = None,
         onsale_start_date_time: Optional[str] = None,
         onsale_end_date_time: Optional[str] = None,
-        city: Optional[str] = None,
+        city: Optional[List[str]] = None,
         country_code: Optional[str] = None,
         state_code: Optional[str] = None,
-        classification_name: Optional[str] = None,
-        classification_id: Optional[str] = None,
+        classification_name: Optional[List[str]] = None,
+        classification_id: Optional[List[str]] = None,
         dma_id: Optional[str] = None,
-        local_start_date_time: Optional[str] = None,
-        local_start_end_date_time: Optional[str] = None,
-        start_end_date_time: Optional[str] = None,
-        public_visibility_start_date_time: Optional[str] = None,
-        pre_sale_date_time: Optional[str] = None,
+        local_start_date_time: Optional[List[str]] = None,
+        local_start_end_date_time: Optional[List[str]] = None,
+        start_end_date_time: Optional[List[str]] = None,
+        public_visibility_start_date_time: Optional[List[str]] = None,
+        pre_sale_date_time: Optional[List[str]] = None,
         onsale_on_start_date: Optional[str] = None,
         onsale_on_after_start_date: Optional[str] = None,
-        collection_id: Optional[str] = None,
-        segment_id: Optional[str] = None,
-        segment_name: Optional[str] = None,
+        collection_id: Optional[List[str]] = None,
+        segment_id: Optional[List[str]] = None,
+        segment_name: Optional[List[str]] = None,
         include_family: Optional[str] = None,
         promoter_id: Optional[str] = None,
-        genre_id: Optional[str] = None,
-        sub_genre_id: Optional[str] = None,
-        type_id: Optional[str] = None,
-        sub_type_id: Optional[str] = None,
+        genre_id: Optional[List[str]] = None,
+        sub_genre_id: Optional[List[str]] = None,
+        type_id: Optional[List[str]] = None,
+        sub_type_id: Optional[List[str]] = None,
         geo_point: Optional[str] = None,
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Event search
@@ -647,7 +647,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get event details
@@ -695,7 +695,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get event images
@@ -748,18 +748,18 @@ class TicketmasterClient(ConnectorClientBase):
         size: Optional[str] = None,
         page: Optional[str] = None,
         sort: Optional[str] = None,
-        classification_name: Optional[str] = None,
-        classification_id: Optional[str] = None,
+        classification_name: Optional[List[str]] = None,
+        classification_id: Optional[List[str]] = None,
         include_family: Optional[str] = None,
-        segment_id: Optional[str] = None,
-        genre_id: Optional[str] = None,
-        sub_genre_id: Optional[str] = None,
-        type_id: Optional[str] = None,
-        sub_type_id: Optional[str] = None,
+        segment_id: Optional[List[str]] = None,
+        genre_id: Optional[List[str]] = None,
+        sub_genre_id: Optional[List[str]] = None,
+        type_id: Optional[List[str]] = None,
+        sub_type_id: Optional[List[str]] = None,
         country_code: Optional[str] = None,
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Attraction search
@@ -895,7 +895,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get attraction details
@@ -951,7 +951,7 @@ class TicketmasterClient(ConnectorClientBase):
         country_code: Optional[str] = None,
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Classification search
@@ -1047,7 +1047,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get classification details
@@ -1094,7 +1094,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get genre details
@@ -1140,7 +1140,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get segment details
@@ -1186,7 +1186,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get sub-genre details
@@ -1250,7 +1250,7 @@ class TicketmasterClient(ConnectorClientBase):
         geo_point: Optional[str] = None,
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Venue search
@@ -1368,7 +1368,7 @@ class TicketmasterClient(ConnectorClientBase):
         self,
         id: str,
         locale: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get venue details
@@ -1424,14 +1424,14 @@ class TicketmasterClient(ConnectorClientBase):
         include_test: Optional[str] = None,
         size: Optional[str] = None,
         country_code: Optional[str] = None,
-        segment_id: Optional[str] = None,
+        segment_id: Optional[List[str]] = None,
         geo_point: Optional[str] = None,
-        resource: Optional[str] = None,
+        resource: Optional[List[str]] = None,
         preferred_country: Optional[str] = None,
-        start_end_date_time: Optional[str] = None,
-        local_start_end_date_time: Optional[str] = None,
+        start_end_date_time: Optional[List[str]] = None,
+        local_start_end_date_time: Optional[List[str]] = None,
         include_spellcheck: Optional[str] = None,
-        domain: Optional[str] = None,
+        domain: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Find suggestions

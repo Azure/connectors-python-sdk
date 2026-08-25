@@ -148,13 +148,13 @@ class EventbriteClient(ConnectorClientBase):
         event_category_id: Optional[str] = None,
         event_password: Optional[str] = None,
         event_capacity: Optional[str] = None,
-        event_shareable: Optional[str] = None,
-        event_invite_only: Optional[str] = None,
-        event_online_event: Optional[str] = None,
-        event_listed: Optional[str] = None,
-        event_hide_start_date: Optional[str] = None,
-        event_hide_end_date: Optional[str] = None,
-        event_show_remaining: Optional[str] = None,
+        event_shareable: Optional[bool] = None,
+        event_invite_only: Optional[bool] = None,
+        event_online_event: Optional[bool] = None,
+        event_listed: Optional[bool] = None,
+        event_hide_start_date: Optional[bool] = None,
+        event_hide_end_date: Optional[bool] = None,
+        event_show_remaining: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Create event
@@ -290,13 +290,13 @@ class EventbriteClient(ConnectorClientBase):
         event_category_id: Optional[str] = None,
         event_password: Optional[str] = None,
         event_capacity: Optional[str] = None,
-        event_shareable: Optional[str] = None,
-        event_invite_only: Optional[str] = None,
-        event_online_event: Optional[str] = None,
-        event_listed: Optional[str] = None,
-        event_hide_start_date: Optional[str] = None,
-        event_hide_end_date: Optional[str] = None,
-        event_show_remaining: Optional[str] = None,
+        event_shareable: Optional[bool] = None,
+        event_invite_only: Optional[bool] = None,
+        event_online_event: Optional[bool] = None,
+        event_listed: Optional[bool] = None,
+        event_hide_start_date: Optional[bool] = None,
+        event_hide_end_date: Optional[bool] = None,
+        event_show_remaining: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Update event

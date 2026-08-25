@@ -443,6 +443,36 @@ try:
 except (ImportError, NameError):
     RepliconClient = None  # type: ignore[assignment,misc]
 
+try:
+    from .etsy import EtsyClient
+except (ImportError, NameError):
+    EtsyClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .elfsquaddata import ElfsquaddataClient
+except (ImportError, NameError):
+    ElfsquaddataClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .impexium import ImpexiumClient
+except (ImportError, NameError):
+    ImpexiumClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .jedoxodatahub import JedoxodatahubClient
+except (ImportError, NameError):
+    JedoxodatahubClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .orderful import OrderfulClient
+except (ImportError, NameError):
+    OrderfulClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .cloudconvert import CloudconvertClient
+except (ImportError, NameError):
+    CloudconvertClient = None  # type: ignore[assignment,misc]
+
 __version__ = '0.4.0b1'
 
 __all__ = [
@@ -547,4 +577,10 @@ __all__ = [
     "MeetingroommapClient",
     "Starrezrestv1Client",
     "RepliconClient",
+    "EtsyClient",
+    "ElfsquaddataClient",
+    "ImpexiumClient",
+    "JedoxodatahubClient",
+    "OrderfulClient",
+    "CloudconvertClient",
 ]

@@ -1510,10 +1510,10 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         node_id: str,
-        creator_ids: Optional[str] = None,
+        creator_ids: Optional[List[str]] = None,
         cursor: Optional[str] = None,
-        limit: Optional[str] = None,
-        sort: Optional[str] = None,
+        limit: Optional[int] = None,
+        sort: Optional[List[str]] = None,
     ) -> dict[str, Any] | None:
         """
         Get comments
@@ -1738,17 +1738,17 @@ class SeismicplannerClient(ConnectorClientBase):
         planned_end_date_to: Optional[str] = None,
         planned_start_date_from: Optional[str] = None,
         planned_start_date_to: Optional[str] = None,
-        ids: Optional[str] = None,
+        ids: Optional[List[str]] = None,
         title: Optional[str] = None,
-        manager_ids: Optional[str] = None,
-        creator_ids: Optional[str] = None,
-        associated_node_ids: Optional[str] = None,
+        manager_ids: Optional[List[str]] = None,
+        creator_ids: Optional[List[str]] = None,
+        associated_node_ids: Optional[List[str]] = None,
         cursor: Optional[str] = None,
-        limit: Optional[str] = None,
-        sort: Optional[str] = None,
+        limit: Optional[int] = None,
+        sort: Optional[List[str]] = None,
         custom_properties: Optional[str] = None,
-        follower_ids: Optional[str] = None,
-        include_associations: Optional[str] = None,
+        follower_ids: Optional[List[str]] = None,
+        include_associations: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Get projects
@@ -1858,8 +1858,8 @@ class SeismicplannerClient(ConnectorClientBase):
     async def delete_projects_async(
         self,
         space_id: str,
-        ids: str,
-        delete_tasks: Optional[str] = None,
+        ids: List[str],
+        delete_tasks: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Delete projects
@@ -1936,8 +1936,8 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         project_id: str,
-        associated_nodes_depth: Optional[str] = None,
-        include_works: Optional[str] = None,
+        associated_nodes_depth: Optional[int] = None,
+        include_works: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Get project
@@ -1988,7 +1988,7 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         project_id: str,
-        delete_tasks: Optional[str] = None,
+        delete_tasks: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Delete project
@@ -2079,25 +2079,25 @@ class SeismicplannerClient(ConnectorClientBase):
         created_at_to: Optional[str] = None,
         updated_at_from: Optional[str] = None,
         updated_at_to: Optional[str] = None,
-        ids: Optional[str] = None,
+        ids: Optional[List[str]] = None,
         title: Optional[str] = None,
-        assignee_ids: Optional[str] = None,
-        priorities: Optional[str] = None,
+        assignee_ids: Optional[List[str]] = None,
+        priorities: Optional[List[str]] = None,
         keywords: Optional[str] = None,
-        assigner_ids: Optional[str] = None,
-        creator_ids: Optional[str] = None,
-        step_ids: Optional[str] = None,
+        assigner_ids: Optional[List[str]] = None,
+        creator_ids: Optional[List[str]] = None,
+        step_ids: Optional[List[int]] = None,
         status_schema_id: Optional[str] = None,
         cursor: Optional[str] = None,
-        limit: Optional[str] = None,
-        sort: Optional[str] = None,
+        limit: Optional[int] = None,
+        sort: Optional[List[str]] = None,
         project_id: Optional[str] = None,
-        has_project: Optional[str] = None,
+        has_project: Optional[bool] = None,
         custom_properties: Optional[str] = None,
-        follower_ids: Optional[str] = None,
-        associated_node_ids: Optional[str] = None,
-        content_refs: Optional[str] = None,
-        include_request_form_custom_properties: Optional[str] = None,
+        follower_ids: Optional[List[str]] = None,
+        associated_node_ids: Optional[List[str]] = None,
+        content_refs: Optional[List[str]] = None,
+        include_request_form_custom_properties: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Get requests
@@ -2438,12 +2438,12 @@ class SeismicplannerClient(ConnectorClientBase):
     async def get_status_schemas_async(
         self,
         space_id: str,
-        is_default: Optional[str] = None,
+        is_default: Optional[bool] = None,
         type_: Optional[str] = None,
-        ids: Optional[str] = None,
-        creator_ids: Optional[str] = None,
+        ids: Optional[List[str]] = None,
+        creator_ids: Optional[List[str]] = None,
         cursor: Optional[str] = None,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get status schemas
@@ -2557,26 +2557,26 @@ class SeismicplannerClient(ConnectorClientBase):
         created_at_to: Optional[str] = None,
         updated_at_from: Optional[str] = None,
         updated_at_to: Optional[str] = None,
-        ids: Optional[str] = None,
+        ids: Optional[List[str]] = None,
         title: Optional[str] = None,
         description: Optional[str] = None,
-        assignee_ids: Optional[str] = None,
-        priorities: Optional[str] = None,
+        assignee_ids: Optional[List[str]] = None,
+        priorities: Optional[List[str]] = None,
         keywords: Optional[str] = None,
-        assigner_ids: Optional[str] = None,
-        step_ids: Optional[str] = None,
+        assigner_ids: Optional[List[str]] = None,
+        step_ids: Optional[List[int]] = None,
         status_schema_id: Optional[str] = None,
         cursor: Optional[str] = None,
-        limit: Optional[str] = None,
-        sort: Optional[str] = None,
-        recursive: Optional[str] = None,
+        limit: Optional[int] = None,
+        sort: Optional[List[str]] = None,
+        recursive: Optional[bool] = None,
         project_id: Optional[str] = None,
-        has_project: Optional[str] = None,
+        has_project: Optional[bool] = None,
         custom_properties: Optional[str] = None,
-        follower_ids: Optional[str] = None,
-        associated_node_ids: Optional[str] = None,
-        creator_ids: Optional[str] = None,
-        include_associations: Optional[str] = None,
+        follower_ids: Optional[List[str]] = None,
+        associated_node_ids: Optional[List[str]] = None,
+        creator_ids: Optional[List[str]] = None,
+        include_associations: Optional[bool] = None,
         parent_id: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """

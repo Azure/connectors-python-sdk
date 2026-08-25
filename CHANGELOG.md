@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Orderful** (`orderful.py`) connector client with unit tests and a sample
+- **CloudConvert** (`cloudconvert.py`) connector client with unit tests and a sample
+- **4 new connector clients** with unit tests and samples: Etsy, Elfsquad Data, Impexium, and Jedox OData Hub
 - **9 new connector clients** with unit tests and samples: Eventbrite, Formstack Forms, Typeform, Ticketmaster, Seismic Planner, Way We Do, Meeting Room Map, StarRez REST V1, and Replicon
 - Added current Salesforce external-ID and table metadata discovery operations.
 - Added current managed connector discovery operations for Azure IoT Central device templates, Azure Monitor Logs time ranges, Azure Tables storage accounts, Azure Data Explorer query schemas, and Service Bus entities, system properties, queues, session options, topics, subscriptions, and subscription filters.

@@ -21,6 +21,7 @@ SAMPLE_DIRECTORY = (
         "docusign",
         "github",
         "googletasks",
+        "orderful",
         "pdfco",
         "planner",
         "salesforce",

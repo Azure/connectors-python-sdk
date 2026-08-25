@@ -171,8 +171,8 @@ class TypeformClient(ConnectorClientBase):
     async def list_forms_async(
         self,
         search: Optional[str] = None,
-        page: Optional[str] = None,
-        page_size: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
         workspace_id: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
