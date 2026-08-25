@@ -1533,10 +1533,20 @@ class SeismicplannerClient(ConnectorClientBase):
         )
         query_params = []
         if creator_ids is not None:
-            value = str(creator_ids)
-            if isinstance(creator_ids, bool):
-                value = value.lower()
-            query_params.append(f"creatorIds={quote(value)}")
+            if isinstance(creator_ids, list):
+                joined_parts = []
+                for item in creator_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"creatorIds={quote(joined)}")
+            else:
+                value = str(creator_ids)
+                if isinstance(creator_ids, bool):
+                    value = value.lower()
+                query_params.append(f"creatorIds={quote(value)}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
@@ -1548,10 +1558,20 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"limit={quote(value)}")
         if sort is not None:
-            value = str(sort)
-            if isinstance(sort, bool):
-                value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            if isinstance(sort, list):
+                joined_parts = []
+                for item in sort:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"sort={quote(joined)}")
+            else:
+                value = str(sort)
+                if isinstance(sort, bool):
+                    value = value.lower()
+                query_params.append(f"sort={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1781,30 +1801,70 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"plannedStartDateTo={quote(value)}")
         if ids is not None:
-            value = str(ids)
-            if isinstance(ids, bool):
-                value = value.lower()
-            query_params.append(f"ids={quote(value)}")
+            if isinstance(ids, list):
+                joined_parts = []
+                for item in ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"ids={quote(joined)}")
+            else:
+                value = str(ids)
+                if isinstance(ids, bool):
+                    value = value.lower()
+                query_params.append(f"ids={quote(value)}")
         if title is not None:
             value = str(title)
             if isinstance(title, bool):
                 value = value.lower()
             query_params.append(f"title={quote(value)}")
         if manager_ids is not None:
-            value = str(manager_ids)
-            if isinstance(manager_ids, bool):
-                value = value.lower()
-            query_params.append(f"managerIds={quote(value)}")
+            if isinstance(manager_ids, list):
+                joined_parts = []
+                for item in manager_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"managerIds={quote(joined)}")
+            else:
+                value = str(manager_ids)
+                if isinstance(manager_ids, bool):
+                    value = value.lower()
+                query_params.append(f"managerIds={quote(value)}")
         if creator_ids is not None:
-            value = str(creator_ids)
-            if isinstance(creator_ids, bool):
-                value = value.lower()
-            query_params.append(f"creatorIds={quote(value)}")
+            if isinstance(creator_ids, list):
+                joined_parts = []
+                for item in creator_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"creatorIds={quote(joined)}")
+            else:
+                value = str(creator_ids)
+                if isinstance(creator_ids, bool):
+                    value = value.lower()
+                query_params.append(f"creatorIds={quote(value)}")
         if associated_node_ids is not None:
-            value = str(associated_node_ids)
-            if isinstance(associated_node_ids, bool):
-                value = value.lower()
-            query_params.append(f"associatedNodeIds={quote(value)}")
+            if isinstance(associated_node_ids, list):
+                joined_parts = []
+                for item in associated_node_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"associatedNodeIds={quote(joined)}")
+            else:
+                value = str(associated_node_ids)
+                if isinstance(associated_node_ids, bool):
+                    value = value.lower()
+                query_params.append(f"associatedNodeIds={quote(value)}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
@@ -1816,20 +1876,40 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"limit={quote(value)}")
         if sort is not None:
-            value = str(sort)
-            if isinstance(sort, bool):
-                value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            if isinstance(sort, list):
+                joined_parts = []
+                for item in sort:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"sort={quote(joined)}")
+            else:
+                value = str(sort)
+                if isinstance(sort, bool):
+                    value = value.lower()
+                query_params.append(f"sort={quote(value)}")
         if custom_properties is not None:
             value = str(custom_properties)
             if isinstance(custom_properties, bool):
                 value = value.lower()
             query_params.append(f"customProperties={quote(value)}")
         if follower_ids is not None:
-            value = str(follower_ids)
-            if isinstance(follower_ids, bool):
-                value = value.lower()
-            query_params.append(f"followerIds={quote(value)}")
+            if isinstance(follower_ids, list):
+                joined_parts = []
+                for item in follower_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"followerIds={quote(joined)}")
+            else:
+                value = str(follower_ids)
+                if isinstance(follower_ids, bool):
+                    value = value.lower()
+                query_params.append(f"followerIds={quote(value)}")
         if include_associations is not None:
             value = str(include_associations)
             if isinstance(include_associations, bool):
@@ -1871,10 +1951,20 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/projects"
         )
         query_params = []
-        value = str(ids)
-        if isinstance(ids, bool):
-            value = value.lower()
-        query_params.append(f"ids={quote(value)}")
+        if isinstance(ids, list):
+            joined_parts = []
+            for item in ids:
+                value = str(item)
+                if isinstance(item, bool):
+                    value = value.lower()
+                joined_parts.append(value)
+            joined = ','.join(joined_parts)
+            query_params.append(f"ids={quote(joined)}")
+        else:
+            value = str(ids)
+            if isinstance(ids, bool):
+                value = value.lower()
+            query_params.append(f"ids={quote(value)}")
         if delete_tasks is not None:
             value = str(delete_tasks)
             if isinstance(delete_tasks, bool):
@@ -2150,45 +2240,105 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"updatedAtTo={quote(value)}")
         if ids is not None:
-            value = str(ids)
-            if isinstance(ids, bool):
-                value = value.lower()
-            query_params.append(f"ids={quote(value)}")
+            if isinstance(ids, list):
+                joined_parts = []
+                for item in ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"ids={quote(joined)}")
+            else:
+                value = str(ids)
+                if isinstance(ids, bool):
+                    value = value.lower()
+                query_params.append(f"ids={quote(value)}")
         if title is not None:
             value = str(title)
             if isinstance(title, bool):
                 value = value.lower()
             query_params.append(f"title={quote(value)}")
         if assignee_ids is not None:
-            value = str(assignee_ids)
-            if isinstance(assignee_ids, bool):
-                value = value.lower()
-            query_params.append(f"assigneeIds={quote(value)}")
+            if isinstance(assignee_ids, list):
+                joined_parts = []
+                for item in assignee_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"assigneeIds={quote(joined)}")
+            else:
+                value = str(assignee_ids)
+                if isinstance(assignee_ids, bool):
+                    value = value.lower()
+                query_params.append(f"assigneeIds={quote(value)}")
         if priorities is not None:
-            value = str(priorities)
-            if isinstance(priorities, bool):
-                value = value.lower()
-            query_params.append(f"priorities={quote(value)}")
+            if isinstance(priorities, list):
+                joined_parts = []
+                for item in priorities:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"priorities={quote(joined)}")
+            else:
+                value = str(priorities)
+                if isinstance(priorities, bool):
+                    value = value.lower()
+                query_params.append(f"priorities={quote(value)}")
         if keywords is not None:
             value = str(keywords)
             if isinstance(keywords, bool):
                 value = value.lower()
             query_params.append(f"keywords={quote(value)}")
         if assigner_ids is not None:
-            value = str(assigner_ids)
-            if isinstance(assigner_ids, bool):
-                value = value.lower()
-            query_params.append(f"assignerIds={quote(value)}")
+            if isinstance(assigner_ids, list):
+                joined_parts = []
+                for item in assigner_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"assignerIds={quote(joined)}")
+            else:
+                value = str(assigner_ids)
+                if isinstance(assigner_ids, bool):
+                    value = value.lower()
+                query_params.append(f"assignerIds={quote(value)}")
         if creator_ids is not None:
-            value = str(creator_ids)
-            if isinstance(creator_ids, bool):
-                value = value.lower()
-            query_params.append(f"creatorIds={quote(value)}")
+            if isinstance(creator_ids, list):
+                joined_parts = []
+                for item in creator_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"creatorIds={quote(joined)}")
+            else:
+                value = str(creator_ids)
+                if isinstance(creator_ids, bool):
+                    value = value.lower()
+                query_params.append(f"creatorIds={quote(value)}")
         if step_ids is not None:
-            value = str(step_ids)
-            if isinstance(step_ids, bool):
-                value = value.lower()
-            query_params.append(f"stepIds={quote(value)}")
+            if isinstance(step_ids, list):
+                joined_parts = []
+                for item in step_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"stepIds={quote(joined)}")
+            else:
+                value = str(step_ids)
+                if isinstance(step_ids, bool):
+                    value = value.lower()
+                query_params.append(f"stepIds={quote(value)}")
         if status_schema_id is not None:
             value = str(status_schema_id)
             if isinstance(status_schema_id, bool):
@@ -2205,10 +2355,20 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"limit={quote(value)}")
         if sort is not None:
-            value = str(sort)
-            if isinstance(sort, bool):
-                value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            if isinstance(sort, list):
+                joined_parts = []
+                for item in sort:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"sort={quote(joined)}")
+            else:
+                value = str(sort)
+                if isinstance(sort, bool):
+                    value = value.lower()
+                query_params.append(f"sort={quote(value)}")
         if project_id is not None:
             value = str(project_id)
             if isinstance(project_id, bool):
@@ -2225,20 +2385,50 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"customProperties={quote(value)}")
         if follower_ids is not None:
-            value = str(follower_ids)
-            if isinstance(follower_ids, bool):
-                value = value.lower()
-            query_params.append(f"followerIds={quote(value)}")
+            if isinstance(follower_ids, list):
+                joined_parts = []
+                for item in follower_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"followerIds={quote(joined)}")
+            else:
+                value = str(follower_ids)
+                if isinstance(follower_ids, bool):
+                    value = value.lower()
+                query_params.append(f"followerIds={quote(value)}")
         if associated_node_ids is not None:
-            value = str(associated_node_ids)
-            if isinstance(associated_node_ids, bool):
-                value = value.lower()
-            query_params.append(f"associatedNodeIds={quote(value)}")
+            if isinstance(associated_node_ids, list):
+                joined_parts = []
+                for item in associated_node_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"associatedNodeIds={quote(joined)}")
+            else:
+                value = str(associated_node_ids)
+                if isinstance(associated_node_ids, bool):
+                    value = value.lower()
+                query_params.append(f"associatedNodeIds={quote(value)}")
         if content_refs is not None:
-            value = str(content_refs)
-            if isinstance(content_refs, bool):
-                value = value.lower()
-            query_params.append(f"contentRefs={quote(value)}")
+            if isinstance(content_refs, list):
+                joined_parts = []
+                for item in content_refs:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"contentRefs={quote(joined)}")
+            else:
+                value = str(content_refs)
+                if isinstance(content_refs, bool):
+                    value = value.lower()
+                query_params.append(f"contentRefs={quote(value)}")
         if include_request_form_custom_properties is not None:
             value = str(include_request_form_custom_properties)
             if isinstance(include_request_form_custom_properties, bool):
@@ -2468,15 +2658,35 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"type={quote(value)}")
         if ids is not None:
-            value = str(ids)
-            if isinstance(ids, bool):
-                value = value.lower()
-            query_params.append(f"ids={quote(value)}")
+            if isinstance(ids, list):
+                joined_parts = []
+                for item in ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"ids={quote(joined)}")
+            else:
+                value = str(ids)
+                if isinstance(ids, bool):
+                    value = value.lower()
+                query_params.append(f"ids={quote(value)}")
         if creator_ids is not None:
-            value = str(creator_ids)
-            if isinstance(creator_ids, bool):
-                value = value.lower()
-            query_params.append(f"creatorIds={quote(value)}")
+            if isinstance(creator_ids, list):
+                joined_parts = []
+                for item in creator_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"creatorIds={quote(joined)}")
+            else:
+                value = str(creator_ids)
+                if isinstance(creator_ids, bool):
+                    value = value.lower()
+                query_params.append(f"creatorIds={quote(value)}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
@@ -2630,10 +2840,20 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"updatedAtTo={quote(value)}")
         if ids is not None:
-            value = str(ids)
-            if isinstance(ids, bool):
-                value = value.lower()
-            query_params.append(f"ids={quote(value)}")
+            if isinstance(ids, list):
+                joined_parts = []
+                for item in ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"ids={quote(joined)}")
+            else:
+                value = str(ids)
+                if isinstance(ids, bool):
+                    value = value.lower()
+                query_params.append(f"ids={quote(value)}")
         if title is not None:
             value = str(title)
             if isinstance(title, bool):
@@ -2645,30 +2865,70 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"description={quote(value)}")
         if assignee_ids is not None:
-            value = str(assignee_ids)
-            if isinstance(assignee_ids, bool):
-                value = value.lower()
-            query_params.append(f"assigneeIds={quote(value)}")
+            if isinstance(assignee_ids, list):
+                joined_parts = []
+                for item in assignee_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"assigneeIds={quote(joined)}")
+            else:
+                value = str(assignee_ids)
+                if isinstance(assignee_ids, bool):
+                    value = value.lower()
+                query_params.append(f"assigneeIds={quote(value)}")
         if priorities is not None:
-            value = str(priorities)
-            if isinstance(priorities, bool):
-                value = value.lower()
-            query_params.append(f"priorities={quote(value)}")
+            if isinstance(priorities, list):
+                joined_parts = []
+                for item in priorities:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"priorities={quote(joined)}")
+            else:
+                value = str(priorities)
+                if isinstance(priorities, bool):
+                    value = value.lower()
+                query_params.append(f"priorities={quote(value)}")
         if keywords is not None:
             value = str(keywords)
             if isinstance(keywords, bool):
                 value = value.lower()
             query_params.append(f"keywords={quote(value)}")
         if assigner_ids is not None:
-            value = str(assigner_ids)
-            if isinstance(assigner_ids, bool):
-                value = value.lower()
-            query_params.append(f"assignerIds={quote(value)}")
+            if isinstance(assigner_ids, list):
+                joined_parts = []
+                for item in assigner_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"assignerIds={quote(joined)}")
+            else:
+                value = str(assigner_ids)
+                if isinstance(assigner_ids, bool):
+                    value = value.lower()
+                query_params.append(f"assignerIds={quote(value)}")
         if step_ids is not None:
-            value = str(step_ids)
-            if isinstance(step_ids, bool):
-                value = value.lower()
-            query_params.append(f"stepIds={quote(value)}")
+            if isinstance(step_ids, list):
+                joined_parts = []
+                for item in step_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"stepIds={quote(joined)}")
+            else:
+                value = str(step_ids)
+                if isinstance(step_ids, bool):
+                    value = value.lower()
+                query_params.append(f"stepIds={quote(value)}")
         if status_schema_id is not None:
             value = str(status_schema_id)
             if isinstance(status_schema_id, bool):
@@ -2685,10 +2945,20 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"limit={quote(value)}")
         if sort is not None:
-            value = str(sort)
-            if isinstance(sort, bool):
-                value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            if isinstance(sort, list):
+                joined_parts = []
+                for item in sort:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"sort={quote(joined)}")
+            else:
+                value = str(sort)
+                if isinstance(sort, bool):
+                    value = value.lower()
+                query_params.append(f"sort={quote(value)}")
         if recursive is not None:
             value = str(recursive)
             if isinstance(recursive, bool):
@@ -2710,20 +2980,50 @@ class SeismicplannerClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"customProperties={quote(value)}")
         if follower_ids is not None:
-            value = str(follower_ids)
-            if isinstance(follower_ids, bool):
-                value = value.lower()
-            query_params.append(f"followerIds={quote(value)}")
+            if isinstance(follower_ids, list):
+                joined_parts = []
+                for item in follower_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"followerIds={quote(joined)}")
+            else:
+                value = str(follower_ids)
+                if isinstance(follower_ids, bool):
+                    value = value.lower()
+                query_params.append(f"followerIds={quote(value)}")
         if associated_node_ids is not None:
-            value = str(associated_node_ids)
-            if isinstance(associated_node_ids, bool):
-                value = value.lower()
-            query_params.append(f"associatedNodeIds={quote(value)}")
+            if isinstance(associated_node_ids, list):
+                joined_parts = []
+                for item in associated_node_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"associatedNodeIds={quote(joined)}")
+            else:
+                value = str(associated_node_ids)
+                if isinstance(associated_node_ids, bool):
+                    value = value.lower()
+                query_params.append(f"associatedNodeIds={quote(value)}")
         if creator_ids is not None:
-            value = str(creator_ids)
-            if isinstance(creator_ids, bool):
-                value = value.lower()
-            query_params.append(f"creatorIds={quote(value)}")
+            if isinstance(creator_ids, list):
+                joined_parts = []
+                for item in creator_ids:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"creatorIds={quote(joined)}")
+            else:
+                value = str(creator_ids)
+                if isinstance(creator_ids, bool):
+                    value = value.lower()
+                query_params.append(f"creatorIds={quote(value)}")
         if include_associations is not None:
             value = str(include_associations)
             if isinstance(include_associations, bool):

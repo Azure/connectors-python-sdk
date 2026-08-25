@@ -494,10 +494,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"onsaleEndDateTime={quote(value)}")
         if city is not None:
-            value = str(city)
-            if isinstance(city, bool):
-                value = value.lower()
-            query_params.append(f"city={quote(value)}")
+            if isinstance(city, list):
+                joined_parts = []
+                for item in city:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"city={quote(joined)}")
+            else:
+                value = str(city)
+                if isinstance(city, bool):
+                    value = value.lower()
+                query_params.append(f"city={quote(value)}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
@@ -509,45 +519,115 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"stateCode={quote(value)}")
         if classification_name is not None:
-            value = str(classification_name)
-            if isinstance(classification_name, bool):
-                value = value.lower()
-            query_params.append(f"classificationName={quote(value)}")
+            if isinstance(classification_name, list):
+                joined_parts = []
+                for item in classification_name:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"classificationName={quote(joined)}")
+            else:
+                value = str(classification_name)
+                if isinstance(classification_name, bool):
+                    value = value.lower()
+                query_params.append(f"classificationName={quote(value)}")
         if classification_id is not None:
-            value = str(classification_id)
-            if isinstance(classification_id, bool):
-                value = value.lower()
-            query_params.append(f"classificationId={quote(value)}")
+            if isinstance(classification_id, list):
+                joined_parts = []
+                for item in classification_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"classificationId={quote(joined)}")
+            else:
+                value = str(classification_id)
+                if isinstance(classification_id, bool):
+                    value = value.lower()
+                query_params.append(f"classificationId={quote(value)}")
         if dma_id is not None:
             value = str(dma_id)
             if isinstance(dma_id, bool):
                 value = value.lower()
             query_params.append(f"dmaId={quote(value)}")
         if local_start_date_time is not None:
-            value = str(local_start_date_time)
-            if isinstance(local_start_date_time, bool):
-                value = value.lower()
-            query_params.append(f"localStartDateTime={quote(value)}")
+            if isinstance(local_start_date_time, list):
+                joined_parts = []
+                for item in local_start_date_time:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"localStartDateTime={quote(joined)}")
+            else:
+                value = str(local_start_date_time)
+                if isinstance(local_start_date_time, bool):
+                    value = value.lower()
+                query_params.append(f"localStartDateTime={quote(value)}")
         if local_start_end_date_time is not None:
-            value = str(local_start_end_date_time)
-            if isinstance(local_start_end_date_time, bool):
-                value = value.lower()
-            query_params.append(f"localStartEndDateTime={quote(value)}")
+            if isinstance(local_start_end_date_time, list):
+                joined_parts = []
+                for item in local_start_end_date_time:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"localStartEndDateTime={quote(joined)}")
+            else:
+                value = str(local_start_end_date_time)
+                if isinstance(local_start_end_date_time, bool):
+                    value = value.lower()
+                query_params.append(f"localStartEndDateTime={quote(value)}")
         if start_end_date_time is not None:
-            value = str(start_end_date_time)
-            if isinstance(start_end_date_time, bool):
-                value = value.lower()
-            query_params.append(f"startEndDateTime={quote(value)}")
+            if isinstance(start_end_date_time, list):
+                joined_parts = []
+                for item in start_end_date_time:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"startEndDateTime={quote(joined)}")
+            else:
+                value = str(start_end_date_time)
+                if isinstance(start_end_date_time, bool):
+                    value = value.lower()
+                query_params.append(f"startEndDateTime={quote(value)}")
         if public_visibility_start_date_time is not None:
-            value = str(public_visibility_start_date_time)
-            if isinstance(public_visibility_start_date_time, bool):
-                value = value.lower()
-            query_params.append(f"publicVisibilityStartDateTime={quote(value)}")
+            if isinstance(public_visibility_start_date_time, list):
+                joined_parts = []
+                for item in public_visibility_start_date_time:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"publicVisibilityStartDateTime={quote(joined)}")
+            else:
+                value = str(public_visibility_start_date_time)
+                if isinstance(public_visibility_start_date_time, bool):
+                    value = value.lower()
+                query_params.append(f"publicVisibilityStartDateTime={quote(value)}")
         if pre_sale_date_time is not None:
-            value = str(pre_sale_date_time)
-            if isinstance(pre_sale_date_time, bool):
-                value = value.lower()
-            query_params.append(f"preSaleDateTime={quote(value)}")
+            if isinstance(pre_sale_date_time, list):
+                joined_parts = []
+                for item in pre_sale_date_time:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"preSaleDateTime={quote(joined)}")
+            else:
+                value = str(pre_sale_date_time)
+                if isinstance(pre_sale_date_time, bool):
+                    value = value.lower()
+                query_params.append(f"preSaleDateTime={quote(value)}")
         if onsale_on_start_date is not None:
             value = str(onsale_on_start_date)
             if isinstance(onsale_on_start_date, bool):
@@ -559,20 +639,50 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"onsaleOnAfterStartDate={quote(value)}")
         if collection_id is not None:
-            value = str(collection_id)
-            if isinstance(collection_id, bool):
-                value = value.lower()
-            query_params.append(f"collectionId={quote(value)}")
+            if isinstance(collection_id, list):
+                joined_parts = []
+                for item in collection_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"collectionId={quote(joined)}")
+            else:
+                value = str(collection_id)
+                if isinstance(collection_id, bool):
+                    value = value.lower()
+                query_params.append(f"collectionId={quote(value)}")
         if segment_id is not None:
-            value = str(segment_id)
-            if isinstance(segment_id, bool):
-                value = value.lower()
-            query_params.append(f"segmentId={quote(value)}")
+            if isinstance(segment_id, list):
+                joined_parts = []
+                for item in segment_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"segmentId={quote(joined)}")
+            else:
+                value = str(segment_id)
+                if isinstance(segment_id, bool):
+                    value = value.lower()
+                query_params.append(f"segmentId={quote(value)}")
         if segment_name is not None:
-            value = str(segment_name)
-            if isinstance(segment_name, bool):
-                value = value.lower()
-            query_params.append(f"segmentName={quote(value)}")
+            if isinstance(segment_name, list):
+                joined_parts = []
+                for item in segment_name:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"segmentName={quote(joined)}")
+            else:
+                value = str(segment_name)
+                if isinstance(segment_name, bool):
+                    value = value.lower()
+                query_params.append(f"segmentName={quote(value)}")
         if include_family is not None:
             value = str(include_family)
             if isinstance(include_family, bool):
@@ -584,25 +694,65 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"promoterId={quote(value)}")
         if genre_id is not None:
-            value = str(genre_id)
-            if isinstance(genre_id, bool):
-                value = value.lower()
-            query_params.append(f"genreId={quote(value)}")
+            if isinstance(genre_id, list):
+                joined_parts = []
+                for item in genre_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"genreId={quote(joined)}")
+            else:
+                value = str(genre_id)
+                if isinstance(genre_id, bool):
+                    value = value.lower()
+                query_params.append(f"genreId={quote(value)}")
         if sub_genre_id is not None:
-            value = str(sub_genre_id)
-            if isinstance(sub_genre_id, bool):
-                value = value.lower()
-            query_params.append(f"subGenreId={quote(value)}")
+            if isinstance(sub_genre_id, list):
+                joined_parts = []
+                for item in sub_genre_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"subGenreId={quote(joined)}")
+            else:
+                value = str(sub_genre_id)
+                if isinstance(sub_genre_id, bool):
+                    value = value.lower()
+                query_params.append(f"subGenreId={quote(value)}")
         if type_id is not None:
-            value = str(type_id)
-            if isinstance(type_id, bool):
-                value = value.lower()
-            query_params.append(f"typeId={quote(value)}")
+            if isinstance(type_id, list):
+                joined_parts = []
+                for item in type_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"typeId={quote(joined)}")
+            else:
+                value = str(type_id)
+                if isinstance(type_id, bool):
+                    value = value.lower()
+                query_params.append(f"typeId={quote(value)}")
         if sub_type_id is not None:
-            value = str(sub_type_id)
-            if isinstance(sub_type_id, bool):
-                value = value.lower()
-            query_params.append(f"subTypeId={quote(value)}")
+            if isinstance(sub_type_id, list):
+                joined_parts = []
+                for item in sub_type_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"subTypeId={quote(joined)}")
+            else:
+                value = str(sub_type_id)
+                if isinstance(sub_type_id, bool):
+                    value = value.lower()
+                query_params.append(f"subTypeId={quote(value)}")
         if geo_point is not None:
             value = str(geo_point)
             if isinstance(geo_point, bool):
@@ -619,10 +769,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"includeSpellcheck={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -667,10 +827,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -714,10 +884,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -812,45 +992,115 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"sort={quote(value)}")
         if classification_name is not None:
-            value = str(classification_name)
-            if isinstance(classification_name, bool):
-                value = value.lower()
-            query_params.append(f"classificationName={quote(value)}")
+            if isinstance(classification_name, list):
+                joined_parts = []
+                for item in classification_name:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"classificationName={quote(joined)}")
+            else:
+                value = str(classification_name)
+                if isinstance(classification_name, bool):
+                    value = value.lower()
+                query_params.append(f"classificationName={quote(value)}")
         if classification_id is not None:
-            value = str(classification_id)
-            if isinstance(classification_id, bool):
-                value = value.lower()
-            query_params.append(f"classificationId={quote(value)}")
+            if isinstance(classification_id, list):
+                joined_parts = []
+                for item in classification_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"classificationId={quote(joined)}")
+            else:
+                value = str(classification_id)
+                if isinstance(classification_id, bool):
+                    value = value.lower()
+                query_params.append(f"classificationId={quote(value)}")
         if include_family is not None:
             value = str(include_family)
             if isinstance(include_family, bool):
                 value = value.lower()
             query_params.append(f"includeFamily={quote(value)}")
         if segment_id is not None:
-            value = str(segment_id)
-            if isinstance(segment_id, bool):
-                value = value.lower()
-            query_params.append(f"segmentId={quote(value)}")
+            if isinstance(segment_id, list):
+                joined_parts = []
+                for item in segment_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"segmentId={quote(joined)}")
+            else:
+                value = str(segment_id)
+                if isinstance(segment_id, bool):
+                    value = value.lower()
+                query_params.append(f"segmentId={quote(value)}")
         if genre_id is not None:
-            value = str(genre_id)
-            if isinstance(genre_id, bool):
-                value = value.lower()
-            query_params.append(f"genreId={quote(value)}")
+            if isinstance(genre_id, list):
+                joined_parts = []
+                for item in genre_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"genreId={quote(joined)}")
+            else:
+                value = str(genre_id)
+                if isinstance(genre_id, bool):
+                    value = value.lower()
+                query_params.append(f"genreId={quote(value)}")
         if sub_genre_id is not None:
-            value = str(sub_genre_id)
-            if isinstance(sub_genre_id, bool):
-                value = value.lower()
-            query_params.append(f"subGenreId={quote(value)}")
+            if isinstance(sub_genre_id, list):
+                joined_parts = []
+                for item in sub_genre_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"subGenreId={quote(joined)}")
+            else:
+                value = str(sub_genre_id)
+                if isinstance(sub_genre_id, bool):
+                    value = value.lower()
+                query_params.append(f"subGenreId={quote(value)}")
         if type_id is not None:
-            value = str(type_id)
-            if isinstance(type_id, bool):
-                value = value.lower()
-            query_params.append(f"typeId={quote(value)}")
+            if isinstance(type_id, list):
+                joined_parts = []
+                for item in type_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"typeId={quote(joined)}")
+            else:
+                value = str(type_id)
+                if isinstance(type_id, bool):
+                    value = value.lower()
+                query_params.append(f"typeId={quote(value)}")
         if sub_type_id is not None:
-            value = str(sub_type_id)
-            if isinstance(sub_type_id, bool):
-                value = value.lower()
-            query_params.append(f"subTypeId={quote(value)}")
+            if isinstance(sub_type_id, list):
+                joined_parts = []
+                for item in sub_type_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"subTypeId={quote(joined)}")
+            else:
+                value = str(sub_type_id)
+                if isinstance(sub_type_id, bool):
+                    value = value.lower()
+                query_params.append(f"subTypeId={quote(value)}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
@@ -867,10 +1117,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"includeSpellcheck={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -914,10 +1174,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1019,10 +1289,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"includeSpellcheck={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1066,10 +1346,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1112,10 +1402,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1158,10 +1458,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1208,10 +1518,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1340,10 +1660,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"includeSpellcheck={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1387,10 +1717,20 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"locale={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1497,45 +1837,95 @@ class TicketmasterClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"countryCode={quote(value)}")
         if segment_id is not None:
-            value = str(segment_id)
-            if isinstance(segment_id, bool):
-                value = value.lower()
-            query_params.append(f"segmentId={quote(value)}")
+            if isinstance(segment_id, list):
+                joined_parts = []
+                for item in segment_id:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"segmentId={quote(joined)}")
+            else:
+                value = str(segment_id)
+                if isinstance(segment_id, bool):
+                    value = value.lower()
+                query_params.append(f"segmentId={quote(value)}")
         if geo_point is not None:
             value = str(geo_point)
             if isinstance(geo_point, bool):
                 value = value.lower()
             query_params.append(f"geoPoint={quote(value)}")
         if resource is not None:
-            value = str(resource)
-            if isinstance(resource, bool):
-                value = value.lower()
-            query_params.append(f"resource={quote(value)}")
+            if isinstance(resource, list):
+                joined_parts = []
+                for item in resource:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"resource={quote(joined)}")
+            else:
+                value = str(resource)
+                if isinstance(resource, bool):
+                    value = value.lower()
+                query_params.append(f"resource={quote(value)}")
         if preferred_country is not None:
             value = str(preferred_country)
             if isinstance(preferred_country, bool):
                 value = value.lower()
             query_params.append(f"preferredCountry={quote(value)}")
         if start_end_date_time is not None:
-            value = str(start_end_date_time)
-            if isinstance(start_end_date_time, bool):
-                value = value.lower()
-            query_params.append(f"startEndDateTime={quote(value)}")
+            if isinstance(start_end_date_time, list):
+                joined_parts = []
+                for item in start_end_date_time:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"startEndDateTime={quote(joined)}")
+            else:
+                value = str(start_end_date_time)
+                if isinstance(start_end_date_time, bool):
+                    value = value.lower()
+                query_params.append(f"startEndDateTime={quote(value)}")
         if local_start_end_date_time is not None:
-            value = str(local_start_end_date_time)
-            if isinstance(local_start_end_date_time, bool):
-                value = value.lower()
-            query_params.append(f"localStartEndDateTime={quote(value)}")
+            if isinstance(local_start_end_date_time, list):
+                joined_parts = []
+                for item in local_start_end_date_time:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"localStartEndDateTime={quote(joined)}")
+            else:
+                value = str(local_start_end_date_time)
+                if isinstance(local_start_end_date_time, bool):
+                    value = value.lower()
+                query_params.append(f"localStartEndDateTime={quote(value)}")
         if include_spellcheck is not None:
             value = str(include_spellcheck)
             if isinstance(include_spellcheck, bool):
                 value = value.lower()
             query_params.append(f"includeSpellcheck={quote(value)}")
         if domain is not None:
-            value = str(domain)
-            if isinstance(domain, bool):
-                value = value.lower()
-            query_params.append(f"domain={quote(value)}")
+            if isinstance(domain, list):
+                joined_parts = []
+                for item in domain:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"domain={quote(joined)}")
+            else:
+                value = str(domain)
+                if isinstance(domain, bool):
+                    value = value.lower()
+                query_params.append(f"domain={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
