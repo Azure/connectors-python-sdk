@@ -13,7 +13,7 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 | Component | Status |
 |-----------|--------|
 | Core SDK | ✅ Complete — Token providers, HTTP client, retry logic, async/await |
-| Connectors | ✅ 19+ connectors — See [README.md](README.md#validated-connectors) |
+| Connectors | ✅ 92 connectors — See [README.md](README.md#validated-connectors) |
 | CI/CD | ✅ Complete — GitHub Actions for pytest, flake8, build |
 | PyPI Publishing | ✅ Complete — Release workflow ready |
 | Documentation | ✅ Complete — README, samples, test docs |

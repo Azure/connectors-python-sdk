@@ -177,9 +177,11 @@ The following connectors have been generated and validated with comprehensive te
 | **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
+| **Eventbrite** | `azure.connectors.eventbrite` | ✅ Complete | 🔄 SDK Generated |
 | **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated |
 | **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
 | **Fin & Ops Apps (Dynamics 365)** | `azure.connectors.dynamicsax` | ✅ Complete | 🔄 SDK Generated |
+| **Formstack Forms** | `azure.connectors.formstackforms` | ✅ Complete | 🔄 SDK Generated |
 | **Freshservice** | `azure.connectors.freshservice` | ✅ Complete | 🔄 SDK Generated |
 | **FTP** | `azure.connectors.ftp` | ✅ Complete | 🔄 SDK Generated |
 | **GitHub** | `azure.connectors.github` | ✅ Complete | 🔄 SDK Generated |
@@ -191,6 +193,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Insightly** | `azure.connectors.insightly` | ✅ Complete | 🔄 SDK Generated |
 | **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated |
 | **Mailchimp** | `azure.connectors.mailchimp` | ✅ Complete | 🔄 SDK Generated |
+| **Meeting Room Map** | `azure.connectors.meetingroommap` | ✅ Complete | 🔄 SDK Generated |
 | **Microsoft Bookings** | `azure.connectors.microsoftbookings` | ✅ Complete | 🔄 SDK Generated |
 | **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated |
 | **Microsoft Defender ATP** | `azure.connectors.wdatp` | ✅ Complete | 🔄 SDK Generated |
@@ -214,9 +217,11 @@ The following connectors have been generated and validated with comprehensive te
 | **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated |
 | **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated |
 | **Projectplace** | `azure.connectors.projectplace` | ✅ Complete | 🔄 SDK Generated |
+| **Replicon** | `azure.connectors.replicon` | ✅ Complete | 🔄 SDK Generated |
 | **Rev.ai** | `azure.connectors.revai` | ✅ Complete | 🔄 SDK Generated |
 | **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated |
 | **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated |
+| **Seismic Planner** | `azure.connectors.seismicplanner` | ✅ Complete | 🔄 SDK Generated |
 | **SendGrid** | `azure.connectors.sendgrid` | ✅ Complete | 🔄 SDK Generated |
 | **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated |
@@ -226,11 +231,15 @@ The following connectors have been generated and validated with comprehensive te
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated |
 | **SQL Server** | `azure.connectors.sql` | ✅ Complete | 🔄 SDK Generated |
 | **Starmind** | `azure.connectors.starmind` | ✅ Complete | 🔄 SDK Generated |
+| **StarRez REST V1** | `azure.connectors.starrezrestv1` | ✅ Complete | 🔄 SDK Generated |
 | **Tallyfy** | `azure.connectors.tallyfy` | ✅ Complete | 🔄 SDK Generated |
 | **TextRequest** | `azure.connectors.textrequest` | ✅ Complete | 🔄 SDK Generated |
+| **Ticketmaster** | `azure.connectors.ticketmaster` | ✅ Complete | 🔄 SDK Generated |
 | **Trello** | `azure.connectors.trello` | ✅ Complete | 🔄 SDK Generated |
 | **Twitter** | `azure.connectors.twitter` | ✅ Complete | 🔄 SDK Generated |
+| **Typeform** | `azure.connectors.typeform` | ✅ Complete | 🔄 SDK Generated |
 | **Universal Print** | `azure.connectors.universalprint` | ✅ Complete | 🔄 SDK Generated |
+| **Way We Do** | `azure.connectors.waywedo` | ✅ Complete | 🔄 SDK Generated |
 | **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated |
 | **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
 | **WordPress** | `azure.connectors.wordpress` | ✅ Complete | 🔄 SDK Generated |
@@ -238,7 +247,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated |
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 83 connectors supported
+**Total:** 92 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

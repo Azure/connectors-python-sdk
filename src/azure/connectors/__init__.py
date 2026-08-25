@@ -398,6 +398,51 @@ try:
 except (ImportError, NameError):
     ZohosignClient = None  # type: ignore[assignment,misc]
 
+try:
+    from .eventbrite import EventbriteClient
+except (ImportError, NameError):
+    EventbriteClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .formstackforms import FormstackformsClient
+except (ImportError, NameError):
+    FormstackformsClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .typeform import TypeformClient
+except (ImportError, NameError):
+    TypeformClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .ticketmaster import TicketmasterClient
+except (ImportError, NameError):
+    TicketmasterClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .seismicplanner import SeismicplannerClient
+except (ImportError, NameError):
+    SeismicplannerClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .waywedo import WaywedoClient
+except (ImportError, NameError):
+    WaywedoClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .meetingroommap import MeetingroommapClient
+except (ImportError, NameError):
+    MeetingroommapClient = None  # type: ignore[assignment,misc]
+
+try:
+    from .starrezrestv1 import Starrezrestv1Client
+except (ImportError, NameError):
+    Starrezrestv1Client = None  # type: ignore[assignment,misc]
+
+try:
+    from .replicon import RepliconClient
+except (ImportError, NameError):
+    RepliconClient = None  # type: ignore[assignment,misc]
+
 __version__ = '0.4.0b1'
 
 __all__ = [
@@ -493,4 +538,13 @@ __all__ = [
     "DocuwareClient",
     "SigninghubClient",
     "ZohosignClient",
+    "EventbriteClient",
+    "FormstackformsClient",
+    "TypeformClient",
+    "TicketmasterClient",
+    "SeismicplannerClient",
+    "WaywedoClient",
+    "MeetingroommapClient",
+    "Starrezrestv1Client",
+    "RepliconClient",
 ]
