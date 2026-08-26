@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import ConnectorException
+from azure.connectors import AzureIdentityTokenProvider, ConnectorException
 from azure.connectors.starrezrestv1 import SelectBookingInput, Starrezrestv1Client
 
 
@@ -18,9 +18,12 @@ async def main() -> None:
         print("Set STARREZRESTV1_CONNECTION_URL to run this sample.")
         return
 
-    credential = DefaultAzureCredential()
+    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
     try:
-        async with Starrezrestv1Client(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Starrezrestv1Client(
+            CONNECTION_RUNTIME_URL,
+            token_provider,
+        ) as client:
             bookings = await client.select_booking_async(
                 input=SelectBookingInput(
                     return_empty_array_on_no_result=True,

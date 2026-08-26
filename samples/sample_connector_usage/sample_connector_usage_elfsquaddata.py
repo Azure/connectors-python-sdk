@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import ConnectorException
+from azure.connectors import AzureIdentityTokenProvider, ConnectorException
 from azure.connectors.elfsquaddata import ElfsquaddataClient
 
 
@@ -22,9 +22,12 @@ async def main() -> None:
         )
         return
 
-    credential = DefaultAzureCredential()
+    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
     try:
-        async with ElfsquaddataClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with ElfsquaddataClient(
+            CONNECTION_RUNTIME_URL,
+            token_provider,
+        ) as client:
             entities = await client.get_entities_async(
                 entity_name=ENTITY_NAME,
                 top=10,

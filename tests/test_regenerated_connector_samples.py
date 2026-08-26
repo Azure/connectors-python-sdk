@@ -51,6 +51,8 @@ SAMPLE_DIRECTORY = (
 def test_regenerated_connector_sample_imports(connector_name: str) -> None:
     """Test added and regenerated samples import their current public models."""
     sample_path = SAMPLE_DIRECTORY / f"sample_connector_usage_{connector_name}.py"
+    assert sample_path.read_bytes().endswith(b"\n")
+
     specification = importlib.util.spec_from_file_location(
         f"sample_connector_usage_{connector_name}",
         sample_path,

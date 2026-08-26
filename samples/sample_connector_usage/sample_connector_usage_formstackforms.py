@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import ConnectorException
+from azure.connectors import AzureIdentityTokenProvider, ConnectorException
 from azure.connectors.formstackforms import FormstackformsClient
 
 
@@ -18,9 +18,12 @@ async def main() -> None:
         print("Set FORMSTACKFORMS_CONNECTION_URL to run this sample.")
         return
 
-    credential = DefaultAzureCredential()
+    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
     try:
-        async with FormstackformsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with FormstackformsClient(
+            CONNECTION_RUNTIME_URL,
+            token_provider,
+        ) as client:
             forms = await client.get_available_forms_async()
             print(f"Forms: {forms}")
     except ConnectorException as ex:

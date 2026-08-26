@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import ConnectorException
+from azure.connectors import AzureIdentityTokenProvider, ConnectorException
 from azure.connectors.seismicplanner import SeismicplannerClient
 
 
@@ -19,9 +19,12 @@ async def main() -> None:
         print("Set SEISMICPLANNER_CONNECTION_URL and SEISMICPLANNER_SPACE_ID to run this sample.")
         return
 
-    credential = DefaultAzureCredential()
+    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
     try:
-        async with SeismicplannerClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SeismicplannerClient(
+            CONNECTION_RUNTIME_URL,
+            token_provider,
+        ) as client:
             projects = await client.get_projects_async(space_id=SPACE_ID)
             print(f"Projects: {projects}")
     except ConnectorException as ex:
