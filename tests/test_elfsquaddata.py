@@ -2,8 +2,13 @@
 
 """Contract tests for ElfsquaddataClient."""
 
+from unittest.mock import AsyncMock, patch
+
+import pytest
+
 import azure.connectors.elfsquaddata as elfsquaddata_module
 from azure.connectors.elfsquaddata import ElfsquaddataClient, TRIGGER_OPERATIONS
+from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -45,3 +50,35 @@ class TestElfsquaddataClient(GeneratedConnectorContractTests):
 def test_trigger_operations() -> None:
     """Test Elfsquad Data trigger metadata remains complete."""
     assert set(TRIGGER_OPERATIONS) == {"create_trigger"}
+
+
+@pytest.mark.asyncio
+async def test_get_entities_serializes_query_and_response(
+    mock_token_provider,
+) -> None:
+    """Test entity query serialization and response deserialization."""
+    client = ElfsquaddataClient(
+        "https://example.azure.com/connections/test",
+        token_provider=mock_token_provider,
+    )
+
+    with patch.object(
+        client._http_client,
+        "send_async",
+        new_callable=AsyncMock,
+        return_value=MockResponse(status=200, text='{"value": []}'),
+    ) as mock_send:
+        result = await client.get_entities_async(
+            entity_name="products",
+            top=10,
+            select="id,name",
+            count=True,
+        )
+
+    mock_send.assert_awaited_once_with(
+        "GET",
+        "https://example.azure.com/connections/test/data/1/products"
+        "?$top=10&$select=id%2Cname&$count=true",
+        body=None,
+    )
+    assert result == {"value": []}

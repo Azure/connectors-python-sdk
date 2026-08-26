@@ -7,7 +7,7 @@ from __future__ import annotations
 import dataclasses
 import inspect
 from types import ModuleType
-from typing import Any, get_origin, get_type_hints
+from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -35,14 +35,15 @@ async def invoke_generated_operation(
     client: Any,
     operation: str,
     module: ModuleType,
+    include_optional_parameters: bool = False,
 ) -> Any:
-    """Invoke a generated operation with representative required arguments."""
+    """Invoke a generated operation with representative arguments."""
     method = getattr(client, f"{operation}_async")
     type_hints = get_type_hints(method, globalns=vars(module))
     arguments = {
         parameter.name: _representative_value(type_hints[parameter.name])
         for parameter in inspect.signature(method).parameters.values()
-        if parameter.default is inspect.Parameter.empty
+        if include_optional_parameters or parameter.default is inspect.Parameter.empty
     }
     return await method(**arguments)
 
@@ -136,12 +137,33 @@ class GeneratedConnectorContractTests:
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text='{"ok": true}'),
             ) as mock_send:
-                await invoke_generated_operation(client, operation, self.connector_module)
+                result = await invoke_generated_operation(
+                    client,
+                    operation,
+                    self.connector_module,
+                    include_optional_parameters=True,
+                )
 
             method, url = mock_send.call_args.args[:2]
             assert method == expected_method, operation
-            assert url.startswith("https://example.azure.com/connections/test"), operation
-            assert (mock_send.call_args.kwargs["body"] is not None) is expects_body, operation
+            assert url.startswith("https://example.azure.com/connections/test/"), operation
+            assert "{" not in url and "}" not in url, operation
+
+            body = mock_send.call_args.kwargs["body"]
+            assert (body is not None) is expects_body, operation
+            if expects_body:
+                assert to_wire(body), operation
+
+            return_type = get_type_hints(
+                getattr(client, f"{operation}_async"),
+                globalns=vars(self.connector_module),
+            )["return"]
+            if return_type is type(None):
+                assert result is None, operation
+            elif return_type is bytes:
+                assert result == b'{"ok": true}', operation
+            else:
+                assert result == {"ok": True}, operation
 
     @pytest.mark.asyncio
     async def test_non_success_responses_raise_exception(self, mock_token_provider: Any) -> None:
@@ -179,10 +201,37 @@ def _representative_value(annotation: Any) -> Any:
     if annotation is bool:
         return True
 
-    if get_origin(annotation) is list:
-        return []
+    origin = get_origin(annotation)
+    if origin is list:
+        item_types = get_args(annotation)
+        return [_representative_value(item_types[0])] if item_types else ["value"]
+
+    if origin is dict:
+        return {"key": "value"}
+
+    non_null_types = [
+        item_type
+        for item_type in get_args(annotation)
+        if item_type is not type(None)
+    ]
+    if len(non_null_types) == 1:
+        return _representative_value(non_null_types[0])
+
+    if annotation is Any:
+        return "value"
 
     if inspect.isclass(annotation) and dataclasses.is_dataclass(annotation):
-        return annotation()
+        instance = annotation()
+        model_fields = dataclasses.fields(instance)
+        if model_fields:
+            model_field = model_fields[0]
+            value = (
+                {"key": "value"}
+                if model_field.name == ADDITIONAL_PROPERTIES_FIELD
+                else "value"
+            )
+            setattr(instance, model_field.name, value)
+
+        return instance
 
     raise AssertionError(f"Unsupported generated parameter type '{annotation}'.")

@@ -110,7 +110,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_meetingroommap.py` | Meeting Room Map | `MEETINGROOMMAP_CONNECTION_URL` |
 | `sample_connector_usage_starrezrestv1.py` | StarRez REST V1 | `STARREZRESTV1_CONNECTION_URL` |
 | `sample_connector_usage_replicon.py` | Replicon | `REPLICON_CONNECTION_URL` |
-| `sample_connector_usage_elfsquaddata.py` | Elfsquad Data | `ELFSQUADDATA_CONNECTION_URL` |
+| `sample_connector_usage_elfsquaddata.py` | Elfsquad Data | `ELFSQUADDATA_CONNECTION_URL`, `ELFSQUADDATA_ENTITY_NAME` |
 | `sample_connector_usage_etsy.py` | Etsy | `ETSY_CONNECTION_URL` |
 | `sample_connector_usage_impexium.py` | Impexium | `IMPEXIUM_CONNECTION_URL` |
 | `sample_connector_usage_jedoxodatahub.py` | Jedox OData Hub | `JEDOXODATAHUB_CONNECTION_URL` |

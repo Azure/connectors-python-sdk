@@ -2,8 +2,14 @@
 
 """Contract tests for Starrezrestv1Client."""
 
+from unittest.mock import AsyncMock, patch
+
+import pytest
+
 import azure.connectors.starrezrestv1 as starrezrestv1_module
-from azure.connectors.starrezrestv1 import Starrezrestv1Client
+from azure.connectors.sdk.serialization import to_wire
+from azure.connectors.starrezrestv1 import SelectBookingInput, Starrezrestv1Client
+from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -47,3 +53,37 @@ class TestStarrezrestv1Client(GeneratedConnectorContractTests):
     connector_module = starrezrestv1_module
     connector_name = "starrezrestv1"
     operation_contracts = OPERATION_CONTRACTS
+
+
+@pytest.mark.asyncio
+async def test_select_booking_sends_filter_and_deserializes_response(
+    mock_token_provider,
+) -> None:
+    """Test a bounded booking query sends a meaningful request body."""
+    client = Starrezrestv1Client(
+        "https://example.azure.com/connections/test",
+        token_provider=mock_token_provider,
+    )
+    request = SelectBookingInput(
+        return_empty_array_on_no_result=True,
+        page_size=10,
+    )
+
+    with patch.object(
+        client._http_client,
+        "send_async",
+        new_callable=AsyncMock,
+        return_value=MockResponse(status=200, text='{"bookings": []}'),
+    ) as mock_send:
+        result = await client.select_booking_async(input=request)
+
+    mock_send.assert_awaited_once_with(
+        "POST",
+        "https://example.azure.com/connections/test/select/Booking.json",
+        body=request,
+    )
+    assert to_wire(request) == {
+        "_returnEmptyArrayOnNoResult": True,
+        "_pageSize": 10,
+    }
+    assert result == {"bookings": []}

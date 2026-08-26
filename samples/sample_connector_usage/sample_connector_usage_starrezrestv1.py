@@ -6,14 +6,14 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.starrezrestv1 import CreateBookingInput, Starrezrestv1Client
+from azure.connectors.starrezrestv1 import SelectBookingInput, Starrezrestv1Client
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("STARREZRESTV1_CONNECTION_URL", "")
 
 
 async def main() -> None:
-    """Create a StarRez booking from a typed request model."""
+    """List up to ten StarRez bookings."""
     if not CONNECTION_RUNTIME_URL:
         print("Set STARREZRESTV1_CONNECTION_URL to run this sample.")
         return
@@ -21,8 +21,13 @@ async def main() -> None:
     credential = DefaultAzureCredential()
     try:
         async with Starrezrestv1Client(CONNECTION_RUNTIME_URL, credential) as client:
-            booking = await client.create_booking_async(input=CreateBookingInput())
-            print(f"Booking: {booking}")
+            bookings = await client.select_booking_async(
+                input=SelectBookingInput(
+                    return_empty_array_on_no_result=True,
+                    page_size=10,
+                )
+            )
+            print(f"Bookings: {bookings}")
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
