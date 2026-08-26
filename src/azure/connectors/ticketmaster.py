@@ -388,6 +388,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/discovery/v2/events.json"
         )
         query_params = []
+        item: object
         if size is not None:
             value = str(size)
             if isinstance(size, bool):
@@ -821,6 +822,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/discovery/v2/events/{quote(str(id), safe='')}"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -878,6 +880,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/discovery/v2/events/{quote(str(id), safe='')}/images"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -951,6 +954,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/discovery/v2/attractions"
         )
         query_params = []
+        item: object
         if id is not None:
             value = str(id)
             if isinstance(id, bool):
@@ -1168,6 +1172,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/discovery/v2/attractions/{quote(str(id), safe='')}"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -1233,6 +1238,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/discovery/v2/classifications"
         )
         query_params = []
+        item: object
         if id is not None:
             value = str(id)
             if isinstance(id, bool):
@@ -1340,6 +1346,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/discovery/v2/classifications/{quote(str(id), safe='')}"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -1396,6 +1403,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/discovery/v2/classifications/genres/{quote(str(id), safe='')}"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -1452,6 +1460,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/discovery/v2/classifications/segments/{quote(str(id), safe='')}"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -1512,6 +1521,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -1579,6 +1589,7 @@ class TicketmasterClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/discovery/v2/venues"
         query_params = []
+        item: object
         if id is not None:
             value = str(id)
             if isinstance(id, bool):
@@ -1711,6 +1722,7 @@ class TicketmasterClient(ConnectorClientBase):
             f"/discovery/v2/venues/{quote(str(id), safe='')}"
         )
         query_params = []
+        item: object
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
@@ -1781,6 +1793,7 @@ class TicketmasterClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/discovery/v2/suggest"
         query_params = []
+        item: object
         if keyword is not None:
             value = str(keyword)
             if isinstance(keyword, bool):

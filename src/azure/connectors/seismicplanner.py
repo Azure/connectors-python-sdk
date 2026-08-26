@@ -1532,6 +1532,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/comments"
         )
         query_params = []
+        item: object
         if creator_ids is not None:
             if isinstance(creator_ids, list):
                 joined_parts = []
@@ -1780,6 +1781,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/projects"
         )
         query_params = []
+        item: object
         if planned_end_date_from is not None:
             value = str(planned_end_date_from)
             if isinstance(planned_end_date_from, bool):
@@ -1951,6 +1953,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/projects"
         )
         query_params = []
+        item: object
         if isinstance(ids, list):
             joined_parts = []
             for item in ids:
@@ -2199,6 +2202,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/requests"
         )
         query_params = []
+        item: object
         if planned_end_date_from is not None:
             value = str(planned_end_date_from)
             if isinstance(planned_end_date_from, bool):
@@ -2647,6 +2651,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/statusschema"
         )
         query_params = []
+        item: object
         if is_default is not None:
             value = str(is_default)
             if isinstance(is_default, bool):
@@ -2799,6 +2804,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/tasks"
         )
         query_params = []
+        item: object
         if planned_end_date_from is not None:
             value = str(planned_end_date_from)
             if isinstance(planned_end_date_from, bool):
