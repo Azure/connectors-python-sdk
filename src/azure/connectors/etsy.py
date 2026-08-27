@@ -2613,13 +2613,13 @@ SortOn = Literal["created", "price", "updated"]
 SortOrder = Literal["asc", "ascending", "desc", "descending", "up", "down"]
 
 
-State = Literal["0", "1", "2", "3", "4", "5"]
+State = Literal[0, 1, 2, 3, 4, 5]
 
 
 State2 = Literal["active", "inactive"]
 
 
-Type = Literal["0", "1"]
+Type = Literal[0, 1]
 
 
 Type1 = Literal["physical", "download", "both"]
