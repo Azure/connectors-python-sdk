@@ -473,7 +473,7 @@ try:
 except (ImportError, NameError):
     CloudconvertClient = None  # type: ignore[assignment,misc]
 
-__version__ = '0.4.0b1'
+__version__ = '0.5.0b1'
 
 __all__ = [
     'ConnectorClientBase',
