@@ -215,7 +215,7 @@ class ZohosignClient(ConnectorClientBase):
 
     async def download_completion_certificate_async(
         self,
-        request_id: str,
+        request_id: int,
     ) -> bytes:
         """
         Download Completion Certificate
@@ -245,7 +245,7 @@ class ZohosignClient(ConnectorClientBase):
 
     async def download_document_async(
         self,
-        request_id: str,
+        request_id: int,
     ) -> bytes:
         """
         Download Document
@@ -273,8 +273,8 @@ class ZohosignClient(ConnectorClientBase):
 
     async def download_file_async(
         self,
-        request_id: str,
-        document_id: str,
+        request_id: int,
+        document_id: int,
     ) -> bytes:
         """
         Download File
@@ -306,7 +306,7 @@ class ZohosignClient(ConnectorClientBase):
 
     async def get_form_data_async(
         self,
-        request_id: str,
+        request_id: int,
     ) -> dict[str, Any] | None:
         """
         Get data of completed request
@@ -337,7 +337,7 @@ class ZohosignClient(ConnectorClientBase):
 
     async def recall_document_async(
         self,
-        request_id: str,
+        request_id: int,
     ) -> None:
         """
         Recall a particular document
@@ -363,7 +363,7 @@ class ZohosignClient(ConnectorClientBase):
 
     async def remind_document_recipients_async(
         self,
-        request_id: str,
+        request_id: int,
     ) -> None:
         """
         Reminder for recipients
@@ -389,7 +389,7 @@ class ZohosignClient(ConnectorClientBase):
 
     async def delete_document_async(
         self,
-        request_id: str,
+        request_id: int,
     ) -> None:
         """
         Delete Document
@@ -415,7 +415,7 @@ class ZohosignClient(ConnectorClientBase):
 
     async def get_document_async(
         self,
-        request_id: str,
+        request_id: int,
     ) -> dict[str, Any] | None:
         """
         Get a document

@@ -91,6 +91,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_yammer.py` | Yammer (Viva Engage) | `YAMMER_CONNECTION_URL` |
 | `sample_connector_usage_azureeventgrid.py` | Azure Event Grid | `AZUREEVENTGRID_CONNECTION_URL` |
 | `sample_connector_usage_azureiotcentral.py` | Azure IoT Central | `AZUREIOTCENTRAL_CONNECTION_URL` |
+| `sample_connector_usage_cloudconvert.py` | CloudConvert | `CLOUDCONVERT_CONNECTION_URL` |
 | `sample_connector_usage_cloudmersiveconvert.py` | Cloudmersive Document Conversion | `CLOUDMERSIVECONVERT_CONNECTION_URL` |
 | `sample_connector_usage_dynamicsax.py` | Fin & Ops Apps (Dynamics 365) | `DYNAMICSAX_CONNECTION_URL` |
 | `sample_connector_usage_pdfco.py` | PDF.co | `PDFCO_CONNECTION_URL` |
@@ -100,7 +101,21 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_pipedrive.py` | Pipedrive | `PIPEDRIVE_CONNECTION_URL` |
 | `sample_connector_usage_docuware.py` | DocuWare | `DOCUWARE_CONNECTION_URL` |
 | `sample_connector_usage_signinghub.py` | SigningHub | `SIGNINGHUB_CONNECTION_URL` |
-| `sample_connector_usage_zohosign.py` | Zoho Sign | `ZOHOSIGN_CONNECTION_URL` |
+| `sample_connector_usage_eventbrite.py` | Eventbrite | `EVENTBRITE_CONNECTION_URL` |
+| `sample_connector_usage_formstackforms.py` | Formstack Forms | `FORMSTACKFORMS_CONNECTION_URL` |
+| `sample_connector_usage_typeform.py` | Typeform | `TYPEFORM_CONNECTION_URL` |
+| `sample_connector_usage_ticketmaster.py` | Ticketmaster | `TICKETMASTER_CONNECTION_URL` |
+| `sample_connector_usage_seismicplanner.py` | Seismic Planner | `SEISMICPLANNER_CONNECTION_URL`, `SEISMICPLANNER_SPACE_ID` |
+| `sample_connector_usage_waywedo.py` | Way We Do | `WAYWEDO_CONNECTION_URL` |
+| `sample_connector_usage_meetingroommap.py` | Meeting Room Map | `MEETINGROOMMAP_CONNECTION_URL` |
+| `sample_connector_usage_starrezrestv1.py` | StarRez REST V1 | `STARREZRESTV1_CONNECTION_URL` |
+| `sample_connector_usage_replicon.py` | Replicon | `REPLICON_CONNECTION_URL` |
+| `sample_connector_usage_elfsquaddata.py` | Elfsquad Data | `ELFSQUADDATA_CONNECTION_URL`, `ELFSQUADDATA_ENTITY_NAME` |
+| `sample_connector_usage_etsy.py` | Etsy | `ETSY_CONNECTION_URL` |
+| `sample_connector_usage_impexium.py` | Impexium | `IMPEXIUM_CONNECTION_URL` |
+| `sample_connector_usage_jedoxodatahub.py` | Jedox OData Hub | `JEDOXODATAHUB_CONNECTION_URL` |
+| `sample_connector_usage_orderful.py` | Orderful | `ORDERFUL_CONNECTION_URL` |
+| `sample_connector_usage_zohosign.py` | Zoho Sign | `ZOHOSIGN_CONNECTION_URL`, `ZOHOSIGN_REQUEST_ID` |
 
 Set the appropriate environment variable to your connection runtime URL before running:
 

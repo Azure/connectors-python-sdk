@@ -18,24 +18,41 @@ SAMPLE_DIRECTORY = (
 @pytest.mark.parametrize(
     "connector_name",
     [
+        "cloudconvert",
         "docusign",
+        "elfsquaddata",
+        "etsy",
+        "eventbrite",
+        "formstackforms",
         "github",
         "googletasks",
+        "impexium",
+        "jedoxodatahub",
+        "meetingroommap",
+        "orderful",
         "pdfco",
         "planner",
+        "replicon",
         "salesforce",
+        "seismicplanner",
         "signinghub",
         "slack",
         "smtp",
+        "starrezrestv1",
+        "ticketmaster",
         "todo",
+        "typeform",
+        "waywedo",
         "wordonlinebusiness",
         "yammer",
         "zohosign",
     ],
 )
 def test_regenerated_connector_sample_imports(connector_name: str) -> None:
-    """Test regenerated connector samples import their current public models."""
+    """Test added and regenerated samples import their current public models."""
     sample_path = SAMPLE_DIRECTORY / f"sample_connector_usage_{connector_name}.py"
+    assert sample_path.read_bytes().endswith(b"\n")
+
     specification = importlib.util.spec_from_file_location(
         f"sample_connector_usage_{connector_name}",
         sample_path,

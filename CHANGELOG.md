@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0b1] - 2026-08-31
+
 ### Breaking Changes
 
 - Regenerated Microsoft To Do request models now use the current contract names `CreateToDoList`, `CreateToDo`, and `UpdateToDo` instead of the deprecated `V2`-suffixed names. Its polling triggers are now available through `TRIGGER_OPERATIONS`, not callable client methods.
@@ -14,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Regenerated Google Tasks and Slack trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Slack also no longer exposes the deprecated `create_group_async` operation.
 - Regenerated Salesforce trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Salesforce bulk upload and generic HTTP request operations now accept raw `bytes` bodies instead of generated request models.
 - Regenerated Office 365 Groups Mail, Planner, SMTP, and Yammer now expose current request and response model names instead of deprecated version-family sibling names. Their polling triggers are available through `TRIGGER_OPERATIONS`, not callable client methods.
+- Regenerated Zoho Sign document operations now require integer request and document identifiers. `send_sign_request_async` and `update_document_async` retain string request identifiers.
 - `UploadDocument.document_id` now represents the natural `document_id` wire field. Callers that used it for `documentId` must use `document_id_2` instead.
 - Regenerated Azure Queues, DocuSign, Event Hubs, Microsoft Forms, SharePoint Online, and Microsoft Teams from the current managed connector contracts. Trigger routes are now exposed through `TRIGGER_OPERATIONS` instead of callable client methods, and deprecated DocuSign operations are no longer generated.
 - Azure Event Hubs batch sends now require `partition_key`. Word Online (Business) template and PDF operations now require `source`, `drive`, and `file` identifiers.
@@ -34,25 +37,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected eight malformed PDF.co method names: `p_d_f_search_text_async` to `pdf_search_text_async`, `p_d_f_from_x_l_s_x_l_s_x_async` to `pdf_from_xls_xlsx_async`, `p_d_f_un_searchable_async` to `pdf_unsearchable_async`, `x_l_sto_c_s_v_async` to `xls_to_csv_async`, `x_l_sto_h_t_m_l_async` to `xls_to_html_async`, `x_l_sto_j_s_o_n_async` to `xls_to_json_async`, `x_l_sto_t_x_t_async` to `xls_to_txt_async`, and `x_l_sto_x_m_l_async` to `xls_to_xml_async`.
 - Current routes now bind to their exact current request definitions instead of deprecated version-family siblings. SharePoint Online also preserves both `/copyFile` and `/copyFileAsync` as distinct callable methods.
 - Regenerated SigningHub so properties whose wire names normalize to the same Python identifier are preserved with distinct serializable fields.
+- Generated string enums, integer enums, arrays, and `allOf` definitions now retain their Swagger JSON wire shapes instead of being emitted as dynamic object wrappers.
+- **Azure Queues** (`azurequeues.py`): corrected the public `QueueMessage.next_visible_time` property while preserving the `TimeNextVisible` wire name, and added `dequeue_count` plus the nested queue-message response models.
 
 ### Added
 
+- **Orderful** (`orderful.py`) connector client with unit tests and a sample
+- **CloudConvert** (`cloudconvert.py`) connector client with unit tests and a sample
+- **4 new connector clients** with unit tests and samples: Etsy, Elfsquad Data, Impexium, and Jedox OData Hub
+- **9 new connector clients** with unit tests and samples: Eventbrite, Formstack Forms, Typeform, Ticketmaster, Seismic Planner, Way We Do, Meeting Room Map, StarRez REST V1, and Replicon
 - Added current Salesforce external-ID and table metadata discovery operations.
 - Added current managed connector discovery operations for Azure IoT Central device templates, Azure Monitor Logs time ranges, Azure Tables storage accounts, Azure Data Explorer query schemas, and Service Bus entities, system properties, queues, session options, topics, subscriptions, and subscription filters.
 - **Zoho Sign** (`zohosign.py`) connector client with unit tests and a sample
 - Discovery and schema operations from the latest Azure Event Hubs, SharePoint Online, Microsoft Teams, and Word Online (Business) contracts
-- **DocuWare** (`docuware.py`) connector client with unit tests and samples
-- **SigningHub** (`signinghub.py`) connector client with unit tests and samples
-- **Pipedrive** (`pipedrive.py`) connector client with unit tests and samples
-- **Zendesk** (`zendesk.py`) connector client with unit tests and samples
-- **SQL Server** (`sql.py`) connector client with unit tests and samples
-- **Plumsail Documents** (`plumsail.py`) connector client with unit tests and samples
-- **PDF.co** (`pdfco.py`) connector client with unit tests and samples
-- **Fin & Ops Apps (Dynamics 365)** (`dynamicsax.py`) connector client with unit tests and samples
-- **Cloudmersive Document Conversion** (`cloudmersiveconvert.py`) connector client with unit tests and samples
-- **Azure IoT Central** (`azureiotcentral.py`) connector client with unit tests and samples
-- **Azure Event Grid** (`azureeventgrid.py`) connector client with unit tests and samples
-- **Universal Print** (`universalprint.py`) connector client with unit tests and samples
 - **Twitter** (`twitter.py`) connector client with unit tests and samples
 - **WordPress** (`wordpress.py`) connector client with unit tests and samples
 - **Plivo** (`plivo.py`) connector client with unit tests and samples
@@ -71,6 +68,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Freshservice** (`freshservice.py`) connector client with unit tests and samples
 - **Infusionsoft (Keap)** (`infusionsoft.py`) connector client with unit tests and samples
 - **Insightly** (`insightly.py`) connector client with unit tests and samples
+
+## [0.4.0b1] - 2026-07-27
+
+### Added
+
+- **DocuWare** (`docuware.py`) connector client with unit tests and samples
+- **SigningHub** (`signinghub.py`) connector client with unit tests and samples
+- **Pipedrive** (`pipedrive.py`) connector client with unit tests and samples
+- **Zendesk** (`zendesk.py`) connector client with unit tests and samples
+- **SQL Server** (`sql.py`) connector client with unit tests and samples
+- **Plumsail Documents** (`plumsail.py`) connector client with unit tests and samples
+- **PDF.co** (`pdfco.py`) connector client with unit tests and samples
+- **Fin & Ops Apps (Dynamics 365)** (`dynamicsax.py`) connector client with unit tests and samples
+- **Cloudmersive Document Conversion** (`cloudmersiveconvert.py`) connector client with unit tests and samples
+- **Azure IoT Central** (`azureiotcentral.py`) connector client with unit tests and samples
+- **Azure Event Grid** (`azureeventgrid.py`) connector client with unit tests and samples
+- **Universal Print** (`universalprint.py`) connector client with unit tests and samples
 - **GitHub** (`github.py`) connector client with unit tests and samples
 - **Slack** (`slack.py`) connector client with unit tests and samples
 - **Jira** (`jira.py`) connector client with unit tests and samples
@@ -104,13 +118,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Generated string enums, integer enums, arrays, and `allOf` definitions now retain their Swagger JSON wire shapes instead of being emitted as dynamic object wrappers.
-- **Azure Queues** (`azurequeues.py`): corrected the public `QueueMessage.next_visible_time` property while preserving the `TimeNextVisible` wire name, and added `dequeue_count` plus the nested queue-message response models.
 - **Microsoft Dataverse** (`commondataservice.py`): path parameters are now double URL-encoded so values containing reserved characters (for example the `://` in an environment/organization URL used as the `dataset` segment) survive apihub gateway routing. Previously these segments were single-encoded and could be mis-routed. Fix applied in the CodefulSdkGenerator and regenerated; added regression tests covering encoding of the `dataset`, `table`, and `id` segments.
 - **Microsoft Dataverse** (`commondataservice.py`): regenerated with the corrected CodefulSdkGenerator so curated internal operations are retained. The client now exposes all 22 operations at parity with the .NET SDK (previously 11), adding attachment, association/disassociation, collection-relationship, option-set/multi-select metadata, delete, and pagination methods. Added unit tests covering the new operations.
 - **Microsoft Dataverse** (`commondataservice.py`): `get_next_page_async` now returns the page payload (`dict[str, Any] | None`) instead of discarding it as `None`, so pagination via `nextLink` is usable and at parity with the .NET `GetNextPageAsync`. Operations whose swagger omits a response schema now honor the per-operation response-type override in the Python generator path. Fix applied in the CodefulSdkGenerator and regenerated; added tests covering the returned payload and the trigger-operation registry.
 
-## [0.3.0b2]
+## [0.3.0b2] - 2026-06-04
 
 ### Added
 
@@ -217,8 +229,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EditorConfig and VSCode settings
 - Pyproject.toml packaging configuration
 
-[Unreleased]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.3.0b2...HEAD
-[0.3.0b2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.2.0b2...v0.3.0b2
+[Unreleased]: https://github.com/Azure/connectors-python-sdk/compare/0.5.0b1...HEAD
+[0.5.0b1]: https://github.com/Azure/connectors-python-sdk/compare/0.4.0b1...0.5.0b1
+[0.4.0b1]: https://github.com/Azure/connectors-python-sdk/compare/0.3.0b2...0.4.0b1
+[0.3.0b2]: https://github.com/Azure/connectors-python-sdk/compare/0.2.0b2...0.3.0b2
 [0.2.0b2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0b1...v0.2.0b2
 [0.2.0b1]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev2...v0.2.0b1
 [0.1.0dev2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev1...v0.1.0dev2

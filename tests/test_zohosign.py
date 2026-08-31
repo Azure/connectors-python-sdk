@@ -1,126 +1,70 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for ZohosignClient."""
+"""Contract tests for ZohosignClient."""
 
-from unittest.mock import AsyncMock, patch
+from typing import get_type_hints
 
-import pytest
-
-from azure.connectors.sdk import ConnectorException, ManagedIdentityTokenProvider
-from azure.connectors.zohosign import InvokeAPIInput, UpdateDocumentInput, ZohosignClient
-from tests.conftest import MockResponse
+import azure.connectors.zohosign as zohosign_module
+from azure.connectors.zohosign import ZohosignClient, TRIGGER_OPERATIONS
+from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
-class TestZohosignClientInitialization:
-    """Tests for ZohosignClient initialization and lifecycle."""
-
-    def test_init_with_valid_url_and_defaults(self):
-        """Test initialization with the default token provider."""
-        client = ZohosignClient("https://example.azure.com/connections/test/")
-
-        assert client._connection_runtime_url == "https://example.azure.com/connections/test"
-        assert client.connector_name == "zohosign"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
-
-    @pytest.mark.asyncio
-    async def test_context_manager_closes_client(self, mock_token_provider):
-        """Test the async context manager closes the client."""
-        with patch.object(ZohosignClient, "close", new_callable=AsyncMock) as mock_close:
-            async with ZohosignClient(
-                "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
-            ):
-                pass
-
-            mock_close.assert_called_once()
+OPERATION_CONTRACTS = {
+    "delete_document": ("PUT", False),
+    "download_completion_certificate": ("GET", False),
+    "download_document": ("GET", False),
+    "download_file": ("GET", False),
+    "get_document": ("GET", False),
+    "get_form_data": ("GET", False),
+    "get_template_details": ("GET", False),
+    "get_templates": ("GET", False),
+    "invoke_api": ("POST", True),
+    "recall_document": ("POST", False),
+    "remind_document_recipients": ("POST", False),
+    "send_sign_request": ("POST", False),
+    "update_document": ("PUT", True),
+}
 
 
-class TestZohosignOperations:
-    """Tests for representative Zoho Sign operations."""
+class TestZohosignClient(GeneratedConnectorContractTests):
+    """Test the generated Zoho Sign client contract."""
 
-    @pytest.mark.asyncio
-    async def test_get_document_success(self, mock_token_provider):
-        """Test document retrieval serializes the request path."""
-        client = ZohosignClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"status": "success"}')
+    client_type = ZohosignClient
+    connector_module = zohosign_module
+    connector_name = "zohosign"
+    operation_contracts = OPERATION_CONTRACTS
 
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.get_document_async(request_id="request-1")
 
-            assert mock_send.call_args.args[0] == "GET"
-            assert mock_send.call_args.args[1].endswith("/requests/request-1")
-            assert result == {"status": "success"}
+def test_trigger_operations() -> None:
+    """Test the Zoho Sign trigger metadata remains complete."""
+    assert set(TRIGGER_OPERATIONS) == {"zoho-sign-triggers"}
 
-    @pytest.mark.asyncio
-    async def test_invoke_api_forwards_body(self, mock_token_provider):
-        """Test generic API invocation forwards its dynamic body."""
-        client = ZohosignClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        payload = InvokeAPIInput(additional_properties={"name": "contract"})
-        mock_response = MockResponse(status=200, text='{"code": 0}')
 
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.invoke_api_async(input=payload, url="requests", method="POST")
+def test_document_identifiers_use_integer_annotations() -> None:
+    """Test Zoho Sign document identifiers preserve Swagger integer types."""
+    integer_request_id_operations = [
+        "delete_document",
+        "download_completion_certificate",
+        "download_document",
+        "download_file",
+        "get_document",
+        "get_form_data",
+        "recall_document",
+        "remind_document_recipients",
+    ]
 
-            assert mock_send.call_args.kwargs["body"] is payload
-            assert "method=POST" in mock_send.call_args.args[1]
+    for operation in integer_request_id_operations:
+        type_hints = get_type_hints(getattr(ZohosignClient, f"{operation}_async"))
+        assert type_hints["request_id"] is int, operation
 
-    @pytest.mark.asyncio
-    async def test_update_document_forwards_body(self, mock_token_provider):
-        """Test document update forwards its typed body."""
-        client = ZohosignClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        payload = UpdateDocumentInput(requests={"request_name": "Contract"})
-        mock_response = MockResponse(status=200, text='{"status": "success"}')
+    download_file_hints = get_type_hints(ZohosignClient.download_file_async)
+    assert download_file_hints["document_id"] is int
 
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.update_document_async(input=payload, request_id="request-1")
+    for operation in ["send_sign_request", "update_document"]:
+        type_hints = get_type_hints(getattr(ZohosignClient, f"{operation}_async"))
+        assert type_hints["request_id"] is str, operation
 
-            assert mock_send.call_args.args[0] == "PUT"
-            assert mock_send.call_args.kwargs["body"] is payload
 
-    @pytest.mark.asyncio
-    async def test_non_success_response_raises_exception(self, mock_token_provider):
-        """Test API errors raise ConnectorException."""
-        client = ZohosignClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.get_document_async(request_id="missing")
-
-            assert exc_info.value.status_code == 404
-
-    def test_multipart_create_document_is_not_generated(self):
-        """Test the unsupported multipart operation is excluded."""
-        assert not hasattr(ZohosignClient, "create_document_async")
+def test_multipart_create_document_is_not_generated() -> None:
+    """Test the unsupported multipart operation is excluded."""
+    assert not hasattr(ZohosignClient, "create_document_async")
