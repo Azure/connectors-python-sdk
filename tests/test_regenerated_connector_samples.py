@@ -4,12 +4,13 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 from pathlib import Path
 
 import pytest
 
-from scripts.validate_connector_samples import validate_samples
+from scripts.validate_connector_samples import SampleVisitor, validate_samples
 
 
 SAMPLE_DIRECTORY = (
@@ -18,6 +19,16 @@ SAMPLE_DIRECTORY = (
 
 
 SAMPLE_PATHS = sorted(SAMPLE_DIRECTORY.glob("sample_connector_usage_*.py"))
+
+
+class TypedClient:
+    """Provide a typed client surface for sample validator tests."""
+
+    def __init__(self, connection_runtime_url: str) -> None:
+        """Initialize the test client."""
+
+    async def list_items_async(self, *, top: int) -> None:
+        """Represent a generated method with an integer argument."""
 
 
 @pytest.mark.parametrize(
@@ -49,3 +60,19 @@ def test_all_connector_samples_match_generated_apis() -> None:
 
     assert len(sample_paths) == 98
     assert issues == []
+
+
+def test_sample_validator_rejects_incompatible_literal_type() -> None:
+    """Test a string literal is rejected for an integer parameter."""
+    tree = ast.parse(
+        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "client.list_items_async(top='10')\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "argument 'top' has type 'str', expected 'int'",
+    ]

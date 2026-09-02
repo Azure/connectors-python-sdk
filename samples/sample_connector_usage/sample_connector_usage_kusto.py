@@ -191,7 +191,7 @@ async def example_4_visualize_results():
                 cluster=KUSTO_CLUSTER_URL,
                 db=KUSTO_DATABASE,
                 csl=query,
-                chart_type="timechart",
+                chart_type="Time Chart",
             )
 
             chart = await client.run_kusto_query_and_visualize_results_async(

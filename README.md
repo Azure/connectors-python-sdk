@@ -81,7 +81,7 @@ pip install azure-connectors[dev]
 
 ```python
 import asyncio
-from azure.connectors.office365 import Office365Client
+from azure.connectors.office365 import Office365Client, SendEmailInput
 from azure.connectors.sdk import ManagedIdentityTokenProvider
 
 async def send_email_example():
@@ -93,12 +93,13 @@ async def send_email_example():
     
     # Create client and send email
     async with Office365Client(connection_url, token_provider) as client:
-        await client.send_email_v2_async(
+        email = SendEmailInput(
             to="recipient@example.com",
             subject="Hello from Python SDK",
             body="<p>This email was sent using the Azure Connectors Python SDK!</p>",
-            from_address="sender@example.com"
+            from_="sender@example.com"
         )
+        await client.send_email_async(input=email)
     
     print("Email sent successfully!")
 
@@ -130,17 +131,24 @@ asyncio.run(list_sharepoint_items())
 ### Example: Post a Teams message
 
 ```python
-from azure.connectors.teams import TeamsClient
+from azure.connectors.teams import DynamicPostMessageRequest, TeamsClient
 
 async def post_teams_message():
     connection_url = "https://example.azure.com/connections/teams"
     
     async with TeamsClient(connection_url) as client:
+        message = DynamicPostMessageRequest(
+            additional_properties={
+                "body": {
+                    "content": "Hello from Python!",
+                    "contentType": "text"
+                }
+            }
+        )
         await client.post_message_to_conversation_async(
-            group_id="team-group-id",
-            channel_id="19:channel-id",
-            body_content="Hello from Python!",
-            body_content_type="text"
+            input=message,
+            poster="User",
+            location="19:channel-id"
         )
     
     print("Message posted to Teams!")
@@ -324,7 +332,7 @@ azure-connectors/
 │   ├── sharepointonline.py     # SharePoint generated client
 │   ├── teams.py                # Teams generated client
 │   ├── kusto.py                # Kusto generated client
-│   └── msgraph.py              # MS Graph generated client
+│   └── msgraphgroupsanduser.py # Microsoft Graph generated client
 ├── tests/                      # Comprehensive test suite
 ├── samples/                    # Usage examples
 └── docs/                       # Additional documentation
@@ -334,37 +342,35 @@ azure-connectors/
 
 The SDK supports **SDK-type bindings** for Python Function apps, allowing functions to bind to and return rich, strongly-typed objects instead of raw JSON payloads. This enables cleaner code and better IDE support with type hints.
 
-### Example: Parsing Email Messages
+### Example: Receiving Email Messages
 
-Use the `from_json` class method to convert JSON payloads into typed objects:
+Use the Azure Functions connector extension's SDK type annotation. The
+extension converter normalizes the trigger payload and returns generated Azure
+Connectors SDK models:
 
 ```python
-from azure.connectors.office365 import ClientReceiveMessage
+import azure.functions as func
+import azurefunctions.extensions.connectors.office365 as office365
 
-# Parse JSON payload into a list of typed email message objects
-messages = ClientReceiveMessage.from_json(payload)
+app = func.FunctionApp()
 
-for message in messages:
-    print(f"From: {message.from_}")
-    print(f"Subject: {message.subject}")
-    print(f"Importance: {message.importance}")  # 0=Low, 1=Normal, 2=High
+
+@app.connector_trigger(arg_name="messages")
+def process_emails(
+    messages: list[office365.ClientReceiveMessage],
+) -> None:
+    for message in messages:
+        print(message.from_)
+        print(message.subject)
 ```
 
-The `from_json` method handles:
-
-- JSON string or dictionary input
-- Nested `body.value` payload structure
-- Field name conversion (camelCase → snake_case)
-- Type conversion (e.g., importance string → int)
-- Attachment parsing
-
-> **Note:** The `from_json` method is **not auto-generated** by the SDK code generator. See [docs/sdk-type-bindings.md](docs/sdk-type-bindings.md) for implementation details and how to add support for new types.
-
-This feature is particularly useful when building Azure Functions that process connector webhook payloads or trigger data.
+Generated connector models intentionally do not provide `from_json()` methods.
+See [SDK-Type Bindings for Azure Functions](docs/sdk-type-bindings.md) for the
+ownership model and extension implementation guidance.
 
 ## Related Projects
 
-- **[Azure Functions Connector Extension](https://github.com/Azure/azure-functions-connector-extension)**  - An Azure Functions trigger extension for receiving webhook callbacks from Connector Namespace managed connectors
+- **[Azure Functions Connector Extension](https://github.com/Azure/azure-functions-python-extensions/tree/main/azurefunctions-extensions-connectors)** — An Azure Functions trigger extension for receiving webhook callbacks from Connector Namespace managed connectors
 - **[Connectors .NET SDK](https://github.com/Azure/Connectors-NET-SDK)** — .NET implementation of this SDK
 - **[Connectors Node.js SDK](https://github.com/Azure/connectors-nodejs-sdk)** — Node.js implementation of this SDK
 

@@ -72,7 +72,7 @@ async def example_4_get_user() -> None:
 
     credential = DefaultAzureCredential()
     async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-        user = await client.get_user_async(user_id="USER_ID", account="ACCOUNT_ID")
+        user = await client.get_user_async(user_id=12345, account="ACCOUNT_ID")
         print(f"User: {user}")
 
 

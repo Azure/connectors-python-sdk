@@ -18,7 +18,7 @@ async def find_questions() -> None:
     async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
         questions = await client.find_questions_async(
             query="distributed systems",
-            limit="10",
+            limit=10,
         )
         print(f"Questions: {questions}")
 

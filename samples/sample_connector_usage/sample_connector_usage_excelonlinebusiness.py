@@ -76,7 +76,7 @@ async def example_1_list_table_rows():
                 file=FILE_ID,
                 table=TABLE_NAME,
                 source=SOURCE_URL if SOURCE_URL else None,
-                top="10",  # Limit to 10 rows
+                top=10,  # Limit to 10 rows
             )
 
             if result and "value" in result:

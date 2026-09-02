@@ -54,7 +54,7 @@ async def example_2_create_channel() -> None:
     async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
         created = await client.create_channel_async(
             name="sdk-sample-channel",
-            is_private="false",
+            is_private=False,
         )
         channel = created.get("channel", {}) if created else {}
         print(f"Created channel: {channel.get('name')} ({channel.get('id')})")

@@ -61,7 +61,7 @@ async def example_2_get_contact_lists() -> None:
 
     credential = DefaultAzureCredential()
     async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        lists = await client.get_contact_lists_async(page="1", limit="10")
+        lists = await client.get_contact_lists_async(page=1, limit=10)
         print(f"Contact lists: {lists}")
 
 

@@ -92,7 +92,7 @@ async def example_2_list_accounts():
                 table="accounts",
                 filter="statecode eq 0",  # Active accounts only
                 orderby="name asc",
-                top="10",
+                top=10,
             )
 
             if result and result.get("value"):

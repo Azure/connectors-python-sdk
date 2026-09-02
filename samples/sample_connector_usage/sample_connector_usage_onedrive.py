@@ -247,7 +247,7 @@ async def example_8_copy_file():
             result = await client.copy_drive_file_async(
                 id=file_id,
                 destination=dest_folder,
-                overwrite="false"
+                overwrite=False
             )
 
             if result:

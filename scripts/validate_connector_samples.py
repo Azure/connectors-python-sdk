@@ -14,8 +14,8 @@ import inspect
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from types import ModuleType
-from typing import Any
+from types import ModuleType, UnionType
+from typing import Any, Literal, Union, get_args, get_origin, get_type_hints
 
 
 @dataclass(frozen=True)
@@ -125,18 +125,19 @@ class SampleVisitor(ast.NodeVisitor):
         *,
         include_instance: bool,
     ) -> None:
-        """Bind an AST call shape to a runtime signature without executing it."""
+        """Validate an AST call against a runtime signature without executing it."""
         try:
             signature = inspect.signature(callable_object)
         except (TypeError, ValueError):
             return
 
-        positional_arguments = [object() for _ in node.args]
+        instance_argument = object()
+        positional_arguments: list[Any] = list(node.args)
         if include_instance:
-            positional_arguments.insert(0, object())
+            positional_arguments.insert(0, instance_argument)
 
         keyword_arguments = {
-            keyword.arg: object()
+            keyword.arg: keyword.value
             for keyword in node.keywords
             if keyword.arg is not None
         }
@@ -146,12 +147,65 @@ class SampleVisitor(ast.NodeVisitor):
 
         try:
             if has_unpacking:
-                signature.bind_partial(*positional_arguments, **keyword_arguments)
+                bound_arguments = signature.bind_partial(
+                    *positional_arguments,
+                    **keyword_arguments,
+                )
             else:
-                signature.bind(*positional_arguments, **keyword_arguments)
+                bound_arguments = signature.bind(
+                    *positional_arguments,
+                    **keyword_arguments,
+                )
         except TypeError as error:
             name = getattr(callable_object, "__qualname__", repr(callable_object))
             self._add_issue(node, f"call to '{name}' is invalid: {error}")
+            return
+
+        try:
+            type_hints = get_type_hints(callable_object)
+        except (NameError, TypeError):
+            type_hints = {}
+
+        for parameter_name, argument_node in bound_arguments.arguments.items():
+            if argument_node is instance_argument or not isinstance(
+                argument_node,
+                ast.AST,
+            ):
+                continue
+
+            parameter = signature.parameters[parameter_name]
+            annotation = type_hints.get(parameter_name, parameter.annotation)
+            self._validate_literal_type(
+                argument_node,
+                annotation,
+                parameter_name,
+            )
+
+    def _validate_literal_type(
+        self,
+        node: ast.AST,
+        annotation: Any,
+        parameter_name: str,
+    ) -> None:
+        """Validate a statically resolvable literal against an annotation."""
+        try:
+            value = ast.literal_eval(node)
+        except (ValueError, TypeError, SyntaxError):
+            return
+
+        if _value_matches_annotation(value, annotation):
+            return
+
+        annotation_name = (
+            getattr(annotation, "__name__", str(annotation))
+            if get_origin(annotation) is None
+            else str(annotation).replace("typing.", "")
+        )
+        self._add_issue(
+            node,
+            f"argument '{parameter_name}' has type '{type(value).__name__}', "
+            f"expected '{annotation_name}'",
+        )
 
     def _add_issue(self, node: ast.AST, message: str) -> None:
         """Record an issue at an AST node."""
@@ -162,6 +216,37 @@ class SampleVisitor(ast.NodeVisitor):
                 message=message,
             )
         )
+
+
+def _value_matches_annotation(value: Any, annotation: Any) -> bool:
+    """Return whether a literal value is compatible with an annotation."""
+    if annotation is Any or annotation is inspect.Parameter.empty:
+        return True
+
+    origin = get_origin(annotation)
+    annotation_arguments = get_args(annotation)
+    if origin in (Union, UnionType):
+        return any(
+            _value_matches_annotation(value, item_type)
+            for item_type in annotation_arguments
+        )
+
+    if origin is Literal:
+        return any(
+            type(value) is type(literal_value) and value == literal_value
+            for literal_value in annotation_arguments
+        )
+
+    if origin in (list, dict, tuple, set):
+        return type(value) is origin
+
+    if annotation is float:
+        return type(value) in (int, float)
+
+    if inspect.isclass(annotation):
+        return type(value) is annotation
+
+    return True
 
 
 def load_connector_modules(source_root: Path) -> dict[str, ModuleType]:

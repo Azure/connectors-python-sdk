@@ -116,7 +116,7 @@ async def example_3_get_calendar_events():
         try:
             result = await client.calendar_get_items_async(
                 table=calendar_id,
-                top="5"  # Get up to 5 events
+                top=5  # Get up to 5 events
             )
 
             if result:
@@ -149,7 +149,7 @@ async def example_4_get_contacts():
         try:
             result = await client.contact_get_items_async(
                 table=folder_id,
-                top="10"  # Get up to 10 contacts
+                top=10  # Get up to 10 contacts
             )
 
             if result:

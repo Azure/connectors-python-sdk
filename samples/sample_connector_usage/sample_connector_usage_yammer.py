@@ -70,7 +70,7 @@ async def example_2_get_groups():
     async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Get only groups the user belongs to
-            groups = await client.get_groups_async(mine="1")
+            groups = await client.get_groups_async(mine=1)
 
             if groups:
                 print(f"Found {len(groups)} group(s):")
@@ -94,7 +94,7 @@ async def example_3_get_messages():
     async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Get recent messages (limit to 10)
-            result = await client.get_all_messages_async(limit="10")
+            result = await client.get_all_messages_async(limit=10)
 
             if result and result.get("value"):
                 messages = result["value"]
@@ -119,7 +119,7 @@ async def example_4_get_following_feed():
 
     async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_messages_following_async(limit="5")
+            result = await client.get_messages_following_async(limit=5)
 
             if result and result.get("value"):
                 messages = result["value"]

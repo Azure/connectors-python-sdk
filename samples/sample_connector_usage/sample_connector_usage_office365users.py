@@ -172,7 +172,7 @@ async def example_5_search_users():
         try:
             results = await client.search_user_async(
                 search_term=search_term,
-                top="10",
+                top=10,
             )
 
             if results and "value" in results:

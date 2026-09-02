@@ -73,7 +73,7 @@ async def example_2_get_records():
         try:
             result = await client.get_items_async(
                 table="account",
-                top="5",
+                top=5,
                 select="Id,Name,Phone",
             )
 

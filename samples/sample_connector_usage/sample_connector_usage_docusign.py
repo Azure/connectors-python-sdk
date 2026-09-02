@@ -56,7 +56,7 @@ async def example_2_search_envelopes(account_id: str) -> None:
     async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
         envelopes_response = await client.search_list_envelopes_async(
             account_id=account_id,
-            top="5",
+            top=5,
         )
 
         envelopes = envelopes_response.get("value", []) if envelopes_response else []
