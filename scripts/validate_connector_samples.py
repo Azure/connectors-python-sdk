@@ -36,6 +36,7 @@ class SampleVisitor(ast.NodeVisitor):
         self.modules = modules
         self.imported_symbols: dict[str, Any] = {}
         self.client_variables: dict[str, type[Any]] = {}
+        self.variable_types: dict[str, type[Any]] = {}
         self.issues: list[ValidationIssue] = []
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
@@ -65,12 +66,15 @@ class SampleVisitor(ast.NodeVisitor):
             self.imported_symbols[local_name] = getattr(module, imported_name.name)
 
     def visit_Assign(self, node: ast.Assign) -> None:
-        """Track client instances assigned to local names."""
+        """Track client instances and statically typed values assigned to names."""
         client_type = self._client_type_from_expression(node.value)
-        if client_type is not None:
-            for target in node.targets:
-                if isinstance(target, ast.Name):
+        value_type = self._infer_static_type(node.value)
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                if client_type is not None:
                     self.client_variables[target.id] = client_type
+                if value_type is not None:
+                    self.variable_types[target.id] = value_type
         self.generic_visit(node)
 
     def visit_AsyncWith(self, node: ast.AsyncWith) -> None:
@@ -117,6 +121,52 @@ class SampleVisitor(ast.NodeVisitor):
         if isinstance(node, ast.Name):
             return self.client_variables.get(node.id)
         return self._client_type_from_expression(node)
+
+    def _infer_static_type(self, node: ast.AST) -> type[Any] | None:
+        """Infer the type of a literal, simple name, environment value, or cast."""
+        if isinstance(node, ast.Name):
+            return self.variable_types.get(node.id)
+
+        try:
+            return type(ast.literal_eval(node))
+        except (ValueError, TypeError, SyntaxError):
+            pass
+
+        if not isinstance(node, ast.Call):
+            return None
+
+        if isinstance(node.func, ast.Name) and node.func.id in {
+            "bool",
+            "float",
+            "int",
+            "str",
+        }:
+            return {
+                "bool": bool,
+                "float": float,
+                "int": int,
+                "str": str,
+            }[node.func.id]
+
+        if (
+            isinstance(node.func, ast.Attribute)
+            and node.func.attr in {"get", "getenv"}
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "os"
+        ):
+            return str
+
+        if (
+            isinstance(node.func, ast.Attribute)
+            and node.func.attr == "get"
+            and isinstance(node.func.value, ast.Attribute)
+            and isinstance(node.func.value.value, ast.Name)
+            and node.func.value.value.id == "os"
+            and node.func.value.attr == "environ"
+        ):
+            return str
+
+        return None
 
     def _validate_signature(
         self,
@@ -187,14 +237,20 @@ class SampleVisitor(ast.NodeVisitor):
         annotation: Any,
         parameter_name: str,
     ) -> None:
-        """Validate a statically resolvable literal against an annotation."""
+        """Validate a statically resolvable value against an annotation."""
         try:
             value = ast.literal_eval(node)
         except (ValueError, TypeError, SyntaxError):
-            return
-
-        if _value_matches_annotation(value, annotation):
-            return
+            value_type = self._infer_static_type(node)
+            if value_type is None or _type_matches_annotation(
+                value_type,
+                annotation,
+            ):
+                return
+        else:
+            if _value_matches_annotation(value, annotation):
+                return
+            value_type = type(value)
 
         annotation_name = (
             getattr(annotation, "__name__", str(annotation))
@@ -203,7 +259,7 @@ class SampleVisitor(ast.NodeVisitor):
         )
         self._add_issue(
             node,
-            f"argument '{parameter_name}' has type '{type(value).__name__}', "
+            f"argument '{parameter_name}' has type '{value_type.__name__}', "
             f"expected '{annotation_name}'",
         )
 
@@ -245,6 +301,37 @@ def _value_matches_annotation(value: Any, annotation: Any) -> bool:
 
     if inspect.isclass(annotation):
         return type(value) is annotation
+
+    return True
+
+
+def _type_matches_annotation(value_type: type[Any], annotation: Any) -> bool:
+    """Return whether a statically inferred type is compatible with an annotation."""
+    if annotation is Any or annotation is inspect.Parameter.empty:
+        return True
+
+    origin = get_origin(annotation)
+    annotation_arguments = get_args(annotation)
+    if origin in (Union, UnionType):
+        return any(
+            _type_matches_annotation(value_type, item_type)
+            for item_type in annotation_arguments
+        )
+
+    if origin is Literal:
+        return any(
+            value_type is type(literal_value)
+            for literal_value in annotation_arguments
+        )
+
+    if origin in (list, dict, tuple, set):
+        return value_type is origin
+
+    if annotation is float:
+        return value_type in (int, float)
+
+    if inspect.isclass(annotation):
+        return value_type is annotation
 
     return True
 

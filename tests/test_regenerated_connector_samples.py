@@ -76,3 +76,35 @@ def test_sample_validator_rejects_incompatible_literal_type() -> None:
     assert [issue.message for issue in visitor.issues] == [
         "argument 'top' has type 'str', expected 'int'",
     ]
+
+
+def test_sample_validator_rejects_environment_string_for_integer() -> None:
+    """Test an environment string is rejected for an integer parameter."""
+    tree = ast.parse(
+        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "top = os.environ.get('TOP', '')\n"
+        "client.list_items_async(top=top)\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "argument 'top' has type 'str', expected 'int'",
+    ]
+
+
+def test_sample_validator_accepts_cast_environment_value() -> None:
+    """Test casting an environment value satisfies an integer parameter."""
+    tree = ast.parse(
+        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "top = int(os.environ.get('TOP', '0'))\n"
+        "client.list_items_async(top=top)\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(tree)
+
+    assert visitor.issues == []

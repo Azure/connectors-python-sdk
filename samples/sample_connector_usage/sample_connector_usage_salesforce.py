@@ -26,7 +26,7 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.salesforce import SalesforceClient
+from azure.connectors.salesforce import ExecuteSoqlQueryParameters, SalesforceClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/salesforce/[connection-id]
@@ -102,9 +102,9 @@ async def example_3_execute_soql():
 
     async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            query_input = {
-                "queryString": "SELECT Id, Name FROM Account LIMIT 5",
-            }
+            query_input = ExecuteSoqlQueryParameters(
+                query="SELECT Id, Name FROM Account LIMIT 5",
+            )
             result = await client.execute_soql_query_async(input=query_input)
 
             if result:

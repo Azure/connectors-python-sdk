@@ -176,7 +176,7 @@ async def example_6_get_user_details():
     async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Replace with an actual user ID
-            user_id = "current"  # 'current' gets the authenticated user
+            user_id = 123456789
             user = await client.get_user_details_by_id_async(user_id=user_id)
 
             if user:

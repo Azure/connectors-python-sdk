@@ -31,6 +31,8 @@ try:
     from azure.identity.aio import DefaultAzureCredential
     from azure.connectors import ConnectorException
     from azure.connectors.sharepointonline import (
+        PatchItemInput,
+        PostItemInput,
         SharepointonlineClient,
     )
     IMPORTS_AVAILABLE = True
@@ -123,9 +125,9 @@ async def example_3_create_list_item():
 
     async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            new_item = {
-                'Title': 'Test Task from Python SDK',
-            }
+            new_item = PostItemInput(
+                additional_properties={'Title': 'Test Task from Python SDK'},
+            )
 
             created = await client.post_item_async(
                 dataset=SHAREPOINT_SITE_URL,
@@ -142,7 +144,7 @@ async def example_3_create_list_item():
                 await client.delete_item_async(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
-                    id=str(item_id),
+                    id=int(item_id),
                 )
                 print(f"Cleaned up: Deleted test item {item_id}")
             else:
@@ -168,9 +170,9 @@ async def example_4_update_list_item():
         try:
             # CREATE
             print("Creating item...")
-            new_item = {
-                'Title': 'Task to Update',
-            }
+            new_item = PostItemInput(
+                additional_properties={'Title': 'Task to Update'},
+            )
             created = await client.post_item_async(
                 dataset=SHAREPOINT_SITE_URL,
                 table=list_name,
@@ -184,19 +186,19 @@ async def example_4_update_list_item():
             item = await client.get_item_async(
                 dataset=SHAREPOINT_SITE_URL,
                 table=list_name,
-                id=str(item_id),
+                id=int(item_id),
             )
             print(f"  Read item {item_id}: {item.get('Title')}")
 
             # UPDATE
             print("Updating item...")
-            updates = {
-                'Title': 'Updated Task Title',
-            }
+            updates = PatchItemInput(
+                additional_properties={'Title': 'Updated Task Title'},
+            )
             await client.patch_item_async(
                 dataset=SHAREPOINT_SITE_URL,
                 table=list_name,
-                id=str(item_id),
+                id=int(item_id),
                 input=updates,
             )
 
@@ -204,7 +206,7 @@ async def example_4_update_list_item():
             updated_item = await client.get_item_async(
                 dataset=SHAREPOINT_SITE_URL,
                 table=list_name,
-                id=str(item_id),
+                id=int(item_id),
             )
             print(f"  Updated item {item_id}: {updated_item.get('Title')}")
 
@@ -213,7 +215,7 @@ async def example_4_update_list_item():
             await client.delete_item_async(
                 dataset=SHAREPOINT_SITE_URL,
                 table=list_name,
-                id=str(item_id),
+                id=int(item_id),
             )
             print(f"  Deleted item {item_id}")
 
@@ -268,7 +270,7 @@ async def example_5_query_with_filters():
                     await client.delete_item_async(
                         dataset=SHAREPOINT_SITE_URL,
                         table=list_name,
-                        id=str(item['Id']),
+                        id=int(item['Id']),
                     )
             print("  Cleaned up test items")
 
@@ -335,7 +337,7 @@ async def example_7_error_handling():
     async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Attempt to get an item with an invalid ID
-            invalid_item_id = "99999"
+            invalid_item_id = 99999
             list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
 
             item = await client.get_item_async(

@@ -36,7 +36,7 @@ from azure.connectors.textrequest import (
 CONNECTION_RUNTIME_URL = os.environ.get("TEXTREQUEST_CONNECTION_URL", "")
 
 # The id of the dashboard to make calls on.
-DASHBOARD_ID = os.environ.get("TEXTREQUEST_DASHBOARD_ID", "")
+DASHBOARD_ID = int(os.environ.get("TEXTREQUEST_DASHBOARD_ID", "0"))
 
 
 async def example_1_send_message() -> None:
