@@ -235,7 +235,7 @@ class CampfireClient(ConnectorClientBase):
 
     async def get_user_async(
         self,
-        user_id: str,
+        user_id: int,
         account: str,
     ) -> dict[str, Any] | None:
         """

@@ -25,7 +25,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.dropbox import CreateFileInput, DropboxClient
+from azure.connectors.dropbox import DropboxClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/dropbox/[connection-id]
@@ -89,15 +89,8 @@ async def example_3_create_file():
 
     async with DropboxClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            upload_input = CreateFileInput(
-                additional_properties={
-                    "$content-type": "text/plain",
-                    "$content": "Hello from azure-connectors Dropbox sample!",
-                }
-            )
-
             result = await client.create_file_async(
-                input=upload_input,
+                input=b"Hello from azure-connectors Dropbox sample!",
                 folder_path=destination_folder,
                 name=destination_name,
             )
@@ -110,9 +103,9 @@ async def example_3_create_file():
             print(f"Connector error: {ex}")
 
 
-async def example_4_trigger_poll_examples():
-    """Example 4: Poll trigger endpoints manually for testing."""
-    print("\n=== Example 4: Trigger Poll Calls ===")
+async def example_4_list_folder_for_polling():
+    """Example 4: List a folder as the basis for polling logic."""
+    print("\n=== Example 4: List Folder for Polling ===")
 
     folder_id = os.environ.get("DROPBOX_TEST_FOLDER_ID", "")
     if not folder_id:
@@ -123,17 +116,10 @@ async def example_4_trigger_poll_examples():
 
     async with DropboxClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            content_payload = await client.on_new_file_async(folder_id=folder_id)
-            batch_payload = await client.on_new_files_async(
-                folder_id=folder_id,
-                max_file_count="10",
-            )
-
-            content_size = len(content_payload) if content_payload else 0
-            batch_count = len(batch_payload.get("value", [])) if batch_payload else 0
-
-            print(f"OnNewFile (content trigger) bytes: {content_size}")
-            print(f"OnNewFiles (properties trigger) count: {batch_count}")
+            result = await client.list_folder_async(id=folder_id)
+            items = result.get("value", []) if result else []
+            print(f"Folder listing returned {len(items)} item(s).")
+            print("Persist item IDs or timestamps to implement polling with this action client.")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
@@ -150,7 +136,7 @@ async def main():
     await example_1_list_root_folder()
     await example_2_get_file_metadata_by_path()
     await example_3_create_file()
-    await example_4_trigger_poll_examples()
+    await example_4_list_folder_for_polling()
 
     print("\n=== Dropbox sample completed ===")
 

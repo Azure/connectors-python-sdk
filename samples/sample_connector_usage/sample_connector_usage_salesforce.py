@@ -15,7 +15,9 @@ Installation:
 
 Usage:
     Set environment variable:
-    $env:SALESFORCE_CONNECTION_URL = "https://[region].azure-apihub.net/apim/salesforce/[connection-id]"
+    $env:SALESFORCE_CONNECTION_URL = (
+        "https://[region].azure-apihub.net/apim/salesforce/[connection-id]"
+    )
 
     python sample_connector_usage_salesforce.py
 """

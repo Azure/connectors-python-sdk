@@ -1386,7 +1386,7 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Time Off instances in a team
@@ -1540,7 +1540,7 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Shifts in a team
@@ -1694,7 +1694,7 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Open Shifts in a team
@@ -1883,7 +1883,7 @@ class ShiftsClient(ConnectorClientBase):
     async def list_time_off_reasons_async(
         self,
         team_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Time Off Reasons in a team
@@ -1928,7 +1928,7 @@ class ShiftsClient(ConnectorClientBase):
     async def list_scheduling_groups_async(
         self,
         team_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Scheduling Groups in a team
@@ -2010,7 +2010,7 @@ class ShiftsClient(ConnectorClientBase):
     async def list_time_off_requests_async(
         self,
         team_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         state: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -2175,7 +2175,7 @@ class ShiftsClient(ConnectorClientBase):
     async def list_offer_shift_requests_async(
         self,
         team_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         state: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -2341,7 +2341,7 @@ class ShiftsClient(ConnectorClientBase):
     async def list_swap_shifts_change_requests_async(
         self,
         team_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         state: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -2506,7 +2506,7 @@ class ShiftsClient(ConnectorClientBase):
     async def list_open_shift_change_requests_async(
         self,
         team_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         state: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -2672,7 +2672,7 @@ class ShiftsClient(ConnectorClientBase):
         self,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Open Shifts from my teams
@@ -2724,7 +2724,7 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Shifts from my teams
@@ -2780,7 +2780,7 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List all Times Off from my teams

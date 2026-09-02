@@ -374,7 +374,7 @@ class TwitterClient(ConnectorClientBase):
     async def user_timeline_async(
         self,
         user_name: str,
-        max_results: Optional[str] = None,
+        max_results: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get user timeline
@@ -415,7 +415,7 @@ class TwitterClient(ConnectorClientBase):
 
     async def home_timeline_async(
         self,
-        max_results: Optional[str] = None,
+        max_results: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get home timeline
@@ -453,7 +453,7 @@ class TwitterClient(ConnectorClientBase):
     async def search_tweet_async(
         self,
         search_query: str,
-        max_results: Optional[str] = None,
+        max_results: Optional[int] = None,
         since_id: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -501,7 +501,7 @@ class TwitterClient(ConnectorClientBase):
     async def followers_async(
         self,
         user_name: str,
-        max_results: Optional[str] = None,
+        max_results: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get followers
@@ -541,7 +541,7 @@ class TwitterClient(ConnectorClientBase):
 
     async def my_followers_async(
         self,
-        max_results: Optional[str] = None,
+        max_results: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get my followers
@@ -578,7 +578,7 @@ class TwitterClient(ConnectorClientBase):
     async def following_async(
         self,
         user_name: str,
-        max_results: Optional[str] = None,
+        max_results: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get following
@@ -618,7 +618,7 @@ class TwitterClient(ConnectorClientBase):
 
     async def my_following_async(
         self,
-        max_results: Optional[str] = None,
+        max_results: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get my following
@@ -731,7 +731,7 @@ class TwitterClient(ConnectorClientBase):
     async def retweet_async(
         self,
         tweet_id: str,
-        trim_user: Optional[str] = None,
+        trim_user: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Retweet

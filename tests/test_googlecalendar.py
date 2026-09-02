@@ -2,6 +2,8 @@
 
 """Unit tests for GooglecalendarClient."""
 
+import inspect
+
 import pytest
 from unittest.mock import AsyncMock, patch
 
@@ -16,6 +18,7 @@ from azure.connectors.googlecalendar import (
     RequestEvent,
     ResponseEvent,
     ResponseEventWithActionType,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -51,19 +54,6 @@ async def _invoke_operation(client: GooglecalendarClient, operation: str):
             calendar_id="cal123",
             event_id="evt123",
         )
-    if operation == "on_new_event_in_calendar":
-        return await client.on_new_event_in_calendar_async(calendar_id="cal123")
-    if operation == "on_updated_event_in_calendar":
-        return await client.on_updated_event_in_calendar_async(calendar_id="cal123")
-    if operation == "on_deleted_event_in_calendar":
-        return await client.on_deleted_event_in_calendar_async(calendar_id="cal123")
-    if operation == "on_changed_event_in_calendar":
-        return await client.on_changed_event_in_calendar_async(
-            calendar_id="cal123",
-            single_events="true",
-        )
-    if operation == "on_event_started":
-        return await client.on_event_started_async(calendar_id="cal123")
     if operation == "list_writable_calendars":
         return await client.list_writable_calendars_async()
 
@@ -242,30 +232,6 @@ class TestGooglecalendarClientMethods:
             assert isinstance(call_args.kwargs["body"], RequestEvent)
 
     @pytest.mark.asyncio
-    async def test_on_changed_event_in_calendar_success(self, mock_token_provider):
-        """Test on_changed_event_in_calendar_async handles optional query param."""
-        client = GooglecalendarClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"items": []}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.on_changed_event_in_calendar_async(
-                calendar_id="cal123",
-                single_events="true",
-            )
-
-            call_args = mock_send.call_args
-            assert "/trigger4/calendars/cal123/events" in call_args[0][1]
-            assert "singleEvents=true" in call_args[0][1]
-
-    @pytest.mark.asyncio
     async def test_list_writable_calendars_success(self, mock_token_provider):
         """Test list_writable_calendars_async includes fixed writer query."""
         client = GooglecalendarClient(
@@ -300,11 +266,6 @@ class TestGooglecalendarClientErrorHandling:
             "get_event",
             "delete_event",
             "update_event",
-            "on_new_event_in_calendar",
-            "on_updated_event_in_calendar",
-            "on_deleted_event_in_calendar",
-            "on_changed_event_in_calendar",
-            "on_event_started",
             "list_writable_calendars",
         ],
     )
@@ -330,6 +291,69 @@ class TestGooglecalendarClientErrorHandling:
                 await _invoke_operation(client, operation)
 
             assert exc_info.value.status_code == 500
+
+
+class TestGooglecalendarApiSurface:
+    """Tests for the generated callable and trigger operation surfaces."""
+
+    def test_callable_method_signatures(self):
+        """Test the client exposes exactly the generated callable methods."""
+        expected_signatures = {
+            "create_event_async": ("self", "input", "calendar_id"),
+            "delete_event_async": ("self", "calendar_id", "event_id"),
+            "get_event_async": ("self", "calendar_id", "event_id"),
+            "list_calendars_async": ("self", "min_access_role"),
+            "list_events_async": ("self", "calendar_id", "time_min", "time_max", "q"),
+            "list_writable_calendars_async": ("self",),
+            "update_event_async": ("self", "input", "calendar_id", "event_id"),
+        }
+        actual_signatures = {
+            name: tuple(inspect.signature(method).parameters)
+            for name, method in vars(GooglecalendarClient).items()
+            if inspect.iscoroutinefunction(method)
+        }
+
+        assert actual_signatures == expected_signatures
+
+    def test_trigger_registry_metadata(self):
+        """Test polling triggers are represented by exact registration metadata."""
+        assert TRIGGER_OPERATIONS == {
+            "OnNewEventInCalendar": {
+                "operation_id": "OnNewEventInCalendar",
+                "path": "/{connectionId}/trigger1/calendars/{calendar_id}/events",
+                "method": "get",
+                "required_parameters": ["calendar_id"],
+                "callback_payload_type": "CalendarEventList",
+            },
+            "OnUpdatedEventInCalendar": {
+                "operation_id": "OnUpdatedEventInCalendar",
+                "path": "/{connectionId}/trigger2/calendars/{calendar_id}/events",
+                "method": "get",
+                "required_parameters": ["calendar_id"],
+                "callback_payload_type": "CalendarEventList",
+            },
+            "OnDeletedEventInCalendar": {
+                "operation_id": "OnDeletedEventInCalendar",
+                "path": "/{connectionId}/trigger3/calendars/{calendar_id}/events",
+                "method": "get",
+                "required_parameters": ["calendar_id"],
+                "callback_payload_type": "CalendarEventList",
+            },
+            "OnChangedEventInCalendar": {
+                "operation_id": "OnChangedEventInCalendar",
+                "path": "/{connectionId}/trigger4/calendars/{calendar_id}/events",
+                "method": "get",
+                "required_parameters": ["calendar_id"],
+                "callback_payload_type": "CalendarEventChangedList",
+            },
+            "OnEventStarted": {
+                "operation_id": "OnEventStarted",
+                "path": "/{connectionId}/eventstarted/calendars/{calendar_id}/events",
+                "method": "get",
+                "required_parameters": ["calendar_id"],
+                "callback_payload_type": "CalendarEventList",
+            },
+        }
 
 
 class TestGooglecalendarTypeSerialization:

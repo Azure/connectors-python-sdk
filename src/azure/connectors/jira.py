@@ -1090,7 +1090,7 @@ class JiraClient(ConnectorClientBase):
     async def delete_project_async(
         self,
         project_id_or_key: str,
-        enable_undo: Optional[str] = None,
+        enable_undo: Optional[bool] = None,
     ) -> None:
         """
         Delete Project
@@ -1127,9 +1127,9 @@ class JiraClient(ConnectorClientBase):
         self,
         input: EditIssueInput,
         issue_id_or_key: str,
-        notify_users: Optional[str] = None,
-        override_screen_security: Optional[str] = None,
-        override_editable_flag: Optional[str] = None,
+        notify_users: Optional[bool] = None,
+        override_screen_security: Optional[bool] = None,
+        override_editable_flag: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Edit Issue
@@ -1405,7 +1405,7 @@ class JiraClient(ConnectorClientBase):
 
     async def remove_project_category_async(
         self,
-        id: str,
+        id: int,
     ) -> None:
         """
         Remove Project Category

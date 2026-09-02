@@ -31,12 +31,24 @@ class TableMetadata:
     """Table name"""
     title: Optional[str] = None
     """Table title"""
-    x_ms_permission: Optional[str] = None
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
     schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """Url link"""
 
 
@@ -56,7 +68,10 @@ class Item:
     Response for Get a row
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
@@ -130,13 +145,25 @@ class TabularDataSetsMetadata:
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
@@ -148,9 +175,15 @@ class BlobDataSetsMetadata:
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
@@ -160,11 +193,17 @@ class TableToCreate:
     Definition: TableToCreate
     """
 
-    table_name: Optional[str] = None
+    table_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TableName"},
+    )
     """Enter the Excel table name."""
-    range: Optional[str] = None
+    range: Optional[str] = field(default=None, metadata={"wire_name": "Range"})
     """Enter the table address using A1 notation."""
-    columns_names: Optional[str] = None
+    columns_names: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ColumnsNames"},
+    )
     """Enter the columns names separated by ';' or ','."""
 
 
@@ -174,14 +213,32 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
@@ -206,9 +263,15 @@ class TableSortRestrictionsMetadata:
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
@@ -220,9 +283,15 @@ class TableFilterRestrictionsMetadata:
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
@@ -252,11 +321,17 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
@@ -266,17 +341,26 @@ class BlobMetadata:
     Definition: BlobMetadata
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
@@ -322,7 +406,7 @@ class ExcelonlineClient(ConnectorClientBase):
         input: TableToCreate,
         drive: str,
         file: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create table
 
@@ -330,7 +414,11 @@ class ExcelonlineClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/drives/{str(drive)}/files/{str(file)}/tables"
+            f"/drives"
+            f"/{quote(str(drive), safe='')}"
+            f"/files"
+            f"/{quote(str(file), safe='')}"
+            f"/tables"
         )
         query_params = []
         query_params.append("source=" + quote("me"))
@@ -360,7 +448,7 @@ class ExcelonlineClient(ConnectorClientBase):
         file: str,
         table: str,
         id_column: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Add a key column to a table
 
@@ -370,11 +458,11 @@ class ExcelonlineClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/createIdColumn"
         )
         query_params = []
@@ -407,11 +495,11 @@ class ExcelonlineClient(ConnectorClientBase):
         table: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
         date_time_format: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List rows present in a table
 
@@ -419,7 +507,13 @@ class ExcelonlineClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/drives/{str(drive)}/files/{str(file)}/tables/{str(table)}/items"
+            f"/drives"
+            f"/{quote(str(drive), safe='')}"
+            f"/files"
+            f"/{quote(str(file), safe='')}"
+            f"/tables"
+            f"/{quote(str(table), safe='')}"
+            f"/items"
         )
         query_params = []
         query_params.append("source=" + quote("me"))
@@ -479,9 +573,9 @@ class ExcelonlineClient(ConnectorClientBase):
         file: str,
         table: str,
         id: str,
-        id_column: Optional[str],
+        id_column: str,
         date_time_format: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a row
 
@@ -491,21 +585,20 @@ class ExcelonlineClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
         query_params.append("source=" + quote("me"))
-        if id_column is not None:
-            value = str(id_column)
-            if isinstance(id_column, bool):
-                value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
+        value = str(id_column)
+        if isinstance(id_column, bool):
+            value = value.lower()
+        query_params.append(f"idColumn={quote(value)}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
@@ -537,8 +630,8 @@ class ExcelonlineClient(ConnectorClientBase):
         file: str,
         table: str,
         id: str,
-        id_column: Optional[str],
-    ):
+        id_column: str,
+    ) -> None:
         """
         Delete a row
 
@@ -547,21 +640,20 @@ class ExcelonlineClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
         query_params.append("source=" + quote("me"))
-        if id_column is not None:
-            value = str(id_column)
-            if isinstance(id_column, bool):
-                value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
+        value = str(id_column)
+        if isinstance(id_column, bool):
+            value = value.lower()
+        query_params.append(f"idColumn={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -584,9 +676,9 @@ class ExcelonlineClient(ConnectorClientBase):
         file: str,
         table: str,
         id: str,
-        id_column: Optional[str],
+        id_column: str,
         date_time_format: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a row
 
@@ -598,21 +690,20 @@ class ExcelonlineClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
         query_params.append("source=" + quote("me"))
-        if id_column is not None:
-            value = str(id_column)
-            if isinstance(id_column, bool):
-                value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
+        value = str(id_column)
+        if isinstance(id_column, bool):
+            value = value.lower()
+        query_params.append(f"idColumn={quote(value)}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
@@ -642,7 +733,7 @@ class ExcelonlineClient(ConnectorClientBase):
         self,
         drive: str,
         file: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get worksheets
 
@@ -653,9 +744,9 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/codeless"
             f"/v1.0"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/workbook"
             f"/worksheets"
         )
@@ -686,7 +777,7 @@ class ExcelonlineClient(ConnectorClientBase):
         input: CreateWorksheetInput,
         drive: str,
         file: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create worksheet
 
@@ -697,9 +788,9 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/codeless"
             f"/v1.0"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/workbook"
             f"/worksheets"
         )
@@ -729,7 +820,7 @@ class ExcelonlineClient(ConnectorClientBase):
         self,
         drive: str,
         file: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get tables
 
@@ -740,9 +831,9 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/codeless"
             f"/v1.0"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/workbook"
             f"/tables"
         )
@@ -775,7 +866,7 @@ class ExcelonlineClient(ConnectorClientBase):
         file: str,
         table: str,
         date_time_format: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add a row into a table
 
@@ -786,12 +877,12 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/codeless"
             f"/v1.2"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/workbook"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/rows"
         )
         query_params = []
@@ -826,7 +917,7 @@ class ExcelonlineClient(ConnectorClientBase):
         drive: str,
         file: str,
         table: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get table columns
 
@@ -837,12 +928,12 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/codeless"
             f"/v1.0"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(str(file), safe='')}"
             f"/workbook"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/columns"
         )
         query_params = []

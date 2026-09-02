@@ -36,6 +36,7 @@ from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azureautomation import (
     AzureautomationClient,
+    CreateJobInput,
     CreateJobResponse,
     Subscription,
     ResourceGroup,
@@ -99,9 +100,10 @@ async def example_2_create_job():
         try:
             # Create a new automation job
             result = await client.create_job_async(
+                input=CreateJobInput(properties={}),
                 subscription_id=SUBSCRIPTION_ID,
                 resource_group_name=RESOURCE_GROUP_NAME,
-                automation_account=AUTOMATION_ACCOUNT
+                automation_account=AUTOMATION_ACCOUNT,
             )
 
             if result:
@@ -129,10 +131,11 @@ async def example_3_create_job_and_wait():
         try:
             # Create job with wait parameter to wait for completion
             result = await client.create_job_async(
+                input=CreateJobInput(properties={}),
                 subscription_id=SUBSCRIPTION_ID,
                 resource_group_name=RESOURCE_GROUP_NAME,
                 automation_account=AUTOMATION_ACCOUNT,
-                wait="true"
+                wait=True,
             )
 
             if result:

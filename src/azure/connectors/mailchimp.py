@@ -1053,8 +1053,8 @@ class MailchimpClient(ConnectorClientBase):
 
     async def get_lists_async(
         self,
-        count: Optional[str] = None,
-        offset: Optional[str] = None,
+        count: Optional[int] = None,
+        offset: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get all the lists
@@ -1125,8 +1125,8 @@ class MailchimpClient(ConnectorClientBase):
         self,
         input: NewMembersInListRequest,
         list_id: str,
-        skip_merge_validation: Optional[str] = None,
-        skip_duplicate_check: Optional[str] = None,
+        skip_merge_validation: Optional[bool] = None,
+        skip_duplicate_check: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Subscribe or unsubscribe list members
@@ -1171,8 +1171,8 @@ class MailchimpClient(ConnectorClientBase):
     async def get_list_members_async(
         self,
         list_id: str,
-        count: Optional[str] = None,
-        offset: Optional[str] = None,
+        count: Optional[int] = None,
+        offset: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Show list members

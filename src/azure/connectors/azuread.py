@@ -789,7 +789,7 @@ class AzureadClient(ConnectorClientBase):
     async def get_group_members_async(
         self,
         id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get group members

@@ -206,8 +206,7 @@ class TestCreateIdColumn:
                 file="file-id",
                 table="Table1",
                 source="me",
-                id_column="ID",
-                populate_column="true"
+                id_column="ID"
             )
 
             mock_send.assert_called_once()
@@ -237,8 +236,7 @@ class TestCreateIdColumn:
                     file="file-id",
                     table="InvalidTable",
                     source="me",
-                    id_column="ID",
-                    populate_column="true"
+                    id_column="ID"
                 )
 
             assert exc_info.value.status_code == 400

@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class LocationListResult:
-    """Response for Lists the subscription locations"""
+    """
+    Response for Lists the subscription locations
+    """
 
     value: Optional[List[Location]] = None
     """The locations."""
@@ -31,23 +33,40 @@ class LocationListResult:
 
 @dataclass
 class Subscription:
-    """Response for Read a subscription"""
+    """
+    Response for Read a subscription
+    """
 
     id: Optional[str] = None
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """The subscription Id."""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The tenant Id."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The subscription display name."""
     state: Optional[str] = None
     """The subscription state."""
-    subscription_policies: Optional[SubscriptionPolicies] = None
-    authorization_source: Optional[str] = None
+    subscription_policies: Optional[SubscriptionPolicies] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionPolicies"},
+    )
+    authorization_source: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "authorizationSource"},
+    )
     """
     The authorization source of the request. Valid values are one or more
     combinations of Legacy, RoleBased, Bypassed, Direct and Management. For
@@ -57,17 +76,24 @@ class Subscription:
 
 @dataclass
 class SubscriptionListResult:
-    """Response for List subscriptions"""
+    """
+    Response for List subscriptions
+    """
 
     value: Optional[List[Subscription]] = None
     """The subscriptions."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class DeploymentExtended:
-    """Response for Read a template deployment"""
+    """
+    Response for Read a template deployment
+    """
 
     id: Optional[str] = None
     """The ID of the deployment."""
@@ -78,7 +104,9 @@ class DeploymentExtended:
 
 @dataclass
 class DeploymentValidateResult:
-    """Response for Validate a template deployment"""
+    """
+    Response for Validate a template deployment
+    """
 
     error: Optional[ResourceManagementErrorWithDetails] = None
     properties: Optional[DeploymentPropertiesExtended] = None
@@ -86,7 +114,9 @@ class DeploymentValidateResult:
 
 @dataclass
 class DeploymentExportResult:
-    """Response for Export deployment template"""
+    """
+    Response for Export deployment template
+    """
 
     template: Optional[Dict[str, Any]] = None
     """The template content."""
@@ -94,72 +124,107 @@ class DeploymentExportResult:
 
 @dataclass
 class DeploymentListResult:
-    """Response for List template deployments"""
+    """
+    Response for List template deployments
+    """
 
     value: Optional[List[DeploymentExtended]] = None
     """The list of deployments."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class DeploymentOperation:
-    """Response for Read a template deployment operation"""
+    """
+    Response for Read a template deployment operation
+    """
 
     id: Optional[str] = None
     """Full deployment operation id."""
-    operation_id: Optional[str] = None
+    operation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "operationId"},
+    )
     """Deployment operation id."""
     properties: Optional[DeploymentOperationProperties] = None
 
 
 @dataclass
 class DeploymentOperationsListResult:
-    """Response for Lists template deployment operations"""
+    """
+    Response for Lists template deployment operations
+    """
 
     value: Optional[List[DeploymentOperation]] = None
     """The list of deployments."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class Provider:
-    """Response for Unregister resource provider"""
+    """
+    Response for Unregister resource provider
+    """
 
     id: Optional[str] = None
     """The provider id."""
     namespace: Optional[str] = None
     """The namespace of the provider."""
-    registration_state: Optional[str] = None
+    registration_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "registrationState"},
+    )
     """The registration state of the provider."""
-    resource_types: Optional[List[ProviderResourceType]] = None
+    resource_types: Optional[List[ProviderResourceType]] = field(
+        default=None,
+        metadata={"wire_name": "resourceTypes"},
+    )
     """The collection of provider resource types."""
 
 
 @dataclass
 class ProviderListResult:
-    """Response for List resource providers"""
+    """
+    Response for List resource providers
+    """
 
     value: Optional[List[Provider]] = None
     """The list of resource providers."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class ResourceListResult:
-    """Response for List resources by resource group"""
+    """
+    Response for List resources by resource group
+    """
 
     value: Optional[List[GenericResource]] = None
     """The list of resources."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class ResourceGroup:
-    """Response for Read a resource group"""
+    """
+    Response for Read a resource group
+    """
 
     id: Optional[str] = None
     """
@@ -173,7 +238,10 @@ class ResourceGroup:
     group has been created. Has to be one of the supported Azure Locations,
     such as West US, East US, West Europe, East Asia, etc.
     """
-    managed_by: Optional[str] = None
+    managed_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managedBy"},
+    )
     """Id of the resource that manages this resource group."""
     tags: Optional[Dict[str, Any]] = None
     """The tags attached to the resource group."""
@@ -182,7 +250,9 @@ class ResourceGroup:
 
 @dataclass
 class ResourceGroupExportResult:
-    """Response for Export a resource group template"""
+    """
+    Response for Export a resource group template
+    """
 
     template: Optional[Dict[str, Any]] = None
     """The template content."""
@@ -191,23 +261,30 @@ class ResourceGroupExportResult:
 
 @dataclass
 class ResourceGroupListResult:
-    """Response for List resource groups"""
+    """
+    Response for List resource groups
+    """
 
     value: Optional[List[ResourceGroup]] = None
     """The list of resource groups."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class GenericResource:
-    """Response for Read a resource"""
+    """
+    Response for Read a resource
+    """
 
     id: Optional[str] = None
     """Resource Id"""
     name: Optional[str] = None
     """Resource name"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Resource type"""
     location: Optional[str] = None
     """Resource location"""
@@ -216,7 +293,10 @@ class GenericResource:
     plan: Optional[Plan] = None
     kind: Optional[str] = None
     """The kind of the resource."""
-    managed_by: Optional[str] = None
+    managed_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managedBy"},
+    )
     """Id of the resource that manages this resource."""
     sku: Optional[Sku] = None
     identity: Optional[Identity] = None
@@ -226,7 +306,9 @@ class GenericResource:
 
 @dataclass
 class ResourcesInvokeInput:
-    """Invoke resource operation"""
+    """
+    Invoke resource operation
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -237,7 +319,9 @@ class ResourcesInvokeInput:
 
 @dataclass
 class ResourcesInvokeResponse:
-    """Response for Invoke resource operation"""
+    """
+    Response for Invoke resource operation
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -248,7 +332,9 @@ class ResourcesInvokeResponse:
 
 @dataclass
 class ProviderResourcesInvokeInput:
-    """Invoke resource operation in provider"""
+    """
+    Invoke resource operation in provider
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -259,7 +345,9 @@ class ProviderResourcesInvokeInput:
 
 @dataclass
 class ProviderResourcesInvokeResponse:
-    """Response for Invoke resource operation in provider"""
+    """
+    Response for Invoke resource operation in provider
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -270,22 +358,32 @@ class ProviderResourcesInvokeResponse:
 
 @dataclass
 class TagValue:
-    """Response for Create or update a subscription resource tag value"""
+    """
+    Response for Create or update a subscription resource tag value
+    """
 
     id: Optional[str] = None
     """The tag ID."""
-    tag_value: Optional[str] = None
+    tag_value: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tagValue"},
+    )
     """The tag value."""
     count: Optional[TagCount] = None
 
 
 @dataclass
 class TagDetails:
-    """Response for Create or update a subscription resource tag name"""
+    """
+    Response for Create or update a subscription resource tag name
+    """
 
     id: Optional[str] = None
     """The tag ID."""
-    tag_name: Optional[str] = None
+    tag_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tagName"},
+    )
     """The tag name."""
     count: Optional[TagCount] = None
     values: Optional[List[TagValue]] = None
@@ -294,28 +392,41 @@ class TagDetails:
 
 @dataclass
 class TagsListResult:
-    """Response for List subscription resource tags"""
+    """
+    Response for List subscription resource tags
+    """
 
     value: Optional[List[TagDetails]] = None
     """The list of tags."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class Location:
-    """Definition: Location"""
+    """
+    Definition: Location
+    """
 
     id: Optional[str] = None
     """
     The fully qualified Id of the location. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000/locations/westus.
     """
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """The subscription Id."""
     name: Optional[str] = None
     """The location name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The display name of the location."""
     latitude: Optional[str] = None
     """The latitude of the location."""
@@ -325,79 +436,120 @@ class Location:
 
 @dataclass
 class SubscriptionPolicies:
-    """Definition: SubscriptionPolicies"""
+    """
+    Definition: SubscriptionPolicies
+    """
 
-    location_placement_id: Optional[str] = None
+    location_placement_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "locationPlacementId"},
+    )
     """
     The subscription location placement Id. The Id indicates which regions are
     visible for a subscription. For example, a subscription with a location
     placement Id of Public_2014-09-01 has access to Azure public regions.
     """
-    quota_id: Optional[str] = None
+    quota_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "quotaId"},
+    )
     """The subscription quota Id."""
-    spending_limit: Optional[str] = None
+    spending_limit: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "spendingLimit"},
+    )
     """The subscription spending limit."""
 
 
 @dataclass
 class TemplateLink:
-    """Definition: TemplateLink"""
+    """
+    Definition: TemplateLink
+    """
 
     uri: Optional[str] = None
     """URI referencing the template."""
-    content_version: Optional[str] = None
+    content_version: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentVersion"},
+    )
     """If included it must match the ContentVersion in the template."""
 
 
 @dataclass
 class ParametersLink:
-    """Definition: ParametersLink"""
+    """
+    Definition: ParametersLink
+    """
 
     uri: Optional[str] = None
     """URI referencing the template."""
-    content_version: Optional[str] = None
+    content_version: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentVersion"},
+    )
     """If included it must match the ContentVersion in the template."""
 
 
 @dataclass
 class DeploymentProperties:
-    """Definition: DeploymentProperties"""
+    """
+    Definition: DeploymentProperties
+    """
 
     template: Optional[Dict[str, Any]] = None
     """
     The template content. It can be a JObject or a well formed JSON string. Use
     only one of Template or TemplateLink.
     """
-    template_link: Optional[TemplateLink] = None
+    template_link: Optional[TemplateLink] = field(
+        default=None,
+        metadata={"wire_name": "templateLink"},
+    )
     parameters: Optional[Dict[str, Any]] = None
     """
     Deployment parameters. It can be a JObject or a well formed JSON string.
     Use only one of Parameters or ParametersLink.
     """
-    parameters_link: Optional[ParametersLink] = None
+    parameters_link: Optional[ParametersLink] = field(
+        default=None,
+        metadata={"wire_name": "parametersLink"},
+    )
     mode: Optional[str] = None
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = None
+    debug_setting: Optional[DebugSetting] = field(
+        default=None,
+        metadata={"wire_name": "debugSetting"},
+    )
 
 
 @dataclass
 class DebugSetting:
-    """Definition: DebugSetting"""
+    """
+    Definition: DebugSetting
+    """
 
-    detail_level: Optional[str] = None
+    detail_level: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "detailLevel"},
+    )
     """The debug detail level."""
 
 
 @dataclass
 class Deployment:
-    """Definition: Deployment"""
+    """
+    Definition: Deployment
+    """
 
     properties: Optional[DeploymentProperties] = None
 
 
 @dataclass
 class ResourceManagementErrorWithDetails:
-    """Definition: ResourceManagementErrorWithDetails"""
+    """
+    Definition: ResourceManagementErrorWithDetails
+    """
 
     code: Optional[str] = None
     """The error code returned from the server."""
@@ -411,17 +563,24 @@ class ResourceManagementErrorWithDetails:
 
 @dataclass
 class AliasPathType:
-    """Definition: AliasPathType"""
+    """
+    Definition: AliasPathType
+    """
 
     path: Optional[str] = None
     """The path of an alias."""
-    api_versions: Optional[List[str]] = None
+    api_versions: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "apiVersions"},
+    )
     """The api versions."""
 
 
 @dataclass
 class AliasType:
-    """Definition: AliasType"""
+    """
+    Definition: AliasType
+    """
 
     name: Optional[str] = None
     """The alias name."""
@@ -431,9 +590,14 @@ class AliasType:
 
 @dataclass
 class ProviderResourceType:
-    """Definition: ProviderResourceType"""
+    """
+    Definition: ProviderResourceType
+    """
 
-    resource_type: Optional[str] = None
+    resource_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceType"},
+    )
     """The resource type."""
     locations: Optional[List[ObjectWithoutType]] = None
     """
@@ -441,7 +605,10 @@ class ProviderResourceType:
     """
     aliases: Optional[List[AliasType]] = None
     """The aliases that are supported by this resource type."""
-    api_versions: Optional[List[str]] = None
+    api_versions: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "apiVersions"},
+    )
     """The api version."""
     properties: Optional[Dict[str, Any]] = None
     """The properties."""
@@ -449,37 +616,64 @@ class ProviderResourceType:
 
 @dataclass
 class BasicDependency:
-    """Definition: BasicDependency"""
+    """
+    Definition: BasicDependency
+    """
 
     id: Optional[str] = None
     """The ID of the dependency."""
-    resource_type: Optional[str] = None
+    resource_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceType"},
+    )
     """The dependency resource type."""
-    resource_name: Optional[str] = None
+    resource_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceName"},
+    )
     """The dependency resource name."""
 
 
 @dataclass
 class Dependency:
-    """Definition: Dependency"""
+    """
+    Definition: Dependency
+    """
 
-    depends_on: Optional[List[BasicDependency]] = None
+    depends_on: Optional[List[BasicDependency]] = field(
+        default=None,
+        metadata={"wire_name": "dependsOn"},
+    )
     """The list of dependencies."""
     id: Optional[str] = None
     """The ID of the dependency."""
-    resource_type: Optional[str] = None
+    resource_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceType"},
+    )
     """The dependency resource type."""
-    resource_name: Optional[str] = None
+    resource_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceName"},
+    )
     """The dependency resource name."""
 
 
 @dataclass
 class DeploymentPropertiesExtended:
-    """Definition: DeploymentPropertiesExtended"""
+    """
+    Definition: DeploymentPropertiesExtended
+    """
 
-    provisioning_state: Optional[str] = None
+    provisioning_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisioningState"},
+    )
     """The state of the provisioning."""
-    correlation_id: Optional[str] = None
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "correlationId"},
+    )
     """The correlation ID of the deployment."""
     timestamp: Optional[str] = None
     """The timestamp of the template deployment."""
@@ -491,18 +685,29 @@ class DeploymentPropertiesExtended:
     """The list of deployment dependencies."""
     template: Optional[Dict[str, Any]] = None
     """The template content. Use only one of Template or TemplateLink."""
-    template_link: Optional[TemplateLink] = None
+    template_link: Optional[TemplateLink] = field(
+        default=None,
+        metadata={"wire_name": "templateLink"},
+    )
     parameters: Optional[Dict[str, Any]] = None
     """Deployment parameters. Use only one of Parameters or ParametersLink."""
-    parameters_link: Optional[ParametersLink] = None
+    parameters_link: Optional[ParametersLink] = field(
+        default=None,
+        metadata={"wire_name": "parametersLink"},
+    )
     mode: Optional[str] = None
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = None
+    debug_setting: Optional[DebugSetting] = field(
+        default=None,
+        metadata={"wire_name": "debugSetting"},
+    )
 
 
 @dataclass
 class Plan:
-    """Definition: Plan"""
+    """
+    Definition: Plan
+    """
 
     name: Optional[str] = None
     """The plan ID."""
@@ -510,13 +715,18 @@ class Plan:
     """The publisher ID."""
     product: Optional[str] = None
     """The offer ID."""
-    promotion_code: Optional[str] = None
+    promotion_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "promotionCode"},
+    )
     """The promotion code."""
 
 
 @dataclass
 class Sku:
-    """Definition: Sku"""
+    """
+    Definition: Sku
+    """
 
     name: Optional[str] = None
     """The sku name."""
@@ -534,27 +744,42 @@ class Sku:
 
 @dataclass
 class Identity:
-    """Definition: Identity"""
+    """
+    Definition: Identity
+    """
 
-    principal_id: Optional[str] = None
+    principal_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "principalId"},
+    )
     """The principal id of resource identity."""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The tenant id of resource."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """The identity type."""
 
 
 @dataclass
 class ResourceGroupProperties:
-    """Definition: ResourceGroupProperties"""
+    """
+    Definition: ResourceGroupProperties
+    """
 
-    provisioning_state: Optional[str] = None
+    provisioning_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisioningState"},
+    )
     """The provisioning state."""
 
 
 @dataclass
 class ExportTemplateRequest:
-    """Definition: ExportTemplateRequest"""
+    """
+    Definition: ExportTemplateRequest
+    """
 
     resources: Optional[List[str]] = None
     """
@@ -571,9 +796,11 @@ class ExportTemplateRequest:
 
 @dataclass
 class TagCount:
-    """Definition: TagCount"""
+    """
+    Definition: TagCount
+    """
 
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """Type of count."""
     value: Optional[int] = None
     """Value of count."""
@@ -581,19 +808,29 @@ class TagCount:
 
 @dataclass
 class TargetResource:
-    """Definition: TargetResource"""
+    """
+    Definition: TargetResource
+    """
 
     id: Optional[str] = None
     """The ID of the resource."""
-    resource_name: Optional[str] = None
+    resource_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceName"},
+    )
     """The name of the resource."""
-    resource_type: Optional[str] = None
+    resource_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "resourceType"},
+    )
     """The type of the resource."""
 
 
 @dataclass
 class HttpMessage:
-    """Definition: HttpMessage"""
+    """
+    Definition: HttpMessage
+    """
 
     content: Optional[Dict[str, Any]] = None
     """HTTP message content."""
@@ -601,26 +838,45 @@ class HttpMessage:
 
 @dataclass
 class DeploymentOperationProperties:
-    """Definition: DeploymentOperationProperties"""
+    """
+    Definition: DeploymentOperationProperties
+    """
 
-    provisioning_state: Optional[str] = None
+    provisioning_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisioningState"},
+    )
     """The state of the provisioning."""
     timestamp: Optional[str] = None
     """The date and time of the operation."""
-    service_request_id: Optional[str] = None
+    service_request_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "serviceRequestId"},
+    )
     """Deployment operation service request id."""
-    status_code: Optional[str] = None
+    status_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "statusCode"},
+    )
     """Operation status code."""
-    status_message: Optional[Dict[str, Any]] = None
+    status_message: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "statusMessage"},
+    )
     """Operation status message."""
-    target_resource: Optional[TargetResource] = None
+    target_resource: Optional[TargetResource] = field(
+        default=None,
+        metadata={"wire_name": "targetResource"},
+    )
     request: Optional[HttpMessage] = None
     response: Optional[HttpMessage] = None
 
 
 @dataclass
 class ObjectWithoutType:
-    """Definition: ObjectWithoutType"""
+    """
+    Definition: ObjectWithoutType
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -666,32 +922,29 @@ class ArmClient(ConnectorClientBase):
     async def subscriptions_list_locations_async(
         self,
         subscription_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Lists the subscription locations
 
         Lists the locations available for the subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}/locations"
+            f"/subscriptions/{quote(str(subscription_id), safe='')}/locations"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -704,32 +957,29 @@ class ArmClient(ConnectorClientBase):
     async def subscriptions_get_async(
         self,
         subscription_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Read a subscription
 
         Reads the details for a particular subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}"
+            f"/subscriptions/{quote(str(subscription_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -741,29 +991,26 @@ class ArmClient(ConnectorClientBase):
 
     async def subscriptions_list_async(
         self,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         List subscriptions
 
         Gets a list of all the subscriptions to which the principal has access.
         """
-        path = f"{self._connection_runtime_url}/subscriptions"
+        request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -778,45 +1025,42 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        x_ms_api_version: Optional[str],
-        wait: Optional[str] = None,
-    ):
+        wait: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Read a template deployment
 
         Reads a template deployment within a resource group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Resources"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if wait is not None:
             value = str(wait)
             if isinstance(wait, bool):
                 value = value.lower()
             query_params.append(f"wait={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -832,46 +1076,43 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        x_ms_api_version: Optional[str],
-        wait: Optional[str] = None,
-    ):
+        wait: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Create or update a template deployment
 
         Create or update a named resource group template deployment. A template
         and parameters are expected for the request to succeed.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Resources"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if wait is not None:
             value = str(wait)
             if isinstance(wait, bool):
                 value = value.lower()
             query_params.append(f"wait={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -886,40 +1127,37 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Delete template deployment
 
         Deletes a resource group template deployment. The resources will not be
         deleted; only the metadata about the template deployment.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Resources"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -929,41 +1167,38 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Cancel a template deployment
 
         Cancel a currently running template deployment. All pending template
         operations will be suspended.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Resources"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
             f"/cancel"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -974,8 +1209,7 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Validate a template deployment
 
@@ -983,33 +1217,31 @@ class ArmClient(ConnectorClientBase):
         effects and can be used to test a template deployment for syntax or
         logical errors.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Resources"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
             f"/validate"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1024,40 +1256,37 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Export deployment template
 
         Exports a template from a past resource group deployment.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Resources"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
             f"/exportTemplate"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1071,27 +1300,27 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         resource_group_name: str,
-        x_ms_api_version: Optional[str],
         filter: Optional[str] = None,
-        top: Optional[str] = None,
-    ):
+        top: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
         List template deployments
 
         Lists all the resource group template deployments. This operation is
         useful to know what has been provisioned thus far.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Resources"
             f"/deployments"
         )
         query_params = []
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -1102,20 +1331,17 @@ class ArmClient(ConnectorClientBase):
             if isinstance(top, bool):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1131,40 +1357,37 @@ class ArmClient(ConnectorClientBase):
         resource_group_name: str,
         deployment_name: str,
         operation_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Read a template deployment operation
 
         Reads a particular resource group template deployment operation. This
         is useful for troubleshooting failed template deployments.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
             f"/operations"
-            f"/{str(operation_id)}"
+            f"/{quote(str(operation_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1179,45 +1402,42 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        x_ms_api_version: Optional[str],
-        top: Optional[str] = None,
-    ):
+        top: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
         Lists template deployment operations
 
         Lists all the template deployment operations. This is useful for
         troubleshooting failed template deployments.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/deployments"
-            f"/{str(deployment_name)}"
+            f"/{quote(str(deployment_name), safe='')}"
             f"/operations"
         )
         query_params = []
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1231,8 +1451,7 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         resource_provider_namespace: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Unregister resource provider
 
@@ -1240,29 +1459,27 @@ class ArmClient(ConnectorClientBase):
         there are any resources from that resource provider in the
         subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
             f"/unregister"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1276,37 +1493,34 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         resource_provider_namespace: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Register resource provider
 
         Registers a resource provider to be used with a subscription. This will
         provision permissions for the service into your subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
             f"/register"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1319,20 +1533,20 @@ class ArmClient(ConnectorClientBase):
     async def providers_list_async(
         self,
         subscription_id: str,
-        x_ms_api_version: Optional[str],
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         expand: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List resource providers
 
         Lists the resource providers available for the subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}/providers"
+            f"/subscriptions/{quote(str(subscription_id), safe='')}/providers"
         )
         query_params = []
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
@@ -1343,20 +1557,17 @@ class ArmClient(ConnectorClientBase):
             if isinstance(expand, bool):
                 value = value.lower()
             query_params.append(f"$expand={quote(value)}")
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1370,41 +1581,38 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         resource_provider_namespace: str,
-        x_ms_api_version: Optional[str],
         expand: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Read resource provider
 
         Reads a particular resource provider within the subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
         )
         query_params = []
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
             query_params.append(f"$expand={quote(value)}")
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1418,30 +1626,25 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         resource_group_name: str,
-        x_ms_api_version: Optional[str],
         filter: Optional[str] = None,
         expand: Optional[str] = None,
-        top: Optional[str] = None,
-    ):
+        top: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
         List resources by resource group
 
         Lists all the resources under a resource group.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourceGroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/resources"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -1458,14 +1661,16 @@ class ArmClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1479,35 +1684,32 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         resource_group_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Read a resource group
 
         Reads a particular resource group within the subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1522,36 +1724,33 @@ class ArmClient(ConnectorClientBase):
         input: ResourceGroup,
         subscription_id: str,
         resource_group_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create or update a resource group
 
         Creates or updates a resource group. The response code can be used to
         distinguish between a create (201) or update (200).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1565,35 +1764,32 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         resource_group_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Delete a resource group
 
         Delete a particular resource group within the subscription.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1603,36 +1799,33 @@ class ArmClient(ConnectorClientBase):
         input: ResourceGroup,
         subscription_id: str,
         resource_group_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update an existing resource group
 
         Updates an existing resource group. If the resource does not exist,
         this request will fail.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1647,8 +1840,7 @@ class ArmClient(ConnectorClientBase):
         input: ExportTemplateRequest,
         subscription_id: str,
         resource_group_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Export a resource group template
 
@@ -1656,29 +1848,27 @@ class ArmClient(ConnectorClientBase):
         only be successful if the underlying resources have a schema defined by
         Microsoft.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/exportTemplate"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1691,26 +1881,23 @@ class ArmClient(ConnectorClientBase):
     async def resource_groups_list_async(
         self,
         subscription_id: str,
-        x_ms_api_version: Optional[str],
         filter: Optional[str] = None,
-        top: Optional[str] = None,
-    ):
+        top: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
         List resource groups
 
         Lists all the resource groups within the subscription. The results are
         paginated at 1,000+ records.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}/resourcegroups"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -1722,14 +1909,16 @@ class ArmClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1742,22 +1931,22 @@ class ArmClient(ConnectorClientBase):
     async def resources_list_async(
         self,
         subscription_id: str,
-        x_ms_api_version: Optional[str],
         filter: Optional[str] = None,
         expand: Optional[str] = None,
-        top: Optional[str] = None,
-    ):
+        top: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
         List resources by subscription
 
         Reads all of the resources under a particular subscription. The results
         are paginated at 1,000+ records.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}/resources"
+            f"/subscriptions/{quote(str(subscription_id), safe='')}/resources"
         )
         query_params = []
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -1773,20 +1962,17 @@ class ArmClient(ConnectorClientBase):
             if isinstance(top, bool):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1802,38 +1988,39 @@ class ArmClient(ConnectorClientBase):
         resource_group_name: str,
         resource_provider_namespace: str,
         short_resource_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+        x_ms_api_version: str,
+    ) -> dict[str, Any] | None:
         """
         Read a resource
 
         Reads a resource object.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
-            f"/{str(short_resource_id)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
+            f"/{quote(str(short_resource_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        value = str(x_ms_api_version)
+        if isinstance(x_ms_api_version, bool):
+            value = value.lower()
+        query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1850,39 +2037,40 @@ class ArmClient(ConnectorClientBase):
         resource_group_name: str,
         resource_provider_namespace: str,
         short_resource_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+        x_ms_api_version: str,
+    ) -> dict[str, Any] | None:
         """
         Create or update a resource
 
         Creates or updates a resource. The response code can be used to
         distinguish between a create (201) or update (200).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
-            f"/{str(short_resource_id)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
+            f"/{quote(str(short_resource_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        value = str(x_ms_api_version)
+        if isinstance(x_ms_api_version, bool):
+            value = value.lower()
+        query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1898,38 +2086,39 @@ class ArmClient(ConnectorClientBase):
         resource_group_name: str,
         resource_provider_namespace: str,
         short_resource_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+        x_ms_api_version: str,
+    ) -> None:
         """
         Delete a resource
 
         Deletes a resource.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
-            f"/{str(short_resource_id)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
+            f"/{quote(str(short_resource_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        value = str(x_ms_api_version)
+        if isinstance(x_ms_api_version, bool):
+            value = value.lower()
+        query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1942,39 +2131,40 @@ class ArmClient(ConnectorClientBase):
         resource_provider_namespace: str,
         short_resource_id: str,
         action_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+        x_ms_api_version: str,
+    ) -> dict[str, Any] | None:
         """
         Invoke resource operation
 
         Invokes an operation on an Azure resource.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
-            f"/{str(short_resource_id)}"
-            f"/{str(action_name)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
+            f"/{quote(str(short_resource_id), safe='')}"
+            f"/{quote(str(action_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        value = str(x_ms_api_version)
+        if isinstance(x_ms_api_version, bool):
+            value = value.lower()
+        query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1989,36 +2179,37 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_provider_namespace: str,
         short_resource_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+        x_ms_api_version: str,
+    ) -> dict[str, Any] | None:
         """
         Read a resource in provider
 
         Reads a resource object.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
-            f"/{str(short_resource_id)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
+            f"/{quote(str(short_resource_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        value = str(x_ms_api_version)
+        if isinstance(x_ms_api_version, bool):
+            value = value.lower()
+        query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2034,36 +2225,37 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         resource_provider_namespace: str,
         short_resource_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+        x_ms_api_version: str,
+    ) -> dict[str, Any] | None:
         """
         Invoke resource operation in provider
 
         Invokes an operation on an Azure resource.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/providers"
-            f"/{str(resource_provider_namespace)}"
-            f"/{str(short_resource_id)}"
+            f"/{quote(str(resource_provider_namespace), safe='')}"
+            f"/{quote(str(short_resource_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        value = str(x_ms_api_version)
+        if isinstance(x_ms_api_version, bool):
+            value = value.lower()
+        query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2078,37 +2270,34 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         tag_name: str,
         tag_value: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create or update a subscription resource tag value
 
         Create or update a subscription resource tag value.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/tagNames"
-            f"/{str(tag_name)}"
+            f"/{quote(str(tag_name), safe='')}"
             f"/tagValues"
-            f"/{str(tag_value)}"
+            f"/{quote(str(tag_value), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2123,37 +2312,34 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         tag_name: str,
         tag_value: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Delete a subscription resource tag value
 
         Delete a subscription resource tag value.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/tagNames"
-            f"/{str(tag_name)}"
+            f"/{quote(str(tag_name), safe='')}"
             f"/tagValues"
-            f"/{str(tag_value)}"
+            f"/{quote(str(tag_value), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2162,32 +2348,32 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         tag_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create or update a subscription resource tag name
 
         Create or update a subscription resource tag name.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}/tagNames/{str(tag_name)}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/tagNames"
+            f"/{quote(str(tag_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2201,32 +2387,32 @@ class ArmClient(ConnectorClientBase):
         self,
         subscription_id: str,
         tag_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Delete a subscription resource tag name
 
         Delete a subscription resource tag name.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}/tagNames/{str(tag_name)}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/tagNames"
+            f"/{quote(str(tag_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -2234,32 +2420,29 @@ class ArmClient(ConnectorClientBase):
     async def tags_list_async(
         self,
         subscription_id: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         List subscription resource tags
 
         Lists all the subscription resource tags.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions/{str(subscription_id)}/tagNames"
+            f"/subscriptions/{quote(str(subscription_id), safe='')}/tagNames"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

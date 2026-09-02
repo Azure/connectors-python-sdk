@@ -5,8 +5,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, List
+from dataclasses import dataclass, field
+from typing import Optional, Any, List
+from urllib.parse import quote
 import json
 
 from azure.connectors.sdk import (
@@ -22,89 +23,154 @@ from azure.connectors.sdk import (
 
 @dataclass
 class KeyMetadataCollection:
-    """Response for List keys"""
+    """
+    Response for List keys
+    """
 
     value: Optional[List[KeyMetadata]] = None
     """The keys"""
-    continuation_token: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "continuationToken"},
+    )
     """Continuation token"""
 
 
 @dataclass
 class KeyMetadata:
-    """Response for Get key metadata"""
+    """
+    Response for Get key metadata
+    """
 
     name: Optional[str] = None
     """Name of the key"""
     version: Optional[str] = None
     """Version of the key"""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """A flag indicating whether the key is enabled"""
-    created_time: Optional[str] = None
+    created_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdTime"},
+    )
     """Time when the key was created"""
-    last_updated_time: Optional[str] = None
+    last_updated_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastUpdatedTime"},
+    )
     """Time when the key was last updated"""
-    validity_start_time: Optional[str] = None
+    validity_start_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "validityStartTime"},
+    )
     """Time when the key validity starts."""
-    validity_end_time: Optional[str] = None
+    validity_end_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "validityEndTime"},
+    )
     """Time when the key validity ends."""
-    allowed_operations: Optional[List[str]] = None
+    allowed_operations: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "allowedOperations"},
+    )
     """Operations allowed using the key"""
-    key_type: Optional[str] = None
+    key_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "keyType"},
+    )
     """Type of the key"""
 
 
 @dataclass
 class KeyEncryptOutput:
-    """Response for Encrypt data with key"""
+    """
+    Response for Encrypt data with key
+    """
 
-    encrypted_data: Optional[str] = None
+    encrypted_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "encryptedData"},
+    )
     """Encrypted data"""
 
 
 @dataclass
 class KeyDecryptOutput:
-    """Response for Decrypt data with key"""
+    """
+    Response for Decrypt data with key
+    """
 
-    raw_data: Optional[str] = None
+    raw_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "rawData"},
+    )
     """Raw data"""
 
 
 @dataclass
 class SecretMetadataCollection:
-    """Response for List secrets"""
+    """
+    Response for List secrets
+    """
 
     value: Optional[List[SecretMetadata]] = None
     """The secrets"""
-    continuation_token: Optional[str] = None
+    continuation_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "continuationToken"},
+    )
     """Continuation token"""
 
 
 @dataclass
 class SecretMetadata:
-    """Response for Get secret metadata"""
+    """
+    Response for Get secret metadata
+    """
 
     name: Optional[str] = None
     """Name of the secret"""
     version: Optional[str] = None
     """Version of the secret"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Content type of the secret"""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """A flag indicating whether the secret is enabled"""
-    created_time: Optional[str] = None
+    created_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdTime"},
+    )
     """Time when the secret was created"""
-    last_updated_time: Optional[str] = None
+    last_updated_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastUpdatedTime"},
+    )
     """Time when the secret was last updated"""
-    validity_start_time: Optional[str] = None
+    validity_start_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "validityStartTime"},
+    )
     """Time when the secret validity starts."""
-    validity_end_time: Optional[str] = None
+    validity_end_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "validityEndTime"},
+    )
     """Time when the secret validity ends."""
 
 
 @dataclass
 class Secret:
-    """Response for Get secret"""
+    """
+    Response for Get secret
+    """
 
     value: Optional[str] = None
     """Value of the secret"""
@@ -112,37 +178,65 @@ class Secret:
     """Name of the secret"""
     version: Optional[str] = None
     """Version of the secret"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """Content type of the secret"""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """A flag indicating whether the secret is enabled"""
-    created_time: Optional[str] = None
+    created_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdTime"},
+    )
     """Time when the secret was created"""
-    last_updated_time: Optional[str] = None
+    last_updated_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastUpdatedTime"},
+    )
     """Time when the secret was last updated"""
-    validity_start_time: Optional[str] = None
+    validity_start_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "validityStartTime"},
+    )
     """Time when the secret validity starts."""
-    validity_end_time: Optional[str] = None
+    validity_end_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "validityEndTime"},
+    )
     """Time when the secret validity ends."""
 
 
 @dataclass
 class KeyEncryptInput:
-    """Definition: KeyEncryptInput"""
+    """
+    Definition: KeyEncryptInput
+    """
 
     algorithm: Optional[str] = None
     """Algorithm to use for encrypting the data"""
-    raw_data: Optional[str] = None
+    raw_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "rawData"},
+    )
     """Data to encrypt"""
 
 
 @dataclass
 class KeyDecryptInput:
-    """Definition: KeyDecryptInput"""
+    """
+    Definition: KeyDecryptInput
+    """
 
     algorithm: Optional[str] = None
     """Algorithm to use for decrypting the data"""
-    encrypted_data: Optional[str] = None
+    encrypted_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "encryptedData"},
+    )
     """Data to decrypt"""
 
 
@@ -182,20 +276,22 @@ class KeyvaultClient(ConnectorClientBase):
 
     async def list_keys_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List keys
 
         List keys.
         """
-        path = f"{self._connection_runtime_url}/keys"
+        request_url = f"{self._connection_runtime_url}/keys"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -208,20 +304,25 @@ class KeyvaultClient(ConnectorClientBase):
     async def list_key_versions_async(
         self,
         key_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List key versions
 
         List versions of a key.
         """
-        path = f"{self._connection_runtime_url}/keys/{str(key_name)}/versions"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/keys/{quote(str(key_name), safe='')}/versions"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -234,20 +335,25 @@ class KeyvaultClient(ConnectorClientBase):
     async def get_key_metadata_async(
         self,
         key_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get key metadata
 
         Gets metadata of a key.
         """
-        path = f"{self._connection_runtime_url}/keys/{str(key_name)}/metadata"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/keys/{quote(str(key_name), safe='')}/metadata"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -261,23 +367,29 @@ class KeyvaultClient(ConnectorClientBase):
         self,
         key_name: str,
         key_version: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get key version metadata
 
         Gets metadata of a version of a key.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/keys/{str(key_name)}/versions/{str(key_version)}/metadata"
+            f"/keys"
+            f"/{quote(str(key_name), safe='')}"
+            f"/versions"
+            f"/{quote(str(key_version), safe='')}"
+            f"/metadata"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -291,20 +403,25 @@ class KeyvaultClient(ConnectorClientBase):
         self,
         input: KeyEncryptInput,
         key_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Encrypt data with key
 
         Encrypt data using the latest version of a key.
         """
-        path = f"{self._connection_runtime_url}/keys/{str(key_name)}/encrypt"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/keys/{quote(str(key_name), safe='')}/encrypt"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -319,23 +436,29 @@ class KeyvaultClient(ConnectorClientBase):
         input: KeyEncryptInput,
         key_name: str,
         key_version: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Encrypt data with key version
 
         Encrypt data using a specific version of a key.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/keys/{str(key_name)}/versions/{str(key_version)}/encrypt"
+            f"/keys"
+            f"/{quote(str(key_name), safe='')}"
+            f"/versions"
+            f"/{quote(str(key_version), safe='')}"
+            f"/encrypt"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -349,7 +472,7 @@ class KeyvaultClient(ConnectorClientBase):
         self,
         input: KeyDecryptInput,
         key_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Decrypt data with key
 
@@ -357,14 +480,19 @@ class KeyvaultClient(ConnectorClientBase):
         operation is typically classified as secret and can be visible in the
         run history.
         """
-        path = f"{self._connection_runtime_url}/keys/{str(key_name)}/decrypt"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/keys/{quote(str(key_name), safe='')}/decrypt"
+        )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -379,7 +507,7 @@ class KeyvaultClient(ConnectorClientBase):
         input: KeyDecryptInput,
         key_name: str,
         key_version: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Decrypt data with key version
 
@@ -387,17 +515,23 @@ class KeyvaultClient(ConnectorClientBase):
         operation is typically classified as secret and can be visible in the
         run history.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/keys/{str(key_name)}/versions/{str(key_version)}/decrypt"
+            f"/keys"
+            f"/{quote(str(key_name), safe='')}"
+            f"/versions"
+            f"/{quote(str(key_version), safe='')}"
+            f"/decrypt"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -409,20 +543,22 @@ class KeyvaultClient(ConnectorClientBase):
 
     async def list_secrets_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List secrets
 
         List secrets.
         """
-        path = f"{self._connection_runtime_url}/secrets"
+        request_url = f"{self._connection_runtime_url}/secrets"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -435,23 +571,25 @@ class KeyvaultClient(ConnectorClientBase):
     async def list_secret_versions_async(
         self,
         secret_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List secret versions
 
         List versions of a secret.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/secrets/{str(secret_name)}/versions"
+            f"/secrets/{quote(str(secret_name), safe='')}/versions"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -464,23 +602,25 @@ class KeyvaultClient(ConnectorClientBase):
     async def get_secret_metadata_async(
         self,
         secret_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get secret metadata
 
         Gets metadata of a secret.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/secrets/{str(secret_name)}/metadata"
+            f"/secrets/{quote(str(secret_name), safe='')}/metadata"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -494,27 +634,29 @@ class KeyvaultClient(ConnectorClientBase):
         self,
         secret_name: str,
         secret_version: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get secret version metadata
 
         Gets metadata of a version of a secret.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/secrets"
-            f"/{str(secret_name)}"
+            f"/{quote(str(secret_name), safe='')}"
             f"/versions"
-            f"/{str(secret_version)}"
+            f"/{quote(str(secret_version), safe='')}"
             f"/metadata"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -527,23 +669,26 @@ class KeyvaultClient(ConnectorClientBase):
     async def get_secret_async(
         self,
         secret_name: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get secret
 
         Gets a secret. Output of this operation is typically classified as
         secret and can be visible in the run history.
         """
-        path = (
-            f"{self._connection_runtime_url}/secrets/{str(secret_name)}/value"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/secrets/{quote(str(secret_name), safe='')}/value"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -557,24 +702,30 @@ class KeyvaultClient(ConnectorClientBase):
         self,
         secret_name: str,
         secret_version: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get secret version
 
         Gets a version of a secret. Output of this operation is typically
         classified as secret and can be visible in the run history.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/secrets/{str(secret_name)}/versions/{str(secret_version)}/value"
+            f"/secrets"
+            f"/{quote(str(secret_name), safe='')}"
+            f"/versions"
+            f"/{quote(str(secret_version), safe='')}"
+            f"/value"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

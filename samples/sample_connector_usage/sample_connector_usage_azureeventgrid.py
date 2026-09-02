@@ -26,7 +26,6 @@ import asyncio
 import os
 
 from azure.identity.aio import DefaultAzureCredential
-from azure.connectors import ConnectorException
 from azure.connectors.azureeventgrid import (
     AzureeventgridClient,
     EventRequest,
@@ -72,9 +71,9 @@ async def example_2_list_topic_types():
             print(f"  - {topic_type.get('name', 'N/A')}")
 
 
-async def example_3_create_subscription():
-    """Example 3: Create an Event Grid subscription for a resource."""
-    print("\n=== Example 3: Create Subscription ===")
+async def example_3_build_event_request():
+    """Example 3: Build an Event Grid request payload."""
+    print("\n=== Example 3: Build Event Request ===")
 
     subscription_id = os.environ.get("AZUREEVENTGRID_SUBSCRIPTION_ID", "")
     resource_type = os.environ.get("AZUREEVENTGRID_RESOURCE_TYPE", "")
@@ -86,19 +85,13 @@ async def example_3_create_subscription():
         )
         return
 
-    credential = DefaultAzureCredential()
-
-    async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            await client.create_subscription_async(
-                input=EventRequest(properties={}),
-                subscription_id=subscription_id,
-                resource_type=resource_type,
-                subscription_name="sdk-sample-subscription",
-            )
-            print("Subscription request submitted.")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+    request = EventRequest(properties={
+        "subscriptionId": subscription_id,
+        "resourceType": resource_type,
+        "subscriptionName": "sdk-sample-subscription",
+    })
+    print(f"Prepared Event Grid request properties: {request.properties}")
+    print("The generated client exposes discovery operations, not subscription creation.")
 
 
 async def main():
@@ -112,7 +105,7 @@ async def main():
 
     await example_1_list_subscriptions()
     await example_2_list_topic_types()
-    await example_3_create_subscription()
+    await example_3_build_event_request()
 
     print("\n=== Azure Event Grid sample completed ===")
 

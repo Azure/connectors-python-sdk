@@ -190,7 +190,6 @@ class TestListGroupsByDisplayNameSearch:
             return_value=mock_response_success
         ) as mock_send:
             result = await client.list_groups_by_display_name_search_async(
-                count="true",
                 search="Test"
             )
 
@@ -199,7 +198,6 @@ class TestListGroupsByDisplayNameSearch:
             mock_send.assert_called_once()
             call_path = mock_send.call_args[0][1]
             assert "$search=Test" in call_path
-            assert "$count=true" in call_path
 
     @pytest.mark.asyncio
     async def test_success_with_count_only(self, mock_token_provider, mock_response_success):
@@ -217,11 +215,10 @@ class TestListGroupsByDisplayNameSearch:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.list_groups_by_display_name_search_async(count="true")
+            result = await client.list_groups_by_display_name_search_async()
 
             assert result is not None
             call_path = mock_send.call_args[0][1]
-            assert "$count=true" in call_path
             assert "$search" not in call_path
 
     @pytest.mark.asyncio
@@ -241,7 +238,6 @@ class TestListGroupsByDisplayNameSearch:
             return_value=mock_response_success
         ) as mock_send:
             await client.list_groups_by_display_name_search_async(
-                count="true",
                 search="Test Group Name"
             )
 
@@ -263,7 +259,7 @@ class TestListGroupsByDisplayNameSearch:
             return_value=mock_response_error
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_groups_by_display_name_search_async(count="true")
+                await client.list_groups_by_display_name_search_async()
 
             assert exc_info.value.status_code == 400
 
@@ -343,7 +339,6 @@ class TestListDirectGroupMembers:
         ) as mock_send:
             result = await client.list_direct_group_members_async(
                 group_id="group-123",
-                count="true",
                 filter="userType eq 'Member'",
                 select="id,displayName"
             )
@@ -354,7 +349,6 @@ class TestListDirectGroupMembers:
             assert "/v1.0/groups/group-123/members" in call_path
             assert "$filter=userType%20eq%20%27Member%27" in call_path
             assert "$select=id%2CdisplayName" in call_path
-            assert "$count=true" in call_path
 
     @pytest.mark.asyncio
     async def test_success_with_group_id_and_count_only(
@@ -375,14 +369,12 @@ class TestListDirectGroupMembers:
             return_value=mock_response_success
         ) as mock_send:
             result = await client.list_direct_group_members_async(
-                group_id="group-456",
-                count="false"
+                group_id="group-456"
             )
 
             assert result is not None
             call_path = mock_send.call_args[0][1]
             assert "/v1.0/groups/group-456/members" in call_path
-            assert "$count=false" in call_path
             assert "$filter" not in call_path
             assert "$select" not in call_path
 
@@ -403,8 +395,7 @@ class TestListDirectGroupMembers:
             return_value=mock_response_success
         ) as mock_send:
             await client.list_direct_group_members_async(
-                group_id="test-group-id",
-                count="true"
+                group_id="test-group-id"
             )
 
             call_path = mock_send.call_args[0][1]
@@ -426,8 +417,7 @@ class TestListDirectGroupMembers:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.list_direct_group_members_async(
-                    group_id="group-123",
-                    count="true"
+                    group_id="group-123"
                 )
 
             assert exc_info.value.status_code == 400
@@ -844,11 +834,10 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            # Pass boolean True as count
-            await client.list_groups_by_display_name_search_async(count=True)
+            await client.list_groups_by_display_name_search_async(search="Group")
 
             call_path = mock_send.call_args[0][1]
-            assert "$count=true" in call_path
+            assert "$search=Group" in call_path
 
     @pytest.mark.asyncio
     async def test_empty_string_parameters_excluded(
@@ -870,13 +859,11 @@ class TestEdgeCases:
         ) as mock_send:
             await client.list_direct_group_members_async(
                 group_id="group-123",
-                count="true",
                 filter=None,
                 select=None
             )
 
             call_path = mock_send.call_args[0][1]
-            assert "$count=true" in call_path
             assert "$filter" not in call_path
             assert "$select" not in call_path
 

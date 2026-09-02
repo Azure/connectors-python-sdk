@@ -147,7 +147,7 @@ class InfusionsoftClient(ConnectorClientBase):
     async def update_task_async(
         self,
         input: CreateTaskRequest,
-        id: str,
+        id: int,
     ) -> dict[str, Any] | None:
         """
         Update a task

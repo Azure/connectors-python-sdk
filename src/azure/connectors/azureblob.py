@@ -23,91 +23,111 @@ from azure.connectors.sdk import (
 
 @dataclass
 class BlobMetadata:
-    """Response for Copy blob (V2)"""
+    """
+    Response for Copy blob
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
 
 
 @dataclass
-class CreateBlockBlobInput:
-    """Create block blob (V2)"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class CreateFileInput:
-    """Create blob (V2)"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class SharedAccessSignature:
-    """Response for Create SAS URI by path (V2)"""
+    """
+    Response for Create SAS URI by path
+    """
 
-    web_url: Optional[str] = None
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "WebUrl"},
+    )
     """A URL to an object with access token."""
 
 
 @dataclass
 class SharedAccessSignatureBlobPolicy:
-    """Response for Get available access policies (V2)"""
+    """
+    Response for Get available access policies
+    """
 
-    group_policy_identifier: Optional[str] = None
+    group_policy_identifier: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "GroupPolicyIdentifier"},
+    )
     """
     The string identifying a stored access policy. The Group policy parameters
     (e.g. Start time and End time) have precedence over input parameters
     mentioned in actions.
     """
-    permissions: Optional[str] = None
+    permissions: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Permissions"},
+    )
     """The permissions specified on the SAS (Values separated by comma)."""
-    start_time: Optional[str] = None
+    start_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "StartTime"},
+    )
     """
     The date and time at which the SAS becomes valid (example:
     '2017-11-01T15:30:00+00:00'). Default = now().
     """
-    expiry_time: Optional[str] = None
+    expiry_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ExpiryTime"},
+    )
     """
     The date and time after which the SAS is no longer valid (example:
     '2017-12-01T15:30:00+00:00'). Default = now() + 24h.
     """
-    access_protocol: Optional[str] = None
+    access_protocol: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "AccessProtocol"},
+    )
     """
     The allowed protocols (https only, or http and https). Null if you don't
     want to restrict protocol.
     """
-    ip_address_or_range: Optional[str] = None
+    ip_address_or_range: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "IpAddressOrRange"},
+    )
     """
     The allowed IP address or IP address range. Null if you don't want to
     restrict based on IP address.
@@ -116,38 +136,60 @@ class SharedAccessSignatureBlobPolicy:
 
 @dataclass
 class DataWithSensitivityLabelInfo:
-    """Response for Get Blob Metadata (V2)"""
+    """
+    Response for Get Blob Metadata
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "SensitivityLabelInfo"},
+    )
     """Sensitivity label metadata info list"""
 
 
 @dataclass
 class ListOfBlobsWithSensitivityLabels:
-    """Response for Lists blobs (V2)"""
+    """
+    Response for Lists blobs
+    """
 
     value: Optional[List[DataWithSensitivityLabelInfo]] = None
     """List of Blobs"""
@@ -155,30 +197,39 @@ class ListOfBlobsWithSensitivityLabels:
 
 @dataclass
 class BlobMetadataPage:
-    """Response for Lists blobs in the root folder  (V2)"""
+    """
+    Response for Lists blobs in the root folder
+    """
 
     value: Optional[List[BlobMetadata]] = None
     """Blob metadata collection."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """An Url which can be used to retrieve the next page."""
-    next_page_marker: Optional[str] = None
+    next_page_marker: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextPageMarker"},
+    )
     """A marker which can be used to retrieve the next page."""
 
 
 @dataclass
-class UpdateFileInput:
-    """Update blob (V2)"""
+class StorageAccountList:
+    """
+    Response for Get storage accounts
+    """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
+    value: Optional[List[StorageAccount]] = None
+    """List of storage account names"""
 
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -189,42 +240,67 @@ class ObjectEntity:
 
 @dataclass
 class BlobMetadataResponse:
-    """Definition: BlobMetadataResponse"""
+    """
+    Definition: BlobMetadataResponse
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
 
 
 @dataclass
 class SensitivityLabelMetadata:
-    """Definition: SensitivityLabelMetadata"""
+    """
+    Definition: SensitivityLabelMetadata
+    """
 
-    sensitivity_label_id: Optional[str] = None
+    sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelId"},
+    )
     """SensitivityLabel Id."""
     name: Optional[str] = None
     """SensitivityLabel name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """SensitivityLabel displayName info"""
     tooltip: Optional[str] = None
     """SensitivityLabel details on tooltip."""
@@ -232,37 +308,48 @@ class SensitivityLabelMetadata:
     """SensitivityLabel priority."""
     color: Optional[str] = None
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = None
+    is_encrypted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEncrypted"},
+    )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = None
+    is_parent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isParent"},
+    )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = None
+    parent_sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentSensitivityLabelId"},
+    )
     """Parent  SensitivityLabel Id."""
 
 
 @dataclass
-class StorageAccountList:
-    """Definition: StorageAccountList"""
-
-    value: Optional[List[StorageAccount]] = None
-    """List of storage account names"""
-
-
-@dataclass
 class StorageAccount:
-    """Definition: StorageAccount"""
+    """
+    Definition: StorageAccount
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the storage account."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the storage account."""
 
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -270,29 +357,51 @@ class DataSetsMetadata:
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
@@ -333,13 +442,12 @@ class AzureblobClient(ConnectorClientBase):
     async def copy_file_async(
         self,
         dataset: str,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
-        Copy blob (V2)
+        Copy blob
 
         This operation copies a blob. If blob is being deleted/renamed on
         server right after it was copied, connector may return HTTP 404 error
@@ -349,40 +457,39 @@ class AzureblobClient(ConnectorClientBase):
         please use relative path. Otherwise, maximum size of a source for copy
         blob operation is 50 MB.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/copyFile"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/copyFile"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -394,95 +501,94 @@ class AzureblobClient(ConnectorClientBase):
 
     async def create_block_blob_async(
         self,
-        input: CreateBlockBlobInput,
+        input: bytes,
         storage_account_name: str,
-        folder_path: Optional[str],
-        name: Optional[str],
-    ):
+        folder_path: str,
+        name: str,
+    ) -> None:
         """
-        Create block blob (V2)
+        Create block blob
 
         This operation uploads a block blob to Azure Blob Storage.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/codeless"
             f"/datasets"
-            f"/{str(storage_account_name)}"
+            f"/{quote(str(storage_account_name), safe='')}"
             f"/CreateBlockBlob"
         )
         query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
+        value = str(folder_path)
+        if isinstance(folder_path, bool):
+            value = value.lower()
+        query_params.append(f"folderPath={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def create_file_async(
         self,
-        input: CreateFileInput,
+        input: bytes,
         dataset: str,
-        folder_path: Optional[str],
-        name: Optional[str],
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        folder_path: str,
+        name: str,
+    ) -> dict[str, Any] | None:
         """
-        Create blob (V2)
+        Create blob
 
         This operation uploads a blob to Azure Blob Storage.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/files"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
         )
         query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(folder_path)
+        if isinstance(folder_path, bool):
+            value = value.lower()
+        query_params.append(f"folderPath={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -496,32 +602,36 @@ class AzureblobClient(ConnectorClientBase):
         self,
         input: SharedAccessSignatureBlobPolicy,
         storage_account_name: str,
-        path: Optional[str],
-    ):
+        path: str,
+    ) -> dict[str, Any] | None:
         """
-        Create SAS URI by path (V2)
+        Create SAS URI by path
 
         This operation creates a SAS link for a blob using the path.
         """
-        url = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(storage_account_name)}/CreateSharedLinkByPath"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(str(storage_account_name), safe='')}"
+            f"/CreateSharedLinkByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", url, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                url,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -535,23 +645,29 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
-    ):
+    ) -> None:
         """
-        Delete blob (V2)
+        Delete blob
 
         This operation deletes a blob.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -559,50 +675,48 @@ class AzureblobClient(ConnectorClientBase):
     async def extract_folder_async(
         self,
         dataset: str,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
-        Extract archive to folder (V2)
+        Extract archive to folder
 
         This operation extracts an archive blob into a folder (example: .zip).
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/extractFolderV2"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/extractFolderV2"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
             query_params.append(f"overwrite={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
-                value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -615,32 +729,36 @@ class AzureblobClient(ConnectorClientBase):
     async def get_access_policies_async(
         self,
         storage_account_name: str,
-        path: Optional[str],
-    ):
+        path: str,
+    ) -> dict[str, Any] | None:
         """
-        Get available access policies (V2)
+        Get available access policies
 
         This operation gets available shared access policies for a blob.
         """
-        url = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(storage_account_name)}/policies"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(str(storage_account_name), safe='')}"
+            f"/policies"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", url, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                url,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -654,20 +772,22 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
-        infer_content_type: Optional[str] = None,
-    ):
+        infer_content_type: Optional[bool] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> bytes:
         """
-        Get blob content (V2)
+        Get blob content
 
         This operation retrieves blob contents using id.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/files"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/content"
         )
         query_params = []
@@ -676,89 +796,133 @@ class AzureblobClient(ConnectorClientBase):
             if isinstance(infer_content_type, bool):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
+                value = value.lower()
+            query_params.append(f"purviewAccountName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_content_by_path_async(
         self,
         dataset: str,
-        path: Optional[str],
-        infer_content_type: Optional[str] = None,
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        path: str,
+        infer_content_type: Optional[bool] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> bytes:
         """
-        Get blob content using path (V2)
+        Get blob content using path
 
         This operation retrieves blob contents using path.
         """
-        url = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/GetFileContentByPath"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/GetFileContentByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
             query_params.append(f"inferContentType={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
+                value = value.lower()
+            query_params.append(f"purviewAccountName={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", url, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                url,
+                request_url,
                 response.status,
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def get_file_metadata_async(
         self,
         dataset: str,
         id: str,
-    ):
+        extract_sensitivity_label: Optional[bool] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> dict[str, Any] | None:
         """
-        Get Blob Metadata (V2)
+        Get Blob Metadata
 
         This operation retrieves blob metadata using blob id.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
+        query_params = []
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
+                value = value.lower()
+            query_params.append(f"purviewAccountName={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -771,38 +935,49 @@ class AzureblobClient(ConnectorClientBase):
     async def get_file_metadata_by_path_async(
         self,
         dataset: str,
-        path: Optional[str],
-        query_parameters_single_encoded: Optional[str] = None,
-    ):
+        path: str,
+        extract_sensitivity_label: Optional[bool] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> dict[str, Any] | None:
         """
-        Get Blob Metadata using path (V2)
+        Get Blob Metadata using path
 
         This operation retrieves blob metadata using path.
         """
-        url = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/GetFileByPath"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/GetFileByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"path={quote(value)}")
-        if query_parameters_single_encoded is not None:
-            value = str(query_parameters_single_encoded)
-            if isinstance(query_parameters_single_encoded, bool):
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"queryParametersSingleEncoded={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", url, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                url,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -817,16 +992,22 @@ class AzureblobClient(ConnectorClientBase):
         dataset: str,
         id: str,
         next_page_marker: Optional[str] = None,
-        use_flat_listing: Optional[str] = None,
-    ):
+        use_flat_listing: Optional[bool] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        purview_account_name: Optional[str] = None,
+    ) -> dict[str, Any] | None:
         """
-        Lists blobs (V2)
+        Lists blobs
 
         This operation lists blobs in a container.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/foldersV2/{str(id)}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/foldersV2"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
         if next_page_marker is not None:
@@ -839,15 +1020,27 @@ class AzureblobClient(ConnectorClientBase):
             if isinstance(use_flat_listing, bool):
                 value = value.lower()
             query_params.append(f"useFlatListing={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if purview_account_name is not None:
+            value = str(purview_account_name)
+            if isinstance(purview_account_name, bool):
+                value = value.lower()
+            query_params.append(f"purviewAccountName={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -861,97 +1054,37 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         next_page_marker: Optional[str] = None,
-        use_flat_listing: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Lists blobs in the root folder (V2)
+        Lists blobs in the root folder
 
         This operation lists blobs in the Azure Blob Storage root folder.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/foldersV2"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/foldersV2"
         )
         query_params = []
+        query_params.append("useFlatListing=" + quote("false"))
         if next_page_marker is not None:
             value = str(next_page_marker)
             if isinstance(next_page_marker, bool):
                 value = value.lower()
             query_params.append(f"nextPageMarker={quote(value)}")
-        if use_flat_listing is not None:
-            value = str(use_flat_listing)
-            if isinstance(use_flat_listing, bool):
-                value = value.lower()
-            query_params.append(f"useFlatListing={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                path,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_updated_files_async(
-        self,
-        dataset: str,
-        folder_id: Optional[str],
-        max_file_count: Optional[str] = None,
-        check_both_created_and_modified_date_time: Optional[str] = None,
-    ):
-        """
-        When a blob is added or modified (properties only) (V2)
-
-        This operation triggers a flow when one or more blobs are added or
-        modified in a container. This trigger will only fetch the file
-        metadata. To get the file content, you can use the \\"Get file
-        content\\" operation. The trigger does not fire if a file is
-        added/updated in a subfolder. If it is required to trigger on
-        subfolders, multiple triggers should be created.
-        """
-        path = (
-            f"{self._connection_runtime_url}"
-            f"/v2"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/triggers"
-            f"/batch"
-            f"/onupdatedfile"
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
         )
-        query_params = []
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if max_file_count is not None:
-            value = str(max_file_count)
-            if isinstance(max_file_count, bool):
-                value = value.lower()
-            query_params.append(f"maxFileCount={quote(value)}")
-        if check_both_created_and_modified_date_time is not None:
-            value = str(check_both_created_and_modified_date_time)
-            if isinstance(check_both_created_and_modified_date_time, bool):
-                value = value.lower()
-            query_params.append(f"checkBothCreatedAndModifiedDateTime={quote(value)}")
-        if query_params:
-            path += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async("GET", path, body=None)
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -964,65 +1097,77 @@ class AzureblobClient(ConnectorClientBase):
     async def set_blob_tier_by_path_async(
         self,
         storage_account_name: str,
-        path: Optional[str],
-        new_tier: Optional[str],
-    ):
+        path: str,
+        new_tier: str,
+    ) -> None:
         """
-        Set blob tier by path (V2)
+        Set blob tier by path
 
         This operation sets a tier for a block blob on a standard storage
         account using the path.
         """
-        url = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(storage_account_name)}/SetBlobTierByPath"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(str(storage_account_name), safe='')}"
+            f"/SetBlobTierByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
-        if new_tier is not None:
-            value = str(new_tier)
-            if isinstance(new_tier, bool):
-                value = value.lower()
-            query_params.append(f"newTier={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
+        value = str(new_tier)
+        if isinstance(new_tier, bool):
+            value = value.lower()
+        query_params.append(f"newTier={quote(value)}")
         if query_params:
-            url += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", url, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                url,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def update_file_async(
         self,
-        input: UpdateFileInput,
+        input: bytes,
         dataset: str,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Update blob (V2)
+        Update blob
 
         This operation updates a blob in Azure Blob Storage.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{quote(str(dataset), safe='')}/files/{str(id)}"
+            f"/v2"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1031,3 +1176,48 @@ class AzureblobClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+    async def get_data_sets_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        Get storage accounts
+
+        This operation list the user's Azure Storage Account.
+        """
+        request_url = f"{self._connection_runtime_url}/v2/codeless/GetDataSets"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnUpdatedFiles_V2": {
+        "operation_id": "OnUpdatedFiles_V2",
+        "path": "/{connectionId}/v2/datasets/{dataset}/triggers/batch/onupdatedfile",
+        "method": "get",
+        "required_parameters": ["dataset", "folderId"],
+        "callback_payload_type": "BlobMetadata",
+    },
+}

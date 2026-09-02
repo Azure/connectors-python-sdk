@@ -8,9 +8,7 @@ from unittest.mock import AsyncMock, patch
 from azure.connectors.dropbox import (
     BlobMetadata,
     BlobMetadataPage,
-    CreateFileInput,
     DropboxClient,
-    UpdateFileInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -25,7 +23,7 @@ async def _invoke_operation(client: DropboxClient, operation: str):
     if operation == "get_file_metadata":
         return await client.get_file_metadata_async(id="file123")
     if operation == "update_file":
-        return await client.update_file_async(input=UpdateFileInput(), id="file123")
+        return await client.update_file_async(input=b"updated content", id="file123")
     if operation == "delete_file":
         return await client.delete_file_async(id="file123")
     if operation == "get_file_metadata_by_path":
@@ -36,7 +34,7 @@ async def _invoke_operation(client: DropboxClient, operation: str):
         return await client.get_file_content_async(id="file123")
     if operation == "create_file":
         return await client.create_file_async(
-            input=CreateFileInput(),
+            input=b"file content",
             folder_path="/Documents",
             name="created.txt",
         )
@@ -45,14 +43,6 @@ async def _invoke_operation(client: DropboxClient, operation: str):
             source="/Documents/source.txt",
             destination="/Documents/copy.txt",
         )
-    if operation == "on_new_file":
-        return await client.on_new_file_async(folder_id="folder123")
-    if operation == "on_updated_file":
-        return await client.on_updated_file_async(folder_id="folder123")
-    if operation == "on_new_files":
-        return await client.on_new_files_async(folder_id="folder123")
-    if operation == "on_updated_files":
-        return await client.on_updated_files_async(folder_id="folder123")
     if operation == "list_folder":
         return await client.list_folder_async(id="folder123")
     if operation == "list_root_folder":
@@ -213,7 +203,7 @@ class TestDropboxClientMethods:
             return_value=mock_response,
         ) as mock_send:
             result = await client.create_file_async(
-                input=CreateFileInput(),
+                input=b"file content",
                 folder_path="/Documents",
                 name="created.txt",
             )
@@ -223,48 +213,6 @@ class TestDropboxClientMethods:
             assert call_args[0][0] == "POST"
             assert "folderPath=/Documents" in call_args[0][1]
             assert "name=created.txt" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_on_new_file_success(self, mock_token_provider):
-        """Test on_new_file_async returns binary callback content."""
-        client = DropboxClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, content=b"event payload")
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.on_new_file_async(folder_id="folder123")
-
-            assert result == b"event payload"
-            call_args = mock_send.call_args
-            assert "/triggers/onnewfile" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_on_new_files_success(self, mock_token_provider):
-        """Test on_new_files_async serializes trigger query parameters."""
-        client = DropboxClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"value": []}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.on_new_files_async(folder_id="folder123", max_file_count="20")
-
-            call_args = mock_send.call_args
-            assert "folderId=folder123" in call_args[0][1]
-            assert "maxFileCount=20" in call_args[0][1]
 
 
 class TestDropboxClientErrorHandling:
@@ -282,10 +230,6 @@ class TestDropboxClientErrorHandling:
             "get_file_content",
             "create_file",
             "copy_file",
-            "on_new_file",
-            "on_updated_file",
-            "on_new_files",
-            "on_updated_files",
             "list_folder",
             "list_root_folder",
             "extract_folder",
@@ -322,10 +266,5 @@ class TestDropboxTypeSerialization:
         """Test generated dataclasses initialize with expected default values."""
         metadata = BlobMetadata()
         page = BlobMetadataPage()
-        create_input = CreateFileInput()
-        update_input = UpdateFileInput()
-
         assert metadata.id is None
         assert page.value is None
-        assert create_input.additional_properties == {}
-        assert update_input.additional_properties == {}

@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, List
+from dataclasses import dataclass, field
+from typing import Optional, Any, List
 from urllib.parse import quote
 import json
 
@@ -23,20 +23,27 @@ from azure.connectors.sdk import (
 
 @dataclass
 class VirtualMachineInScaleSet:
-    """Response for Get virtual machine in a VM scale set"""
+    """
+    Response for Get virtual machine in a VM scale set
+    """
 
     id: Optional[str] = None
     """The ID of the virtual machine."""
     name: Optional[str] = None
     """The Name of the virtual machine."""
-    instance_id: Optional[str] = None
+    instance_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "instanceId"},
+    )
     """The instance Id of the virtual machine."""
     properties: Optional[VirtualMachineInScaleSetProperties] = None
 
 
 @dataclass
 class VirtualMachine:
-    """Response for Get virtual machine"""
+    """
+    Response for Get virtual machine
+    """
 
     id: Optional[str] = None
     """The ID of the virtual machine."""
@@ -47,29 +54,108 @@ class VirtualMachine:
 
 @dataclass
 class SubscriptionListResult:
-    """Definition: SubscriptionListResult"""
+    """
+    Response for List subscriptions
+    """
 
     value: Optional[List[Subscription]] = None
     """The subscriptions."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
+class ResourceGroupListResult:
+    """
+    Response for List resource groups
+    """
+
+    value: Optional[List[ResourceGroup]] = None
+    """The list of resource groups."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
+class VirtualMachineScaleSetListResult:
+    """
+    Response for List virtual machine scale sets
+    """
+
+    value: Optional[List[VirtualMachineScaleSet]] = None
+    """The list of virtual machine scale sets."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
+class VirtualMachineInScaleSetListResult:
+    """
+    Response for List virtual machines in a VM scale set
+    """
+
+    value: Optional[List[VirtualMachineInScaleSet]] = None
+    """The list of virtual machines in a VM scale set."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
+class VirtualMachineListResult:
+    """
+    Response for List virtual machines
+    """
+
+    value: Optional[List[VirtualMachine]] = None
+    """The list of virtual machines."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class Subscription:
-    """Definition: Subscription"""
+    """
+    Definition: Subscription
+    """
 
     id: Optional[str] = None
     """The fully qualified Id."""
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """The subscription Id."""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The tenant Id."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The subscription display name."""
     state: Optional[str] = None
     """The subscription state."""
-    authorization_source: Optional[str] = None
+    authorization_source: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "authorizationSource"},
+    )
     """
     The authorization source of the request. Valid values are one or more
     combinations of Legacy, RoleBased, Bypassed, Direct and Management. For
@@ -78,40 +164,27 @@ class Subscription:
 
 
 @dataclass
-class ResourceGroupListResult:
-    """Definition: ResourceGroupListResult"""
-
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class ResourceGroup:
-    """Definition: ResourceGroup"""
+    """
+    Definition: ResourceGroup
+    """
 
     id: Optional[str] = None
     """The ID of the resource group."""
     name: Optional[str] = None
     """The Name of the resource group."""
-    managed_by: Optional[str] = None
+    managed_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managedBy"},
+    )
     """Id of the resource that manages this resource group."""
 
 
 @dataclass
-class VirtualMachineScaleSetListResult:
-    """Definition: VirtualMachineScaleSetListResult"""
-
-    value: Optional[List[VirtualMachineScaleSet]] = None
-    """The list of virtual machine scale sets."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class VirtualMachineScaleSet:
-    """Definition: VirtualMachineScaleSet"""
+    """
+    Definition: VirtualMachineScaleSet
+    """
 
     id: Optional[str] = None
     """The ID of the virtual machine scale set."""
@@ -122,45 +195,40 @@ class VirtualMachineScaleSet:
 
 @dataclass
 class VirtualMachineScaleSetProperties:
-    """Definition: VirtualMachineScaleSetProperties"""
+    """
+    Definition: VirtualMachineScaleSetProperties
+    """
 
-    provisioning_state: Optional[str] = None
+    provisioning_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisioningState"},
+    )
     """The state of the virtual machine scale set."""
 
 
 @dataclass
-class VirtualMachineInScaleSetListResult:
-    """Definition: VirtualMachineInScaleSetListResult"""
-
-    value: Optional[List[VirtualMachineInScaleSet]] = None
-    """The list of virtual machines in a VM scale set."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class VirtualMachineInScaleSetProperties:
-    """Definition: VirtualMachineInScaleSetProperties"""
+    """
+    Definition: VirtualMachineInScaleSetProperties
+    """
 
-    provisioning_state: Optional[str] = None
+    provisioning_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisioningState"},
+    )
     """The state of the virtual machine."""
 
 
 @dataclass
-class VirtualMachineListResult:
-    """Definition: VirtualMachineListResult"""
-
-    value: Optional[List[VirtualMachine]] = None
-    """The list of virtual machines."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class VirtualMachineProperties:
-    """Definition: VirtualMachineProperties"""
+    """
+    Definition: VirtualMachineProperties
+    """
 
-    provisioning_state: Optional[str] = None
+    provisioning_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisioningState"},
+    )
     """The state of the virtual machine."""
 
 
@@ -204,41 +272,38 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str] = "2019-12-01",
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get virtual machine in a VM scale set
 
         Gets a virtual machine in a VM scale set.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachineScaleSets"
-            f"/{str(virtual_machine_scale_set_name)}"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
             f"/virtualMachines"
-            f"/{str(virtual_machine_in_scale_set_instance_id)}"
+            f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -254,8 +319,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str] = "2019-12-01",
-    ):
+    ) -> None:
         """
         Deallocate virtual machine in a VM scale set
 
@@ -264,35 +328,33 @@ class AzurevmClient(ConnectorClientBase):
         not billed for the compute resources of this virtual machine once it is
         deallocated.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachineScaleSets"
-            f"/{str(virtual_machine_scale_set_name)}"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
             f"/virtualMachines"
-            f"/{str(virtual_machine_in_scale_set_instance_id)}"
+            f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
             f"/deallocate"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -303,8 +365,7 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str] = "2019-12-01",
-    ):
+    ) -> None:
         """
         Power off virtual machine in a VM scale set
 
@@ -312,35 +373,33 @@ class AzurevmClient(ConnectorClientBase):
         resources are still attached and you are getting charged for the
         resources.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachineScaleSets"
-            f"/{str(virtual_machine_scale_set_name)}"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
             f"/virtualMachines"
-            f"/{str(virtual_machine_in_scale_set_instance_id)}"
+            f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
             f"/poweroff"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -351,43 +410,40 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str] = "2019-12-01",
-    ):
+    ) -> None:
         """
         Redeploy virtual machine in a VM scale set
 
         Shuts down the virtual machine in the VM scale set, moves it to a new
         node, and powers it back on.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachineScaleSets"
-            f"/{str(virtual_machine_scale_set_name)}"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
             f"/virtualMachines"
-            f"/{str(virtual_machine_in_scale_set_instance_id)}"
+            f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
             f"/redeploy"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -398,43 +454,40 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str] = "2019-12-01",
-    ):
+    ) -> None:
         """
         Reimage virtual machine in a VM scale set
 
         Reimages (upgrade the operating system) a specific virtual machine in a
         VM scale set.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachineScaleSets"
-            f"/{str(virtual_machine_scale_set_name)}"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
             f"/virtualMachines"
-            f"/{str(virtual_machine_in_scale_set_instance_id)}"
+            f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
             f"/reimage"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -445,42 +498,39 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str] = "2019-12-01",
-    ):
+    ) -> None:
         """
         Restart virtual machine in a VM scale set
 
         Restarts a virtual machine in a VM scale set.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachineScaleSets"
-            f"/{str(virtual_machine_scale_set_name)}"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
             f"/virtualMachines"
-            f"/{str(virtual_machine_in_scale_set_instance_id)}"
+            f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
             f"/restart"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -491,42 +541,39 @@ class AzurevmClient(ConnectorClientBase):
         resource_group_name: str,
         virtual_machine_scale_set_name: str,
         virtual_machine_in_scale_set_instance_id: str,
-        x_ms_api_version: Optional[str] = "2019-12-01",
-    ):
+    ) -> None:
         """
         Start virtual machine in a VM scale set
 
         Starts a virtual machine in a VM scale set.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachineScaleSets"
-            f"/{str(virtual_machine_scale_set_name)}"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
             f"/virtualMachines"
-            f"/{str(virtual_machine_in_scale_set_instance_id)}"
+            f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
             f"/start"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -536,39 +583,36 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
-        api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get virtual machine
 
         Gets a virtual machine.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachines"
-            f"/{str(virtual_machine_name)}"
+            f"/{quote(str(virtual_machine_name), safe='')}"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -583,40 +627,37 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
-        api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Start virtual machine
 
         Starts a virtual machine.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachines"
-            f"/{str(virtual_machine_name)}"
+            f"/{quote(str(virtual_machine_name), safe='')}"
             f"/start"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -626,8 +667,7 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
-        api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Deallocate virtual machine
 
@@ -635,33 +675,31 @@ class AzurevmClient(ConnectorClientBase):
         are not billed for the compute resources that this virtual machine
         uses.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachines"
-            f"/{str(virtual_machine_name)}"
+            f"/{quote(str(virtual_machine_name), safe='')}"
             f"/deallocate"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -671,8 +709,7 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
-        api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Power off virtual machine
 
@@ -680,33 +717,31 @@ class AzurevmClient(ConnectorClientBase):
         restarted with the same provisioned resources. You are still charged
         for this virtual machine.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachines"
-            f"/{str(virtual_machine_name)}"
+            f"/{quote(str(virtual_machine_name), safe='')}"
             f"/powerOff"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -716,40 +751,37 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
-        api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Reapply virtual machine
 
         Reapply a virtual machine's state.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachines"
-            f"/{str(virtual_machine_name)}"
+            f"/{quote(str(virtual_machine_name), safe='')}"
             f"/reapply"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -759,41 +791,38 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
-        api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Redeploy virtual machine
 
         Shuts down the virtual machine, moves it to a new node, and powers it
         back on.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachines"
-            f"/{str(virtual_machine_name)}"
+            f"/{quote(str(virtual_machine_name), safe='')}"
             f"/redeploy"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -803,40 +832,234 @@ class AzurevmClient(ConnectorClientBase):
         subscription_id: str,
         resource_group_name: str,
         virtual_machine_name: str,
-        api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Restart virtual machine
 
         Restarts a virtual machine.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Compute"
             f"/virtualMachines"
-            f"/{str(virtual_machine_name)}"
+            f"/{quote(str(virtual_machine_name), safe='')}"
             f"/restart"
         )
         query_params = []
-        if api_version is not None:
-            value = str(api_version)
-            if isinstance(api_version, bool):
-                value = value.lower()
-            query_params.append(f"api-version={quote(value)}")
+        query_params.append("api-version=" + quote("2019-12-01"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
+
+    async def subscriptions_list_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        List subscriptions
+
+        Gets a list of all the subscriptions to which the principal has access.
+        """
+        request_url = f"{self._connection_runtime_url}/subscriptions"
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2020-01-01"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def resource_groups_list_async(
+        self,
+        subscription_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        List resource groups
+
+        Lists all the resource groups within the subscription.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2020-01-01"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def virtual_machine_scale_sets_list_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        List virtual machine scale sets
+
+        Lists all the virtual machine scale sets within the resource group.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.Compute"
+            f"/virtualMachineScaleSets"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def virtual_machines_in_scale_set_list_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+        virtual_machine_scale_set_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        List virtual machines in a VM scale set
+
+        Lists all the virtual machines in a VM scale set.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.Compute"
+            f"/virtualMachineScaleSets"
+            f"/{quote(str(virtual_machine_scale_set_name), safe='')}"
+            f"/virtualMachines"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def virtual_machines_list_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        List virtual machines
+
+        Lists all the virtual machines within the resource group.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.Compute"
+            f"/virtualMachines"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)

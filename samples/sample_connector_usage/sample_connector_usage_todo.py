@@ -86,7 +86,11 @@ async def example_3_create_and_update_todo(list_id: str) -> None:
             return
 
         update_request = UpdateToDo(title="SDK sample task (updated)", status="inProgress")
-        updated_todo = await client.update_to_do_async(input=update_request, folder_id=list_id, id=todo_id)
+        updated_todo = await client.update_to_do_async(
+            input=update_request,
+            folder_id=list_id,
+            id=todo_id,
+        )
         print(f"Updated title: {updated_todo.get('title') if updated_todo else 'n/a'}")
 
 

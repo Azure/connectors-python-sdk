@@ -42,6 +42,7 @@ class Table:
     """
 
     value: Optional[List[Row]] = None
+    error: Optional[PartialQueryError] = None
 
 
 @dataclass
@@ -73,6 +74,7 @@ class VisualizeResults:
         default=None,
         metadata={"wire_name": "attachmentName"},
     )
+    error: Optional[PartialQueryError] = None
 
 
 @dataclass
@@ -139,7 +141,7 @@ class ObjectEntity:
 @dataclass
 class Row:
     """
-    Definition: RowV2
+    Definition: Row
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -147,6 +149,15 @@ class Row:
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
+
+
+@dataclass
+class PartialQueryError:
+    """
+    Definition: PartialQueryError
+    """
+
+    code: Optional[str] = None
 
 
 @dataclass

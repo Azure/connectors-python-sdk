@@ -27,7 +27,7 @@ SUCCESS_CONTRACTS = {
     "post_question_draft": ("POST", "/api/v3/questions", True),
     "publish_question_draft": (
         "PUT",
-        "/api/v3/questions/value/publish",
+        "/api/v3/questions/1/publish",
         False,
     ),
 }

@@ -27,7 +27,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.googledrive import CreateFileInput, GoogledriveClient
+from azure.connectors.googledrive import GoogledriveClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/googledrive/[connection-id]
@@ -91,16 +91,9 @@ async def example_3_create_file():
 
     async with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            upload_input = CreateFileInput(
-                additional_properties={
-                    "$content-type": "text/plain",
-                    "$content": "Hello from azure-connectors Google Drive sample!",
-                }
-            )
-
             result = await client.create_file_async(
-                input=upload_input,
-                folder_path=destination_folder,
+                input=b"Hello from azure-connectors Google Drive sample!",
+                folder_id=destination_folder,
                 name=destination_name,
             )
 
@@ -112,27 +105,27 @@ async def example_3_create_file():
             print(f"Connector error: {ex}")
 
 
-async def example_4_list_sheet_tabs():
-    """Example 4: List worksheet tabs in a Google Sheet file."""
-    print("\n=== Example 4: List Google Sheet Tabs ===")
+async def example_4_list_drive_items_for_sheet_selection():
+    """Example 4: List Drive items to locate a Google Sheet file."""
+    print("\n=== Example 4: Find Google Sheet Files ===")
 
-    dataset_id = os.environ.get("GOOGLEDRIVE_TEST_SHEET_DATASET", "")
-    if not dataset_id:
-        print("Set GOOGLEDRIVE_TEST_SHEET_DATASET to a Google Sheet file id.")
+    folder_id = os.environ.get("GOOGLEDRIVE_TEST_SHEET_FOLDER", "")
+    if not folder_id:
+        print("Set GOOGLEDRIVE_TEST_SHEET_FOLDER to a Drive folder id.")
         return
 
     credential = DefaultAzureCredential()
 
     async with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_tables_async(dataset=dataset_id)
+            result = await client.list_folder_async(id=folder_id)
 
             if result and "value" in result:
-                print(f"Found {len(result['value'])} sheet tab(s):")
-                for table in result["value"]:
-                    print(f"  - {table.get('name', 'N/A')}")
+                print(f"Found {len(result['value'])} Drive item(s):")
+                for item in result["value"]:
+                    print(f"  - {item.get('Name', 'N/A')}")
             else:
-                print("No sheet tabs returned.")
+                print("No Drive items returned.")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
@@ -149,7 +142,7 @@ async def main():
     await example_1_list_root_folder()
     await example_2_get_file_metadata_by_path()
     await example_3_create_file()
-    await example_4_list_sheet_tabs()
+    await example_4_list_drive_items_for_sheet_selection()
 
     print("\n=== Google Drive sample completed ===")
 

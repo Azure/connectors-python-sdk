@@ -269,8 +269,8 @@ class YammerClient(ConnectorClientBase):
     async def get_groups_async(
         self,
         network_id: Optional[str] = None,
-        mine: Optional[str] = None,
-        show_all_company_group: Optional[str] = None,
+        mine: Optional[int] = None,
+        show_all_company_group: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get groups
@@ -316,7 +316,7 @@ class YammerClient(ConnectorClientBase):
 
     async def get_user_details_by_id_async(
         self,
-        user_id: str,
+        user_id: int,
     ) -> dict[str, Any] | None:
         """
         Get user details
@@ -380,10 +380,10 @@ class YammerClient(ConnectorClientBase):
     async def get_all_messages_async(
         self,
         network_id: Optional[str] = None,
-        older_than: Optional[str] = None,
-        newer_than: Optional[str] = None,
+        older_than: Optional[int] = None,
+        newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get all messages
@@ -442,10 +442,10 @@ class YammerClient(ConnectorClientBase):
     async def get_messages_following_async(
         self,
         network_id: Optional[str] = None,
-        older_than: Optional[str] = None,
-        newer_than: Optional[str] = None,
+        older_than: Optional[int] = None,
+        newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get the messages from my Following feed
@@ -505,12 +505,12 @@ class YammerClient(ConnectorClientBase):
 
     async def get_messages_in_group_async(
         self,
-        group_id: str,
+        group_id: int,
         network_id: Optional[str] = None,
-        older_than: Optional[str] = None,
-        newer_than: Optional[str] = None,
+        older_than: Optional[int] = None,
+        newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get messages in a group
@@ -569,7 +569,7 @@ class YammerClient(ConnectorClientBase):
 
     async def get_messages_in_thread_async(
         self,
-        thread_id: str,
+        thread_id: int,
     ) -> dict[str, Any] | None:
         """
         Get messages in a thread

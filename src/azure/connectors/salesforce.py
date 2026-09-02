@@ -990,8 +990,8 @@ class SalesforceClient(ConnectorClientBase):
         table: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1058,8 +1058,8 @@ class SalesforceClient(ConnectorClientBase):
         self,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1121,8 +1121,8 @@ class SalesforceClient(ConnectorClientBase):
         self,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1184,8 +1184,8 @@ class SalesforceClient(ConnectorClientBase):
         self,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1247,8 +1247,8 @@ class SalesforceClient(ConnectorClientBase):
         self,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1310,8 +1310,8 @@ class SalesforceClient(ConnectorClientBase):
         self,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1373,8 +1373,8 @@ class SalesforceClient(ConnectorClientBase):
         self,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1495,7 +1495,7 @@ class SalesforceClient(ConnectorClientBase):
     async def get_all_jobs_async(
         self,
         concurreny_mode: Optional[str] = None,
-        is_pk_chunking_enabled: Optional[str] = None,
+        is_pk_chunking_enabled: Optional[bool] = None,
         job_type: Optional[str] = None,
         query_locator: Optional[str] = None,
     ) -> dict[str, Any] | None:

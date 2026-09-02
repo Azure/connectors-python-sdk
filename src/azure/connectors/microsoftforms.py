@@ -133,7 +133,7 @@ class MicrosoftformsClient(ConnectorClientBase):
     async def get_form_response_by_id_async(
         self,
         form_id: str,
-        response_id: str,
+        response_id: int,
     ) -> dict[str, Any] | None:
         """
         Get response details

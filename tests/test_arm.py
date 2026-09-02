@@ -49,8 +49,19 @@ from azure.connectors.sdk import (
 from tests.conftest import MockResponse
 
 
-# Default API version for tests
-DEFAULT_API_VERSION = "2021-04-01"
+# API versions emitted by the generated ARM client.
+ARM_API_VERSION = "2016-06-01"
+RESOURCE_API_VERSION = "2021-04-01"
+
+
+@pytest.fixture
+async def arm_client(mock_token_provider):
+    """Provide an ARM client that is closed after each test."""
+    async with ArmClient(
+        "https://example.azure.com/connections/test",
+        token_provider=mock_token_provider
+    ) as client:
+        yield client
 
 
 class TestArmClientInitialization:
@@ -144,13 +155,8 @@ class TestSubscriptionsListAsync:
     """Tests for subscriptions_list_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_subscriptions(self, mock_token_provider):
+    async def test_success_with_subscriptions(self, arm_client):
         """Test successful GET request returns subscriptions."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "value": [
                 {
@@ -175,19 +181,17 @@ class TestSubscriptionsListAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.subscriptions_list_async(
-                x_ms_api_version=DEFAULT_API_VERSION
-            )
+            result = await arm_client.subscriptions_list_async()
 
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/subscriptions"
-                f"?x-ms-api-version={DEFAULT_API_VERSION}",
+                f"?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
             assert result is not None
@@ -197,87 +201,64 @@ class TestSubscriptionsListAsync:
             assert result["value"][1]["displayName"] == "Development Subscription"
 
     @pytest.mark.asyncio
-    async def test_success_without_api_version(self, mock_token_provider):
-        """Test GET request without api version omits query parameter."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
+    async def test_success_uses_generated_api_version(self, arm_client):
+        """Test GET request uses the API version fixed by the generated client."""
         mock_response_data = {"value": [], "nextLink": None}
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.subscriptions_list_async(x_ms_api_version=None)
+            result = await arm_client.subscriptions_list_async()
 
             mock_send.assert_called_once_with(
                 "GET",
-                "https://example.azure.com/connections/test/subscriptions",
+                "https://example.azure.com/connections/test/subscriptions"
+                f"?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_success_with_empty_subscriptions(self, mock_token_provider):
+    async def test_success_with_empty_subscriptions(self, arm_client):
         """Test successful GET request with no subscriptions."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {"value": [], "nextLink": None}
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.subscriptions_list_async(
-                x_ms_api_version=DEFAULT_API_VERSION
-            )
+            result = await arm_client.subscriptions_list_async()
 
             mock_send.assert_called_once()
             assert result is not None
             assert result["value"] == []
 
     @pytest.mark.asyncio
-    async def test_success_with_empty_response_body(self, mock_token_provider):
+    async def test_success_with_empty_response_body(self, arm_client):
         """Test successful GET request with empty response body returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.subscriptions_list_async(
-                x_ms_api_version=DEFAULT_API_VERSION
-            )
+            result = await arm_client.subscriptions_list_async()
 
             mock_send.assert_called_once()
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_success_with_pagination(self, mock_token_provider):
+    async def test_success_with_pagination(self, arm_client):
         """Test response includes nextLink for pagination."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "value": [
                 {
@@ -292,120 +273,90 @@ class TestSubscriptionsListAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.subscriptions_list_async(
-                x_ms_api_version=DEFAULT_API_VERSION
-            )
+            result = await arm_client.subscriptions_list_async()
 
             assert result is not None
             assert "nextLink" in result
             assert result["nextLink"] is not None
 
     @pytest.mark.asyncio
-    async def test_error_unauthorized(self, mock_token_provider):
+    async def test_error_unauthorized(self, arm_client):
         """Test 401 Unauthorized raises ConnectorException."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(
             status=401,
             text='{"error": {"code": "Unauthorized", "message": "Authentication failed"}}'
         )
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.subscriptions_list_async(
-                    x_ms_api_version=DEFAULT_API_VERSION
-                )
+                await arm_client.subscriptions_list_async()
 
             assert exc_info.value.status_code == 401
 
     @pytest.mark.asyncio
-    async def test_error_forbidden(self, mock_token_provider):
+    async def test_error_forbidden(self, arm_client):
         """Test 403 Forbidden raises ConnectorException."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(
             status=403,
             text='{"error": {"code": "Forbidden", "message": "Access denied"}}'
         )
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.subscriptions_list_async(
-                    x_ms_api_version=DEFAULT_API_VERSION
-                )
+                await arm_client.subscriptions_list_async()
 
             assert exc_info.value.status_code == 403
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, mock_token_provider):
+    async def test_error_not_found(self, arm_client):
         """Test 404 Not Found raises ConnectorException."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(
             status=404,
             text='{"error": {"code": "NotFound", "message": "Resource not found"}}'
         )
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.subscriptions_list_async(
-                    x_ms_api_version=DEFAULT_API_VERSION
-                )
+                await arm_client.subscriptions_list_async()
 
             assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_error_server_error(self, mock_token_provider):
+    async def test_error_server_error(self, arm_client):
         """Test 500 Internal Server Error raises ConnectorException."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(
             status=500,
             text='{"error": {"code": "InternalServerError", "message": "Server error"}}'
         )
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.subscriptions_list_async(
-                    x_ms_api_version=DEFAULT_API_VERSION
-                )
+                await arm_client.subscriptions_list_async()
 
             assert exc_info.value.status_code == 500
 
@@ -797,13 +748,8 @@ class TestResourceGroupsListAsync:
     """Tests for resource_groups_list_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_resource_groups(self, mock_token_provider):
+    async def test_success_with_resource_groups(self, arm_client):
         """Test successful GET request returns resource groups."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "value": [
                 {
@@ -824,20 +770,19 @@ class TestResourceGroupsListAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.resource_groups_list_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.resource_groups_list_async(
                 subscription_id="sub-1"
             )
 
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/subscriptions/"
-                f"sub-1/resourcegroups?x-ms-api-version={DEFAULT_API_VERSION}",
+                f"sub-1/resourcegroups?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
             assert result is not None
@@ -845,27 +790,21 @@ class TestResourceGroupsListAsync:
             assert result["value"][0]["name"] == "rg-1"
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, mock_token_provider):
+    async def test_error_not_found(self, arm_client):
         """Test 404 Not Found raises ConnectorException."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(
             status=404,
             text='{"error": {"code": "NotFound", "message": "Subscription not found"}}'
         )
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.resource_groups_list_async(
-                    x_ms_api_version=DEFAULT_API_VERSION,
+                await arm_client.resource_groups_list_async(
                     subscription_id="sub-1"
                 )
 
@@ -876,13 +815,8 @@ class TestResourceGroupsGetAsync:
     """Tests for resource_groups_get_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, arm_client):
         """Test successful GET request returns resource group."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "id": "/subscriptions/sub-1/resourceGroups/rg-1",
             "name": "rg-1",
@@ -893,13 +827,12 @@ class TestResourceGroupsGetAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.resource_groups_get_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.resource_groups_get_async(
                 subscription_id="sub-1",
                 resource_group_name="rg-1"
             )
@@ -914,23 +847,17 @@ class TestResourceGroupsDeleteAsync:
     """Tests for resource_groups_delete_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_none(self, mock_token_provider):
+    async def test_success_returns_none(self, arm_client):
         """Test successful DELETE request returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.resource_groups_delete_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.resource_groups_delete_async(
                 subscription_id="sub-1",
                 resource_group_name="rg-1"
             )
@@ -938,29 +865,23 @@ class TestResourceGroupsDeleteAsync:
             mock_send.assert_called_once_with(
                 "DELETE",
                 "https://example.azure.com/connections/test/subscriptions/"
-                f"sub-1/resourcegroups/rg-1?x-ms-api-version={DEFAULT_API_VERSION}",
+                f"sub-1/resourcegroups/rg-1?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_success_202_accepted(self, mock_token_provider):
+    async def test_success_202_accepted(self, arm_client):
         """Test 202 Accepted for async delete returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=202, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.resource_groups_delete_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.resource_groups_delete_async(
                 subscription_id="sub-1",
                 resource_group_name="rg-1"
             )
@@ -968,27 +889,21 @@ class TestResourceGroupsDeleteAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, mock_token_provider):
+    async def test_error_not_found(self, arm_client):
         """Test 404 Not Found raises ConnectorException."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(
             status=404,
             text='{"error": {"code": "NotFound", "message": "Resource group not found"}}'
         )
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.resource_groups_delete_async(
-                    x_ms_api_version=DEFAULT_API_VERSION,
+                await arm_client.resource_groups_delete_async(
                     subscription_id="sub-1",
                     resource_group_name="rg-1"
                 )
@@ -1000,13 +915,8 @@ class TestDeploymentsGetAsync:
     """Tests for deployments_get_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, arm_client):
         """Test successful GET request returns deployment."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "id": (
                 "/subscriptions/sub-1/resourceGroups/rg-1"
@@ -1021,13 +931,12 @@ class TestDeploymentsGetAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.deployments_get_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.deployments_get_async(
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
                 deployment_name="deploy-1"
@@ -1042,23 +951,17 @@ class TestDeploymentsDeleteAsync:
     """Tests for deployments_delete_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_none(self, mock_token_provider):
+    async def test_success_returns_none(self, arm_client):
         """Test successful DELETE request returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.deployments_delete_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.deployments_delete_async(
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
                 deployment_name="deploy-1"
@@ -1071,23 +974,17 @@ class TestDeploymentsCancelAsync:
     """Tests for deployments_cancel_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_none(self, mock_token_provider):
+    async def test_success_returns_none(self, arm_client):
         """Test successful POST cancel request returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=204, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.deployments_cancel_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.deployments_cancel_async(
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
                 deployment_name="deploy-1"
@@ -1097,7 +994,7 @@ class TestDeploymentsCancelAsync:
                 "POST",
                 "https://example.azure.com/connections/test/subscriptions/"
                 "sub-1/resourcegroups/rg-1/providers/Microsoft.Resources/"
-                f"deployments/deploy-1/cancel?x-ms-api-version={DEFAULT_API_VERSION}",
+                f"deployments/deploy-1/cancel?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
             assert result is None
@@ -1107,13 +1004,8 @@ class TestProvidersListAsync:
     """Tests for providers_list_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_providers(self, mock_token_provider):
+    async def test_success_with_providers(self, arm_client):
         """Test successful GET request returns providers."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "value": [
                 {
@@ -1130,13 +1022,12 @@ class TestProvidersListAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.providers_list_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.providers_list_async(
                 subscription_id="sub-1"
             )
 
@@ -1149,13 +1040,8 @@ class TestProvidersRegisterAsync:
     """Tests for providers_register_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, arm_client):
         """Test successful POST request registers provider."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "namespace": "Microsoft.Compute",
             "registrationState": "Registered"
@@ -1163,13 +1049,12 @@ class TestProvidersRegisterAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.providers_register_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.providers_register_async(
                 subscription_id="sub-1",
                 resource_provider_namespace="Microsoft.Compute"
             )
@@ -1183,13 +1068,8 @@ class TestSubscriptionsListLocationsAsync:
     """Tests for subscriptions_list_locations_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_locations(self, mock_token_provider):
+    async def test_success_with_locations(self, arm_client):
         """Test successful GET request returns locations."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "value": [
                 {
@@ -1207,20 +1087,19 @@ class TestSubscriptionsListLocationsAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.subscriptions_list_locations_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.subscriptions_list_locations_async(
                 subscription_id="sub-1"
             )
 
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/subscriptions/"
-                f"sub-1/locations?x-ms-api-version={DEFAULT_API_VERSION}",
+                f"sub-1/locations?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
             assert result is not None
@@ -1231,13 +1110,8 @@ class TestSubscriptionsGetAsync:
     """Tests for subscriptions_get_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, arm_client):
         """Test successful GET request returns subscription."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response_data = {
             "id": "/subscriptions/sub-1",
             "subscriptionId": "sub-1",
@@ -1247,20 +1121,19 @@ class TestSubscriptionsGetAsync:
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.subscriptions_get_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.subscriptions_get_async(
                 subscription_id="sub-1"
             )
 
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/subscriptions/"
-                f"sub-1?x-ms-api-version={DEFAULT_API_VERSION}",
+                f"sub-1?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
             assert result is not None
@@ -1271,23 +1144,17 @@ class TestTagsDeleteValueAsync:
     """Tests for tags_delete_value_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_none(self, mock_token_provider):
+    async def test_success_returns_none(self, arm_client):
         """Test successful DELETE request returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.tags_delete_value_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.tags_delete_value_async(
                 subscription_id="sub-1",
                 tag_name="environment",
                 tag_value="deprecated"
@@ -1300,23 +1167,17 @@ class TestTagsDeleteAsync:
     """Tests for tags_delete_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_none(self, mock_token_provider):
+    async def test_success_returns_none(self, arm_client):
         """Test successful DELETE request returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.tags_delete_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.tags_delete_async(
                 subscription_id="sub-1",
                 tag_name="obsolete-tag"
             )
@@ -1328,23 +1189,18 @@ class TestResourcesDeleteByIdAsync:
     """Tests for resources_delete_by_id_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_none(self, mock_token_provider):
+    async def test_success_returns_none(self, arm_client):
         """Test successful DELETE request returns None."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.resources_delete_by_id_async(
-                x_ms_api_version=DEFAULT_API_VERSION,
+            result = await arm_client.resources_delete_by_id_async(
+                x_ms_api_version=RESOURCE_API_VERSION,
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
                 resource_provider_namespace="Microsoft.Compute",
@@ -1354,27 +1210,22 @@ class TestResourcesDeleteByIdAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, mock_token_provider):
+    async def test_error_not_found(self, arm_client):
         """Test 404 Not Found raises ConnectorException."""
-        client = ArmClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
         mock_response = MockResponse(
             status=404,
             text='{"error": {"code": "NotFound", "message": "Resource not found"}}'
         )
 
         with patch.object(
-            client._http_client,
+            arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.resources_delete_by_id_async(
-                    x_ms_api_version=DEFAULT_API_VERSION,
+                await arm_client.resources_delete_by_id_async(
+                    x_ms_api_version=RESOURCE_API_VERSION,
                     subscription_id="sub-1",
                     resource_group_name="rg-1",
                     resource_provider_namespace="Microsoft.Compute",

@@ -27,86 +27,59 @@ class BlobMetadata:
     Response for Get file metadata using id
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    folder_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FolderId"},
+    )
+    """The unique id of the parent folder of the file or folder."""
+    folder_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FolderPath"},
+    )
+    """The current path of the parent folder of the file or folder."""
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
-    last_modified_by: Optional[str] = None
+    last_modified_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModifiedBy"},
+    )
     """The user who last modified the file or folder."""
-
-
-@dataclass
-class UpdateFileInput:
-    """
-    Update file
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class CreateFileInput:
-    """
-    Create file
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class TableMetadata:
-    """
-    Response for Get sheet metadata
-    """
-
-    name: Optional[str] = None
-    """Table name"""
-    title: Optional[str] = None
-    """Table title"""
-    x_ms_permission: Optional[str] = None
-    """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
-    """Url link"""
-
-
-@dataclass
-class TablesList:
-    """
-    Response for Get sheets
-    """
-
-    value: Optional[List[Table]] = None
-    """List of Tables"""
 
 
 @dataclass
@@ -127,13 +100,25 @@ class TabularDataSetsMetadata:
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
@@ -145,9 +130,15 @@ class BlobDataSetsMetadata:
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
@@ -165,19 +156,68 @@ class ObjectEntity:
 
 
 @dataclass
+class TableMetadata:
+    """
+    Definition: TableMetadata
+    """
+
+    name: Optional[str] = None
+    """Table name"""
+    title: Optional[str] = None
+    """Table title"""
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
+    """Table permission"""
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
+    schema: Optional[ObjectEntity] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
+    """Url link"""
+
+
+@dataclass
 class TableCapabilitiesMetadata:
     """
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
@@ -189,9 +229,15 @@ class TableSortRestrictionsMetadata:
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
@@ -203,9 +249,15 @@ class TableFilterRestrictionsMetadata:
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
@@ -220,16 +272,32 @@ class TableSelectRestrictionsMetadata:
 
 
 @dataclass
+class TablesList:
+    """
+    Definition: TablesList
+    """
+
+    value: Optional[List[Table]] = None
+    """List of Tables"""
+
+
+@dataclass
 class Table:
     """
     Definition: Table
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
@@ -239,7 +307,10 @@ class Item:
     Definition: Item
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
@@ -268,9 +339,12 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Dataset name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Dataset display name"""
     query: Optional[List[PassThroughNativeQuery]] = None
     """Pass-through Native Queries"""
@@ -282,9 +356,12 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """Procedure name"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """Procedure display name"""
 
 
@@ -294,7 +371,10 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = None
+    language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Language"},
+    )
     """Query language"""
 
 
@@ -335,14 +415,18 @@ class GoogledriveClient(ConnectorClientBase):
     async def get_file_metadata_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get file metadata using id
 
         Retrieves file metadata from Google Drive using id
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -364,20 +448,27 @@ class GoogledriveClient(ConnectorClientBase):
 
     async def update_file_async(
         self,
-        input: UpdateFileInput,
+        input: bytes,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update file
 
         Updates a file in Google Drive
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -396,14 +487,18 @@ class GoogledriveClient(ConnectorClientBase):
     async def delete_file_async(
         self,
         id: str,
-    ):
+    ) -> None:
         """
         Delete file
 
         Deletes a file from Google Drive
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -420,8 +515,8 @@ class GoogledriveClient(ConnectorClientBase):
 
     async def get_file_metadata_by_path_async(
         self,
-        path: Optional[str],
-    ):
+        path: str,
+    ) -> dict[str, Any] | None:
         """
         Get file metadata using path
 
@@ -432,11 +527,10 @@ class GoogledriveClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -459,9 +553,9 @@ class GoogledriveClient(ConnectorClientBase):
 
     async def get_file_content_by_path_async(
         self,
-        path: Optional[str],
-        infer_content_type: Optional[str] = None,
-    ):
+        path: str,
+        infer_content_type: Optional[bool] = None,
+    ) -> bytes:
         """
         Get file content using path
 
@@ -473,11 +567,10 @@ class GoogledriveClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
@@ -503,8 +596,8 @@ class GoogledriveClient(ConnectorClientBase):
     async def get_file_content_async(
         self,
         id: str,
-        infer_content_type: Optional[str] = None,
-    ):
+        infer_content_type: Optional[bool] = None,
+    ) -> bytes:
         """
         Get file content using id
 
@@ -512,7 +605,11 @@ class GoogledriveClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/content"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/content"
         )
         query_params = []
         if infer_content_type is not None:
@@ -537,56 +634,12 @@ class GoogledriveClient(ConnectorClientBase):
 
         return response.content
 
-    async def create_file_async(
-        self,
-        input: CreateFileInput,
-        folder_path: Optional[str],
-        name: Optional[str],
-    ):
-        """
-        Create file
-
-        Uploads a file to Google Drive
-        """
-        request_url = f"{self._connection_runtime_url}/datasets/default/files"
-        query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def copy_file_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Copy file
 
@@ -597,16 +650,14 @@ class GoogledriveClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -635,7 +686,7 @@ class GoogledriveClient(ConnectorClientBase):
     async def list_folder_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List files in folder
 
@@ -643,7 +694,10 @@ class GoogledriveClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/folders/{str(id)}"
+            f"/datasets"
+            f"/default"
+            f"/folders"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -665,7 +719,7 @@ class GoogledriveClient(ConnectorClientBase):
 
     async def list_root_folder_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List files in root folder
 
@@ -692,42 +746,38 @@ class GoogledriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extract_folder_async(
+    async def create_file_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        input: bytes,
+        folder_id: str,
+        name: str,
+    ) -> dict[str, Any] | None:
         """
-        Extract archive to folder
+        Create file
 
-        Extracts an archive file into a folder in Google Drive (example: .zip)
+        Uploads a file to a Google Drive folder selected by its identifier
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
+            f"{self._connection_runtime_url}/datasets/default/v2/files"
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
-        if overwrite is not None:
-            value = str(overwrite)
-            if isinstance(overwrite, bool):
-                value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+        value = str(folder_id)
+        if isinstance(folder_id, bool):
+            value = value.lower()
+        query_params.append(f"folderId={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -743,63 +793,45 @@ class GoogledriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_table_async(
+    async def extract_folder_async(
         self,
-        dataset: str,
-        table: str,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
-        Get sheet metadata
+        Extract archive to folder
 
-        Retrieves Google Sheet metadata
+        Extracts an archive file into a folder in Google Drive (example: .zip)
         """
         request_url = (
-            f"{self._connection_runtime_url}"
-            f"/$metadata.json"
-            f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
-            f"/tables"
-            f"/{str(table)}"
+            f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
+        query_params = []
+        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
+        if overwrite is not None:
+            value = str(overwrite)
+            if isinstance(overwrite, bool):
+                value = value.lower()
+            query_params.append(f"overwrite={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "POST", request_url, body=None
         )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_tables_async(
-        self,
-        dataset: str,
-    ):
-        """
-        Get sheets
-
-        Retrieves sheet names from a Google Sheet file
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
+                "POST",
                 request_url,
                 response.status,
                 response.text,

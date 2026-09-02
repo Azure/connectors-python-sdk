@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, List
+from dataclasses import dataclass, field
+from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
@@ -41,13 +41,22 @@ class FeedItem:
     """Feed ID"""
     title: Optional[str] = None
     """Feed title"""
-    primary_link: Optional[str] = None
+    primary_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "primaryLink"},
+    )
     """Primary feed link"""
     links: Optional[List[str]] = None
     """Feed links"""
-    updated_on: Optional[str] = None
+    updated_on: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "updatedOn"},
+    )
     """Feed updated on"""
-    publish_date: Optional[str] = None
+    publish_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "publishDate"},
+    )
     """Feed published date"""
     summary: Optional[str] = None
     """Feed item summary"""
@@ -91,55 +100,12 @@ class RssClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "rss"
 
-    async def on_new_feed_async(
-        self,
-        feed_url: Optional[str],
-        since_property: Optional[str] = None,
-    ):
-        """
-        When a feed item is published
-
-        This operation triggers a workflow when a new item is published in an
-        RSS feed.
-        """
-        request_url = f"{self._connection_runtime_url}/OnNewFeed"
-        query_params = []
-        if feed_url is not None:
-            value = str(feed_url)
-            if isinstance(feed_url, bool):
-                value = value.lower()
-            query_params.append(f"feedUrl={quote(value)}")
-        if since_property is not None:
-            value = str(since_property)
-            if isinstance(since_property, bool):
-                value = value.lower()
-            query_params.append(f"sinceProperty={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def list_feed_items_async(
         self,
-        feed_url: Optional[str],
+        feed_url: str,
         since: Optional[str] = None,
         since_property: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all RSS feed items
 
@@ -147,11 +113,10 @@ class RssClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/ListFeedItems"
         query_params = []
-        if feed_url is not None:
-            value = str(feed_url)
-            if isinstance(feed_url, bool):
-                value = value.lower()
-            query_params.append(f"feedUrl={quote(value)}")
+        value = str(feed_url)
+        if isinstance(feed_url, bool):
+            value = value.lower()
+        query_params.append(f"feedUrl={quote(value)}")
         if since is not None:
             value = str(since)
             if isinstance(since, bool):
@@ -181,3 +146,21 @@ class RssClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewFeed": {
+        "operation_id": "OnNewFeed",
+        "path": "/{connectionId}/OnNewFeed",
+        "method": "get",
+        "required_parameters": ["feedUrl"],
+        "callback_payload_type": "TriggerBatchResponseFeedItem",
+    },
+}

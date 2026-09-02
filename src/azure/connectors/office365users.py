@@ -22,19 +22,10 @@ from azure.connectors.sdk import (
 # Type Definitions
 
 @dataclass
-class UpdateMyPhotoInput:
-    """Update my profile photo"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class MyTrendingDocumentsResponse:
-    """Response for Get my trending documents"""
+    """
+    Response for Get my trending documents
+    """
 
     value: Optional[List[GraphTrending]] = None
     """value"""
@@ -42,7 +33,9 @@ class MyTrendingDocumentsResponse:
 
 @dataclass
 class LinklessEntityListResponseListPerson:
-    """Response for Get relevant people"""
+    """
+    Response for Get relevant people
+    """
 
     value: Optional[List[Person]] = None
     """Value"""
@@ -50,42 +43,49 @@ class LinklessEntityListResponseListPerson:
 
 @dataclass
 class ClientPhotoMetadata:
-    """Response for Get user photo metadata"""
+    """
+    Response for Get user photo metadata
+    """
 
-    has_photo: Optional[bool] = None
+    has_photo: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "HasPhoto"},
+    )
     """Has photo"""
-    height: Optional[int] = None
+    height: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Height"},
+    )
     """Height of photo"""
-    width: Optional[int] = None
+    width: Optional[int] = field(default=None, metadata={"wire_name": "Width"})
     """Width of photo"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ContentType"},
+    )
     """Content Type of photo"""
-    image_file_extension: Optional[str] = None
+    image_file_extension: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ImageFileExtension"},
+    )
     """File extension for the photo (ex: \".jpg\")"""
 
 
 @dataclass
 class TrendingDocumentsResponse:
-    """Response for Get trending documents"""
+    """
+    Response for Get trending documents
+    """
 
     value: Optional[List[GraphTrending]] = None
     """value"""
 
 
 @dataclass
-class HttpRequestInput:
-    """Send an HTTP request"""
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
 class ObjectWithoutType:
-    """Response for Send an HTTP request"""
+    """
+    Response for Send an HTTP request
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -96,30 +96,46 @@ class ObjectWithoutType:
 
 @dataclass
 class DirectReportsResponse:
-    """Response for Get direct reports (V2)"""
+    """
+    Response for Get direct reports
+    """
 
-    value: Optional[List[GraphUserV1]] = None
+    value: Optional[List[GraphUser]] = None
     """Value"""
 
 
 @dataclass
 class GraphUser:
-    """Response for Get manager (V2)"""
+    """
+    Response for Get manager
+    """
 
-    about_me: Optional[str] = None
+    about_me: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "aboutMe"},
+    )
     """About Me"""
-    account_enabled: Optional[bool] = None
+    account_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "accountEnabled"},
+    )
     """
     true if the account is enabled; otherwise, false. This property is required
     when a user is created.
     """
     birthday: Optional[str] = None
     """Birthday"""
-    business_phones: Optional[List[str]] = None
+    business_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "businessPhones"},
+    )
     """Business Phones"""
     city: Optional[str] = None
     """The city in which the user is located."""
-    company_name: Optional[str] = None
+    company_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "companyName"},
+    )
     """The name of the company in which the user works."""
     country: Optional[str] = None
     """
@@ -128,42 +144,78 @@ class GraphUser:
     """
     department: Optional[str] = None
     """The name of the department in which the user works."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Display Name"""
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "givenName"},
+    )
     """Given Name"""
-    hire_date: Optional[str] = None
+    hire_date: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "hireDate"},
+    )
     """Hire Date"""
     id: Optional[str] = None
     """Id"""
     interests: Optional[List[str]] = None
     """Interests"""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobTitle"},
+    )
     """Job Title"""
     mail: Optional[str] = None
     """Mail"""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """
     The mail alias for the user. This property must be specified when a user is
     created.
     """
-    mobile_phone: Optional[str] = None
+    mobile_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mobilePhone"},
+    )
     """Mobile Phone"""
-    my_site: Optional[str] = None
+    my_site: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mySite"},
+    )
     """My Site"""
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "officeLocation"},
+    )
     """Office Location"""
-    past_projects: Optional[List[str]] = None
+    past_projects: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "pastProjects"},
+    )
     """Past Projects"""
-    postal_code: Optional[str] = None
+    postal_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "postalCode"},
+    )
     """
     The postal code for the user's postal address. The postal code is specific
     to the user's country/region. In the United States of America, this
     attribute contains the ZIP code.
     """
-    preferred_language: Optional[str] = None
+    preferred_language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "preferredLanguage"},
+    )
     """Preferred Language"""
-    preferred_name: Optional[str] = None
+    preferred_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "preferredName"},
+    )
     """Preferred Name"""
     responsibilities: Optional[List[str]] = None
     """Responsibilities"""
@@ -173,39 +225,64 @@ class GraphUser:
     """Skills"""
     state: Optional[str] = None
     """State"""
-    street_address: Optional[str] = None
+    street_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "streetAddress"},
+    )
     """Street Address"""
     surname: Optional[str] = None
     """Surname"""
-    user_principal_name: Optional[str] = None
+    user_principal_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userPrincipalName"},
+    )
     """User Principal Name"""
-    user_type: Optional[str] = None
+    user_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userType"},
+    )
     """User Type"""
 
 
 @dataclass
 class EntityListResponseIReadOnlyListUser:
-    """Response for Search for users (V2)"""
+    """
+    Response for Search for users
+    """
 
     value: Optional[List[User]] = None
     """Value"""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
     """Next page link"""
 
 
 @dataclass
-class GraphUserUpdateableV1:
-    """Definition: GraphUserUpdateable_V1"""
+class GraphUserUpdateable:
+    """
+    Definition: GraphUserUpdateable
+    """
 
-    about_me: Optional[str] = None
+    about_me: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "aboutMe"},
+    )
     """About Me"""
     birthday: Optional[str] = None
     """Birthday"""
     interests: Optional[List[str]] = None
     """Interests"""
-    my_site: Optional[str] = None
+    my_site: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mySite"},
+    )
     """My Site"""
-    past_projects: Optional[List[str]] = None
+    past_projects: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "pastProjects"},
+    )
     """Past Projects"""
     schools: Optional[List[str]] = None
     """Schools"""
@@ -215,41 +292,69 @@ class GraphUserUpdateableV1:
 
 @dataclass
 class GraphTrending:
-    """Definition: GraphTrending"""
+    """
+    Definition: GraphTrending
+    """
 
     id: Optional[str] = None
     """Unique identifier of the relationship"""
     weight: Optional[float] = None
     """Value indicating how much the document is currently trending"""
-    resource_visualization: Optional[ResourceVisualization] = None
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    resource_visualization: Optional[ResourceVisualization] = field(
+        default=None,
+        metadata={"wire_name": "resourceVisualization"},
+    )
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
 
 
 @dataclass
 class ResourceVisualization:
-    """Definition: resourceVisualization"""
+    """
+    Definition: resourceVisualization
+    """
 
     title: Optional[str] = None
     """The item's title text"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     The item's media type (can be used for filtering for a specific file based
     on a specific type)
     """
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mediaType"},
+    )
     """
     The items media type (can be used for filtering for a specific type of file
     based on supported IANA Media MIME types)
     """
-    preview_image_url: Optional[str] = None
+    preview_image_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "previewImageUrl"},
+    )
     """A URL leading to the preview image for the item"""
-    preview_text: Optional[str] = None
+    preview_text: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "previewText"},
+    )
     """A preview text for the item"""
-    container_web_url: Optional[str] = None
+    container_web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "containerWebUrl"},
+    )
     """A path leading to the folder in which the item is stored"""
-    container_display_name: Optional[str] = None
+    container_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "containerDisplayName"},
+    )
     """A string describing where the item is stored"""
-    container_type: Optional[str] = None
+    container_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "containerType"},
+    )
     """
     Can be used for filtering by the type of container in which the file is
     stored
@@ -258,13 +363,21 @@ class ResourceVisualization:
 
 @dataclass
 class SensitivityLabelMetadata:
-    """Definition: sensitivityLabelMetadata"""
+    """
+    Definition: sensitivityLabelMetadata
+    """
 
-    sensitivity_label_id: Optional[str] = None
+    sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelId"},
+    )
     """SensitivityLabel Id."""
     name: Optional[str] = None
     """SensitivityLabel name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """SensitivityLabel displayName info"""
     tooltip: Optional[str] = None
     """SensitivityLabel details on tooltip."""
@@ -272,45 +385,83 @@ class SensitivityLabelMetadata:
     """SensitivityLabel priority."""
     color: Optional[str] = None
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = None
+    is_encrypted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEncrypted"},
+    )
     """ is SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """Whether SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = None
+    is_parent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isParent"},
+    )
     """Whether SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = None
+    parent_sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentSensitivityLabelId"},
+    )
     """Parent SensitivityLabel Id."""
 
 
 @dataclass
 class Person:
-    """Definition: Person"""
+    """
+    Definition: Person
+    """
 
     id: Optional[str] = None
     """A unique identifier for the Person object in the directory"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The person's display name"""
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "givenName"},
+    )
     """The person's given name"""
     surname: Optional[str] = None
     """The person's surname"""
     birthday: Optional[str] = None
     """The person's birthday"""
-    person_notes: Optional[str] = None
+    person_notes: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "personNotes"},
+    )
     """Free-form notes that the current user has taken about this person"""
-    is_favorite: Optional[bool] = None
+    is_favorite: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isFavorite"},
+    )
     """If the current user has flagged this person as a favorite"""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "jobTitle"},
+    )
     """The person's job title"""
-    company_name: Optional[str] = None
+    company_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "companyName"},
+    )
     """The name of the person's company"""
     department: Optional[str] = None
     """The person's department"""
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "officeLocation"},
+    )
     """The location of the person's office"""
     profession: Optional[str] = None
     """The person's profession"""
-    user_principal_name: Optional[str] = None
+    user_principal_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userPrincipalName"},
+    )
     """
     The user principal name(UPN) of the user.The UPN is an Internet-style login
     name for the user based on the Internet standard RFC 822. By convention,
@@ -318,9 +469,15 @@ class Person:
     @domain, where domain must be present in the tenant's collection of
     verified domains.
     """
-    im_address: Optional[str] = None
+    im_address: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "imAddress"},
+    )
     """The person's VOIP SIP address"""
-    scored_email_addresses: Optional[List[ScoredEmailAddress]] = None
+    scored_email_addresses: Optional[List[ScoredEmailAddress]] = field(
+        default=None,
+        metadata={"wire_name": "scoredEmailAddresses"},
+    )
     """Collection of the person's email addresses with a relevance score"""
     phones: Optional[List[Phone]] = None
     """The person's phone numbers"""
@@ -328,11 +485,16 @@ class Person:
 
 @dataclass
 class ScoredEmailAddress:
-    """Definition: ScoredEmailAddress"""
+    """
+    Definition: ScoredEmailAddress
+    """
 
     address: Optional[str] = None
     """The email address"""
-    relevance_score: Optional[float] = None
+    relevance_score: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "relevanceScore"},
+    )
     """
     The relevance score of the email address. A relevance score is used as a
     sort key, in relation to the other returned results. A higher relevance
@@ -344,11 +506,13 @@ class ScoredEmailAddress:
 
 @dataclass
 class Phone:
-    """Definition: Phone"""
+    """
+    Definition: Phone
+    """
 
     number: Optional[str] = None
     """The phone number"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """
     The type of phone number. Possible values: home, business, mobile, other,
     assistant, homeFax, businessFax, otherFax, pager, radio.
@@ -357,64 +521,111 @@ class Phone:
 
 @dataclass
 class User:
-    """Definition: User"""
+    """
+    Definition: User
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """A unique identifier for the user object in the directory."""
-    account_enabled: Optional[bool] = None
+    account_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "AccountEnabled"},
+    )
     """
     true if the account is enabled; otherwise, false. This property is required
     when a user is created.
     """
-    business_phones: Optional[List[str]] = None
+    business_phones: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "BusinessPhones"},
+    )
     """A list of business phone numbers for the user"""
-    city: Optional[str] = None
+    city: Optional[str] = field(default=None, metadata={"wire_name": "City"})
     """The city in which the user is located."""
-    company_name: Optional[str] = None
+    company_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CompanyName"},
+    )
     """The name of the company in which the user works."""
-    country: Optional[str] = None
+    country: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Country"},
+    )
     """
     The country/region in which the user is located; for example, \"US\" or
     \"UK\".
     """
-    department: Optional[str] = None
+    department: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Department"},
+    )
     """The name of the department in which the user works."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """
     The name displayed in the address book for the user. This is usually the
     combination of the user's first name, middle initial and last name. This
     property is required when a user is created and it cannot be cleared during
     updates.
     """
-    given_name: Optional[str] = None
+    given_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "GivenName"},
+    )
     """The given name (first name) of the user."""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "JobTitle"},
+    )
     """The user's job title."""
-    mail: Optional[str] = None
+    mail: Optional[str] = field(default=None, metadata={"wire_name": "Mail"})
     """
     The SMTP/email address for the user, for example,
     \"jeff@contoso.onmicrosoft.com\". Read-Only.
     """
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MailNickname"},
+    )
     """
     The mail alias for the user. This property must be specified when a user is
     created.
     """
-    mobile_phone: Optional[str] = None
+    mobile_phone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mobilePhone"},
+    )
     """The primary cellular telephone number for the user."""
-    office_location: Optional[str] = None
+    office_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "OfficeLocation"},
+    )
     """The office location in the user's place of business."""
-    postal_code: Optional[str] = None
+    postal_code: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PostalCode"},
+    )
     """
     The postal code for the user's postal address. The postal code is specific
     to the user's country/region. In the United States of America, this
     attribute contains the ZIP code.
     """
-    surname: Optional[str] = None
+    surname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Surname"},
+    )
     """The user's surname (family name or last name)."""
-    telephone_number: Optional[str] = None
+    telephone_number: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TelephoneNumber"},
+    )
     """The primary cellular telephone number for the user."""
-    user_principal_name: Optional[str] = None
+    user_principal_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "UserPrincipalName"},
+    )
     """
     The user principal name (UPN) of the user. The UPN is an Internet-style
     login name for the user based on the Internet standard RFC 822. By
@@ -426,94 +637,15 @@ class User:
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
-
-
-@dataclass
-class GraphUserV1:
-    """Definition: GraphUser_V1"""
-
-    about_me: Optional[str] = None
-    """About Me"""
-    account_enabled: Optional[bool] = None
-    """
-    true if the account is enabled; otherwise, false. This property is required
-    when a user is created.
-    """
-    birthday: Optional[str] = None
-    """Birthday"""
-    business_phones: Optional[List[str]] = None
-    """Business Phones"""
-    city: Optional[str] = None
-    """The city in which the user is located."""
-    company_name: Optional[str] = None
-    """The name of the company in which the user works."""
-    country: Optional[str] = None
-    """
-    The country/region in which the user is located; for example, \"US\" or
-    \"UK\".
-    """
-    department: Optional[str] = None
-    """The name of the department in which the user works."""
-    display_name: Optional[str] = None
-    """Display Name"""
-    given_name: Optional[str] = None
-    """Given Name"""
-    hire_date: Optional[str] = None
-    """Hire Date"""
-    id: Optional[str] = None
-    """Id"""
-    interests: Optional[List[str]] = None
-    """Interests"""
-    job_title: Optional[str] = None
-    """Job Title"""
-    mail: Optional[str] = None
-    """Mail"""
-    mail_nickname: Optional[str] = None
-    """
-    The mail alias for the user. This property must be specified when a user is
-    created.
-    """
-    mobile_phone: Optional[str] = None
-    """Mobile Phone"""
-    my_site: Optional[str] = None
-    """My Site"""
-    office_location: Optional[str] = None
-    """Office Location"""
-    past_projects: Optional[List[str]] = None
-    """Past Projects"""
-    postal_code: Optional[str] = None
-    """
-    The postal code for the user's postal address. The postal code is specific
-    to the user's country/region. In the United States of America, this
-    attribute contains the ZIP code.
-    """
-    preferred_language: Optional[str] = None
-    """Preferred Language"""
-    preferred_name: Optional[str] = None
-    """Preferred Name"""
-    responsibilities: Optional[List[str]] = None
-    """Responsibilities"""
-    schools: Optional[List[str]] = None
-    """Schools"""
-    skills: Optional[List[str]] = None
-    """Skills"""
-    state: Optional[str] = None
-    """State"""
-    street_address: Optional[str] = None
-    """Street Address"""
-    surname: Optional[str] = None
-    """Surname"""
-    user_principal_name: Optional[str] = None
-    """User Principal Name"""
-    user_type: Optional[str] = None
-    """User Type"""
 
 
 # Client Class
@@ -552,43 +684,52 @@ class Office365usersClient(ConnectorClientBase):
 
     async def update_my_profile_async(
         self,
-        input: GraphUserUpdateableV1,
-    ):
+        input: GraphUserUpdateable,
+    ) -> None:
         """
         Update my profile
 
         Updates the profile of the current user
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me"
+        request_url = f"{self._connection_runtime_url}/codeless/v1.0/me"
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
     async def update_my_photo_async(
         self,
-        input: UpdateMyPhotoInput,
-    ):
+        input: bytes,
+    ) -> None:
         """
         Update my profile photo
 
         Updates the profile photo of the current user. The size of the photo
         must be less than 4 MB.
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me/photo/$value"
+        request_url = (
+            f"{self._connection_runtime_url}/codeless/v1.0/me/photo/$value"
+        )
 
-        response = await self.http_client.send_async("PUT", path, body=input)
+        response = await self.http_client.send_async(
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -596,15 +737,15 @@ class Office365usersClient(ConnectorClientBase):
     async def my_trending_documents_async(
         self,
         filter: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Get my trending documents
 
         Retrieves the trending documents for the signed in user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless/beta/me/insights/trending"
         )
@@ -625,14 +766,16 @@ class Office365usersClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -645,23 +788,25 @@ class Office365usersClient(ConnectorClientBase):
     async def relevant_people_async(
         self,
         user_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get relevant people
 
         Get relevant people.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/users/{str(user_id)}/relevantpeople"
+            f"/users/{quote(str(user_id), safe='')}/relevantpeople"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -673,29 +818,30 @@ class Office365usersClient(ConnectorClientBase):
 
     async def user_photo_metadata_async(
         self,
-        user_id: Optional[str],
-    ):
+        user_id: str,
+    ) -> dict[str, Any] | None:
         """
         Get user photo metadata
 
         Get user photo metadata.
         """
-        path = f"{self._connection_runtime_url}/users/photo"
+        request_url = f"{self._connection_runtime_url}/users/photo"
         query_params = []
-        if user_id is not None:
-            value = str(user_id)
-            if isinstance(user_id, bool):
-                value = value.lower()
-            query_params.append(f"userId={quote(value)}")
+        value = str(user_id)
+        if isinstance(user_id, bool):
+            value = value.lower()
+        query_params.append(f"userId={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -709,15 +855,17 @@ class Office365usersClient(ConnectorClientBase):
         self,
         id: str,
         filter: Optional[str] = None,
-    ):
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Get trending documents
 
         Retrieves the trending documents for a user
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/beta/users/{str(id)}/insights/trending"
+            f"/codeless/beta/users/{quote(str(id), safe='')}/insights/trending"
         )
         query_params = []
         if filter is not None:
@@ -725,15 +873,27 @@ class Office365usersClient(ConnectorClientBase):
             if isinstance(filter, bool):
                 value = value.lower()
             query_params.append(f"$filter={quote(value)}")
+        if extract_sensitivity_label is not None:
+            value = str(extract_sensitivity_label)
+            if isinstance(extract_sensitivity_label, bool):
+                value = value.lower()
+            query_params.append(f"extractSensitivityLabel={quote(value)}")
+        if fetch_sensitivity_label_metadata is not None:
+            value = str(fetch_sensitivity_label_metadata)
+            if isinstance(fetch_sensitivity_label_metadata, bool):
+                value = value.lower()
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -745,8 +905,8 @@ class Office365usersClient(ConnectorClientBase):
 
     async def http_request_async(
         self,
-        input: HttpRequestInput,
-    ):
+        input: bytes,
+    ) -> dict[str, Any] | None:
         """
         Send an HTTP request
 
@@ -756,14 +916,19 @@ class Office365usersClient(ConnectorClientBase):
         inferenceClassification. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
         """
-        path = f"{self._connection_runtime_url}/codeless/httprequest"
+        request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -777,18 +942,18 @@ class Office365usersClient(ConnectorClientBase):
         self,
         id: str,
         select: Optional[str] = None,
-        top: Optional[str] = None,
-    ):
+        top: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
-        Get direct reports (V2)
+        Get direct reports
 
         Retrieves the user profiles of the specified user's direct reports.
         Learn more about available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/users/{str(id)}/directReports"
+            f"/codeless/v1.0/users/{quote(str(id), safe='')}/directReports"
         )
         query_params = []
         if select is not None:
@@ -802,14 +967,16 @@ class Office365usersClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$top={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -823,17 +990,17 @@ class Office365usersClient(ConnectorClientBase):
         self,
         id: str,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get manager (V2)
+        Get manager
 
         Retrieves the profile of the specified user's manager. Learn more about
         available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/users/{str(id)}/manager"
+            f"/codeless/v1.0/users/{quote(str(id), safe='')}/manager"
         )
         query_params = []
         if select is not None:
@@ -842,14 +1009,16 @@ class Office365usersClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -862,15 +1031,15 @@ class Office365usersClient(ConnectorClientBase):
     async def my_profile_async(
         self,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get my profile (V2)
+        Get my profile
 
         Retrieves the profile of the current user. Learn more about available
         fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/me"
+        request_url = f"{self._connection_runtime_url}/codeless/v1.0/me"
         query_params = []
         if select is not None:
             value = str(select)
@@ -878,14 +1047,16 @@ class Office365usersClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -898,16 +1069,15 @@ class Office365usersClient(ConnectorClientBase):
     async def search_user_async(
         self,
         search_term: Optional[str] = None,
-        top: Optional[str] = None,
-        is_search_term_required: Optional[str] = None,
-        skip_token: Optional[str] = None,
-    ):
+        top: Optional[int] = None,
+        is_search_term_required: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
-        Search for users (V2)
+        Search for users
 
-        Retrieves the user profiles that match the search term (V2).
+        Retrieves the user profiles that match the search term.
         """
-        path = f"{self._connection_runtime_url}/v2/users"
+        request_url = f"{self._connection_runtime_url}/v2/users"
         query_params = []
         if search_term is not None:
             value = str(search_term)
@@ -924,20 +1094,17 @@ class Office365usersClient(ConnectorClientBase):
             if isinstance(is_search_term_required, bool):
                 value = value.lower()
             query_params.append(f"isSearchTermRequired={quote(value)}")
-        if skip_token is not None:
-            value = str(skip_token)
-            if isinstance(skip_token, bool):
-                value = value.lower()
-            query_params.append(f"skipToken={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -950,42 +1117,47 @@ class Office365usersClient(ConnectorClientBase):
     async def user_photo_async(
         self,
         id: str,
-    ):
+    ) -> bytes:
         """
-        Get user photo (V2)
+        Get user photo
 
         Retrieves the photo of the specified user if they have one
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/codeless/v1.0/users/{str(id)}/photo/$value"
+            f"/codeless/v1.0/users/{quote(str(id), safe='')}/photo/$value"
         )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
 
-        return response.text.encode('latin-1') if response.text else b''
+        return response.content
 
     async def user_profile_async(
         self,
         id: str,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Get user profile (V2)
+        Get user profile
 
         Retrieves the profile of a specific user. Learn more about available
         fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
         """
-        path = f"{self._connection_runtime_url}/codeless/v1.0/users/{str(id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/codeless/v1.0/users/{quote(str(id), safe='')}"
+        )
         query_params = []
         if select is not None:
             value = str(select)
@@ -993,14 +1165,16 @@ class Office365usersClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

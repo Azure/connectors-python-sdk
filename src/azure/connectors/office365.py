@@ -4633,8 +4633,8 @@ class Office365Client(ConnectorClientBase):
         table: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get events
@@ -4878,8 +4878,8 @@ class Office365Client(ConnectorClientBase):
         folder: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get contacts
@@ -5195,8 +5195,8 @@ class Office365Client(ConnectorClientBase):
         input: DirectForwardMessage,
         message_id: str,
         mailbox_address: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
     ) -> None:
         """
         Forward an email
@@ -5248,8 +5248,8 @@ class Office365Client(ConnectorClientBase):
         message_id: str,
         attachment_id: str,
         mailbox_address: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Get Attachment
@@ -5306,10 +5306,10 @@ class Office365Client(ConnectorClientBase):
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
-        include_attachments: Optional[str] = None,
+        include_attachments: Optional[bool] = None,
         internet_message_id: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Get email
@@ -5374,13 +5374,13 @@ class Office365Client(ConnectorClientBase):
         to_or_cc: Optional[str] = None,
         from_: Optional[str] = None,
         importance: Optional[str] = None,
-        fetch_only_with_attachment: Optional[str] = None,
+        fetch_only_with_attachment: Optional[bool] = None,
         subject_filter: Optional[str] = None,
-        fetch_only_unread: Optional[str] = None,
+        fetch_only_unread: Optional[bool] = None,
         mailbox_address: Optional[str] = None,
-        include_attachments: Optional[str] = None,
+        include_attachments: Optional[bool] = None,
         search_query: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get emails
@@ -5486,8 +5486,8 @@ class Office365Client(ConnectorClientBase):
         end_date_time_utc: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         search: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """

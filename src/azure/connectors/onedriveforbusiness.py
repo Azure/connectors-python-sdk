@@ -27,59 +27,54 @@ class BlobMetadata:
     Response for Get file metadata
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique identifier of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    name_no_ext: Optional[str] = None
+    name_no_ext: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "NameNoExt"},
+    )
     """The name of the file or folder, without the file extension."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The file or folder size in bytes."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The file locator of the file or folder."""
-    last_modified_by: Optional[str] = None
+    last_modified_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModifiedBy"},
+    )
     """The user who last modified the file or folder."""
-
-
-@dataclass
-class UpdateFileInput:
-    """
-    Update file
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class CreateFileInput:
-    """
-    Create file
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
 
 @dataclass
@@ -88,11 +83,14 @@ class Thumbnail:
     Response for Get file thumbnail
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = field(default=None, metadata={"wire_name": "Url"})
     """A URL that points to the thumbnail."""
-    width: Optional[int] = None
+    width: Optional[int] = field(default=None, metadata={"wire_name": "Width"})
     """The thumbnail width in pixels."""
-    height: Optional[int] = None
+    height: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Height"},
+    )
     """The thumbnail height in pixels."""
 
 
@@ -102,7 +100,10 @@ class SharingLink:
     Response for Create share link
     """
 
-    web_url: Optional[str] = None
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "WebUrl"},
+    )
     """A URL that points to the file or folder."""
 
 
@@ -114,7 +115,10 @@ class BlobMetadataPage:
 
     value: Optional[List[BlobMetadata]] = None
     """Blob metadata collection."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """A URL which can be used to retrieve the next page."""
 
 
@@ -136,13 +140,25 @@ class TabularDataSetsMetadata:
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
@@ -154,9 +170,15 @@ class BlobDataSetsMetadata:
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
@@ -166,7 +188,10 @@ class Tags:
     Definition: Tags
     """
 
-    tags: Optional[List[str]] = None
+    tags: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "Tags"},
+    )
     """A list of tags."""
 
 
@@ -176,9 +201,15 @@ class ForASelectedFileResponse:
     Definition: ForASelectedFileResponse
     """
 
-    file_path: Optional[str] = None
+    file_path: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "filePath"},
+    )
     """The unique path of the file."""
-    file_url: Optional[str] = None
+    file_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "fileUrl"},
+    )
     """The URL to the source file."""
 
 
@@ -219,14 +250,18 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def get_file_metadata_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get file metadata
 
         This operation gets the metadata for a file.
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -248,20 +283,27 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def update_file_async(
         self,
-        input: UpdateFileInput,
+        input: bytes,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update file
 
         This operation updates a file.
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -280,14 +322,18 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def delete_file_async(
         self,
         id: str,
-    ):
+    ) -> None:
         """
         Delete file
 
         This operation deletes a file.
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -304,8 +350,8 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def get_file_metadata_by_path_async(
         self,
-        path: Optional[str],
-    ):
+        path: str,
+    ) -> dict[str, Any] | None:
         """
         Get file metadata using path
 
@@ -315,11 +361,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -342,9 +387,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def get_file_content_by_path_async(
         self,
-        path: Optional[str],
-        infer_content_type: Optional[str] = None,
-    ):
+        path: str,
+        infer_content_type: Optional[bool] = None,
+    ) -> bytes:
         """
         Get file content using path
 
@@ -355,11 +400,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/GetFileContentByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
@@ -385,8 +429,8 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def get_file_content_async(
         self,
         id: str,
-        infer_content_type: Optional[str] = None,
-    ):
+        infer_content_type: Optional[bool] = None,
+    ) -> bytes:
         """
         Get file content
 
@@ -394,7 +438,11 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/content"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/content"
         )
         query_params = []
         if infer_content_type is not None:
@@ -421,10 +469,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def create_file_async(
         self,
-        input: CreateFileInput,
-        folder_path: Optional[str],
-        name: Optional[str],
-    ):
+        input: bytes,
+        folder_path: str,
+        name: str,
+    ) -> dict[str, Any] | None:
         """
         Create file
 
@@ -432,21 +480,22 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
+        value = str(folder_path)
+        if isinstance(folder_path, bool):
+            value = value.lower()
+        query_params.append(f"folderPath={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -464,10 +513,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def copy_file_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Upload file from URL
 
@@ -477,16 +526,14 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/copyFile"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -515,9 +562,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def copy_drive_file_async(
         self,
         id: str,
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Copy file
 
@@ -525,14 +572,17 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/copy"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/copy"
         )
         query_params = []
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -560,10 +610,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def copy_drive_file_by_path_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Copy file using path
 
@@ -573,16 +623,14 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/CopyFileByPath"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -611,9 +659,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def move_file_async(
         self,
         id: str,
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Move or rename a file
 
@@ -621,14 +669,17 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/move"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/move"
         )
         query_params = []
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -656,10 +707,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def move_file_by_path_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Move or rename a file using path
 
@@ -669,16 +720,14 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/MoveFileByPath"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -708,7 +757,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         self,
         id: str,
         type_: Optional[str] = None,
-    ):
+    ) -> bytes:
         """
         Convert file
 
@@ -717,7 +766,11 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/convert"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/convert"
         )
         query_params = []
         if type_ is not None:
@@ -744,9 +797,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def convert_file_by_path_async(
         self,
-        path: Optional[str],
+        path: str,
         type_: Optional[str] = None,
-    ):
+    ) -> bytes:
         """
         Convert file using path
 
@@ -759,11 +812,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/ConvertFileByPath"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
@@ -789,8 +841,8 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def get_file_thumbnail_async(
         self,
         id: str,
-        size: Optional[str],
-    ):
+        size: str,
+    ) -> dict[str, Any] | None:
         """
         Get file thumbnail
 
@@ -799,14 +851,17 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/thumbnail"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/thumbnail"
         )
         query_params = []
-        if size is not None:
-            value = str(size)
-            if isinstance(size, bool):
-                value = value.lower()
-            query_params.append(f"size={quote(value)}")
+        value = str(size)
+        if isinstance(size, bool):
+            value = value.lower()
+        query_params.append(f"size={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -829,7 +884,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def list_root_folder_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List files in root folder
 
@@ -860,10 +915,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def find_files_async(
         self,
         id: str,
-        query: Optional[str],
-        find_mode: Optional[str],
-        max_file_count: Optional[str] = None,
-    ):
+        query: str,
+        find_mode: str,
+        max_file_count: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
         Find files in folder
 
@@ -872,19 +927,21 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/folders/{str(id)}/search"
+            f"/datasets"
+            f"/default"
+            f"/folders"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/search"
         )
         query_params = []
-        if query is not None:
-            value = str(query)
-            if isinstance(query, bool):
-                value = value.lower()
-            query_params.append(f"query={quote(value)}")
-        if find_mode is not None:
-            value = str(find_mode)
-            if isinstance(find_mode, bool):
-                value = value.lower()
-            query_params.append(f"findMode={quote(value)}")
+        value = str(query)
+        if isinstance(query, bool):
+            value = value.lower()
+        query_params.append(f"query={quote(value)}")
+        value = str(find_mode)
+        if isinstance(find_mode, bool):
+            value = value.lower()
+        query_params.append(f"findMode={quote(value)}")
         if max_file_count is not None:
             value = str(max_file_count)
             if isinstance(max_file_count, bool):
@@ -912,11 +969,11 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def find_files_by_path_async(
         self,
-        query: Optional[str],
-        path: Optional[str],
-        find_mode: Optional[str],
-        max_file_count: Optional[str] = None,
-    ):
+        query: str,
+        path: str,
+        find_mode: str,
+        max_file_count: Optional[int] = None,
+    ) -> dict[str, Any] | None:
         """
         Find files in folder by path
 
@@ -927,21 +984,18 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/findFile"
         )
         query_params = []
-        if query is not None:
-            value = str(query)
-            if isinstance(query, bool):
-                value = value.lower()
-            query_params.append(f"query={quote(value)}")
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
-        if find_mode is not None:
-            value = str(find_mode)
-            if isinstance(find_mode, bool):
-                value = value.lower()
-            query_params.append(f"findMode={quote(value)}")
+        value = str(query)
+        if isinstance(query, bool):
+            value = value.lower()
+        query_params.append(f"query={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
+        value = str(find_mode)
+        if isinstance(find_mode, bool):
+            value = value.lower()
+        query_params.append(f"findMode={quote(value)}")
         if max_file_count is not None:
             value = str(max_file_count)
             if isinstance(max_file_count, bool):
@@ -970,9 +1024,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def create_share_link_async(
         self,
         id: str,
-        type_: Optional[str],
+        type_: str,
         scope: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create share link
 
@@ -980,14 +1034,17 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/shareV2"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/shareV2"
         )
         query_params = []
-        if type_ is not None:
-            value = str(type_)
-            if isinstance(type_, bool):
-                value = value.lower()
-            query_params.append(f"type={quote(value)}")
+        value = str(type_)
+        if isinstance(type_, bool):
+            value = value.lower()
+        query_params.append(f"type={quote(value)}")
         if scope is not None:
             value = str(scope)
             if isinstance(scope, bool):
@@ -1015,10 +1072,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def create_share_link_by_path_async(
         self,
-        path: Optional[str],
-        type_: Optional[str],
+        path: str,
+        type_: str,
         scope: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create share link by path
 
@@ -1029,16 +1086,14 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/datasets/default/CreateShareLinkByPathV2"
         )
         query_params = []
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
-        if type_ is not None:
-            value = str(type_)
-            if isinstance(type_, bool):
-                value = value.lower()
-            query_params.append(f"type={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
+        value = str(type_)
+        if isinstance(type_, bool):
+            value = value.lower()
+        query_params.append(f"type={quote(value)}")
         if scope is not None:
             value = str(scope)
             if isinstance(scope, bool):
@@ -1066,10 +1121,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
     async def extract_folder_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Extract archive to folder
 
@@ -1080,16 +1135,14 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -1118,7 +1171,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
     async def list_folder_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List files in folder
 
@@ -1126,7 +1179,10 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/foldersV2/{str(id)}"
+            f"/datasets"
+            f"/default"
+            f"/foldersV2"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
         query_params.append("skipToken=" + quote(""))
@@ -1151,210 +1207,41 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def on_new_file_async(
-        self,
-        folder_id: Optional[str],
-        include_subfolders: Optional[str] = None,
-        infer_content_type: Optional[str] = None,
-    ):
-        """
-        When a file is created
 
-        This operation triggers a flow when a new file is created in a folder.
-        Files larger than 50 MB will be skipped and not returned by this
-        trigger. Files moved within OneDrive are not considered new files.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/triggers/onnewfilev2"
-        )
-        query_params = []
-        query_params.append("simulate=" + quote("false"))
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if include_subfolders is not None:
-            value = str(include_subfolders)
-            if isinstance(include_subfolders, bool):
-                value = value.lower()
-            query_params.append(f"includeSubfolders={quote(value)}")
-        if infer_content_type is not None:
-            value = str(infer_content_type)
-            if isinstance(infer_content_type, bool):
-                value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def on_new_files_async(
-        self,
-        folder_id: Optional[str],
-        include_subfolders: Optional[str] = None,
-        max_file_count: Optional[str] = None,
-    ):
-        """
-        When a file is created (properties only)
-
-        This operation triggers a flow when a new file is created in a folder.
-        Files moved within OneDrive are not considered new files.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/triggers/batch/onnewfilesv2"
-        )
-        query_params = []
-        query_params.append("simulate=" + quote("false"))
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if include_subfolders is not None:
-            value = str(include_subfolders)
-            if isinstance(include_subfolders, bool):
-                value = value.lower()
-            query_params.append(f"includeSubfolders={quote(value)}")
-        if max_file_count is not None:
-            value = str(max_file_count)
-            if isinstance(max_file_count, bool):
-                value = value.lower()
-            query_params.append(f"maxFileCount={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_updated_file_async(
-        self,
-        folder_id: Optional[str],
-        include_subfolders: Optional[str] = None,
-        infer_content_type: Optional[str] = None,
-    ):
-        """
-        When a file is modified
-
-        This operation triggers a flow when a file is modified in a folder.
-        Files larger than 50 MB will be skipped and not returned by this
-        trigger.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/triggers/onupdatedfilev2"
-        )
-        query_params = []
-        query_params.append("includeFileContent=" + quote("true"))
-        query_params.append("simulate=" + quote("false"))
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if include_subfolders is not None:
-            value = str(include_subfolders)
-            if isinstance(include_subfolders, bool):
-                value = value.lower()
-            query_params.append(f"includeSubfolders={quote(value)}")
-        if infer_content_type is not None:
-            value = str(infer_content_type)
-            if isinstance(infer_content_type, bool):
-                value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        return response.content
-
-    async def on_updated_files_async(
-        self,
-        folder_id: Optional[str],
-        include_subfolders: Optional[str] = None,
-        max_file_count: Optional[str] = None,
-    ):
-        """
-        When a file is modified (properties only)
-
-        This operation triggers a flow when a file is modified in a folder.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/triggers/batch/onupdatedfilesv2"
-        )
-        query_params = []
-        query_params.append("simulate=" + quote("false"))
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if include_subfolders is not None:
-            value = str(include_subfolders)
-            if isinstance(include_subfolders, bool):
-                value = value.lower()
-            query_params.append(f"includeSubfolders={quote(value)}")
-        if max_file_count is not None:
-            value = str(max_file_count)
-            if isinstance(max_file_count, bool):
-                value = value.lower()
-            query_params.append(f"maxFileCount={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewFileV2": {
+        "operation_id": "OnNewFileV2",
+        "path": "/{connectionId}/datasets/default/triggers/onnewfilev2",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": None,
+    },
+    "OnNewFilesV2": {
+        "operation_id": "OnNewFilesV2",
+        "path": "/{connectionId}/datasets/default/triggers/batch/onnewfilesv2",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": "BlobMetadata",
+    },
+    "OnUpdatedFileV2": {
+        "operation_id": "OnUpdatedFileV2",
+        "path": "/{connectionId}/datasets/default/triggers/onupdatedfilev2",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": None,
+    },
+    "OnUpdatedFilesV2": {
+        "operation_id": "OnUpdatedFilesV2",
+        "path": "/{connectionId}/datasets/default/triggers/batch/onupdatedfilesv2",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": "BlobMetadata",
+    },
+}

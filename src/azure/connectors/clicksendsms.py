@@ -533,8 +533,8 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def get_contact_lists_async(
         self,
-        page: Optional[str] = None,
-        limit: Optional[str] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get Contact Lists
@@ -604,7 +604,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def delete_list_async(
         self,
-        list_id: str,
+        list_id: int,
     ) -> dict[str, Any] | None:
         """
         Delete List
@@ -636,7 +636,7 @@ class ClicksendsmsClient(ConnectorClientBase):
     async def create_list_contact_async(
         self,
         input: CreateListContactInput,
-        list_id: str,
+        list_id: int,
     ) -> dict[str, Any] | None:
         """
         Create New Contact
@@ -667,7 +667,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def view_list_contacts_async(
         self,
-        list_id: str,
+        list_id: int,
     ) -> dict[str, Any] | None:
         """
         Get Contacts in a List
@@ -698,8 +698,8 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def delete_list_contact_async(
         self,
-        list_id: str,
-        contact_id: str,
+        list_id: int,
+        contact_id: int,
     ) -> dict[str, Any] | None:
         """
         Delete a Contact

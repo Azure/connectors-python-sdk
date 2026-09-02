@@ -24,7 +24,7 @@ from azure.connectors.sdk import (
 @dataclass
 class ExecutePassThroughNativeQueryResponse:
     """
-    Response for Execute a SQL query (V2)
+    Response for Execute a SQL query
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -37,7 +37,7 @@ class ExecutePassThroughNativeQueryResponse:
 @dataclass
 class ExecuteProcedureInput:
     """
-    Execute stored procedure (V2)
+    Execute stored procedure
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -50,7 +50,7 @@ class ExecuteProcedureInput:
 @dataclass
 class ExecuteProcedureResponse:
     """
-    Response for Execute stored procedure (V2)
+    Response for Execute stored procedure
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -63,7 +63,7 @@ class ExecuteProcedureResponse:
 @dataclass
 class GetItemResponse:
     """
-    Response for Get row (V2)
+    Response for Get row
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -76,7 +76,7 @@ class GetItemResponse:
 @dataclass
 class GetItemsResponse:
     """
-    Response for Get rows (V2)
+    Response for Get rows
     """
 
     metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
@@ -91,7 +91,7 @@ class GetItemsResponse:
 @dataclass
 class SqlItemsList:
     """
-    Response for When an item is created (V2)
+    Response for When an item is created
     """
 
     value: Optional[List[SqlItem]] = None
@@ -101,7 +101,7 @@ class SqlItemsList:
 @dataclass
 class GetTablesResponse:
     """
-    Response for Get tables (V2)
+    Response for Get tables
     """
 
     metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
@@ -116,7 +116,7 @@ class GetTablesResponse:
 @dataclass
 class PatchItemInput:
     """
-    Update row (V2)
+    Update row
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -129,7 +129,7 @@ class PatchItemInput:
 @dataclass
 class PatchItemResponse:
     """
-    Response for Update row (V2)
+    Response for Update row
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -142,7 +142,7 @@ class PatchItemResponse:
 @dataclass
 class PostItemInput:
     """
-    Insert row (V2)
+    Insert row
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -155,7 +155,7 @@ class PostItemInput:
 @dataclass
 class PostItemResponse:
     """
-    Response for Insert row (V2)
+    Response for Insert row
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -370,7 +370,7 @@ class DataSetsList:
 @dataclass
 class DataSetsMetadata:
     """
-    Definition: DataSetsMetadataV2
+    Definition: DataSetsMetadata
     """
 
     tabular: Optional[TabularDataSetsMetadata] = None
@@ -1019,7 +1019,7 @@ class SqlClient(ConnectorClientBase):
         id: str,
     ) -> None:
         """
-        Delete row (V2)
+        Delete row
 
         This operation deletes a row from a table.
         """
@@ -1027,11 +1027,14 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1053,13 +1056,20 @@ class SqlClient(ConnectorClientBase):
         database: str,
     ) -> dict[str, Any] | None:
         """
-        Execute a SQL query (V2)
+        Execute a SQL query
 
-        Execute a SQL query (V2)
+        Execute a SQL query
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(server)},{str(database)}/query/sql"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/query"
+            f"/sql"
         )
 
         response = await self.http_client.send_async(
@@ -1087,7 +1097,7 @@ class SqlClient(ConnectorClientBase):
         procedure: str,
     ) -> dict[str, Any] | None:
         """
-        Execute stored procedure (V2)
+        Execute stored procedure
 
         This operation runs a stored procedure.
         """
@@ -1095,9 +1105,12 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/procedures"
-            f"/{str(procedure)}"
+            f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1125,7 +1138,7 @@ class SqlClient(ConnectorClientBase):
         id: str,
     ) -> dict[str, Any] | None:
         """
-        Get row (V2)
+        Get row
 
         This operation gets a row from a table.
         """
@@ -1133,11 +1146,14 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1165,15 +1181,15 @@ class SqlClient(ConnectorClientBase):
         apply: Optional[str] = None,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        skip: Optional[str] = None,
-        top: Optional[str] = None,
+        skip: Optional[int] = None,
+        top: Optional[int] = None,
         select: Optional[str] = None,
-        count: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
+        count: Optional[bool] = None,
+        extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
-        Get rows (V2)
+        Get rows
 
         This operation gets rows from a table.
         """
@@ -1181,9 +1197,12 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
         query_params = []
@@ -1256,17 +1275,23 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-        extract_sensitivity_label: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
-        Get tables (V2)
+        Get tables
 
         This operation gets tables from a database.
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(server)},{str(database)}/tables"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/tables"
         )
         query_params = []
         if extract_sensitivity_label is not None:
@@ -1308,7 +1333,7 @@ class SqlClient(ConnectorClientBase):
         id: str,
     ) -> dict[str, Any] | None:
         """
-        Update row (V2)
+        Update row
 
         This operation updates an existing row in a table.
         """
@@ -1316,11 +1341,14 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1348,7 +1376,7 @@ class SqlClient(ConnectorClientBase):
         table: str,
     ) -> dict[str, Any] | None:
         """
-        Insert row (V2)
+        Insert row
 
         This operation inserts a new row into a table.
         """
@@ -1356,9 +1384,12 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
 
@@ -1453,7 +1484,14 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(server)},{str(database)}/tablesfor/deleteitem"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/deleteitem"
         )
 
         response = await self.http_client.send_async(
@@ -1473,7 +1511,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pass_through_native_query_metadata_v2_async(
+    async def get_pass_through_native_query_metadata_async(
         self,
         input: SqlPassThroughNativeQueryBody,
         server: str,
@@ -1489,7 +1527,10 @@ class SqlClient(ConnectorClientBase):
             f"/v2"
             f"/$metadata.json"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/query"
             f"/sql"
         )
@@ -1523,7 +1564,13 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(server)},{str(database)}/procedures"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/procedures"
         )
 
         response = await self.http_client.send_async(
@@ -1559,9 +1606,12 @@ class SqlClient(ConnectorClientBase):
             f"/v2"
             f"/$metadata.json"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/procedures"
-            f"/{str(procedure)}"
+            f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1593,7 +1643,14 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(server)},{str(database)}/tablesfor/getitem"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/getitem"
         )
 
         response = await self.http_client.send_async(
@@ -1613,12 +1670,12 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_table_v2_async(
+    async def get_table_async(
         self,
         server: str,
         database: str,
         table: str,
-        extract_sensitivity_label: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1631,9 +1688,12 @@ class SqlClient(ConnectorClientBase):
             f"/v2"
             f"/$metadata.json"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
         )
         query_params = []
         if extract_sensitivity_label is not None:
@@ -1680,7 +1740,10 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tablesfor"
             f"/getonnewitems"
         )
@@ -1716,7 +1779,10 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tablesfor"
             f"/getonupdateditems"
         )
@@ -1750,7 +1816,14 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(server)},{str(database)}/tablesfor/patchitem"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/patchitem"
         )
 
         response = await self.http_client.send_async(
@@ -1786,9 +1859,12 @@ class SqlClient(ConnectorClientBase):
             f"/v2"
             f"/$metadata.json"
             f"/datasets"
-            f"/{str(server)},{str(database)}"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/forPatchItem"
         )
 
@@ -1821,7 +1897,14 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/v2/datasets/{str(server)},{str(database)}/tablesfor/postitem"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/postitem"
         )
 
         response = await self.http_client.send_async(
@@ -1831,68 +1914,6 @@ class SqlClient(ConnectorClientBase):
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_table_async(
-        self,
-        table: str,
-    ) -> dict[str, Any] | None:
-        """
-        Get table metadata
-
-        This operation gets metadata for a table.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/$metadata.json/datasets/default/tables/{str(table)}"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_pass_through_native_query_metadata_async(
-        self,
-        input: PassThroughNativeQueryBody,
-    ) -> dict[str, Any] | None:
-        """
-        Get pass-through native SQL query metadata
-
-        Retrieves metadata for a pass-through native SQL query.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/$metadata.json/datasets/default/query/sql"
-        )
-
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
                 request_url,
                 response.status,
                 response.text,
@@ -1914,7 +1935,11 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/$metadata.json/datasets/default/procedures/{str(procedure)}"
+            f"/$metadata.json"
+            f"/datasets"
+            f"/default"
+            f"/procedures"
+            f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(

@@ -1161,8 +1161,8 @@ class GithubClient(ConnectorClientBase):
         sort: Optional[str] = None,
         direction: Optional[str] = None,
         since: Optional[str] = None,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get all issues of a repository
@@ -1365,7 +1365,7 @@ class GithubClient(ConnectorClientBase):
 
     async def get_repository_by_id_async(
         self,
-        repository_id: str,
+        repository_id: int,
     ) -> dict[str, Any] | None:
         """
         Get a repository by Id
@@ -1479,7 +1479,7 @@ class GithubClient(ConnectorClientBase):
         input: PullRequestMergeRequest,
         repository_owner: str,
         repository_name: str,
-        pull_number: str,
+        pull_number: int,
     ) -> dict[str, Any] | None:
         """
         Merge a pull request
@@ -1517,7 +1517,7 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        pull_number: str,
+        pull_number: int,
     ) -> dict[str, Any] | None:
         """
         Get a pull request
@@ -1555,7 +1555,7 @@ class GithubClient(ConnectorClientBase):
         input: PullRequestUpdateRequest,
         repository_owner: str,
         repository_name: str,
-        pull_number: str,
+        pull_number: int,
     ) -> dict[str, Any] | None:
         """
         Update a pull request
@@ -1596,7 +1596,7 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        pull_number: str,
+        pull_number: int,
     ) -> dict[str, Any] | None:
         """
         Get the list of files from a pull request
@@ -1636,7 +1636,7 @@ class GithubClient(ConnectorClientBase):
         input: RequestReviewersBody,
         repository_owner: str,
         repository_name: str,
-        pull_number: str,
+        pull_number: int,
     ) -> None:
         """
         Request reviewers for a pull request
@@ -1671,7 +1671,7 @@ class GithubClient(ConnectorClientBase):
         input: RequestReviewersBody,
         repository_owner: str,
         repository_name: str,
-        pull_number: str,
+        pull_number: int,
     ) -> None:
         """
         Remove requested reviewers from a pull request
@@ -1750,8 +1750,8 @@ class GithubClient(ConnectorClientBase):
         base: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get all Pull Requests of A Repository
@@ -1901,7 +1901,7 @@ class GithubClient(ConnectorClientBase):
     async def add_selected_repo_to_org_secret_async(
         self,
         repository_owner: str,
-        repository_id: str,
+        repository_id: int,
         secret_name: str,
     ) -> None:
         """
@@ -1941,7 +1941,7 @@ class GithubClient(ConnectorClientBase):
     async def remove_selected_repo_from_org_secret_async(
         self,
         repository_owner: str,
-        repository_id: str,
+        repository_id: int,
         secret_name: str,
     ) -> None:
         """
@@ -2014,7 +2014,7 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        issue_number: str,
+        issue_number: int,
     ) -> dict[str, Any] | None:
         """
         Get a particular issue of a repository
@@ -2052,7 +2052,7 @@ class GithubClient(ConnectorClientBase):
         input: IssueUpdateModel,
         repository_owner: str,
         repository_name: str,
-        issue_number: str,
+        issue_number: int,
     ) -> dict[str, Any] | None:
         """
         Update an Issue
@@ -2090,7 +2090,7 @@ class GithubClient(ConnectorClientBase):
         input: MilestoneUpdateModel,
         repository_owner: str,
         repository_name: str,
-        milestone_number: str,
+        milestone_number: int,
     ) -> dict[str, Any] | None:
         """
         Update a milestone
@@ -2177,8 +2177,8 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Lists the available assignees for issues in a repository
@@ -2227,8 +2227,8 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List repository collaborators
@@ -2317,8 +2317,8 @@ class GithubClient(ConnectorClientBase):
         state: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all milestones of a repository
@@ -2382,8 +2382,8 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all labels for a repository
@@ -2432,9 +2432,9 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        issue_number: str,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        issue_number: int,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all labels for an issue
@@ -2487,8 +2487,8 @@ class GithubClient(ConnectorClientBase):
         type_: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all public repositories for a user
@@ -2551,8 +2551,8 @@ class GithubClient(ConnectorClientBase):
         type_: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all public repositories for an organization
@@ -2618,8 +2618,8 @@ class GithubClient(ConnectorClientBase):
         type_: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all repositories for the authenticated user
@@ -2699,8 +2699,8 @@ class GithubClient(ConnectorClientBase):
         q: str,
         sort: Optional[str] = None,
         order: Optional[str] = None,
-        per_page: Optional[str] = None,
-        page: Optional[str] = None,
+        per_page: Optional[int] = None,
+        page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Find issues by state and keyword

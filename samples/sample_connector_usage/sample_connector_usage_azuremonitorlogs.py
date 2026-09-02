@@ -16,7 +16,9 @@ Installation:
 
 Usage:
     Set environment variable:
-    $env:AZUREMONITORLOGS_CONNECTION_URL = "https://[region].azure-apihub.net/apim/azuremonitorlogs/[connection-id]"
+    $env:AZUREMONITORLOGS_CONNECTION_URL = (
+        "https://[region].azure-apihub.net/apim/azuremonitorlogs/[connection-id]"
+    )
 
     python sample_connector_usage_azuremonitorlogs.py
 """

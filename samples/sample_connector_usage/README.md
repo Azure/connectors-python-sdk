@@ -65,7 +65,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_mq.py` | IBM MQ | `MQ_CONNECTION_URL` |
 | `sample_connector_usage_microsoftbookings.py` | Microsoft Bookings | `MICROSOFTBOOKINGS_CONNECTION_URL` |
 | `sample_connector_usage_microsoftforms.py` | Microsoft Forms | `MICROSOFTFORMS_CONNECTION_URL` |
-| `sample_connector_usage_msgraph.py` | MS Graph Groups & Users | `MSGRAPH_CONNECTION_URL` |
+| `sample_connector_usage_msgraphgroupsanduser.py` | MS Graph Groups & Users | `MSGRAPH_CONNECTION_URL` |
 | `sample_connector_usage_office365.py` | Office 365 Outlook | `OFFICE365_CONNECTION_URL` |
 | `sample_connector_usage_office365groups.py` | Office 365 Groups | `OFFICE365GROUPS_CONNECTION_URL` |
 | `sample_connector_usage_office365groupsmail.py` | Office 365 Groups Mail | `OFFICE365GROUPSMAIL_CONNECTION_URL` |

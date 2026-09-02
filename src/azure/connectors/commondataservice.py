@@ -69,7 +69,7 @@ class ItemsList:
 @dataclass
 class DataSetsList:
     """
-    Response for GetDataSets_V2
+    Response for GetDataSets
     """
 
     value: Optional[List[DataSet]] = None
@@ -136,7 +136,7 @@ class ObjectEntity:
 @dataclass
 class TablesList:
     """
-    Response for GetTables_V2
+    Response for GetTables
     """
 
     value: Optional[List[Table]] = None
@@ -895,7 +895,7 @@ class CommondataserviceClient(ConnectorClientBase):
         input: bytes,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
         display_name: str,
     ) -> dict[str, Any] | None:
         """
@@ -1191,7 +1191,7 @@ class CommondataserviceClient(ConnectorClientBase):
         self,
     ) -> dict[str, Any] | None:
         """
-        GetDataSets_V2
+        GetDataSets
         """
         request_url = f"{self._connection_runtime_url}/v2/datasets"
 
@@ -1298,7 +1298,7 @@ class CommondataserviceClient(ConnectorClientBase):
         apply: Optional[str] = None,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         expand: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1561,7 +1561,7 @@ class CommondataserviceClient(ConnectorClientBase):
         dataset: str,
     ) -> dict[str, Any] | None:
         """
-        GetTables_V2
+        GetTables
         """
         request_url = (
             f"{self._connection_runtime_url}"
