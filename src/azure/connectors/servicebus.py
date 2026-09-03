@@ -425,7 +425,7 @@ class ServicebusClient(ConnectorClientBase):
     async def get_deferred_message_from_queue_async(
         self,
         queue_name: str,
-        sequence_number: str,
+        sequence_number: int,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
     ) -> dict[str, Any] | None:
@@ -622,7 +622,7 @@ class ServicebusClient(ConnectorClientBase):
     async def get_messages_from_queue_with_peek_lock_async(
         self,
         queue_name: str,
-        max_message_count: Optional[str] = None,
+        max_message_count: Optional[int] = None,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
     ) -> dict[str, Any] | None:
@@ -841,7 +841,7 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-        sequence_number: str,
+        sequence_number: int,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
     ) -> dict[str, Any] | None:
@@ -1123,7 +1123,7 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
-        max_message_count: Optional[str] = None,
+        max_message_count: Optional[int] = None,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
     ) -> dict[str, Any] | None:

@@ -91,8 +91,8 @@ async def example_1_send_message_to_queue():
 
 
 async def example_2_receive_message_from_queue():
-    """Example 2: Receive a message from a Service Bus queue (auto-complete)."""
-    print("\n=== Example 2: Receive Message from Queue (Auto-Complete) ===")
+    """Example 2: Receive one queue message with a peek lock."""
+    print("\n=== Example 2: Receive Message from Queue ===")
 
     if not QUEUE_NAME:
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
@@ -102,15 +102,19 @@ async def example_2_receive_message_from_queue():
 
     async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_message_from_queue_async(
-                queue_name=QUEUE_NAME
+            result = await client.get_messages_from_queue_with_peek_lock_async(
+                queue_name=QUEUE_NAME,
+                max_message_count=1,
             )
+            messages = result.get("value", []) if result else []
 
-            if result:
+            if messages:
+                message = messages[0]
                 print(f"Message received from queue '{QUEUE_NAME}':")
-                print(f"  Message ID: {result.get('messageId', 'N/A')}")
-                print(f"  Content: {result.get('contentData', 'N/A')}")
-                print(f"  Content Type: {result.get('contentType', 'N/A')}")
+                print(f"  Message ID: {message.get('messageId', 'N/A')}")
+                print(f"  Content: {message.get('contentData', 'N/A')}")
+                print(f"  Content Type: {message.get('contentType', 'N/A')}")
+                print("  Complete or abandon the message by using its lock token.")
             else:
                 print(f"No messages available in queue '{QUEUE_NAME}'.")
 
@@ -133,25 +137,29 @@ async def example_3_receive_with_peek_lock():
     async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Receive message with peek-lock (message is locked, not removed)
-            result = await client.get_new_message_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME
+            result = await client.get_messages_from_queue_with_peek_lock_async(
+                queue_name=QUEUE_NAME,
+                max_message_count=1,
             )
+            messages = result.get("value", []) if result else []
 
-            if result:
-                lock_token = result.get("lockToken")
+            if messages:
+                message = messages[0]
+                lock_token = message.get("lockToken")
                 print("Message received with peek-lock:")
                 print(f"  Lock Token: {lock_token}")
-                print(f"  Content: {result.get('contentData', 'N/A')}")
+                print(f"  Content: {message.get('contentData', 'N/A')}")
 
                 # Process the message...
                 print("  Processing message...")
 
                 # Complete the message (remove from queue)
-                await client.complete_message_in_queue_async(
-                    queue_name=QUEUE_NAME,
-                    lock_token=lock_token
-                )
-                print("  Message completed successfully.")
+                if lock_token:
+                    await client.complete_message_in_queue_async(
+                        queue_name=QUEUE_NAME,
+                        lock_token=lock_token,
+                    )
+                    print("  Message completed successfully.")
             else:
                 print(f"No messages available in queue '{QUEUE_NAME}'.")
 
@@ -173,21 +181,25 @@ async def example_4_receive_and_abandon():
 
     async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_new_message_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME
+            result = await client.get_messages_from_queue_with_peek_lock_async(
+                queue_name=QUEUE_NAME,
+                max_message_count=1,
             )
+            messages = result.get("value", []) if result else []
 
-            if result:
-                lock_token = result.get("lockToken")
+            if messages:
+                message = messages[0]
+                lock_token = message.get("lockToken")
                 print("Message received with peek-lock:")
-                print(f"  Content: {result.get('contentData', 'N/A')}")
+                print(f"  Content: {message.get('contentData', 'N/A')}")
 
                 # Abandon the message (return to queue for retry)
-                await client.abandon_message_in_queue_async(
-                    queue_name=QUEUE_NAME,
-                    lock_token=lock_token
-                )
-                print("  Message abandoned and returned to queue.")
+                if lock_token:
+                    await client.abandon_message_in_queue_async(
+                        queue_name=QUEUE_NAME,
+                        lock_token=lock_token,
+                    )
+                    print("  Message abandoned and returned to queue.")
             else:
                 print(f"No messages available in queue '{QUEUE_NAME}'.")
 
@@ -246,15 +258,18 @@ async def example_6_receive_from_topic_subscription():
 
     async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_message_from_topic_async(
+            result = await client.get_messages_from_topic_with_peek_lock_async(
                 topic_name=TOPIC_NAME,
-                subscription_name=SUBSCRIPTION_NAME
+                subscription_name=SUBSCRIPTION_NAME,
+                max_message_count=1,
             )
+            messages = result.get("value", []) if result else []
 
-            if result:
+            if messages:
+                message = messages[0]
                 print(f"Message received from '{TOPIC_NAME}/{SUBSCRIPTION_NAME}':")
-                print(f"  Message ID: {result.get('messageId', 'N/A')}")
-                print(f"  Content: {result.get('contentData', 'N/A')}")
+                print(f"  Message ID: {message.get('messageId', 'N/A')}")
+                print(f"  Content: {message.get('contentData', 'N/A')}")
             else:
                 print(f"No messages in subscription '{SUBSCRIPTION_NAME}'.")
 
@@ -276,23 +291,27 @@ async def example_7_dead_letter_message():
 
     async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_new_message_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME
+            result = await client.get_messages_from_queue_with_peek_lock_async(
+                queue_name=QUEUE_NAME,
+                max_message_count=1,
             )
+            messages = result.get("value", []) if result else []
 
-            if result:
-                lock_token = result.get("lockToken")
+            if messages:
+                message = messages[0]
+                lock_token = message.get("lockToken")
                 print("Message received:")
-                print(f"  Content: {result.get('contentData', 'N/A')}")
+                print(f"  Content: {message.get('contentData', 'N/A')}")
 
                 # Move to dead-letter queue
-                await client.dead_letter_message_in_queue_async(
-                    queue_name=QUEUE_NAME,
-                    lock_token=lock_token,
-                    dead_letter_reason="Processing failed",
-                    dead_letter_error_description="Max retries exceeded"
-                )
-                print("  Message moved to dead-letter queue.")
+                if lock_token:
+                    await client.dead_letter_message_in_queue_async(
+                        queue_name=QUEUE_NAME,
+                        lock_token=lock_token,
+                        dead_letter_reason="Processing failed",
+                        dead_letter_error_description="Max retries exceeded",
+                    )
+                    print("  Message moved to dead-letter queue.")
             else:
                 print(f"No messages available in queue '{QUEUE_NAME}'.")
 
@@ -314,14 +333,15 @@ async def example_8_batch_receive():
 
     async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_messages_from_queue_async(
+            result = await client.get_messages_from_queue_with_peek_lock_async(
                 queue_name=QUEUE_NAME,
-                max_message_count="5"
+                max_message_count=5,
             )
+            messages = result.get("value", []) if result else []
 
-            if result:
-                print(f"Received {len(result)} messages from '{QUEUE_NAME}':")
-                for i, msg in enumerate(result, 1):
+            if messages:
+                print(f"Received {len(messages)} messages from '{QUEUE_NAME}':")
+                for i, msg in enumerate(messages, 1):
                     print(f"  {i}. {msg.get('contentData', 'N/A')[:50]}...")
             else:
                 print(f"No messages available in queue '{QUEUE_NAME}'.")

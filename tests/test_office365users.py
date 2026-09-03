@@ -6,9 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.office365users import (
     Office365usersClient,
-    GraphUserUpdateableV1,
-    UpdateMyPhotoInput,
-    HttpRequestInput,
+    GraphUserUpdateable,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -117,7 +115,7 @@ class TestUpdateMyProfile:
         )
 
         mock_response = MockResponse(status=200, text='{}')
-        profile_input = GraphUserUpdateableV1(about_me="Test about me")
+        profile_input = GraphUserUpdateable(about_me="Test about me")
 
         with patch.object(
             client._http_client,
@@ -145,7 +143,7 @@ class TestUpdateMyPhoto:
         )
 
         mock_response = MockResponse(status=200, text='{}')
-        photo_input = UpdateMyPhotoInput()
+        photo_input = b"photo content"
 
         with patch.object(
             client._http_client,
@@ -441,7 +439,7 @@ class TestHttpRequest:
             status=200,
             text='{"result": "success"}'
         )
-        request_input = HttpRequestInput()
+        request_input = b"request content"
 
         with patch.object(
             client._http_client,
@@ -473,7 +471,7 @@ class TestHttpRequest:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.http_request_async(input=HttpRequestInput())
+            result = await client.http_request_async(input=b"request content")
             assert result is None
 
     @pytest.mark.asyncio
@@ -493,7 +491,7 @@ class TestHttpRequest:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.http_request_async(input=HttpRequestInput())
+                await client.http_request_async(input=b"request content")
 
             assert exc_info.value.status_code == 400
 
@@ -804,16 +802,14 @@ class TestSearchUser:
         ) as mock_send:
             await client.search_user_async(
                 search_term="John",
-                top="25",
-                is_search_term_required="true",
-                skip_token="abc123"
+                top=25,
+                is_search_term_required=True
             )
 
             call_args = mock_send.call_args
             assert "searchTerm=John" in call_args[0][1]
             assert "top=25" in call_args[0][1]
             assert "isSearchTermRequired=true" in call_args[0][1]
-            assert "skipToken=abc123" in call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_token_provider):
@@ -868,8 +864,7 @@ class TestUserPhoto:
         )
 
         binary_content = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR'
-        # NOTE(sdk): Method uses response.text.encode('latin-1') so we provide text as string.
-        mock_response = MockResponse(status=200, text=binary_content.decode('latin-1'))
+        mock_response = MockResponse(status=200, content=binary_content)
 
         with patch.object(
             client._http_client,

@@ -1503,13 +1503,13 @@ class TallyfyClient(ConnectorClientBase):
     async def get_user_tasks_async(
         self,
         org: str,
-        user_id: str,
+        user_id: int,
         q: Optional[str] = None,
         status: Optional[str] = None,
         sort: Optional[str] = None,
         tag: Optional[str] = None,
-        page: Optional[str] = None,
-        per_page: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get a member's tasks

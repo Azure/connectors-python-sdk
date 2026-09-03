@@ -865,7 +865,7 @@ class WebexClient(ConnectorClientBase):
         mentioned_people: Optional[str] = None,
         before_message: Optional[str] = None,
         before: Optional[str] = None,
-        max: Optional[str] = None,
+        max: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get Messages
@@ -1048,7 +1048,7 @@ class WebexClient(ConnectorClientBase):
 
     async def get_spaces_async(
         self,
-        max: Optional[str] = None,
+        max: Optional[int] = None,
         type_: Optional[str] = None,
         sort_by: Optional[str] = None,
     ) -> dict[str, Any] | None:

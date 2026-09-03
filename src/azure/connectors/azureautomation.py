@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -23,7 +23,9 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreateJobResponse:
-    """Response for Get status of job"""
+    """
+    Response for Get status of job
+    """
 
     id: Optional[str] = None
     """Resource ID of the Job"""
@@ -32,41 +34,95 @@ class CreateJobResponse:
 
 
 @dataclass
+class CreateJobInput:
+    """
+    Create job
+    """
+
+    properties: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class SubscriptionListResult:
+    """
+    Response for List subscriptions
+    """
+
+    value: Optional[List[Subscription]] = None
+    """The subscriptions."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
+class ResourceGroupListResult:
+    """
+    Response for List resource groups
+    """
+
+    value: Optional[List[ResourceGroup]] = None
+    """The list of resource groups."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
 class AutomationAccountResponse:
-    """Definition: AutomationAccountResponse"""
+    """
+    Response for List Automation accounts
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
 
 
 @dataclass
-class SubscriptionListResult:
-    """Definition: SubscriptionListResult"""
+class RunbookListResults:
+    """
+    Response for List runbooks
+    """
 
-    value: Optional[List[Subscription]] = None
-    """The subscriptions."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
+    value: Optional[List[Dict[str, Any]]] = None
 
 
 @dataclass
 class Subscription:
-    """Definition: Subscription"""
+    """
+    Definition: Subscription
+    """
 
     id: Optional[str] = None
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """The subscription Id."""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The tenant Id."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The subscription display name."""
     state: Optional[str] = None
     """The subscription state."""
-    authorization_source: Optional[str] = None
+    authorization_source: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "authorizationSource"},
+    )
     """
     The authorization source of the request. Valid values are one or more
     combinations of Legacy, RoleBased, Bypassed, Direct and Management. For
@@ -75,18 +131,10 @@ class Subscription:
 
 
 @dataclass
-class ResourceGroupListResult:
-    """Definition: ResourceGroupListResult"""
-
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class ResourceGroup:
-    """Definition: ResourceGroup"""
+    """
+    Definition: ResourceGroup
+    """
 
     id: Optional[str] = None
     """
@@ -94,15 +142,11 @@ class ResourceGroup:
     """
     name: Optional[str] = None
     """The Name of the resource group."""
-    managed_by: Optional[str] = None
+    managed_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managedBy"},
+    )
     """Id of the resource that manages this resource group."""
-
-
-@dataclass
-class RunbookListResults:
-    """Definition: RunbookListResults"""
-
-    value: Optional[List[Dict[str, Any]]] = None
 
 
 # Client Class
@@ -145,33 +189,39 @@ class AzureautomationClient(ConnectorClientBase):
         resource_group_name: str,
         automation_account: str,
         job_id: str,
-    ):
+    ) -> bytes:
         """
         Get job output
 
         Get outputs of an Azure Automation job.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourceGroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Automation"
             f"/automationAccounts"
-            f"/{str(automation_account)}"
+            f"/{quote(str(automation_account), safe='')}"
             f"/jobs"
-            f"/{str(job_id)}"
+            f"/{quote(str(job_id), safe='')}"
             f"/output"
         )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -184,32 +234,38 @@ class AzureautomationClient(ConnectorClientBase):
         resource_group_name: str,
         automation_account: str,
         job_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get status of job
 
         Get Status of a Job
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourceGroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Automation"
             f"/automationAccounts"
-            f"/{str(automation_account)}"
+            f"/{quote(str(automation_account), safe='')}"
             f"/jobs"
-            f"/{str(job_id)}"
+            f"/{quote(str(job_id), safe='')}"
         )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -221,43 +277,256 @@ class AzureautomationClient(ConnectorClientBase):
 
     async def create_job_async(
         self,
+        input: CreateJobInput,
         subscription_id: str,
         resource_group_name: str,
         automation_account: str,
-        wait: Optional[str] = None,
-    ):
+        runbook_name: Optional[str] = None,
+        wait: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Create job
 
         Create Job to run on hybrid worker
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourceGroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.Automation"
             f"/automationAccounts"
-            f"/{str(automation_account)}"
+            f"/{quote(str(automation_account), safe='')}"
             f"/jobs"
         )
         query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        if runbook_name is not None:
+            value = str(runbook_name)
+            if isinstance(runbook_name, bool):
+                value = value.lower()
+            query_params.append(f"runbookName={quote(value)}")
         if wait is not None:
             value = str(wait)
             if isinstance(wait, bool):
                 value = value.lower()
             query_params.append(f"wait={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PUT", path, body=None)
+        response = await self.http_client.send_async(
+            "PUT", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def subscriptions_list_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        List subscriptions
+
+        Gets a list of all the subscriptions to which the principal has access.
+        """
+        request_url = f"{self._connection_runtime_url}/subscriptions"
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-11-01"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def resource_groups_list_async(
+        self,
+        subscription_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        List resource groups
+
+        Lists all the resource groups within the subscription. Paginates at
+        1,000 records.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def automation_accounts_list_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        List Automation accounts
+
+        Lists Azure Automation accounts in a resource group.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourceGroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.Automation"
+            f"/automationAccounts"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def runbooks_list_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+        automation_account: str,
+    ) -> dict[str, Any] | None:
+        """
+        List runbooks
+
+        Lists Azure Automation runbooks in an automation account.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourceGroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.Automation"
+            f"/automationAccounts"
+            f"/{quote(str(automation_account), safe='')}"
+            f"/runbooks"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_runbook_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+        automation_account: str,
+        runbook_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get runbook
+
+        Get information on an Azure Automation runbook.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourceGroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.Automation"
+            f"/automationAccounts"
+            f"/{quote(str(automation_account), safe='')}"
+            f"/runbooks"
+            f"/{quote(str(runbook_name), safe='')}"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )

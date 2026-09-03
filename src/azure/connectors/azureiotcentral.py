@@ -1353,7 +1353,7 @@ class ScheduledJobPatch:
 @dataclass
 class EmailUser:
     """
-    Definition: EmailUserV1
+    Definition: EmailUser
     """
 
     id: Optional[str] = None
@@ -1372,7 +1372,7 @@ class EmailUser:
 @dataclass
 class ServicePrincipalUser:
     """
-    Definition: ServicePrincipalUserV1
+    Definition: ServicePrincipalUser
     """
 
     id: Optional[str] = None
@@ -1399,7 +1399,7 @@ class ServicePrincipalUser:
 @dataclass
 class RoleAssignment:
     """
-    Definition: RoleAssignmentV1
+    Definition: RoleAssignment
     """
 
     role: Optional[str] = None
@@ -4774,7 +4774,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         application: str,
         scheduled_job_end_type: Optional[str] = None,
         job_type: Optional[str] = None,
-        patch: Optional[str] = None,
+        patch: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_ScheduledJob
@@ -4827,7 +4827,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         user_type: Optional[str] = None,
-        patch: Optional[str] = None,
+        patch: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_User

@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
@@ -23,9 +23,14 @@ from azure.connectors.sdk import (
 
 @dataclass
 class ListUsersResponse:
-    """Response for List Users"""
+    """
+    Response for List Users
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -33,11 +38,19 @@ class ListUsersResponse:
 
 @dataclass
 class ListGroupsByDisplayNameSearchResponse:
-    """Response for List Groups By Display Name Search"""
+    """
+    Response for List Groups By Display Name Search
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
-    count: Optional[int] = None
+    count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "@odata.count"},
+    )
     """@odata.count"""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -45,9 +58,14 @@ class ListGroupsByDisplayNameSearchResponse:
 
 @dataclass
 class ListSubscribedSkusResponse:
-    """Response for List Subscribed Skus"""
+    """
+    Response for List Subscribed Skus
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -55,11 +73,19 @@ class ListSubscribedSkusResponse:
 
 @dataclass
 class ListDirectGroupMembersResponse:
-    """Response for List Direct Group Members"""
+    """
+    Response for List Direct Group Members
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
-    count: Optional[int] = None
+    count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "@odata.count"},
+    )
     """@odata.count"""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -67,9 +93,14 @@ class ListDirectGroupMembersResponse:
 
 @dataclass
 class GetMemberLicenseDetailsResponse:
-    """Response for Get Member License Details"""
+    """
+    Response for Get Member License Details
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
     value: Optional[List[Dict[str, Any]]] = None
     """value"""
@@ -77,97 +108,190 @@ class GetMemberLicenseDetailsResponse:
 
 @dataclass
 class GetGroupPropertiesResponse:
-    """Response for Get Group Properties"""
+    """
+    Response for Get Group Properties
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
     id: Optional[str] = None
     """Object id of the group"""
-    deleted_date_time: Optional[str] = None
+    deleted_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "deletedDateTime"},
+    )
     """Group's deletion date time"""
     classification: Optional[str] = None
     """classification"""
-    created_date_time: Optional[str] = None
+    created_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "createdDateTime"},
+    )
     """Group's creation date time"""
-    creation_options: Optional[List[str]] = None
+    creation_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "creationOptions"},
+    )
     """Created options of the group."""
     description: Optional[str] = None
     """description"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Group's display name"""
-    expiration_date_time: Optional[str] = None
+    expiration_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "expirationDateTime"},
+    )
     """Group's expiration date time"""
-    group_types: Optional[List[str]] = None
+    group_types: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "groupTypes"},
+    )
     """Group types for the group."""
-    is_assignable_to_role: Optional[str] = None
+    is_assignable_to_role: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "isAssignableToRole"},
+    )
     """Can a role be assigned to this group?"""
     mail: Optional[str] = None
     """Group's email"""
-    mail_enabled: Optional[bool] = None
+    mail_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "mailEnabled"},
+    )
     """Is group email enabled?"""
-    mail_nickname: Optional[str] = None
+    mail_nickname: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "mailNickname"},
+    )
     """Group's email nick name"""
-    membership_rule: Optional[str] = None
+    membership_rule: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "membershipRule"},
+    )
     """The rule that is used for membership evaluation."""
-    membership_rule_processing_state: Optional[str] = None
+    membership_rule_processing_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "membershipRuleProcessingState"},
+    )
     """
     The processing state of the rule that is used for membership evaluation.
     """
-    on_premises_domain_name: Optional[str] = None
+    on_premises_domain_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesDomainName"},
+    )
     """
     Contains the on-premises domainFQDN, also called dnsDomainName synchronized
     from the on-premises directory.
     """
-    on_premises_last_sync_date_time: Optional[str] = None
+    on_premises_last_sync_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesLastSyncDateTime"},
+    )
     """
     The time and date at which the tenant was last synced with the on-premise
     directory.
     """
-    on_premises_net_bios_name: Optional[str] = None
+    on_premises_net_bios_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesNetBiosName"},
+    )
     """Name of networking service for on-premise server."""
-    on_premises_sam_account_name: Optional[str] = None
+    on_premises_sam_account_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesSamAccountName"},
+    )
     """Sam account name for on-premise directory."""
-    on_premises_security_identifier: Optional[str] = None
+    on_premises_security_identifier: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesSecurityIdentifier"},
+    )
     """The on-premises security identifier."""
-    on_premises_sync_enabled: Optional[bool] = None
+    on_premises_sync_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesSyncEnabled"},
+    )
     """True if on-premises sync is enabled for the group."""
-    preferred_data_location: Optional[str] = None
+    preferred_data_location: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "preferredDataLocation"},
+    )
     """Preferred data location of the group."""
-    preferred_language: Optional[str] = None
+    preferred_language: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "preferredLanguage"},
+    )
     """Preferred language as configured in Microsoft Entra ID."""
-    proxy_addresses: Optional[List[str]] = None
+    proxy_addresses: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "proxyAddresses"},
+    )
     """Proxy addresses of the group."""
-    renewed_date_time: Optional[str] = None
+    renewed_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "renewedDateTime"},
+    )
     """Renewed date time of the group."""
-    resource_behavior_options: Optional[List[str]] = None
+    resource_behavior_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "resourceBehaviorOptions"},
+    )
     """Resource behavior options of the group."""
-    resource_provisioning_options: Optional[List[str]] = None
+    resource_provisioning_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "resourceProvisioningOptions"},
+    )
     """Resource provisioning options of the group."""
-    security_enabled: Optional[bool] = None
+    security_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabled"},
+    )
     """Indicates if the group is security enabled."""
-    security_identifier: Optional[str] = None
+    security_identifier: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "securityIdentifier"},
+    )
     """Security identifier of the group."""
     theme: Optional[str] = None
     """Theme of Microsoft Entra ID group."""
     visibility: Optional[str] = None
     """Visibility of the group."""
-    on_premises_provisioning_errors: Optional[List[str]] = None
+    on_premises_provisioning_errors: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "onPremisesProvisioningErrors"},
+    )
     """On premise provisioning errors of the group."""
 
 
 @dataclass
 class GetMemberGroupsInput:
-    """Get Member Groups"""
+    """
+    Get Member Groups
+    """
 
-    security_enabled_only: Optional[bool] = None
+    security_enabled_only: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "securityEnabledOnly"},
+    )
     """Do you want to retrieve security enabled groups only?"""
 
 
 @dataclass
 class GetMemberGroupsResponse:
-    """Response for Get Member Groups"""
+    """
+    Response for Get Member Groups
+    """
 
-    context: Optional[str] = None
+    context: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.context"},
+    )
     """The Odata.context link."""
     value: Optional[List[str]] = None
     """value"""
@@ -209,20 +333,22 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
     async def list_users_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Users
 
         Retrieve all users in the organization (Microsoft Entra ID Tenant)
         """
-        path = f"{self._connection_runtime_url}/v1.0/users"
+        request_url = f"{self._connection_runtime_url}/v1.0/users"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -234,35 +360,32 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
     async def list_groups_by_display_name_search_async(
         self,
-        count: Optional[str],
         search: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Groups By Display Name Search
 
         Retrieve groups by searching group's display name
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups"
+        request_url = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
+        query_params.append("$count=" + quote("true"))
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
             query_params.append(f"$search={quote(value)}")
-        if count is not None:
-            value = str(count)
-            if isinstance(count, bool):
-                value = value.lower()
-            query_params.append(f"$count={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -274,20 +397,22 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
     async def list_subscribed_skus_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Subscribed Skus
 
         Details of organization's subscribed license plan SKUs
         """
-        path = f"{self._connection_runtime_url}/v1.0/subscribedSkus"
+        request_url = f"{self._connection_runtime_url}/v1.0/subscribedSkus"
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -300,20 +425,20 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
     async def list_direct_group_members_async(
         self,
         group_id: str,
-        count: Optional[str],
         filter: Optional[str] = None,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List Direct Group Members
 
         Retrieve direct members of a group with count
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/groups/{str(group_id)}/members"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}/members"
         )
         query_params = []
+        query_params.append("$count=" + quote("true"))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -324,20 +449,17 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             if isinstance(select, bool):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
-        if count is not None:
-            value = str(count)
-            if isinstance(count, bool):
-                value = value.lower()
-            query_params.append(f"$count={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -351,15 +473,15 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         self,
         id: str,
         select: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Member License Details
 
         Retrieve group member(user)'s license details
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/users/{str(id)}/licenseDetails"
+            f"/v1.0/users/{quote(str(id), safe='')}/licenseDetails"
         )
         query_params = []
         if select is not None:
@@ -368,14 +490,16 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -388,20 +512,25 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
     async def get_group_properties_async(
         self,
         group_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Group Properties
 
         Retrieve properties and relationships of an Microsoft Entra ID group
         """
-        path = f"{self._connection_runtime_url}/v1.0/groups/{str(group_id)}"
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0/groups/{quote(str(group_id), safe='')}"
+        )
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -415,23 +544,25 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         self,
         input: GetMemberGroupsInput,
         member_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get Member Groups
 
         Group memberships for a user (member)
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/v1.0/users/{str(member_id)}/getMemberGroups"
+            f"/v1.0/users/{quote(str(member_id), safe='')}/getMemberGroups"
         )
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

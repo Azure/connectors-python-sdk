@@ -58,7 +58,7 @@ async def example_2_create_card() -> None:
                 title="SDK sample card",
                 description="Created from the projectplace SDK sample.",
             ),
-            board_id="789012",
+            board_id=789012,
         )
         print(f"Created card: {card}")
 
@@ -71,7 +71,7 @@ async def example_3_move_card() -> None:
     async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
         card = await client.move_card_async(
             input=MoveCardInput(card_id=123456, column_id=654321),
-            board_id="789012",
+            board_id=789012,
         )
         print(f"Moved card: {card}")
 

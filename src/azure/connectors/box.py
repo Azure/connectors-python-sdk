@@ -27,57 +27,49 @@ class BlobMetadata:
     Response for Get file metadata using id
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
-    last_modified_by: Optional[str] = None
+    last_modified_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModifiedBy"},
+    )
     """The user who last modified the file or folder."""
-
-
-@dataclass
-class UpdateFileInput:
-    """
-    Update file
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
-
-
-@dataclass
-class CreateFileInput:
-    """
-    Create file
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
 
 @dataclass
@@ -98,13 +90,25 @@ class TabularDataSetsMetadata:
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
@@ -116,9 +120,15 @@ class BlobDataSetsMetadata:
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
@@ -141,28 +151,43 @@ class BlobMetadataResponse:
     Definition: BlobMetadataResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    last_modified: Optional[str] = None
+    last_modified: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "LastModified"},
+    )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = None
+    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
     """The size of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = None
+    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
     """The etag of the file or folder."""
-    file_locator: Optional[str] = None
+    file_locator: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileLocator"},
+    )
     """The filelocator of the file or folder."""
 
 
@@ -213,14 +238,18 @@ class BoxClient(ConnectorClientBase):
     async def get_file_metadata_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get file metadata using id
 
         Retrieves the file metadata from Box using file id.
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -242,20 +271,27 @@ class BoxClient(ConnectorClientBase):
 
     async def update_file_async(
         self,
-        input: UpdateFileInput,
+        input: bytes,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update file
 
         Updates an existing file in Box.
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -274,14 +310,18 @@ class BoxClient(ConnectorClientBase):
     async def delete_file_async(
         self,
         id: str,
-    ):
+    ) -> None:
         """
         Delete file
 
         Deletes an existing file from Box.
         """
         request_url = (
-            f"{self._connection_runtime_url}/datasets/default/files/{str(id)}"
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -298,8 +338,8 @@ class BoxClient(ConnectorClientBase):
 
     async def get_file_metadata_by_path_async(
         self,
-        path: Optional[str],
-    ):
+        path: str,
+    ) -> dict[str, Any] | None:
         """
         Get file metadata using path
 
@@ -310,11 +350,10 @@ class BoxClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -337,9 +376,9 @@ class BoxClient(ConnectorClientBase):
 
     async def get_file_content_by_path_async(
         self,
-        path: Optional[str],
-        infer_content_type: Optional[str] = None,
-    ):
+        path: str,
+        infer_content_type: Optional[bool] = None,
+    ) -> bytes:
         """
         Get file content using path
 
@@ -351,11 +390,10 @@ class BoxClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if path is not None:
-            value = str(path)
-            if isinstance(path, bool):
-                value = value.lower()
-            query_params.append(f"path={quote(value)}")
+        value = str(path)
+        if isinstance(path, bool):
+            value = value.lower()
+        query_params.append(f"path={quote(value)}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
@@ -381,8 +419,8 @@ class BoxClient(ConnectorClientBase):
     async def get_file_content_async(
         self,
         id: str,
-        infer_content_type: Optional[str] = None,
-    ):
+        infer_content_type: Optional[bool] = None,
+    ) -> bytes:
         """
         Get file content using id
 
@@ -390,7 +428,11 @@ class BoxClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/files/{str(id)}/content"
+            f"/datasets"
+            f"/default"
+            f"/files"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
+            f"/content"
         )
         query_params = []
         if infer_content_type is not None:
@@ -417,10 +459,10 @@ class BoxClient(ConnectorClientBase):
 
     async def create_file_async(
         self,
-        input: CreateFileInput,
-        folder_path: Optional[str],
-        name: Optional[str],
-    ):
+        input: bytes,
+        folder_path: str,
+        name: str,
+    ) -> dict[str, Any] | None:
         """
         Create file
 
@@ -429,21 +471,22 @@ class BoxClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if folder_path is not None:
-            value = str(folder_path)
-            if isinstance(folder_path, bool):
-                value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
-        if name is not None:
-            value = str(name)
-            if isinstance(name, bool):
-                value = value.lower()
-            query_params.append(f"name={quote(value)}")
+        value = str(folder_path)
+        if isinstance(folder_path, bool):
+            value = value.lower()
+        query_params.append(f"folderPath={quote(value)}")
+        value = str(name)
+        if isinstance(name, bool):
+            value = value.lower()
+        query_params.append(f"name={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST",
+            request_url,
+            body=input,
+            content_type="application/octet-stream",
         )
 
         if not (200 <= response.status < 300):
@@ -461,10 +504,10 @@ class BoxClient(ConnectorClientBase):
 
     async def copy_file_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Copy file
 
@@ -475,16 +518,14 @@ class BoxClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -513,7 +554,7 @@ class BoxClient(ConnectorClientBase):
     async def list_folder_async(
         self,
         id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List files and folders in folder
 
@@ -521,7 +562,10 @@ class BoxClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/default/folders/{str(id)}"
+            f"/datasets"
+            f"/default"
+            f"/folders"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -543,7 +587,7 @@ class BoxClient(ConnectorClientBase):
 
     async def list_root_folder_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List files and folders in root folder
 
@@ -572,10 +616,10 @@ class BoxClient(ConnectorClientBase):
 
     async def extract_folder_async(
         self,
-        source: Optional[str],
-        destination: Optional[str],
-        overwrite: Optional[str] = None,
-    ):
+        source: str,
+        destination: str,
+        overwrite: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Extract archive to folder
 
@@ -586,16 +630,14 @@ class BoxClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("queryParametersSingleEncoded=" + quote("true"))
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if destination is not None:
-            value = str(destination)
-            if isinstance(destination, bool):
-                value = value.lower()
-            query_params.append(f"destination={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(destination)
+        if isinstance(destination, bool):
+            value = value.lower()
+        query_params.append(f"destination={quote(value)}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
@@ -621,102 +663,27 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def on_new_files_async(
-        self,
-        folder_id: Optional[str],
-        max_file_count: Optional[str] = None,
-    ):
-        """
-        When a file is created (properties only) (V2)
 
-        This operation triggers a flow when a new file is created in a folder.
-        The trigger does not fire if a file is added/updated in a subfolder. If
-        it is required to trigger on subfolders, multiple triggers should be
-        created. In case when 'Split On' option is turned off for
-        Trigger-&gt;Settings successful trigger runs may produce empty array
-        for 'List of Files' output.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/triggers/batch/onnewfileV2"
-        )
-        query_params = []
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if max_file_count is not None:
-            value = str(max_file_count)
-            if isinstance(max_file_count, bool):
-                value = value.lower()
-            query_params.append(f"maxFileCount={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_updated_files_async(
-        self,
-        folder_id: Optional[str],
-        max_file_count: Optional[str] = None,
-    ):
-        """
-        When a file is modified (properties only) (V2)
-
-        This operation triggers a flow when a file is modified in a folder. The
-        trigger does not fire if a file is added/updated in a subfolder. If it
-        is required to trigger on subfolders, multiple triggers should be
-        created. In case when 'Split On' option is turned off for
-        Trigger-&gt;Settings successful trigger runs may produce empty array
-        for 'List of Files' output.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/datasets/default/triggers/batch/onupdatedfileV2"
-        )
-        query_params = []
-        if folder_id is not None:
-            value = str(folder_id)
-            if isinstance(folder_id, bool):
-                value = value.lower()
-            query_params.append(f"folderId={quote(value)}")
-        if max_file_count is not None:
-            value = str(max_file_count)
-            if isinstance(max_file_count, bool):
-                value = value.lower()
-            query_params.append(f"maxFileCount={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewFilesV2": {
+        "operation_id": "OnNewFilesV2",
+        "path": "/{connectionId}/datasets/default/triggers/batch/onnewfileV2",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": "BlobMetadata",
+    },
+    "OnUpdatedFilesV2": {
+        "operation_id": "OnUpdatedFilesV2",
+        "path": "/{connectionId}/datasets/default/triggers/batch/onupdatedfileV2",
+        "method": "get",
+        "required_parameters": ["folderId"],
+        "callback_payload_type": "BlobMetadata",
+    },
+}

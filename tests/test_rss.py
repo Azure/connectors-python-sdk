@@ -2,12 +2,15 @@
 
 """Unit tests for RssClient."""
 
+import inspect
+
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.connectors.rss import (
     FeedItem,
     RssClient,
+    TRIGGER_OPERATIONS,
     TriggerBatchResponseFeedItem,
 )
 from azure.connectors.sdk import (
@@ -20,11 +23,6 @@ from tests.conftest import MockResponse
 
 async def _invoke_operation(client: RssClient, operation: str):
     """Invoke an RSS operation by name for shared parameterized tests."""
-    if operation == "on_new_feed":
-        return await client.on_new_feed_async(
-            feed_url="https://contoso.example/feed.xml",
-            since_property="PublishDate",
-        )
     if operation == "list_feed_items":
         return await client.list_feed_items_async(
             feed_url="https://contoso.example/feed.xml",
@@ -117,33 +115,6 @@ class TestRssClientMethods:
     """Success path tests for RSS operations."""
 
     @pytest.mark.asyncio
-    async def test_on_new_feed_success(self, mock_token_provider):
-        """Test on_new_feed_async serializes query params and returns JSON."""
-        client = RssClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"value":[{"id":"1"}]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.on_new_feed_async(
-                feed_url="https://contoso.example/feed.xml",
-                since_property="PublishDate",
-            )
-
-            assert len(result["value"]) == 1
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/OnNewFeed" in call_args[0][1]
-            assert "feedUrl=https%3A//contoso.example/feed.xml" in call_args[0][1]
-            assert "sinceProperty=PublishDate" in call_args[0][1]
-
-    @pytest.mark.asyncio
     async def test_list_feed_items_success(self, mock_token_provider):
         """Test list_feed_items_async serializes query params and returns JSON."""
         client = RssClient(
@@ -177,7 +148,7 @@ class TestRssClientErrorHandling:
     """Error handling tests for RSS operations."""
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("operation", ["on_new_feed", "list_feed_items"])
+    @pytest.mark.parametrize("operation", ["list_feed_items"])
     async def test_error_response_raises_exception_for_all_operations(
         self,
         mock_token_provider,
@@ -200,6 +171,39 @@ class TestRssClientErrorHandling:
                 await _invoke_operation(client, operation)
 
             assert exc_info.value.status_code == 500
+
+
+class TestRssApiSurface:
+    """Tests for the generated callable and trigger operation surfaces."""
+
+    def test_callable_method_signatures(self):
+        """Test the client exposes exactly the generated callable methods."""
+        actual_signatures = {
+            name: tuple(inspect.signature(method).parameters)
+            for name, method in vars(RssClient).items()
+            if inspect.iscoroutinefunction(method)
+        }
+
+        assert actual_signatures == {
+            "list_feed_items_async": (
+                "self",
+                "feed_url",
+                "since",
+                "since_property",
+            ),
+        }
+
+    def test_trigger_registry_metadata(self):
+        """Test the feed trigger is represented by exact registration metadata."""
+        assert TRIGGER_OPERATIONS == {
+            "OnNewFeed": {
+                "operation_id": "OnNewFeed",
+                "path": "/{connectionId}/OnNewFeed",
+                "method": "get",
+                "required_parameters": ["feedUrl"],
+                "callback_payload_type": "TriggerBatchResponseFeedItem",
+            },
+        }
 
 
 class TestRssTypeSerialization:

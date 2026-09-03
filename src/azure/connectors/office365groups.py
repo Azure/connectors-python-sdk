@@ -319,7 +319,7 @@ class Office365groupsClient(ConnectorClientBase):
     async def list_group_members_async(
         self,
         group_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List group members
@@ -396,10 +396,10 @@ class Office365groupsClient(ConnectorClientBase):
 
     async def list_groups_async(
         self,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
         filter: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         skiptoken: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -719,8 +719,8 @@ class Office365groupsClient(ConnectorClientBase):
 
     async def list_owned_groups_async(
         self,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         List groups that I own and belong to

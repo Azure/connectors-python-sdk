@@ -7,12 +7,10 @@ from unittest.mock import AsyncMock, patch
 
 from azure.connectors.googledrive import (
     BlobMetadata,
-    CreateFileInput,
     GoogledriveClient,
     Table,
     TableMetadata,
     TablesList,
-    UpdateFileInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -27,7 +25,7 @@ async def _invoke_operation(client: GoogledriveClient, operation: str):
     if operation == "get_file_metadata":
         return await client.get_file_metadata_async(id="file123")
     if operation == "update_file":
-        return await client.update_file_async(input=UpdateFileInput(), id="file123")
+        return await client.update_file_async(input=b"updated content", id="file123")
     if operation == "delete_file":
         return await client.delete_file_async(id="file123")
     if operation == "get_file_metadata_by_path":
@@ -38,8 +36,8 @@ async def _invoke_operation(client: GoogledriveClient, operation: str):
         return await client.get_file_content_async(id="file123")
     if operation == "create_file":
         return await client.create_file_async(
-            input=CreateFileInput(),
-            folder_path="/Documents",
+            input=b"file content",
+            folder_id="folder123",
             name="created.txt",
         )
     if operation == "copy_file":
@@ -56,11 +54,6 @@ async def _invoke_operation(client: GoogledriveClient, operation: str):
             source="/Documents/archive.zip",
             destination="/Documents/extracted",
         )
-    if operation == "get_table":
-        return await client.get_table_async(dataset="sheet-file-id", table="Sheet1")
-    if operation == "get_tables":
-        return await client.get_tables_async(dataset="sheet-file-id")
-
     raise ValueError(f"Unsupported operation '{operation}'.")
 
 
@@ -211,58 +204,16 @@ class TestGoogledriveClientMethods:
             return_value=mock_response,
         ) as mock_send:
             result = await client.create_file_async(
-                input=CreateFileInput(),
-                folder_path="/Documents",
+                input=b"file content",
+                folder_id="folder123",
                 name="created.txt",
             )
 
             assert result["id"] == "new1"
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
-            assert "folderPath=/Documents" in call_args[0][1]
+            assert "folderId=folder123" in call_args[0][1]
             assert "name=created.txt" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_get_table_success(self, mock_token_provider):
-        """Test get_table_async returns parsed table metadata."""
-        client = GoogledriveClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"name":"Sheet1","title":"Budget"}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.get_table_async(dataset="sheet-file-id", table="Sheet1")
-
-            assert result["name"] == "Sheet1"
-            call_args = mock_send.call_args
-            assert "/$metadata.json/datasets/sheet-file-id/tables/Sheet1" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_get_tables_success(self, mock_token_provider):
-        """Test get_tables_async returns parsed table list."""
-        client = GoogledriveClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"value":[{"name":"Sheet1"}]}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            result = await client.get_tables_async(dataset="sheet-file-id")
-
-            assert len(result["value"]) == 1
-            call_args = mock_send.call_args
-            assert "/datasets/sheet-file-id/tables" in call_args[0][1]
 
 
 class TestGoogledriveClientErrorHandling:
@@ -283,8 +234,6 @@ class TestGoogledriveClientErrorHandling:
             "list_folder",
             "list_root_folder",
             "extract_folder",
-            "get_table",
-            "get_tables",
         ],
     )
     async def test_error_response_raises_exception_for_all_operations(
@@ -317,15 +266,11 @@ class TestGoogledriveTypeSerialization:
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
         metadata = BlobMetadata()
-        create_input = CreateFileInput()
-        update_input = UpdateFileInput()
         table = Table()
         table_metadata = TableMetadata()
         tables = TablesList()
 
         assert metadata.id is None
-        assert create_input.additional_properties == {}
-        assert update_input.additional_properties == {}
         assert table.name is None
         assert table_metadata.name is None
         assert tables.value is None

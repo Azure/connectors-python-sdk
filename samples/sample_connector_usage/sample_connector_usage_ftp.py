@@ -5,7 +5,7 @@
 import asyncio
 import os
 
-from azure.connectors.ftp import CreateFileInput, FtpClient
+from azure.connectors.ftp import FtpClient
 
 
 async def main() -> None:
@@ -22,22 +22,14 @@ async def main() -> None:
         print("root listing", root_listing)
 
         created = await client.create_file_async(
-            input=CreateFileInput(
-                additional_properties={
-                    "$content-type": "text/plain",
-                    "$content": "hello from azure-connectors ftp sample",
-                }
-            ),
+            input=b"hello from azure-connectors ftp sample",
             folder_path=folder_path,
             name=file_name,
         )
         print("created file", created)
 
-        trigger_payload = await client.on_updated_files_async(
-            folder_id=folder_path,
-            max_file_count="10",
-        )
-        print("on updated files payload", trigger_payload)
+        folder_items = await client.list_folder_async(id=folder_path)
+        print("folder items available for polling", folder_items)
 
 
 if __name__ == "__main__":

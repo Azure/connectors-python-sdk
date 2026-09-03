@@ -23,12 +23,12 @@ async def main() -> None:
         )
         print(f"Retrieved {len(items or [])} item(s) from '{feed_url}'.")
 
-        trigger_payload = await client.on_new_feed_async(
+        latest_items = await client.list_feed_items_async(
             feed_url=feed_url,
             since_property="PublishDate",
         )
-        values = (trigger_payload or {}).get("value", [])
-        print(f"OnNewFeed returned {len(values)} item(s).")
+        values = (latest_items or {}).get("value", [])
+        print(f"Polling query returned {len(values)} item(s).")
 
 
 if __name__ == "__main__":

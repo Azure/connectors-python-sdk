@@ -62,7 +62,10 @@ class ResponseEvent:
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled\".
     """
-    html_link: Optional[str] = None
+    html_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "htmlLink"},
+    )
     """Unique ID of the list."""
     id: Optional[str] = None
     """Opaque identifier of the event."""
@@ -76,7 +79,10 @@ class ResponseEvent:
     """Creation time of the event."""
     updated: Optional[str] = None
     """Last modification time of the event."""
-    end_time_unspecified: Optional[bool] = None
+    end_time_unspecified: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "endTimeUnspecified"},
+    )
     """
     Whether the end time is actually unspecified. An end time is still provided
     for compatibility reasons, even if this attribute is set to True.
@@ -120,7 +126,10 @@ class CalendarListEntry:
     """Description of the calendar."""
     location: Optional[str] = None
     """Geographic location of the calendar as free-form text."""
-    time_zone: Optional[str] = None
+    time_zone: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "timeZone"},
+    )
     """The time zone of the calendar."""
 
 
@@ -147,7 +156,10 @@ class RequestEvent:
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled\".
     """
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Is all-day event?"""
 
 
@@ -174,7 +186,10 @@ class PatchEvent:
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled.
     """
-    is_all_day: Optional[bool] = None
+    is_all_day: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isAllDay"},
+    )
     """Is all-day event?"""
 
 
@@ -184,7 +199,10 @@ class ResponseEventWithActionType:
     Definition: ResponseEventWithActionType
     """
 
-    action_type: Optional[str] = None
+    action_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "actionType"},
+    )
     """Type of action which changed the event in change trigger."""
     summary: Optional[str] = None
     """A summary of the event."""
@@ -201,7 +219,10 @@ class ResponseEventWithActionType:
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled\".
     """
-    html_link: Optional[str] = None
+    html_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "htmlLink"},
+    )
     """Unique ID of the list."""
     id: Optional[str] = None
     """Opaque identifier of the event."""
@@ -215,7 +236,10 @@ class ResponseEventWithActionType:
     """Creation time of the event."""
     updated: Optional[str] = None
     """Last modification time of the event."""
-    end_time_unspecified: Optional[bool] = None
+    end_time_unspecified: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "endTimeUnspecified"},
+    )
     """
     Whether the end time is actually unspecified. An end time is still provided
     for compatibility reasons, even if this attribute is set to True.
@@ -259,7 +283,7 @@ class GooglecalendarClient(ConnectorClientBase):
     async def list_calendars_async(
         self,
         min_access_role: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List calendars
 
@@ -298,7 +322,7 @@ class GooglecalendarClient(ConnectorClientBase):
         time_min: Optional[str] = None,
         time_max: Optional[str] = None,
         q: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List the events on a calendar
 
@@ -307,7 +331,7 @@ class GooglecalendarClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/calendars/{str(calendar_id)}/events"
+            f"/calendars/{quote(str(calendar_id), safe='')}/events"
         )
         query_params = []
         if time_min is not None:
@@ -349,7 +373,7 @@ class GooglecalendarClient(ConnectorClientBase):
         self,
         input: RequestEvent,
         calendar_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create an event
 
@@ -357,7 +381,7 @@ class GooglecalendarClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/calendars/{str(calendar_id)}/events"
+            f"/calendars/{quote(str(calendar_id), safe='')}/events"
         )
 
         response = await self.http_client.send_async(
@@ -381,7 +405,7 @@ class GooglecalendarClient(ConnectorClientBase):
         self,
         calendar_id: str,
         event_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get an event
 
@@ -390,7 +414,10 @@ class GooglecalendarClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/calendars/{str(calendar_id)}/events/{str(event_id)}"
+            f"/calendars"
+            f"/{quote(str(calendar_id), safe='')}"
+            f"/events"
+            f"/{quote(str(event_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -414,7 +441,7 @@ class GooglecalendarClient(ConnectorClientBase):
         self,
         calendar_id: str,
         event_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Delete an event
 
@@ -422,7 +449,10 @@ class GooglecalendarClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/calendars/{str(calendar_id)}/events/{str(event_id)}"
+            f"/calendars"
+            f"/{quote(str(calendar_id), safe='')}"
+            f"/events"
+            f"/{quote(str(event_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -447,7 +477,7 @@ class GooglecalendarClient(ConnectorClientBase):
         input: PatchEvent,
         calendar_id: str,
         event_id: str,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update an event
 
@@ -455,7 +485,10 @@ class GooglecalendarClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/calendars/{str(calendar_id)}/events/{str(event_id)}"
+            f"/calendars"
+            f"/{quote(str(calendar_id), safe='')}"
+            f"/events"
+            f"/{quote(str(event_id), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -475,174 +508,9 @@ class GooglecalendarClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def on_new_event_in_calendar_async(
-        self,
-        calendar_id: str,
-    ):
-        """
-        When an event is added to a calendar
-
-        This operation triggers when a new event is added to a calendar.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger1/calendars/{str(calendar_id)}/events"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_updated_event_in_calendar_async(
-        self,
-        calendar_id: str,
-    ):
-        """
-        When an event is updated in a calendar
-
-        This operation triggers when an event is updated in a calendar.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger2/calendars/{str(calendar_id)}/events"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_deleted_event_in_calendar_async(
-        self,
-        calendar_id: str,
-    ):
-        """
-        When an event is deleted from a calendar
-
-        This operation triggers when a new event is deleted from a calendar.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger3/calendars/{str(calendar_id)}/events"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_changed_event_in_calendar_async(
-        self,
-        calendar_id: str,
-        single_events: Optional[str] = None,
-    ):
-        """
-        When an event is added, updated or deleted from a calendar
-
-        This operation triggers when a new event is added, updated or deleted
-        from a calendar.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/trigger4/calendars/{str(calendar_id)}/events"
-        )
-        query_params = []
-        if single_events is not None:
-            value = str(single_events)
-            if isinstance(single_events, bool):
-                value = value.lower()
-            query_params.append(f"singleEvents={quote(value)}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def on_event_started_async(
-        self,
-        calendar_id: str,
-    ):
-        """
-        When an event starts
-
-        This operation triggers when an event starts.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/eventstarted/calendars/{str(calendar_id)}/events"
-        )
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     async def list_writable_calendars_async(
         self,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List writable calendars
 
@@ -671,3 +539,49 @@ class GooglecalendarClient(ConnectorClientBase):
             return None
 
         return json.loads(response.text)
+
+
+# Trigger Operations
+#
+# Trigger routes are not callable client methods. Register a trigger with the
+# Connector Namespace trigger-config API using the operation id and required
+# parameters below; Connector Namespace invokes the callback when the trigger
+# fires. When the callback body has a JSON schema, ``callback_payload_type``
+# names the generated dataclass to deserialize the callback payload into.
+TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    "OnNewEventInCalendar": {
+        "operation_id": "OnNewEventInCalendar",
+        "path": "/{connectionId}/trigger1/calendars/{calendar_id}/events",
+        "method": "get",
+        "required_parameters": ["calendar_id"],
+        "callback_payload_type": "CalendarEventList",
+    },
+    "OnUpdatedEventInCalendar": {
+        "operation_id": "OnUpdatedEventInCalendar",
+        "path": "/{connectionId}/trigger2/calendars/{calendar_id}/events",
+        "method": "get",
+        "required_parameters": ["calendar_id"],
+        "callback_payload_type": "CalendarEventList",
+    },
+    "OnDeletedEventInCalendar": {
+        "operation_id": "OnDeletedEventInCalendar",
+        "path": "/{connectionId}/trigger3/calendars/{calendar_id}/events",
+        "method": "get",
+        "required_parameters": ["calendar_id"],
+        "callback_payload_type": "CalendarEventList",
+    },
+    "OnChangedEventInCalendar": {
+        "operation_id": "OnChangedEventInCalendar",
+        "path": "/{connectionId}/trigger4/calendars/{calendar_id}/events",
+        "method": "get",
+        "required_parameters": ["calendar_id"],
+        "callback_payload_type": "CalendarEventChangedList",
+    },
+    "OnEventStarted": {
+        "operation_id": "OnEventStarted",
+        "path": "/{connectionId}/eventstarted/calendars/{calendar_id}/events",
+        "method": "get",
+        "required_parameters": ["calendar_id"],
+        "callback_payload_type": "CalendarEventList",
+    },
+}

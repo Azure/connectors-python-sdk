@@ -39,7 +39,11 @@ async def example_1_list_resources() -> list[dict]:
     credential = DefaultAzureCredential()
     async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
         resources_response = await client.list_resources_async()
-        resources = resources_response if isinstance(resources_response, list) else resources_response.get("value", []) if resources_response else []
+        resources = (
+            resources_response
+            if isinstance(resources_response, list)
+            else resources_response.get("value", []) if resources_response else []
+        )
 
         print(f"Found {len(resources)} resources")
         for resource in resources[:5]:
@@ -81,7 +85,13 @@ async def example_3_create_issue(cloud_id: str) -> None:
                     "description": {
                         "type": "doc",
                         "version": 1,
-                        "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Created from jira SDK sample."}]}],
+                        "content": [{
+                            "type": "paragraph",
+                            "content": [{
+                                "type": "text",
+                                "text": "Created from jira SDK sample.",
+                            }],
+                        }],
                     },
                 }
             }

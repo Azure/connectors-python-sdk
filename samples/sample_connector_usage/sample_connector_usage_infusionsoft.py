@@ -73,7 +73,7 @@ async def example_3_update_task() -> None:
             description="Updated from the infusionsoft SDK sample.",
         )
 
-        updated = await client.update_task_async(input=request, id="1")
+        updated = await client.update_task_async(input=request, id=1)
         print(f"Updated task: {updated.get('id') if updated else 'n/a'}")
 
 

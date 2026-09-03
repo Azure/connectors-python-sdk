@@ -18,7 +18,7 @@ async def list_user_timeline() -> None:
     async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
         timeline = await client.user_timeline_async(
             user_name="Azure",
-            max_results="10",
+            max_results=10,
         )
         print(f"Timeline: {timeline}")
 
@@ -29,7 +29,7 @@ async def search_posts() -> None:
     async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
         results = await client.search_tweet_async(
             search_query="Azure Logic Apps",
-            max_results="10",
+            max_results=10,
         )
         print(f"Search results: {results}")
 

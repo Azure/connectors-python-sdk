@@ -306,7 +306,7 @@ class FreshserviceClient(ConnectorClientBase):
     async def add_note_async(
         self,
         input: AddNoteRequest,
-        ticket_id: str,
+        ticket_id: int,
     ) -> dict[str, Any] | None:
         """
         Add a note to a ticket
@@ -366,7 +366,7 @@ class FreshserviceClient(ConnectorClientBase):
     async def update_ticket_async(
         self,
         input: UpdateTicketRequest,
-        ticket_id: str,
+        ticket_id: int,
     ) -> dict[str, Any] | None:
         """
         Update a ticket

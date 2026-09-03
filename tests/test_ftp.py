@@ -8,9 +8,7 @@ from unittest.mock import AsyncMock, patch
 from azure.connectors.ftp import (
     BlobMetadata,
     BlobMetadataPage,
-    CreateFileInput,
     FtpClient,
-    UpdateFileInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -24,14 +22,14 @@ async def _invoke_operation(client: FtpClient, operation: str):
     """Invoke an FTP operation by name for shared error tests."""
     if operation == "create_file":
         return await client.create_file_async(
-            input=CreateFileInput(),
+            input=b"file content",
             folder_path="/inbound",
             name="sample.txt",
         )
     if operation == "get_file_metadata":
         return await client.get_file_metadata_async(id="file123")
     if operation == "update_file":
-        return await client.update_file_async(input=UpdateFileInput(), id="file123")
+        return await client.update_file_async(input=b"updated content", id="file123")
     if operation == "delete_file":
         return await client.delete_file_async(id="file123")
     if operation == "copy_file":
@@ -46,8 +44,6 @@ async def _invoke_operation(client: FtpClient, operation: str):
         return await client.get_file_content_by_path_async(path="/inbound/sample.txt")
     if operation == "get_file_content":
         return await client.get_file_content_async(id="file123")
-    if operation == "on_updated_files":
-        return await client.on_updated_files_async(folder_id="folder123", max_file_count="10")
     if operation == "list_folder":
         return await client.list_folder_async(id="folder123")
     if operation == "list_root_folder":
@@ -169,7 +165,7 @@ class TestFtpClientMethods:
             return_value=mock_response,
         ) as mock_send:
             result = await client.create_file_async(
-                input=CreateFileInput(),
+                input=b"file content",
                 folder_path="/inbound",
                 name="sample.txt",
             )
@@ -178,7 +174,7 @@ class TestFtpClientMethods:
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "folderPath=/inbound" in call_args[0][1]
-            assert isinstance(call_args.kwargs["body"], CreateFileInput)
+            assert call_args.kwargs["body"] == b"file content"
 
     @pytest.mark.asyncio
     async def test_get_file_metadata_success(self, mock_token_provider):
@@ -218,27 +214,6 @@ class TestFtpClientMethods:
             result = await client.get_file_content_by_path_async(path="/inbound/sample.txt")
 
             assert result == b"ftp file content"
-
-    @pytest.mark.asyncio
-    async def test_on_updated_files_success(self, mock_token_provider):
-        """Test trigger method includes trigger-specific query parameter."""
-        client = FtpClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, text='{"value": []}')
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.on_updated_files_async(folder_id="folder123", max_file_count="10")
-
-            call_path = mock_send.call_args[0][1]
-            assert "checkBothCreatedAndModifiedDateTime=false" in call_path
-            assert "folderId=folder123" in call_path
 
     @pytest.mark.asyncio
     async def test_list_root_folder_success(self, mock_token_provider):
@@ -303,7 +278,6 @@ class TestFtpClientErrorHandling:
             "get_file_metadata_by_path",
             "get_file_content_by_path",
             "get_file_content",
-            "on_updated_files",
             "list_folder",
             "list_root_folder",
             "extract_folder",
@@ -340,10 +314,5 @@ class TestFtpTypeSerialization:
         """Test generated dataclasses initialize with expected default values."""
         metadata = BlobMetadata()
         page = BlobMetadataPage()
-        create_input = CreateFileInput()
-        update_input = UpdateFileInput()
-
         assert metadata.id is None
         assert page.value is None
-        assert create_input.additional_properties == {}
-        assert update_input.additional_properties == {}

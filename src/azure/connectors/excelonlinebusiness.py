@@ -23,33 +23,54 @@ from azure.connectors.sdk import (
 
 @dataclass
 class TableMetadata:
-    """Response for Create table"""
+    """
+    Response for Create table
+    """
 
     name: Optional[str] = None
     """Table name"""
     title: Optional[str] = None
     """Table title"""
-    x_ms_permission: Optional[str] = None
+    x_ms_permission: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-permission"},
+    )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = None
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+        default=None,
+        metadata={"wire_name": "x-ms-capabilities"},
+    )
     schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = None
-    web_url: Optional[str] = None
+    referenced_entities: Optional[ObjectEntity] = field(
+        default=None,
+        metadata={"wire_name": "referencedEntities"},
+    )
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "webUrl"},
+    )
     """Url link"""
 
 
 @dataclass
 class ItemsList:
-    """Response for List rows present in a table"""
+    """
+    Response for List rows present in a table
+    """
 
     value: Optional[List[Item]] = None
     """List of Items"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
 
 
 @dataclass
 class CommentsList:
-    """Response for List all comments present in a workbook"""
+    """
+    Response for List all comments present in a workbook
+    """
 
     value: Optional[List[Comment]] = None
     """List of Comments"""
@@ -57,42 +78,67 @@ class CommentsList:
 
 @dataclass
 class Comment:
-    """Response for Get a comment present in a workbook"""
+    """
+    Response for Get a comment present in a workbook
+    """
 
     id: Optional[str] = None
     """The unique identifier for the comment."""
     content: Optional[str] = None
     """The content of the comment."""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """The content type of the comment."""
 
 
 @dataclass
 class GetItemResponse:
-    """Response for Get a row"""
+    """
+    Response for Get a row
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
 
 
 @dataclass
 class Item:
-    """Response for Update a row"""
+    """
+    Response for Update a row
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
 class GetAllWorksheetsResponse:
-    """Response for Get worksheets"""
+    """
+    Response for Get worksheets
+    """
 
     value: Optional[List[WorksheetMetadata]] = None
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
 
 
 @dataclass
 class CreateWorksheetInput:
-    """Create worksheet"""
+    """
+    Create worksheet
+    """
 
     name: Optional[str] = None
     """Worksheet name."""
@@ -100,7 +146,9 @@ class CreateWorksheetInput:
 
 @dataclass
 class WorksheetMetadata:
-    """Response for Create worksheet"""
+    """
+    Response for Create worksheet
+    """
 
     id: Optional[str] = None
     """Worksheet Id."""
@@ -114,15 +162,22 @@ class WorksheetMetadata:
 
 @dataclass
 class GetTablesResponse:
-    """Response for Get tables"""
+    """
+    Response for Get tables
+    """
 
     value: Optional[List[Dict[str, Any]]] = None
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = None
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelInfo"},
+    )
 
 
 @dataclass
 class RunScriptProdInput:
-    """Run script from SharePoint library"""
+    """
+    Run script from SharePoint library
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -133,7 +188,9 @@ class RunScriptProdInput:
 
 @dataclass
 class RunScriptProdResponse:
-    """Response for Run script from SharePoint library"""
+    """
+    Response for Run script from SharePoint library
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -143,18 +200,67 @@ class RunScriptProdResponse:
 
 
 @dataclass
-class CreateFileMetadata:
-    """Definition: CreateFileMetadata"""
+class GetSourcesResponse:
+    """
+    Response for Get sources
+    """
 
-    file_name: Optional[str] = None
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class GetDrivesResponse:
+    """
+    Response for Get drives
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class GetColumnsResponse:
+    """
+    Response for Get table columns
+    """
+
+    value: Optional[List[Dict[str, Any]]] = None
+
+
+@dataclass
+class GetSingleScriptResponse:
+    """
+    Response for Gets one script
+    """
+
+    parameter_info: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "parameterInfo"},
+    )
+
+
+@dataclass
+class CreateFileMetadata:
+    """
+    Definition: CreateFileMetadata
+    """
+
+    file_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "FileName"},
+    )
     """Name of the newly created file"""
-    web_url: Optional[str] = None
+    web_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "WebUrl"},
+    )
     """URL to open the file in the browser on your OneDrive"""
 
 
 @dataclass
 class DataSetsMetadata:
-    """Definition: DataSetsMetadata"""
+    """
+    Definition: DataSetsMetadata
+    """
 
     tabular: Optional[TabularDataSetsMetadata] = None
     blob: Optional[BlobDataSetsMetadata] = None
@@ -162,35 +268,59 @@ class DataSetsMetadata:
 
 @dataclass
 class TabularDataSetsMetadata:
-    """Definition: TabularDataSetsMetadata"""
+    """
+    Definition: TabularDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = None
+    table_display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tableDisplayName"},
+    )
     """Table display name"""
-    table_plural_name: Optional[str] = None
+    table_plural_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tablePluralName"},
+    )
     """Table plural display name"""
 
 
 @dataclass
 class BlobDataSetsMetadata:
-    """Definition: BlobDataSetsMetadata"""
+    """
+    Definition: BlobDataSetsMetadata
+    """
 
     source: Optional[str] = None
     """Blob dataset source"""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = None
+    url_encoding: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "urlEncoding"},
+    )
     """Blob dataset url encoding"""
 
 
 @dataclass
 class TablesList:
-    """Definition: TablesList"""
+    """
+    Definition: TablesList
+    """
 
     value: Optional[List[Table]] = None
     """List of Tables"""
@@ -198,46 +328,84 @@ class TablesList:
 
 @dataclass
 class Table:
-    """Definition: Table"""
+    """
+    Definition: Table
+    """
 
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "DynamicProperties"},
+    )
     """Additional table properties provided by the connector to the clients."""
 
 
 @dataclass
 class TableToCreate:
-    """Definition: TableToCreate"""
+    """
+    Definition: TableToCreate
+    """
 
-    table_name: Optional[str] = None
+    table_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "TableName"},
+    )
     """Enter the Excel table name."""
-    range: Optional[str] = None
+    range: Optional[str] = field(default=None, metadata={"wire_name": "Range"})
     """Enter the table address using A1 notation."""
-    columns_names: Optional[str] = None
+    columns_names: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ColumnsNames"},
+    )
     """Enter the columns names separated by ';' or ','."""
 
 
 @dataclass
 class TableCapabilitiesMetadata:
-    """Definition: TableCapabilitiesMetadata"""
+    """
+    Definition: TableCapabilitiesMetadata
+    """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = None
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = None
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = None
-    is_only_server_pagable: Optional[bool] = None
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "sortRestrictions"},
+    )
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "filterRestrictions"},
+    )
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+        default=None,
+        metadata={"wire_name": "selectRestrictions"},
+    )
+    is_only_server_pagable: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isOnlyServerPagable"},
+    )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = None
+    filter_function_support: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "filterFunctionSupport"},
+    )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = None
+    server_paging_options: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "serverPagingOptions"},
+    )
     """List of supported server-driven paging capabilities"""
 
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -248,31 +416,49 @@ class ObjectEntity:
 
 @dataclass
 class TableSortRestrictionsMetadata:
-    """Definition: TableSortRestrictionsMetadata"""
+    """
+    Definition: TableSortRestrictionsMetadata
+    """
 
     sortable: Optional[bool] = None
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = None
+    unsortable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "unsortableProperties"},
+    )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = None
+    ascending_only_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "ascendingOnlyProperties"},
+    )
     """List of properties which support ascending order only"""
 
 
 @dataclass
 class TableFilterRestrictionsMetadata:
-    """Definition: TableFilterRestrictionsMetadata"""
+    """
+    Definition: TableFilterRestrictionsMetadata
+    """
 
     filterable: Optional[bool] = None
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = None
+    non_filterable_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "nonFilterableProperties"},
+    )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = None
+    required_properties: Optional[List[str]] = field(
+        default=None,
+        metadata={"wire_name": "requiredProperties"},
+    )
     """List of required properties"""
 
 
 @dataclass
 class TableSelectRestrictionsMetadata:
-    """Definition: TableSelectRestrictionsMetadata"""
+    """
+    Definition: TableSelectRestrictionsMetadata
+    """
 
     selectable: Optional[bool] = None
     """Indicates whether this table has selectable columns"""
@@ -280,17 +466,24 @@ class TableSelectRestrictionsMetadata:
 
 @dataclass
 class CommentDetails:
-    """Definition: CommentDetails"""
+    """
+    Definition: CommentDetails
+    """
 
     content: Optional[str] = None
     """The content of the comment."""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "contentType"},
+    )
     """The content type of the comment."""
 
 
 @dataclass
 class TabularItemsList:
-    """Definition: TabularItemsList"""
+    """
+    Definition: TabularItemsList
+    """
 
     value: Optional[List[TabularItem]] = None
     """List of Items"""
@@ -298,14 +491,21 @@ class TabularItemsList:
 
 @dataclass
 class TabularItem:
-    """Definition: TabularItem"""
+    """
+    Definition: TabularItem
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
 class ScriptParameters:
-    """Definition: ScriptParameters"""
+    """
+    Definition: ScriptParameters
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -316,7 +516,9 @@ class ScriptParameters:
 
 @dataclass
 class ScriptReturnValues:
-    """Definition: ScriptReturnValues"""
+    """
+    Definition: ScriptReturnValues
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -327,26 +529,42 @@ class ScriptReturnValues:
 
 @dataclass
 class RawAndFormattedTableSchema:
-    """Definition: RawAndFormattedTableSchema"""
+    """
+    Definition: RawAndFormattedTableSchema
+    """
 
-    dynamic_properties: Optional[Dict[str, Any]] = None
+    dynamic_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "dynamicProperties"},
+    )
 
 
 @dataclass
 class BlobMetadata:
-    """Definition: BlobMetadata"""
+    """
+    Definition: BlobMetadata
+    """
 
-    id: Optional[str] = None
+    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
     """The unique id of the file or folder."""
-    name: Optional[str] = None
+    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
     """The name of the file or folder."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "DisplayName"},
+    )
     """The display name of the file or folder."""
-    path: Optional[str] = None
+    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
     """The path of the file or folder."""
-    media_type: Optional[str] = None
+    media_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MediaType"},
+    )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = None
+    is_folder: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "IsFolder"},
+    )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
@@ -355,13 +573,21 @@ class BlobMetadata:
 
 @dataclass
 class SensitivityLabelMetadata:
-    """Definition: SensitivityLabelMetadata"""
+    """
+    Definition: SensitivityLabelMetadata
+    """
 
-    sensitivity_label_id: Optional[str] = None
+    sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "sensitivityLabelId"},
+    )
     """SensitivityLabel Id."""
     name: Optional[str] = None
     """SensitivityLabel name."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """SensitivityLabel displayName info"""
     tooltip: Optional[str] = None
     """SensitivityLabel details on tooltip."""
@@ -369,14 +595,75 @@ class SensitivityLabelMetadata:
     """SensitivityLabel priority."""
     color: Optional[str] = None
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = None
+    is_encrypted: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEncrypted"},
+    )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isEnabled"},
+    )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = None
+    is_parent: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "isParent"},
+    )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = None
+    parent_sensitivity_label_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "parentSensitivityLabelId"},
+    )
     """Parent  SensitivityLabel Id."""
+
+
+@dataclass
+class WorkbookRange:
+    """
+    Definition: WorkbookRange
+    """
+
+    address: Optional[str] = None
+    """Range address including the sheet name, e.g. Sheet1!A1:D10."""
+    address_local: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "addressLocal"},
+    )
+    cell_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "cellCount"},
+    )
+    column_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "columnCount"},
+    )
+    row_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "rowCount"},
+    )
+    column_index: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "columnIndex"},
+    )
+    row_index: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "rowIndex"},
+    )
+    values: Optional[List[List[Any]]] = None
+    """2-D array of cell values."""
+    text: Optional[List[List[str]]] = None
+    """2-D array of display text."""
+    formulas: Optional[List[List[str]]] = None
+    """2-D array of formulas."""
+    number_format: Optional[List[List[str]]] = field(
+        default=None,
+        metadata={"wire_name": "numberFormat"},
+    )
+    value_types: Optional[List[List[str]]] = field(
+        default=None,
+        metadata={"wire_name": "valueTypes"},
+    )
+    """2-D array of value type names (e.g. String, Double, Empty)."""
 
 
 # Client Class
@@ -418,32 +705,37 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         input: TableToCreate,
         drive: str,
         file: str,
-        source: Optional[str],
-    ):
+        source: str,
+    ) -> dict[str, Any] | None:
         """
         Create table
 
         Create a new table in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/drives/{str(drive)}/files/{str(file)}/tables"
+            f"/drives"
+            f"/{quote(str(drive), safe='')}"
+            f"/files"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
+            f"/tables"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -458,51 +750,47 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         drive: str,
         file: str,
         table: str,
-        source: Optional[str],
+        source: str,
         id_column: Optional[str] = None,
-        populate_column: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Add a key column to a table
 
         Add a key column to an Excel table. The new column will be appended to
         the right.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/createIdColumn"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
+        query_params.append("populateColumn=" + quote("false"))
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
         if id_column is not None:
             value = str(id_column)
             if isinstance(id_column, bool):
                 value = value.lower()
             query_params.append(f"idColumn={quote(value)}")
-        if populate_column is not None:
-            value = str(populate_column)
-            if isinstance(populate_column, bool):
-                value = value.lower()
-            query_params.append(f"populateColumn={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -512,32 +800,36 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         drive: str,
         file: str,
         table: str,
-        source: Optional[str],
+        source: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
-        id_column: Optional[str] = None,
         date_time_format: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         List rows present in a table
 
         List rows present in a table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/drives/{str(drive)}/files/{str(file)}/tables/{str(table)}/items"
+            f"/drives"
+            f"/{quote(str(drive), safe='')}"
+            f"/files"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
+            f"/tables"
+            f"/{quote(str(table), safe='')}"
+            f"/items"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -563,11 +855,6 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             if isinstance(select, bool):
                 value = value.lower()
             query_params.append(f"$select={quote(value)}")
-        if id_column is not None:
-            value = str(id_column)
-            if isinstance(id_column, bool):
-                value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
@@ -584,14 +871,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -606,15 +895,20 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         drive: str,
         file: str,
         source: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         List all comments present in a workbook
 
         List all comments present in a workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
-            f"/drives/{str(drive)}/items/{str(file)}/workbook/comments"
+            f"/drives"
+            f"/{quote(str(drive), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
+            f"/workbook"
+            f"/comments"
         )
         query_params = []
         if source is not None:
@@ -623,14 +917,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"source={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -646,21 +942,21 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         file: str,
         commentid: str,
         source: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a comment present in a workbook
 
         Get a comment present in a workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/workbook"
             f"/comments"
-            f"/{str(commentid)}"
+            f"/{quote(str(commentid), safe='')}"
         )
         query_params = []
         if source is not None:
@@ -669,14 +965,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"source={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -693,21 +991,21 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         file: str,
         commentid: str,
         source: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Reply to a comment present in a workbook
 
         Reply to a comment present in a workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/workbook"
             f"/comments"
-            f"/{str(commentid)}"
+            f"/{quote(str(commentid), safe='')}"
             f"/replies"
         )
         query_params = []
@@ -717,14 +1015,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"source={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -740,39 +1040,37 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         file: str,
         table: str,
         id: str,
-        source: Optional[str],
-        id_column: Optional[str],
+        source: str,
+        id_column: str,
         date_time_format: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Get a row
 
         Get a row using a key column.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if id_column is not None:
-            value = str(id_column)
-            if isinstance(id_column, bool):
-                value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(id_column)
+        if isinstance(id_column, bool):
+            value = value.lower()
+        query_params.append(f"idColumn={quote(value)}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
@@ -789,14 +1087,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -812,45 +1112,45 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         file: str,
         table: str,
         id: str,
-        source: Optional[str],
-        id_column: Optional[str],
-    ):
+        source: str,
+        id_column: str,
+    ) -> None:
         """
         Delete a row
 
         Delete a row using a key column.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if id_column is not None:
-            value = str(id_column)
-            if isinstance(id_column, bool):
-                value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(id_column)
+        if isinstance(id_column, bool):
+            value = value.lower()
+        query_params.append(f"idColumn={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("DELETE", path, body=None)
+        response = await self.http_client.send_async(
+            "DELETE", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -862,11 +1162,10 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         file: str,
         table: str,
         id: str,
-        source: Optional[str],
-        id_column: Optional[str],
-        mode: Optional[str] = None,
+        source: str,
+        id_column: str,
         date_time_format: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Update a row
 
@@ -875,47 +1174,42 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         append (instead of overwrite) a value, use the \"Get a row\" action to
         retrieve the content first.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/files"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if id_column is not None:
-            value = str(id_column)
-            if isinstance(id_column, bool):
-                value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
-        if mode is not None:
-            value = str(mode)
-            if isinstance(mode, bool):
-                value = value.lower()
-            query_params.append(f"mode={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(id_column)
+        if isinstance(id_column, bool):
+            value = value.lower()
+        query_params.append(f"idColumn={quote(value)}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("PATCH", path, body=input)
+        response = await self.http_client.send_async(
+            "PATCH", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PATCH",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -929,32 +1223,31 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         self,
         drive: str,
         file: str,
-        source: Optional[str],
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+        source: str,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Get worksheets
 
         Get a list of worksheets in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/workbook"
             f"/worksheets"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
@@ -966,14 +1259,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -988,39 +1283,40 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         input: CreateWorksheetInput,
         drive: str,
         file: str,
-        source: Optional[str],
-    ):
+        source: str,
+    ) -> dict[str, Any] | None:
         """
         Create worksheet
 
         Create a new worksheet in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/workbook"
             f"/worksheets"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1034,38 +1330,31 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         self,
         drive: str,
         file: str,
-        source: Optional[str],
-        select: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
-    ):
+        source: str,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
+    ) -> dict[str, Any] | None:
         """
         Get tables
 
         Get a list of tables in the Excel workbook.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.0"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/workbook"
             f"/tables"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if select is not None:
-            value = str(select)
-            if isinstance(select, bool):
-                value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
@@ -1077,14 +1366,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1100,47 +1391,48 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         drive: str,
         file: str,
         table: str,
-        source: Optional[str],
+        source: str,
         date_time_format: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Add a row into a table
 
         Add a new row into the Excel table.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless"
             f"/v1.2"
             f"/drives"
-            f"/{str(drive)}"
+            f"/{quote(str(drive), safe='')}"
             f"/items"
-            f"/{str(file)}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
             f"/workbook"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(str(table), safe='')}"
             f"/rows"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
                 value = value.lower()
             query_params.append(f"dateTimeFormat={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -1157,47 +1449,266 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         file: str,
         script_drive: str,
         script_id: str,
-        source: Optional[str],
-        script_source: Optional[str],
-    ):
+        source: str,
+        script_source: str,
+    ) -> dict[str, Any] | None:
         """
         Run script from SharePoint library
 
         Runs an Office Script against an Excel workbook. Use this action when
         the script is saved outside of the default location.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
             f"/officescripting"
             f"/api"
             f"/unattended"
             f"/run"
-            f"/{str(drive)}"
-            f"/{str(file)}"
-            f"/{str(script_drive)}"
-            f"/{str(script_id)}"
+            f"/{quote(str(drive), safe='')}"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
+            f"/{quote(str(script_drive), safe='')}"
+            f"/{quote(quote(str(script_id), safe=''), safe='')}"
         )
         query_params = []
-        if source is not None:
-            value = str(source)
-            if isinstance(source, bool):
-                value = value.lower()
-            query_params.append(f"source={quote(value)}")
-        if script_source is not None:
-            value = str(script_source)
-            if isinstance(script_source, bool):
-                value = value.lower()
-            query_params.append(f"scriptSource={quote(value)}")
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        value = str(script_source)
+        if isinstance(script_source, bool):
+            value = value.lower()
+        query_params.append(f"scriptSource={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_sources_async(
+        self,
+        top: Optional[str] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get sources
+
+        Get a list of sources.
+        """
+        request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
+        query_params = []
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_drives_async(
+        self,
+        source: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get drives
+
+        Get a list of drives.
+        """
+        request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
+        query_params = []
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_columns_async(
+        self,
+        drive: str,
+        file: str,
+        table: str,
+        source: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get table columns
+
+        Get table columns.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/codeless"
+            f"/v1.0"
+            f"/drives"
+            f"/{quote(str(drive), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
+            f"/workbook"
+            f"/tables"
+            f"/{quote(str(table), safe='')}"
+            f"/columns"
+        )
+        query_params = []
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_table_async(
+        self,
+        drive: str,
+        file: str,
+        table: str,
+        source: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get metadata of a table
+
+        Get metadata of a table.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/codeless"
+            f"/v1.0"
+            f"/drives"
+            f"/{quote(str(drive), safe='')}"
+            f"/items"
+            f"/{quote(quote(str(file), safe=''), safe='')}"
+            f"/workbook"
+            f"/tables"
+            f"/{quote(str(table), safe='')}"
+            f"/metadata"
+        )
+        query_params = []
+        value = str(source)
+        if isinstance(source, bool):
+            value = value.lower()
+        query_params.append(f"source={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_single_script_async(
+        self,
+        script_source: str,
+        script_drive: str,
+        script_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Gets one script
+
+        Gets one of the scripts.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2/officescripting/api/storage/script"
+        )
+        query_params = []
+        value = str(script_source)
+        if isinstance(script_source, bool):
+            value = value.lower()
+        query_params.append(f"scriptSource={quote(value)}")
+        value = str(script_drive)
+        if isinstance(script_drive, bool):
+            value = value.lower()
+        query_params.append(f"scriptDrive={quote(value)}")
+        value = str(script_id)
+        if isinstance(script_id, bool):
+            value = value.lower()
+        query_params.append(f"scriptId={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )

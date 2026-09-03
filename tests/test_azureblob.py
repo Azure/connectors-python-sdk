@@ -6,10 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.azureblob import (
     AzureblobClient,
-    CreateBlockBlobInput,
-    CreateFileInput,
     SharedAccessSignatureBlobPolicy,
-    UpdateFileInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -229,7 +226,7 @@ class TestCreateBlockBlob:
         )
 
         mock_response = MockResponse(status=200, text='{}')
-        blob_input = CreateBlockBlobInput()
+        blob_input = b"blob content"
 
         with patch.object(
             client._http_client,
@@ -267,7 +264,7 @@ class TestCreateFile:
             status=200,
             text='{"id": "blob456", "name": "new-file.txt", "path": "/uploads/new-file.txt"}'
         )
-        file_input = CreateFileInput()
+        file_input = b"file content"
 
         with patch.object(
             client._http_client,
@@ -306,7 +303,7 @@ class TestCreateFile:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.create_file_async(
-                    input=CreateFileInput(),
+                    input=b"file content",
                     dataset="mycontainer",
                     folder_path="/uploads",
                     name="existing-file.txt"
@@ -1028,13 +1025,11 @@ class TestListRootFolder:
         ) as mock_send:
             await client.list_root_folder_async(
                 dataset="mycontainer",
-                next_page_marker="marker456",
-                use_flat_listing="false"
+                next_page_marker="marker456"
             )
 
             call_args = mock_send.call_args
-            assert "nextPageMarker=" in call_args[0][1]
-            assert "useFlatListing=false" in call_args[0][1]
+            assert "nextPageMarker=marker456" in call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_token_provider):
@@ -1075,91 +1070,6 @@ class TestListRootFolder:
                 await client.list_root_folder_async(dataset="mycontainer")
 
             assert exc_info.value.status_code == 403
-
-
-class TestOnUpdatedFiles:
-    """Tests for on_updated_files_async method."""
-
-    @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
-        """Test successful GET request."""
-        client = AzureblobClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "blob1", "lastModified": "2024-01-15T10:00:00Z"}]}'
-        )
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            result = await client.on_updated_files_async(
-                dataset="mycontainer",
-                folder_id="folder123"
-            )
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "triggers/batch/onupdatedfile" in call_args[0][1]
-            assert "value" in result
-
-    @pytest.mark.asyncio
-    async def test_with_all_parameters(self, mock_token_provider):
-        """Test GET request with all parameters."""
-        client = AzureblobClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='{"value": []}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_updated_files_async(
-                dataset="mycontainer",
-                folder_id="folder123",
-                max_file_count="10",
-                check_both_created_and_modified_date_time="true"
-            )
-
-            call_args = mock_send.call_args
-            assert "maxFileCount=10" in call_args[0][1]
-            assert "checkBothCreatedAndModifiedDateTime=true" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
-        """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=500, text='{"error": "Internal Server Error"}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            with pytest.raises(ConnectorException) as exc_info:
-                await client.on_updated_files_async(
-                    dataset="mycontainer",
-                    folder_id="folder123"
-                )
-
-            assert exc_info.value.status_code == 500
 
 
 class TestSetBlobTierByPath:
@@ -1209,7 +1119,7 @@ class TestUpdateFile:
             status=200,
             text='{"id": "blob123", "name": "updated-file.txt", "lastModified": "2024-01-15"}'
         )
-        update_input = UpdateFileInput()
+        update_input = b"updated content"
 
         with patch.object(
             client._http_client,
@@ -1246,7 +1156,7 @@ class TestUpdateFile:
             return_value=mock_response
         ):
             result = await client.update_file_async(
-                input=UpdateFileInput(),
+                input=b"updated content",
                 dataset="mycontainer",
                 id="blob123"
             )
@@ -1270,7 +1180,7 @@ class TestUpdateFile:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.update_file_async(
-                    input=UpdateFileInput(),
+                    input=b"updated content",
                     dataset="mycontainer",
                     id="nonexistent"
                 )

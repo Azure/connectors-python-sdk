@@ -23,38 +23,66 @@ from azure.connectors.sdk import (
 
 @dataclass
 class CreatePipelineRunResponse:
-    """Response for Create a pipeline run"""
+    """
+    Response for Create a pipeline run
+    """
 
-    run_id: Optional[str] = None
+    run_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "runId"},
+    )
     """runId"""
 
 
 @dataclass
 class PipelineRun:
-    """Response for Get a pipeline run"""
+    """
+    Response for Get a pipeline run
+    """
 
-    run_id: Optional[str] = None
+    run_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "runId"},
+    )
     """Identifier of a run"""
-    pipeline_name: Optional[str] = None
+    pipeline_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "pipelineName"},
+    )
     """The pipeline name"""
     parameters: Optional[Dict[str, Any]] = None
     """
     The full of partial list of parameter name, value pair used in the pipeline
     run.
     """
-    invoked_by: Optional[Dict[str, Any]] = None
+    invoked_by: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "invokedBy"},
+    )
     """Entity that started the pipeline."""
-    run_start: Optional[str] = None
+    run_start: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "runStart"},
+    )
     """The start time of a pipeline run in ISO8601 format."""
-    run_end: Optional[str] = None
+    run_end: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "runEnd"},
+    )
     """The end time of a pipeline run in ISO8601 format."""
-    duration_in_ms: Optional[int] = None
+    duration_in_ms: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "durationInMs"},
+    )
     """The duration of a pipeline run in milliseconds."""
     status: Optional[str] = None
     """The status of the pipeline run."""
     message: Optional[str] = None
     """The message from a pipeline run."""
-    last_updated: Optional[str] = None
+    last_updated: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "lastUpdated"},
+    )
     """
     The last updated timestamp for the pipeline run event in ISO8601 format.
     """
@@ -63,18 +91,70 @@ class PipelineRun:
 
 
 @dataclass
+class SubscriptionListResult:
+    """
+    Response for List subscriptions
+    """
+
+    value: Optional[List[Subscription]] = None
+    """The subscriptions."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
+class ResourceGroupListResult:
+    """
+    Response for List resource groups
+    """
+
+    value: Optional[List[ResourceGroup]] = None
+    """The list of resource groups."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
 class DataFactoryListResult:
-    """Definition: DataFactoryListResult"""
+    """
+    Response for List Factories
+    """
 
     value: Optional[List[DataFactory]] = None
     """The list of Data Factories."""
-    next_link: Optional[str] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to get the next set of results."""
+
+
+@dataclass
+class PipelineListResult:
+    """
+    Response for List pipelines
+    """
+
+    value: Optional[List[Pipeline]] = None
+    """The list of Data Factories."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
     """The URL to get the next set of results."""
 
 
 @dataclass
 class DataFactory:
-    """Definition: DataFactory"""
+    """
+    Definition: DataFactory
+    """
 
     name: Optional[str] = None
     """The resource name."""
@@ -86,25 +166,17 @@ class DataFactory:
     """Managed service identity of the factory."""
     id: Optional[str] = None
     """The resource identitfier."""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """The resource type."""
     location: Optional[str] = None
     """The resource location"""
 
 
 @dataclass
-class PipelineListResult:
-    """Definition: PipelineListResult"""
-
-    value: Optional[List[Pipeline]] = None
-    """The list of Data Factories."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class Pipeline:
-    """Definition: Pipeline"""
+    """
+    Definition: Pipeline
+    """
 
     id: Optional[str] = None
     """The resource identifier."""
@@ -118,7 +190,9 @@ class Pipeline:
 
 @dataclass
 class Activity:
-    """Definition: Activity"""
+    """
+    Definition: Activity
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -129,17 +203,22 @@ class Activity:
 
 @dataclass
 class ActivityFull:
-    """Definition: Activity-Full"""
+    """
+    Definition: Activity-Full
+    """
 
     name: Optional[str] = None
     """name"""
-    type_: Optional[str] = None
+    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
     """type"""
     inputs: Optional[List[Dict[str, Any]]] = None
     """inputs"""
     outputs: Optional[List[Dict[str, Any]]] = None
     """outputs"""
-    type_properties: Optional[Dict[str, Any]] = None
+    type_properties: Optional[Dict[str, Any]] = field(
+        default=None,
+        metadata={"wire_name": "typeProperties"},
+    )
     """typeProperties"""
     policy: Optional[Dict[str, Any]] = None
     """policy"""
@@ -147,7 +226,9 @@ class ActivityFull:
 
 @dataclass
 class ParameterValueSpecification:
-    """Definition: ParameterValueSpecification"""
+    """
+    Definition: ParameterValueSpecification
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -157,34 +238,41 @@ class ParameterValueSpecification:
 
 
 @dataclass
-class SubscriptionListResult:
-    """Definition: SubscriptionListResult"""
-
-    value: Optional[List[Subscription]] = None
-    """The subscriptions."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class Subscription:
-    """Definition: Subscription"""
+    """
+    Definition: Subscription
+    """
 
     id: Optional[str] = None
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = None
+    subscription_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionId"},
+    )
     """The subscription Id."""
-    tenant_id: Optional[str] = None
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
     """The tenant Id."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
     """The subscription display name."""
     state: Optional[str] = None
     """The subscription state."""
-    subscription_policies: Optional[SubscriptionPolicies] = None
-    authorization_source: Optional[str] = None
+    subscription_policies: Optional[SubscriptionPolicies] = field(
+        default=None,
+        metadata={"wire_name": "subscriptionPolicies"},
+    )
+    authorization_source: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "authorizationSource"},
+    )
     """
     The authorization source of the request. Valid values are one or more
     combinations of Legacy, RoleBased, Bypassed, Direct and Management. For
@@ -194,33 +282,36 @@ class Subscription:
 
 @dataclass
 class SubscriptionPolicies:
-    """Definition: SubscriptionPolicies"""
+    """
+    Definition: SubscriptionPolicies
+    """
 
-    location_placement_id: Optional[str] = None
+    location_placement_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "locationPlacementId"},
+    )
     """
     The subscription location placement Id. The Id indicates which regions are
     visible for a subscription. For example, a subscription with a location
     placement Id of Public_2014-09-01 has access to Azure public regions.
     """
-    quota_id: Optional[str] = None
+    quota_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "quotaId"},
+    )
     """The subscription quota Id."""
-    spending_limit: Optional[str] = None
+    spending_limit: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "spendingLimit"},
+    )
     """The subscription spending limit."""
 
 
 @dataclass
-class ResourceGroupListResult:
-    """Definition: ResourceGroupListResult"""
-
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups."""
-    next_link: Optional[str] = None
-    """The URL to get the next set of results."""
-
-
-@dataclass
 class ResourceGroup:
-    """Definition: ResourceGroup"""
+    """
+    Definition: ResourceGroup
+    """
 
     id: Optional[str] = None
     """
@@ -234,7 +325,10 @@ class ResourceGroup:
     group has been created. Has to be one of the supported Azure Locations,
     such as West US, East US, West Europe, East Asia, etc.
     """
-    managed_by: Optional[str] = None
+    managed_by: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "managedBy"},
+    )
     """Id of the resource that manages this resource group."""
     tags: Optional[Dict[str, Any]] = None
     """The tags attached to the resource group."""
@@ -243,9 +337,14 @@ class ResourceGroup:
 
 @dataclass
 class ResourceGroupProperties:
-    """Definition: ResourceGroupProperties"""
+    """
+    Definition: ResourceGroupProperties
+    """
 
-    provisioning_state: Optional[str] = None
+    provisioning_state: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "provisioningState"},
+    )
     """The provisioning state."""
 
 
@@ -290,48 +389,45 @@ class AzuredatafactoryClient(ConnectorClientBase):
         resource_group_name: str,
         data_factory_name: str,
         pipeline_name: str,
-        x_ms_api_version: Optional[str],
         reference_pipeline_run_id: Optional[str] = None,
-    ):
+    ) -> dict[str, Any] | None:
         """
         Create a pipeline run
 
         This operation creates a new pipeline run in your factory
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.DataFactory"
             f"/factories"
-            f"/{str(data_factory_name)}"
+            f"/{quote(str(data_factory_name), safe='')}"
             f"/pipelines"
-            f"/{str(pipeline_name)}"
+            f"/{quote(str(pipeline_name), safe='')}"
             f"/CreateRun"
         )
         query_params = []
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
         if reference_pipeline_run_id is not None:
             value = str(reference_pipeline_run_id)
             if isinstance(reference_pipeline_run_id, bool):
                 value = value.lower()
             query_params.append(f"referencePipelineRunId={quote(value)}")
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -347,41 +443,38 @@ class AzuredatafactoryClient(ConnectorClientBase):
         resource_group_name: str,
         data_factory_name: str,
         pipeline_run_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> None:
         """
         Cancel a pipeline run
 
         This operation cancels a pipeline run by its run ID.
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.DataFactory"
             f"/factories"
-            f"/{str(data_factory_name)}"
+            f"/{quote(str(data_factory_name), safe='')}"
             f"/cancelpipelineRun"
-            f"/{str(pipeline_run_name)}"
+            f"/{quote(str(pipeline_run_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("POST", path, body=None)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -392,41 +485,206 @@ class AzuredatafactoryClient(ConnectorClientBase):
         resource_group_name: str,
         data_factory_name: str,
         pipeline_run_name: str,
-        x_ms_api_version: Optional[str],
-    ):
+    ) -> dict[str, Any] | None:
         """
         Get a pipeline run
 
         Get a particular pipeline run execution
         """
-        path = (
+        request_url = (
             f"{self._connection_runtime_url}"
             f"/subscriptions"
-            f"/{str(subscription_id)}"
+            f"/{quote(str(subscription_id), safe='')}"
             f"/resourcegroups"
-            f"/{str(resource_group_name)}"
+            f"/{quote(str(resource_group_name), safe='')}"
             f"/providers"
             f"/Microsoft.DataFactory"
             f"/factories"
-            f"/{str(data_factory_name)}"
+            f"/{quote(str(data_factory_name), safe='')}"
             f"/pipelineRuns"
-            f"/{str(pipeline_run_name)}"
+            f"/{quote(str(pipeline_run_name), safe='')}"
         )
         query_params = []
-        if x_ms_api_version is not None:
-            value = str(x_ms_api_version)
-            if isinstance(x_ms_api_version, bool):
-                value = value.lower()
-            query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
         if query_params:
-            path += '?' + '&'.join(query_params)
+            request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async("GET", path, body=None)
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "GET",
-                path,
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_subscriptions_async(
+        self,
+    ) -> dict[str, Any] | None:
+        """
+        List subscriptions
+
+        Gets a list of all the subscriptions to which the principal has access.
+        """
+        request_url = f"{self._connection_runtime_url}/subscriptions"
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_resource_groups_async(
+        self,
+        subscription_id: str,
+        filter: Optional[str] = None,
+        top: Optional[int] = None,
+    ) -> dict[str, Any] | None:
+        """
+        List resource groups
+
+        Lists all the resource groups within the subscription. The results are
+        paginated at 1,000+ records.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        if filter is not None:
+            value = str(filter)
+            if isinstance(filter, bool):
+                value = value.lower()
+            query_params.append(f"$filter={quote(value)}")
+        if top is not None:
+            value = str(top)
+            if isinstance(top, bool):
+                value = value.lower()
+            query_params.append(f"$top={quote(value)}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_data_factories_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        List Factories
+
+        Get the list of Data Factories
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.DataFactory"
+            f"/factories"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def list_pipelines_async(
+        self,
+        subscription_id: str,
+        resource_group_name: str,
+        data_factory_name: str,
+    ) -> dict[str, Any] | None:
+        """
+        List pipelines
+
+        List the list of pipelines from a particular factory
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.DataFactory"
+            f"/factories"
+            f"/{quote(str(data_factory_name), safe='')}"
+            f"/pipelines"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
                 response.status,
                 response.text,
             )

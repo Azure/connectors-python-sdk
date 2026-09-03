@@ -211,7 +211,7 @@ class SlackClient(ConnectorClientBase):
     async def create_channel_async(
         self,
         name: Optional[str] = None,
-        is_private: Optional[str] = None,
+        is_private: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Create a channel

@@ -71,7 +71,7 @@ async def example_3_list_shifts(team_id: str) -> None:
 
     credential = DefaultAzureCredential()
     async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        shifts_response = await client.list_shifts_async(team_id=team_id, top="10")
+        shifts_response = await client.list_shifts_async(team_id=team_id, top=10)
         shifts = shifts_response.get("value", []) if shifts_response else []
 
         print(f"Found {len(shifts)} shifts")

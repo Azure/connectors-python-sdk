@@ -77,83 +77,35 @@ async def example_1_list_booking_businesses():
             print(f"Error: {ex}")
 
 
-async def example_2_register_create_webhook():
-    """Example 2: Register a webhook for appointment creation events."""
-    print("\n=== Example 2: Register Create Appointment Webhook ===")
+async def example_2_build_create_webhook():
+    """Example 2: Build an appointment-created webhook payload."""
+    print("\n=== Example 2: Build Create Appointment Webhook ===")
 
-    credential = DefaultAzureCredential()
-
-    async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            webhook_input = CreateAppointmentInput(
-                webhook={"callbackUrl": WEBHOOK_CALLBACK_URL}
-            )
-
-            result = await client.create_appointment_async(
-                input=webhook_input,
-                s_m_t_p_address=BOOKING_SMTP_ADDRESS
-            )
-
-            if result:
-                print("Webhook registered successfully!")
-                print(f"Webhook ID: {result.get('webhook_id')}")
-            else:
-                print("Webhook registration completed (no response body)")
-
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+    webhook_input = CreateAppointmentInput(
+        webhook={"callbackUrl": WEBHOOK_CALLBACK_URL}
+    )
+    print(f"Business: {BOOKING_SMTP_ADDRESS}")
+    print(f"Create webhook payload: {webhook_input.webhook}")
 
 
-async def example_3_register_update_webhook():
-    """Example 3: Register a webhook for appointment update events."""
-    print("\n=== Example 3: Register Update Appointment Webhook ===")
+async def example_3_build_update_webhook():
+    """Example 3: Build an appointment-updated webhook payload."""
+    print("\n=== Example 3: Build Update Appointment Webhook ===")
 
-    credential = DefaultAzureCredential()
-
-    async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            webhook_input = UpdateAppointmentInput(
-                webhook={"callbackUrl": WEBHOOK_CALLBACK_URL}
-            )
-
-            await client.update_appointment_async(
-                input=webhook_input,
-                s_m_t_p_address=BOOKING_SMTP_ADDRESS
-            )
-
-            print("Update webhook registered successfully!")
-
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+    webhook_input = UpdateAppointmentInput(
+        webhook={"callbackUrl": WEBHOOK_CALLBACK_URL}
+    )
+    print(f"Update webhook payload: {webhook_input.webhook}")
 
 
-async def example_4_register_cancel_webhook():
-    """Example 4: Register a webhook for appointment cancellation events."""
-    print("\n=== Example 4: Register Cancel Appointment Webhook ===")
+async def example_4_build_cancel_webhook():
+    """Example 4: Build an appointment-cancelled webhook payload."""
+    print("\n=== Example 4: Build Cancel Appointment Webhook ===")
 
-    credential = DefaultAzureCredential()
-
-    async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            webhook_input = CancelAppointmentInput(
-                webhook={"callbackUrl": WEBHOOK_CALLBACK_URL}
-            )
-
-            await client.cancel_appointment_async(
-                input=webhook_input,
-                s_m_t_p_address=BOOKING_SMTP_ADDRESS
-            )
-
-            print("Cancel webhook registered successfully!")
-
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+    webhook_input = CancelAppointmentInput(
+        webhook={"callbackUrl": WEBHOOK_CALLBACK_URL}
+    )
+    print(f"Cancel webhook payload: {webhook_input.webhook}")
 
 
 async def main():
@@ -168,10 +120,11 @@ async def main():
     # Run read-only example by default
     await example_1_list_booking_businesses()
 
-    # Uncomment to register webhooks (requires valid callback URL):
-    # await example_2_register_create_webhook()
-    # await example_3_register_update_webhook()
-    # await example_4_register_cancel_webhook()
+    # The current generated action client exposes payload models but not the
+    # webhook registration trigger operations.
+    await example_2_build_create_webhook()
+    await example_3_build_update_webhook()
+    await example_4_build_cancel_webhook()
 
     print("\n=== All examples completed ===")
 

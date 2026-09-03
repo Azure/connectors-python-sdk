@@ -64,7 +64,7 @@ async def example_2_update_ticket() -> None:
     async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
         request = UpdateTicketRequest(priority="3", status="3")
 
-        updated = await client.update_ticket_async(input=request, ticket_id="1")
+        updated = await client.update_ticket_async(input=request, ticket_id=1)
         ticket = updated.get("ticket", {}) if updated else {}
         print(f"Updated ticket: {ticket.get('id')}")
 
@@ -80,7 +80,7 @@ async def example_3_add_note() -> None:
             private=True,
         )
 
-        note = await client.add_note_async(input=request, ticket_id="1")
+        note = await client.add_note_async(input=request, ticket_id=1)
         conversation = note.get("conversation", {}) if note else {}
         print(f"Added note: {conversation.get('id')}")
 

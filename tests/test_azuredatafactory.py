@@ -167,8 +167,7 @@ class TestCreatePipelineRunAsync:
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
-                pipeline_name="pipeline-test",
-                x_ms_api_version="2018-06-01"
+                pipeline_name="pipeline-test"
             )
 
             mock_send.assert_called_once()
@@ -205,7 +204,6 @@ class TestCreatePipelineRunAsync:
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
                 pipeline_name="pipeline-test",
-                x_ms_api_version="2018-06-01",
                 reference_pipeline_run_id="ref-run-001"
             )
 
@@ -235,8 +233,7 @@ class TestCreatePipelineRunAsync:
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
-                pipeline_name="pipeline-test",
-                x_ms_api_version="2018-06-01"
+                pipeline_name="pipeline-test"
             )
 
             assert result is None
@@ -268,8 +265,7 @@ class TestCreatePipelineRunAsync:
                     subscription_id="sub-123",
                     resource_group_name="rg-test",
                     data_factory_name="adf-test",
-                    pipeline_name="pipeline-test",
-                    x_ms_api_version="2018-06-01"
+                    pipeline_name="pipeline-test"
                 )
 
             assert exc_info.value.status_code == 400
@@ -309,8 +305,7 @@ class TestCancelPipelineRunAsync:
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
-                pipeline_run_name="run-12345",
-                x_ms_api_version="2018-06-01"
+                pipeline_run_name="run-12345"
             )
 
             mock_send.assert_called_once()
@@ -357,8 +352,7 @@ class TestGetPipelineRunAsync:
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
-                pipeline_run_name="run-12345",
-                x_ms_api_version="2018-06-01"
+                pipeline_run_name="run-12345"
             )
 
             mock_send.assert_called_once()
@@ -388,8 +382,7 @@ class TestGetPipelineRunAsync:
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
-                pipeline_run_name="run-12345",
-                x_ms_api_version="2018-06-01"
+                pipeline_run_name="run-12345"
             )
 
             assert result is None
@@ -418,8 +411,7 @@ class TestGetPipelineRunAsync:
                     subscription_id="sub-123",
                     resource_group_name="rg-test",
                     data_factory_name="adf-test",
-                    pipeline_run_name="run-12345",
-                    x_ms_api_version="2018-06-01"
+                    pipeline_run_name="run-12345"
                 )
 
             assert exc_info.value.status_code == 404

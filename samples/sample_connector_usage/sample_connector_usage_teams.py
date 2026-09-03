@@ -27,17 +27,17 @@ CONNECTION_RUNTIME_URL = ""
 async def example_1_list_joined_teams():
     """Example 1: List all Teams you're a member of"""
     print("\n=== Example 1: List Joined Teams ===")
-    
+
     credential = DefaultAzureCredential()
     client = TeamsClient(CONNECTION_RUNTIME_URL, credential)
-    
+
     try:
         teams = await client.get_all_teams_async()
-        
+
         print(f"Found {len(teams.get('value', []))} teams")
         for team in teams.get('value', [])[:3]:  # Show first 3
             print(f"  - {team.get('displayName')} ({team.get('id')})")
-            
+
     except Exception as ex:
         print(f"Error: {ex}")
 
@@ -45,17 +45,17 @@ async def example_1_list_joined_teams():
 async def example_2_list_associated_teams():
     """Example 2: List associated teams (direct membership + shared channels)"""
     print("\n=== Example 2: List Associated Teams ===")
-    
+
     credential = DefaultAzureCredential()
     client = TeamsClient(CONNECTION_RUNTIME_URL, credential)
-    
+
     try:
         teams = await client.get_all_associated_teams_async()
-        
+
         print(f"Found {len(teams.get('value', []))} associated teams")
         for team in teams.get('value', [])[:3]:  # Show first 3
             print(f"  - {team.get('displayName')}")
-            
+
     except Exception as ex:
         print(f"Error: {ex}")
 
@@ -65,10 +65,10 @@ async def main():
     print("Teams Connector SDK - Sample Usage")
     print("=" * 50)
     print()
-    
+
     await example_1_list_joined_teams()
     await example_2_list_associated_teams()
-    
+
     print("\n" + "=" * 50)
     print("Sample completed!")
 

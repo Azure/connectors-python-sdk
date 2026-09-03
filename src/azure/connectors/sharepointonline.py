@@ -1741,7 +1741,7 @@ class SharepointonlineClient(ConnectorClientBase):
         input: ItemPermissionCreateLinkBody,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> dict[str, Any] | None:
         """
         Create sharing link for a file or folder
@@ -1787,7 +1787,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[str] = None,
+        overwrite: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Copy file (deprecated)
@@ -2067,7 +2067,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
-        infer_content_type: Optional[str] = None,
+        infer_content_type: Optional[bool] = None,
     ) -> bytes:
         """
         Get file content
@@ -2220,7 +2220,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         path: str,
-        infer_content_type: Optional[str] = None,
+        infer_content_type: Optional[bool] = None,
     ) -> bytes:
         """
         Get file content using path
@@ -2811,7 +2811,7 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
@@ -2891,7 +2891,7 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
@@ -3010,7 +3010,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
         view: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -3057,7 +3057,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> None:
         """
         Delete item
@@ -3091,7 +3091,7 @@ class SharepointonlineClient(ConnectorClientBase):
         input: PatchItemInput,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
         view: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -3139,8 +3139,8 @@ class SharepointonlineClient(ConnectorClientBase):
         input: CreateApprovalRequestInput,
         dataset: str,
         table: str,
-        id: str,
-        approval_type: str,
+        id: int,
+        approval_type: int,
     ) -> dict[str, Any] | None:
         """
         Create an approval request for an item or file
@@ -3186,10 +3186,10 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
         since: str,
         until: Optional[str] = None,
-        include_drafts: Optional[str] = None,
+        include_drafts: Optional[bool] = None,
         view: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -3253,7 +3253,7 @@ class SharepointonlineClient(ConnectorClientBase):
         input: FileCheckInParameters,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> None:
         """
         Check in file
@@ -3288,7 +3288,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> None:
         """
         Check out file
@@ -3324,7 +3324,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> None:
         """
         Discard check out
@@ -3363,7 +3363,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
         view: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -3417,7 +3417,7 @@ class SharepointonlineClient(ConnectorClientBase):
         input: ItemGrantAccessBody,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> None:
         """
         Grant access to an item or a folder
@@ -3452,7 +3452,7 @@ class SharepointonlineClient(ConnectorClientBase):
         input: PatchFileItemInput,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
         view: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -3504,7 +3504,7 @@ class SharepointonlineClient(ConnectorClientBase):
         input: PatchFileItemWithPredictedValuesParameters,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> dict[str, Any] | None:
         """
         Update file properties using AI Builder model results
@@ -3544,7 +3544,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
         approval_action: str,
         comments: Optional[str] = None,
         entity_tag: Optional[str] = None,
@@ -3606,7 +3606,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        id: str,
+        id: int,
     ) -> None:
         """
         Stop sharing an item or a file
@@ -3683,7 +3683,7 @@ class SharepointonlineClient(ConnectorClientBase):
         input: bytes,
         dataset: str,
         table: str,
-        item_id: str,
+        item_id: int,
         display_name: str,
     ) -> dict[str, Any] | None:
         """
@@ -3733,7 +3733,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        item_id: str,
+        item_id: int,
         attachment_id: str,
     ) -> None:
         """
@@ -3769,7 +3769,7 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
-        item_id: str,
+        item_id: int,
         attachment_id: str,
     ) -> bytes:
         """
@@ -3910,7 +3910,7 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[str] = None,
+        overwrite: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Extract folder
@@ -4425,7 +4425,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def get_approval_schema_async(
         self,
-        approval_type: str,
+        approval_type: int,
     ) -> dict[str, Any] | None:
         """
         Get the appropriate creation schema for the approval request type

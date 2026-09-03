@@ -2,6 +2,8 @@
 
 """Unit tests for SqlClient."""
 
+import inspect
+
 import pytest
 from unittest.mock import AsyncMock, patch
 
@@ -12,7 +14,6 @@ from azure.connectors.sql import (
     GetItemsResponse,
     GetTablesResponse,
     ODataServersList,
-    PassThroughNativeQueryBody,
     PatchItemInput,
     PostItemInput,
     ProceduresList,
@@ -77,12 +78,6 @@ async def _invoke_operation(client: SqlClient, operation: str):
         return await client.get_databases_async(server="srv")
     if operation == "get_tables_for_delete_item":
         return await client.get_tables_for_delete_item_async(server="srv", database="db")
-    if operation == "get_pass_through_native_query_metadata_v2":
-        return await client.get_pass_through_native_query_metadata_v2_async(
-            input=SqlPassThroughNativeQueryBody(query="SELECT 1"),
-            server="srv",
-            database="db",
-        )
     if operation == "get_procedures_v2":
         return await client.get_procedures_v2_async(server="srv", database="db")
     if operation == "get_procedure_v2":
@@ -91,8 +86,6 @@ async def _invoke_operation(client: SqlClient, operation: str):
         )
     if operation == "get_tables_for_get_item":
         return await client.get_tables_for_get_item_async(server="srv", database="db")
-    if operation == "get_table_v2":
-        return await client.get_table_v2_async(server="srv", database="db", table="tbl")
     if operation == "get_tables_for_get_on_new_items":
         return await client.get_tables_for_get_on_new_items_async(
             server="srv", database="db"
@@ -110,10 +103,12 @@ async def _invoke_operation(client: SqlClient, operation: str):
     if operation == "get_tables_for_post_item":
         return await client.get_tables_for_post_item_async(server="srv", database="db")
     if operation == "get_table":
-        return await client.get_table_async(table="tbl")
+        return await client.get_table_async(server="srv", database="db", table="tbl")
     if operation == "get_pass_through_native_query_metadata":
         return await client.get_pass_through_native_query_metadata_async(
-            input=PassThroughNativeQueryBody()
+            input=SqlPassThroughNativeQueryBody(query="SELECT 1"),
+            server="srv",
+            database="db",
         )
     if operation == "get_procedure":
         return await client.get_procedure_async(procedure="proc")
@@ -135,11 +130,9 @@ ALL_OPERATIONS = [
     "get_servers",
     "get_databases",
     "get_tables_for_delete_item",
-    "get_pass_through_native_query_metadata_v2",
     "get_procedures_v2",
     "get_procedure_v2",
     "get_tables_for_get_item",
-    "get_table_v2",
     "get_tables_for_get_on_new_items",
     "get_tables_for_get_on_updated_items",
     "get_tables_for_patch_item",
@@ -479,7 +472,7 @@ class TestSqlClientMethods:
 
     @pytest.mark.asyncio
     async def test_get_table_success(self, mock_token_provider):
-        """Test get_table_async targets the legacy default metadata endpoint."""
+        """Test get_table_async targets the current v2 metadata endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider,
@@ -492,9 +485,9 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_table_async(table="tbl")
+            await client.get_table_async(server="srv", database="db", table="tbl")
 
-            assert "/$metadata.json/datasets/default/tables/tbl" in mock_send.call_args[0][1]
+            assert "/v2/$metadata.json/datasets/srv,db/tables/tbl" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
@@ -580,23 +573,91 @@ class TestSqlTypeSerialization:
 class TestSqlTriggerOperations:
     """Tests for the module-level trigger registration metadata."""
 
-    def test_on_new_items_registered_as_trigger(self):
-        """Test the on-new-items route is registered as a trigger operation."""
-        assert "GetOnNewItems_V2" in TRIGGER_OPERATIONS
-        trigger = TRIGGER_OPERATIONS["GetOnNewItems_V2"]
-
-        assert trigger["operation_id"] == "GetOnNewItems_V2"
-        assert trigger["path"].endswith("/onnewitems")
-
-    def test_on_updated_items_registered_as_trigger(self):
-        """Test the on-updated-items route is registered as a trigger operation."""
-        assert "GetOnUpdatedItems_V2" in TRIGGER_OPERATIONS
-        trigger = TRIGGER_OPERATIONS["GetOnUpdatedItems_V2"]
-
-        assert trigger["operation_id"] == "GetOnUpdatedItems_V2"
-        assert trigger["path"].endswith("/onupdateditems")
+    def test_trigger_registry_metadata(self):
+        """Test the trigger registry matches the generated SQL trigger surface."""
+        assert TRIGGER_OPERATIONS == {
+            "GetOnNewItems_V2": {
+                "operation_id": "GetOnNewItems_V2",
+                "path": (
+                    "/{connectionId}/v2/datasets/{server},{database}/tables/"
+                    "{table}/onnewitems"
+                ),
+                "method": "get",
+                "required_parameters": ["server", "database", "table"],
+                "callback_payload_type": "SqlItemsList",
+            },
+            "GetOnUpdatedItems_V2": {
+                "operation_id": "GetOnUpdatedItems_V2",
+                "path": (
+                    "/{connectionId}/datasets/{server},{database}/tables/"
+                    "{table}/onupdateditems"
+                ),
+                "method": "get",
+                "required_parameters": ["server", "database", "table"],
+                "callback_payload_type": "SqlItemsList",
+            },
+        }
 
     def test_trigger_routes_not_client_methods(self):
         """Test the trigger routes are no longer exposed as callable client methods."""
         assert not hasattr(SqlClient, "get_on_new_items_async")
         assert not hasattr(SqlClient, "get_on_updated_items_async")
+
+    def test_callable_method_signatures(self):
+        """Test the client exposes exactly the generated callable methods."""
+        expected_signatures = {
+            "delete_item_async": ("self", "server", "database", "table", "id"),
+            "execute_pass_through_native_query_async": (
+                "self", "input", "server", "database"
+            ),
+            "execute_procedure_async": (
+                "self", "input", "server", "database", "procedure"
+            ),
+            "get_databases_async": ("self", "server"),
+            "get_item_async": ("self", "server", "database", "table", "id"),
+            "get_items_async": (
+                "self", "server", "database", "table", "apply", "filter",
+                "orderby", "skip", "top", "select", "count",
+                "extract_sensitivity_label", "purview_account_name"
+            ),
+            "get_pass_through_native_query_metadata_async": (
+                "self", "input", "server", "database"
+            ),
+            "get_procedure_async": ("self", "procedure"),
+            "get_procedure_v2_async": (
+                "self", "server", "database", "procedure"
+            ),
+            "get_procedures_async": ("self",),
+            "get_procedures_v2_async": ("self", "server", "database"),
+            "get_servers_async": ("self",),
+            "get_table_async": (
+                "self", "server", "database", "table",
+                "extract_sensitivity_label", "purview_account_name"
+            ),
+            "get_table_for_patch_async": ("self", "server", "database", "table"),
+            "get_tables_async": (
+                "self", "server", "database", "extract_sensitivity_label",
+                "purview_account_name"
+            ),
+            "get_tables_for_delete_item_async": ("self", "server", "database"),
+            "get_tables_for_get_item_async": ("self", "server", "database"),
+            "get_tables_for_get_on_new_items_async": (
+                "self", "server", "database"
+            ),
+            "get_tables_for_get_on_updated_items_async": (
+                "self", "server", "database"
+            ),
+            "get_tables_for_patch_item_async": ("self", "server", "database"),
+            "get_tables_for_post_item_async": ("self", "server", "database"),
+            "patch_item_async": (
+                "self", "input", "server", "database", "table", "id"
+            ),
+            "post_item_async": ("self", "input", "server", "database", "table"),
+        }
+        actual_signatures = {
+            name: tuple(inspect.signature(method).parameters)
+            for name, method in vars(SqlClient).items()
+            if inspect.iscoroutinefunction(method)
+        }
+
+        assert actual_signatures == expected_signatures

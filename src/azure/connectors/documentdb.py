@@ -698,7 +698,7 @@ class DocumentdbClient(ConnectorClientBase):
         database_id: str,
         collection_id: str,
         document_id: str,
-        extract_sensitivity_label: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -754,7 +754,7 @@ class DocumentdbClient(ConnectorClientBase):
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
-        extract_sensitivity_label: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -851,11 +851,11 @@ class DocumentdbClient(ConnectorClientBase):
         container_id: str,
         query_text: Optional[str] = None,
         partition_key: Optional[str] = None,
-        max_item_count: Optional[str] = None,
+        max_item_count: Optional[int] = None,
         continuation_token: Optional[str] = None,
         consistency_level: Optional[str] = None,
         session_token: Optional[str] = None,
-        extract_sensitivity_label: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """

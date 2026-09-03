@@ -46,7 +46,7 @@ async def example_1_list_groups():
 
     async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.list_groups_async(top="10")
+            result = await client.list_groups_async(top=10)
 
             if result and "value" in result:
                 groups = result["value"]

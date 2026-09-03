@@ -70,16 +70,16 @@ class UniversalprintClient(ConnectorClientBase):
         input: bytes,
         printer: str,
         file_name: str,
-        configuration_copies: Optional[str] = None,
+        configuration_copies: Optional[int] = None,
         configuration_orientation: Optional[str] = None,
         configuration_color_mode: Optional[str] = None,
         configuration_media_size: Optional[str] = None,
         configuration_duplex_mode: Optional[str] = None,
-        configuration_pages_per_sheet: Optional[str] = None,
-        configuration_dpi: Optional[str] = None,
+        configuration_pages_per_sheet: Optional[int] = None,
+        configuration_dpi: Optional[int] = None,
         configuration_quality: Optional[str] = None,
         configuration_media_type: Optional[str] = None,
-        configuration_finishings: Optional[str] = None,
+        configuration_finishings: Optional[List[str]] = None,
     ) -> None:
         """
         Print PDF
@@ -88,6 +88,7 @@ class UniversalprintClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/print/shares"
         query_params = []
+        item: object
         value = str(printer)
         if isinstance(printer, bool):
             value = value.lower()
@@ -142,10 +143,20 @@ class UniversalprintClient(ConnectorClientBase):
                 value = value.lower()
             query_params.append(f"configuration_mediaType={quote(value)}")
         if configuration_finishings is not None:
-            value = str(configuration_finishings)
-            if isinstance(configuration_finishings, bool):
-                value = value.lower()
-            query_params.append(f"configuration_finishings={quote(value)}")
+            if isinstance(configuration_finishings, list):
+                joined_parts = []
+                for item in configuration_finishings:
+                    value = str(item)
+                    if isinstance(item, bool):
+                        value = value.lower()
+                    joined_parts.append(value)
+                joined = ','.join(joined_parts)
+                query_params.append(f"configuration_finishings={quote(joined)}")
+            else:
+                value = str(configuration_finishings)
+                if isinstance(configuration_finishings, bool):
+                    value = value.lower()
+                query_params.append(f"configuration_finishings={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

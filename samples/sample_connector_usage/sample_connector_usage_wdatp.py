@@ -49,7 +49,7 @@ async def example_1_list_alerts():
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             result = await client.get_alerts_async(
-                top="5",
+                top=5,
                 orderby="alertCreationTime desc"
             )
 
@@ -76,7 +76,7 @@ async def example_2_get_machines():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_machines_async(top="10")
+            result = await client.get_machines_async(top=10)
 
             if result and result.get("value"):
                 print(f"Found {result.get('count', len(result['value']))} machines:")
@@ -197,7 +197,7 @@ async def example_6_machine_actions():
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             result = await client.get_machine_actions_async(
-                top="5",
+                top=5,
                 orderby="creationDateTimeUtc desc"
             )
 
@@ -224,7 +224,7 @@ async def example_7_investigations():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_investigations_async(top="5")
+            result = await client.get_investigations_async(top=5)
 
             if result and result.get("value"):
                 print(f"Found {result.get('count', len(result['value']))} investigations:")

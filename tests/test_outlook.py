@@ -2,6 +2,8 @@
 
 """Unit tests for OutlookClient."""
 
+import inspect
+
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.outlook import (
@@ -16,6 +18,7 @@ from azure.connectors.outlook import (
     EmailAddress,
     PhysicalAddress,
     Table,
+    TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -803,62 +806,70 @@ class TestContactGetItems:
             assert "/datasets/contacts/tables/Contacts/items" in call_args[0][1]
 
 
-class TestOnNewEmail:
-    """Tests for on_new_email_async method (trigger)."""
+class TestOutlookApiSurface:
+    """Tests for the generated callable and trigger operation surfaces."""
 
-    @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
-        """Test successful GET trigger request."""
-        client = OutlookClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
+    def test_callable_method_signatures(self):
+        """Test the client exposes exactly the generated callable methods."""
+        expected_signatures = {
+            "calendar_delete_item_async": ("self", "table", "id"),
+            "calendar_get_item_async": ("self", "table", "id"),
+            "calendar_get_items_async": (
+                "self", "table", "filter", "orderby", "top", "skip"
+            ),
+            "calendar_get_tables_async": ("self",),
+            "calendar_patch_item_async": ("self", "input", "table", "id"),
+            "calendar_post_item_async": ("self", "input", "table"),
+            "contact_delete_item_async": ("self", "table", "id"),
+            "contact_get_item_async": ("self", "table", "id"),
+            "contact_get_items_async": (
+                "self", "table", "filter", "orderby", "top", "skip"
+            ),
+            "contact_get_tables_async": ("self",),
+            "contact_patch_item_async": ("self", "input", "table", "id"),
+            "contact_post_item_async": ("self", "input", "table"),
+            "delete_email_async": ("self", "message_id"),
+            "flag_async": ("self", "message_id"),
+            "forward_email_async": ("self", "input", "message_id"),
+            "get_attachment_async": ("self", "message_id", "attachment_id"),
+            "get_email_async": (
+                "self", "message_id", "include_attachments", "internet_message_id"
+            ),
+            "get_emails_async": (
+                "self", "folder_path", "to", "cc", "to_or_cc", "from_",
+                "importance", "fetch_only_with_attachment", "subject_filter",
+                "fetch_only_unread", "include_attachments", "search_query", "top"
+            ),
+            "get_events_calendar_view_async": (
+                "self", "calendar_id", "start_date_time_offset",
+                "end_date_time_offset", "filter", "orderby", "top", "skip", "search"
+            ),
+            "mark_as_read_async": ("self", "message_id"),
+            "move_async": ("self", "message_id", "folder_path"),
+            "reply_to_async": ("self", "input", "message_id"),
+            "respond_to_event_async": ("self", "input", "event_id", "response"),
+            "send_approval_mail_async": ("self", "input"),
+            "send_email_async": ("self", "input"),
+            "send_mail_with_options_async": ("self", "input"),
+        }
+        actual_signatures = {
+            name: tuple(inspect.signature(method).parameters)
+            for name, method in vars(OutlookClient).items()
+            if inspect.iscoroutinefunction(method)
+        }
 
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "new-msg", "subject": "New Email!"}]}'
-        )
+        assert actual_signatures == expected_signatures
 
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            _ = await client.on_new_email_async()
-
-            mock_send.assert_called_once()
-            call_args = mock_send.call_args
-            assert call_args[0][0] == "GET"
-            assert "/v2/Mail/OnNewEmail" in call_args[0][1]
-
-    @pytest.mark.asyncio
-    async def test_with_filters(self, mock_token_provider):
-        """Test GET trigger with filter parameters."""
-        client = OutlookClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
-        )
-
-        mock_response = MockResponse(status=200, text='{"value": []}')
-
-        with patch.object(
-            client._http_client,
-            'send_async',
-            new_callable=AsyncMock,
-            return_value=mock_response
-        ) as mock_send:
-            await client.on_new_email_async(
-                folder_path="Inbox",
-                from_="important@example.com",
-                importance="High"
-            )
-
-            call_args = mock_send.call_args
-            url = call_args[0][1]
-            assert "folderPath=Inbox" in url
-            assert "from=" in url
-            assert "importance=High" in url
+    def test_on_new_email_trigger_registry_metadata(self):
+        """Test on-new-email is trigger metadata rather than a callable method."""
+        assert not hasattr(OutlookClient, "on_new_email_async")
+        assert TRIGGER_OPERATIONS["OnNewEmailV2"] == {
+            "operation_id": "OnNewEmailV2",
+            "path": "/{connectionId}/v2/Mail/OnNewEmail",
+            "method": "get",
+            "required_parameters": [],
+            "callback_payload_type": "TriggerBatchResponseClientReceiveMessage",
+        }
 
 
 class TestDataClasses:

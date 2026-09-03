@@ -49,7 +49,7 @@ SUCCESS_CONTRACTS = {
     "get_user_organizations": ("GET", "/me/organizations", False),
     "get_user_tasks": (
         "GET",
-        "/organizations/value/users/value/tasks",
+        "/organizations/value/users/1/tasks",
         False,
     ),
     "invite_user_to_organization": (

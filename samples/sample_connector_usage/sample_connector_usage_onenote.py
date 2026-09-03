@@ -198,7 +198,6 @@ async def example_6_get_page_content():
                 notebook_key=NOTEBOOK_KEY,
                 section_id=SECTION_ID,
                 page_id=PAGE_ID,
-                pre_authenticated="true"
             )
 
             if result:

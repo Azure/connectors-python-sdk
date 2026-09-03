@@ -242,8 +242,8 @@ class WordonlinebusinessClient(ConnectorClientBase):
         source: str,
         drive: str,
         file: str,
-        extract_sensitivity_label: Optional[str] = None,
-        fetch_sensitivity_label_metadata: Optional[str] = None,
+        extract_sensitivity_label: Optional[bool] = None,
+        fetch_sensitivity_label_metadata: Optional[bool] = None,
     ) -> bytes:
         """
         Convert Word Document to PDF

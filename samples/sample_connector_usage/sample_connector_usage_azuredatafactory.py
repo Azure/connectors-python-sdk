@@ -49,7 +49,6 @@ SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID", "your-subscription-id"
 RESOURCE_GROUP = os.environ.get("AZURE_RESOURCE_GROUP", "your-resource-group")
 DATA_FACTORY_NAME = os.environ.get("ADF_NAME", "your-data-factory")
 PIPELINE_NAME = os.environ.get("ADF_PIPELINE_NAME", "your-pipeline")
-API_VERSION = "2018-06-01"
 
 
 async def example_1_create_pipeline_run():
@@ -78,7 +77,6 @@ async def example_1_create_pipeline_run():
                 resource_group_name=RESOURCE_GROUP,
                 data_factory_name=DATA_FACTORY_NAME,
                 pipeline_name=PIPELINE_NAME,
-                x_ms_api_version=API_VERSION
             )
 
             if result:
@@ -118,7 +116,6 @@ async def example_2_get_pipeline_run_status(run_id: str):
                 resource_group_name=RESOURCE_GROUP,
                 data_factory_name=DATA_FACTORY_NAME,
                 pipeline_run_name=run_id,
-                x_ms_api_version=API_VERSION
             )
 
             if result:
@@ -162,7 +159,6 @@ async def example_3_cancel_pipeline_run(run_id: str):
                 resource_group_name=RESOURCE_GROUP,
                 data_factory_name=DATA_FACTORY_NAME,
                 pipeline_run_name=run_id,
-                x_ms_api_version=API_VERSION
             )
 
             print(f"Pipeline run {run_id} cancellation requested")

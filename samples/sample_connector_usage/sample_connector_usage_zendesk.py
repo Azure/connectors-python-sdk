@@ -69,7 +69,7 @@ async def example_2_get_items():
         try:
             result = await client.get_items_async(
                 table="tickets",
-                top="10",
+                top=10,
             )
 
             items = (result or {}).get("value", []) if isinstance(result, dict) else []

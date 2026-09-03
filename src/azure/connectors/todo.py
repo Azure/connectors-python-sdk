@@ -775,7 +775,7 @@ class TodoClient(ConnectorClientBase):
     async def list_to_dos_by_folder_async(
         self,
         folder_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List to-dos by folder

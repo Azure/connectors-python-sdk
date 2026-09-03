@@ -593,9 +593,9 @@ class DynamicsaxClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/procedures"
-            f"/{str(procedure)}"
+            f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -622,10 +622,10 @@ class DynamicsaxClient(ConnectorClientBase):
         apply: Optional[str] = None,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        top: Optional[str] = None,
-        skip: Optional[str] = None,
+        top: Optional[int] = None,
+        skip: Optional[int] = None,
         select: Optional[str] = None,
-        cross_company: Optional[str] = None,
+        cross_company: Optional[bool] = None,
     ) -> dict[str, Any] | None:
         """
         Lists items present in table
@@ -635,9 +635,9 @@ class DynamicsaxClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
         query_params = []
@@ -710,9 +710,9 @@ class DynamicsaxClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
         )
 
@@ -747,11 +747,11 @@ class DynamicsaxClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -785,11 +785,11 @@ class DynamicsaxClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -819,11 +819,11 @@ class DynamicsaxClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/items"
-            f"/{str(id)}"
+            f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -854,7 +854,7 @@ class DynamicsaxClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/tables"
+            f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/tables"
         )
 
         response = await self.http_client.send_async(
@@ -912,7 +912,9 @@ class DynamicsaxClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/businesseventcategories"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/businesseventcategories"
         )
 
         response = await self.http_client.send_async(
@@ -945,9 +947,9 @@ class DynamicsaxClient(ConnectorClientBase):
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/businesseventcategories"
-            f"/{str(businesseventcategory)}"
+            f"/{quote(quote(str(businesseventcategory), safe=''), safe='')}"
             f"/businessevents"
         )
 
@@ -981,7 +983,9 @@ class DynamicsaxClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/legalentities"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/legalentities"
         )
         query_params = []
         value = str(businesseventcategory)
@@ -1023,7 +1027,9 @@ class DynamicsaxClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/datasets/{quote(str(dataset), safe='')}/procedures"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/procedures"
         )
 
         response = await self.http_client.send_async(
@@ -1057,9 +1063,9 @@ class DynamicsaxClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/$metadata.json"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/procedures"
-            f"/{str(procedure)}"
+            f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(
@@ -1093,9 +1099,9 @@ class DynamicsaxClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/$metadata.json"
             f"/datasets"
-            f"/{quote(str(dataset), safe='')}"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
-            f"/{str(table)}"
+            f"/{quote(quote(str(table), safe=''), safe='')}"
         )
 
         response = await self.http_client.send_async(

@@ -46,8 +46,8 @@ async def example_1_get_contacts():
     async with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             result = await client.contacts_get_async(
-                record_per_page="10",
-                page_no="1",
+                record_per_page=10,
+                page_no=1,
             )
 
             print(f"Contacts result: {result}")
@@ -70,8 +70,8 @@ async def example_2_add_check_box_field():
 
             result = await client.checkbox_add_check_box_async(
                 input=request,
-                package_id="<package-id>",
-                document_id="<document-id>",
+                package_id=12345,
+                document_id=67890,
             )
 
             print(f"Add checkbox result: {result}")
@@ -91,9 +91,9 @@ async def example_3_delete_attachment():
     async with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             await client.attachment_delete_attachment_async(
-                package_id="<package-id>",
-                document_id="<document-id>",
-                attachment_id="<attachment-id>",
+                package_id=12345,
+                document_id=67890,
+                attachment_id=13579,
             )
 
             print("Attachment deleted successfully")

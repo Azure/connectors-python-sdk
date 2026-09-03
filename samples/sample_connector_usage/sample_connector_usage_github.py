@@ -52,7 +52,7 @@ async def example_2_list_issues(repository_owner: str, repository_name: str) -> 
             repository_owner=repository_owner,
             repository_name=repository_name,
             state="open",
-            per_page="5",
+            per_page=5,
         )
 
         issue_list = issues if isinstance(issues, list) else []

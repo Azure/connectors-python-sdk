@@ -645,7 +645,7 @@ class StarmindClient(ConnectorClientBase):
     async def find_questions_async(
         self,
         query: Optional[str] = None,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
         filter: Optional[str] = None,
         sort: Optional[str] = None,
     ) -> dict[str, Any] | None:
@@ -766,7 +766,7 @@ class StarmindClient(ConnectorClientBase):
 
     async def publish_question_draft_async(
         self,
-        question_id: str,
+        question_id: int,
     ) -> dict[str, Any] | None:
         """
         Publish a question

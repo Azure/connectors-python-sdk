@@ -46,7 +46,7 @@ async def example_1_get_file_cabinets():
     async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             result = await client.get_file_cabinets_async(
-                file_cabinet_type=None,
+                file_cabinet_type="<file-cabinet-type>",
             )
 
             print(f"File cabinets result: {result}")
@@ -70,7 +70,7 @@ async def example_2_search_documents():
             result = await client.search_for_documents_in_file_cabinet_async(
                 input=request,
                 file_cabinet="<file-cabinet-id>",
-                search_dialog_id=None,
+                search_dialog_id="<search-dialog-id>",
             )
 
             print(f"Search result: {result}")

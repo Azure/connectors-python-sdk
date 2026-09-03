@@ -22,50 +22,127 @@ from azure.connectors.sdk import (
 
 @dataclass
 class Item:
-    """Response for Delete message (v2)"""
+    """
+    Response for Delete message
+    """
 
-    item_internal_id: Optional[str] = None
-    message_data: Optional[str] = None
-    message_id: Optional[str] = None
-    correlation_id: Optional[str] = None
-    put_date_time: Optional[str] = None
-    user_identifier: Optional[str] = None
-    put_application_name: Optional[str] = None
-    put_application_type: Optional[str] = None
-    format: Optional[str] = None
-    accounting_token: Optional[str] = None
-    ccsid: Optional[int] = None
-    group_id: Optional[str] = None
-    logical_sequence_number: Optional[int] = None
-    message_type: Optional[str] = None
-    offset: Optional[int] = None
-    original_length: Optional[int] = None
-    persistence: Optional[str] = None
-    priority: Optional[int] = None
-    reply_to_queue: Optional[str] = None
-    reply_to_queue_manager: Optional[str] = None
+    item_internal_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ItemInternalId"},
+    )
+    message_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageData"},
+    )
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationId"},
+    )
+    put_date_time: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PutDateTime"},
+    )
+    user_identifier: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "UserIdentifier"},
+    )
+    put_application_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PutApplicationName"},
+    )
+    put_application_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "PutApplicationType"},
+    )
+    format: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Format"},
+    )
+    accounting_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "AccountingToken"},
+    )
+    ccsid: Optional[int] = field(default=None, metadata={"wire_name": "Ccsid"})
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "GroupId"},
+    )
+    logical_sequence_number: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "LogicalSequenceNumber"},
+    )
+    message_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageType"},
+    )
+    offset: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Offset"},
+    )
+    original_length: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "OriginalLength"},
+    )
+    persistence: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Persistence"},
+    )
+    priority: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "Priority"},
+    )
+    reply_to_queue: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyToQueue"},
+    )
+    reply_to_queue_manager: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyToQueueManager"},
+    )
 
 
 @dataclass
 class ItemsList:
-    """Response for Delete messages (v2)"""
+    """
+    Response for Delete messages
+    """
 
     value: Optional[List[Item]] = None
 
 
 @dataclass
 class SendResponse:
-    """Response for Send message (v2)"""
+    """
+    Response for Send message
+    """
 
-    item_internal_id: Optional[str] = None
-    message_data: Optional[str] = None
-    message_id: Optional[str] = None
-    correlation_id: Optional[str] = None
+    item_internal_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ItemInternalId"},
+    )
+    message_data: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageData"},
+    )
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationId"},
+    )
 
 
 @dataclass
 class ProcedureMetadata:
-    """Definition: ProcedureMetadata"""
+    """
+    Definition: ProcedureMetadata
+    """
 
     name: Optional[str] = None
     title: Optional[str] = None
@@ -74,7 +151,9 @@ class ProcedureMetadata:
 
 @dataclass
 class ObjectEntity:
-    """Definition: Object"""
+    """
+    Definition: Object
+    """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
     """
@@ -85,31 +164,57 @@ class ObjectEntity:
 
 @dataclass
 class SingleGetValidOptions:
-    """Definition: SingleGetValidOptions"""
+    """
+    Definition: SingleGetValidOptions
+    """
 
-    queue: Optional[str] = None
+    queue: Optional[str] = field(default=None, metadata={"wire_name": "Queue"})
     """When specified, overrides the queue defined in the connection."""
-    message_id: Optional[str] = None
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    correlation_id: Optional[str] = None
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    group_id: Optional[str] = None
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "GroupId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    message_token: Optional[str] = None
+    message_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageToken"},
+    )
     """Base64 string that represents a byte array with 16 bytes."""
-    offset: Optional[float] = None
+    offset: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "Offset"},
+    )
     """
     Offset in bytes of the data in the physical message from the start of the
     logical message.
     """
-    logical_sequence_number: Optional[float] = None
+    logical_sequence_number: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "LogicalSequenceNumber"},
+    )
     """Sequence number of a logical message within a group."""
-    include_info: Optional[str] = None
+    include_info: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "IncludeInfo"},
+    )
     """
     Indicates if additional message info should be included. Expects true or
     false.
     """
-    timeout: Optional[str] = None
+    timeout: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Timeout"},
+    )
     """
     Wait time for a message to appear in the queue, expects an XML duration or
     hh:mm:ss.
@@ -118,71 +223,131 @@ class SingleGetValidOptions:
 
 @dataclass
 class MultipleGetValidOptions:
-    """Definition: MultipleGetValidOptions"""
+    """
+    Definition: MultipleGetValidOptions
+    """
 
-    queue: Optional[str] = None
+    queue: Optional[str] = field(default=None, metadata={"wire_name": "Queue"})
     """When specified, overrides the queue defined in the connection."""
-    message_id: Optional[str] = None
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    correlation_id: Optional[str] = None
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    group_id: Optional[str] = None
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "GroupId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    message_token: Optional[str] = None
+    message_token: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageToken"},
+    )
     """Base64 string that represents a byte array with 16 bytes."""
-    offset: Optional[float] = None
+    offset: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "Offset"},
+    )
     """
     Offset in bytes of the data in the physical message from the start of the
     logical message.
     """
-    logical_sequence_number: Optional[float] = None
+    logical_sequence_number: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "LogicalSequenceNumber"},
+    )
     """Sequence number of a logical message within a group."""
-    include_info: Optional[str] = None
+    include_info: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "IncludeInfo"},
+    )
     """
     Indicates if additional message info should be included. Expects true or
     false.
     """
-    timeout: Optional[str] = None
+    timeout: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Timeout"},
+    )
     """
     Wait time for a message to appear in the queue, expects an XML duration or
     hh:mm:ss.
     """
-    batch_size: Optional[float] = None
+    batch_size: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "BatchSize"},
+    )
     """Maximum number of messages to be retrieved from the queue."""
 
 
 @dataclass
 class SendValidDataOptions:
-    """Definition: SendValidDataOptions"""
+    """
+    Definition: SendValidDataOptions
+    """
 
-    queue: Optional[str] = None
+    queue: Optional[str] = field(default=None, metadata={"wire_name": "Queue"})
     """When specified, overrides the queue defined in the connection."""
-    message: Optional[str] = None
+    message: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Message"},
+    )
     """Message data"""
-    message_type: Optional[str] = None
+    message_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageType"},
+    )
     """Message type"""
-    correlation_id: Optional[str] = None
+    correlation_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "CorrelationId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    message_id: Optional[str] = None
+    message_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "MessageId"},
+    )
     """Base64 string that represents a byte array with 24 bytes."""
-    reply_to_queue: Optional[str] = None
+    reply_to_queue: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyToQueue"},
+    )
     """Reply-to queue"""
-    reply_to_queue_manager: Optional[str] = None
+    reply_to_queue_manager: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "ReplyToQueueManager"},
+    )
     """Reply-to queue manager"""
-    code_char_set_id: Optional[float] = None
+    code_char_set_id: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "CodeCharSetId"},
+    )
     """Character set for the message."""
-    offset: Optional[float] = None
+    offset: Optional[float] = field(
+        default=None,
+        metadata={"wire_name": "Offset"},
+    )
     """
     Offset in bytes of the data in the physical message from the start of the
     logical message.
     """
-    format: Optional[str] = None
+    format: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "Format"},
+    )
     """Format field for the message."""
 
 
 @dataclass
 class SendValidDataOptionsArray:
-    """Definition: SendValidDataOptionsArray"""
+    """
+    Definition: SendValidDataOptionsArray
+    """
 
     messages: Optional[List[SendValidDataOptions]] = None
 
@@ -224,20 +389,22 @@ class MqClient(ConnectorClientBase):
     async def delete_async(
         self,
         input: SingleGetValidOptions,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Delete message (v2)
+        Delete message
 
         Deletes one message from the queue, by doing a destructive get.
         """
-        path = f"{self._connection_runtime_url}/v2/delete"
+        request_url = f"{self._connection_runtime_url}/v2/delete"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -250,20 +417,22 @@ class MqClient(ConnectorClientBase):
     async def delete_all_async(
         self,
         input: MultipleGetValidOptions,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Delete messages (v2)
+        Delete messages
 
         Deletes messages from the queue, by doing a destructive get.
         """
-        path = f"{self._connection_runtime_url}/v2/deleteall"
+        request_url = f"{self._connection_runtime_url}/v2/deleteall"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -276,20 +445,22 @@ class MqClient(ConnectorClientBase):
     async def read_async(
         self,
         input: SingleGetValidOptions,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Browse message (v2)
+        Browse message
 
         Browse one message from the queue.
         """
-        path = f"{self._connection_runtime_url}/v2/read"
+        request_url = f"{self._connection_runtime_url}/v2/read"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -302,20 +473,22 @@ class MqClient(ConnectorClientBase):
     async def read_all_async(
         self,
         input: MultipleGetValidOptions,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Browse messages (v2)
+        Browse messages
 
         Browse messages in a queue.
         """
-        path = f"{self._connection_runtime_url}/v2/readall"
+        request_url = f"{self._connection_runtime_url}/v2/readall"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -328,20 +501,22 @@ class MqClient(ConnectorClientBase):
     async def receive_async(
         self,
         input: SingleGetValidOptions,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Receive message (v2)
+        Receive message
 
         Returns one message from the queue, by doing a destructive get.
         """
-        path = f"{self._connection_runtime_url}/v2/receive"
+        request_url = f"{self._connection_runtime_url}/v2/receive"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -354,20 +529,22 @@ class MqClient(ConnectorClientBase):
     async def receive_all_async(
         self,
         input: MultipleGetValidOptions,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Receive messages (v2)
+        Receive messages
 
         Returns messages from the queue, by doing a destructive get.
         """
-        path = f"{self._connection_runtime_url}/v2/receiveall"
+        request_url = f"{self._connection_runtime_url}/v2/receiveall"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )
@@ -380,20 +557,22 @@ class MqClient(ConnectorClientBase):
     async def send_async(
         self,
         input: SendValidDataOptions,
-    ):
+    ) -> dict[str, Any] | None:
         """
-        Send message (v2)
+        Send message
 
         Send a message to a queue.
         """
-        path = f"{self._connection_runtime_url}/v2/send"
+        request_url = f"{self._connection_runtime_url}/v2/send"
 
-        response = await self.http_client.send_async("POST", path, body=input)
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "POST",
-                path,
+                request_url,
                 response.status,
                 response.text,
             )

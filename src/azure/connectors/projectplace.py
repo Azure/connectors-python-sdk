@@ -239,7 +239,7 @@ class ProjectplaceClient(ConnectorClientBase):
     async def create_card_async(
         self,
         input: CreateCardInput,
-        board_id: str,
+        board_id: int,
     ) -> dict[str, Any] | None:
         """
         Create Card
@@ -274,7 +274,7 @@ class ProjectplaceClient(ConnectorClientBase):
     async def move_card_async(
         self,
         input: MoveCardInput,
-        board_id: str,
+        board_id: int,
     ) -> dict[str, Any] | None:
         """
         Move card to another column

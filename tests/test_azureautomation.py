@@ -6,6 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from azure.connectors.azureautomation import (
     AzureautomationClient,
+    CreateJobInput,
     CreateJobResponse,
     AutomationAccountResponse,
     SubscriptionListResult,
@@ -466,6 +467,7 @@ class TestCreateJobAsync:
             return_value=mock_response
         ) as mock_send:
             result = await client.create_job_async(
+                input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation"
@@ -503,6 +505,7 @@ class TestCreateJobAsync:
             return_value=mock_response
         ) as mock_send:
             result = await client.create_job_async(
+                input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation",
@@ -532,6 +535,7 @@ class TestCreateJobAsync:
             return_value=mock_response
         ):
             result = await client.create_job_async(
+                input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation"
@@ -560,6 +564,7 @@ class TestCreateJobAsync:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.create_job_async(
+                    input=CreateJobInput(),
                     subscription_id="sub123",
                     resource_group_name="rg-test",
                     automation_account="myAutomation"
@@ -599,6 +604,7 @@ class TestCreateJobAsync:
         ) as mock_send:
             # Call without wait parameter
             await client.create_job_async(
+                input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation"
@@ -610,6 +616,7 @@ class TestCreateJobAsync:
 
             # Call with wait parameter
             await client.create_job_async(
+                input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation",

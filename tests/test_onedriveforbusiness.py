@@ -9,13 +9,11 @@ import pytest
 from azure.connectors.onedriveforbusiness import (
     BlobMetadata,
     BlobMetadataPage,
-    CreateFileInput,
     ForASelectedFileResponse,
     OnedriveforbusinessClient,
     SharingLink,
     Tags,
     Thumbnail,
-    UpdateFileInput,
 )
 from azure.connectors.sdk import (
     ConnectorClientOptions,
@@ -27,7 +25,7 @@ from tests.conftest import MockResponse
 
 METHOD_ARGUMENTS: list[tuple[str, dict]] = [
     ("get_file_metadata_async", {"id": "file123"}),
-    ("update_file_async", {"id": "file123", "input": UpdateFileInput()}),
+    ("update_file_async", {"id": "file123", "input": b"updated content"}),
     ("delete_file_async", {"id": "file123"}),
     ("get_file_metadata_by_path_async", {"path": "/Documents/file.txt"}),
     ("get_file_content_by_path_async", {"path": "/Documents/file.txt"}),
@@ -35,7 +33,7 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
     (
         "create_file_async",
         {
-            "input": CreateFileInput(),
+            "input": b"file content",
             "folder_path": "/Documents",
             "name": "new.txt",
         },
@@ -86,10 +84,6 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
         {"source": "/Documents/archive.zip", "destination": "/Documents/extracted"},
     ),
     ("list_folder_async", {"id": "folder123"}),
-    ("on_new_file_async", {"folder_id": "folder123"}),
-    ("on_new_files_async", {"folder_id": "folder123"}),
-    ("on_updated_file_async", {"folder_id": "folder123"}),
-    ("on_updated_files_async", {"folder_id": "folder123"}),
 ]
 
 
@@ -209,28 +203,6 @@ class TestOnedriveforbusinessClientMethods:
             result = await client.get_file_content_async(id="file123")
 
             assert result == content
-
-    @pytest.mark.asyncio
-    async def test_on_updated_file_has_internal_default_query_params(self, mock_token_provider):
-        """Test generated internal default query parameters are present."""
-        client = OnedriveforbusinessClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-        )
-        mock_response = MockResponse(status=200, content=b"trigger-payload")
-
-        with patch.object(
-            client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ) as mock_send:
-            await client.on_updated_file_async(folder_id="folder123")
-
-            url = mock_send.call_args[0][1]
-            assert "includeFileContent=true" in url
-            assert "simulate=false" in url
-            assert "folderId=folder123" in url
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

@@ -889,10 +889,10 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_messages_by_contact_phone_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
         phone_number: str,
-        page: str,
-        page_size: str,
+        page: int,
+        page_size: int,
     ) -> dict[str, Any] | None:
         """
         Get a conversation's messages by a contact's phone number
@@ -939,7 +939,7 @@ class TextrequestClient(ConnectorClientBase):
     async def send_message_by_phone_number_async(
         self,
         input: SendMessageByPhoneNumberInput,
-        dashboard_id: str,
+        dashboard_id: int,
         phone_number: str,
     ) -> dict[str, Any] | None:
         """
@@ -976,7 +976,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def archive_conversation_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
         phone_number: str,
     ) -> dict[str, Any] | None:
         """
@@ -1020,7 +1020,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def unarchive_conversation_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
         phone_number: str,
     ) -> dict[str, Any] | None:
         """
@@ -1060,7 +1060,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_contact_by_phone_number_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
         phone_number: str,
     ) -> dict[str, Any] | None:
         """
@@ -1095,7 +1095,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def delete_contact_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
         phone_number: str,
     ) -> dict[str, Any] | None:
         """
@@ -1131,7 +1131,7 @@ class TextrequestClient(ConnectorClientBase):
     async def create_contact_async(
         self,
         input: CreateContactInput,
-        dashboard_id: str,
+        dashboard_id: int,
         phone_number: str,
     ) -> dict[str, Any] | None:
         """
@@ -1167,19 +1167,19 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_contacts_async(
         self,
-        dashboard_id: str,
-        page: str,
-        page_size: str,
+        dashboard_id: int,
+        page: int,
+        page_size: int,
         contact_phone_number: Optional[str] = None,
         last_message_timestamp_before_utc: Optional[str] = None,
         last_message_timestamp_after_utc: Optional[str] = None,
         contact_created_before: Optional[str] = None,
         contact_created_after: Optional[str] = None,
-        is_resolved: Optional[str] = None,
-        is_blocked: Optional[str] = None,
-        is_archived: Optional[str] = None,
-        is_suppressed: Optional[str] = None,
-        has_opted_out: Optional[str] = None,
+        is_resolved: Optional[bool] = None,
+        is_blocked: Optional[bool] = None,
+        is_archived: Optional[bool] = None,
+        is_suppressed: Optional[bool] = None,
+        has_opted_out: Optional[bool] = None,
         last_message_sent_before: Optional[str] = None,
         last_message_sent_after: Optional[str] = None,
         last_message_received_before: Optional[str] = None,
@@ -1346,7 +1346,7 @@ class TextrequestClient(ConnectorClientBase):
     async def bulk_update_contacts_async(
         self,
         input: BulkUpdateContactsInput,
-        dashboard_id: str,
+        dashboard_id: int,
     ) -> dict[str, Any] | None:
         """
         Bulk update contacts
@@ -1379,8 +1379,8 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_group_by_id_async(
         self,
-        dashboard_id: str,
-        group_id: str,
+        dashboard_id: int,
+        group_id: int,
     ) -> dict[str, Any] | None:
         """
         Get a group by its id
@@ -1414,8 +1414,8 @@ class TextrequestClient(ConnectorClientBase):
 
     async def delete_group_async(
         self,
-        dashboard_id: str,
-        group_id: str,
+        dashboard_id: int,
+        group_id: int,
     ) -> dict[str, Any] | None:
         """
         Deletes the group with the specified id
@@ -1452,8 +1452,8 @@ class TextrequestClient(ConnectorClientBase):
     async def update_group_async(
         self,
         input: UpdateGroupInput,
-        dashboard_id: str,
-        group_id: str,
+        dashboard_id: int,
+        group_id: int,
     ) -> dict[str, Any] | None:
         """
         Updates a group with the given id
@@ -1488,9 +1488,9 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_groups_async(
         self,
-        dashboard_id: str,
-        page: str,
-        page_size: str,
+        dashboard_id: int,
+        page: int,
+        page_size: int,
     ) -> dict[str, Any] | None:
         """
         Gets all groups
@@ -1533,7 +1533,7 @@ class TextrequestClient(ConnectorClientBase):
     async def create_group_async(
         self,
         input: CreateGroupInput,
-        dashboard_id: str,
+        dashboard_id: int,
     ) -> dict[str, Any] | None:
         """
         Creates a new group
@@ -1564,9 +1564,9 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_tags_async(
         self,
-        dashboard_id: str,
-        page: str,
-        page_size: str,
+        dashboard_id: int,
+        page: int,
+        page_size: int,
     ) -> dict[str, Any] | None:
         """
         Gets all tags
@@ -1609,7 +1609,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_custom_fields_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
     ) -> dict[str, Any] | None:
         """
         Gets all custom fields
@@ -1641,8 +1641,8 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_payment_async(
         self,
-        dashboard_id: str,
-        payment_id: str,
+        dashboard_id: int,
+        payment_id: int,
     ) -> dict[str, Any] | None:
         """
         Gets the payment with the specified id
@@ -1676,8 +1676,8 @@ class TextrequestClient(ConnectorClientBase):
 
     async def mark_payment_paid_async(
         self,
-        dashboard_id: str,
-        payment_id: str,
+        dashboard_id: int,
+        payment_id: int,
     ) -> dict[str, Any] | None:
         """
         Mark a payment as paid
@@ -1717,8 +1717,8 @@ class TextrequestClient(ConnectorClientBase):
 
     async def send_payment_reminder_async(
         self,
-        dashboard_id: str,
-        payment_id: str,
+        dashboard_id: int,
+        payment_id: int,
     ) -> dict[str, Any] | None:
         """
         Send a follow-up text reminding the user to pay the specified payment
@@ -1755,8 +1755,8 @@ class TextrequestClient(ConnectorClientBase):
 
     async def cancel_payment_async(
         self,
-        dashboard_id: str,
-        payment_id: str,
+        dashboard_id: int,
+        payment_id: int,
     ) -> dict[str, Any] | None:
         """
         Cancels the specified payment
@@ -1793,9 +1793,9 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_payments_async(
         self,
-        dashboard_id: str,
-        page: str,
-        page_size: str,
+        dashboard_id: int,
+        page: int,
+        page_size: int,
         reference_number: Optional[str] = None,
         phone_number: Optional[str] = None,
         sort_type: Optional[str] = None,
@@ -1863,7 +1863,7 @@ class TextrequestClient(ConnectorClientBase):
     async def create_payment_async(
         self,
         input: CreatePaymentInput,
-        dashboard_id: str,
+        dashboard_id: int,
     ) -> dict[str, Any] | None:
         """
         Creates a new payment
@@ -1895,7 +1895,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_dashboard_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
     ) -> dict[str, Any] | None:
         """
         Get info on this specific dashboard
@@ -1926,7 +1926,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def delete_dashboard_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
     ) -> dict[str, Any] | None:
         """
         Deletes the specified dashboard
@@ -1958,7 +1958,7 @@ class TextrequestClient(ConnectorClientBase):
     async def update_dashboards_name_async(
         self,
         input: UpdateDashboardsNameInput,
-        dashboard_id: str,
+        dashboard_id: int,
     ) -> dict[str, Any] | None:
         """
         Update a specific dashboard's name
@@ -1992,13 +1992,13 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_conversations_async(
         self,
-        dashboard_id: str,
+        dashboard_id: int,
         tags: Optional[str] = None,
         show_unresolved_only: Optional[str] = None,
         include_archived: Optional[str] = None,
         search: Optional[str] = None,
-        page: Optional[str] = None,
-        page_size: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Gets all conversations for this dashboard
@@ -2063,8 +2063,8 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_dashboards_async(
         self,
-        page: Optional[str] = None,
-        page_size: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get all dashboards in an account

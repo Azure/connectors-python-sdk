@@ -1806,7 +1806,7 @@ class InsightlyClient(ConnectorClientBase):
 
     async def delete_task_async(
         self,
-        task_id: str,
+        task_id: int,
     ) -> dict[str, Any] | None:
         """
         Delete task
@@ -1837,7 +1837,7 @@ class InsightlyClient(ConnectorClientBase):
 
     async def follow_task_async(
         self,
-        task_id: str,
+        task_id: int,
     ) -> dict[str, Any] | None:
         """
         Follow a task
@@ -1868,7 +1868,7 @@ class InsightlyClient(ConnectorClientBase):
 
     async def delete_project_async(
         self,
-        project_id: str,
+        project_id: int,
     ) -> dict[str, Any] | None:
         """
         Delete project
@@ -1899,7 +1899,7 @@ class InsightlyClient(ConnectorClientBase):
 
     async def delete_lead_async(
         self,
-        lead_id: str,
+        lead_id: int,
     ) -> dict[str, Any] | None:
         """
         Delete lead
@@ -1930,7 +1930,7 @@ class InsightlyClient(ConnectorClientBase):
 
     async def delete_contact_async(
         self,
-        contact_id: str,
+        contact_id: int,
     ) -> dict[str, Any] | None:
         """
         Delete contact

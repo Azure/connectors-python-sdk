@@ -106,9 +106,9 @@ async def example_3_create_event():
             print(f"Connector error: {ex}")
 
 
-async def example_4_trigger_poll_examples():
-    """Example 4: Poll trigger endpoints for calendar event changes."""
-    print("\n=== Example 4: Trigger Poll Calls ===")
+async def example_4_list_events_for_polling():
+    """Example 4: List events in a time window for polling logic."""
+    print("\n=== Example 4: List Events for Polling ===")
 
     calendar_id = os.environ.get("GOOGLECALENDAR_TEST_CALENDAR_ID", "")
     if not calendar_id:
@@ -119,16 +119,14 @@ async def example_4_trigger_poll_examples():
 
     async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            changed = await client.on_changed_event_in_calendar_async(
+            result = await client.list_events_async(
                 calendar_id=calendar_id,
-                single_events="true",
+                time_min="2026-07-09T00:00:00Z",
+                time_max="2026-07-10T00:00:00Z",
             )
-            started = await client.on_event_started_async(calendar_id=calendar_id)
-
-            changed_items = len(changed.get("items", [])) if changed else 0
-            started_items = len(started.get("items", [])) if started else 0
-            print(f"Changed trigger returned {changed_items} event(s).")
-            print(f"Started trigger returned {started_items} event(s).")
+            events = result.get("items", []) if result else []
+            print(f"Time-window query returned {len(events)} event(s).")
+            print("Persist event IDs and update times to implement change polling.")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
@@ -145,7 +143,7 @@ async def main():
     await example_1_list_calendars()
     await example_2_list_events()
     await example_3_create_event()
-    await example_4_trigger_poll_examples()
+    await example_4_list_events_for_polling()
 
     print("\n=== Google Calendar sample completed ===")
 

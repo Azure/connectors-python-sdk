@@ -52,7 +52,7 @@ async def example_2_get_lists() -> None:
 
     credential = DefaultAzureCredential()
     async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        lists = await client.get_lists_async(count="10", offset="0")
+        lists = await client.get_lists_async(count=10, offset=0)
         print(f"Lists: {lists}")
 
 

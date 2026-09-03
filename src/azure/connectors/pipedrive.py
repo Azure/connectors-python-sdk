@@ -448,7 +448,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def get_deal_async(
         self,
-        deal_id: str,
+        deal_id: int,
     ) -> dict[str, Any] | None:
         """
         Get deal by id
@@ -480,7 +480,7 @@ class PipedriveClient(ConnectorClientBase):
     async def update_deal_status_async(
         self,
         input: UpdateDealStatusRequest,
-        deal_id: str,
+        deal_id: int,
     ) -> dict[str, Any] | None:
         """
         Update deal status
@@ -541,7 +541,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def get_stage_async(
         self,
-        stage_id: str,
+        stage_id: int,
     ) -> dict[str, Any] | None:
         """
         Get stage by id
@@ -601,7 +601,7 @@ class PipedriveClient(ConnectorClientBase):
     async def update_deal_stage_async(
         self,
         input: UpdateDealStageRequest,
-        deal_id: str,
+        deal_id: int,
     ) -> dict[str, Any] | None:
         """
         Update deal stage

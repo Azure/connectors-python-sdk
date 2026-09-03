@@ -529,7 +529,7 @@ class DocuwareClient(ConnectorClientBase):
     async def get_document_information_async(
         self,
         file_cabinet_id: str,
-        document_id: str,
+        document_id: int,
     ) -> dict[str, Any] | None:
         """
         Get document information
@@ -564,7 +564,7 @@ class DocuwareClient(ConnectorClientBase):
     async def delete_document_async(
         self,
         file_cabinet_id: str,
-        document_id: str,
+        document_id: int,
     ) -> None:
         """
         Delete a document
@@ -594,7 +594,7 @@ class DocuwareClient(ConnectorClientBase):
     async def download_file_async(
         self,
         file_cabinet_id: str,
-        document_id: str,
+        document_id: int,
         file_number: str,
         document_format: str,
     ) -> bytes:
@@ -639,7 +639,7 @@ class DocuwareClient(ConnectorClientBase):
     async def download_document_async(
         self,
         file_cabinet_id: str,
-        document_id: str,
+        document_id: int,
         document_format: str,
     ) -> bytes:
         """
@@ -681,7 +681,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         input: UpdateIndexFieldsInput,
         file_cabinet_id: str,
-        document_id: str,
+        document_id: int,
     ) -> dict[str, Any] | None:
         """
         Update index fields
@@ -763,7 +763,7 @@ class DocuwareClient(ConnectorClientBase):
         self,
         input: PlaceAStampInput,
         file_cabinet_id: str,
-        document_id: str,
+        document_id: int,
     ) -> dict[str, Any] | None:
         """
         Place a stamp

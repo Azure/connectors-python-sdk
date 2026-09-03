@@ -180,8 +180,8 @@ async def example_5_convert_with_sensitivity_labels():
                 source=SOURCE,
                 drive=DRIVE,
                 file=FILE,
-                extract_sensitivity_label="true",
-                fetch_sensitivity_label_metadata="true"
+                extract_sensitivity_label=True,
+                fetch_sensitivity_label_metadata=True
             )
 
             print(f"PDF generated with sensitivity labels, size: {len(result)} bytes")

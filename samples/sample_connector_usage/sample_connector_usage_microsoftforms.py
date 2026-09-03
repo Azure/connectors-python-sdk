@@ -13,7 +13,9 @@ Installation:
 
 Usage:
     Set environment variable:
-    $env:MICROSOFTFORMS_CONNECTION_URL = "https://[region].azure-apihub.net/apim/microsoftforms/[connection-id]"
+    $env:MICROSOFTFORMS_CONNECTION_URL = (
+        "https://[region].azure-apihub.net/apim/microsoftforms/[connection-id]"
+    )
 
     python sample_connector_usage_microsoftforms.py
 """

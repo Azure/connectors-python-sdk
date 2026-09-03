@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Regenerated all 98 supported connector clients from the current CodefulSdkGenerator and managed connector contracts; 62 clients contain public contract changes.
+- Corrected generated parameter types across connector operations, including pagination values, numeric identifiers, and Boolean options. Callers must now pass the annotated `int` and `bool` values instead of string representations.
+- Added current discovery and schema operations for Azure Automation, Azure Blob Storage, Azure Data Factory, Azure VM, Excel Online (Business), Microsoft Teams, and Microsoft Defender for Endpoint.
+
+### Changed
+
+- Updated all connector samples to match generated method signatures and added literal-type validation to the sample contract checks.
+- Added focused success, route, request-body, response, and error coverage for newly generated operations.
+- Clarified that Azure Functions SDK-type deserialization is owned by the Azure Functions connector extension rather than generated connector clients.
+
 ## [0.5.0b1] - 2026-08-31
 
 ### Breaking Changes

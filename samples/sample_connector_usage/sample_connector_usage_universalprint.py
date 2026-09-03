@@ -72,7 +72,7 @@ async def example_2_print_file():
                 input=pdf_file_path.read_bytes(),
                 printer="your-printer-share-id",
                 file_name=pdf_file_path.name,
-                configuration_copies="1",
+                configuration_copies=1,
                 configuration_color_mode="color",
                 configuration_orientation="portrait",
             )

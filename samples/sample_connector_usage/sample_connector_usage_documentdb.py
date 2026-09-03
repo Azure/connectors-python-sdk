@@ -146,7 +146,7 @@ async def example_3_query_with_pagination():
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT c.id, c.type FROM c",
-                max_item_count="2"
+                max_item_count=2
             )
 
             if result:

@@ -519,7 +519,7 @@ class RevaiClient(ConnectorClientBase):
 
     async def transcriptions_get_async(
         self,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
         starting_after: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -681,7 +681,7 @@ class RevaiClient(ConnectorClientBase):
 
     async def vocabularies_get_async(
         self,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         Get list of vocabularies
@@ -813,7 +813,7 @@ class RevaiClient(ConnectorClientBase):
 
     async def extractions_get_async(
         self,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
         starting_after: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -952,7 +952,7 @@ class RevaiClient(ConnectorClientBase):
     async def extraction_result_get_async(
         self,
         id: str,
-        threshold: Optional[str] = None,
+        threshold: Optional[float] = None,
     ) -> dict[str, Any] | None:
         """
         Get topic extraction result
@@ -991,7 +991,7 @@ class RevaiClient(ConnectorClientBase):
 
     async def analysises_get_async(
         self,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
         starting_after: Optional[str] = None,
     ) -> None:
         """
@@ -1164,7 +1164,7 @@ class RevaiClient(ConnectorClientBase):
 
     async def identifications_get_async(
         self,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
         starting_after: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -1330,7 +1330,7 @@ class RevaiClient(ConnectorClientBase):
 
     async def alignments_get_async(
         self,
-        limit: Optional[str] = None,
+        limit: Optional[int] = None,
         starting_after: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """

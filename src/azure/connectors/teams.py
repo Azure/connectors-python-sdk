@@ -302,6 +302,32 @@ class UpdateChannelPropertiesInput:
 
 
 @dataclass
+class ArchiveChannelInput:
+    """
+    Archive a channel
+    """
+
+    should_set_spo_site_read_only_for_members: Optional[bool] = field(
+        default=None,
+        metadata={"wire_name": "shouldSetSpoSiteReadOnlyForMembers"},
+    )
+    """
+    If true, sets permissions for channel members to read-only on the
+    SharePoint Online site associated with the team.
+    """
+
+
+@dataclass
+class AsyncOperationResponse:
+    """
+    Response for Archive a channel
+    """
+
+    status: Optional[str] = None
+    """The status of the asynchronous operation"""
+
+
+@dataclass
 class GetAllChannelsForTeamResponse:
     """
     Response for List all channels
@@ -1331,7 +1357,7 @@ GetFlowContinuationSubscriptionWithPosterOutputMetadataInput = str
 @dataclass
 class ObjectEntity:
     """
-    Definition: Object
+    Response for Get subscription scope input schema
     """
 
     additional_properties: Dict[str, Any] = field(default_factory=dict)
@@ -3066,6 +3092,148 @@ class DynamicRecordingTriggerRequest:
     scope: Optional[Dict[str, Any]] = None
 
 
+@dataclass
+class SingleTagTriggerRequest:
+    """
+    Definition: SingleTagTriggerRequest
+    """
+
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
+    """Webhook callback URL"""
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "groupId"},
+    )
+    """The team that owns the tag to monitor"""
+    tag_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tagId"},
+    )
+    """The specific tag to monitor"""
+
+
+@dataclass
+class SingleTagMemberTriggerRequest:
+    """
+    Definition: SingleTagMemberTriggerRequest
+    """
+
+    notification_url: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "notificationUrl"},
+    )
+    """Webhook callback URL"""
+    group_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "groupId"},
+    )
+    """The team that owns the tag whose membership to monitor"""
+    tag_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tagId"},
+    )
+    """The specific tag whose membership to monitor"""
+
+
+@dataclass
+class TagWebhookResponseSchema:
+    """
+    Definition: TagWebhookResponseSchema
+    """
+
+    change_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeType"},
+    )
+    """The tag lifecycle change: 'created', 'updated', or 'deleted'."""
+    id: Optional[str] = None
+    """The tag identifier."""
+    team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "teamId"},
+    )
+    """The team (group) ID that owns the tag."""
+    tag_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tagId"},
+    )
+    """The tag ID."""
+    display_name: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "displayName"},
+    )
+    """Display name of the tag."""
+    description: Optional[str] = None
+    """Description of the tag."""
+    member_count: Optional[int] = field(
+        default=None,
+        metadata={"wire_name": "memberCount"},
+    )
+    """Number of members in the tag."""
+    tag_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tagType"},
+    )
+    """Tag type."""
+    event_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "eventId"},
+    )
+    """
+    Per-event identifier from the source tag event, unique per event and stable
+    across retries. Used for delivery idempotency and correlation.
+    """
+
+
+@dataclass
+class TagMemberWebhookResponseSchema:
+    """
+    Definition: TagMemberWebhookResponseSchema
+    """
+
+    change_type: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "changeType"},
+    )
+    """
+    The membership change: 'created' (member added) or 'deleted' (member
+    removed).
+    """
+    id: Optional[str] = None
+    """The tag member identifier."""
+    team_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "teamId"},
+    )
+    """The team (group) ID that owns the tag."""
+    tag_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tagId"},
+    )
+    """The tag ID whose membership changed."""
+    tenant_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "tenantId"},
+    )
+    """Tenant ID of the tag member."""
+    user_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "userId"},
+    )
+    """User ID of the tag member."""
+    event_id: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "eventId"},
+    )
+    """
+    Per-event identifier from the source tag event, unique per event and stable
+    across retries. Used for delivery idempotency and correlation.
+    """
+
+
 # Client Class
 
 class TeamsClient(ConnectorClientBase):
@@ -3339,6 +3507,47 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
+    async def archive_channel_async(
+        self,
+        input: ArchiveChannelInput,
+        group_id: str,
+        channel_id: str,
+    ) -> dict[str, Any] | None:
+        """
+        Archive a channel
+
+        Archive a channel in a team. When a channel is archived, users can't
+        send new messages or react to existing messages in the channel, edit
+        the channel settings, or make other changes to the channel. Archiving
+        is an asynchronous operation.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v1.0"
+            f"/teams"
+            f"/{quote(str(group_id), safe='')}"
+            f"/channels"
+            f"/{quote(str(channel_id), safe='')}"
+            f"/archive"
+        )
+
+        response = await self.http_client.send_async(
+            "POST", request_url, body=input
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def get_all_channels_for_team_async(
         self,
         group_id: str,
@@ -3579,7 +3788,7 @@ class TeamsClient(ConnectorClientBase):
         group_id: str,
         channel_id: str,
         message_id: str,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
     ) -> dict[str, Any] | None:
         """
         List replies of a channel message
@@ -5465,7 +5674,7 @@ class TeamsClient(ConnectorClientBase):
         self,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
     ) -> dict[str, Any] | None:
@@ -5528,7 +5737,7 @@ class TeamsClient(ConnectorClientBase):
         self,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
-        top: Optional[str] = None,
+        top: Optional[int] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
     ) -> dict[str, Any] | None:
@@ -6111,6 +6320,42 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def get_subscription_scope_schema_async(
+        self,
+        scope_type: str,
+    ) -> dict[str, Any] | None:
+        """
+        Get subscription scope input schema
+
+        Returns the input schema for a subscription trigger based on the
+        selected scope type.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/internalparameters"
+            f"/triggers"
+            f"/subscriptionscope"
+            f"/{quote(str(scope_type), safe='')}"
+            f"/schema"
+        )
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
 
 # Trigger Operations
 #
@@ -6149,6 +6394,20 @@ TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
         "path": "/{connectionId}/beta/subscriptions/messagereactiontrigger/threadType/{threadType}",
         "method": "post",
         "required_parameters": ["reactionKey", "frequency", "runningPolicy", "threadType"],
+        "callback_payload_type": None,
+    },
+    "TranscriptTrigger": {
+        "operation_id": "TranscriptTrigger",
+        "path": "/{connectionId}/beta/subscriptions/transcripttrigger",
+        "method": "post",
+        "required_parameters": ["scopeType", "body"],
+        "callback_payload_type": None,
+    },
+    "RecordingTrigger": {
+        "operation_id": "RecordingTrigger",
+        "path": "/{connectionId}/beta/subscriptions/recordingtrigger",
+        "method": "post",
+        "required_parameters": ["scopeType", "body"],
         "callback_payload_type": None,
     },
     "WebhookChatMessageTrigger": {

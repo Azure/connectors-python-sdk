@@ -94,7 +94,7 @@ async def example_2_read_rows():
                 server=SERVER,
                 database=DATABASE,
                 table=TABLE,
-                top="5",
+                top=5,
                 orderby="Id desc",
             )
             rows = result.get("value", []) if result else []

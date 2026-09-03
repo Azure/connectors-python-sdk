@@ -65,7 +65,7 @@ async def example_2_get_deal():
 
     async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_deal_async(deal_id="1")
+            result = await client.get_deal_async(deal_id=1)
             print(f"Deal: {result}")
 
         except ConnectorException as ex:
