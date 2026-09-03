@@ -132,6 +132,16 @@ class SampleVisitor(ast.NodeVisitor):
         except (ValueError, TypeError, SyntaxError):
             pass
 
+        container_types: tuple[tuple[type[ast.AST], type[Any]], ...] = (
+            (ast.Dict, dict),
+            (ast.List, list),
+            (ast.Set, set),
+            (ast.Tuple, tuple),
+        )
+        for node_type, container_type in container_types:
+            if isinstance(node, node_type):
+                return container_type
+
         if not isinstance(node, ast.Call):
             return None
 

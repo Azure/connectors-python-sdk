@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,13 @@ SAMPLE_DIRECTORY = (
 SAMPLE_PATHS = sorted(SAMPLE_DIRECTORY.glob("sample_connector_usage_*.py"))
 
 
+@dataclass
+class TypedInput:
+    """Provide a typed request model for sample validator tests."""
+
+    value: str
+
+
 class TypedClient:
     """Provide a typed client surface for sample validator tests."""
 
@@ -29,6 +37,9 @@ class TypedClient:
 
     async def list_items_async(self, *, top: int) -> None:
         """Represent a generated method with an integer argument."""
+
+    async def create_item_async(self, *, input: TypedInput) -> None:
+        """Represent a generated method with a typed request body."""
 
 
 @pytest.mark.parametrize(
@@ -108,3 +119,20 @@ def test_sample_validator_accepts_cast_environment_value() -> None:
     visitor.visit(tree)
 
     assert visitor.issues == []
+
+
+def test_sample_validator_rejects_dynamic_dict_for_typed_input() -> None:
+    """Test a dictionary with a dynamic value is rejected for a typed input."""
+    tree = ast.parse(
+        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "index = 0\n"
+        "client.create_item_async(input={'value': f'Item {index + 1}'})\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "argument 'input' has type 'dict', expected 'TypedInput'",
+    ]

@@ -242,7 +242,9 @@ async def example_5_query_with_filters():
                 await client.post_item_async(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
-                    input={'Title': f'Test Item {i + 1}'},
+                    input=PostItemInput(
+                        additional_properties={'Title': f'Test Item {i + 1}'},
+                    ),
                 )
             print("  Created 3 test items")
 
