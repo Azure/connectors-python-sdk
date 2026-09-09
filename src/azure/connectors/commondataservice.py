@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -64,6 +64,11 @@ class ItemsList:
 
     value: Optional[List[Item]] = None
     """List of Items"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -791,6 +796,28 @@ class CommondataserviceClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "commondataservice"
 
+    def _resolve_pagination_url(self, next_link: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            return f"{self._connection_runtime_url}{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        if parsed_next_link.hostname == parsed_connection.hostname:
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and parsed_next_link.port == parsed_connection.port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def get_data_sets_metadata_async(
         self,
     ) -> dict[str, Any] | None:
@@ -1300,7 +1327,7 @@ class CommondataserviceClient(ConnectorClientBase):
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         expand: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List rows (legacy)
 
@@ -1343,23 +1370,34 @@ class CommondataserviceClient(ConnectorClientBase):
             query_params.append(f"$expand={quote(value)}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link)
+            request_body = None
 
     async def get_metadata_for_patch_item_async(
         self,

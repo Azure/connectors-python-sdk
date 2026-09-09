@@ -168,12 +168,52 @@ class TestGetItems:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_items_async(dataset="default", table="accounts")
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/v2/datasets/default/tables/accounts/items" in call_args[0][1]
-            assert result["value"] == []
+            assert result == []
+
+    @pytest.mark.asyncio
+    async def test_get_items_follows_odata_next_link(self, mock_token_provider):
+        """Test list items follows the exact connector continuation URL."""
+        client = _make_client(mock_token_provider)
+        next_link = (
+            "https://example.azure.com/connections/test/v2/datasets/default/"
+            "tables/accounts/items?$skiptoken=page2"
+        )
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
+
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_count == 2
+            assert mock_send.await_args_list[1].args[1] == next_link
 
     @pytest.mark.asyncio
     async def test_get_items_with_query_params(self, mock_token_provider):
@@ -186,7 +226,7 @@ class TestGetItems:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_items_async(
+            result = client.get_items_async(
                 dataset="default",
                 table="contacts",
                 apply="groupby((name))",
@@ -195,6 +235,7 @@ class TestGetItems:
                 top="10",
                 expand="primarycontactid",
             )
+            await anext(result, None)
 
             url = mock_send.call_args[0][1]
             assert "%24apply=" in url or "$apply=" in url
@@ -215,7 +256,9 @@ class TestGetItems:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_items_async(dataset="default", table="accounts")
+                await anext(
+                    client.get_items_async(dataset="default", table="accounts")
+                )
 
             assert exc_info.value.status_code == 500
 
@@ -1134,10 +1177,11 @@ class TestPathParameterEncoding:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_items_async(
+            result = client.get_items_async(
                 dataset="https://org12345.crm.dynamics.com",
                 table="accounts",
             )
+            await anext(result, None)
 
             url = mock_send.call_args[0][1]
 
