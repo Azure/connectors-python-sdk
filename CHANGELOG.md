@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added focused success, route, request-body, response, and error coverage for newly generated operations.
 - Clarified that Azure Functions SDK-type deserialization is owned by the Azure Functions connector extension rather than generated connector clients.
 
+### Fixed
+
+- **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
+
 ## [0.5.0b1] - 2026-08-31
 
 ### Breaking Changes
