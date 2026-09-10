@@ -268,6 +268,43 @@ class TestGetItems:
             )
 
     @pytest.mark.asyncio
+    async def test_get_items_resolves_leading_slash_next_link_against_runtime(
+        self,
+        mock_token_provider,
+    ):
+        """Test leading-slash continuations stay on the connection runtime."""
+        client = _make_client(mock_token_provider)
+        next_link = "/continuation/items?$skiptoken=page2"
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
+
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_args_list[1].args[1] == (
+                "https://example.azure.com/connections/test"
+                f"{next_link}"
+            )
+
+    @pytest.mark.asyncio
     async def test_get_items_routes_bare_token_through_next_link_endpoint(
         self,
         mock_token_provider,
