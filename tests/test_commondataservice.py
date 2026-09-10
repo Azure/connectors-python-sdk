@@ -949,13 +949,16 @@ class TestCreateAttachment:
                 b"file-bytes",
                 dataset="default",
                 table="accounts",
-                id="1",
+                id="00000000-0000-0000-0000-000000000001",
                 display_name="note.txt",
             )
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
-            assert "/attachments" in call_args[0][1]
+            assert (
+                "/items/00000000-0000-0000-0000-000000000001/attachments"
+                in call_args[0][1]
+            )
             assert "displayName=note.txt" in call_args[0][1]
             assert call_args.kwargs["content_type"] == "application/octet-stream"
             assert result == {"annotationid": "abc"}
@@ -976,7 +979,7 @@ class TestCreateAttachment:
                     b"file-bytes",
                     dataset="default",
                     table="accounts",
-                    id="1",
+                    id="00000000-0000-0000-0000-000000000001",
                     display_name="note.txt",
                 )
 

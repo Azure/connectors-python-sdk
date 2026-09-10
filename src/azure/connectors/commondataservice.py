@@ -940,7 +940,7 @@ class CommondataserviceClient(ConnectorClientBase):
         input: bytes,
         dataset: str,
         table: str,
-        id: int,
+        id: str,
         display_name: str,
     ) -> dict[str, Any] | None:
         """
