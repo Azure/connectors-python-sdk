@@ -1350,6 +1350,9 @@ class CommondataserviceClient(ConnectorClientBase):
         List rows (legacy)
 
         This operation gets rows for a table
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
