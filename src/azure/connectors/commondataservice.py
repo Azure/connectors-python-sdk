@@ -807,13 +807,18 @@ class CommondataserviceClient(ConnectorClientBase):
             return f"{self._connection_runtime_url}/nextLink/{encoded_token}"
 
         parsed_connection = urlsplit(self._connection_runtime_url)
-        next_link_port = parsed_next_link.port or (
-            443 if parsed_next_link.scheme == "https" else 80
-        )
-        connection_port = parsed_connection.port or (
-            443 if parsed_connection.scheme == "https" else 80
-        )
-        if parsed_next_link.hostname.lower() == parsed_connection.hostname.lower():
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
             if (
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
@@ -822,7 +827,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
             raise ValueError(
                 "Pagination URL origin "
-                f"'{parsed_next_link.scheme}://{parsed_next_link.hostname}:{next_link_port}' "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
                 "must use the connection runtime scheme and port."
             )
 

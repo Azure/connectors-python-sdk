@@ -8,6 +8,7 @@ from azure.connectors.commondataservice import (
     TRIGGER_OPERATIONS,
     AssociateRecordsPatchItemInput,
     CommondataserviceClient,
+    ItemsList,
     PatchItemInput,
     PostItemInput,
 )
@@ -16,6 +17,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -76,6 +78,18 @@ class TestCommondataserviceClientInitialization:
         )
 
         assert client.connector_name == "commondataservice"
+
+
+class TestCommondataserviceTypeSerialization:
+    """Tests generated Dataverse model wire names."""
+
+    def test_items_list_next_link_uses_odata_wire_name(self):
+        """Test ItemsList serializes its continuation with the Swagger name."""
+        items = ItemsList(next_link="https://example.azure.com/next-page")
+
+        assert to_wire(items) == {
+            "@odata.nextLink": "https://example.azure.com/next-page"
+        }
 
 
 class TestCommondataserviceClientLifecycle:
@@ -324,6 +338,68 @@ class TestGetItems:
             "Pagination URL origin 'http://example.azure.com:80' must use the "
             "connection runtime scheme and port."
         )
+
+    @pytest.mark.parametrize(
+        ("connection_runtime_url", "next_link"),
+        [
+            (
+                "https://example.azure.com/connections/test",
+                "https://example.azure.com:0/connections/test/items",
+            ),
+            (
+                "https://example.azure.com:0/connections/test",
+                "https://example.azure.com/connections/test/items",
+            ),
+        ],
+    )
+    def test_resolve_pagination_url_preserves_explicit_port_zero(
+        self,
+        mock_token_provider,
+        connection_runtime_url,
+        next_link,
+    ):
+        """Test explicit port zero is validated rather than defaulted."""
+        client = CommondataserviceClient(
+            connection_runtime_url,
+            token_provider=mock_token_provider,
+        )
+
+        with pytest.raises(ValueError, match="scheme and port"):
+            client._resolve_pagination_url(
+                next_link,
+                f"{connection_runtime_url}/current/items",
+            )
+
+    @pytest.mark.parametrize(
+        ("connection_runtime_url", "next_link"),
+        [
+            (
+                "https://example.azure.com/connections/test",
+                "https://:443/items",
+            ),
+            (
+                "https://:443/connections/test",
+                "https://example.azure.com/items",
+            ),
+        ],
+    )
+    def test_resolve_pagination_url_rejects_missing_hostname(
+        self,
+        mock_token_provider,
+        connection_runtime_url,
+        next_link,
+    ):
+        """Test both continuation and runtime URLs require hostnames."""
+        client = CommondataserviceClient(
+            connection_runtime_url,
+            token_provider=mock_token_provider,
+        )
+
+        with pytest.raises(ValueError, match="must include a hostname"):
+            client._resolve_pagination_url(
+                next_link,
+                f"{connection_runtime_url}/current/items",
+            )
 
     @pytest.mark.asyncio
     async def test_get_items_with_query_params(self, mock_token_provider):
