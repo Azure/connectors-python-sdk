@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Microsoft Dataverse `get_items_async` now returns an `AsyncIterator[dict[str, Any]]`. Callers must use `async for` instead of awaiting a single response dictionary; iteration preserves and follows `@odata.nextLink` until all rows are returned. ([Azure/Connectors-NET-SDK#208](https://github.com/Azure/Connectors-NET-SDK/issues/208), AzureUX-BPM PR 17086991)
+
 - Regenerated all 98 supported connector clients from the current CodefulSdkGenerator and managed connector contracts; 62 clients contain public contract changes.
 - Corrected generated parameter types across connector operations, including pagination values, numeric identifiers, and Boolean options. Callers must now pass the annotated `int` and `bool` values instead of string representations.
 - Added current discovery and schema operations for Azure Automation, Azure Blob Storage, Azure Data Factory, Azure VM, Excel Online (Business), Microsoft Teams, and Microsoft Defender for Endpoint.
