@@ -799,18 +799,29 @@ class CommondataserviceClient(ConnectorClientBase):
     def _resolve_pagination_url(self, next_link: str) -> str:
         parsed_next_link = urlsplit(next_link)
         if not parsed_next_link.scheme or not parsed_next_link.netloc:
-            return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith(("/", "?")):
+                return f"{self._connection_runtime_url}{next_link}"
+            encoded_token = quote(str(next_link), safe='')
+            return f"{self._connection_runtime_url}/nextLink/{encoded_token}"
 
         parsed_connection = urlsplit(self._connection_runtime_url)
-        if parsed_next_link.hostname == parsed_connection.hostname:
+        next_link_port = parsed_next_link.port or (
+            443 if parsed_next_link.scheme == "https" else 80
+        )
+        connection_port = parsed_connection.port or (
+            443 if parsed_connection.scheme == "https" else 80
+        )
+        if parsed_next_link.hostname.lower() == parsed_connection.hostname.lower():
             if (
                 parsed_next_link.scheme == parsed_connection.scheme
-                and parsed_next_link.port == parsed_connection.port
+                and next_link_port == connection_port
             ):
                 return next_link
 
             raise ValueError(
-                "Pagination URL must use the connection runtime scheme and port."
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{parsed_next_link.hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
             )
 
         suffix = parsed_next_link.path

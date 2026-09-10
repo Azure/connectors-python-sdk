@@ -216,6 +216,59 @@ class TestGetItems:
             assert mock_send.await_args_list[1].args[1] == next_link
 
     @pytest.mark.asyncio
+    async def test_get_items_routes_bare_token_through_next_link_endpoint(
+        self,
+        mock_token_provider,
+    ):
+        """Test list items encodes a bare continuation token in the nextLink route."""
+        client = _make_client(mock_token_provider)
+        next_link = "accounts?$select=name%2Crevenue&$skiptoken=page 2"
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
+
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_args_list[1].args[1] == (
+                "https://example.azure.com/connections/test/nextLink/"
+                "accounts%3F%24select%3Dname%252Crevenue%26%24skiptoken%3Dpage%202"
+            )
+
+    def test_resolve_pagination_url_reports_origin_without_opaque_state(
+        self,
+        mock_token_provider,
+    ):
+        """Test rejected pagination URLs identify only their sanitized origin."""
+        client = _make_client(mock_token_provider)
+
+        with pytest.raises(ValueError) as exc_info:
+            client._resolve_pagination_url(
+                "http://example.azure.com/connections/test/items?secret=opaque"
+            )
+
+        assert "http://example.azure.com:80" in str(exc_info.value)
+        assert "secret" not in str(exc_info.value)
+        assert "opaque" not in str(exc_info.value)
+
+    @pytest.mark.asyncio
     async def test_get_items_with_query_params(self, mock_token_provider):
         """Test list items serializes OData query parameters."""
         client = _make_client(mock_token_provider)
