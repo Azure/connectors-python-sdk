@@ -216,6 +216,44 @@ class TestGetItems:
             assert mock_send.await_args_list[1].args[1] == next_link
 
     @pytest.mark.asyncio
+    async def test_get_items_resolves_query_only_next_link_against_current_url(
+        self,
+        mock_token_provider,
+    ):
+        """Test query-only continuations retain the current collection path."""
+        client = _make_client(mock_token_provider)
+        next_link = "?$skiptoken=page2"
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                    filter="statecode eq 0",
+                )
+            ]
+
+            first_request_url = mock_send.await_args_list[0].args[1]
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_args_list[1].args[1] == (
+                f"{first_request_url.partition('?')[0]}{next_link}"
+            )
+
+    @pytest.mark.asyncio
     async def test_get_items_routes_bare_token_through_next_link_endpoint(
         self,
         mock_token_provider,
@@ -260,7 +298,8 @@ class TestGetItems:
         client = _make_client(mock_token_provider)
 
         result = client._resolve_pagination_url(
-            "https://other.example.com/continuation/items?$skiptoken=page2"
+            "https://other.example.com/continuation/items?$skiptoken=page2",
+            "https://example.azure.com/connections/test/current/items",
         )
 
         assert result == (
@@ -277,7 +316,8 @@ class TestGetItems:
 
         with pytest.raises(ValueError) as exc_info:
             client._resolve_pagination_url(
-                "http://example.azure.com/connections/test/items?secret=opaque"
+                "http://example.azure.com/connections/test/items?secret=opaque",
+                "https://example.azure.com/connections/test/current/items",
             )
 
         assert str(exc_info.value) == (

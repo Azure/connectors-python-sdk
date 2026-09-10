@@ -796,11 +796,13 @@ class CommondataserviceClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "commondataservice"
 
-    def _resolve_pagination_url(self, next_link: str) -> str:
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
         parsed_next_link = urlsplit(next_link)
         if not parsed_next_link.scheme or not parsed_next_link.netloc:
-            if next_link.startswith(("/", "?")):
+            if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
             encoded_token = quote(str(next_link), safe='')
             return f"{self._connection_runtime_url}/nextLink/{encoded_token}"
 
@@ -1407,7 +1409,7 @@ class CommondataserviceClient(ConnectorClientBase):
             if not next_link:
                 return
 
-            request_url = self._resolve_pagination_url(next_link)
+            request_url = self._resolve_pagination_url(next_link, request_url)
             request_body = None
 
     async def get_metadata_for_patch_item_async(
