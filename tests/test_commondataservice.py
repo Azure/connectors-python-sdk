@@ -252,11 +252,27 @@ class TestGetItems:
                 "accounts%3F%24select%3Dname%252Crevenue%26%24skiptoken%3Dpage%202"
             )
 
+    def test_resolve_pagination_url_routes_cross_host_through_runtime(
+        self,
+        mock_token_provider,
+    ):
+        """Test cross-host pagination URLs retain only their path and query."""
+        client = _make_client(mock_token_provider)
+
+        result = client._resolve_pagination_url(
+            "https://other.example.com/continuation/items?$skiptoken=page2"
+        )
+
+        assert result == (
+            "https://example.azure.com/connections/test/continuation/"
+            "items?$skiptoken=page2"
+        )
+
     def test_resolve_pagination_url_reports_origin_without_opaque_state(
         self,
         mock_token_provider,
     ):
-        """Test rejected pagination URLs identify only their sanitized origin."""
+        """Test scheme mismatches identify only the sanitized origin."""
         client = _make_client(mock_token_provider)
 
         with pytest.raises(ValueError) as exc_info:
@@ -264,9 +280,10 @@ class TestGetItems:
                 "http://example.azure.com/connections/test/items?secret=opaque"
             )
 
-        assert "http://example.azure.com:80" in str(exc_info.value)
-        assert "secret" not in str(exc_info.value)
-        assert "opaque" not in str(exc_info.value)
+        assert str(exc_info.value) == (
+            "Pagination URL origin 'http://example.azure.com:80' must use the "
+            "connection runtime scheme and port."
+        )
 
     @pytest.mark.asyncio
     async def test_get_items_with_query_params(self, mock_token_provider):

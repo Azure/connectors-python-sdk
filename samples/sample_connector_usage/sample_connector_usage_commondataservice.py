@@ -87,17 +87,20 @@ async def example_2_list_accounts():
 
     async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_items_async(
-                dataset=DATASET,
-                table="accounts",
-                filter="statecode eq 0",  # Active accounts only
-                orderby="name asc",
-                top=10,
-            )
+            accounts = [
+                account
+                async for account in client.get_items_async(
+                    dataset=DATASET,
+                    table="accounts",
+                    filter="statecode eq 0",  # Active accounts only
+                    orderby="name asc",
+                    top=10,
+                )
+            ]
 
-            if result and result.get("value"):
-                print(f"Found {len(result['value'])} accounts:")
-                for account in result["value"][:5]:
+            if accounts:
+                print(f"Found {len(accounts)} accounts:")
+                for account in accounts[:5]:
                     print(f"  - {account.get('name', 'N/A')}")
             else:
                 print("No accounts found")
