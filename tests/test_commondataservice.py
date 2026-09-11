@@ -8,6 +8,7 @@ from azure.connectors.commondataservice import (
     TRIGGER_OPERATIONS,
     AssociateRecordsPatchItemInput,
     CommondataserviceClient,
+    ItemsList,
     PatchItemInput,
     PostItemInput,
 )
@@ -16,6 +17,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 
 
@@ -76,6 +78,18 @@ class TestCommondataserviceClientInitialization:
         )
 
         assert client.connector_name == "commondataservice"
+
+
+class TestCommondataserviceTypeSerialization:
+    """Tests generated Dataverse model wire names."""
+
+    def test_items_list_next_link_uses_odata_wire_name(self):
+        """Test ItemsList serializes its continuation with the Swagger name."""
+        items = ItemsList(next_link="https://example.azure.com/next-page")
+
+        assert to_wire(items) == {
+            "@odata.nextLink": "https://example.azure.com/next-page"
+        }
 
 
 class TestCommondataserviceClientLifecycle:
@@ -168,12 +182,261 @@ class TestGetItems:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_items_async(dataset="default", table="accounts")
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/v2/datasets/default/tables/accounts/items" in call_args[0][1]
-            assert result["value"] == []
+            assert result == []
+
+    @pytest.mark.asyncio
+    async def test_get_items_follows_odata_next_link(self, mock_token_provider):
+        """Test list items follows the exact connector continuation URL."""
+        client = _make_client(mock_token_provider)
+        next_link = (
+            "https://example.azure.com/connections/test/v2/datasets/default/"
+            "tables/accounts/items?$skiptoken=page2"
+        )
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
+
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_count == 2
+            assert mock_send.await_args_list[1].args[1] == next_link
+
+    @pytest.mark.asyncio
+    async def test_get_items_resolves_query_only_next_link_against_current_url(
+        self,
+        mock_token_provider,
+    ):
+        """Test query-only continuations retain the current collection path."""
+        client = _make_client(mock_token_provider)
+        next_link = "?$skiptoken=page2"
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                    filter="statecode eq 0",
+                )
+            ]
+
+            first_request_url = mock_send.await_args_list[0].args[1]
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_args_list[1].args[1] == (
+                f"{first_request_url.partition('?')[0]}{next_link}"
+            )
+
+    @pytest.mark.asyncio
+    async def test_get_items_resolves_leading_slash_next_link_against_runtime(
+        self,
+        mock_token_provider,
+    ):
+        """Test leading-slash continuations stay on the connection runtime."""
+        client = _make_client(mock_token_provider)
+        next_link = "/continuation/items?$skiptoken=page2"
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
+
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_args_list[1].args[1] == (
+                "https://example.azure.com/connections/test"
+                f"{next_link}"
+            )
+
+    @pytest.mark.asyncio
+    async def test_get_items_routes_bare_token_through_next_link_endpoint(
+        self,
+        mock_token_provider,
+    ):
+        """Test list items encodes a bare continuation token in the nextLink route."""
+        client = _make_client(mock_token_provider)
+        next_link = "accounts?$select=name%2Crevenue&$skiptoken=page 2"
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"sequence": 1}], '
+                    f'"@odata.nextLink": "{next_link}"}}'
+                ),
+            ),
+            MockResponse(status=200, text='{"value": [{"sequence": 2}]}'),
+        ]
+
+        with patch.object(
+            client._http_client, 'send_async', new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.side_effect = responses
+
+            result = [
+                item async for item in client.get_items_async(
+                    dataset="default",
+                    table="accounts",
+                )
+            ]
+
+            assert result == [{"sequence": 1}, {"sequence": 2}]
+            assert mock_send.await_args_list[1].args[1] == (
+                "https://example.azure.com/connections/test/nextLink/"
+                "accounts%3F%24select%3Dname%252Crevenue%26%24skiptoken%3Dpage%202"
+            )
+
+    def test_resolve_pagination_url_routes_cross_host_through_runtime(
+        self,
+        mock_token_provider,
+    ):
+        """Test cross-host pagination URLs retain only their path and query."""
+        client = _make_client(mock_token_provider)
+
+        result = client._resolve_pagination_url(
+            "https://other.example.com/continuation/items?$skiptoken=page2",
+            "https://example.azure.com/connections/test/current/items",
+        )
+
+        assert result == (
+            "https://example.azure.com/connections/test/continuation/"
+            "items?$skiptoken=page2"
+        )
+
+    def test_resolve_pagination_url_reports_origin_without_opaque_state(
+        self,
+        mock_token_provider,
+    ):
+        """Test scheme mismatches identify only the sanitized origin."""
+        client = _make_client(mock_token_provider)
+
+        with pytest.raises(ValueError) as exc_info:
+            client._resolve_pagination_url(
+                "http://example.azure.com/connections/test/items?secret=opaque",
+                "https://example.azure.com/connections/test/current/items",
+            )
+
+        assert str(exc_info.value) == (
+            "Pagination URL origin 'http://example.azure.com:80' must use the "
+            "connection runtime scheme and port."
+        )
+
+    @pytest.mark.parametrize(
+        ("connection_runtime_url", "next_link"),
+        [
+            (
+                "https://example.azure.com/connections/test",
+                "https://example.azure.com:0/connections/test/items",
+            ),
+            (
+                "https://example.azure.com:0/connections/test",
+                "https://example.azure.com/connections/test/items",
+            ),
+        ],
+    )
+    def test_resolve_pagination_url_preserves_explicit_port_zero(
+        self,
+        mock_token_provider,
+        connection_runtime_url,
+        next_link,
+    ):
+        """Test explicit port zero is validated rather than defaulted."""
+        client = CommondataserviceClient(
+            connection_runtime_url,
+            token_provider=mock_token_provider,
+        )
+
+        with pytest.raises(ValueError, match="scheme and port"):
+            client._resolve_pagination_url(
+                next_link,
+                f"{connection_runtime_url}/current/items",
+            )
+
+    @pytest.mark.parametrize(
+        ("connection_runtime_url", "next_link"),
+        [
+            (
+                "https://example.azure.com/connections/test",
+                "https://:443/items",
+            ),
+            (
+                "https://:443/connections/test",
+                "https://example.azure.com/items",
+            ),
+        ],
+    )
+    def test_resolve_pagination_url_rejects_missing_hostname(
+        self,
+        mock_token_provider,
+        connection_runtime_url,
+        next_link,
+    ):
+        """Test both continuation and runtime URLs require hostnames."""
+        client = CommondataserviceClient(
+            connection_runtime_url,
+            token_provider=mock_token_provider,
+        )
+
+        with pytest.raises(ValueError, match="must include a hostname"):
+            client._resolve_pagination_url(
+                next_link,
+                f"{connection_runtime_url}/current/items",
+            )
 
     @pytest.mark.asyncio
     async def test_get_items_with_query_params(self, mock_token_provider):
@@ -186,7 +449,7 @@ class TestGetItems:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_items_async(
+            result = client.get_items_async(
                 dataset="default",
                 table="contacts",
                 apply="groupby((name))",
@@ -195,6 +458,7 @@ class TestGetItems:
                 top="10",
                 expand="primarycontactid",
             )
+            await anext(result, None)
 
             url = mock_send.call_args[0][1]
             assert "%24apply=" in url or "$apply=" in url
@@ -215,7 +479,9 @@ class TestGetItems:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_items_async(dataset="default", table="accounts")
+                await anext(
+                    client.get_items_async(dataset="default", table="accounts")
+                )
 
             assert exc_info.value.status_code == 500
 
@@ -683,13 +949,16 @@ class TestCreateAttachment:
                 b"file-bytes",
                 dataset="default",
                 table="accounts",
-                id="1",
+                id="00000000-0000-0000-0000-000000000001",
                 display_name="note.txt",
             )
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
-            assert "/attachments" in call_args[0][1]
+            assert (
+                "/items/00000000-0000-0000-0000-000000000001/attachments"
+                in call_args[0][1]
+            )
             assert "displayName=note.txt" in call_args[0][1]
             assert call_args.kwargs["content_type"] == "application/octet-stream"
             assert result == {"annotationid": "abc"}
@@ -710,7 +979,7 @@ class TestCreateAttachment:
                     b"file-bytes",
                     dataset="default",
                     table="accounts",
-                    id="1",
+                    id="00000000-0000-0000-0000-000000000001",
                     display_name="note.txt",
                 )
 
@@ -1134,10 +1403,11 @@ class TestPathParameterEncoding:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_items_async(
+            result = client.get_items_async(
                 dataset="https://org12345.crm.dynamics.com",
                 table="accounts",
             )
+            await anext(result, None)
 
             url = mock_send.call_args[0][1]
 

@@ -87,17 +87,20 @@ async def example_2_list_accounts():
 
     async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_items_async(
-                dataset=DATASET,
-                table="accounts",
-                filter="statecode eq 0",  # Active accounts only
-                orderby="name asc",
-                top=10,
-            )
+            accounts = [
+                account
+                async for account in client.get_items_async(
+                    dataset=DATASET,
+                    table="accounts",
+                    filter="statecode eq 0",  # Active accounts only
+                    orderby="name asc",
+                    top=10,
+                )
+            ]
 
-            if result and result.get("value"):
-                print(f"Found {len(result['value'])} accounts:")
-                for account in result["value"][:5]:
+            if accounts:
+                print(f"Found {len(accounts)} accounts:")
+                for account in accounts[:5]:
                     print(f"  - {account.get('name', 'N/A')}")
             else:
                 print("No accounts found")
@@ -204,9 +207,39 @@ async def example_5_update_account():
             print(f"Error: {ex}")
 
 
-async def example_6_get_table_metadata():
-    """Example 6: Get metadata for the 'accounts' table."""
-    print("\n=== Example 6: Get Table Metadata ===")
+async def example_6_create_attachment():
+    """Example 6: Add a note attachment to an account row."""
+    print("\n=== Example 6: Create Account Attachment ===")
+
+    credential = DefaultAzureCredential()
+
+    # Replace with an actual account id from your Dataverse environment.
+    account_id = "00000000-0000-0000-0000-000000000000"
+
+    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        try:
+            result = await client.create_attachment_async(
+                input=b"Sample attachment content",
+                dataset=DATASET,
+                table="accounts",
+                id=account_id,
+                display_name="sample-note.txt",
+            )
+
+            if result:
+                print(f"Attachment created with id: {result.get('annotationid', 'N/A')}")
+            else:
+                print("Attachment created successfully")
+
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
+
+
+async def example_7_get_table_metadata():
+    """Example 7: Get metadata for the 'accounts' table."""
+    print("\n=== Example 7: Get Table Metadata ===")
 
     credential = DefaultAzureCredential()
 
@@ -243,7 +276,8 @@ async def main():
     await example_3_get_account_by_id()
     await example_4_create_account()
     await example_5_update_account()
-    await example_6_get_table_metadata()
+    await example_6_create_attachment()
+    await example_7_get_table_metadata()
 
     print("\n=== All examples completed ===")
 
