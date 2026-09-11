@@ -979,7 +979,7 @@ class CustomPropertyValues:
     """
 
     id: Optional[str] = None
-    localizations: Optional[Dict[str, Any]] = None
+    localizations: Optional[Dict[str, CustomPropertyDataDisplay]] = None
     """Localization object"""
     multiple_value: Optional[bool] = field(
         default=None,

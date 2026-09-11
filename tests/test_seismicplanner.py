@@ -2,8 +2,14 @@
 
 """Contract tests for SeismicplannerClient."""
 
+from typing import Dict, Optional, get_type_hints
+
 import azure.connectors.seismicplanner as seismicplanner_module
-from azure.connectors.seismicplanner import SeismicplannerClient
+from azure.connectors.seismicplanner import (
+    CustomPropertyDataDisplay,
+    CustomPropertyValues,
+    SeismicplannerClient,
+)
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -42,3 +48,16 @@ class TestSeismicplannerClient(GeneratedConnectorContractTests):
     connector_module = seismicplanner_module
     connector_name = "seismicplanner"
     operation_contracts = OPERATION_CONTRACTS
+
+    def test_localizations_use_typed_map_values(self) -> None:
+        """Test that localization dictionary values retain their Swagger model type."""
+        type_hints = get_type_hints(CustomPropertyValues)
+        model = CustomPropertyValues(
+            localizations={"en-US": CustomPropertyDataDisplay(name="English")}
+        )
+
+        assert type_hints["localizations"] == Optional[
+            Dict[str, CustomPropertyDataDisplay]
+        ]
+        assert model.localizations is not None
+        assert model.localizations["en-US"].name == "English"
