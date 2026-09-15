@@ -71,7 +71,7 @@ class SendMailInput:
     """Subject line of your email"""
     htmlbody: Optional[str] = None
     """This is the body content for your email."""
-    reply_to: Optional[List[ReplyToAddresss]] = None
+    reply_to: Optional[List[ReplyToAddress]] = None
     """
     The email address to which the recipient's email responses will be
     addressed.
@@ -121,7 +121,7 @@ class SendTemplateMailInput:
     You can use merge tags to replace the placeholders with multiple values for
     different recipients.
     """
-    reply_to: Optional[List[ReplyToAddresss]] = None
+    reply_to: Optional[List[ReplyToAddress]] = None
     """Reply To"""
 
 
@@ -166,9 +166,9 @@ class EmailAddress:
 
 
 @dataclass
-class ReplyToAddresss:
+class ReplyToAddress:
     """
-    Definition: ReplyToAddresss
+    Definition: ReplyToAddress
     """
 
     address: Optional[str] = None

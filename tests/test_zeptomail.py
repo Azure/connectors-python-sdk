@@ -5,7 +5,12 @@
 from typing import Any, Dict, List, Optional, get_type_hints
 
 import azure.connectors.zeptomail as zeptomail_module
-from azure.connectors.zeptomail import SendTemplateMailInput, ZeptomailClient
+from azure.connectors.zeptomail import (
+    ReplyToAddress,
+    SendMailInput,
+    SendTemplateMailInput,
+    ZeptomailClient,
+)
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -41,3 +46,14 @@ def test_merge_key_detail_preserves_mixed_values() -> None:
         "value": "Ada",
         "rank": 2,
     }
+
+
+def test_reply_to_uses_corrected_model_in_both_requests() -> None:
+    """Test the corrected public type preserves both reply-to annotations."""
+    expected_type = Optional[List[ReplyToAddress]]
+
+    assert get_type_hints(SendMailInput)["reply_to"] == expected_type
+    assert get_type_hints(SendTemplateMailInput)["reply_to"] == expected_type
+    assert ReplyToAddress(address="reply@example.com", name="Reply").address == (
+        "reply@example.com"
+    )
