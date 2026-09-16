@@ -283,47 +283,47 @@ class ZeptomailClient(ConnectorClientBase):
         value = str(mailagent_key)
         if isinstance(mailagent_key, bool):
             value = value.lower()
-        query_params.append(f"mailagent_key={quote(value)}")
+        query_params.append(f"mailagent_key={quote(value, safe='')}")
         if subject is not None:
             value = str(subject)
             if isinstance(subject, bool):
                 value = value.lower()
-            query_params.append(f"subject={quote(value)}")
+            query_params.append(f"subject={quote(value, safe='')}")
         if from_ is not None:
             value = str(from_)
             if isinstance(from_, bool):
                 value = value.lower()
-            query_params.append(f"from={quote(value)}")
+            query_params.append(f"from={quote(value, safe='')}")
         if to is not None:
             value = str(to)
             if isinstance(to, bool):
                 value = value.lower()
-            query_params.append(f"to={quote(value)}")
+            query_params.append(f"to={quote(value, safe='')}")
         if date_from is not None:
             value = str(date_from)
             if isinstance(date_from, bool):
                 value = value.lower()
-            query_params.append(f"date_from={quote(value)}")
+            query_params.append(f"date_from={quote(value, safe='')}")
         if date_to is not None:
             value = str(date_to)
             if isinstance(date_to, bool):
                 value = value.lower()
-            query_params.append(f"date_to={quote(value)}")
+            query_params.append(f"date_to={quote(value, safe='')}")
         if request_id is not None:
             value = str(request_id)
             if isinstance(request_id, bool):
                 value = value.lower()
-            query_params.append(f"request_id={quote(value)}")
+            query_params.append(f"request_id={quote(value, safe='')}")
         if is_hb is not None:
             value = str(is_hb)
             if isinstance(is_hb, bool):
                 value = value.lower()
-            query_params.append(f"is_hb={quote(value)}")
+            query_params.append(f"is_hb={quote(value, safe='')}")
         if is_sb is not None:
             value = str(is_sb)
             if isinstance(is_sb, bool):
                 value = value.lower()
-            query_params.append(f"is_sb={quote(value)}")
+            query_params.append(f"is_sb={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -420,17 +420,17 @@ class ZeptomailClient(ConnectorClientBase):
         value = str(mailagent)
         if isinstance(mailagent, bool):
             value = value.lower()
-        query_params.append(f"mailagent={quote(value)}")
+        query_params.append(f"mailagent={quote(value, safe='')}")
         if from_time is not None:
             value = str(from_time)
             if isinstance(from_time, bool):
                 value = value.lower()
-            query_params.append(f"from_time={quote(value)}")
+            query_params.append(f"from_time={quote(value, safe='')}")
         if to_time is not None:
             value = str(to_time)
             if isinstance(to_time, bool):
                 value = value.lower()
-            query_params.append(f"to_time={quote(value)}")
+            query_params.append(f"to_time={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
