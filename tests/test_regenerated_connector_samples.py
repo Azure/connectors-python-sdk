@@ -69,7 +69,7 @@ def test_all_connector_samples_match_generated_apis() -> None:
 
     sample_paths, issues = validate_samples(repo_root)
 
-    assert len(sample_paths) == 98
+    assert len(sample_paths) == 99
     assert issues == []
 
 

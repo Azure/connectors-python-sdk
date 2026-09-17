@@ -399,6 +399,11 @@ except (ImportError, NameError):
     ZohosignClient = None  # type: ignore[assignment,misc]
 
 try:
+    from .zeptomail import ZeptomailClient
+except (ImportError, NameError):
+    ZeptomailClient = None  # type: ignore[assignment,misc]
+
+try:
     from .eventbrite import EventbriteClient
 except (ImportError, NameError):
     EventbriteClient = None  # type: ignore[assignment,misc]
@@ -568,6 +573,7 @@ __all__ = [
     "DocuwareClient",
     "SigninghubClient",
     "ZohosignClient",
+    "ZeptomailClient",
     "EventbriteClient",
     "FormstackformsClient",
     "TypeformClient",

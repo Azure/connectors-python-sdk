@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Zoho ZeptoMail generated client** — adds five public mail-agent, send-mail, template-mail, and analytics actions. `SendTemplateMailInput.merge_key_detail` remains `List[Dict[str, Any]]` so fixed string fields and arbitrary non-string merge values stay representable. The malformed Swagger type `ReplyToAddresss` is exposed as `ReplyToAddress` without changing the `reply_to` wire field.
+
 ### Breaking Changes
 
 - Seismic Planner `CustomPropertyValues.localizations` now exposes `Dict[str, CustomPropertyDataDisplay]` instead of `Dict[str, Any]`. Callers can access typed values directly, such as `localizations["en-US"].name`. ([Azure/Connectors-NET-SDK#262](https://github.com/Azure/Connectors-NET-SDK/issues/262), AzureUX-BPM PR 17131877)
