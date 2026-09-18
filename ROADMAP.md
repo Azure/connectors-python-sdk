@@ -16,7 +16,7 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 | Connectors | ✅ 99 connectors — See [README.md](README.md#validated-connectors) |
 | CI/CD | ✅ Complete — GitHub Actions for pytest, flake8, build |
 | PyPI Publishing | ✅ Complete — Release workflow ready |
-| Documentation | 🚧 In progress — MkDocs API site prepared for GitHub Pages |
+| Documentation | ✅ Complete — README, samples, test docs, API reference docs |
 
 ---
 
@@ -63,7 +63,6 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 - [ ] Documentation enhancements
   - [x] MkDocs Material documentation site
   - [x] API reference auto-generation
-  - [ ] Enable the GitHub Pages deployment
   - [ ] Tutorial series
 
 ### Milestones

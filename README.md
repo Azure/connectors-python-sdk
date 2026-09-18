@@ -389,7 +389,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 For issues and questions:
 
 - 🐛 **Bug reports:** [File an issue](https://github.com/Azure/Connectors-Python-SDK/issues)
-- 📚 **Documentation:** Browse the [source guides](docs/). The [API reference](https://azure.github.io/connectors-python-sdk/) becomes available after GitHub Pages is enabled for the repository.
+- 📚 **Documentation:** Browse the [source guides](docs/) and the [API reference](https://azure.github.io/connectors-python-sdk/).
 
 See [SUPPORT.md](SUPPORT.md) for more information.
 
