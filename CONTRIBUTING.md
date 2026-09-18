@@ -188,19 +188,28 @@ pytest --cov=azure.connectors --cov-report=html
 
 ### Building Documentation
 
-If Sphinx documentation is added in the future:
+Install the documentation dependencies from the repository root:
 
 ```bash
-# Install docs dependencies
-pip install -e ".[docs]"
-
-# Build docs
-cd docs
-make html
-
-# View docs
-open _build/html/index.html
+python -m pip install -e "./src[docs]"
 ```
+
+Build the complete site and validate that every shipped Python module has an API page:
+
+```bash
+python -m mkdocs build --strict
+python scripts/validate_api_docs.py --site-dir site
+```
+
+Preview documentation changes locally at `http://127.0.0.1:8000/`:
+
+```bash
+python -m mkdocs serve
+```
+
+API pages under `api/core/` and `api/connectors/` are generated from the Python source during each build. Do not create or edit those pages manually. Update public docstrings in the owning source; generated connector corrections must be made in the CodefulSdkGenerator and regenerated.
+
+The generated `site/` directory is local build output and must not be committed.
 
 ## Release Process
 

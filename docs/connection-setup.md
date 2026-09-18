@@ -396,6 +396,6 @@ The endpoint path may be incorrect. Check the connector's swagger/OpenAPI spec f
 
 ## See Also
 
-- [scripts/Setup-Connection.ps1](../scripts/Setup-Connection.ps1) - Automated setup script
-- [ROADMAP.md](../ROADMAP.md) - Connector generation progress and lessons learned
+- [scripts/Setup-Connection.ps1](https://github.com/Azure/connectors-python-sdk/blob/main/scripts/Setup-Connection.ps1) - Automated setup script
+- [ROADMAP.md](https://github.com/Azure/connectors-python-sdk/blob/main/ROADMAP.md) - Connector generation progress and lessons learned
 - [DirectConnector Sample](https://github.com/Azure/Connectors-NET-Samples) - Working example with Office 365, SharePoint, and Teams

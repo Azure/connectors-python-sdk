@@ -30,11 +30,19 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/Azure/connectors-python-sdk"
+Documentation = "https://azure.github.io/connectors-python-sdk/"
 Repository = "https://github.com/Azure/connectors-python-sdk"
 Changelog = "https://github.com/Azure/connectors-python-sdk/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+docs = [
+    "mkdocs>=1.6,<2",
+    "mkdocs-gen-files>=0.5,<1",
+    "mkdocs-literate-nav>=0.6,<1",
+    "mkdocs-material>=9.6,<10",
+    "mkdocs-section-index>=0.3,<1",
+    "mkdocstrings[python]>=0.29,<1",
+]
 dev = [
     "flake8>=6,<8",
     "mypy",
