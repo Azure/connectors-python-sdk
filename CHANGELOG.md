@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Core request controls** — `ConnectorHttpClient.send_async()` now accepts keyword-only per-request timeouts, custom headers, caller-provided request IDs, and response hooks. Requests receive a generated `x-ms-client-request-id` when callers do not provide one.
 - **Generated API documentation site** — adds a MkDocs Material reference for the core SDK and every shipped connector module, strict source-to-site coverage validation, and a GitHub Pages deployment workflow for `main`.
 - **Zoho ZeptoMail generated client** — adds five public mail-agent, send-mail, template-mail, and analytics actions. `SendTemplateMailInput.merge_key_detail` remains `List[Dict[str, Any]]` so fixed string fields and arbitrary non-string merge values stay representable. The malformed Swagger type `ReplyToAddresss` is exposed as `ReplyToAddress` without changing the `reply_to` wire field.
 
@@ -24,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Core connector failures now inherit from `azure.core.exceptions.HttpResponseError`, expose structured `error_code` and `error_message` fields when present, and translate exhausted `aiohttp` transport failures to `ServiceRequestError`.
+- Azure Identity credential parameters now use the `azure.core.credentials_async.AsyncTokenCredential` protocol instead of untyped `object` or `Any` annotations.
 - Updated all connector samples to match generated method signatures and added literal-type validation to the sample contract checks.
 - Added focused success, route, request-body, response, and error coverage for newly generated operations.
 - Clarified that Azure Functions SDK-type deserialization is owned by the Azure Functions connector extension rather than generated connector clients.

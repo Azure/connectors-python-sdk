@@ -4,9 +4,11 @@
 
 import asyncio
 import json
-from typing import Any, Dict, List, NamedTuple, Optional, TypeVar, Generic
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, TypeVar, Generic
+from uuid import uuid4
 import aiohttp
 from aiohttp import ClientTimeout
+from azure.core.exceptions import ServiceRequestError
 
 from .authentication import TokenProvider
 from .options import ConnectorClientOptions
@@ -94,6 +96,13 @@ class ConnectorHttpClient:
         scopes: Optional[List[str]] = None,
         body: Optional[Any] = None,
         content_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Dict[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[
+            Callable[[_ResponseSnapshot, Dict[str, str]], None]
+        ] = None,
     ) -> _ResponseSnapshot:
         """
         Send an HTTP request with authentication and retry.
@@ -108,6 +117,13 @@ class ConnectorHttpClient:
                 ``application/octet-stream`` for raw binary bodies and
                 ``application/json`` otherwise. This value does not change
                 how the body is serialized.
+            timeout: Optional per-request timeout in seconds.
+            headers: Optional custom request headers. Authentication,
+                content type, and request ID headers are set by the client.
+            client_request_id: Optional caller-provided request identifier.
+                A unique identifier is generated when omitted.
+            response_hook: Optional callback invoked after the response is
+                received, with the response and response headers.
 
         Returns:
             The HTTP response.
@@ -131,10 +147,12 @@ class ConnectorHttpClient:
                 else "application/json"
             )
 
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": content_type,
-        }
+        request_headers = dict(headers or {})
+        request_headers["Authorization"] = f"Bearer {token}"
+        request_headers["Content-Type"] = content_type
+        request_headers["x-ms-client-request-id"] = (
+            client_request_id or str(uuid4())
+        )
 
         request_body: Optional[Any] = None
         if body is not None:
@@ -147,9 +165,18 @@ class ConnectorHttpClient:
                 # JSON body so top-level collections of models are converted too.
                 request_body = json.dumps(to_wire(body))
 
-        return await self._send_with_retry(
-            session, method, url, headers, request_body
+        response = await self._send_with_retry(
+            session,
+            method,
+            url,
+            request_headers,
+            request_body,
+            timeout=timeout,
         )
+        if response_hook is not None:
+            response_hook(response, response.headers)
+
+        return response
 
     async def _send_with_retry(
         self,
@@ -158,15 +185,21 @@ class ConnectorHttpClient:
         url: str,
         headers: Dict[str, str],
         body: Optional[Any],
+        *,
+        timeout: Optional[float] = None,
     ) -> _ResponseSnapshot:
         """Send request with retry logic."""
         last_exception = None
+        request_options: Dict[str, Any] = {
+            "headers": headers,
+            "data": body,
+        }
+        if timeout is not None:
+            request_options["timeout"] = ClientTimeout(total=timeout)
 
         for attempt in range(self._options.max_retry_attempts):
             try:
-                async with session.request(
-                    method, url, headers=headers, data=body
-                ) as response:
+                async with session.request(method, url, **request_options) as response:
                     # For transient errors, retry
                     if response.status >= 500 or response.status == 429:
                         if (
@@ -190,7 +223,7 @@ class ConnectorHttpClient:
                 if attempt < self._options.max_retry_attempts - 1:
                     await self._delay_retry(attempt)
                     continue
-                raise
+                raise ServiceRequestError(message=str(ex)) from ex
 
         # NOTE(victoriahall): If all retries exhausted without returning,
         # raise the last exception or a generic error.

@@ -3,7 +3,8 @@
 """Authentication token providers for connector clients."""
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Any
+from typing import List, Optional
+from azure.core.credentials_async import AsyncTokenCredential
 from azure.identity.aio import (
     DefaultAzureCredential,
     ManagedIdentityCredential,
@@ -31,7 +32,7 @@ class TokenProvider(ABC):
 class AzureIdentityTokenProvider(TokenProvider):
     """Token provider that wraps Azure Identity async credentials."""
 
-    def __init__(self, credential: Any):
+    def __init__(self, credential: AsyncTokenCredential):
         """
         Initialize an AzureIdentityTokenProvider.
 

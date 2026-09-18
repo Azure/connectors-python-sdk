@@ -1,8 +1,10 @@
 """Unit tests for SDK http_client module."""
 
+import aiohttp
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import dataclass, field
+from azure.core.exceptions import ServiceRequestError
 
 from azure.connectors.sdk.http_client import ConnectorHttpClient, ConnectorResponse
 from azure.connectors.sdk.options import ConnectorClientOptions
@@ -152,6 +154,7 @@ class TestConnectorHttpClient:
 
         assert session is not None
         assert client._session is session
+        await client.close()
 
     @pytest.mark.asyncio
     async def test_ensure_session_reuses_existing_session(self, mock_token_provider):
@@ -163,6 +166,7 @@ class TestConnectorHttpClient:
         session2 = await client._ensure_session()
 
         assert session1 is session2
+        await client.close()
 
     @pytest.mark.asyncio
     async def test_close_closes_session(self, mock_token_provider):
@@ -558,6 +562,134 @@ class TestConnectorHttpClient:
             assert headers["Content-Type"] == "application/json"
 
     @pytest.mark.asyncio
+    async def test_send_async_applies_custom_headers_and_request_id(
+        self, mock_token_provider
+    ):
+        """Test custom headers and caller request IDs reach the transport."""
+        mock_token_provider.get_access_token_async = AsyncMock(
+            return_value="token"
+        )
+        client = ConnectorHttpClient(
+            mock_token_provider,
+            ConnectorClientOptions(),
+        )
+        mock_response = MagicMock()
+
+        with patch.object(
+            client,
+            '_send_with_retry',
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.send_async(
+                "GET",
+                "https://api.example.com/data",
+                headers={"x-custom-header": "custom-value"},
+                client_request_id="request-id",
+            )
+
+            request_headers = mock_send.call_args[0][3]
+            assert request_headers["x-custom-header"] == "custom-value"
+            assert request_headers["x-ms-client-request-id"] == "request-id"
+            assert request_headers["Authorization"] == "Bearer token"
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_send_async_generates_request_id(self, mock_token_provider):
+        """Test requests receive a generated correlation identifier."""
+        mock_token_provider.get_access_token_async = AsyncMock(
+            return_value="token"
+        )
+        client = ConnectorHttpClient(
+            mock_token_provider,
+            ConnectorClientOptions(),
+        )
+        mock_response = MagicMock()
+
+        with patch(
+            "azure.connectors.sdk.http_client.uuid4",
+            return_value="generated-request-id",
+        ), patch.object(
+            client,
+            '_send_with_retry',
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.send_async("GET", "https://api.example.com/data")
+
+            request_headers = mock_send.call_args[0][3]
+            assert (
+                request_headers["x-ms-client-request-id"]
+                == "generated-request-id"
+            )
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_send_async_forwards_per_request_timeout(
+        self, mock_token_provider
+    ):
+        """Test a per-request timeout overrides the client default."""
+        mock_token_provider.get_access_token_async = AsyncMock(
+            return_value="token"
+        )
+        client = ConnectorHttpClient(
+            mock_token_provider,
+            ConnectorClientOptions(timeout_seconds=30.0),
+        )
+        mock_response = MagicMock()
+
+        with patch.object(
+            client,
+            '_send_with_retry',
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ) as mock_send:
+            await client.send_async(
+                "GET",
+                "https://api.example.com/data",
+                timeout=2.5,
+            )
+
+            assert mock_send.call_args.kwargs["timeout"] == 2.5
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_send_async_invokes_response_hook(self, mock_token_provider):
+        """Test the response hook observes the completed operation response."""
+        mock_token_provider.get_access_token_async = AsyncMock(
+            return_value="token"
+        )
+        client = ConnectorHttpClient(
+            mock_token_provider,
+            ConnectorClientOptions(),
+        )
+        mock_response = MagicMock()
+        mock_response.headers = {"x-response-header": "response-value"}
+        response_hook = MagicMock()
+
+        with patch.object(
+            client,
+            '_send_with_retry',
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            result = await client.send_async(
+                "GET",
+                "https://api.example.com/data",
+                response_hook=response_hook,
+            )
+
+        assert result is mock_response
+        response_hook.assert_called_once_with(
+            mock_response,
+            mock_response.headers,
+        )
+        await client.close()
+
+    @pytest.mark.asyncio
     async def test_send_async_with_bytes_body_sends_raw_octet_stream(self, mock_token_provider):
         """Test send_async sends raw bytes as application/octet-stream."""
         mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
@@ -616,6 +748,62 @@ class TestConnectorHttpClient:
             sent_body = call_args[0][4]
             assert headers["Content-Type"] == "application/pdf"
             assert sent_body == body
+
+    @pytest.mark.asyncio
+    async def test_send_with_retry_wraps_exhausted_transport_error(
+        self, mock_token_provider
+    ):
+        """Test exhausted transport failures use the Azure Core hierarchy."""
+        options = ConnectorClientOptions(max_retry_attempts=1)
+        client = ConnectorHttpClient(mock_token_provider, options)
+        session = MagicMock()
+        session.request.side_effect = aiohttp.ClientConnectionError(
+            "Connection failed."
+        )
+
+        with pytest.raises(ServiceRequestError) as exc_info:
+            await client._send_with_retry(
+                session=session,
+                method="GET",
+                url="https://api.example.com/data",
+                headers={},
+                body=None,
+            )
+
+        assert isinstance(exc_info.value.__cause__, aiohttp.ClientConnectionError)
+
+    @pytest.mark.asyncio
+    async def test_send_with_retry_applies_per_request_timeout(
+        self, mock_token_provider
+    ):
+        """Test timeout seconds are converted for the aiohttp transport."""
+        client = ConnectorHttpClient(
+            mock_token_provider,
+            ConnectorClientOptions(),
+        )
+        response = MagicMock()
+        response.status = 200
+        response.headers = {}
+        response.text = AsyncMock(return_value="")
+        response.read = AsyncMock(return_value=b"")
+        request_context = MagicMock()
+        request_context.__aenter__ = AsyncMock(return_value=response)
+        request_context.__aexit__ = AsyncMock(return_value=None)
+        session = MagicMock()
+        session.request.return_value = request_context
+
+        await client._send_with_retry(
+            session=session,
+            method="GET",
+            url="https://api.example.com/data",
+            headers={},
+            body=None,
+            timeout=2.5,
+        )
+
+        request_timeout = session.request.call_args.kwargs["timeout"]
+        assert isinstance(request_timeout, aiohttp.ClientTimeout)
+        assert request_timeout.total == 2.5
 
     @pytest.mark.asyncio
     async def test_delay_retry_with_exponential_backoff(self, mock_token_provider):

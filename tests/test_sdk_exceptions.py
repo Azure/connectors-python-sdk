@@ -1,6 +1,7 @@
 """Unit tests for SDK exceptions module."""
 
 import pytest
+from azure.core.exceptions import HttpResponseError
 
 from azure.connectors.sdk.exceptions import ConnectorException
 
@@ -54,6 +55,12 @@ class TestConnectorException:
         ex = ConnectorException("GET", "/", 500, "error")
 
         assert isinstance(ex, Exception)
+
+    def test_exception_inherits_from_http_response_error(self):
+        """Test that connector failures use the Azure Core HTTP hierarchy."""
+        ex = ConnectorException("GET", "/", 500, "error")
+
+        assert isinstance(ex, HttpResponseError)
 
     def test_exception_can_be_raised_and_caught(self):
         """Test that exception can be raised and caught."""
@@ -137,6 +144,23 @@ class TestConnectorException:
 
         assert json_body in str(ex)
         assert ex.response_body == json_body
+        assert ex.error_code == "InvalidRequest"
+        assert ex.error_message == "The request is invalid"
+
+    def test_exception_with_top_level_error_details(self):
+        """Test top-level connector error details remain programmatically available."""
+        json_body = '{"code": "ConnectorFailure", "message": "Call failed."}'
+        ex = ConnectorException("POST", "/resource", 502, json_body)
+
+        assert ex.error_code == "ConnectorFailure"
+        assert ex.error_message == "Call failed."
+
+    def test_exception_with_non_json_body_has_no_error_details(self):
+        """Test unstructured response bodies do not invent error details."""
+        ex = ConnectorException("GET", "/resource", 500, "Server error")
+
+        assert ex.error_code is None
+        assert ex.error_message is None
 
     def test_max_response_body_length_constant(self):
         """Test that MAX_RESPONSE_BODY_LENGTH constant is accessible."""

@@ -26,6 +26,7 @@ classifiers = [
 ]
 dependencies = [
     "aiohttp",
+    "azure-core",
     "azure-identity[aio]",
 ]
 

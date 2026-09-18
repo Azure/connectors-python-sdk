@@ -4,6 +4,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Optional, Union
+from azure.core.credentials_async import AsyncTokenCredential
 
 from .authentication import TokenProvider, AzureIdentityTokenProvider
 from .http_client import ConnectorHttpClient
@@ -15,7 +16,7 @@ class ConnectorClientBase(ABC):
 
     def __init__(
         self,
-        token_provider: Union[TokenProvider, object],
+        token_provider: Union[TokenProvider, AsyncTokenCredential],
         options: Optional[ConnectorClientOptions] = None,
     ):
         """
