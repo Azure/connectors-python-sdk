@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Generated API documentation site** — adds a MkDocs Material reference for the core SDK and every shipped connector module, strict source-to-site coverage validation, and a GitHub Pages deployment workflow for `main`.
 - **Zoho ZeptoMail generated client** — adds five public mail-agent, send-mail, template-mail, and analytics actions. `SendTemplateMailInput.merge_key_detail` remains `List[Dict[str, Any]]` so fixed string fields and arbitrary non-string merge values stay representable. The malformed Swagger type `ReplyToAddresss` is exposed as `ReplyToAddress` without changing the `reply_to` wire field.
 
 ### Breaking Changes

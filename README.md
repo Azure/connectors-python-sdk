@@ -1,6 +1,7 @@
 [![CI](https://dev.azure.com/azfunc/public/_apis/build/status%2Fazure%2Fconnectors-python-sdk%2Fpython-connectors.public?repoName=Azure%2Fconnectors-python-sdk&branchName=main)](https://dev.azure.com/azfunc/public/_build/latest?definitionId=1724&repoName=Azure%2Fconnectors-python-sdk&branchName=main)
 [![PyPI version](https://badge.fury.io/py/azure-connectors.svg)](https://badge.fury.io/py/azure-connectors)
 [![Python versions](https://img.shields.io/pypi/pyversions/azure-connectors.svg)](https://pypi.org/project/azure-connectors/)
+[![API documentation](https://img.shields.io/badge/docs-API_reference-005a9e.svg)](https://azure.github.io/connectors-python-sdk/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Azure Connectors Python SDK
@@ -388,7 +389,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 For issues and questions:
 
 - 🐛 **Bug reports:** [File an issue](https://github.com/Azure/Connectors-Python-SDK/issues)
-- 📚 **Documentation:** See [docs/](docs/) folder
+- 📚 **Documentation:** Browse the [source guides](docs/). The [API reference](https://azure.github.io/connectors-python-sdk/) becomes available after GitHub Pages is enabled for the repository.
 
 See [SUPPORT.md](SUPPORT.md) for more information.
 
