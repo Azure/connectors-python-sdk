@@ -9,8 +9,6 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-import mkdocs_gen_files
-
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = REPOSITORY_ROOT / "src" / "azure" / "connectors"
@@ -73,6 +71,8 @@ def _write_module_page(
     names: list[str],
 ) -> Path:
     """Write one virtual Markdown page for a Python module."""
+    import mkdocs_gen_files
+
     document_path = API_ROOT / section / f"{source_path.stem}.md"
     title = _module_title(source_path, names)
 
@@ -102,6 +102,8 @@ def _source_modules(directory: Path) -> list[Path]:
 
 def _generate_reference() -> None:
     """Generate API pages and the literate navigation file."""
+    import mkdocs_gen_files
+
     navigation = mkdocs_gen_files.Nav()
     navigation["Home"] = "index.md"
     navigation[("Guides", "Connection setup")] = "connection-setup.md"
@@ -142,4 +144,5 @@ def _generate_reference() -> None:
         navigation_file.writelines(navigation.build_literate_nav())
 
 
-_generate_reference()
+if __name__ in {"__main__", "<run_path>"}:
+    _generate_reference()

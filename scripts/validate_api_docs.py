@@ -12,6 +12,7 @@ from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = REPOSITORY_ROOT / "src" / "azure" / "connectors"
+API_CONTENT_MARKER = 'class="doc doc-object doc-module"'
 
 
 def _source_module_names(directory: Path) -> set[str]:
@@ -24,14 +25,14 @@ def _source_module_names(directory: Path) -> set[str]:
 
 
 def _built_module_names(directory: Path) -> set[str]:
-    """Return module names represented by nonempty built HTML pages."""
+    """Return module names represented by rendered API content."""
     if not directory.is_dir():
         return set()
 
     return {
         path.parent.name
         for path in directory.glob("*/index.html")
-        if path.stat().st_size > 0
+        if API_CONTENT_MARKER in path.read_text(encoding="utf-8")
     }
 
 

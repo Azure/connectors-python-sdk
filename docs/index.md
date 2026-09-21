@@ -11,7 +11,7 @@ Build type-safe Python integrations with Azure managed connectors for services s
 python -m pip install azure-connectors
 ```
 
-The SDK requires Python 3.10 or later and provides asynchronous connector clients, typed request and response models, and Azure Identity integration.
+The SDK requires Python 3.10 or later and provides asynchronous connector clients, typed request models, generated schema classes, and Azure Identity integration. Connector operation responses are currently returned as dictionaries rather than generated model instances.
 
 ## Create a client
 
