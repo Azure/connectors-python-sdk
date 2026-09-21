@@ -260,8 +260,9 @@ The following connectors have been generated and validated with comprehensive te
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated |
 | **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated |
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
+| **Zoho ZeptoMail** | `azure.connectors.zeptomail` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 98 connectors supported
+**Total:** 99 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 
