@@ -41,7 +41,7 @@ docs = [
     "mkdocs-literate-nav>=0.6,<1",
     "mkdocs-material>=9.6,<10",
     "mkdocs-section-index>=0.3,<1",
-    "mkdocstrings[python]>=0.29,<1",
+    "mkdocstrings[python]>=0.29,<2",
 ]
 dev = [
     "flake8>=6,<8",
