@@ -1,0 +1,24 @@
+:root {
+  --md-text-font: "Segoe UI Variable Text", "Aptos", sans-serif;
+  --md-code-font: "Cascadia Code", "Cascadia Mono", monospace;
+}
+
+.md-header {
+  border-bottom: 3px solid #f7630c;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  font-family: "Segoe UI Variable Display", "Aptos Display", sans-serif;
+  letter-spacing: 0;
+}
+
+.md-typeset h1 {
+  color: #005a9e;
+  font-weight: 650;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h1 {
+  color: #75b6e7;
+}

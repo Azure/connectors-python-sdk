@@ -44,3 +44,6 @@ samples/generated/*.cs
 **/*.egg-info/
 **/build
 **/.idea
+
+# Documentation build output
+/site/
