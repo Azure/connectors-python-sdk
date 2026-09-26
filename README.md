@@ -164,15 +164,21 @@ By default, `GET`, `HEAD`, `OPTIONS`, and `TRACE` use the configured retry setti
 Only opt in when the connector operation can tolerate replay, preferably with a service-supported idempotency key or deduplication:
 
 ```python
+import asyncio
+
 from azure.connectors.sdk import ConnectorClientOptions
 from azure.connectors.teams import TeamsClient
 
-options = ConnectorClientOptions(
-    max_retry_attempts=3,
-    retry_unsafe_http_methods=True,  # May repeat connector side effects.
-)
-async with TeamsClient(connection_url, options=options) as client:
-    ...
+async def use_teams_client():
+    connection_url = "https://example.azure.com/connections/teams"
+    options = ConnectorClientOptions(
+        max_retry_attempts=3,
+        retry_unsafe_http_methods=True,  # May repeat connector side effects.
+    )
+    async with TeamsClient(connection_url, options=options) as client:
+        print(client.connector_name)
+
+asyncio.run(use_teams_client())
 ```
 
 `max_retry_attempts`, timeout, and backoff settings continue to govern eligible retries. This is the same [cross-language retry-safety contract](https://github.com/Azure/Connectors-NET-SDK/blob/main/docs/retry-safety.md) as the .NET and Node.js SDKs, with a Python-idiomatic option name.
