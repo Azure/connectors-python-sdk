@@ -8,7 +8,11 @@ from typing import Optional
 
 @dataclass
 class ConnectorClientOptions:
-    """Configuration options for connector clients."""
+    """Configuration options for connector clients.
+
+    Automatic retries apply to GET, HEAD, OPTIONS, and TRACE by default.
+    Other methods make one attempt unless retry_unsafe_http_methods is enabled.
+    """
 
     base_uri: Optional[str] = None
     """The base URI for the connector endpoint."""
@@ -24,3 +28,10 @@ class ConnectorClientOptions:
 
     initial_retry_delay_seconds: float = 0.5
     """The initial retry delay in seconds."""
+
+    retry_unsafe_http_methods: bool = False
+    """Allow configured retries for methods other than GET, HEAD, OPTIONS, and TRACE.
+
+    Defaults to False; enabling this can duplicate connector side effects after
+    an ambiguous response or transport failure.
+    """

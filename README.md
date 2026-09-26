@@ -26,10 +26,10 @@ Azure provides a rich ecosystem of [managed connectors](https://learn.microsoft.
 - **Async/await native** — Built on `aiohttp` with full async support for modern Python applications
 - **Type-safe operations** — Generated async methods with type hints and comprehensive docstrings
 - **Built-in authentication** — Managed identity, Azure Identity, and API key token providers
-- **Resilient HTTP** — Configurable retry policies with exponential backoff for transient failures
+- **Resilient HTTP** — Configurable retries with exponential backoff for safe HTTP methods; unsafe methods make one attempt by default
 - **1,000+ connectors** — Any Azure managed connector available via API Hub can be generated
 
-> **Note:** This is the Python SDK. A [.NET SDK](https://github.com/Azure/Connectors-NET-SDK) is also available. Node.js and Java SDKs are planned in collaboration with the Azure Functions team.
+> **Note:** This is the Python SDK. [.NET](https://github.com/Azure/Connectors-NET-SDK) and [Node.js](https://github.com/Azure/Connectors-NodeJS-SDK) SDKs are also available. A Java SDK is planned in collaboration with the Azure Functions team.
 
 ## How It Works
 
@@ -156,6 +156,26 @@ async def post_teams_message():
 
 asyncio.run(post_teams_message())
 ```
+
+### Retry safety
+
+By default, `GET`, `HEAD`, `OPTIONS`, and `TRACE` use the configured retry settings. `POST`, `PUT`, `PATCH`, `DELETE`, and any other method make one attempt, including after a transient `429` or `5xx` response or an `aiohttp.ClientError`. A connector may complete a side effect before either failure becomes visible. This is a change from earlier versions that retried every HTTP method.
+
+Only opt in when the connector operation can tolerate replay, preferably with a service-supported idempotency key or deduplication:
+
+```python
+from azure.connectors.sdk import ConnectorClientOptions
+from azure.connectors.teams import TeamsClient
+
+options = ConnectorClientOptions(
+    max_retry_attempts=3,
+    retry_unsafe_http_methods=True,  # May repeat connector side effects.
+)
+async with TeamsClient(connection_url, options=options) as client:
+    ...
+```
+
+`max_retry_attempts`, timeout, and backoff settings continue to govern eligible retries. This is the same [cross-language retry-safety contract](https://github.com/Azure/Connectors-NET-SDK/blob/main/docs/retry-safety.md) as the .NET and Node.js SDKs, with a Python-idiomatic option name.
 
 ## Validated Connectors
 
