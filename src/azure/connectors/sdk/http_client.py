@@ -163,6 +163,7 @@ class ConnectorHttpClient:
         body: Optional[Any],
     ) -> _ResponseSnapshot:
         """Send request with retry logic."""
+        method = method.upper()
         last_exception = None
         max_attempts = (
             self._options.max_retry_attempts

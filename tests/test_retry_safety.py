@@ -50,6 +50,44 @@ async def test_post_transient_response_is_sent_once_by_default(mock_token_provid
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "method, expected_attempts",
+    [
+        ("get", 2), ("GeT", 2),
+        ("head", 2), ("HeAd", 2),
+        ("options", 2), ("OpTiOnS", 2),
+        ("trace", 2), ("TrAcE", 2),
+        ("post", 1), ("PuT", 1), ("pAtCh", 1),
+        ("delete", 1), ("CuStOm", 1),
+    ],
+)
+@pytest.mark.parametrize("failure", ["response", "transport"])
+async def test_method_case_is_normalized_before_retry_and_dispatch(
+    method, expected_attempts, failure, mock_token_provider
+):
+    """Classification and every dispatch must use the same uppercase method."""
+    options = ConnectorClientOptions(max_retry_attempts=2)
+    session = MagicMock()
+    first_outcome = (
+        response_context(500)
+        if failure == "response"
+        else aiohttp.ClientConnectionError("Unknown outcome.")
+    )
+    session.request.side_effect = [first_outcome, response_context(200)]
+
+    if failure == "transport" and expected_attempts == 1:
+        with pytest.raises(aiohttp.ClientConnectionError):
+            await send_with_session(method, options, session, mock_token_provider)
+    else:
+        result = await send_with_session(method, options, session, mock_token_provider)
+        assert result.status == (200 if expected_attempts == 2 else 500)
+
+    assert session.request.call_count == expected_attempts
+    for request_call in session.request.call_args_list:
+        assert request_call.args[0] == method.upper()
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("method", ["GET", "HEAD", "OPTIONS", "TRACE"])
 @pytest.mark.parametrize("status", [429, 500, 503])
 async def test_safe_methods_retry_transient_responses(
@@ -99,7 +137,8 @@ async def test_safe_method_uses_exact_configured_attempts(mock_token_provider):
 
 
 @pytest.mark.asyncio
-async def test_post_transient_response_retries_when_enabled(mock_token_provider):
+@pytest.mark.parametrize("method", ["POST", "post", "PoSt"])
+async def test_post_transient_response_retries_when_enabled(method, mock_token_provider):
     """Apply the configured retry budget when explicitly opted in."""
     options = ConnectorClientOptions(
         max_retry_attempts=2, retry_unsafe_http_methods=True
@@ -107,10 +146,12 @@ async def test_post_transient_response_retries_when_enabled(mock_token_provider)
     session = MagicMock()
     session.request.side_effect = [response_context(429), response_context(200)]
 
-    result = await send_with_session("POST", options, session, mock_token_provider)
+    result = await send_with_session(method, options, session, mock_token_provider)
 
     assert result.status == 200
     assert session.request.call_count == 2
+    for request_call in session.request.call_args_list:
+        assert request_call.args[0] == "POST"
 
 
 @pytest.mark.asyncio
@@ -134,7 +175,8 @@ async def test_transport_error_obeys_method_safety(method, mock_token_provider):
 
 
 @pytest.mark.asyncio
-async def test_post_transport_error_retries_when_enabled(mock_token_provider):
+@pytest.mark.parametrize("method", ["POST", "post", "PoSt"])
+async def test_post_transport_error_retries_when_enabled(method, mock_token_provider):
     """Opt-in permits replay after a retriable transport failure."""
     options = ConnectorClientOptions(
         max_retry_attempts=2, retry_unsafe_http_methods=True
@@ -144,10 +186,12 @@ async def test_post_transport_error_retries_when_enabled(mock_token_provider):
         aiohttp.ClientConnectionError("Unknown outcome."), response_context(200)
     ]
 
-    result = await send_with_session("POST", options, session, mock_token_provider)
+    result = await send_with_session(method, options, session, mock_token_provider)
 
     assert result.status == 200
     assert session.request.call_count == 2
+    for request_call in session.request.call_args_list:
+        assert request_call.args[0] == "POST"
 
 
 @pytest.mark.asyncio
