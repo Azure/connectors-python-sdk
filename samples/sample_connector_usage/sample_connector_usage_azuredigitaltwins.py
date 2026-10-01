@@ -122,15 +122,15 @@ async def example_3_query_twins():
             query_input = QueryTwinsInput(
                 query="SELECT * FROM digitaltwins"
             )
-            result = await client.query_twins_async(input=query_input)
+            query_response = await client.query_twins_async(input=query_input)
 
-            if result.get("value"):
-                print(f"Query results: {result['value']}")
+            if query_response and query_response.get("value"):
+                print(f"Query results: {query_response['value']}")
             else:
                 print("No twins found matching query")
 
             # Check for continuation token for pagination
-            if result.get("continuation_token"):
+            if query_response and query_response.get("continuation_token"):
                 print("More results available (use continuation_token)")
 
         except ConnectorException as ex:

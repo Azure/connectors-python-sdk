@@ -147,6 +147,9 @@ async for item in client.get_items_async(...):
     `subscriptions`, `documents`, or `users`, rather than adding a `result` alias.
 - Treat collected items as lists, not response dictionaries, and remove repeated
     conditions rather than retaining expressions such as `if documents and documents`.
+- Preserve null guards for nullable non-pageable responses, such as
+    `response and response.get("value")`. Test `None`, empty dictionaries, and
+    populated responses separately; a repeated receiver is not a repeated condition.
 - Execute migrated samples with empty and nonempty mocked results. Assert their
     output and reject caught-and-printed errors; imports and call signatures alone
     do not validate how a response is consumed.

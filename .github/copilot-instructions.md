@@ -10,6 +10,7 @@ This repository contains the Python SDK for Azure Connectors. Code must follow P
 - Reviewers independently fetch live definitions using their own empty temporary directory. Do not supply the producer's responses as review inputs or substitute a cache when live results differ.
 - Keep refreshes within the existing repository structure. Do not introduce cache folders, replay manifests, or new scaffolding unless explicitly requested. Temporary response stores are removed after the run.
 - Capture known response data directly in semantic variables, without redundant `result` aliases or duplicated conditions. Check the actual returned shape after regeneration; an item list is not a response dictionary.
+- Preserve nullable-response guards such as `response and response.get(...)`; they are not duplicate conditions. Test non-pageable consumers with `None`, empty dictionaries, and populated responses separately. Do not simplify conditions by matching text prefixes.
 - Execute changed samples with empty and nonempty mocked results and assert their output, including absence of caught-and-printed errors. Pagination tests must exercise continuation requests, later-page items, and termination, including an empty initial page with a next link.
 
 ## Quick Reference: Coding Style Rules

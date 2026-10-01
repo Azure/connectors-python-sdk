@@ -106,17 +106,17 @@ async def example_3_advanced_hunting():
             query = "DeviceInfo | take 5 | project DeviceName, OSPlatform, PublicIP"
             input_data = AdvancedHuntingInput(query=query)
 
-            result = await client.advanced_hunting_async(input=input_data)
+            hunting_response = await client.advanced_hunting_async(input=input_data)
 
-            if result.get("results"):
-                print(f"Query returned {len(result['results'])} results:")
-                for row in result["results"]:
+            if hunting_response and hunting_response.get("results"):
+                print(f"Query returned {len(hunting_response['results'])} results:")
+                for row in hunting_response["results"]:
                     print(f"  - {row}")
             else:
                 print("No results from query.")
 
-            if result.get("stats"):
-                print(f"Execution time: {result['stats'].get('executionTime', 'N/A')}s")
+            if hunting_response and hunting_response.get("stats"):
+                print(f"Execution time: {hunting_response['stats'].get('executionTime', 'N/A')}s")
 
         except ConnectorException as ex:
             print(f"Connector error (status {ex.status_code}): {ex}")

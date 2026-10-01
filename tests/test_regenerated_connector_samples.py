@@ -121,6 +121,7 @@ def test_sample_validator_rejects_dictionary_access_on_collected_items() -> None
         ("if items and items:\n    pass", ["remove repeated conditions"]),
         ("items = [item async for item in client.get_items_async()]", []),
         ("if items and ready:\n    pass", []),
+        ("if response and response.get('value'):\n    pass", []),
     ],
 )
 def test_sample_validator_checks_consumer_principles(
@@ -193,6 +194,54 @@ async def test_pageable_samples_report_collected_items(
         assert f"Documents retrieved: {item_count}" in output
     else:
         assert f"{item_count} {expected_noun}" in output
+
+
+@pytest.mark.parametrize("response_kind", ["none", "empty", "populated"])
+@pytest.mark.parametrize(
+    "connector,function_name,client_name,operation_name,item_key,empty_message",
+    [
+        ("azuredigitaltwins", "example_3_query_twins", "AzuredigitaltwinsClient",
+         "query_twins_async", "value", "No twins found matching query"),
+        ("planner", "example_2_list_group_plans", "PlannerClient",
+         "list_group_plans_async", "value", "No plans found"),
+        ("wdatp", "example_3_advanced_hunting", "WdatpClient",
+         "advanced_hunting_async", "results", "No results from query."),
+    ],
+)
+async def test_nonpageable_samples_preserve_nullable_responses(
+    connector: str,
+    function_name: str,
+    client_name: str,
+    operation_name: str,
+    item_key: str,
+    empty_message: str,
+    response_kind: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Execute null, empty, and populated nullable APIs without weakening list checks."""
+    module = importlib.import_module(
+        f"samples.sample_connector_usage.sample_connector_usage_{connector}"
+    )
+    response = None if response_kind == "none" else {}
+    if response_kind == "populated":
+        response = {item_key: [{"id": "matched-item", "title": "matched-plan"}]}
+    client = MagicMock()
+    setattr(client, operation_name, AsyncMock(return_value=response))
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
+    monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
+
+    arguments = ["sample-group"] if connector == "planner" else []
+    await getattr(module, function_name)(*arguments)
+
+    output = capsys.readouterr().out
+    assert "Error:" not in output
+    assert "Connector error" not in output
+    if response_kind == "populated":
+        assert "matched-item" in output
+    else:
+        assert empty_message in output
 
 
 def test_sample_validator_rejects_incompatible_literal_type() -> None:

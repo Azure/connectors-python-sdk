@@ -67,7 +67,7 @@ async def example_2_list_group_plans(group_id: str):
     try:
         plans = await client.list_group_plans_async(group_id=group_id)
 
-        if plans.get('value'):
+        if plans and plans.get('value'):
             print(f"Found {len(plans.get('value', []))} plans in group")
             for plan in plans.get('value', [])[:5]:  # Show first 5
                 print(f"  - {plan.get('title')} ({plan.get('id')})")
