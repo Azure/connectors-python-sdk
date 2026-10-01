@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- Generated pageable operations now return async iterators of items rather than
-  response dictionaries. Consume them with `async for`, or collect them with
+- This regeneration propagates the existing async-iterator paging contract to
+  32 additional connectors, extending [Fix Dataverse list pagination (#84)](https://github.com/Azure/connectors-python-sdk/pull/84).
+  Pageable operations return items rather than response dictionaries. Consume them
+  with `async for`, or collect them with
   `[item async for item in client.get_items_async(...)]`; samples use this contract.
 
 - **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and `aiohttp.ClientError`. Set `ConnectorClientOptions(retry_unsafe_http_methods=True)` per client only when replay is acceptable; existing retry count, timeout, and backoff settings remain available. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
