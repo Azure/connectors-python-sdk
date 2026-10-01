@@ -26,6 +26,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestAzureadClientInitialization:
@@ -1063,13 +1064,13 @@ class TestGetGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_group_members_async(id="group-123")
+            result = await collect_operation_result(client.get_group_members_async(id="group-123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/v1.0/groups/group-123/members" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_top_parameter(self, mock_token_provider):
@@ -1081,7 +1082,7 @@ class TestGetGroupMembers:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"id": "user1"}], "nextLink": "https://graph.microsoft.com/next"}'
+            text='{"value": [{"id": "user1"}], "nextLink": null}'
         )
 
         with patch.object(
@@ -1090,15 +1091,18 @@ class TestGetGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_group_members_async(id="group-123", top="10")
+            result = await collect_operation_result(
+                client.get_group_members_async(id="group-123", top="10")
+            )
 
             call_args = mock_send.call_args
             assert "$top=10" in call_args[0][1]
-            assert result["nextLink"] is not None
+            mock_send.assert_called_once()
+            assert result == [{"id": "user1"}]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
-        """Test that empty response returns None."""
+    async def test_empty_response_yields_no_items(self, mock_token_provider):
+        """Test that empty response yields no items."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
@@ -1112,8 +1116,8 @@ class TestGetGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_group_members_async(id="group-123")
-            assert result is None
+            result = await collect_operation_result(client.get_group_members_async(id="group-123"))
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -1132,7 +1136,9 @@ class TestGetGroupMembers:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_group_members_async(id="nonexistent-group")
+                await collect_operation_result(
+                    client.get_group_members_async(id="nonexistent-group")
+                )
 
             assert exc_info.value.status_code == 404
 

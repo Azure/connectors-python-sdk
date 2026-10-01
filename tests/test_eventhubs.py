@@ -137,7 +137,7 @@ class TestTriggerOperations:
             )
 
             url = mock_send.call_args[0][1]
-            assert "contentType=application/json" in url
+            assert "contentType=application%2Fjson" in url
             assert "contentSchema=schema-1" in url
             assert result == {"type": "object"}
 

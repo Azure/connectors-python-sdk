@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -168,6 +168,11 @@ class QueryDocumentsResponse:
         metadata={"wire_name": "@metadata"},
     )
     """List of columns along with their Sensitivity Labels"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -487,6 +492,45 @@ class DocumentdbClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "documentdb"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def create_document_async(
         self,
         input: PostDocumentsRequest,
@@ -723,12 +767,12 @@ class DocumentdbClient(ConnectorClientBase):
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -778,12 +822,12 @@ class DocumentdbClient(ConnectorClientBase):
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -857,11 +901,14 @@ class DocumentdbClient(ConnectorClientBase):
         session_token: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Query documents
 
         Query documents.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -879,61 +926,72 @@ class DocumentdbClient(ConnectorClientBase):
             value = str(query_text)
             if isinstance(query_text, bool):
                 value = value.lower()
-            query_params.append(f"queryText={quote(value)}")
+            query_params.append(f"queryText={quote(value, safe='')}")
         if partition_key is not None:
             value = str(partition_key)
             if isinstance(partition_key, bool):
                 value = value.lower()
-            query_params.append(f"partitionKey={quote(value)}")
+            query_params.append(f"partitionKey={quote(value, safe='')}")
         if max_item_count is not None:
             value = str(max_item_count)
             if isinstance(max_item_count, bool):
                 value = value.lower()
-            query_params.append(f"maxItemCount={quote(value)}")
+            query_params.append(f"maxItemCount={quote(value, safe='')}")
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
                 value = value.lower()
-            query_params.append(f"continuationToken={quote(value)}")
+            query_params.append(f"continuationToken={quote(value, safe='')}")
         if consistency_level is not None:
             value = str(consistency_level)
             if isinstance(consistency_level, bool):
                 value = value.lower()
-            query_params.append(f"consistencyLevel={quote(value)}")
+            query_params.append(f"consistencyLevel={quote(value, safe='')}")
         if session_token is not None:
             value = str(session_token)
             if isinstance(session_token, bool):
                 value = value.lower()
-            query_params.append(f"sessionToken={quote(value)}")
+            query_params.append(f"sessionToken={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def replace_document_async(
         self,

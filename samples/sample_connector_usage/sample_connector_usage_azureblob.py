@@ -165,13 +165,13 @@ async def example_4_list_blobs():
 
         async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                blobs = await client.list_root_folder_async(
+                blobs = [item async for item in client.list_root_folder_async(
                     dataset=STORAGE_ACCOUNT,
-                )
+                )]
 
-                if blobs and "value" in blobs:
-                    print(f"Found {len(blobs['value'])} items in root:")
-                    for blob in blobs["value"][:10]:  # Show first 10
+                if blobs:
+                    print(f"Found {len(blobs)} items in root:")
+                    for blob in blobs[:10]:  # Show first 10
                         name = blob.get("Name", "N/A")
                         is_folder = blob.get("IsFolder", False)
                         size = blob.get("Size", 0)
@@ -190,14 +190,14 @@ async def example_4_list_blobs():
 
     async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            blobs = await client.list_folder_async(
+            blobs = [item async for item in client.list_folder_async(
                 dataset=STORAGE_ACCOUNT,
                 id=folder_id,
-            )
+            )]
 
-            if blobs and "value" in blobs:
-                print(f"Found {len(blobs['value'])} items:")
-                for blob in blobs["value"][:10]:  # Show first 10
+            if blobs:
+                print(f"Found {len(blobs)} items:")
+                for blob in blobs[:10]:  # Show first 10
                     name = blob.get("Name", "N/A")
                     is_folder = blob.get("IsFolder", False)
                     size = blob.get("Size", 0)

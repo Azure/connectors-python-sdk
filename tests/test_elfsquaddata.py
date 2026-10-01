@@ -10,6 +10,7 @@ import azure.connectors.elfsquaddata as elfsquaddata_module
 from azure.connectors.elfsquaddata import ElfsquaddataClient, TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 OPERATION_CONTRACTS = {
@@ -68,12 +69,12 @@ async def test_get_entities_serializes_query_and_response(
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"value": []}'),
     ) as mock_send:
-        result = await client.get_entities_async(
+        result = await collect_operation_result(client.get_entities_async(
             entity_name="products",
             top=10,
             select="id,name",
             count=True,
-        )
+        ))
 
     mock_send.assert_awaited_once_with(
         "GET",
@@ -81,4 +82,4 @@ async def test_get_entities_serializes_query_and_response(
         "?$top=10&$select=id%2Cname&$count=true",
         body=None,
     )
-    assert result == {"value": []}
+    assert result == []

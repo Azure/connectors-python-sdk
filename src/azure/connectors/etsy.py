@@ -2817,21 +2817,21 @@ class EtsyClient(ConnectorClientBase):
         value = str(min_created)
         if isinstance(min_created, bool):
             value = value.lower()
-        query_params.append(f"min_created={quote(value)}")
+        query_params.append(f"min_created={quote(value, safe='')}")
         value = str(max_created)
         if isinstance(max_created, bool):
             value = value.lower()
-        query_params.append(f"max_created={quote(value)}")
+        query_params.append(f"max_created={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2874,7 +2874,7 @@ class EtsyClient(ConnectorClientBase):
         value = str(ledger_entry_ids)
         if isinstance(ledger_entry_ids, bool):
             value = value.lower()
-        query_params.append(f"ledger_entry_ids={quote(value)}")
+        query_params.append(f"ledger_entry_ids={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2951,7 +2951,7 @@ class EtsyClient(ConnectorClientBase):
         value = str(payment_ids)
         if isinstance(payment_ids, bool):
             value = value.lower()
-        query_params.append(f"payment-ids={quote(value)}")
+        query_params.append(f"payment-ids={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3034,42 +3034,42 @@ class EtsyClient(ConnectorClientBase):
             value = str(min_created)
             if isinstance(min_created, bool):
                 value = value.lower()
-            query_params.append(f"min_created={quote(value)}")
+            query_params.append(f"min_created={quote(value, safe='')}")
         if max_created is not None:
             value = str(max_created)
             if isinstance(max_created, bool):
                 value = value.lower()
-            query_params.append(f"max_created={quote(value)}")
+            query_params.append(f"max_created={quote(value, safe='')}")
         if min_last_modified is not None:
             value = str(min_last_modified)
             if isinstance(min_last_modified, bool):
                 value = value.lower()
-            query_params.append(f"min_last_modified={quote(value)}")
+            query_params.append(f"min_last_modified={quote(value, safe='')}")
         if max_last_modified is not None:
             value = str(max_last_modified)
             if isinstance(max_last_modified, bool):
                 value = value.lower()
-            query_params.append(f"max_last_modified={quote(value)}")
+            query_params.append(f"max_last_modified={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if was_paid is not None:
             value = str(was_paid)
             if isinstance(was_paid, bool):
                 value = value.lower()
-            query_params.append(f"was_paid={quote(value)}")
+            query_params.append(f"was_paid={quote(value, safe='')}")
         if was_shipped is not None:
             value = str(was_shipped)
             if isinstance(was_shipped, bool):
                 value = value.lower()
-            query_params.append(f"was_shipped={quote(value)}")
+            query_params.append(f"was_shipped={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3157,12 +3157,12 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3274,12 +3274,12 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3320,12 +3320,12 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3361,7 +3361,7 @@ class EtsyClient(ConnectorClientBase):
         value = str(origin_country_iso)
         if isinstance(origin_country_iso, bool):
             value = value.lower()
-        query_params.append(f"origin_country_iso={quote(value)}")
+        query_params.append(f"origin_country_iso={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3576,12 +3576,12 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3955,17 +3955,17 @@ class EtsyClient(ConnectorClientBase):
         value = str(shop_name)
         if isinstance(shop_name, bool):
             value = value.lower()
-        query_params.append(f"shop_name={quote(value)}")
+        query_params.append(f"shop_name={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4164,12 +4164,12 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4276,27 +4276,27 @@ class EtsyClient(ConnectorClientBase):
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"State={quote(value)}")
+            query_params.append(f"State={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if sort_on is not None:
             value = str(sort_on)
             if isinstance(sort_on, bool):
                 value = value.lower()
-            query_params.append(f"Sort On={quote(value)}")
+            query_params.append(f"Sort On={quote(value, safe='')}")
         if sort_order is not None:
             value = str(sort_order)
             if isinstance(sort_order, bool):
                 value = value.lower()
-            query_params.append(f"Sort Order={quote(value)}")
+            query_params.append(f"Sort Order={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4368,7 +4368,7 @@ class EtsyClient(ConnectorClientBase):
             value = str(includes)
             if isinstance(includes, bool):
                 value = value.lower()
-            query_params.append(f"includes={quote(value)}")
+            query_params.append(f"includes={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4437,47 +4437,47 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if keywords is not None:
             value = str(keywords)
             if isinstance(keywords, bool):
                 value = value.lower()
-            query_params.append(f"keywords={quote(value)}")
+            query_params.append(f"keywords={quote(value, safe='')}")
         if sort_on is not None:
             value = str(sort_on)
             if isinstance(sort_on, bool):
                 value = value.lower()
-            query_params.append(f"sort_on={quote(value)}")
+            query_params.append(f"sort_on={quote(value, safe='')}")
         if sort_order is not None:
             value = str(sort_order)
             if isinstance(sort_order, bool):
                 value = value.lower()
-            query_params.append(f"sort_order={quote(value)}")
+            query_params.append(f"sort_order={quote(value, safe='')}")
         if min_price is not None:
             value = str(min_price)
             if isinstance(min_price, bool):
                 value = value.lower()
-            query_params.append(f"min_price={quote(value)}")
+            query_params.append(f"min_price={quote(value, safe='')}")
         if max_price is not None:
             value = str(max_price)
             if isinstance(max_price, bool):
                 value = value.lower()
-            query_params.append(f"max_price={quote(value)}")
+            query_params.append(f"max_price={quote(value, safe='')}")
         if taxonomy_id is not None:
             value = str(taxonomy_id)
             if isinstance(taxonomy_id, bool):
                 value = value.lower()
-            query_params.append(f"taxonomy_id={quote(value)}")
+            query_params.append(f"taxonomy_id={quote(value, safe='')}")
         if shop_location is not None:
             value = str(shop_location)
             if isinstance(shop_location, bool):
                 value = value.lower()
-            query_params.append(f"shop_location={quote(value)}")
+            query_params.append(f"shop_location={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4520,17 +4520,17 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if keywords is not None:
             value = str(keywords)
             if isinstance(keywords, bool):
                 value = value.lower()
-            query_params.append(f"keywords={quote(value)}")
+            query_params.append(f"keywords={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4567,12 +4567,12 @@ class EtsyClient(ConnectorClientBase):
         value = str(listing_ids)
         if isinstance(listing_ids, bool):
             value = value.lower()
-        query_params.append(f"listing_ids={quote(value)}")
+        query_params.append(f"listing_ids={quote(value, safe='')}")
         if includes is not None:
             value = str(includes)
             if isinstance(includes, bool):
                 value = value.lower()
-            query_params.append(f"includes={quote(value)}")
+            query_params.append(f"includes={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4613,12 +4613,12 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4848,12 +4848,12 @@ class EtsyClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4896,27 +4896,27 @@ class EtsyClient(ConnectorClientBase):
         value = str(shop_section_ids)
         if isinstance(shop_section_ids, bool):
             value = value.lower()
-        query_params.append(f"shop_section_ids={quote(value)}")
+        query_params.append(f"shop_section_ids={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if sort_on is not None:
             value = str(sort_on)
             if isinstance(sort_on, bool):
                 value = value.lower()
-            query_params.append(f"sort_on={quote(value)}")
+            query_params.append(f"sort_on={quote(value, safe='')}")
         if sort_order is not None:
             value = str(sort_order)
             if isinstance(sort_order, bool):
                 value = value.lower()
-            query_params.append(f"sort_order={quote(value)}")
+            query_params.append(f"sort_order={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5267,7 +5267,7 @@ class EtsyClient(ConnectorClientBase):
             value = str(includes)
             if isinstance(includes, bool):
                 value = value.lower()
-            query_params.append(f"includes={quote(value)}")
+            query_params.append(f"includes={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

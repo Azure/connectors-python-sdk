@@ -34,6 +34,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestPlannerClientInitialization:
@@ -154,11 +155,11 @@ class TestListMyTasksAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_my_tasks_async()
+            result = await collect_operation_result(client.list_my_tasks_async())
 
             mock_send.assert_called_once()
             assert result is not None
-            assert "value" in result
+            assert len(result) > 0
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_token_provider):
@@ -176,8 +177,8 @@ class TestListMyTasksAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_my_tasks_async()
-            assert result is None
+            result = await collect_operation_result(client.list_my_tasks_async())
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -196,7 +197,7 @@ class TestListMyTasksAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.list_my_tasks_async()
+                await collect_operation_result(client.list_my_tasks_async())
 
 
 class TestListGroupPlansAsync:

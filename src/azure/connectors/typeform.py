@@ -187,22 +187,22 @@ class TypeformClient(ConnectorClientBase):
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
-            query_params.append(f"search={quote(value)}")
+            query_params.append(f"search={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if page_size is not None:
             value = str(page_size)
             if isinstance(page_size, bool):
                 value = value.lower()
-            query_params.append(f"page_size={quote(value)}")
+            query_params.append(f"page_size={quote(value, safe='')}")
         if workspace_id is not None:
             value = str(workspace_id)
             if isinstance(workspace_id, bool):
                 value = value.lower()
-            query_params.append(f"workspace_id={quote(value)}")
+            query_params.append(f"workspace_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

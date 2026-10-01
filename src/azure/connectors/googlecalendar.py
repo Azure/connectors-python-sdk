@@ -295,7 +295,7 @@ class GooglecalendarClient(ConnectorClientBase):
             value = str(min_access_role)
             if isinstance(min_access_role, bool):
                 value = value.lower()
-            query_params.append(f"minAccessRole={quote(value)}")
+            query_params.append(f"minAccessRole={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -338,17 +338,17 @@ class GooglecalendarClient(ConnectorClientBase):
             value = str(time_min)
             if isinstance(time_min, bool):
                 value = value.lower()
-            query_params.append(f"timeMin={quote(value)}")
+            query_params.append(f"timeMin={quote(value, safe='')}")
         if time_max is not None:
             value = str(time_max)
             if isinstance(time_max, bool):
                 value = value.lower()
-            query_params.append(f"timeMax={quote(value)}")
+            query_params.append(f"timeMax={quote(value, safe='')}")
         if q is not None:
             value = str(q)
             if isinstance(q, bool):
                 value = value.lower()
-            query_params.append(f"q={quote(value)}")
+            query_params.append(f"q={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

@@ -1455,7 +1455,7 @@ class InsightlyClient(ConnectorClientBase):
         value = str(id)
         if isinstance(id, bool):
             value = value.lower()
-        query_params.append(f"id={quote(value)}")
+        query_params.append(f"id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1546,7 +1546,7 @@ class InsightlyClient(ConnectorClientBase):
         value = str(id)
         if isinstance(id, bool):
             value = value.lower()
-        query_params.append(f"id={quote(value)}")
+        query_params.append(f"id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1637,7 +1637,7 @@ class InsightlyClient(ConnectorClientBase):
         value = str(id)
         if isinstance(id, bool):
             value = value.lower()
-        query_params.append(f"id={quote(value)}")
+        query_params.append(f"id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1728,7 +1728,7 @@ class InsightlyClient(ConnectorClientBase):
         value = str(id)
         if isinstance(id, bool):
             value = value.lower()
-        query_params.append(f"id={quote(value)}")
+        query_params.append(f"id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

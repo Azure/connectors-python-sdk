@@ -47,6 +47,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 # API versions emitted by the generated ARM client.
@@ -186,7 +187,7 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.subscriptions_list_async()
+            result = await collect_operation_result(arm_client.subscriptions_list_async())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -194,11 +195,9 @@ class TestSubscriptionsListAsync:
                 f"?x-ms-api-version={ARM_API_VERSION}",
                 body=None
             )
-            assert result is not None
-            assert "value" in result
-            assert len(result["value"]) == 2
-            assert result["value"][0]["displayName"] == "Production Subscription"
-            assert result["value"][1]["displayName"] == "Development Subscription"
+            assert len(result) == 2
+            assert result[0]["displayName"] == "Production Subscription"
+            assert result[1]["displayName"] == "Development Subscription"
 
     @pytest.mark.asyncio
     async def test_success_uses_generated_api_version(self, arm_client):
@@ -212,7 +211,7 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.subscriptions_list_async()
+            result = await collect_operation_result(arm_client.subscriptions_list_async())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -234,15 +233,14 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.subscriptions_list_async()
+            result = await collect_operation_result(arm_client.subscriptions_list_async())
 
             mock_send.assert_called_once()
-            assert result is not None
-            assert result["value"] == []
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_success_with_empty_response_body(self, arm_client):
-        """Test successful GET request with empty response body returns None."""
+        """Test successful GET request with empty response body yields no items."""
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
@@ -251,14 +249,15 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.subscriptions_list_async()
+            result = await collect_operation_result(arm_client.subscriptions_list_async())
 
             mock_send.assert_called_once()
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
-    async def test_success_with_pagination(self, arm_client):
-        """Test response includes nextLink for pagination."""
+    @pytest.mark.parametrize("empty_first_page", [False, True])
+    async def test_success_with_pagination(self, arm_client, empty_first_page):
+        """Test iteration follows the actual next-link request even after an empty page."""
         mock_response_data = {
             "value": [
                 {
@@ -270,19 +269,41 @@ class TestSubscriptionsListAsync:
             ],
             "nextLink": "https://management.azure.com/subscriptions?$skiptoken=abc123"
         }
+        if empty_first_page:
+            mock_response_data["value"] = []
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
+        final_response = MockResponse(
+            status=200,
+            text=json.dumps({
+                "value": [{"subscriptionId": "subscription-2", "displayName": "Subscription 2"}],
+                "nextLink": None,
+            }),
+        )
 
         with patch.object(
             arm_client._http_client,
             'send_async',
             new_callable=AsyncMock,
-            return_value=mock_response
-        ):
-            result = await arm_client.subscriptions_list_async()
+            side_effect=[mock_response, final_response]
+        ) as mock_send:
+            subscriptions = [
+                subscription async for subscription in arm_client.subscriptions_list_async()
+            ]
 
-            assert result is not None
-            assert "nextLink" in result
-            assert result["nextLink"] is not None
+            assert [subscription["displayName"] for subscription in subscriptions] == (
+                ["Subscription 2"] if empty_first_page else ["Subscription 1", "Subscription 2"]
+            )
+            assert mock_send.await_count == 2
+            assert mock_send.await_args_list[0].args == (
+                "GET",
+                "https://example.azure.com/connections/test/subscriptions"
+                f"?x-ms-api-version={ARM_API_VERSION}",
+            )
+            assert mock_send.await_args_list[1].args == (
+                "GET",
+                "https://example.azure.com/connections/test/subscriptions?$skiptoken=abc123",
+            )
+            assert all(request.kwargs == {"body": None} for request in mock_send.await_args_list)
 
     @pytest.mark.asyncio
     async def test_error_unauthorized(self, arm_client):
@@ -299,7 +320,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await arm_client.subscriptions_list_async()
+                await collect_operation_result(arm_client.subscriptions_list_async())
 
             assert exc_info.value.status_code == 401
 
@@ -318,7 +339,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await arm_client.subscriptions_list_async()
+                await collect_operation_result(arm_client.subscriptions_list_async())
 
             assert exc_info.value.status_code == 403
 
@@ -337,7 +358,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await arm_client.subscriptions_list_async()
+                await collect_operation_result(arm_client.subscriptions_list_async())
 
             assert exc_info.value.status_code == 404
 
@@ -356,7 +377,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await arm_client.subscriptions_list_async()
+                await collect_operation_result(arm_client.subscriptions_list_async())
 
             assert exc_info.value.status_code == 500
 
@@ -775,9 +796,9 @@ class TestResourceGroupsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.resource_groups_list_async(
+            result = await collect_operation_result(arm_client.resource_groups_list_async(
                 subscription_id="sub-1"
-            )
+            ))
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -786,8 +807,8 @@ class TestResourceGroupsListAsync:
                 body=None
             )
             assert result is not None
-            assert len(result["value"]) == 2
-            assert result["value"][0]["name"] == "rg-1"
+            assert len(result) == 2
+            assert result[0]["name"] == "rg-1"
 
     @pytest.mark.asyncio
     async def test_error_not_found(self, arm_client):
@@ -804,9 +825,9 @@ class TestResourceGroupsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await arm_client.resource_groups_list_async(
+                await collect_operation_result(arm_client.resource_groups_list_async(
                     subscription_id="sub-1"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 
@@ -1027,13 +1048,13 @@ class TestProvidersListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.providers_list_async(
+            result = await collect_operation_result(arm_client.providers_list_async(
                 subscription_id="sub-1"
-            )
+            ))
 
             mock_send.assert_called_once()
             assert result is not None
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
 
 class TestProvidersRegisterAsync:

@@ -40,7 +40,7 @@ class ServiceBusMessage:
         metadata={"wire_name": "ContentType"},
     )
     """Content type of the message content"""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, str]] = field(
         default=None,
         metadata={"wire_name": "Properties"},
     )
@@ -189,7 +189,7 @@ class SubscriptionCorrelationFilter:
     This is a user-defined value that Service Bus can use to identify duplicate
     messages, if enabled.
     """
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, str]] = field(
         default=None,
         metadata={"wire_name": "Properties"},
     )
@@ -272,7 +272,7 @@ class ServicebusClient(ConnectorClientBase):
             value = str(system_properties)
             if isinstance(system_properties, bool):
                 value = value.lower()
-            query_params.append(f"systemProperties={quote(value)}")
+            query_params.append(f"systemProperties={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -310,7 +310,7 @@ class ServicebusClient(ConnectorClientBase):
             value = str(system_properties)
             if isinstance(system_properties, bool):
                 value = value.lower()
-            query_params.append(f"systemProperties={quote(value)}")
+            query_params.append(f"systemProperties={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -348,17 +348,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
                 value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
+            query_params.append(f"queueType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -396,17 +396,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
                 value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
+            query_params.append(f"queueType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -444,17 +444,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(sequence_number)
         if isinstance(sequence_number, bool):
             value = value.lower()
-        query_params.append(f"sequenceNumber={quote(value)}")
+        query_params.append(f"sequenceNumber={quote(value, safe='')}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
                 value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
+            query_params.append(f"queueType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -497,17 +497,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
                 value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
+            query_params.append(f"queueType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -546,22 +546,22 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if dead_letter_reason is not None:
             value = str(dead_letter_reason)
             if isinstance(dead_letter_reason, bool):
                 value = value.lower()
-            query_params.append(f"deadLetterReason={quote(value)}")
+            query_params.append(f"deadLetterReason={quote(value, safe='')}")
         if dead_letter_error_description is not None:
             value = str(dead_letter_error_description)
             if isinstance(dead_letter_error_description, bool):
                 value = value.lower()
-            query_params.append(f"deadLetterErrorDescription={quote(value)}")
+            query_params.append(f"deadLetterErrorDescription={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -598,12 +598,12 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
                 value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
+            query_params.append(f"queueType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -644,17 +644,17 @@ class ServicebusClient(ConnectorClientBase):
             value = str(max_message_count)
             if isinstance(max_message_count, bool):
                 value = value.lower()
-            query_params.append(f"maxMessageCount={quote(value)}")
+            query_params.append(f"maxMessageCount={quote(value, safe='')}")
         if queue_type is not None:
             value = str(queue_type)
             if isinstance(queue_type, bool):
                 value = value.lower()
-            query_params.append(f"queueType={quote(value)}")
+            query_params.append(f"queueType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -760,17 +760,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
                 value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
+            query_params.append(f"subscriptionType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -811,17 +811,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
                 value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
+            query_params.append(f"subscriptionType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -862,17 +862,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(sequence_number)
         if isinstance(sequence_number, bool):
             value = value.lower()
-        query_params.append(f"sequenceNumber={quote(value)}")
+        query_params.append(f"sequenceNumber={quote(value, safe='')}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
                 value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
+            query_params.append(f"subscriptionType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -918,17 +918,17 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
                 value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
+            query_params.append(f"subscriptionType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -970,22 +970,22 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if dead_letter_reason is not None:
             value = str(dead_letter_reason)
             if isinstance(dead_letter_reason, bool):
                 value = value.lower()
-            query_params.append(f"deadLetterReason={quote(value)}")
+            query_params.append(f"deadLetterReason={quote(value, safe='')}")
         if dead_letter_error_description is not None:
             value = str(dead_letter_error_description)
             if isinstance(dead_letter_error_description, bool):
                 value = value.lower()
-            query_params.append(f"deadLetterErrorDescription={quote(value)}")
+            query_params.append(f"deadLetterErrorDescription={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1025,12 +1025,12 @@ class ServicebusClient(ConnectorClientBase):
         value = str(lock_token)
         if isinstance(lock_token, bool):
             value = value.lower()
-        query_params.append(f"lockToken={quote(value)}")
+        query_params.append(f"lockToken={quote(value, safe='')}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
                 value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
+            query_params.append(f"subscriptionType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1069,7 +1069,7 @@ class ServicebusClient(ConnectorClientBase):
             value = str(subscription_filter_type)
             if isinstance(subscription_filter_type, bool):
                 value = value.lower()
-            query_params.append(f"subscriptionFilterType={quote(value)}")
+            query_params.append(f"subscriptionFilterType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1148,17 +1148,17 @@ class ServicebusClient(ConnectorClientBase):
             value = str(max_message_count)
             if isinstance(max_message_count, bool):
                 value = value.lower()
-            query_params.append(f"maxMessageCount={quote(value)}")
+            query_params.append(f"maxMessageCount={quote(value, safe='')}")
         if subscription_type is not None:
             value = str(subscription_type)
             if isinstance(subscription_type, bool):
                 value = value.lower()
-            query_params.append(f"subscriptionType={quote(value)}")
+            query_params.append(f"subscriptionType={quote(value, safe='')}")
         if session_id is not None:
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1429,7 +1429,7 @@ class ServicebusClient(ConnectorClientBase):
         value = str(subscription_filter_type)
         if isinstance(subscription_filter_type, bool):
             value = value.lower()
-        query_params.append(f"subscriptionFilterType={quote(value)}")
+        query_params.append(f"subscriptionFilterType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

@@ -23,6 +23,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestWdatpClientInitialization:
@@ -179,12 +180,12 @@ class TestGetAlerts:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_alerts_async()
+            result = await collect_operation_result(client.get_alerts_async())
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "api/alerts" in call_args[0][1]
-            assert result["count"] == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_get_alerts_with_filter(self, mock_token_provider):
@@ -198,7 +199,7 @@ class TestGetAlerts:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.get_alerts_async(filter="severity eq 'High'")
+            await collect_operation_result(client.get_alerts_async(filter="severity eq 'High'"))
 
             call_args = mock_send.call_args
             assert "$filter=" in call_args[0][1]
@@ -215,7 +216,7 @@ class TestGetAlerts:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.get_alerts_async(top="10", skip="5")
+            await collect_operation_result(client.get_alerts_async(top="10", skip="5"))
 
             call_args = mock_send.call_args
             assert "$top=10" in call_args[0][1]
@@ -307,11 +308,11 @@ class TestGetMachines:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_machines_async()
+            result = await collect_operation_result(client.get_machines_async())
 
             call_args = mock_send.call_args
             assert "api/machines" in call_args[0][1]
-            assert result["count"] == 2
+            assert len(result) == 2
 
 
 class TestGetSingleMachine:
@@ -462,11 +463,11 @@ class TestGetMachineActions:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_machine_actions_async()
+            result = await collect_operation_result(client.get_machine_actions_async())
 
             call_args = mock_send.call_args
             assert "api/machineactions" in call_args[0][1]
-            assert result["count"] == 1
+            assert len(result) == 1
 
 
 class TestGetInvestigations:
@@ -488,11 +489,11 @@ class TestGetInvestigations:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_investigations_async()
+            result = await collect_operation_result(client.get_investigations_async())
 
             call_args = mock_send.call_args
             assert "api/investigations" in call_args[0][1]
-            assert result["count"] == 1
+            assert len(result) == 1
 
 
 class TestStartInvestigation:
@@ -662,8 +663,8 @@ class TestGetRemediationActivities:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_remediation_activities_async()
+            result = await collect_operation_result(client.get_remediation_activities_async())
 
             call_args = mock_send.call_args
             assert "api/remediationtasks" in call_args[0][1]
-            assert result["count"] == 1
+            assert len(result) == 1

@@ -14,6 +14,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestAzureblobClientInitialization:
@@ -892,16 +893,16 @@ class TestListFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_folder_async(
+            result = await collect_operation_result(client.list_folder_async(
                 dataset="mycontainer",
                 id="folder123"
-            )
+            ))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "foldersV2/folder123" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_pagination_parameters(self, mock_token_provider):
@@ -919,12 +920,12 @@ class TestListFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_folder_async(
+            await collect_operation_result(client.list_folder_async(
                 dataset="mycontainer",
                 id="folder123",
                 next_page_marker="marker123",
                 use_flat_listing="true"
-            )
+            ))
 
             call_args = mock_send.call_args
             assert "nextPageMarker=" in call_args[0][1]
@@ -946,11 +947,11 @@ class TestListFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_folder_async(
+            result = await collect_operation_result(client.list_folder_async(
                 dataset="mycontainer",
                 id="folder123"
-            )
-            assert result is None
+            ))
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -969,10 +970,10 @@ class TestListFolder:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_folder_async(
+                await collect_operation_result(client.list_folder_async(
                     dataset="mycontainer",
                     id="nonexistent"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 
@@ -999,13 +1000,15 @@ class TestListRootFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_root_folder_async(dataset="mycontainer")
+            result = await collect_operation_result(
+                client.list_root_folder_async(dataset="mycontainer")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "foldersV2" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_pagination_parameters(self, mock_token_provider):
@@ -1023,10 +1026,10 @@ class TestListRootFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_root_folder_async(
+            await collect_operation_result(client.list_root_folder_async(
                 dataset="mycontainer",
                 next_page_marker="marker456"
-            )
+            ))
 
             call_args = mock_send.call_args
             assert "nextPageMarker=marker456" in call_args[0][1]
@@ -1047,8 +1050,10 @@ class TestListRootFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_root_folder_async(dataset="mycontainer")
-            assert result is None
+            result = await collect_operation_result(
+                client.list_root_folder_async(dataset="mycontainer")
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -1067,7 +1072,7 @@ class TestListRootFolder:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_root_folder_async(dataset="mycontainer")
+                await collect_operation_result(client.list_root_folder_async(dataset="mycontainer"))
 
             assert exc_info.value.status_code == 403
 

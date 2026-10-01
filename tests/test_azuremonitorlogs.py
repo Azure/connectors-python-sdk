@@ -21,6 +21,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestAzuremonitorlogsClientInitialization:
@@ -197,14 +198,14 @@ class TestListSubscriptionsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_subscriptions_async()
+            result = await collect_operation_result(client.list_subscriptions_async())
 
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/listSubscriptions",
                 body=None,
             )
-            assert result["value"][0]["subscriptionId"] == "sub-id"
+            assert result[0]["subscriptionId"] == "sub-id"
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -221,7 +222,7 @@ class TestListSubscriptionsAsync:
             return_value=MockResponse(status=500, text="Server error"),
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_subscriptions_async()
+                await collect_operation_result(client.list_subscriptions_async())
 
             assert exc_info.value.status_code == 500
 
@@ -243,7 +244,9 @@ class TestListResourceGroupsAsync:
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"value": []}'),
         ) as mock_send:
-            await client.list_resource_groups_async(subscriptions="sub-id")
+            await collect_operation_result(
+                client.list_resource_groups_async(subscriptions="sub-id")
+            )
 
             call_args = mock_send.call_args
             assert call_args.args[0] == "GET"
@@ -275,17 +278,17 @@ class TestListResourcesAsync:
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"value": []}'),
         ) as mock_send:
-            await client.list_resources_async(
+            await collect_operation_result(client.list_resources_async(
                 subscriptions="sub-id",
                 resourcegroups="rg1",
                 resourcetype="Microsoft.OperationalInsights/workspaces",
-            )
+            ))
 
             request_url = mock_send.call_args.args[1]
             assert "listResources?" in request_url
             assert "subscriptions=sub-id" in request_url
             assert "resourcegroups=rg1" in request_url
-            assert "resourcetype=Microsoft.OperationalInsights/workspaces" in request_url
+            assert "resourcetype=Microsoft.OperationalInsights%2Fworkspaces" in request_url
 
 
 class TestQueryDataAsync:

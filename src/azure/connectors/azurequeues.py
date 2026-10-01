@@ -202,7 +202,7 @@ class AzurequeuesClient(ConnectorClientBase):
         value = str(popreceipt)
         if isinstance(popreceipt, bool):
             value = value.lower()
-        query_params.append(f"popreceipt={quote(value)}")
+        query_params.append(f"popreceipt={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -245,12 +245,12 @@ class AzurequeuesClient(ConnectorClientBase):
             value = str(numofmessages)
             if isinstance(numofmessages, bool):
                 value = value.lower()
-            query_params.append(f"numofmessages={quote(value)}")
+            query_params.append(f"numofmessages={quote(value, safe='')}")
         if visibilitytimeout is not None:
             value = str(visibilitytimeout)
             if isinstance(visibilitytimeout, bool):
                 value = value.lower()
-            query_params.append(f"visibilitytimeout={quote(value)}")
+            query_params.append(f"visibilitytimeout={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -361,7 +361,7 @@ class AzurequeuesClient(ConnectorClientBase):
         value = str(queue_name)
         if isinstance(queue_name, bool):
             value = value.lower()
-        query_params.append(f"queueName={quote(value)}")
+        query_params.append(f"queueName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

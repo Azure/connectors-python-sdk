@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
+from collections.abc import AsyncIterator, Awaitable
 from types import ModuleType
 from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
@@ -27,8 +28,19 @@ def get_generated_operations(client_type: type[Any]) -> set[str]:
         name.removesuffix("_async")
         for name in dir(client_type)
         if name.endswith("_async")
-        and inspect.iscoroutinefunction(getattr(client_type, name))
+        and (
+            inspect.iscoroutinefunction(getattr(client_type, name))
+            or inspect.isasyncgenfunction(getattr(client_type, name))
+        )
     }
+
+
+async def collect_operation_result(result: Awaitable[Any] | AsyncIterator[Any]) -> Any:
+    """Await an operation or collect its pageable items without changing their shape."""
+    if isinstance(result, AsyncIterator):
+        return [item async for item in result]
+
+    return await result
 
 
 async def invoke_generated_operation(
@@ -45,7 +57,7 @@ async def invoke_generated_operation(
         for parameter in inspect.signature(method).parameters.values()
         if include_optional_parameters or parameter.default is inspect.Parameter.empty
     }
-    return await method(**arguments)
+    return await collect_operation_result(method(**arguments))
 
 
 class GeneratedConnectorContractTests:
@@ -162,6 +174,8 @@ class GeneratedConnectorContractTests:
                 assert result is None, operation
             elif return_type is bytes:
                 assert result == b'{"ok": true}', operation
+            elif inspect.isasyncgenfunction(getattr(client, f"{operation}_async")):
+                assert result == [], operation
             else:
                 assert result == {"ok": True}, operation
 

@@ -148,7 +148,7 @@ class MicrosoftformsClient(ConnectorClientBase):
         value = str(response_id)
         if isinstance(response_id, bool):
             value = value.lower()
-        query_params.append(f"response_id={quote(value)}")
+        query_params.append(f"response_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

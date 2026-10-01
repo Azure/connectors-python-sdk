@@ -47,10 +47,9 @@ async def example_1_list_subscriptions():
 
     async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.subscriptions_list_async()
+            subscriptions = [item async for item in client.subscriptions_list_async()]
 
-            if result and "value" in result:
-                subscriptions = result["value"]
+            if subscriptions:
                 print(f"Found {len(subscriptions)} subscription(s):")
                 for sub in subscriptions:
                     sub_id = sub.get("subscriptionId", "N/A")
@@ -76,10 +75,9 @@ async def example_2_list_subscriptions_with_details():
 
     async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.subscriptions_list_async()
+            subscriptions = [item async for item in client.subscriptions_list_async()]
 
-            if result and "value" in result:
-                subscriptions = result["value"]
+            if subscriptions:
                 print(f"Retrieved {len(subscriptions)} subscription(s) with details:\n")
 
                 for i, sub in enumerate(subscriptions, 1):
@@ -101,10 +99,6 @@ async def example_2_list_subscriptions_with_details():
                     print(f"  Authorization Source: {auth_source}")
                     print()
 
-                # Check for pagination
-                next_link = result.get("nextLink")
-                if next_link:
-                    print(f"More results available. Next link: {next_link}")
             else:
                 print("No subscriptions found.")
 
@@ -122,17 +116,16 @@ async def example_3_filter_enabled_subscriptions():
 
     async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.subscriptions_list_async()
+            subscriptions = [item async for item in client.subscriptions_list_async()]
 
-            if result and "value" in result:
-                all_subs = result["value"]
+            if subscriptions:
                 enabled_subs = [
-                    sub for sub in all_subs
+                    sub for sub in subscriptions
                     if sub.get("state", "").lower() == "enabled"
                 ]
 
                 print(f"Found {len(enabled_subs)} enabled subscription(s) "
-                      f"out of {len(all_subs)} total:\n")
+                      f"out of {len(subscriptions)} total:\n")
 
                 for sub in enabled_subs:
                     print(f"  - {sub.get('displayName', 'N/A')}")
@@ -140,7 +133,7 @@ async def example_3_filter_enabled_subscriptions():
 
                 # Show disabled/warned subscriptions if any
                 other_subs = [
-                    sub for sub in all_subs
+                    sub for sub in subscriptions
                     if sub.get("state", "").lower() != "enabled"
                 ]
                 if other_subs:

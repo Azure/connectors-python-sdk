@@ -25,6 +25,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestOffice365groupsClientInitialization:
@@ -145,12 +146,12 @@ class TestListGroupMembersAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_group_members_async(group_id="group-123")
+            result = await collect_operation_result(
+                client.list_group_members_async(group_id="group-123")
+            )
 
             mock_send.assert_called_once()
-            assert result is not None
-            assert "value" in result
-            assert len(result["value"]) == 1
+            assert result == [{"id": "user1", "displayName": "John Doe"}]
 
     @pytest.mark.asyncio
     async def test_with_top_parameter(self, mock_token_provider):
@@ -171,14 +172,16 @@ class TestListGroupMembersAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_group_members_async(group_id="group-123", top="10")
+            await collect_operation_result(
+                client.list_group_members_async(group_id="group-123", top="10")
+            )
 
             call_args = mock_send.call_args
             assert "$top=10" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_items(self, mock_token_provider):
+        """Test that an empty page yields no items."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
@@ -192,8 +195,10 @@ class TestListGroupMembersAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_group_members_async(group_id="group-123")
-            assert result is None
+            result = await collect_operation_result(
+                client.list_group_members_async(group_id="group-123")
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -212,7 +217,9 @@ class TestListGroupMembersAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.list_group_members_async(group_id="group-123")
+                await collect_operation_result(
+                    client.list_group_members_async(group_id="group-123")
+                )
 
 
 class TestListGroupsAsync:
@@ -237,11 +244,10 @@ class TestListGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_groups_async()
+            result = await collect_operation_result(client.list_groups_async())
 
             mock_send.assert_called_once()
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "group1", "displayName": "Engineering"}]
 
     @pytest.mark.asyncio
     async def test_with_filter_parameter(self, mock_token_provider):
@@ -259,7 +265,9 @@ class TestListGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_groups_async(filter="displayName eq 'Engineering'")
+            await collect_operation_result(
+                client.list_groups_async(filter="displayName eq 'Engineering'")
+            )
 
             call_args = mock_send.call_args
             assert "$filter=" in call_args[0][1]
@@ -280,7 +288,7 @@ class TestListGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_groups_async(top="50", skiptoken="token123")
+            await collect_operation_result(client.list_groups_async(top="50", skiptoken="token123"))
 
             call_args = mock_send.call_args
             path = call_args[0][1]
@@ -473,15 +481,14 @@ class TestListDeletedGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_deleted_groups_async()
+            result = await collect_operation_result(client.list_deleted_groups_async())
 
             mock_send.assert_called_once()
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "deleted-group", "displayName": "Old Group"}]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_items(self, mock_token_provider):
+        """Test that an empty page yields no items."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
             token_provider=mock_token_provider
@@ -495,8 +502,8 @@ class TestListDeletedGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_deleted_groups_async()
-            assert result is None
+            result = await collect_operation_result(client.list_deleted_groups_async())
+            assert result == []
 
 
 class TestRestoreDeletedGroupAsync:
@@ -652,7 +659,7 @@ class TestListDeletedGroupsByOwnerAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_deleted_groups_by_owner_async()
+            result = await collect_operation_result(client.list_deleted_groups_by_owner_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args

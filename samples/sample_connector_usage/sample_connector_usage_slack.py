@@ -38,8 +38,7 @@ async def example_1_list_channels() -> None:
 
     credential = DefaultAzureCredential()
     async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-        channels_response = await client.list_channels_async()
-        channels = channels_response.get("value", []) if channels_response else []
+        channels = [item async for item in client.list_channels_async()]
 
         print(f"Found {len(channels)} channels")
         for channel in channels[:5]:

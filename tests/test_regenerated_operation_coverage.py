@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+import inspect
+import json
 from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, patch
@@ -162,12 +164,14 @@ async def test_newly_generated_operation_success_contract(
         "https://example.azure.com/connections/test",
         token_provider=mock_token_provider,
     )
+    is_pageable = inspect.isasyncgenfunction(getattr(client, f"{operation}_async"))
+    response_payload = {"value": [{"id": "item-1"}]} if is_pageable else {"ok": True}
 
     with patch.object(
         client._http_client,
         "send_async",
         new_callable=AsyncMock,
-        return_value=MockResponse(status=200, text='{"ok": true}'),
+        return_value=MockResponse(status=200, text=json.dumps(response_payload)),
     ) as mock_send:
         result = await invoke_generated_operation(
             client,
@@ -180,7 +184,7 @@ async def test_newly_generated_operation_success_contract(
     assert method == expected_method
     assert expected_path in request_url
     assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-    assert result == {"ok": True}
+    assert result == (response_payload["value"] if is_pageable else response_payload)
 
 
 @pytest.mark.parametrize(

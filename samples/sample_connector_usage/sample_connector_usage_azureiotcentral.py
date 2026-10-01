@@ -51,8 +51,7 @@ async def example_1_list_devices():
     credential = DefaultAzureCredential()
 
     async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.devices_list_async(application=APPLICATION)
-        devices = result.get("value", []) if result else []
+        devices = [item async for item in client.devices_list_async(application=APPLICATION)]
 
         print(f"Found {len(devices)} device(s).")
         for device in devices[:10]:
@@ -68,8 +67,7 @@ async def example_2_list_device_groups():
     credential = DefaultAzureCredential()
 
     async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.device_groups_list_async(application=APPLICATION)
-        device_groups = result.get("value", []) if result else []
+        device_groups = [item async for item in client.device_groups_list_async(application=APPLICATION)]
 
         print(f"Found {len(device_groups)} device group(s).")
         for device_group in device_groups[:10]:

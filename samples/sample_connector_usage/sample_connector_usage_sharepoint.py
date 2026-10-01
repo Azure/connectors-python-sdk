@@ -91,14 +91,14 @@ async def example_2_get_list_items():
 
     async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            items = await client.get_items_async(
+            items = [item async for item in client.get_items_async(
                 dataset=SHAREPOINT_SITE_URL,
                 table=list_name,
-            )
+            )]
 
-            if items and 'value' in items:
-                print(f"Found {len(items['value'])} items in '{list_name}' list:")
-                for item in items['value']:
+            if items:
+                print(f"Found {len(items)} items in '{list_name}' list:")
+                for item in items:
                     title = item.get('Title', 'No Title')
                     item_id = item.get('Id', 'Unknown')
                     print(f"  - [{item_id}] {title}")
@@ -250,24 +250,24 @@ async def example_5_query_with_filters():
 
             # Query with filters
             print("\nQuerying items (ordered by creation date, top 5)...")
-            items = await client.get_items_async(
+            items = [item async for item in client.get_items_async(
                 dataset=SHAREPOINT_SITE_URL,
                 table=list_name,
                 filter=None,
                 orderby='Created desc',
                 top=5,
-            )
+            )]
 
-            if items and 'value' in items:
-                print(f"Found {len(items['value'])} items:")
-                for item in items['value']:
+            if items:
+                print(f"Found {len(items)} items:")
+                for item in items:
                     title = item.get('Title', 'No Title')
                     created = item.get('Created', 'Unknown')
                     print(f"  - {title} (Created: {created})")
 
             # Clean up test items
             print("\nCleaning up test items...")
-            for item in items.get('value', [])[:3]:
+            for item in items[:3]:
                 if 'Test Item' in item.get('Title', ''):
                     await client.delete_item_async(
                         dataset=SHAREPOINT_SITE_URL,

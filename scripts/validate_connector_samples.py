@@ -71,11 +71,39 @@ class SampleVisitor(ast.NodeVisitor):
         value_type = self._infer_static_type(node.value)
         for target in node.targets:
             if isinstance(target, ast.Name):
+                if (
+                    isinstance(node.value, ast.IfExp)
+                    and isinstance(node.value.body, ast.Name)
+                    and isinstance(node.value.test, ast.Name)
+                    and node.value.body.id == target.id == node.value.test.id
+                    and isinstance(node.value.orelse, ast.List)
+                    and not node.value.orelse.elts
+                    and self.variable_types.get(target.id) is list
+                ):
+                    self._add_issue(node, "remove redundant fallback for collected items")
+                if (
+                    target.id == "result"
+                    and isinstance(node.value, ast.ListComp)
+                    and any(generator.is_async for generator in node.value.generators)
+                ):
+                    self._add_issue(
+                        node, "capture collected items in a semantic name instead of 'result'"
+                    )
                 if client_type is not None:
                     self.client_variables[target.id] = client_type
                 if value_type is not None:
                     self.variable_types[target.id] = value_type
+                else:
+                    self.variable_types.pop(target.id, None)
         self.generic_visit(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        """Keep local variable facts from leaking into another sample function."""
+        variable_types = self.variable_types.copy()
+        client_variables = self.client_variables.copy()
+        self.generic_visit(node)
+        self.variable_types = variable_types
+        self.client_variables = client_variables
 
     def visit_AsyncWith(self, node: ast.AsyncWith) -> None:
         """Track generated clients introduced by async context managers."""
@@ -83,6 +111,24 @@ class SampleVisitor(ast.NodeVisitor):
             client_type = self._client_type_from_expression(item.context_expr)
             if client_type is not None and isinstance(item.optional_vars, ast.Name):
                 self.client_variables[item.optional_vars.id] = client_type
+        self.generic_visit(node)
+
+    def visit_Await(self, node: ast.Await) -> None:
+        """Reject awaiting a generated pageable operation instead of iterating it."""
+        call = node.value
+        if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute):
+            client_type = self._client_type_for_receiver(call.func.value)
+            method = getattr(client_type, call.func.attr, None)
+            if inspect.isasyncgenfunction(method):
+                self._add_issue(node, f"'{call.func.attr}' must be consumed with async for")
+        self.generic_visit(node)
+
+    def visit_BoolOp(self, node: ast.BoolOp) -> None:
+        """Reject repeated simple-name conditions in sample consumer code."""
+        if isinstance(node.op, ast.And):
+            names = [value.id for value in node.values if isinstance(value, ast.Name)]
+            if len(names) != len(set(names)):
+                self._add_issue(node, "remove repeated conditions")
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
@@ -103,6 +149,14 @@ class SampleVisitor(ast.NodeVisitor):
                     )
                 else:
                     self._validate_signature(node, method, include_instance=True)
+            else:
+                receiver_type = self._infer_static_type(node.func.value)
+                if receiver_type in {list, dict, set, tuple} and not hasattr(
+                    receiver_type, node.func.attr
+                ):
+                    self._add_issue(
+                        node, f"'{receiver_type.__name__}' has no method '{node.func.attr}'"
+                    )
 
         self.generic_visit(node)
 
@@ -127,6 +181,12 @@ class SampleVisitor(ast.NodeVisitor):
         if isinstance(node, ast.Name):
             return self.variable_types.get(node.id)
 
+        if isinstance(node, ast.IfExp):
+            body_type = self._infer_static_type(node.body)
+            if body_type is not None and body_type is self._infer_static_type(node.orelse):
+                return body_type
+            return None
+
         try:
             return type(ast.literal_eval(node))
         except (ValueError, TypeError, SyntaxError):
@@ -134,8 +194,11 @@ class SampleVisitor(ast.NodeVisitor):
 
         container_types: tuple[tuple[type[ast.AST], type[Any]], ...] = (
             (ast.Dict, dict),
+            (ast.DictComp, dict),
             (ast.List, list),
+            (ast.ListComp, list),
             (ast.Set, set),
+            (ast.SetComp, set),
             (ast.Tuple, tuple),
         )
         for node_type, container_type in container_types:

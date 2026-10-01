@@ -547,12 +547,12 @@ class ClicksendsmsClient(ConnectorClientBase):
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -802,7 +802,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         value = str(convert)
         if isinstance(convert, bool):
             value = value.lower()
-        query_params.append(f"convert={quote(value)}")
+        query_params.append(f"convert={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -837,7 +837,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         value = str(q)
         if isinstance(q, bool):
             value = value.lower()
-        query_params.append(f"q={quote(value)}")
+        query_params.append(f"q={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

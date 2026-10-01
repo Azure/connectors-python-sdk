@@ -92,56 +92,56 @@ class UniversalprintClient(ConnectorClientBase):
         value = str(printer)
         if isinstance(printer, bool):
             value = value.lower()
-        query_params.append(f"printer={quote(value)}")
+        query_params.append(f"printer={quote(value, safe='')}")
         value = str(file_name)
         if isinstance(file_name, bool):
             value = value.lower()
-        query_params.append(f"fileName={quote(value)}")
+        query_params.append(f"fileName={quote(value, safe='')}")
         if configuration_copies is not None:
             value = str(configuration_copies)
             if isinstance(configuration_copies, bool):
                 value = value.lower()
-            query_params.append(f"configuration_copies={quote(value)}")
+            query_params.append(f"configuration_copies={quote(value, safe='')}")
         if configuration_orientation is not None:
             value = str(configuration_orientation)
             if isinstance(configuration_orientation, bool):
                 value = value.lower()
-            query_params.append(f"configuration_orientation={quote(value)}")
+            query_params.append(f"configuration_orientation={quote(value, safe='')}")
         if configuration_color_mode is not None:
             value = str(configuration_color_mode)
             if isinstance(configuration_color_mode, bool):
                 value = value.lower()
-            query_params.append(f"configuration_colorMode={quote(value)}")
+            query_params.append(f"configuration_colorMode={quote(value, safe='')}")
         if configuration_media_size is not None:
             value = str(configuration_media_size)
             if isinstance(configuration_media_size, bool):
                 value = value.lower()
-            query_params.append(f"configuration_mediaSize={quote(value)}")
+            query_params.append(f"configuration_mediaSize={quote(value, safe='')}")
         if configuration_duplex_mode is not None:
             value = str(configuration_duplex_mode)
             if isinstance(configuration_duplex_mode, bool):
                 value = value.lower()
-            query_params.append(f"configuration_duplexMode={quote(value)}")
+            query_params.append(f"configuration_duplexMode={quote(value, safe='')}")
         if configuration_pages_per_sheet is not None:
             value = str(configuration_pages_per_sheet)
             if isinstance(configuration_pages_per_sheet, bool):
                 value = value.lower()
-            query_params.append(f"configuration_pagesPerSheet={quote(value)}")
+            query_params.append(f"configuration_pagesPerSheet={quote(value, safe='')}")
         if configuration_dpi is not None:
             value = str(configuration_dpi)
             if isinstance(configuration_dpi, bool):
                 value = value.lower()
-            query_params.append(f"configuration_dpi={quote(value)}")
+            query_params.append(f"configuration_dpi={quote(value, safe='')}")
         if configuration_quality is not None:
             value = str(configuration_quality)
             if isinstance(configuration_quality, bool):
                 value = value.lower()
-            query_params.append(f"configuration_quality={quote(value)}")
+            query_params.append(f"configuration_quality={quote(value, safe='')}")
         if configuration_media_type is not None:
             value = str(configuration_media_type)
             if isinstance(configuration_media_type, bool):
                 value = value.lower()
-            query_params.append(f"configuration_mediaType={quote(value)}")
+            query_params.append(f"configuration_mediaType={quote(value, safe='')}")
         if configuration_finishings is not None:
             if isinstance(configuration_finishings, list):
                 joined_parts = []
@@ -151,12 +151,12 @@ class UniversalprintClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"configuration_finishings={quote(joined)}")
+                query_params.append(f"configuration_finishings={quote(joined, safe='')}")
             else:
                 value = str(configuration_finishings)
                 if isinstance(configuration_finishings, bool):
                     value = value.lower()
-                query_params.append(f"configuration_finishings={quote(value)}")
+                query_params.append(f"configuration_finishings={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

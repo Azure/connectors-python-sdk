@@ -46,10 +46,9 @@ async def example_1_list_groups():
 
     async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.list_groups_async(top=10)
+            groups = [item async for item in client.list_groups_async(top=10)]
 
-            if result and "value" in result:
-                groups = result["value"]
+            if groups:
                 print(f"Found {len(groups)} groups:")
                 for group in groups[:5]:
                     print(f"  - {group.get('displayName', 'N/A')} ({group.get('id', 'N/A')})")
@@ -73,10 +72,9 @@ async def example_2_list_group_members():
 
     async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.list_group_members_async(group_id=GROUP_ID)
+            members = [item async for item in client.list_group_members_async(group_id=GROUP_ID)]
 
-            if result and "value" in result:
-                members = result["value"]
+            if members:
                 print(f"Found {len(members)} members:")
                 for member in members[:5]:
                     print(f"  - {member.get('displayName', 'N/A')}")
@@ -195,10 +193,9 @@ async def example_6_list_deleted_groups():
 
     async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.list_deleted_groups_async()
+            groups = [item async for item in client.list_deleted_groups_async()]
 
-            if result and "value" in result:
-                groups = result["value"]
+            if groups:
                 print(f"Found {len(groups)} deleted groups:")
                 for group in groups[:5]:
                     print(f"  - {group.get('displayName', 'N/A')} ({group.get('id', 'N/A')})")

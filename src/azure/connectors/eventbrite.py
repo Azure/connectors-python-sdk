@@ -169,91 +169,91 @@ class EventbriteClient(ConnectorClientBase):
         value = str(event_name_html)
         if isinstance(event_name_html, bool):
             value = value.lower()
-        query_params.append(f"event.name.html={quote(value)}")
+        query_params.append(f"event.name.html={quote(value, safe='')}")
         value = str(event_description_html)
         if isinstance(event_description_html, bool):
             value = value.lower()
-        query_params.append(f"event.description.html={quote(value)}")
+        query_params.append(f"event.description.html={quote(value, safe='')}")
         value = str(event_start_utc)
         if isinstance(event_start_utc, bool):
             value = value.lower()
-        query_params.append(f"event.start.utc={quote(value)}")
+        query_params.append(f"event.start.utc={quote(value, safe='')}")
         value = str(event_end_utc)
         if isinstance(event_end_utc, bool):
             value = value.lower()
-        query_params.append(f"event.end.utc={quote(value)}")
+        query_params.append(f"event.end.utc={quote(value, safe='')}")
         value = str(event_start_timezone)
         if isinstance(event_start_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.start.timezone={quote(value)}")
+        query_params.append(f"event.start.timezone={quote(value, safe='')}")
         value = str(event_end_timezone)
         if isinstance(event_end_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.end.timezone={quote(value)}")
+        query_params.append(f"event.end.timezone={quote(value, safe='')}")
         value = str(event_currency)
         if isinstance(event_currency, bool):
             value = value.lower()
-        query_params.append(f"event.currency={quote(value)}")
+        query_params.append(f"event.currency={quote(value, safe='')}")
         if event_organizer_id is not None:
             value = str(event_organizer_id)
             if isinstance(event_organizer_id, bool):
                 value = value.lower()
-            query_params.append(f"event.organizer_id={quote(value)}")
+            query_params.append(f"event.organizer_id={quote(value, safe='')}")
         if event_venue_id is not None:
             value = str(event_venue_id)
             if isinstance(event_venue_id, bool):
                 value = value.lower()
-            query_params.append(f"event.venue_id={quote(value)}")
+            query_params.append(f"event.venue_id={quote(value, safe='')}")
         if event_category_id is not None:
             value = str(event_category_id)
             if isinstance(event_category_id, bool):
                 value = value.lower()
-            query_params.append(f"event.category_id={quote(value)}")
+            query_params.append(f"event.category_id={quote(value, safe='')}")
         if event_password is not None:
             value = str(event_password)
             if isinstance(event_password, bool):
                 value = value.lower()
-            query_params.append(f"event.password={quote(value)}")
+            query_params.append(f"event.password={quote(value, safe='')}")
         if event_capacity is not None:
             value = str(event_capacity)
             if isinstance(event_capacity, bool):
                 value = value.lower()
-            query_params.append(f"event.capacity={quote(value)}")
+            query_params.append(f"event.capacity={quote(value, safe='')}")
         if event_shareable is not None:
             value = str(event_shareable)
             if isinstance(event_shareable, bool):
                 value = value.lower()
-            query_params.append(f"event.shareable={quote(value)}")
+            query_params.append(f"event.shareable={quote(value, safe='')}")
         if event_invite_only is not None:
             value = str(event_invite_only)
             if isinstance(event_invite_only, bool):
                 value = value.lower()
-            query_params.append(f"event.invite_only={quote(value)}")
+            query_params.append(f"event.invite_only={quote(value, safe='')}")
         if event_online_event is not None:
             value = str(event_online_event)
             if isinstance(event_online_event, bool):
                 value = value.lower()
-            query_params.append(f"event.online_event={quote(value)}")
+            query_params.append(f"event.online_event={quote(value, safe='')}")
         if event_listed is not None:
             value = str(event_listed)
             if isinstance(event_listed, bool):
                 value = value.lower()
-            query_params.append(f"event.listed={quote(value)}")
+            query_params.append(f"event.listed={quote(value, safe='')}")
         if event_hide_start_date is not None:
             value = str(event_hide_start_date)
             if isinstance(event_hide_start_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_start_date={quote(value)}")
+            query_params.append(f"event.hide_start_date={quote(value, safe='')}")
         if event_hide_end_date is not None:
             value = str(event_hide_end_date)
             if isinstance(event_hide_end_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_end_date={quote(value)}")
+            query_params.append(f"event.hide_end_date={quote(value, safe='')}")
         if event_show_remaining is not None:
             value = str(event_show_remaining)
             if isinstance(event_show_remaining, bool):
                 value = value.lower()
-            query_params.append(f"event.show_remaining={quote(value)}")
+            query_params.append(f"event.show_remaining={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -311,99 +311,99 @@ class EventbriteClient(ConnectorClientBase):
         value = str(organization_id)
         if isinstance(organization_id, bool):
             value = value.lower()
-        query_params.append(f"organization_id={quote(value)}")
+        query_params.append(f"organization_id={quote(value, safe='')}")
         if event_name_html is not None:
             value = str(event_name_html)
             if isinstance(event_name_html, bool):
                 value = value.lower()
-            query_params.append(f"event.name.html={quote(value)}")
+            query_params.append(f"event.name.html={quote(value, safe='')}")
         if event_description_html is not None:
             value = str(event_description_html)
             if isinstance(event_description_html, bool):
                 value = value.lower()
-            query_params.append(f"event.description.html={quote(value)}")
+            query_params.append(f"event.description.html={quote(value, safe='')}")
         if event_start_utc is not None:
             value = str(event_start_utc)
             if isinstance(event_start_utc, bool):
                 value = value.lower()
-            query_params.append(f"event.start.utc={quote(value)}")
+            query_params.append(f"event.start.utc={quote(value, safe='')}")
         if event_end_utc is not None:
             value = str(event_end_utc)
             if isinstance(event_end_utc, bool):
                 value = value.lower()
-            query_params.append(f"event.end.utc={quote(value)}")
+            query_params.append(f"event.end.utc={quote(value, safe='')}")
         value = str(event_start_timezone)
         if isinstance(event_start_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.start.timezone={quote(value)}")
+        query_params.append(f"event.start.timezone={quote(value, safe='')}")
         value = str(event_end_timezone)
         if isinstance(event_end_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.end.timezone={quote(value)}")
+        query_params.append(f"event.end.timezone={quote(value, safe='')}")
         value = str(event_currency)
         if isinstance(event_currency, bool):
             value = value.lower()
-        query_params.append(f"event.currency={quote(value)}")
+        query_params.append(f"event.currency={quote(value, safe='')}")
         if event_organizer_id is not None:
             value = str(event_organizer_id)
             if isinstance(event_organizer_id, bool):
                 value = value.lower()
-            query_params.append(f"event.organizer_id={quote(value)}")
+            query_params.append(f"event.organizer_id={quote(value, safe='')}")
         if event_venue_id is not None:
             value = str(event_venue_id)
             if isinstance(event_venue_id, bool):
                 value = value.lower()
-            query_params.append(f"event.venue_id={quote(value)}")
+            query_params.append(f"event.venue_id={quote(value, safe='')}")
         if event_category_id is not None:
             value = str(event_category_id)
             if isinstance(event_category_id, bool):
                 value = value.lower()
-            query_params.append(f"event.category_id={quote(value)}")
+            query_params.append(f"event.category_id={quote(value, safe='')}")
         if event_password is not None:
             value = str(event_password)
             if isinstance(event_password, bool):
                 value = value.lower()
-            query_params.append(f"event.password={quote(value)}")
+            query_params.append(f"event.password={quote(value, safe='')}")
         if event_capacity is not None:
             value = str(event_capacity)
             if isinstance(event_capacity, bool):
                 value = value.lower()
-            query_params.append(f"event.capacity={quote(value)}")
+            query_params.append(f"event.capacity={quote(value, safe='')}")
         if event_shareable is not None:
             value = str(event_shareable)
             if isinstance(event_shareable, bool):
                 value = value.lower()
-            query_params.append(f"event.shareable={quote(value)}")
+            query_params.append(f"event.shareable={quote(value, safe='')}")
         if event_invite_only is not None:
             value = str(event_invite_only)
             if isinstance(event_invite_only, bool):
                 value = value.lower()
-            query_params.append(f"event.invite_only={quote(value)}")
+            query_params.append(f"event.invite_only={quote(value, safe='')}")
         if event_online_event is not None:
             value = str(event_online_event)
             if isinstance(event_online_event, bool):
                 value = value.lower()
-            query_params.append(f"event.online_event={quote(value)}")
+            query_params.append(f"event.online_event={quote(value, safe='')}")
         if event_listed is not None:
             value = str(event_listed)
             if isinstance(event_listed, bool):
                 value = value.lower()
-            query_params.append(f"event.listed={quote(value)}")
+            query_params.append(f"event.listed={quote(value, safe='')}")
         if event_hide_start_date is not None:
             value = str(event_hide_start_date)
             if isinstance(event_hide_start_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_start_date={quote(value)}")
+            query_params.append(f"event.hide_start_date={quote(value, safe='')}")
         if event_hide_end_date is not None:
             value = str(event_hide_end_date)
             if isinstance(event_hide_end_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_end_date={quote(value)}")
+            query_params.append(f"event.hide_end_date={quote(value, safe='')}")
         if event_show_remaining is not None:
             value = str(event_show_remaining)
             if isinstance(event_show_remaining, bool):
                 value = value.lower()
-            query_params.append(f"event.show_remaining={quote(value)}")
+            query_params.append(f"event.show_remaining={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -564,11 +564,11 @@ class EventbriteClient(ConnectorClientBase):
         value = str(order_by)
         if isinstance(order_by, bool):
             value = value.lower()
-        query_params.append(f"order_by={quote(value)}")
+        query_params.append(f"order_by={quote(value, safe='')}")
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

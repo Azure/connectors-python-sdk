@@ -408,7 +408,7 @@ class KustoClient(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

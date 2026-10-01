@@ -211,7 +211,7 @@ class TestDropboxClientMethods:
             assert result["id"] == "new1"
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
-            assert "folderPath=/Documents" in call_args[0][1]
+            assert "folderPath=%2FDocuments" in call_args[0][1]
             assert "name=created.txt" in call_args[0][1]
 
 
