@@ -46,7 +46,7 @@ async def example_1_list_my_tasks():
     try:
         tasks = [item async for item in client.list_my_tasks_async()]
 
-        if tasks and tasks:
+        if tasks:
             print(f"Found {len(tasks)} tasks assigned to me")
             for task in tasks[:5]:  # Show first 5
                 print(f"  - {task.get('title')} ({task.get('percentComplete')}% complete)")
@@ -67,7 +67,7 @@ async def example_2_list_group_plans(group_id: str):
     try:
         plans = await client.list_group_plans_async(group_id=group_id)
 
-        if plans and plans.get('value'):
+        if plans.get('value'):
             print(f"Found {len(plans.get('value', []))} plans in group")
             for plan in plans.get('value', [])[:5]:  # Show first 5
                 print(f"  - {plan.get('title')} ({plan.get('id')})")
@@ -79,7 +79,7 @@ async def example_2_list_group_plans(group_id: str):
 
 
 async def example_3_get_task_details(task_id: str):
-    """Example 3: Get task and task details"""
+    """Example 3: Get task details"""
     print("\n=== Example 3: Get Task Details ===")
 
     credential = DefaultAzureCredential()

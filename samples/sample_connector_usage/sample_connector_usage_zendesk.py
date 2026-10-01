@@ -67,12 +67,11 @@ async def example_2_get_items():
 
     async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = [item async for item in client.get_items_async(
+            items = [item async for item in client.get_items_async(
                 table="tickets",
                 top=10,
             )]
 
-            items = (result or {}).get("value", []) if isinstance(result, dict) else []
             print(f"Retrieved {len(items)} item(s).")
 
         except ConnectorException as ex:

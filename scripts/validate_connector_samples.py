@@ -71,11 +71,29 @@ class SampleVisitor(ast.NodeVisitor):
         value_type = self._infer_static_type(node.value)
         for target in node.targets:
             if isinstance(target, ast.Name):
+                if (
+                    target.id == "result"
+                    and isinstance(node.value, ast.ListComp)
+                    and any(generator.is_async for generator in node.value.generators)
+                ):
+                    self._add_issue(
+                        node, "capture collected items in a semantic name instead of 'result'"
+                    )
                 if client_type is not None:
                     self.client_variables[target.id] = client_type
                 if value_type is not None:
                     self.variable_types[target.id] = value_type
+                else:
+                    self.variable_types.pop(target.id, None)
         self.generic_visit(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        """Keep local variable facts from leaking into another sample function."""
+        variable_types = self.variable_types.copy()
+        client_variables = self.client_variables.copy()
+        self.generic_visit(node)
+        self.variable_types = variable_types
+        self.client_variables = client_variables
 
     def visit_AsyncWith(self, node: ast.AsyncWith) -> None:
         """Track generated clients introduced by async context managers."""
@@ -93,6 +111,14 @@ class SampleVisitor(ast.NodeVisitor):
             method = getattr(client_type, call.func.attr, None)
             if inspect.isasyncgenfunction(method):
                 self._add_issue(node, f"'{call.func.attr}' must be consumed with async for")
+        self.generic_visit(node)
+
+    def visit_BoolOp(self, node: ast.BoolOp) -> None:
+        """Reject repeated simple-name conditions in sample consumer code."""
+        if isinstance(node.op, ast.And):
+            names = [value.id for value in node.values if isinstance(value, ast.Name)]
+            if len(names) != len(set(names)):
+                self._add_issue(node, "remove repeated conditions")
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
@@ -113,6 +139,14 @@ class SampleVisitor(ast.NodeVisitor):
                     )
                 else:
                     self._validate_signature(node, method, include_instance=True)
+            else:
+                receiver_type = self._infer_static_type(node.func.value)
+                if receiver_type in {list, dict, set, tuple} and not hasattr(
+                    receiver_type, node.func.attr
+                ):
+                    self._add_issue(
+                        node, f"'{receiver_type.__name__}' has no method '{node.func.attr}'"
+                    )
 
         self.generic_visit(node)
 
@@ -144,8 +178,11 @@ class SampleVisitor(ast.NodeVisitor):
 
         container_types: tuple[tuple[type[ast.AST], type[Any]], ...] = (
             (ast.Dict, dict),
+            (ast.DictComp, dict),
             (ast.List, list),
+            (ast.ListComp, list),
             (ast.Set, set),
+            (ast.SetComp, set),
             (ast.Tuple, tuple),
         )
         for node_type, container_type in container_types:

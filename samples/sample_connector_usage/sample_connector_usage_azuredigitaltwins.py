@@ -59,13 +59,13 @@ async def example_1_list_models():
     ) as client:
         try:
             # List all models
-            result = [item async for item in client.list_models_async(
+            models = [item async for item in client.list_models_async(
                 include_model_definition="true"
             )]
 
-            if result and result:
-                print(f"Found {len(result)} models:")
-                for model in result:
+            if models:
+                print(f"Found {len(models)} models:")
+                for model in models:
                     print(f"  - {model.get('id', 'Unknown')}")
             else:
                 print("No models found")
@@ -124,13 +124,13 @@ async def example_3_query_twins():
             )
             result = await client.query_twins_async(input=query_input)
 
-            if result and result.get("value"):
+            if result.get("value"):
                 print(f"Query results: {result['value']}")
             else:
                 print("No twins found matching query")
 
             # Check for continuation token for pagination
-            if result and result.get("continuation_token"):
+            if result.get("continuation_token"):
                 print("More results available (use continuation_token)")
 
         except ConnectorException as ex:
@@ -153,7 +153,7 @@ async def example_4_list_relationships():
             # List outgoing relationships
             outgoing = [item async for item in client.list_relationships_async(twinid=twin_id)]
 
-            if outgoing and outgoing:
+            if outgoing:
                 print(f"Outgoing relationships from {twin_id}:")
                 for rel in outgoing:
                     print(f"  -> {rel.get('$targetId')} "
@@ -166,7 +166,7 @@ async def example_4_list_relationships():
                 twinid=twin_id
             )]
 
-            if incoming and incoming:
+            if incoming:
                 print(f"Incoming relationships to {twin_id}:")
                 for rel in incoming:
                     print(f"  <- {rel.get('$sourceId')} "

@@ -44,8 +44,8 @@ async def example_1_get_tables():
 
     async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = [item async for item in client.get_tables_async()]
-            tables = result if result else []
+            tables = [item async for item in client.get_tables_async()]
+            tables = tables if tables else []
 
             if tables:
                 print(f"Found {len(tables)} table(s):")
@@ -71,13 +71,13 @@ async def example_2_get_records():
 
     async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = [item async for item in client.get_items_async(
+            records = [item async for item in client.get_items_async(
                 table="account",
                 top=5,
                 select="Id,Name,Phone",
             )]
 
-            records = result if result else []
+            records = records if records else []
             if records:
                 print(f"Found {len(records)} account record(s):")
                 for record in records:

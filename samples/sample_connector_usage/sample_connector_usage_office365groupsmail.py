@@ -20,7 +20,7 @@ async def main() -> None:
 
     async with Office365groupsmailClient(connection_url) as client:
         conversations = [item async for item in client.list_conversations_async(group_id=group_id)]
-        conversation_count = len((conversations or {}).get("value", []))
+        conversation_count = len(conversations)
         print(f"Found {conversation_count} conversation(s) in group '{group_id}'.")
 
         groups = await client.list_groups_async()

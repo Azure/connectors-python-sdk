@@ -66,16 +66,15 @@ async def example_1_query_all_documents():
 
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = [item async for item in client.query_documents_async(
+            documents = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT * FROM c"
             )]
 
-            if result:
-                documents = result
-                count = len(result)
+            if documents:
+                count = len(documents)
                 print(f"Found {count} document(s) in container '{CONTAINER_ID}':")
                 for i, doc in enumerate(documents[:3], 1):  # Show first 3
                     doc_id = doc.get("id", "N/A")
@@ -104,16 +103,15 @@ async def example_2_query_with_filter():
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Query with WHERE clause - adjust field names for your schema
-            result = [item async for item in client.query_documents_async(
+            documents = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT * FROM c WHERE c.type = 'sample'"
             )]
 
-            if result:
-                documents = result
-                count = len(result)
+            if documents:
+                count = len(documents)
                 print(f"Found {count} document(s) matching filter:")
                 for doc in documents[:5]:
                     doc_id = doc.get("id", "N/A")
@@ -129,7 +127,7 @@ async def example_2_query_with_filter():
 
 
 async def example_3_query_with_pagination():
-    """Example 3: Query documents with pagination."""
+    """Example 3: Iterate documents while following continuation links automatically."""
     print("\n=== Example 3: Query with Pagination ===")
 
     if not COSMOS_DB_ACCOUNT or not DATABASE_ID or not CONTAINER_ID:
@@ -140,8 +138,7 @@ async def example_3_query_with_pagination():
 
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            # First page - limit to 2 items
-            result = [item async for item in client.query_documents_async(
+            documents = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
@@ -149,21 +146,10 @@ async def example_3_query_with_pagination():
                 max_item_count=2
             )]
 
-            if result:
-                documents = result
-                continuation = result.get("continuation_token")
-                request_charge = result.get("request_charge", 0)
-
-                print(f"Page 1: Retrieved {len(documents)} document(s)")
-                print(f"  Request charge: {request_charge} RUs")
+            if documents:
+                print(f"Retrieved {len(documents)} document(s) across all pages")
                 for doc in documents:
                     print(f"  - id: {doc.get('id', 'N/A')}")
-
-                if continuation:
-                    print(f"  Continuation token available (truncated): {continuation[:30]}...")
-                    print("  Use continuation_token parameter to fetch next page.")
-                else:
-                    print("  No more pages available.")
             else:
                 print("No documents found.")
 
@@ -193,7 +179,7 @@ async def example_4_query_with_partition_key():
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Query within a specific partition
-            result = [item async for item in client.query_documents_async(
+            documents = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
@@ -201,8 +187,7 @@ async def example_4_query_with_partition_key():
                 partition_key=partition_key
             )]
 
-            if result:
-                documents = result
+            if documents:
                 print(f"Found {len(documents)} document(s) in partition '{partition_key}':")
                 for doc in documents[:5]:
                     print(f"  - id: {doc.get('id', 'N/A')}")
@@ -229,7 +214,7 @@ async def example_5_query_with_consistency():
         try:
             # Query with Session consistency (common for read-your-writes)
             # Valid levels: Strong, BoundedStaleness, Session, Eventual
-            result = [item async for item in client.query_documents_async(
+            documents = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
@@ -237,17 +222,9 @@ async def example_5_query_with_consistency():
                 consistency_level="Session"
             )]
 
-            if result:
-                documents = result
-                session_token = result.get("session_token", "N/A")
-                activity_id = result.get("activity_id", "N/A")
-
+            if documents:
                 print("Query completed with Session consistency:")
                 print(f"  Documents retrieved: {len(documents)}")
-                print(f"  Activity ID: {activity_id}")
-                if session_token and session_token != "N/A":
-                    token_preview = session_token[:30] if len(session_token) > 30 else session_token
-                    print(f"  Session token: {token_preview}...")
 
                 for doc in documents:
                     print(f"  - id: {doc.get('id', 'N/A')}")

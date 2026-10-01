@@ -90,14 +90,14 @@ async def example_2_read_rows():
 
     async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = [item async for item in client.get_items_async(
+            rows = [item async for item in client.get_items_async(
                 server=SERVER,
                 database=DATABASE,
                 table=TABLE,
                 top=5,
                 orderby="Id desc",
             )]
-            rows = result if result else []
+            rows = rows if rows else []
             print(f"Retrieved {len(rows)} row(s) from '{TABLE}'.")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

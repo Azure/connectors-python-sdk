@@ -255,8 +255,9 @@ class TestSubscriptionsListAsync:
             assert result == []
 
     @pytest.mark.asyncio
-    async def test_success_with_pagination(self, arm_client):
-        """Test both pages yield their items and stop after the final page."""
+    @pytest.mark.parametrize("empty_first_page", [False, True])
+    async def test_success_with_pagination(self, arm_client, empty_first_page):
+        """Test iteration follows the actual next-link request even after an empty page."""
         mock_response_data = {
             "value": [
                 {
@@ -268,6 +269,8 @@ class TestSubscriptionsListAsync:
             ],
             "nextLink": "https://management.azure.com/subscriptions?$skiptoken=abc123"
         }
+        if empty_first_page:
+            mock_response_data["value"] = []
         mock_response = MockResponse(status=200, text=json.dumps(mock_response_data))
         final_response = MockResponse(
             status=200,
@@ -283,13 +286,24 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             side_effect=[mock_response, final_response]
         ) as mock_send:
-            result = await collect_operation_result(arm_client.subscriptions_list_async())
+            subscriptions = [
+                subscription async for subscription in arm_client.subscriptions_list_async()
+            ]
 
-            assert [item["displayName"] for item in result] == ["Subscription 1", "Subscription 2"]
-            assert mock_send.await_count == 2
-            assert mock_send.call_args_list[1].args[1] == (
-                "https://example.azure.com/connections/test/subscriptions?$skiptoken=abc123"
+            assert [subscription["displayName"] for subscription in subscriptions] == (
+                ["Subscription 2"] if empty_first_page else ["Subscription 1", "Subscription 2"]
             )
+            assert mock_send.await_count == 2
+            assert mock_send.await_args_list[0].args == (
+                "GET",
+                "https://example.azure.com/connections/test/subscriptions"
+                f"?x-ms-api-version={ARM_API_VERSION}",
+            )
+            assert mock_send.await_args_list[1].args == (
+                "GET",
+                "https://example.azure.com/connections/test/subscriptions?$skiptoken=abc123",
+            )
+            assert all(request.kwargs == {"body": None} for request in mock_send.await_args_list)
 
     @pytest.mark.asyncio
     async def test_error_unauthorized(self, arm_client):

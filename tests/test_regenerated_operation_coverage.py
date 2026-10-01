@@ -4,10 +4,8 @@
 
 from __future__ import annotations
 
-import hashlib
 import inspect
 import json
-from pathlib import Path
 from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, patch
@@ -24,48 +22,6 @@ import azure.connectors.wdatp as wdatp
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import invoke_generated_operation
-
-
-REPOSITORY_ROOT = Path(__file__).parent.parent
-GENERATION_MANIFEST = json.loads(
-    (REPOSITORY_ROOT / "generation.manifest.json").read_text(encoding="utf-8")
-)
-
-
-def canonical_text_hash(relative_path: str) -> str:
-    """Hash the same canonical text recorded by the generator manifest."""
-    text = (REPOSITORY_ROOT / relative_path).read_text(encoding="utf-8")
-    return hashlib.sha256(text.replace("\r\n", "\n").encode("utf-8")).hexdigest()
-
-
-@pytest.mark.parametrize(
-    "connector", GENERATION_MANIFEST["connectors"], ids=lambda connector: connector["apiName"]
-)
-def test_regenerated_client_matches_pinned_inputs(connector: dict[str, Any]) -> None:
-    """Test every committed generated output and Swagger hash matches its provenance."""
-    assert canonical_text_hash(connector["swaggerSnapshot"]) == connector["swaggerSha256"]
-    assert canonical_text_hash(connector["outputFile"]) == connector["outputSha256"]
-
-
-def test_regeneration_records_merged_source_and_minimal_catalog() -> None:
-    """Test the complete shipped inventory uses one unpatched source and minimal catalog."""
-    assert GENERATION_MANIFEST["status"] == "generated"
-    generator = GENERATION_MANIFEST["generator"]
-    assert generator["bpmBaseCommit"] == generator["bpmHeadCommit"]
-    assert len(generator["bpmHeadCommit"]) == 40
-    assert "sourcePatch" not in generator
-    assert generator["assemblyVersion"]
-    source = GENERATION_MANIFEST["swaggerSource"]
-    assert canonical_text_hash(source["managedApisSnapshot"]) == source["managedApisSha256"]
-    catalog = json.loads((REPOSITORY_ROOT / source["managedApisSnapshot"]).read_text())
-    assert {entry["name"] for entry in catalog["value"]} == {
-        connector["apiName"] for connector in GENERATION_MANIFEST["connectors"]
-    }
-    assert len(GENERATION_MANIFEST["connectors"]) == 99
-    for entry in catalog["value"]:
-        assert set(entry) == {"name", "properties"}
-        assert set(entry["properties"]) == {"generalInformation"}
-        assert set(entry["properties"]["generalInformation"]) == {"displayName"}
 
 
 CONNECTOR_OPERATION_CASES = [

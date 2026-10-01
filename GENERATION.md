@@ -31,8 +31,8 @@ Set environment variables (or use defaults):
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ARMCACHE_PATH` | Cache directory for ARM responses | `%TEMP%\armcache` |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | Active Azure CLI subscription |
+| `ARMCACHE_PATH` | Temporary directory for the current live request batch | New empty directory for each run |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription whose live definitions are fetched | Set explicitly |
 | `AZURE_RESOURCE_GROUP` | Resource group with Logic App | (built-in default) |
 | `AZURE_LOGICAPP_SITE` | Logic App Standard site name | (built-in default) |
 | `AZURE_LOCATION` | Azure region for managed APIs | `westus` |
@@ -60,6 +60,10 @@ src\tools\CodefulSdkGenerator\LogicAppsCompiler.Cli\bin\Release\net8.0\LogicApps
 
 ## Generation Commands
 
+Use the [live-download workflow](#live-regeneration-and-review) for every refresh
+and review. The examples below show CLI argument forms, not permission to reuse
+responses from an earlier run.
+
 ### Generate Python Client SDK (Recommended)
 
 Generates typed async Python clients for calling connectors directly from Azure Functions:
@@ -72,7 +76,7 @@ LogicAppsCompiler.exe <output-directory> --pythonDirectClient
 LogicAppsCompiler.exe <output-directory> --pythonDirectClient --connectors=office365,sharepointonline,teams
 
 # Example: Generate to this SDK repo's src/azure/connectors folder
-LogicAppsCompiler.exe "c:\Users\victoriahall\Documents\repos\connectors-python-sdk\src\azure\connectors" --pythonDirectClient --connectors=office365
+LogicAppsCompiler.exe "<path-to-sdk>/src/azure/connectors" --pythonDirectClient --connectors=office365
 ```
 
 **Output structure per connector:**
@@ -93,31 +97,39 @@ LogicAppsCompiler.exe <output-directory> --directClient --connectors=office365
 LogicAppsCompiler.exe <output-directory> --directClient --language=csharp --connectors=office365
 ```
 
-## Pinned Regeneration
+## Live Regeneration and Review
 
-[`generation.manifest.json`](generation.manifest.json) records the immutable generator
-commit, assembly version, capture time, and canonical SHA-256 hashes of each Swagger
-snapshot and generated client. The current run uses a merged generator commit without
-source patches: `bpmBaseCommit` and `bpmHeadCommit` are equal.
+Refresh existing clients from live managed connector definitions. Set the source
+subscription and region explicitly, and use a new empty temporary `ARMCACHE_PATH`
+for every run. The generator's cache is only a transport implementation detail;
+never seed it from repository fixtures or reuse a previous run's responses.
 
-Commit the manifest and its `swagger-cache/` inputs together with the generated clients.
-Canonical hashes use UTF-8 text with CRLF normalized to LF. The managed-API catalog
-contains only shipped connector names and display names, not connection metadata;
-`swaggerSource.managedApisSha256` hashes that exact projected replay input.
+```powershell
+$env:AZURE_SUBSCRIPTION_ID = "<live-subscription-id>"
+$env:AZURE_LOCATION = "<region>"
+$outputDirectory = "<output-directory>"
+$connectorNames = "<comma-separated-existing-api-names>"
+$previousCachePath = $env:ARMCACHE_PATH
+$liveCachePath = Join-Path $env:TEMP ("connector-live-" + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $liveCachePath, $outputDirectory -Force | Out-Null
+try {
+    $env:ARMCACHE_PATH = $liveCachePath
+    LogicAppsCompiler.exe $outputDirectory --directClient --language=python "--connectors=$connectorNames"
+}
+finally {
+    $env:ARMCACHE_PATH = $previousCachePath
+    Remove-Item $liveCachePath -Recurse -Force
+}
+```
 
-For offline replay, build the recorded generator revision in an isolated checkout.
-Set `AZURE_SUBSCRIPTION_ID` and `AZURE_LOCATION` from `swaggerSource`. Create an empty
-`ARMCACHE_PATH`, then copy committed inputs there using the generator's cache keys:
+Check per-connector failures as well as the CLI exit code. Record the merged
+generator revision, source subscription, region, and capture time in the PR.
+Do not add cache folders or replay scaffolding as part of a client refresh.
 
-- Catalog URL: `https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Web/locations/{location}/managedApis?api-version={apiVersion}`.
-- Export URL: the same base ending in `/managedApis/{apiName}?api-version={apiVersion}&export=true`.
-- Cache filename: uppercase hexadecimal SHA-1 of the complete URL's UTF-8 bytes.
-
-Create the output directory before invoking the CLI. Generate the complete manifest
-allowlist with `--directClient --language=python --connectors=<comma-separated-apiNames>`.
-Block network access during replay so missing cache entries fail rather than fetching
-new inputs. Check per-connector failures as well as the CLI exit code, and compare
-every canonical output hash with the manifest before replacing generated source.
+Reviewers must fetch live definitions independently using their own new empty
+temporary directory. Do not give the producer's responses to the reviewer as
+generation inputs. Compare generated outputs after normalizing CRLF to LF;
+investigate live differences instead of substituting cached inputs to make them match.
 
 ### Pageable Results
 
@@ -128,6 +140,18 @@ yields items directly; an empty response yields no items. Do not await a page en
 async for item in client.get_items_async(...):
     process_item(item)
 ```
+
+### Consumer Review Checks
+
+- Capture known response collections directly in semantic names, such as
+    `subscriptions`, `documents`, or `users`, rather than adding a `result` alias.
+- Treat collected items as lists, not response dictionaries, and remove repeated
+    conditions rather than retaining expressions such as `if documents and documents`.
+- Execute migrated samples with empty and nonempty mocked results. Assert their
+    output and reject caught-and-printed errors; imports and call signatures alone
+    do not validate how a response is consumed.
+- Pagination tests must assert the continuation request, items from later pages,
+    and termination, including an empty first page that still has a next link.
 
 ## Generated Code Structure
 

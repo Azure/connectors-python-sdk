@@ -170,15 +170,15 @@ async def example_5_search_users():
 
     async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            results = [item async for item in client.search_user_async(
+            users = [item async for item in client.search_user_async(
                 search_term=search_term,
                 top=10,
             )]
 
-            if results:
+            if users:
                 print(f"Search results for '{search_term}':")
-                print(f"  Found {len(results)} users")
-                for user in results[:5]:  # Show first 5
+                print(f"  Found {len(users)} users")
+                for user in users[:5]:  # Show first 5
                     display_name = user.get("DisplayName", "N/A")
                     mail = user.get("Mail", "N/A")
                     print(f"    - {display_name} ({mail})")
