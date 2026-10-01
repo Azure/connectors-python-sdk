@@ -21,12 +21,13 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 async def _invoke_operation(client: Office365groupsmailClient, operation: str):
     """Invoke an operation by name for shared parameterized tests."""
     if operation == "list_conversations":
-        return await client.list_conversations_async(group_id="group123")
+        return await collect_operation_result(client.list_conversations_async(group_id="group123"))
     if operation == "create_conversation":
         return await client.create_conversation_async(
             input=CreateConversationBody(topic="Hello"),
@@ -38,10 +39,10 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             conversation_id="conv123",
         )
     if operation == "list_conversation_threads":
-        return await client.list_conversation_threads_async(
+        return await collect_operation_result(client.list_conversation_threads_async(
             group_id="group123",
             conversation_id="conv123",
-        )
+        ))
     if operation == "create_conversation_thread":
         return await client.create_conversation_thread_async(
             input=CreateConversationBody(topic="Thread"),
@@ -49,7 +50,7 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             conversation_id="conv123",
         )
     if operation == "list_group_threads":
-        return await client.list_group_threads_async(group_id="group123")
+        return await collect_operation_result(client.list_group_threads_async(group_id="group123"))
     if operation == "create_group_thread":
         return await client.create_group_thread_async(
             input=CreateConversationBody(topic="Group thread"),
@@ -66,10 +67,10 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             thread_id="thread123",
         )
     if operation == "list_thread_posts":
-        return await client.list_thread_posts_async(
+        return await collect_operation_result(client.list_thread_posts_async(
             group_id="group123",
             thread_id="thread123",
-        )
+        ))
     if operation == "get_thread":
         return await client.get_thread_async(
             group_id="group123",
@@ -77,11 +78,11 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             post_id="post123",
         )
     if operation == "get_attachments":
-        return await client.get_attachments_async(
+        return await collect_operation_result(client.get_attachments_async(
             group_id="group123",
             thread_id="thread123",
             post_id="post123",
-        )
+        ))
     if operation == "reply_to_a_thread":
         return await client.reply_to_a_thread_async(
             input=ReplyConversationThreadBody(),
@@ -207,9 +208,11 @@ class TestOffice365groupsmailClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_conversations_async(group_id="group123")
+            result = await collect_operation_result(
+                client.list_conversations_async(group_id="group123")
+            )
 
-            assert len(result["value"]) == 1
+            assert len(result) == 1
             assert "/v1.0/groups/group123/conversations" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio

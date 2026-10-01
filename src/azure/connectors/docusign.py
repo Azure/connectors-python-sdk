@@ -1902,7 +1902,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(document_guid)
         if isinstance(document_guid, bool):
             value = value.lower()
-        query_params.append(f"documentGuid={quote(value)}")
+        query_params.append(f"documentGuid={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1978,7 +1978,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(voided_reason)
         if isinstance(voided_reason, bool):
             value = value.lower()
-        query_params.append(f"voidedReason={quote(value)}")
+        query_params.append(f"voidedReason={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2062,20 +2062,20 @@ class DocusignClient(ConnectorClientBase):
         value = str(reminder_enabled)
         if isinstance(reminder_enabled, bool):
             value = value.lower()
-        query_params.append(f"reminderEnabled={quote(value)}")
+        query_params.append(f"reminderEnabled={quote(value, safe='')}")
         value = str(reminder_delay)
         if isinstance(reminder_delay, bool):
             value = value.lower()
-        query_params.append(f"reminderDelay={quote(value)}")
+        query_params.append(f"reminderDelay={quote(value, safe='')}")
         value = str(reminder_frequency)
         if isinstance(reminder_frequency, bool):
             value = value.lower()
-        query_params.append(f"reminderFrequency={quote(value)}")
+        query_params.append(f"reminderFrequency={quote(value, safe='')}")
         if expire_after is not None:
             value = str(expire_after)
             if isinstance(expire_after, bool):
                 value = value.lower()
-            query_params.append(f"expireAfter={quote(value)}")
+            query_params.append(f"expireAfter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2273,21 +2273,21 @@ class DocusignClient(ConnectorClientBase):
         value = str(email_subject)
         if isinstance(email_subject, bool):
             value = value.lower()
-        query_params.append(f"emailSubject={quote(value)}")
+        query_params.append(f"emailSubject={quote(value, safe='')}")
         if email_body is not None:
             value = str(email_body)
             if isinstance(email_body, bool):
                 value = value.lower()
-            query_params.append(f"emailBody={quote(value)}")
+            query_params.append(f"emailBody={quote(value, safe='')}")
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         if merge_roles_on_draft is not None:
             value = str(merge_roles_on_draft)
             if isinstance(merge_roles_on_draft, bool):
                 value = value.lower()
-            query_params.append(f"merge_roles_on_draft={quote(value)}")
+            query_params.append(f"merge_roles_on_draft={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2347,67 +2347,67 @@ class DocusignClient(ConnectorClientBase):
             value = str(recipient_name)
             if isinstance(recipient_name, bool):
                 value = value.lower()
-            query_params.append(f"recipientName={quote(value)}")
+            query_params.append(f"recipientName={quote(value, safe='')}")
         if recipient_email_id is not None:
             value = str(recipient_email_id)
             if isinstance(recipient_email_id, bool):
                 value = value.lower()
-            query_params.append(f"recipientEmailId={quote(value)}")
+            query_params.append(f"recipientEmailId={quote(value, safe='')}")
         if envelope_title is not None:
             value = str(envelope_title)
             if isinstance(envelope_title, bool):
                 value = value.lower()
-            query_params.append(f"envelopeTitle={quote(value)}")
+            query_params.append(f"envelopeTitle={quote(value, safe='')}")
         if custom_field_name is not None:
             value = str(custom_field_name)
             if isinstance(custom_field_name, bool):
                 value = value.lower()
-            query_params.append(f"customFieldName={quote(value)}")
+            query_params.append(f"customFieldName={quote(value, safe='')}")
         if custom_field_value is not None:
             value = str(custom_field_value)
             if isinstance(custom_field_value, bool):
                 value = value.lower()
-            query_params.append(f"customFieldValue={quote(value)}")
+            query_params.append(f"customFieldValue={quote(value, safe='')}")
         if search_text is not None:
             value = str(search_text)
             if isinstance(search_text, bool):
                 value = value.lower()
-            query_params.append(f"search_text={quote(value)}")
+            query_params.append(f"search_text={quote(value, safe='')}")
         if envelope_status is not None:
             value = str(envelope_status)
             if isinstance(envelope_status, bool):
                 value = value.lower()
-            query_params.append(f"envelopeStatus={quote(value)}")
+            query_params.append(f"envelopeStatus={quote(value, safe='')}")
         if folder_ids is not None:
             value = str(folder_ids)
             if isinstance(folder_ids, bool):
                 value = value.lower()
-            query_params.append(f"folder_ids={quote(value)}")
+            query_params.append(f"folder_ids={quote(value, safe='')}")
         if order_by is not None:
             value = str(order_by)
             if isinstance(order_by, bool):
                 value = value.lower()
-            query_params.append(f"order_by={quote(value)}")
+            query_params.append(f"order_by={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"top={quote(value)}")
+            query_params.append(f"top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"skip={quote(value)}")
+            query_params.append(f"skip={quote(value, safe='')}")
         if from_date is not None:
             value = str(from_date)
             if isinstance(from_date, bool):
                 value = value.lower()
-            query_params.append(f"from_date={quote(value)}")
+            query_params.append(f"from_date={quote(value, safe='')}")
         if to_date is not None:
             value = str(to_date)
             if isinstance(to_date, bool):
                 value = value.lower()
-            query_params.append(f"to_date={quote(value)}")
+            query_params.append(f"to_date={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2450,11 +2450,11 @@ class DocusignClient(ConnectorClientBase):
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2498,21 +2498,21 @@ class DocusignClient(ConnectorClientBase):
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         if email_subject is not None:
             value = str(email_subject)
             if isinstance(email_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailSubject={quote(value)}")
+            query_params.append(f"emailSubject={quote(value, safe='')}")
         if email_body is not None:
             value = str(email_body)
             if isinstance(email_body, bool):
                 value = value.lower()
-            query_params.append(f"emailBody={quote(value)}")
+            query_params.append(f"emailBody={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2557,17 +2557,17 @@ class DocusignClient(ConnectorClientBase):
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         if merge_roles_on_draft is not None:
             value = str(merge_roles_on_draft)
             if isinstance(merge_roles_on_draft, bool):
                 value = value.lower()
-            query_params.append(f"merge_roles_on_draft={quote(value)}")
+            query_params.append(f"merge_roles_on_draft={quote(value, safe='')}")
         if email_subject is not None:
             value = str(email_subject)
             if isinstance(email_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailSubject={quote(value)}")
+            query_params.append(f"emailSubject={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2646,7 +2646,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(field_name)
         if isinstance(field_name, bool):
             value = value.lower()
-        query_params.append(f"fieldName={quote(value)}")
+        query_params.append(f"fieldName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2693,19 +2693,19 @@ class DocusignClient(ConnectorClientBase):
         value = str(field_id)
         if isinstance(field_id, bool):
             value = value.lower()
-        query_params.append(f"fieldId={quote(value)}")
+        query_params.append(f"fieldId={quote(value, safe='')}")
         value = str(field_type)
         if isinstance(field_type, bool):
             value = value.lower()
-        query_params.append(f"fieldType={quote(value)}")
+        query_params.append(f"fieldType={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         value = str(value)
         if isinstance(value, bool):
             value = value.lower()
-        query_params.append(f"value={quote(value)}")
+        query_params.append(f"value={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2752,11 +2752,11 @@ class DocusignClient(ConnectorClientBase):
         value = str(open_in)
         if isinstance(open_in, bool):
             value = value.lower()
-        query_params.append(f"openIn={quote(value)}")
+        query_params.append(f"openIn={quote(value, safe='')}")
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2837,11 +2837,11 @@ class DocusignClient(ConnectorClientBase):
         value = str(folder_id)
         if isinstance(folder_id, bool):
             value = value.lower()
-        query_params.append(f"folderId={quote(value)}")
+        query_params.append(f"folderId={quote(value, safe='')}")
         value = str(remove_recipient_from_envelope_recipient_id)
         if isinstance(remove_recipient_from_envelope_recipient_id, bool):
             value = value.lower()
-        query_params.append(f"RemoveRecipientFromEnvelopeRecipientId={quote(value)}")
+        query_params.append(f"RemoveRecipientFromEnvelopeRecipientId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2889,22 +2889,22 @@ class DocusignClient(ConnectorClientBase):
             value = str(recipient_email)
             if isinstance(recipient_email, bool):
                 value = value.lower()
-            query_params.append(f"recipientEmail={quote(value)}")
+            query_params.append(f"recipientEmail={quote(value, safe='')}")
         if area_code is not None:
             value = str(area_code)
             if isinstance(area_code, bool):
                 value = value.lower()
-            query_params.append(f"areaCode={quote(value)}")
+            query_params.append(f"areaCode={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phoneNumber={quote(value)}")
+            query_params.append(f"phoneNumber={quote(value, safe='')}")
         if recipient_id is not None:
             value = str(recipient_id)
             if isinstance(recipient_id, bool):
                 value = value.lower()
-            query_params.append(f"recipientId={quote(value)}")
+            query_params.append(f"recipientId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2988,15 +2988,15 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_id)
         if isinstance(recipient_id, bool):
             value = value.lower()
-        query_params.append(f"recipientId={quote(value)}")
+        query_params.append(f"recipientId={quote(value, safe='')}")
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         value = str(verification_type)
         if isinstance(verification_type, bool):
             value = value.lower()
-        query_params.append(f"verificationType={quote(value)}")
+        query_params.append(f"verificationType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3055,71 +3055,71 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_id)
         if isinstance(recipient_id, bool):
             value = value.lower()
-        query_params.append(f"recipientId={quote(value)}")
+        query_params.append(f"recipientId={quote(value, safe='')}")
         if signature_type is not None:
             value = str(signature_type)
             if isinstance(signature_type, bool):
                 value = value.lower()
-            query_params.append(f"signatureType={quote(value)}")
+            query_params.append(f"signatureType={quote(value, safe='')}")
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         if client_user_id is not None:
             value = str(client_user_id)
             if isinstance(client_user_id, bool):
                 value = value.lower()
-            query_params.append(f"clientUserId={quote(value)}")
+            query_params.append(f"clientUserId={quote(value, safe='')}")
         if embedded_recipient_start_u_r_l is not None:
             value = str(embedded_recipient_start_u_r_l)
             if isinstance(embedded_recipient_start_u_r_l, bool):
                 value = value.lower()
-            query_params.append(f"embeddedRecipientStartURL={quote(value)}")
+            query_params.append(f"embeddedRecipientStartURL={quote(value, safe='')}")
         if routing_order is not None:
             value = str(routing_order)
             if isinstance(routing_order, bool):
                 value = value.lower()
-            query_params.append(f"routingOrder={quote(value)}")
+            query_params.append(f"routingOrder={quote(value, safe='')}")
         if email_notification_language is not None:
             value = str(email_notification_language)
             if isinstance(email_notification_language, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationLanguage={quote(value)}")
+            query_params.append(f"emailNotificationLanguage={quote(value, safe='')}")
         if email_notification_subject is not None:
             value = str(email_notification_subject)
             if isinstance(email_notification_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationSubject={quote(value)}")
+            query_params.append(f"emailNotificationSubject={quote(value, safe='')}")
         if email_notification_body is not None:
             value = str(email_notification_body)
             if isinstance(email_notification_body, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationBody={quote(value)}")
+            query_params.append(f"emailNotificationBody={quote(value, safe='')}")
         if note is not None:
             value = str(note)
             if isinstance(note, bool):
                 value = value.lower()
-            query_params.append(f"note={quote(value)}")
+            query_params.append(f"note={quote(value, safe='')}")
         if role_name is not None:
             value = str(role_name)
             if isinstance(role_name, bool):
                 value = value.lower()
-            query_params.append(f"roleName={quote(value)}")
+            query_params.append(f"roleName={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phoneNumber={quote(value)}")
+            query_params.append(f"phoneNumber={quote(value, safe='')}")
         if signing_group_id is not None:
             value = str(signing_group_id)
             if isinstance(signing_group_id, bool):
                 value = value.lower()
-            query_params.append(f"signingGroupId={quote(value)}")
+            query_params.append(f"signingGroupId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3165,12 +3165,12 @@ class DocusignClient(ConnectorClientBase):
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         if preserve_template_recipient is not None:
             value = str(preserve_template_recipient)
             if isinstance(preserve_template_recipient, bool):
                 value = value.lower()
-            query_params.append(f"preserve_template_recipient={quote(value)}")
+            query_params.append(f"preserve_template_recipient={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3205,7 +3205,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3249,7 +3249,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(envelope_or_template_id)
         if isinstance(envelope_or_template_id, bool):
             value = value.lower()
-        query_params.append(f"envelopeOrTemplateId={quote(value)}")
+        query_params.append(f"envelopeOrTemplateId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3460,7 +3460,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(document_name)
         if isinstance(document_name, bool):
             value = value.lower()
-        query_params.append(f"documentName={quote(value)}")
+        query_params.append(f"documentName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3507,7 +3507,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(tab_label)
         if isinstance(tab_label, bool):
             value = value.lower()
-        query_params.append(f"tabLabel={quote(value)}")
+        query_params.append(f"tabLabel={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3555,7 +3555,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(tab_type)
         if isinstance(tab_type, bool):
             value = value.lower()
-        query_params.append(f"tabType={quote(value)}")
+        query_params.append(f"tabType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3674,7 +3674,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(instance_name)
         if isinstance(instance_name, bool):
             value = value.lower()
-        query_params.append(f"instanceName={quote(value)}")
+        query_params.append(f"instanceName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3763,77 +3763,77 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         if client_user_id is not None:
             value = str(client_user_id)
             if isinstance(client_user_id, bool):
                 value = value.lower()
-            query_params.append(f"clientUserId={quote(value)}")
+            query_params.append(f"clientUserId={quote(value, safe='')}")
         if recipient_id is not None:
             value = str(recipient_id)
             if isinstance(recipient_id, bool):
                 value = value.lower()
-            query_params.append(f"recipientId={quote(value)}")
+            query_params.append(f"recipientId={quote(value, safe='')}")
         if embedded_recipient_start_u_r_l is not None:
             value = str(embedded_recipient_start_u_r_l)
             if isinstance(embedded_recipient_start_u_r_l, bool):
                 value = value.lower()
-            query_params.append(f"embeddedRecipientStartURL={quote(value)}")
+            query_params.append(f"embeddedRecipientStartURL={quote(value, safe='')}")
         if routing_order is not None:
             value = str(routing_order)
             if isinstance(routing_order, bool):
                 value = value.lower()
-            query_params.append(f"routingOrder={quote(value)}")
+            query_params.append(f"routingOrder={quote(value, safe='')}")
         if email_notification_language is not None:
             value = str(email_notification_language)
             if isinstance(email_notification_language, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationLanguage={quote(value)}")
+            query_params.append(f"emailNotificationLanguage={quote(value, safe='')}")
         if email_notification_subject is not None:
             value = str(email_notification_subject)
             if isinstance(email_notification_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationSubject={quote(value)}")
+            query_params.append(f"emailNotificationSubject={quote(value, safe='')}")
         if email_notification_body is not None:
             value = str(email_notification_body)
             if isinstance(email_notification_body, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationBody={quote(value)}")
+            query_params.append(f"emailNotificationBody={quote(value, safe='')}")
         if note is not None:
             value = str(note)
             if isinstance(note, bool):
                 value = value.lower()
-            query_params.append(f"note={quote(value)}")
+            query_params.append(f"note={quote(value, safe='')}")
         if role_name is not None:
             value = str(role_name)
             if isinstance(role_name, bool):
                 value = value.lower()
-            query_params.append(f"roleName={quote(value)}")
+            query_params.append(f"roleName={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phoneNumber={quote(value)}")
+            query_params.append(f"phoneNumber={quote(value, safe='')}")
         if signing_group_id is not None:
             value = str(signing_group_id)
             if isinstance(signing_group_id, bool):
                 value = value.lower()
-            query_params.append(f"signingGroupId={quote(value)}")
+            query_params.append(f"signingGroupId={quote(value, safe='')}")
         if signature_type is not None:
             value = str(signature_type)
             if isinstance(signature_type, bool):
                 value = value.lower()
-            query_params.append(f"signatureType={quote(value)}")
+            query_params.append(f"signatureType={quote(value, safe='')}")
         if workflow_id is not None:
             value = str(workflow_id)
             if isinstance(workflow_id, bool):
                 value = value.lower()
-            query_params.append(f"workflowId={quote(value)}")
+            query_params.append(f"workflowId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3876,7 +3876,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(email_subject)
         if isinstance(email_subject, bool):
             value = value.lower()
-        query_params.append(f"emailSubject={quote(value)}")
+        query_params.append(f"emailSubject={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3924,15 +3924,15 @@ class DocusignClient(ConnectorClientBase):
         value = str(is_in_person_signer)
         if isinstance(is_in_person_signer, bool):
             value = value.lower()
-        query_params.append(f"isInPersonSigner={quote(value)}")
+        query_params.append(f"isInPersonSigner={quote(value, safe='')}")
         value = str(authentication_method)
         if isinstance(authentication_method, bool):
             value = value.lower()
-        query_params.append(f"authenticationMethod={quote(value)}")
+        query_params.append(f"authenticationMethod={quote(value, safe='')}")
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3980,7 +3980,7 @@ class DocusignClient(ConnectorClientBase):
             value = str(language)
             if isinstance(language, bool):
                 value = value.lower()
-            query_params.append(f"language={quote(value)}")
+            query_params.append(f"language={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4427,12 +4427,12 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         if signature_type is not None:
             value = str(signature_type)
             if isinstance(signature_type, bool):
                 value = value.lower()
-            query_params.append(f"signatureType={quote(value)}")
+            query_params.append(f"signatureType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4467,7 +4467,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(verification_type)
         if isinstance(verification_type, bool):
             value = value.lower()
-        query_params.append(f"verificationType={quote(value)}")
+        query_params.append(f"verificationType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4502,7 +4502,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4540,11 +4540,11 @@ class DocusignClient(ConnectorClientBase):
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         value = str(is_in_person_signer)
         if isinstance(is_in_person_signer, bool):
             value = value.lower()
-        query_params.append(f"isInPersonSigner={quote(value)}")
+        query_params.append(f"isInPersonSigner={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4632,7 +4632,7 @@ class DocusignClient(ConnectorClientBase):
         value = str(tab_type)
         if isinstance(tab_type, bool):
             value = value.lower()
-        query_params.append(f"tabType={quote(value)}")
+        query_params.append(f"tabType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

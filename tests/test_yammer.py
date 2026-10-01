@@ -23,6 +23,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestYammerClientInitialization:
@@ -321,7 +322,7 @@ class TestGetAllMessages:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_all_messages_async()
+            _ = await collect_operation_result(client.get_all_messages_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -344,13 +345,13 @@ class TestGetAllMessages:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_all_messages_async(
+            await collect_operation_result(client.get_all_messages_async(
                 network_id="net123",
                 older_than="100",
                 newer_than="50",
                 threaded="true",
                 limit="20"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -383,7 +384,7 @@ class TestGetMessagesFollowing:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_messages_following_async()
+            _ = await collect_operation_result(client.get_messages_following_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -413,7 +414,7 @@ class TestGetMessagesInGroup:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_messages_in_group_async(group_id="123")
+            _ = await collect_operation_result(client.get_messages_in_group_async(group_id="123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -443,7 +444,7 @@ class TestGetMessagesInThread:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_messages_in_thread_async(thread_id="456")
+            _ = await collect_operation_result(client.get_messages_in_thread_async(thread_id="456"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -745,6 +746,6 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_messages_async()
+                await collect_operation_result(client.get_all_messages_async())
 
             assert exc_info.value.status_code == 500

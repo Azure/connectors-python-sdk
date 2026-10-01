@@ -228,7 +228,7 @@ class TestBoxClientMethods:
             result = await client.get_file_content_by_path_async(path="/Documents/file.txt")
 
             assert result == b"box file content"
-            assert "path=/Documents/file.txt" in mock_send.call_args[0][1]
+            assert "path=%2FDocuments%2Ffile.txt" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_create_file_success(self, mock_token_provider):
@@ -254,7 +254,7 @@ class TestBoxClientMethods:
             assert result["id"] == "new1"
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
-            assert "folderPath=/Documents" in call_args[0][1]
+            assert "folderPath=%2FDocuments" in call_args[0][1]
             assert "name=created.txt" in call_args[0][1]
 
     @pytest.mark.asyncio

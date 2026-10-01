@@ -32,6 +32,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 BASE_URL = "https://example.azure.com/connections/test"
 
@@ -78,7 +79,9 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: DynamicsaxClient, operation: str):
     """Invoke a Dynamics AX operation by name for shared parametrized tests."""
-    return await getattr(client, f"{operation}_async")(**OPERATION_ARGS[operation])
+    return await collect_operation_result(
+        getattr(client, f"{operation}_async")(**OPERATION_ARGS[operation])
+    )
 
 
 def _make_client(token_provider=None):
@@ -194,7 +197,7 @@ class TestDynamicsaxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(dataset="ds", table="tbl")
+            await collect_operation_result(client.get_items_async(dataset="ds", table="tbl"))
 
             request_url = mock_send.call_args[0][1]
             assert "/datasets/ds/tables/tbl/items" in request_url
@@ -211,12 +214,12 @@ class TestDynamicsaxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(
+            await collect_operation_result(client.get_items_async(
                 dataset="ds",
                 table="tbl",
                 filter="Name eq 'x'",
                 top="5",
-            )
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert "$filter=" in request_url
@@ -304,7 +307,7 @@ class TestDynamicsaxClientMethods:
     async def test_all_operations_success(self, mock_token_provider, operation):
         """Test every operation returns the expected success result."""
         client = _make_client(token_provider=mock_token_provider)
-        mock_response = MockResponse(status=200, text='{"value":"ok"}')
+        mock_response = MockResponse(status=200, text='{"value":[{"id":"item-1"}]}')
 
         with patch.object(
             client._http_client,
@@ -316,8 +319,10 @@ class TestDynamicsaxClientMethods:
 
             if operation in NO_JSON_OPERATIONS:
                 assert result is None
+            elif operation == "get_items":
+                assert result == [{"id": "item-1"}]
             else:
-                assert result == {"value": "ok"}
+                assert result == {"value": [{"id": "item-1"}]}
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", sorted(NO_JSON_OPERATIONS))

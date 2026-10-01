@@ -18,6 +18,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 async def _invoke_operation(client: ZendeskClient, operation: str):
@@ -25,7 +26,7 @@ async def _invoke_operation(client: ZendeskClient, operation: str):
     if operation == "get_tables":
         return await client.get_tables_async()
     if operation == "get_items":
-        return await client.get_items_async(table="tickets")
+        return await collect_operation_result(client.get_items_async(table="tickets"))
     if operation == "post_item":
         return await client.post_item_async(input=Item(), table="tickets")
     if operation == "get_item":
@@ -168,11 +169,11 @@ class TestZendeskClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(
+            await collect_operation_result(client.get_items_async(
                 table="tickets",
                 filter="status eq 'open'",
                 top="10",
-            )
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
@@ -416,7 +417,12 @@ class TestZendeskClientSignatures:
         signature = inspect.signature(getattr(ZendeskClient, method_name))
 
         assert signature.return_annotation is not inspect.Signature.empty
-        assert signature.return_annotation in ("dict[str, Any] | None", "None")
+        expected_annotation = (
+            "AsyncIterator[dict[str, Any]]"
+            if inspect.isasyncgenfunction(getattr(ZendeskClient, method_name))
+            else "dict[str, Any] | None"
+        )
+        assert signature.return_annotation in (expected_annotation, "None")
 
 
 class TestZendeskTriggerOperations:

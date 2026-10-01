@@ -443,7 +443,7 @@ class DocuwareClient(ConnectorClientBase):
         value = str(search_dialog_id)
         if isinstance(search_dialog_id, bool):
             value = value.lower()
-        query_params.append(f"SearchDialogId={quote(value)}")
+        query_params.append(f"SearchDialogId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -505,7 +505,7 @@ class DocuwareClient(ConnectorClientBase):
         value = str(file_cabinet_type)
         if isinstance(file_cabinet_type, bool):
             value = value.lower()
-        query_params.append(f"FileCabinetType={quote(value)}")
+        query_params.append(f"FileCabinetType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -618,7 +618,7 @@ class DocuwareClient(ConnectorClientBase):
         value = str(document_format)
         if isinstance(document_format, bool):
             value = value.lower()
-        query_params.append(f"DocumentFormat={quote(value)}")
+        query_params.append(f"DocumentFormat={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -659,7 +659,7 @@ class DocuwareClient(ConnectorClientBase):
         value = str(document_format)
         if isinstance(document_format, bool):
             value = value.lower()
-        query_params.append(f"DocumentFormat={quote(value)}")
+        query_params.append(f"DocumentFormat={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -738,7 +738,7 @@ class DocuwareClient(ConnectorClientBase):
             value = str(store_dialog_id)
             if isinstance(store_dialog_id, bool):
                 value = value.lower()
-            query_params.append(f"StoreDialogID={quote(value)}")
+            query_params.append(f"StoreDialogID={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -815,7 +815,7 @@ class DocuwareClient(ConnectorClientBase):
             value = str(dialog_type)
             if isinstance(dialog_type, bool):
                 value = value.lower()
-            query_params.append(f"DialogType={quote(value)}")
+            query_params.append(f"DialogType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -922,7 +922,7 @@ class DocuwareClient(ConnectorClientBase):
             value = str(field_type)
             if isinstance(field_type, bool):
                 value = value.lower()
-            query_params.append(f"FieldType={quote(value)}")
+            query_params.append(f"FieldType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

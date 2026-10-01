@@ -1529,32 +1529,32 @@ class TallyfyClient(ConnectorClientBase):
             value = str(q)
             if isinstance(q, bool):
                 value = value.lower()
-            query_params.append(f"q={quote(value)}")
+            query_params.append(f"q={quote(value, safe='')}")
         if status is not None:
             value = str(status)
             if isinstance(status, bool):
                 value = value.lower()
-            query_params.append(f"status={quote(value)}")
+            query_params.append(f"status={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"tag={quote(value)}")
+            query_params.append(f"tag={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

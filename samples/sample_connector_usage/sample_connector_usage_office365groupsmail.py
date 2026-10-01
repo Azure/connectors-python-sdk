@@ -19,7 +19,7 @@ async def main() -> None:
         raise ValueError("Set OFFICE365GROUPSMAIL_GROUP_ID environment variable")
 
     async with Office365groupsmailClient(connection_url) as client:
-        conversations = await client.list_conversations_async(group_id=group_id)
+        conversations = [item async for item in client.list_conversations_async(group_id=group_id)]
         conversation_count = len((conversations or {}).get("value", []))
         print(f"Found {conversation_count} conversation(s) in group '{group_id}'.")
 

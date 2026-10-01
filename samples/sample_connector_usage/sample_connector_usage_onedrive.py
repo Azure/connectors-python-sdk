@@ -124,11 +124,11 @@ async def example_4_list_folder():
 
     async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.list_folder_async(id=folder_id)
+            result = [item async for item in client.list_folder_async(id=folder_id)]
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items:")
-                for item in result["value"][:10]:
+            if result:
+                print(f"Found {len(result)} items:")
+                for item in result[:10]:
                     item_type = "📁" if item.get("IsFolder") else "📄"
                     size = item.get("Size", 0)
                     print(f"  {item_type} {item.get('Name', 'N/A')} ({size} bytes)")

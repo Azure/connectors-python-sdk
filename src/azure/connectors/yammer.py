@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -84,6 +84,11 @@ class PageableMessageList:
     """
 
     value: Optional[List[Message]] = None
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -239,6 +244,45 @@ class YammerClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "yammer"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def get_networks_async(
         self,
     ) -> dict[str, Any] | None:
@@ -283,17 +327,17 @@ class YammerClient(ConnectorClientBase):
             value = str(network_id)
             if isinstance(network_id, bool):
                 value = value.lower()
-            query_params.append(f"network_id={quote(value)}")
+            query_params.append(f"network_id={quote(value, safe='')}")
         if mine is not None:
             value = str(mine)
             if isinstance(mine, bool):
                 value = value.lower()
-            query_params.append(f"mine={quote(value)}")
+            query_params.append(f"mine={quote(value, safe='')}")
         if show_all_company_group is not None:
             value = str(show_all_company_group)
             if isinstance(show_all_company_group, bool):
                 value = value.lower()
-            query_params.append(f"showAllCompanyGroup={quote(value)}")
+            query_params.append(f"showAllCompanyGroup={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -361,7 +405,7 @@ class YammerClient(ConnectorClientBase):
         value = str(message_id)
         if isinstance(message_id, bool):
             value = value.lower()
-        query_params.append(f"message_id={quote(value)}")
+        query_params.append(f"message_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -384,13 +428,16 @@ class YammerClient(ConnectorClientBase):
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get all messages
 
         This operation returns all public messages in the logged in user's Viva
         Engage network. Corresponds to \"All\" conversations in the Viva Engage
         web interface.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/v3/messages.json"
         query_params = []
@@ -398,46 +445,57 @@ class YammerClient(ConnectorClientBase):
             value = str(network_id)
             if isinstance(network_id, bool):
                 value = value.lower()
-            query_params.append(f"network_id={quote(value)}")
+            query_params.append(f"network_id={quote(value, safe='')}")
         if older_than is not None:
             value = str(older_than)
             if isinstance(older_than, bool):
                 value = value.lower()
-            query_params.append(f"older_than={quote(value)}")
+            query_params.append(f"older_than={quote(value, safe='')}")
         if newer_than is not None:
             value = str(newer_than)
             if isinstance(newer_than, bool):
                 value = value.lower()
-            query_params.append(f"newer_than={quote(value)}")
+            query_params.append(f"newer_than={quote(value, safe='')}")
         if threaded is not None:
             value = str(threaded)
             if isinstance(threaded, bool):
                 value = value.lower()
-            query_params.append(f"threaded={quote(value)}")
+            query_params.append(f"threaded={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_messages_following_async(
         self,
@@ -446,13 +504,16 @@ class YammerClient(ConnectorClientBase):
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get the messages from my Following feed
 
         This operation returns the messages from Following feed which is
         conversations involving people, groups and topics that the user is
         following.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/v3/messages/following.json"
@@ -462,46 +523,57 @@ class YammerClient(ConnectorClientBase):
             value = str(network_id)
             if isinstance(network_id, bool):
                 value = value.lower()
-            query_params.append(f"network_id={quote(value)}")
+            query_params.append(f"network_id={quote(value, safe='')}")
         if older_than is not None:
             value = str(older_than)
             if isinstance(older_than, bool):
                 value = value.lower()
-            query_params.append(f"older_than={quote(value)}")
+            query_params.append(f"older_than={quote(value, safe='')}")
         if newer_than is not None:
             value = str(newer_than)
             if isinstance(newer_than, bool):
                 value = value.lower()
-            query_params.append(f"newer_than={quote(value)}")
+            query_params.append(f"newer_than={quote(value, safe='')}")
         if threaded is not None:
             value = str(threaded)
             if isinstance(threaded, bool):
                 value = value.lower()
-            query_params.append(f"threaded={quote(value)}")
+            query_params.append(f"threaded={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_messages_in_group_async(
         self,
@@ -511,11 +583,14 @@ class YammerClient(ConnectorClientBase):
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get messages in a group
 
         This operation returns the messages posted in a group.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -526,77 +601,102 @@ class YammerClient(ConnectorClientBase):
             value = str(network_id)
             if isinstance(network_id, bool):
                 value = value.lower()
-            query_params.append(f"network_id={quote(value)}")
+            query_params.append(f"network_id={quote(value, safe='')}")
         if older_than is not None:
             value = str(older_than)
             if isinstance(older_than, bool):
                 value = value.lower()
-            query_params.append(f"older_than={quote(value)}")
+            query_params.append(f"older_than={quote(value, safe='')}")
         if newer_than is not None:
             value = str(newer_than)
             if isinstance(newer_than, bool):
                 value = value.lower()
-            query_params.append(f"newer_than={quote(value)}")
+            query_params.append(f"newer_than={quote(value, safe='')}")
         if threaded is not None:
             value = str(threaded)
             if isinstance(threaded, bool):
                 value = value.lower()
-            query_params.append(f"threaded={quote(value)}")
+            query_params.append(f"threaded={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_messages_in_thread_async(
         self,
         thread_id: int,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get messages in a thread
 
         This operation returns the messages posted in a thread.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v3/messages/in_thread/{quote(str(thread_id), safe='')}.json"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def post_message_async(
         self,
@@ -616,7 +716,7 @@ class YammerClient(ConnectorClientBase):
             value = str(network_id)
             if isinstance(network_id, bool):
                 value = value.lower()
-            query_params.append(f"network_id={quote(value)}")
+            query_params.append(f"network_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

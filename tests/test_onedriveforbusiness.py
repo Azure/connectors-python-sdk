@@ -21,6 +21,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 METHOD_ARGUMENTS: list[tuple[str, dict]] = [
@@ -231,7 +232,7 @@ class TestOnedriveforbusinessClientMethods:
         ):
             method = getattr(client, method_name)
             with pytest.raises(ConnectorException) as exc_info:
-                await method(**kwargs)
+                await collect_operation_result(method(**kwargs))
 
             assert exc_info.value.status_code == 500
 

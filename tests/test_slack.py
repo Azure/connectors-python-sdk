@@ -13,6 +13,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.slack import PostMessageRequest, SlackClient, TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestSlackClientInitialization:
@@ -191,14 +192,14 @@ class TestListChannelsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_channels_async()
+            result = await collect_operation_result(client.list_channels_async())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/v3/conversations.list" in path
             assert result is not None
-            assert "value" in result
+            assert len(result) > 0
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -219,7 +220,7 @@ class TestListChannelsAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_channels_async()
+                await collect_operation_result(client.list_channels_async())
 
 
 class TestCreateChannelAsync:

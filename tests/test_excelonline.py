@@ -23,6 +23,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 async def _invoke_operation(client: ExcelonlineClient, operation: str):
@@ -41,12 +42,12 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             id_column="ID",
         )
     if operation == "get_items":
-        return await client.get_items_async(
+        return await collect_operation_result(client.get_items_async(
             drive="drive123",
             file="file123",
             table="Table1",
             top="10",
-        )
+        ))
     if operation == "get_item":
         return await client.get_item_async(
             drive="drive123",
@@ -229,15 +230,15 @@ class TestExcelonlineClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_items_async(
+            result = await collect_operation_result(client.get_items_async(
                 drive="drive123",
                 file="file123",
                 table="Table1",
                 filter="Name eq 'Item1'",
                 top="10",
-            )
+            ))
 
-            assert len(result["value"]) == 1
+            assert len(result) == 1
             call_path = mock_send.call_args[0][1]
             assert "$filter=Name%20eq%20%27Item1%27" in call_path
             assert "$top=10" in call_path

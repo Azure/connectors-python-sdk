@@ -47,10 +47,10 @@ async def example_1_list_subscriptions():
 
     async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.subscriptions_list_async()
+            result = [item async for item in client.subscriptions_list_async()]
 
-            if result and "value" in result:
-                subscriptions = result["value"]
+            if result:
+                subscriptions = result
                 print(f"Found {len(subscriptions)} subscription(s):")
                 for sub in subscriptions:
                     sub_id = sub.get("subscriptionId", "N/A")
@@ -76,10 +76,10 @@ async def example_2_list_subscriptions_with_details():
 
     async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.subscriptions_list_async()
+            result = [item async for item in client.subscriptions_list_async()]
 
-            if result and "value" in result:
-                subscriptions = result["value"]
+            if result:
+                subscriptions = result
                 print(f"Retrieved {len(subscriptions)} subscription(s) with details:\n")
 
                 for i, sub in enumerate(subscriptions, 1):
@@ -101,10 +101,6 @@ async def example_2_list_subscriptions_with_details():
                     print(f"  Authorization Source: {auth_source}")
                     print()
 
-                # Check for pagination
-                next_link = result.get("nextLink")
-                if next_link:
-                    print(f"More results available. Next link: {next_link}")
             else:
                 print("No subscriptions found.")
 
@@ -122,10 +118,10 @@ async def example_3_filter_enabled_subscriptions():
 
     async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.subscriptions_list_async()
+            result = [item async for item in client.subscriptions_list_async()]
 
-            if result and "value" in result:
-                all_subs = result["value"]
+            if result:
+                all_subs = result
                 enabled_subs = [
                     sub for sub in all_subs
                     if sub.get("state", "").lower() == "enabled"

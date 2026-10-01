@@ -85,6 +85,16 @@ class SampleVisitor(ast.NodeVisitor):
                 self.client_variables[item.optional_vars.id] = client_type
         self.generic_visit(node)
 
+    def visit_Await(self, node: ast.Await) -> None:
+        """Reject awaiting a generated pageable operation instead of iterating it."""
+        call = node.value
+        if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute):
+            client_type = self._client_type_for_receiver(call.func.value)
+            method = getattr(client_type, call.func.attr, None)
+            if inspect.isasyncgenfunction(method):
+                self._add_issue(node, f"'{call.func.attr}' must be consumed with async for")
+        self.generic_visit(node)
+
     def visit_Call(self, node: ast.Call) -> None:
         """Validate generated model construction and client method calls."""
         if isinstance(node.func, ast.Name):

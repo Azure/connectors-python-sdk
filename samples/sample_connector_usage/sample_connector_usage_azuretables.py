@@ -180,17 +180,17 @@ async def example_4_get_entities():
     async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Query entities with optional filter
-            result = await client.get_entities_async(
+            result = [item async for item in client.get_entities_async(
                 storage_account_name=STORAGE_ACCOUNT,
                 table_name=TABLE_NAME,
                 # Optional: filter entities
                 # filter="PartitionKey eq 'SamplePartition'",
                 # Optional: select specific columns
                 # select="PartitionKey,RowKey,Name"
-            )
+            )]
 
             if result:
-                entities = result.get("value", [])
+                entities = result
                 print(f"Entities in table '{TABLE_NAME}':")
                 if entities:
                     for i, entity in enumerate(entities[:5], 1):  # Show first 5

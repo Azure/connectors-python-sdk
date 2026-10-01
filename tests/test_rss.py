@@ -139,7 +139,7 @@ class TestRssClientMethods:
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/ListFeedItems" in call_args[0][1]
-            assert "feedUrl=https%3A//contoso.example/feed.xml" in call_args[0][1]
+            assert "feedUrl=https%3A%2F%2Fcontoso.example%2Ffeed.xml" in call_args[0][1]
             assert "since=2026-01-01T00%3A00%3A00Z" in call_args[0][1]
             assert "sinceProperty=UpdatedOn" in call_args[0][1]
 

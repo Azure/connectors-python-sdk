@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -64,6 +64,11 @@ class ItemsList:
         default=None,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -99,7 +104,7 @@ class GetItemResponse:
     Response for Get a row
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -115,7 +120,7 @@ class Item:
     Response for Update a row
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -339,7 +344,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -495,7 +500,7 @@ class TabularItem:
     Definition: TabularItem
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -533,7 +538,7 @@ class RawAndFormattedTableSchema:
     Definition: RawAndFormattedTableSchema
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -700,6 +705,45 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "excelonlinebusiness"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def create_table_async(
         self,
         input: TableToCreate,
@@ -724,7 +768,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -774,12 +818,12 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if id_column is not None:
             value = str(id_column)
             if isinstance(id_column, bool):
                 value = value.lower()
-            query_params.append(f"idColumn={quote(value)}")
+            query_params.append(f"idColumn={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -809,11 +853,14 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         date_time_format: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List rows present in a table
 
         List rows present in a table.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -829,66 +876,77 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if select is not None:
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
                 value = value.lower()
-            query_params.append(f"dateTimeFormat={quote(value)}")
+            query_params.append(f"dateTimeFormat={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_comments_async(
         self,
@@ -915,7 +973,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -963,7 +1021,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1013,7 +1071,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1066,26 +1124,26 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(id_column)
         if isinstance(id_column, bool):
             value = value.lower()
-        query_params.append(f"idColumn={quote(value)}")
+        query_params.append(f"idColumn={quote(value, safe='')}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
                 value = value.lower()
-            query_params.append(f"dateTimeFormat={quote(value)}")
+            query_params.append(f"dateTimeFormat={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1135,11 +1193,11 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(id_column)
         if isinstance(id_column, bool):
             value = value.lower()
-        query_params.append(f"idColumn={quote(value)}")
+        query_params.append(f"idColumn={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1189,16 +1247,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(id_column)
         if isinstance(id_column, bool):
             value = value.lower()
-        query_params.append(f"idColumn={quote(value)}")
+        query_params.append(f"idColumn={quote(value, safe='')}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
                 value = value.lower()
-            query_params.append(f"dateTimeFormat={quote(value)}")
+            query_params.append(f"dateTimeFormat={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1247,17 +1305,17 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1305,7 +1363,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1354,17 +1412,17 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1416,12 +1474,12 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
                 value = value.lower()
-            query_params.append(f"dateTimeFormat={quote(value)}")
+            query_params.append(f"dateTimeFormat={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1474,11 +1532,11 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(script_source)
         if isinstance(script_source, bool):
             value = value.lower()
-        query_params.append(f"scriptSource={quote(value)}")
+        query_params.append(f"scriptSource={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1514,7 +1572,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1549,7 +1607,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1599,7 +1657,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1649,7 +1707,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1689,15 +1747,15 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         value = str(script_source)
         if isinstance(script_source, bool):
             value = value.lower()
-        query_params.append(f"scriptSource={quote(value)}")
+        query_params.append(f"scriptSource={quote(value, safe='')}")
         value = str(script_drive)
         if isinstance(script_drive, bool):
             value = value.lower()
-        query_params.append(f"scriptDrive={quote(value)}")
+        query_params.append(f"scriptDrive={quote(value, safe='')}")
         value = str(script_id)
         if isinstance(script_id, bool):
             value = value.lower()
-        query_params.append(f"scriptId={quote(value)}")
+        query_params.append(f"scriptId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

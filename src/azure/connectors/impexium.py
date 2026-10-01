@@ -4305,17 +4305,17 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(abandoned_from)
         if isinstance(abandoned_from, bool):
             value = value.lower()
-        query_params.append(f"abandonedFrom={quote(value)}")
+        query_params.append(f"abandonedFrom={quote(value, safe='')}")
         if product_code is not None:
             value = str(product_code)
             if isinstance(product_code, bool):
                 value = value.lower()
-            query_params.append(f"productCode={quote(value)}")
+            query_params.append(f"productCode={quote(value, safe='')}")
         if customer_record_number is not None:
             value = str(customer_record_number)
             if isinstance(customer_record_number, bool):
                 value = value.lower()
-            query_params.append(f"customerRecordNumber={quote(value)}")
+            query_params.append(f"customerRecordNumber={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4397,32 +4397,32 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(code)
             if isinstance(code, bool):
                 value = value.lower()
-            query_params.append(f"Code={quote(value)}")
+            query_params.append(f"Code={quote(value, safe='')}")
         if category_name is not None:
             value = str(category_name)
             if isinstance(category_name, bool):
                 value = value.lower()
-            query_params.append(f"categoryName={quote(value)}")
+            query_params.append(f"categoryName={quote(value, safe='')}")
         if is_public is not None:
             value = str(is_public)
             if isinstance(is_public, bool):
                 value = value.lower()
-            query_params.append(f"isPublic={quote(value)}")
+            query_params.append(f"isPublic={quote(value, safe='')}")
         if changed_since is not None:
             value = str(changed_since)
             if isinstance(changed_since, bool):
                 value = value.lower()
-            query_params.append(f"changedSince={quote(value)}")
+            query_params.append(f"changedSince={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if include_prices is not None:
             value = str(include_prices)
             if isinstance(include_prices, bool):
                 value = value.lower()
-            query_params.append(f"includePrices={quote(value)}")
+            query_params.append(f"includePrices={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4470,17 +4470,17 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(session_code)
             if isinstance(session_code, bool):
                 value = value.lower()
-            query_params.append(f"sessionCode={quote(value)}")
+            query_params.append(f"sessionCode={quote(value, safe='')}")
         if include_details is not None:
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if registered_since is not None:
             value = str(registered_since)
             if isinstance(registered_since, bool):
                 value = value.lower()
-            query_params.append(f"registeredSince={quote(value)}")
+            query_params.append(f"registeredSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4635,17 +4635,17 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(product_code)
             if isinstance(product_code, bool):
                 value = value.lower()
-            query_params.append(f"productCode={quote(value)}")
+            query_params.append(f"productCode={quote(value, safe='')}")
         if purchased_since is not None:
             value = str(purchased_since)
             if isinstance(purchased_since, bool):
                 value = value.lower()
-            query_params.append(f"purchasedSince={quote(value)}")
+            query_params.append(f"purchasedSince={quote(value, safe='')}")
         if product_category_code is not None:
             value = str(product_category_code)
             if isinstance(product_category_code, bool):
                 value = value.lower()
-            query_params.append(f"productCategoryCode={quote(value)}")
+            query_params.append(f"productCategoryCode={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4813,12 +4813,12 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if cancelled_since is not None:
             value = str(cancelled_since)
             if isinstance(cancelled_since, bool):
                 value = value.lower()
-            query_params.append(f"cancelledSince={quote(value)}")
+            query_params.append(f"cancelledSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4867,17 +4867,17 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_line_items)
             if isinstance(include_line_items, bool):
                 value = value.lower()
-            query_params.append(f"includeLineItems={quote(value)}")
+            query_params.append(f"includeLineItems={quote(value, safe='')}")
         if from_date is not None:
             value = str(from_date)
             if isinstance(from_date, bool):
                 value = value.lower()
-            query_params.append(f"fromDate={quote(value)}")
+            query_params.append(f"fromDate={quote(value, safe='')}")
         if to_date is not None:
             value = str(to_date)
             if isinstance(to_date, bool):
                 value = value.lower()
-            query_params.append(f"toDate={quote(value)}")
+            query_params.append(f"toDate={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5465,7 +5465,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5512,7 +5512,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5720,97 +5720,97 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(zip_code)
             if isinstance(zip_code, bool):
                 value = value.lower()
-            query_params.append(f"zipCode={quote(value)}")
+            query_params.append(f"zipCode={quote(value, safe='')}")
         if radius is not None:
             value = str(radius)
             if isinstance(radius, bool):
                 value = value.lower()
-            query_params.append(f"Radius={quote(value)}")
+            query_params.append(f"Radius={quote(value, safe='')}")
         if state_abbreviation is not None:
             value = str(state_abbreviation)
             if isinstance(state_abbreviation, bool):
                 value = value.lower()
-            query_params.append(f"stateAbbreviation={quote(value)}")
+            query_params.append(f"stateAbbreviation={quote(value, safe='')}")
         if congressional_district is not None:
             value = str(congressional_district)
             if isinstance(congressional_district, bool):
                 value = value.lower()
-            query_params.append(f"congressionalDistrict={quote(value)}")
+            query_params.append(f"congressionalDistrict={quote(value, safe='')}")
         if membership_type_code is not None:
             value = str(membership_type_code)
             if isinstance(membership_type_code, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCode={quote(value)}")
+            query_params.append(f"membershipTypeCode={quote(value, safe='')}")
         if membership_type_category is not None:
             value = str(membership_type_category)
             if isinstance(membership_type_category, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCategory={quote(value)}")
+            query_params.append(f"membershipTypeCategory={quote(value, safe='')}")
         if city is not None:
             value = str(city)
             if isinstance(city, bool):
                 value = value.lower()
-            query_params.append(f"City={quote(value)}")
+            query_params.append(f"City={quote(value, safe='')}")
         if name is not None:
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if latitude is not None:
             value = str(latitude)
             if isinstance(latitude, bool):
                 value = value.lower()
-            query_params.append(f"Latitude={quote(value)}")
+            query_params.append(f"Latitude={quote(value, safe='')}")
         if longitude is not None:
             value = str(longitude)
             if isinstance(longitude, bool):
                 value = value.lower()
-            query_params.append(f"Longitude={quote(value)}")
+            query_params.append(f"Longitude={quote(value, safe='')}")
         if domain is not None:
             value = str(domain)
             if isinstance(domain, bool):
                 value = value.lower()
-            query_params.append(f"Domain={quote(value)}")
+            query_params.append(f"Domain={quote(value, safe='')}")
         if include_membership is not None:
             value = str(include_membership)
             if isinstance(include_membership, bool):
                 value = value.lower()
-            query_params.append(f"includeMembership={quote(value)}")
+            query_params.append(f"includeMembership={quote(value, safe='')}")
         if include_address is not None:
             value = str(include_address)
             if isinstance(include_address, bool):
                 value = value.lower()
-            query_params.append(f"includeAddress={quote(value)}")
+            query_params.append(f"includeAddress={quote(value, safe='')}")
         if include_phone is not None:
             value = str(include_phone)
             if isinstance(include_phone, bool):
                 value = value.lower()
-            query_params.append(f"includePhone={quote(value)}")
+            query_params.append(f"includePhone={quote(value, safe='')}")
         if include_email is not None:
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if include_custom_fields is not None:
             value = str(include_custom_fields)
             if isinstance(include_custom_fields, bool):
                 value = value.lower()
-            query_params.append(f"includeCustomFields={quote(value)}")
+            query_params.append(f"includeCustomFields={quote(value, safe='')}")
         if expiring_from is not None:
             value = str(expiring_from)
             if isinstance(expiring_from, bool):
                 value = value.lower()
-            query_params.append(f"expiringFrom={quote(value)}")
+            query_params.append(f"expiringFrom={quote(value, safe='')}")
         if expiring_to is not None:
             value = str(expiring_to)
             if isinstance(expiring_to, bool):
                 value = value.lower()
-            query_params.append(f"expiringTo={quote(value)}")
+            query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5869,77 +5869,77 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(zip_code)
             if isinstance(zip_code, bool):
                 value = value.lower()
-            query_params.append(f"zipCode={quote(value)}")
+            query_params.append(f"zipCode={quote(value, safe='')}")
         if radius is not None:
             value = str(radius)
             if isinstance(radius, bool):
                 value = value.lower()
-            query_params.append(f"Radius={quote(value)}")
+            query_params.append(f"Radius={quote(value, safe='')}")
         if membership_type_code is not None:
             value = str(membership_type_code)
             if isinstance(membership_type_code, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCode={quote(value)}")
+            query_params.append(f"membershipTypeCode={quote(value, safe='')}")
         if membership_type_category is not None:
             value = str(membership_type_category)
             if isinstance(membership_type_category, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCategory={quote(value)}")
+            query_params.append(f"membershipTypeCategory={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if include_membership is not None:
             value = str(include_membership)
             if isinstance(include_membership, bool):
                 value = value.lower()
-            query_params.append(f"includeMembership={quote(value)}")
+            query_params.append(f"includeMembership={quote(value, safe='')}")
         if include_address is not None:
             value = str(include_address)
             if isinstance(include_address, bool):
                 value = value.lower()
-            query_params.append(f"includeAddress={quote(value)}")
+            query_params.append(f"includeAddress={quote(value, safe='')}")
         if include_phone is not None:
             value = str(include_phone)
             if isinstance(include_phone, bool):
                 value = value.lower()
-            query_params.append(f"includePhone={quote(value)}")
+            query_params.append(f"includePhone={quote(value, safe='')}")
         if include_email is not None:
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if include_link is not None:
             value = str(include_link)
             if isinstance(include_link, bool):
                 value = value.lower()
-            query_params.append(f"includeLink={quote(value)}")
+            query_params.append(f"includeLink={quote(value, safe='')}")
         if include_custom_fields is not None:
             value = str(include_custom_fields)
             if isinstance(include_custom_fields, bool):
                 value = value.lower()
-            query_params.append(f"includeCustomFields={quote(value)}")
+            query_params.append(f"includeCustomFields={quote(value, safe='')}")
         if include_categories is not None:
             value = str(include_categories)
             if isinstance(include_categories, bool):
                 value = value.lower()
-            query_params.append(f"includeCategories={quote(value)}")
+            query_params.append(f"includeCategories={quote(value, safe='')}")
         if include_membership_renewal_url is not None:
             value = str(include_membership_renewal_url)
             if isinstance(include_membership_renewal_url, bool):
                 value = value.lower()
-            query_params.append(f"includeMembershipRenewalUrl={quote(value)}")
+            query_params.append(f"includeMembershipRenewalUrl={quote(value, safe='')}")
         if expiring_from is not None:
             value = str(expiring_from)
             if isinstance(expiring_from, bool):
                 value = value.lower()
-            query_params.append(f"expiringFrom={quote(value)}")
+            query_params.append(f"expiringFrom={quote(value, safe='')}")
         if expiring_to is not None:
             value = str(expiring_to)
             if isinstance(expiring_to, bool):
                 value = value.lower()
-            query_params.append(f"expiringTo={quote(value)}")
+            query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6124,7 +6124,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(registration_number)
             if isinstance(registration_number, bool):
                 value = value.lower()
-            query_params.append(f"registrationNumber={quote(value)}")
+            query_params.append(f"registrationNumber={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6196,7 +6196,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(year)
             if isinstance(year, bool):
                 value = value.lower()
-            query_params.append(f"Year={quote(value)}")
+            query_params.append(f"Year={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6243,7 +6243,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6526,7 +6526,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(term)
             if isinstance(term, bool):
                 value = value.lower()
-            query_params.append(f"Term={quote(value)}")
+            query_params.append(f"Term={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6699,12 +6699,12 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(relationship_name)
             if isinstance(relationship_name, bool):
                 value = value.lower()
-            query_params.append(f"relationshipName.={quote(value)}")
+            query_params.append(f"relationshipName.={quote(value, safe='')}")
         if includes_details is not None:
             value = str(includes_details)
             if isinstance(includes_details, bool):
                 value = value.lower()
-            query_params.append(f"includesDetails={quote(value)}")
+            query_params.append(f"includesDetails={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6889,7 +6889,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_inactive)
             if isinstance(include_inactive, bool):
                 value = value.lower()
-            query_params.append(f"includeInactive={quote(value)}")
+            query_params.append(f"includeInactive={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6998,17 +6998,17 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(code)
             if isinstance(code, bool):
                 value = value.lower()
-            query_params.append(f"Code={quote(value)}")
+            query_params.append(f"Code={quote(value, safe='')}")
         if name is not None:
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7085,7 +7085,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(event_code)
             if isinstance(event_code, bool):
                 value = value.lower()
-            query_params.append(f"eventCode={quote(value)}")
+            query_params.append(f"eventCode={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7132,12 +7132,12 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(relationship_name)
             if isinstance(relationship_name, bool):
                 value = value.lower()
-            query_params.append(f"relationshipName={quote(value)}")
+            query_params.append(f"relationshipName={quote(value, safe='')}")
         if include_details is not None:
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7234,7 +7234,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(create_user)
             if isinstance(create_user, bool):
                 value = value.lower()
-            query_params.append(f"createUser={quote(value)}")
+            query_params.append(f"createUser={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7355,7 +7355,7 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7402,12 +7402,12 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(term)
             if isinstance(term, bool):
                 value = value.lower()
-            query_params.append(f"Term={quote(value)}")
+            query_params.append(f"Term={quote(value, safe='')}")
         if position_codes is not None:
             value = str(position_codes)
             if isinstance(position_codes, bool):
                 value = value.lower()
-            query_params.append(f"positionCodes={quote(value)}")
+            query_params.append(f"positionCodes={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7595,7 +7595,7 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7830,7 +7830,7 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7873,22 +7873,22 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(code)
             if isinstance(code, bool):
                 value = value.lower()
-            query_params.append(f"Code={quote(value)}")
+            query_params.append(f"Code={quote(value, safe='')}")
         if name is not None:
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if term is not None:
             value = str(term)
             if isinstance(term, bool):
                 value = value.lower()
-            query_params.append(f"Term={quote(value)}")
+            query_params.append(f"Term={quote(value, safe='')}")
         if active_only is not None:
             value = str(active_only)
             if isinstance(active_only, bool):
                 value = value.lower()
-            query_params.append(f"activeOnly={quote(value)}")
+            query_params.append(f"activeOnly={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -8036,17 +8036,17 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if include_details is not None:
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if old_id is not None:
             value = str(old_id)
             if isinstance(old_id, bool):
                 value = value.lower()
-            query_params.append(f"oldID={quote(value)}")
+            query_params.append(f"oldID={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -8088,7 +8088,7 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(phone_number)
         if isinstance(phone_number, bool):
             value = value.lower()
-        query_params.append(f"phoneNumber={quote(value)}")
+        query_params.append(f"phoneNumber={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

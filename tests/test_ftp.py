@@ -173,7 +173,7 @@ class TestFtpClientMethods:
             assert result["id"] == "new1"
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
-            assert "folderPath=/inbound" in call_args[0][1]
+            assert "folderPath=%2Finbound" in call_args[0][1]
             assert call_args.kwargs["body"] == b"file content"
 
     @pytest.mark.asyncio
@@ -258,8 +258,8 @@ class TestFtpClientMethods:
             )
 
             call_path = mock_send.call_args[0][1]
-            assert "source=/inbound/archive.zip" in call_path
-            assert "destination=/expanded" in call_path
+            assert "source=%2Finbound%2Farchive.zip" in call_path
+            assert "destination=%2Fexpanded" in call_path
             assert result["status"] == "ok"
 
 

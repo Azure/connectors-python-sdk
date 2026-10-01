@@ -71,14 +71,14 @@ async def example_list_discovery_values():
 
     async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            subscriptions = await client.list_subscriptions_async()
-            count = len(subscriptions.get("value", [])) if subscriptions else 0
+            subscriptions = [item async for item in client.list_subscriptions_async()]
+            count = len(subscriptions) if subscriptions else 0
             print(f"Found {count} subscriptions.")
 
-            resource_groups = await client.list_resource_groups_async(
+            resource_groups = [item async for item in client.list_resource_groups_async(
                 subscriptions=SUBSCRIPTION_ID
-            )
-            rg_count = len(resource_groups.get("value", [])) if resource_groups else 0
+            )]
+            rg_count = len(resource_groups) if resource_groups else 0
             print(f"Found {rg_count} resource groups in subscription.")
 
         except ConnectorException as ex:

@@ -1067,12 +1067,12 @@ class MailchimpClient(ConnectorClientBase):
             value = str(count)
             if isinstance(count, bool):
                 value = value.lower()
-            query_params.append(f"count={quote(value)}")
+            query_params.append(f"count={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1142,12 +1142,12 @@ class MailchimpClient(ConnectorClientBase):
             value = str(skip_merge_validation)
             if isinstance(skip_merge_validation, bool):
                 value = value.lower()
-            query_params.append(f"skip_merge_validation={quote(value)}")
+            query_params.append(f"skip_merge_validation={quote(value, safe='')}")
         if skip_duplicate_check is not None:
             value = str(skip_duplicate_check)
             if isinstance(skip_duplicate_check, bool):
                 value = value.lower()
-            query_params.append(f"skip_duplicate_check={quote(value)}")
+            query_params.append(f"skip_duplicate_check={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1188,12 +1188,12 @@ class MailchimpClient(ConnectorClientBase):
             value = str(count)
             if isinstance(count, bool):
                 value = value.lower()
-            query_params.append(f"count={quote(value)}")
+            query_params.append(f"count={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

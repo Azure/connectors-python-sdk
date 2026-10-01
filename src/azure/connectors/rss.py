@@ -116,17 +116,17 @@ class RssClient(ConnectorClientBase):
         value = str(feed_url)
         if isinstance(feed_url, bool):
             value = value.lower()
-        query_params.append(f"feedUrl={quote(value)}")
+        query_params.append(f"feedUrl={quote(value, safe='')}")
         if since is not None:
             value = str(since)
             if isinstance(since, bool):
                 value = value.lower()
-            query_params.append(f"since={quote(value)}")
+            query_params.append(f"since={quote(value, safe='')}")
         if since_property is not None:
             value = str(since_property)
             if isinstance(since_property, bool):
                 value = value.lower()
-            query_params.append(f"sinceProperty={quote(value)}")
+            query_params.append(f"sinceProperty={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

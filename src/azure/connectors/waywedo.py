@@ -691,7 +691,7 @@ class WaywedoClient(ConnectorClientBase):
             value = str(query)
             if isinstance(query, bool):
                 value = value.lower()
-            query_params.append(f"query={quote(value)}")
+            query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -830,7 +830,7 @@ class WaywedoClient(ConnectorClientBase):
             value = str(query)
             if isinstance(query, bool):
                 value = value.lower()
-            query_params.append(f"query={quote(value)}")
+            query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -904,7 +904,7 @@ class WaywedoClient(ConnectorClientBase):
             value = str(query)
             if isinstance(query, bool):
                 value = value.lower()
-            query_params.append(f"query={quote(value)}")
+            query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -940,7 +940,7 @@ class WaywedoClient(ConnectorClientBase):
             value = str(query)
             if isinstance(query, bool):
                 value = value.lower()
-            query_params.append(f"query={quote(value)}")
+            query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1006,17 +1006,17 @@ class WaywedoClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if offset is not None:
             value = str(offset)
             if isinstance(offset, bool):
                 value = value.lower()
-            query_params.append(f"offset={quote(value)}")
+            query_params.append(f"offset={quote(value, safe='')}")
         if status is not None:
             value = str(status)
             if isinstance(status, bool):
                 value = value.lower()
-            query_params.append(f"status={quote(value)}")
+            query_params.append(f"status={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

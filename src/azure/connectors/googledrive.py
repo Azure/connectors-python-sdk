@@ -294,7 +294,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, str]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -307,7 +307,7 @@ class Item:
     Definition: Item
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -530,7 +530,7 @@ class GoogledriveClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -570,12 +570,12 @@ class GoogledriveClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -616,7 +616,7 @@ class GoogledriveClient(ConnectorClientBase):
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -653,16 +653,16 @@ class GoogledriveClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -765,11 +765,11 @@ class GoogledriveClient(ConnectorClientBase):
         value = str(folder_id)
         if isinstance(folder_id, bool):
             value = value.lower()
-        query_params.append(f"folderId={quote(value)}")
+        query_params.append(f"folderId={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -812,16 +812,16 @@ class GoogledriveClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

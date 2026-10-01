@@ -27,6 +27,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestAzuretablesClientInitialization:
@@ -377,16 +378,16 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_entities_async(
+            result = await collect_operation_result(client.get_entities_async(
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
-            )
+            ))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/storageAccounts/mystorageaccount/tables/mytable/entities" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_token_provider):
@@ -404,12 +405,12 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_entities_async(
+            await collect_operation_result(client.get_entities_async(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 filter="PartitionKey eq 'pk1'",
                 select="Name,Value"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -433,10 +434,10 @@ class TestGetEntities:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_entities_async(
+                await collect_operation_result(client.get_entities_async(
                     storage_account_name="mystorageaccount",
                     table_name="nonexistent"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 

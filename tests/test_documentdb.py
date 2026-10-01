@@ -40,6 +40,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestDocumentdbClientInitialization:
@@ -151,17 +152,17 @@ class TestQueryDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.query_documents_async(
+            result = await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer"
-            )
+            ))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/cosmosdb/mycosmosdb/dbs/mydb/colls/mycontainer/query" in call_args[0][1]
-            assert result["count"] == 1
+            assert len(result) == 1
 
     @pytest.mark.asyncio
     async def test_with_query_text(self, mock_token_provider):
@@ -182,12 +183,12 @@ class TestQueryDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.query_documents_async(
+            await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer",
                 query_text="SELECT * FROM c WHERE c.status = 'active'"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -209,12 +210,12 @@ class TestQueryDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.query_documents_async(
+            await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer",
                 partition_key="region-1"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -239,7 +240,7 @@ class TestQueryDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.query_documents_async(
+            await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer",
@@ -249,7 +250,7 @@ class TestQueryDocuments:
                 continuation_token="abc123",
                 consistency_level="Session",
                 session_token="session-xyz"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -277,11 +278,11 @@ class TestQueryDocuments:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.query_documents_async(
+                await collect_operation_result(client.query_documents_async(
                     cosmos_db_account_name="mycosmosdb",
                     database_id="mydb",
                     container_id="nonexistent"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 
@@ -301,12 +302,12 @@ class TestQueryDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.query_documents_async(
+            result = await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer"
-            )
-            assert result is None
+            ))
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_unauthorized_raises_exception(self, mock_token_provider):
@@ -325,11 +326,11 @@ class TestQueryDocuments:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.query_documents_async(
+                await collect_operation_result(client.query_documents_async(
                     cosmos_db_account_name="mycosmosdb",
                     database_id="mydb",
                     container_id="mycontainer"
-                )
+                ))
 
             assert exc_info.value.status_code == 401
 
@@ -654,16 +655,16 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.query_documents_async(
+            await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="account1",
                 database_id="db1",
                 container_id="container1"
-            )
-            await client.query_documents_async(
+            ))
+            await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="account2",
                 database_id="db2",
                 container_id="container2"
-            )
+            ))
 
             assert mock_send.call_count == 2
 
@@ -683,11 +684,11 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.query_documents_async(
+            await collect_operation_result(client.query_documents_async(
                 cosmos_db_account_name="my-cosmos-db",
                 database_id="my-database",
                 container_id="my-container"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]

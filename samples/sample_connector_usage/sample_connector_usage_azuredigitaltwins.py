@@ -59,13 +59,13 @@ async def example_1_list_models():
     ) as client:
         try:
             # List all models
-            result = await client.list_models_async(
+            result = [item async for item in client.list_models_async(
                 include_model_definition="true"
-            )
+            )]
 
-            if result and result.get("value"):
-                print(f"Found {len(result['value'])} models:")
-                for model in result["value"]:
+            if result and result:
+                print(f"Found {len(result)} models:")
+                for model in result:
                     print(f"  - {model.get('id', 'Unknown')}")
             else:
                 print("No models found")
@@ -151,24 +151,24 @@ async def example_4_list_relationships():
     ) as client:
         try:
             # List outgoing relationships
-            outgoing = await client.list_relationships_async(twinid=twin_id)
+            outgoing = [item async for item in client.list_relationships_async(twinid=twin_id)]
 
-            if outgoing and outgoing.get("value"):
+            if outgoing and outgoing:
                 print(f"Outgoing relationships from {twin_id}:")
-                for rel in outgoing["value"]:
+                for rel in outgoing:
                     print(f"  -> {rel.get('$targetId')} "
                           f"({rel.get('$relationshipName')})")
             else:
                 print(f"No outgoing relationships from {twin_id}")
 
             # List incoming relationships
-            incoming = await client.list_incoming_relationships_async(
+            incoming = [item async for item in client.list_incoming_relationships_async(
                 twinid=twin_id
-            )
+            )]
 
-            if incoming and incoming.get("value"):
+            if incoming and incoming:
                 print(f"Incoming relationships to {twin_id}:")
-                for rel in incoming["value"]:
+                for rel in incoming:
                     print(f"  <- {rel.get('$sourceId')} "
                           f"({rel.get('$relationshipName')})")
             else:

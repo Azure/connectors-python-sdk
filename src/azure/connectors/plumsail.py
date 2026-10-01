@@ -1689,7 +1689,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(type_)
         if isinstance(type_, bool):
             value = value.lower()
-        query_params.append(f"type={quote(value)}")
+        query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2010,7 +2010,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(type_)
         if isinstance(type_, bool):
             value = value.lower()
-        query_params.append(f"type={quote(value)}")
+        query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2397,7 +2397,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(process_id)
         if isinstance(process_id, bool):
             value = value.lower()
-        query_params.append(f"processId={quote(value)}")
+        query_params.append(f"processId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2436,7 +2436,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(process_id)
         if isinstance(process_id, bool):
             value = value.lower()
-        query_params.append(f"processId={quote(value)}")
+        query_params.append(f"processId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2471,7 +2471,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(type_)
         if isinstance(type_, bool):
             value = value.lower()
-        query_params.append(f"type={quote(value)}")
+        query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2504,7 +2504,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(type_)
         if isinstance(type_, bool):
             value = value.lower()
-        query_params.append(f"type={quote(value)}")
+        query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2562,7 +2562,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(headers)
         if isinstance(headers, bool):
             value = value.lower()
-        query_params.append(f"headers={quote(value)}")
+        query_params.append(f"headers={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2595,7 +2595,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(process_id)
         if isinstance(process_id, bool):
             value = value.lower()
-        query_params.append(f"processId={quote(value)}")
+        query_params.append(f"processId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2659,7 +2659,7 @@ class PlumsailClient(ConnectorClientBase):
         value = str(pattern)
         if isinstance(pattern, bool):
             value = value.lower()
-        query_params.append(f"pattern={quote(value)}")
+        query_params.append(f"pattern={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

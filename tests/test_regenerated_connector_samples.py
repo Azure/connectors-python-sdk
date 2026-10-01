@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -41,6 +42,10 @@ class TypedClient:
     async def create_item_async(self, *, input: TypedInput) -> None:
         """Represent a generated method with a typed request body."""
 
+    async def get_items_async(self) -> AsyncIterator[dict[str, str]]:
+        """Represent a generated pageable method."""
+        yield {"id": "item-1"}
+
 
 @pytest.mark.parametrize(
     "sample_path",
@@ -71,6 +76,22 @@ def test_all_connector_samples_match_generated_apis() -> None:
 
     assert len(sample_paths) == 99
     assert issues == []
+
+
+def test_sample_validator_rejects_awaiting_pageable_method() -> None:
+    """Test pageable methods require iteration rather than await."""
+    tree = ast.parse(
+        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "await client.get_items_async()\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "'get_items_async' must be consumed with async for",
+    ]
 
 
 def test_sample_validator_rejects_incompatible_literal_type() -> None:

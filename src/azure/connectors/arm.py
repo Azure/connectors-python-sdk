@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -243,7 +243,7 @@ class ResourceGroup:
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource group."""
-    tags: Optional[Dict[str, Any]] = None
+    tags: Optional[Dict[str, str]] = None
     """The tags attached to the resource group."""
     properties: Optional[ResourceGroupProperties] = None
 
@@ -288,7 +288,7 @@ class GenericResource:
     """Resource type"""
     location: Optional[str] = None
     """Resource location"""
-    tags: Optional[Dict[str, Any]] = None
+    tags: Optional[Dict[str, str]] = None
     """Resource tags"""
     plan: Optional[Plan] = None
     kind: Optional[str] = None
@@ -610,7 +610,7 @@ class ProviderResourceType:
         metadata={"wire_name": "apiVersions"},
     )
     """The api version."""
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[Dict[str, str]] = None
     """The properties."""
 
 
@@ -919,6 +919,45 @@ class ArmClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "arm"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def subscriptions_list_locations_async(
         self,
         subscription_id: str,
@@ -991,34 +1030,48 @@ class ArmClient(ConnectorClientBase):
 
     async def subscriptions_list_async(
         self,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List subscriptions
 
         Gets a list of all the subscriptions to which the principal has access.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
         query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def deployments_get_async(
         self,
@@ -1049,7 +1102,7 @@ class ArmClient(ConnectorClientBase):
             value = str(wait)
             if isinstance(wait, bool):
                 value = value.lower()
-            query_params.append(f"wait={quote(value)}")
+            query_params.append(f"wait={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1101,7 +1154,7 @@ class ArmClient(ConnectorClientBase):
             value = str(wait)
             if isinstance(wait, bool):
                 value = value.lower()
-            query_params.append(f"wait={quote(value)}")
+            query_params.append(f"wait={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1302,12 +1355,15 @@ class ArmClient(ConnectorClientBase):
         resource_group_name: str,
         filter: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List template deployments
 
         Lists all the resource group template deployments. This operation is
         useful to know what has been provisioned thus far.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1325,31 +1381,42 @@ class ArmClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def deployment_operations_get_async(
         self,
@@ -1403,12 +1470,15 @@ class ArmClient(ConnectorClientBase):
         resource_group_name: str,
         deployment_name: str,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Lists template deployment operations
 
         Lists all the template deployment operations. This is useful for
         troubleshooting failed template deployments.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1426,26 +1496,37 @@ class ArmClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def providers_unregister_async(
         self,
@@ -1535,11 +1616,14 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         top: Optional[int] = None,
         expand: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List resource providers
 
         Lists the resource providers available for the subscription.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1551,31 +1635,42 @@ class ArmClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"$expand={quote(value)}")
+            query_params.append(f"$expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def providers_get_async(
         self,
@@ -1601,7 +1696,7 @@ class ArmClient(ConnectorClientBase):
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"$expand={quote(value)}")
+            query_params.append(f"$expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1629,11 +1724,14 @@ class ArmClient(ConnectorClientBase):
         filter: Optional[str] = None,
         expand: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List resources by resource group
 
         Lists all the resources under a resource group.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1649,36 +1747,47 @@ class ArmClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"$expand={quote(value)}")
+            query_params.append(f"$expand={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def resource_groups_get_async(
         self,
@@ -1883,12 +1992,15 @@ class ArmClient(ConnectorClientBase):
         subscription_id: str,
         filter: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List resource groups
 
         Lists all the resource groups within the subscription. The results are
         paginated at 1,000+ records.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1902,31 +2014,42 @@ class ArmClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def resources_list_async(
         self,
@@ -1934,12 +2057,15 @@ class ArmClient(ConnectorClientBase):
         filter: Optional[str] = None,
         expand: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List resources by subscription
 
         Reads all of the resources under a particular subscription. The results
         are paginated at 1,000+ records.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1951,36 +2077,47 @@ class ArmClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"$expand={quote(value)}")
+            query_params.append(f"$expand={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def resources_get_by_id_async(
         self,
@@ -2009,7 +2146,7 @@ class ArmClient(ConnectorClientBase):
         value = str(x_ms_api_version)
         if isinstance(x_ms_api_version, bool):
             value = value.lower()
-        query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append(f"x-ms-api-version={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2059,7 +2196,7 @@ class ArmClient(ConnectorClientBase):
         value = str(x_ms_api_version)
         if isinstance(x_ms_api_version, bool):
             value = value.lower()
-        query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append(f"x-ms-api-version={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2107,7 +2244,7 @@ class ArmClient(ConnectorClientBase):
         value = str(x_ms_api_version)
         if isinstance(x_ms_api_version, bool):
             value = value.lower()
-        query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append(f"x-ms-api-version={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2153,7 +2290,7 @@ class ArmClient(ConnectorClientBase):
         value = str(x_ms_api_version)
         if isinstance(x_ms_api_version, bool):
             value = value.lower()
-        query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append(f"x-ms-api-version={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2198,7 +2335,7 @@ class ArmClient(ConnectorClientBase):
         value = str(x_ms_api_version)
         if isinstance(x_ms_api_version, bool):
             value = value.lower()
-        query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append(f"x-ms-api-version={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2244,7 +2381,7 @@ class ArmClient(ConnectorClientBase):
         value = str(x_ms_api_version)
         if isinstance(x_ms_api_version, bool):
             value = value.lower()
-        query_params.append(f"x-ms-api-version={quote(value)}")
+        query_params.append(f"x-ms-api-version={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2420,11 +2557,14 @@ class ArmClient(ConnectorClientBase):
     async def tags_list_async(
         self,
         subscription_id: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List subscription resource tags
 
         Lists all the subscription resource tags.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2434,20 +2574,31 @@ class ArmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2016-06-01"))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None

@@ -259,12 +259,12 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(input_format)
             if isinstance(input_format, bool):
                 value = value.lower()
-            query_params.append(f"input_format={quote(value)}")
+            query_params.append(f"input_format={quote(value, safe='')}")
         if output_format is not None:
             value = str(output_format)
             if isinstance(output_format, bool):
                 value = value.lower()
-            query_params.append(f"output_format={quote(value)}")
+            query_params.append(f"output_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -298,7 +298,7 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(input_format)
             if isinstance(input_format, bool):
                 value = value.lower()
-            query_params.append(f"input_format={quote(value)}")
+            query_params.append(f"input_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -334,7 +334,7 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(output_format)
             if isinstance(output_format, bool):
                 value = value.lower()
-            query_params.append(f"output_format={quote(value)}")
+            query_params.append(f"output_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -368,7 +368,7 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(number_of_inputs)
             if isinstance(number_of_inputs, bool):
                 value = value.lower()
-            query_params.append(f"number_of_inputs={quote(value)}")
+            query_params.append(f"number_of_inputs={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -402,7 +402,7 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(output_format)
             if isinstance(output_format, bool):
                 value = value.lower()
-            query_params.append(f"output_format={quote(value)}")
+            query_params.append(f"output_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

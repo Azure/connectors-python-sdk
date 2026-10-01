@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -682,6 +682,45 @@ class Office365usersClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "office365users"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def update_my_profile_async(
         self,
         input: GraphUserUpdateable,
@@ -754,17 +793,17 @@ class Office365usersClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -830,7 +869,7 @@ class Office365usersClient(ConnectorClientBase):
         value = str(user_id)
         if isinstance(user_id, bool):
             value = value.lower()
-        query_params.append(f"userId={quote(value)}")
+        query_params.append(f"userId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -872,17 +911,17 @@ class Office365usersClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -960,12 +999,12 @@ class Office365usersClient(ConnectorClientBase):
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1007,7 +1046,7 @@ class Office365usersClient(ConnectorClientBase):
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1045,7 +1084,7 @@ class Office365usersClient(ConnectorClientBase):
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1071,11 +1110,14 @@ class Office365usersClient(ConnectorClientBase):
         search_term: Optional[str] = None,
         top: Optional[int] = None,
         is_search_term_required: Optional[bool] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Search for users
 
         Retrieves the user profiles that match the search term.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/v2/users"
         query_params = []
@@ -1083,36 +1125,47 @@ class Office365usersClient(ConnectorClientBase):
             value = str(search_term)
             if isinstance(search_term, bool):
                 value = value.lower()
-            query_params.append(f"searchTerm={quote(value)}")
+            query_params.append(f"searchTerm={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"top={quote(value)}")
+            query_params.append(f"top={quote(value, safe='')}")
         if is_search_term_required is not None:
             value = str(is_search_term_required)
             if isinstance(is_search_term_required, bool):
                 value = value.lower()
-            query_params.append(f"isSearchTermRequired={quote(value)}")
+            query_params.append(f"isSearchTermRequired={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def user_photo_async(
         self,
@@ -1163,7 +1216,7 @@ class Office365usersClient(ConnectorClientBase):
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

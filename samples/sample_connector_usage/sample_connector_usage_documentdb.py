@@ -66,16 +66,16 @@ async def example_1_query_all_documents():
 
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.query_documents_async(
+            result = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT * FROM c"
-            )
+            )]
 
             if result:
-                documents = result.get("value", [])
-                count = result.get("count", len(documents))
+                documents = result
+                count = len(result)
                 print(f"Found {count} document(s) in container '{CONTAINER_ID}':")
                 for i, doc in enumerate(documents[:3], 1):  # Show first 3
                     doc_id = doc.get("id", "N/A")
@@ -104,16 +104,16 @@ async def example_2_query_with_filter():
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Query with WHERE clause - adjust field names for your schema
-            result = await client.query_documents_async(
+            result = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT * FROM c WHERE c.type = 'sample'"
-            )
+            )]
 
             if result:
-                documents = result.get("value", [])
-                count = result.get("count", len(documents))
+                documents = result
+                count = len(result)
                 print(f"Found {count} document(s) matching filter:")
                 for doc in documents[:5]:
                     doc_id = doc.get("id", "N/A")
@@ -141,16 +141,16 @@ async def example_3_query_with_pagination():
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # First page - limit to 2 items
-            result = await client.query_documents_async(
+            result = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT c.id, c.type FROM c",
                 max_item_count=2
-            )
+            )]
 
             if result:
-                documents = result.get("value", [])
+                documents = result
                 continuation = result.get("continuation_token")
                 request_charge = result.get("request_charge", 0)
 
@@ -193,16 +193,16 @@ async def example_4_query_with_partition_key():
     async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Query within a specific partition
-            result = await client.query_documents_async(
+            result = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT * FROM c",
                 partition_key=partition_key
-            )
+            )]
 
             if result:
-                documents = result.get("value", [])
+                documents = result
                 print(f"Found {len(documents)} document(s) in partition '{partition_key}':")
                 for doc in documents[:5]:
                     print(f"  - id: {doc.get('id', 'N/A')}")
@@ -229,16 +229,16 @@ async def example_5_query_with_consistency():
         try:
             # Query with Session consistency (common for read-your-writes)
             # Valid levels: Strong, BoundedStaleness, Session, Eventual
-            result = await client.query_documents_async(
+            result = [item async for item in client.query_documents_async(
                 cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                 database_id=DATABASE_ID,
                 container_id=CONTAINER_ID,
                 query_text="SELECT TOP 5 c.id FROM c ORDER BY c._ts DESC",
                 consistency_level="Session"
-            )
+            )]
 
             if result:
-                documents = result.get("value", [])
+                documents = result
                 session_token = result.get("session_token", "N/A")
                 activity_id = result.get("activity_id", "N/A")
 

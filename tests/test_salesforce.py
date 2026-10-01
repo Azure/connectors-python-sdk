@@ -17,6 +17,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestSalesforceClientInitialization:
@@ -149,13 +150,13 @@ class TestGetTables:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_tables_async()
+            result = await collect_operation_result(client.get_tables_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/datasets/default/tables" in call_args[0][1]
-            assert result["value"][0]["name"] == "account"
+            assert result[0]["name"] == "account"
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -174,7 +175,7 @@ class TestGetTables:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_tables_async()
+                await collect_operation_result(client.get_tables_async())
 
             assert exc_info.value.status_code == 401
 
@@ -198,12 +199,12 @@ class TestGetItems:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(
+            await collect_operation_result(client.get_items_async(
                 table="account",
                 filter="Name eq 'Contoso'",
                 top="5",
                 select="Id,Name",
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -596,7 +597,7 @@ class TestSalesforceDiscoveryOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await getattr(client, method_name)(table="account")
+            result = await collect_operation_result(getattr(client, method_name)(table="account"))
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -635,7 +636,7 @@ class TestSalesforceDiscoveryOperations:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await getattr(client, method_name)(table="account")
+                await collect_operation_result(getattr(client, method_name)(table="account"))
 
             assert exc_info.value.status_code == 404
 

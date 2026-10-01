@@ -1181,57 +1181,57 @@ class GithubClient(ConnectorClientBase):
             value = str(milestone)
             if isinstance(milestone, bool):
                 value = value.lower()
-            query_params.append(f"milestone={quote(value)}")
+            query_params.append(f"milestone={quote(value, safe='')}")
         if state is not None:
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if assignee is not None:
             value = str(assignee)
             if isinstance(assignee, bool):
                 value = value.lower()
-            query_params.append(f"assignee={quote(value)}")
+            query_params.append(f"assignee={quote(value, safe='')}")
         if creator is not None:
             value = str(creator)
             if isinstance(creator, bool):
                 value = value.lower()
-            query_params.append(f"creator={quote(value)}")
+            query_params.append(f"creator={quote(value, safe='')}")
         if mentioned is not None:
             value = str(mentioned)
             if isinstance(mentioned, bool):
                 value = value.lower()
-            query_params.append(f"mentioned={quote(value)}")
+            query_params.append(f"mentioned={quote(value, safe='')}")
         if labels is not None:
             value = str(labels)
             if isinstance(labels, bool):
                 value = value.lower()
-            query_params.append(f"labels={quote(value)}")
+            query_params.append(f"labels={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if since is not None:
             value = str(since)
             if isinstance(since, bool):
                 value = value.lower()
-            query_params.append(f"since={quote(value)}")
+            query_params.append(f"since={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1770,37 +1770,37 @@ class GithubClient(ConnectorClientBase):
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if head is not None:
             value = str(head)
             if isinstance(head, bool):
                 value = value.lower()
-            query_params.append(f"head={quote(value)}")
+            query_params.append(f"head={quote(value, safe='')}")
         if base is not None:
             value = str(base)
             if isinstance(base, bool):
                 value = value.lower()
-            query_params.append(f"base={quote(value)}")
+            query_params.append(f"base={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2197,12 +2197,12 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2247,12 +2247,12 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2337,27 +2337,27 @@ class GithubClient(ConnectorClientBase):
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2402,12 +2402,12 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2455,12 +2455,12 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2504,27 +2504,27 @@ class GithubClient(ConnectorClientBase):
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2568,27 +2568,27 @@ class GithubClient(ConnectorClientBase):
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2633,47 +2633,47 @@ class GithubClient(ConnectorClientBase):
             value = str(visibility)
             if isinstance(visibility, bool):
                 value = value.lower()
-            query_params.append(f"visibility={quote(value)}")
+            query_params.append(f"visibility={quote(value, safe='')}")
         if affiliation is not None:
             value = str(affiliation)
             if isinstance(affiliation, bool):
                 value = value.lower()
-            query_params.append(f"affiliation={quote(value)}")
+            query_params.append(f"affiliation={quote(value, safe='')}")
         if since is not None:
             value = str(since)
             if isinstance(since, bool):
                 value = value.lower()
-            query_params.append(f"since={quote(value)}")
+            query_params.append(f"since={quote(value, safe='')}")
         if before is not None:
             value = str(before)
             if isinstance(before, bool):
                 value = value.lower()
-            query_params.append(f"before={quote(value)}")
+            query_params.append(f"before={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2712,27 +2712,27 @@ class GithubClient(ConnectorClientBase):
         value = str(q)
         if isinstance(q, bool):
             value = value.lower()
-        query_params.append(f"q={quote(value)}")
+        query_params.append(f"q={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if order is not None:
             value = str(order)
             if isinstance(order, bool):
                 value = value.lower()
-            query_params.append(f"order={quote(value)}")
+            query_params.append(f"order={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

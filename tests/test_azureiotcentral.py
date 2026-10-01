@@ -25,6 +25,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 BASE_URL = "https://example.azure.com/connections/test"
@@ -233,7 +234,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 async def _invoke_operation(client: AzureiotcentralClient, operation: str):
     """Invoke an IoT Central operation by name for shared method tests."""
     method = getattr(client, f"{operation}_async")
-    return await method(**OPERATION_ARGS[operation])
+    return await collect_operation_result(method(**OPERATION_ARGS[operation]))
 
 
 def _make_client(token_provider=None):
@@ -334,9 +335,9 @@ class TestAzureiotcentralClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.devices_list_async(application="app-1")
+            result = await collect_operation_result(client.devices_list_async(application="app-1"))
 
-            assert result["value"][0]["id"] == "d-1"
+            assert result[0]["id"] == "d-1"
             assert mock_send.call_args[0][0] == "GET"
             request_url = mock_send.call_args[0][1]
             assert "/api/v1/devices" in request_url
@@ -513,9 +514,9 @@ class TestAzureiotcentralClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.devices_list_async(application="app-1")
+            result = await collect_operation_result(client.devices_list_async(application="app-1"))
 
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)

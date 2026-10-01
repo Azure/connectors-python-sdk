@@ -4983,12 +4983,12 @@ class SigninghubClient(ConnectorClientBase):
             value = str(sort_by)
             if isinstance(sort_by, bool):
                 value = value.lower()
-            query_params.append(f"sort-by={quote(value)}")
+            query_params.append(f"sort-by={quote(value, safe='')}")
         if asc is not None:
             value = str(asc)
             if isinstance(asc, bool):
                 value = value.lower()
-            query_params.append(f"asc={quote(value)}")
+            query_params.append(f"asc={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6077,12 +6077,12 @@ class SigninghubClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"document-ids={quote(joined)}")
+                query_params.append(f"document-ids={quote(joined, safe='')}")
             else:
                 value = str(document_ids)
                 if isinstance(document_ids, bool):
                     value = value.lower()
-                query_params.append(f"document-ids={quote(value)}")
+                query_params.append(f"document-ids={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6272,82 +6272,82 @@ class SigninghubClient(ConnectorClientBase):
             value = str(package_name)
             if isinstance(package_name, bool):
                 value = value.lower()
-            query_params.append(f"package-name={quote(value)}")
+            query_params.append(f"package-name={quote(value, safe='')}")
         if package_id is not None:
             value = str(package_id)
             if isinstance(package_id, bool):
                 value = value.lower()
-            query_params.append(f"package-id={quote(value)}")
+            query_params.append(f"package-id={quote(value, safe='')}")
         if recipient_from is not None:
             value = str(recipient_from)
             if isinstance(recipient_from, bool):
                 value = value.lower()
-            query_params.append(f"recipient-from={quote(value)}")
+            query_params.append(f"recipient-from={quote(value, safe='')}")
         if recipient_to is not None:
             value = str(recipient_to)
             if isinstance(recipient_to, bool):
                 value = value.lower()
-            query_params.append(f"recipient-to={quote(value)}")
+            query_params.append(f"recipient-to={quote(value, safe='')}")
         if document_id is not None:
             value = str(document_id)
             if isinstance(document_id, bool):
                 value = value.lower()
-            query_params.append(f"document-id={quote(value)}")
+            query_params.append(f"document-id={quote(value, safe='')}")
         if expiry is not None:
             value = str(expiry)
             if isinstance(expiry, bool):
                 value = value.lower()
-            query_params.append(f"expiry={quote(value)}")
+            query_params.append(f"expiry={quote(value, safe='')}")
         if modified_from is not None:
             value = str(modified_from)
             if isinstance(modified_from, bool):
                 value = value.lower()
-            query_params.append(f"modified-from={quote(value)}")
+            query_params.append(f"modified-from={quote(value, safe='')}")
         if modified_to is not None:
             value = str(modified_to)
             if isinstance(modified_to, bool):
                 value = value.lower()
-            query_params.append(f"modified-to={quote(value)}")
+            query_params.append(f"modified-to={quote(value, safe='')}")
         if size_from is not None:
             value = str(size_from)
             if isinstance(size_from, bool):
                 value = value.lower()
-            query_params.append(f"size-from={quote(value)}")
+            query_params.append(f"size-from={quote(value, safe='')}")
         if size_to is not None:
             value = str(size_to)
             if isinstance(size_to, bool):
                 value = value.lower()
-            query_params.append(f"size-to={quote(value)}")
+            query_params.append(f"size-to={quote(value, safe='')}")
         if certified_documents is not None:
             value = str(certified_documents)
             if isinstance(certified_documents, bool):
                 value = value.lower()
-            query_params.append(f"certified-documents={quote(value)}")
+            query_params.append(f"certified-documents={quote(value, safe='')}")
         if form_fields is not None:
             value = str(form_fields)
             if isinstance(form_fields, bool):
                 value = value.lower()
-            query_params.append(f"form-fields={quote(value)}")
+            query_params.append(f"form-fields={quote(value, safe='')}")
         if attachments is not None:
             value = str(attachments)
             if isinstance(attachments, bool):
                 value = value.lower()
-            query_params.append(f"attachments={quote(value)}")
+            query_params.append(f"attachments={quote(value, safe='')}")
         if document_type is not None:
             value = str(document_type)
             if isinstance(document_type, bool):
                 value = value.lower()
-            query_params.append(f"document-type={quote(value)}")
+            query_params.append(f"document-type={quote(value, safe='')}")
         if sort_by is not None:
             value = str(sort_by)
             if isinstance(sort_by, bool):
                 value = value.lower()
-            query_params.append(f"sort-by={quote(value)}")
+            query_params.append(f"sort-by={quote(value, safe='')}")
         if asc is not None:
             value = str(asc)
             if isinstance(asc, bool):
                 value = value.lower()
-            query_params.append(f"asc={quote(value)}")
+            query_params.append(f"asc={quote(value, safe='')}")
         if document_statuses is not None:
             if isinstance(document_statuses, list):
                 joined_parts = []
@@ -6357,22 +6357,22 @@ class SigninghubClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"document-statuses={quote(joined)}")
+                query_params.append(f"document-statuses={quote(joined, safe='')}")
             else:
                 value = str(document_statuses)
                 if isinstance(document_statuses, bool):
                     value = value.lower()
-                query_params.append(f"document-statuses={quote(value)}")
+                query_params.append(f"document-statuses={quote(value, safe='')}")
         if owned_by is not None:
             value = str(owned_by)
             if isinstance(owned_by, bool):
                 value = value.lower()
-            query_params.append(f"owned-by={quote(value)}")
+            query_params.append(f"owned-by={quote(value, safe='')}")
         if smart_form is not None:
             value = str(smart_form)
             if isinstance(smart_form, bool):
                 value = value.lower()
-            query_params.append(f"smart-form={quote(value)}")
+            query_params.append(f"smart-form={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -6706,12 +6706,12 @@ class SigninghubClient(ConnectorClientBase):
             value = str(sort_by)
             if isinstance(sort_by, bool):
                 value = value.lower()
-            query_params.append(f"sort-by={quote(value)}")
+            query_params.append(f"sort-by={quote(value, safe='')}")
         if asc is not None:
             value = str(asc)
             if isinstance(asc, bool):
                 value = value.lower()
-            query_params.append(f"asc={quote(value)}")
+            query_params.append(f"asc={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -7046,12 +7046,12 @@ class SigninghubClient(ConnectorClientBase):
             value = str(sort_by)
             if isinstance(sort_by, bool):
                 value = value.lower()
-            query_params.append(f"sort-by={quote(value)}")
+            query_params.append(f"sort-by={quote(value, safe='')}")
         if asc is not None:
             value = str(asc)
             if isinstance(asc, bool):
                 value = value.lower()
-            query_params.append(f"asc={quote(value)}")
+            query_params.append(f"asc={quote(value, safe='')}")
         if id is not None:
             if isinstance(id, list):
                 joined_parts = []
@@ -7061,12 +7061,12 @@ class SigninghubClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"id={quote(joined)}")
+                query_params.append(f"id={quote(joined, safe='')}")
             else:
                 value = str(id)
                 if isinstance(id, bool):
                     value = value.lower()
-                query_params.append(f"id={quote(value)}")
+                query_params.append(f"id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

@@ -44,11 +44,11 @@ async def example_1_list_my_tasks():
     client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
     try:
-        tasks = await client.list_my_tasks_async()
+        tasks = [item async for item in client.list_my_tasks_async()]
 
-        if tasks and tasks.get('value'):
-            print(f"Found {len(tasks.get('value', []))} tasks assigned to me")
-            for task in tasks.get('value', [])[:5]:  # Show first 5
+        if tasks and tasks:
+            print(f"Found {len(tasks)} tasks assigned to me")
+            for task in tasks[:5]:  # Show first 5
                 print(f"  - {task.get('title')} ({task.get('percentComplete')}% complete)")
         else:
             print("No tasks assigned to me")

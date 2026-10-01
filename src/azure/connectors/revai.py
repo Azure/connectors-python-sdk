@@ -534,12 +534,12 @@ class RevaiClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if starting_after is not None:
             value = str(starting_after)
             if isinstance(starting_after, bool):
                 value = value.lower()
-            query_params.append(f"starting_after={quote(value)}")
+            query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -697,7 +697,7 @@ class RevaiClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -830,12 +830,12 @@ class RevaiClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if starting_after is not None:
             value = str(starting_after)
             if isinstance(starting_after, bool):
                 value = value.lower()
-            query_params.append(f"starting_after={quote(value)}")
+            query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -968,7 +968,7 @@ class RevaiClient(ConnectorClientBase):
             value = str(threshold)
             if isinstance(threshold, bool):
                 value = value.lower()
-            query_params.append(f"threshold={quote(value)}")
+            query_params.append(f"threshold={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1008,12 +1008,12 @@ class RevaiClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if starting_after is not None:
             value = str(starting_after)
             if isinstance(starting_after, bool):
                 value = value.lower()
-            query_params.append(f"starting_after={quote(value)}")
+            query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1141,7 +1141,7 @@ class RevaiClient(ConnectorClientBase):
             value = str(filter_for)
             if isinstance(filter_for, bool):
                 value = value.lower()
-            query_params.append(f"filter_for={quote(value)}")
+            query_params.append(f"filter_for={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1179,12 +1179,12 @@ class RevaiClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if starting_after is not None:
             value = str(starting_after)
             if isinstance(starting_after, bool):
                 value = value.lower()
-            query_params.append(f"starting_after={quote(value)}")
+            query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1345,12 +1345,12 @@ class RevaiClient(ConnectorClientBase):
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if starting_after is not None:
             value = str(starting_after)
             if isinstance(starting_after, bool):
                 value = value.lower()
-            query_params.append(f"starting_after={quote(value)}")
+            query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

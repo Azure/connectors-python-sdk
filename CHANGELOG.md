@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Generated pageable operations now return async iterators of items rather than
+  response dictionaries. Consume them with `async for`, or collect them with
+  `[item async for item in client.get_items_async(...)]`; samples use this contract.
+
 - **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and `aiohttp.ClientError`. Set `ConnectorClientOptions(retry_unsafe_http_methods=True)` per client only when replay is acceptable; existing retry count, timeout, and backoff settings remain available. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
 
 - Seismic Planner `CustomPropertyValues.localizations` now exposes `Dict[str, CustomPropertyDataDisplay]` instead of `Dict[str, Any]`. Callers can access typed values directly, such as `localizations["en-US"].name`. ([Azure/Connectors-NET-SDK#262](https://github.com/Azure/Connectors-NET-SDK/issues/262), AzureUX-BPM PR 17131877)
@@ -31,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarified that Azure Functions SDK-type deserialization is owned by the Azure Functions connector extension rather than generated connector clients.
 
 ### Fixed
+
+- Generated query values now escape reserved characters, including `/`, so paths,
+  URLs, and collection values remain within their intended query parameters.
 
 - **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
 

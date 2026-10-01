@@ -14,6 +14,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestOffice365usersClientInitialization:
@@ -777,12 +778,12 @@ class TestSearchUser:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.search_user_async(search_term="John")
+            result = await collect_operation_result(client.search_user_async(search_term="John"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert "searchTerm=John" in call_args[0][1]
-            assert "value" in result
+            assert len(result) > 0
 
     @pytest.mark.asyncio
     async def test_with_all_parameters(self, mock_token_provider):
@@ -800,11 +801,11 @@ class TestSearchUser:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.search_user_async(
+            await collect_operation_result(client.search_user_async(
                 search_term="John",
                 top=25,
                 is_search_term_required=True
-            )
+            ))
 
             call_args = mock_send.call_args
             assert "searchTerm=John" in call_args[0][1]
@@ -827,8 +828,8 @@ class TestSearchUser:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.search_user_async()
-            assert result is None
+            result = await collect_operation_result(client.search_user_async())
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -847,7 +848,7 @@ class TestSearchUser:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.search_user_async(search_term="test")
+                await collect_operation_result(client.search_user_async(search_term="test"))
 
             assert exc_info.value.status_code == 500
 

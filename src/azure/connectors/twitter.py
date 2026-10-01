@@ -387,12 +387,12 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -429,7 +429,7 @@ class TwitterClient(ConnectorClientBase):
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -467,17 +467,17 @@ class TwitterClient(ConnectorClientBase):
         value = str(search_query)
         if isinstance(search_query, bool):
             value = value.lower()
-        query_params.append(f"searchQuery={quote(value)}")
+        query_params.append(f"searchQuery={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if since_id is not None:
             value = str(since_id)
             if isinstance(since_id, bool):
                 value = value.lower()
-            query_params.append(f"sinceId={quote(value)}")
+            query_params.append(f"sinceId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -513,12 +513,12 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -554,7 +554,7 @@ class TwitterClient(ConnectorClientBase):
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -590,12 +590,12 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -631,7 +631,7 @@ class TwitterClient(ConnectorClientBase):
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -667,7 +667,7 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -704,7 +704,7 @@ class TwitterClient(ConnectorClientBase):
             value = str(tweet_text)
             if isinstance(tweet_text, bool):
                 value = value.lower()
-            query_params.append(f"tweetText={quote(value)}")
+            query_params.append(f"tweetText={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -743,12 +743,12 @@ class TwitterClient(ConnectorClientBase):
         value = str(tweet_id)
         if isinstance(tweet_id, bool):
             value = value.lower()
-        query_params.append(f"tweetId={quote(value)}")
+        query_params.append(f"tweetId={quote(value, safe='')}")
         if trim_user is not None:
             value = str(trim_user)
             if isinstance(trim_user, bool):
                 value = value.lower()
-            query_params.append(f"trimUser={quote(value)}")
+            query_params.append(f"trimUser={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

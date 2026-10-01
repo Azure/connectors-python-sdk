@@ -911,11 +911,11 @@ class TextrequestClient(ConnectorClientBase):
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1209,120 +1209,120 @@ class TextrequestClient(ConnectorClientBase):
             value = str(contact_phone_number)
             if isinstance(contact_phone_number, bool):
                 value = value.lower()
-            query_params.append(f"contact_phone_number={quote(value)}")
+            query_params.append(f"contact_phone_number={quote(value, safe='')}")
         if last_message_timestamp_before_utc is not None:
             value = str(last_message_timestamp_before_utc)
             if isinstance(last_message_timestamp_before_utc, bool):
                 value = value.lower()
-            query_params.append(f"last_message_timestamp_before_utc={quote(value)}")
+            query_params.append(f"last_message_timestamp_before_utc={quote(value, safe='')}")
         if last_message_timestamp_after_utc is not None:
             value = str(last_message_timestamp_after_utc)
             if isinstance(last_message_timestamp_after_utc, bool):
                 value = value.lower()
-            query_params.append(f"last_message_timestamp_after_utc={quote(value)}")
+            query_params.append(f"last_message_timestamp_after_utc={quote(value, safe='')}")
         if contact_created_before is not None:
             value = str(contact_created_before)
             if isinstance(contact_created_before, bool):
                 value = value.lower()
-            query_params.append(f"contact_created_before={quote(value)}")
+            query_params.append(f"contact_created_before={quote(value, safe='')}")
         if contact_created_after is not None:
             value = str(contact_created_after)
             if isinstance(contact_created_after, bool):
                 value = value.lower()
-            query_params.append(f"contact_created_after={quote(value)}")
+            query_params.append(f"contact_created_after={quote(value, safe='')}")
         if is_resolved is not None:
             value = str(is_resolved)
             if isinstance(is_resolved, bool):
                 value = value.lower()
-            query_params.append(f"is_resolved={quote(value)}")
+            query_params.append(f"is_resolved={quote(value, safe='')}")
         if is_blocked is not None:
             value = str(is_blocked)
             if isinstance(is_blocked, bool):
                 value = value.lower()
-            query_params.append(f"is_blocked={quote(value)}")
+            query_params.append(f"is_blocked={quote(value, safe='')}")
         if is_archived is not None:
             value = str(is_archived)
             if isinstance(is_archived, bool):
                 value = value.lower()
-            query_params.append(f"is_archived={quote(value)}")
+            query_params.append(f"is_archived={quote(value, safe='')}")
         if is_suppressed is not None:
             value = str(is_suppressed)
             if isinstance(is_suppressed, bool):
                 value = value.lower()
-            query_params.append(f"is_suppressed={quote(value)}")
+            query_params.append(f"is_suppressed={quote(value, safe='')}")
         if has_opted_out is not None:
             value = str(has_opted_out)
             if isinstance(has_opted_out, bool):
                 value = value.lower()
-            query_params.append(f"has_opted_out={quote(value)}")
+            query_params.append(f"has_opted_out={quote(value, safe='')}")
         if last_message_sent_before is not None:
             value = str(last_message_sent_before)
             if isinstance(last_message_sent_before, bool):
                 value = value.lower()
-            query_params.append(f"last_message_sent_before={quote(value)}")
+            query_params.append(f"last_message_sent_before={quote(value, safe='')}")
         if last_message_sent_after is not None:
             value = str(last_message_sent_after)
             if isinstance(last_message_sent_after, bool):
                 value = value.lower()
-            query_params.append(f"last_message_sent_after={quote(value)}")
+            query_params.append(f"last_message_sent_after={quote(value, safe='')}")
         if last_message_received_before is not None:
             value = str(last_message_received_before)
             if isinstance(last_message_received_before, bool):
                 value = value.lower()
-            query_params.append(f"last_message_received_before={quote(value)}")
+            query_params.append(f"last_message_received_before={quote(value, safe='')}")
         if last_message_received_after is not None:
             value = str(last_message_received_after)
             if isinstance(last_message_received_after, bool):
                 value = value.lower()
-            query_params.append(f"last_message_received_after={quote(value)}")
+            query_params.append(f"last_message_received_after={quote(value, safe='')}")
         if tags is not None:
             value = str(tags)
             if isinstance(tags, bool):
                 value = value.lower()
-            query_params.append(f"tags={quote(value)}")
+            query_params.append(f"tags={quote(value, safe='')}")
         if groups is not None:
             value = str(groups)
             if isinstance(groups, bool):
                 value = value.lower()
-            query_params.append(f"groups={quote(value)}")
+            query_params.append(f"groups={quote(value, safe='')}")
         if custom_field_id1 is not None:
             value = str(custom_field_id1)
             if isinstance(custom_field_id1, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_id_1={quote(value)}")
+            query_params.append(f"custom_field_id_1={quote(value, safe='')}")
         if custom_field_value1 is not None:
             value = str(custom_field_value1)
             if isinstance(custom_field_value1, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_value_1={quote(value)}")
+            query_params.append(f"custom_field_value_1={quote(value, safe='')}")
         if custom_field_id2 is not None:
             value = str(custom_field_id2)
             if isinstance(custom_field_id2, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_id_2={quote(value)}")
+            query_params.append(f"custom_field_id_2={quote(value, safe='')}")
         if custom_field_value2 is not None:
             value = str(custom_field_value2)
             if isinstance(custom_field_value2, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_value_2={quote(value)}")
+            query_params.append(f"custom_field_value_2={quote(value, safe='')}")
         if custom_field_id3 is not None:
             value = str(custom_field_id3)
             if isinstance(custom_field_id3, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_id_3={quote(value)}")
+            query_params.append(f"custom_field_id_3={quote(value, safe='')}")
         if custom_field_value3 is not None:
             value = str(custom_field_value3)
             if isinstance(custom_field_value3, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_value_3={quote(value)}")
+            query_params.append(f"custom_field_value_3={quote(value, safe='')}")
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1505,11 +1505,11 @@ class TextrequestClient(ConnectorClientBase):
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1582,11 +1582,11 @@ class TextrequestClient(ConnectorClientBase):
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1816,30 +1816,30 @@ class TextrequestClient(ConnectorClientBase):
             value = str(reference_number)
             if isinstance(reference_number, bool):
                 value = value.lower()
-            query_params.append(f"reference_number={quote(value)}")
+            query_params.append(f"reference_number={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phone_number={quote(value)}")
+            query_params.append(f"phone_number={quote(value, safe='')}")
         if sort_type is not None:
             value = str(sort_type)
             if isinstance(sort_type, bool):
                 value = value.lower()
-            query_params.append(f"sort_type={quote(value)}")
+            query_params.append(f"sort_type={quote(value, safe='')}")
         if sort_direction is not None:
             value = str(sort_direction)
             if isinstance(sort_direction, bool):
                 value = value.lower()
-            query_params.append(f"sort_direction={quote(value)}")
+            query_params.append(f"sort_direction={quote(value, safe='')}")
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2015,32 +2015,32 @@ class TextrequestClient(ConnectorClientBase):
             value = str(tags)
             if isinstance(tags, bool):
                 value = value.lower()
-            query_params.append(f"tags={quote(value)}")
+            query_params.append(f"tags={quote(value, safe='')}")
         if show_unresolved_only is not None:
             value = str(show_unresolved_only)
             if isinstance(show_unresolved_only, bool):
                 value = value.lower()
-            query_params.append(f"show_unresolved_only={quote(value)}")
+            query_params.append(f"show_unresolved_only={quote(value, safe='')}")
         if include_archived is not None:
             value = str(include_archived)
             if isinstance(include_archived, bool):
                 value = value.lower()
-            query_params.append(f"include_archived={quote(value)}")
+            query_params.append(f"include_archived={quote(value, safe='')}")
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
-            query_params.append(f"search={quote(value)}")
+            query_params.append(f"search={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if page_size is not None:
             value = str(page_size)
             if isinstance(page_size, bool):
                 value = value.lower()
-            query_params.append(f"page_size={quote(value)}")
+            query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2077,12 +2077,12 @@ class TextrequestClient(ConnectorClientBase):
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if page_size is not None:
             value = str(page_size)
             if isinstance(page_size, bool):
                 value = value.lower()
-            query_params.append(f"page_size={quote(value)}")
+            query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

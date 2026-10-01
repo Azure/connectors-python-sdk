@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List, Literal
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List, Literal
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -58,6 +58,11 @@ class ListTimesOffResponse:
     )
     value: Optional[List[TimeOffResponse]] = None
     """List of Time Off instances"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -113,6 +118,11 @@ class ListShiftsResponse:
     )
     value: Optional[List[ShiftResponse]] = None
     """List of Shifts"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -177,6 +187,11 @@ class ListOpenShiftsResponse:
     )
     value: Optional[List[OpenShiftResponse]] = None
     """List of Open Shifts"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -232,6 +247,11 @@ class GetTimeOffReasonsResponse:
     )
     value: Optional[List[Dict[str, Any]]] = None
     """The list of Time Off Reasons."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -246,6 +266,11 @@ class ListSchedulingGroupsResponse:
     )
     value: Optional[List[SchedulingGroupResponse]] = None
     """List of Scheduling Groups."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -288,6 +313,11 @@ class ListTimeOffRequestsResponse:
     )
     value: Optional[List[TimeOffRequestResponse]] = None
     """List of Time Off requests."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -426,6 +456,11 @@ class ListOfferShiftRequestsResponse:
     )
     value: Optional[List[OfferShiftRequestResponse]] = None
     """List of Offer Shift requests."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -563,6 +598,11 @@ class ListSwapShiftsChangeRequestsResponse:
     )
     value: Optional[List[SwapShiftsChangeRequestResponse]] = None
     """List of Swap Shifts Change Requests."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -705,6 +745,11 @@ class ListOpenShiftChangeRequestsResponse:
     )
     value: Optional[List[OpenShiftChangeRequestResponse]] = None
     """List of Open Shift Change Requests."""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -833,6 +878,11 @@ class ListOpenShiftsCrossTeamResponse:
     )
     value: Optional[List[OpenShiftResponse]] = None
     """List of Open Shifts"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -847,6 +897,11 @@ class ListShiftsCrossTeamResponse:
     )
     value: Optional[List[ShiftResponse]] = None
     """List of Shifts"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -861,6 +916,11 @@ class ListTimesOffCrossTeamResponse:
     )
     value: Optional[List[TimeOffResponse]] = None
     """List of Times off"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -1349,6 +1409,45 @@ class ShiftsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "shifts"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def get_schedule_async(
         self,
         team_id: str,
@@ -1387,11 +1486,14 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Time Off instances in a team
 
         This operation returns all Time Off instances in a Schedule
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1402,36 +1504,47 @@ class ShiftsClient(ConnectorClientBase):
             value = str(start_time)
             if isinstance(start_time, bool):
                 value = value.lower()
-            query_params.append(f"startTime={quote(value)}")
+            query_params.append(f"startTime={quote(value, safe='')}")
         if end_time is not None:
             value = str(end_time)
             if isinstance(end_time, bool):
                 value = value.lower()
-            query_params.append(f"endTime={quote(value)}")
+            query_params.append(f"endTime={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def create_time_off_async(
         self,
@@ -1541,11 +1654,14 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Shifts in a team
 
         This operation returns all Shifts assigned to members of a team
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1556,36 +1672,47 @@ class ShiftsClient(ConnectorClientBase):
             value = str(start_time)
             if isinstance(start_time, bool):
                 value = value.lower()
-            query_params.append(f"startTime={quote(value)}")
+            query_params.append(f"startTime={quote(value, safe='')}")
         if end_time is not None:
             value = str(end_time)
             if isinstance(end_time, bool):
                 value = value.lower()
-            query_params.append(f"endTime={quote(value)}")
+            query_params.append(f"endTime={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def create_shift_async(
         self,
@@ -1695,11 +1822,14 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Open Shifts in a team
 
         This operation returns all Open Shifts in a team.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1710,36 +1840,47 @@ class ShiftsClient(ConnectorClientBase):
             value = str(start_time)
             if isinstance(start_time, bool):
                 value = value.lower()
-            query_params.append(f"startTime={quote(value)}")
+            query_params.append(f"startTime={quote(value, safe='')}")
         if end_time is not None:
             value = str(end_time)
             if isinstance(end_time, bool):
                 value = value.lower()
-            query_params.append(f"endTime={quote(value)}")
+            query_params.append(f"endTime={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def create_open_shift_async(
         self,
@@ -1884,12 +2025,15 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Time Off Reasons in a team
 
         This operation returns the list of Time Off Reasons associated with a
         team.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1904,36 +2048,50 @@ class ShiftsClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def list_scheduling_groups_async(
         self,
         team_id: str,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Scheduling Groups in a team
 
         This operation returns all Scheduling Groups in a Schedule.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1948,26 +2106,37 @@ class ShiftsClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_scheduling_group_async(
         self,
@@ -2012,11 +2181,14 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Time Off requests in a team
 
         This operation returns all Time Off requests in a Schedule.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2031,31 +2203,42 @@ class ShiftsClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if state is not None:
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_time_off_shift_request_async(
         self,
@@ -2177,11 +2360,14 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Offer Shift requests in a team
 
         This operation returns all Offer Shift requests in a Schedule.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2196,31 +2382,42 @@ class ShiftsClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if state is not None:
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_offer_shift_request_async(
         self,
@@ -2343,11 +2540,14 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Swap Shifts requests in a team
 
         This operation returns all Swap Shifts requests in a Schedule.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2362,31 +2562,42 @@ class ShiftsClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if state is not None:
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_swap_shifts_change_request_async(
         self,
@@ -2508,11 +2719,14 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Open Shift requests in a team
 
         This operation returns all Open Shift change requests in a Schedule.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2527,31 +2741,42 @@ class ShiftsClient(ConnectorClientBase):
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if state is not None:
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_open_shift_change_request_async(
         self,
@@ -2673,12 +2898,15 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Open Shifts from my teams
 
         This operation returns Open Shifts that need to be filled from all your
         teams.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getOpenShifts"
@@ -2688,36 +2916,47 @@ class ShiftsClient(ConnectorClientBase):
             value = str(start_time)
             if isinstance(start_time, bool):
                 value = value.lower()
-            query_params.append(f"startTime={quote(value)}")
+            query_params.append(f"startTime={quote(value, safe='')}")
         if end_time is not None:
             value = str(end_time)
             if isinstance(end_time, bool):
                 value = value.lower()
-            query_params.append(f"endTime={quote(value)}")
+            query_params.append(f"endTime={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def list_shifts_cross_team_async(
         self,
@@ -2725,11 +2964,14 @@ class ShiftsClient(ConnectorClientBase):
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Shifts from my teams
 
         This operation returns assigned Shifts from all your teams.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getShifts"
@@ -2739,41 +2981,52 @@ class ShiftsClient(ConnectorClientBase):
             value = str(start_time)
             if isinstance(start_time, bool):
                 value = value.lower()
-            query_params.append(f"startTime={quote(value)}")
+            query_params.append(f"startTime={quote(value, safe='')}")
         if end_time is not None:
             value = str(end_time)
             if isinstance(end_time, bool):
                 value = value.lower()
-            query_params.append(f"endTime={quote(value)}")
+            query_params.append(f"endTime={quote(value, safe='')}")
         if assigned_to_user_name is not None:
             value = str(assigned_to_user_name)
             if isinstance(assigned_to_user_name, bool):
                 value = value.lower()
-            query_params.append(f"assignedToUserName={quote(value)}")
+            query_params.append(f"assignedToUserName={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def list_times_off_cross_team_async(
         self,
@@ -2781,11 +3034,14 @@ class ShiftsClient(ConnectorClientBase):
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Times Off from my teams
 
         This operation returns times when people are off from all your teams.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getTimesOff"
@@ -2795,41 +3051,52 @@ class ShiftsClient(ConnectorClientBase):
             value = str(start_time)
             if isinstance(start_time, bool):
                 value = value.lower()
-            query_params.append(f"startTime={quote(value)}")
+            query_params.append(f"startTime={quote(value, safe='')}")
         if end_time is not None:
             value = str(end_time)
             if isinstance(end_time, bool):
                 value = value.lower()
-            query_params.append(f"endTime={quote(value)}")
+            query_params.append(f"endTime={quote(value, safe='')}")
         if assigned_to_user_name is not None:
             value = str(assigned_to_user_name)
             if isinstance(assigned_to_user_name, bool):
                 value = value.lower()
-            query_params.append(f"assignedToUserName={quote(value)}")
+            query_params.append(f"assignedToUserName={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_all_teams_async(
         self,

@@ -93,6 +93,42 @@ LogicAppsCompiler.exe <output-directory> --directClient --connectors=office365
 LogicAppsCompiler.exe <output-directory> --directClient --language=csharp --connectors=office365
 ```
 
+## Pinned Regeneration
+
+[`generation.manifest.json`](generation.manifest.json) records the immutable generator
+commit, assembly version, capture time, and canonical SHA-256 hashes of each Swagger
+snapshot and generated client. The current run uses a merged generator commit without
+source patches: `bpmBaseCommit` and `bpmHeadCommit` are equal.
+
+Commit the manifest and its `swagger-cache/` inputs together with the generated clients.
+Canonical hashes use UTF-8 text with CRLF normalized to LF. The managed-API catalog
+contains only shipped connector names and display names, not connection metadata;
+`swaggerSource.managedApisSha256` hashes that exact projected replay input.
+
+For offline replay, build the recorded generator revision in an isolated checkout.
+Set `AZURE_SUBSCRIPTION_ID` and `AZURE_LOCATION` from `swaggerSource`. Create an empty
+`ARMCACHE_PATH`, then copy committed inputs there using the generator's cache keys:
+
+- Catalog URL: `https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Web/locations/{location}/managedApis?api-version={apiVersion}`.
+- Export URL: the same base ending in `/managedApis/{apiName}?api-version={apiVersion}&export=true`.
+- Cache filename: uppercase hexadecimal SHA-1 of the complete URL's UTF-8 bytes.
+
+Create the output directory before invoking the CLI. Generate the complete manifest
+allowlist with `--directClient --language=python --connectors=<comma-separated-apiNames>`.
+Block network access during replay so missing cache entries fail rather than fetching
+new inputs. Check per-connector failures as well as the CLI exit code, and compare
+every canonical output hash with the manifest before replacing generated source.
+
+### Pageable Results
+
+Pageable operations expose async iterators. Iteration follows continuation links and
+yields items directly; an empty response yields no items. Do not await a page envelope:
+
+```python
+async for item in client.get_items_async(...):
+    process_item(item)
+```
+
 ## Generated Code Structure
 
 ### Python Client Output

@@ -48,14 +48,14 @@ async def example_1_list_alerts():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_alerts_async(
+            result = [item async for item in client.get_alerts_async(
                 top=5,
                 orderby="alertCreationTime desc"
-            )
+            )]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} alerts:")
-                for alert in result["value"][:5]:
+            if result and result:
+                print(f"Found {len(result)} alerts:")
+                for alert in result[:5]:
                     print(f"  - [{alert.get('severity', 'N/A')}] {alert.get('title', 'N/A')}")
                     print(f"    ID: {alert.get('id', 'N/A')}")
                     print(f"    Status: {alert.get('status', 'N/A')}")
@@ -76,11 +76,11 @@ async def example_2_get_machines():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_machines_async(top=10)
+            result = [item async for item in client.get_machines_async(top=10)]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} machines:")
-                for machine in result["value"][:5]:
+            if result and result:
+                print(f"Found {len(result)} machines:")
+                for machine in result[:5]:
                     print(f"  - {machine.get('computerDnsName', 'N/A')}")
                     print(f"    ID: {machine.get('id', 'N/A')}")
                     print(f"    OS: {machine.get('osPlatform', 'N/A')}")
@@ -196,14 +196,14 @@ async def example_6_machine_actions():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_machine_actions_async(
+            result = [item async for item in client.get_machine_actions_async(
                 top=5,
                 orderby="creationDateTimeUtc desc"
-            )
+            )]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} actions:")
-                for action in result["value"][:5]:
+            if result and result:
+                print(f"Found {len(result)} actions:")
+                for action in result[:5]:
                     print(f"  - Type: {action.get('type', 'N/A')}")
                     print(f"    Status: {action.get('status', 'N/A')}")
                     print(f"    Machine: {action.get('machineId', 'N/A')[:20]}...")
@@ -224,11 +224,11 @@ async def example_7_investigations():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_investigations_async(top=5)
+            result = [item async for item in client.get_investigations_async(top=5)]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} investigations:")
-                for inv in result["value"][:5]:
+            if result and result:
+                print(f"Found {len(result)} investigations:")
+                for inv in result[:5]:
                     print(f"  - ID: {inv.get('id', 'N/A')}")
                     print(f"    State: {inv.get('state', 'N/A')}")
                     print(f"    Machine: {inv.get('computerDnsName', 'N/A')}")
