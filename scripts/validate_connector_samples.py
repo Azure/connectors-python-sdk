@@ -72,6 +72,16 @@ class SampleVisitor(ast.NodeVisitor):
         for target in node.targets:
             if isinstance(target, ast.Name):
                 if (
+                    isinstance(node.value, ast.IfExp)
+                    and isinstance(node.value.body, ast.Name)
+                    and isinstance(node.value.test, ast.Name)
+                    and node.value.body.id == target.id == node.value.test.id
+                    and isinstance(node.value.orelse, ast.List)
+                    and not node.value.orelse.elts
+                    and self.variable_types.get(target.id) is list
+                ):
+                    self._add_issue(node, "remove redundant fallback for collected items")
+                if (
                     target.id == "result"
                     and isinstance(node.value, ast.ListComp)
                     and any(generator.is_async for generator in node.value.generators)
@@ -170,6 +180,12 @@ class SampleVisitor(ast.NodeVisitor):
         """Infer the type of a literal, simple name, environment value, or cast."""
         if isinstance(node, ast.Name):
             return self.variable_types.get(node.id)
+
+        if isinstance(node, ast.IfExp):
+            body_type = self._infer_static_type(node.body)
+            if body_type is not None and body_type is self._infer_static_type(node.orelse):
+                return body_type
+            return None
 
         try:
             return type(ast.literal_eval(node))

@@ -191,15 +191,12 @@ async def example_4_get_entities():
 
             if entities:
                 print(f"Entities in table '{TABLE_NAME}':")
-                if entities:
-                    for i, entity in enumerate(entities[:5], 1):  # Show first 5
-                        pk = entity.get("PartitionKey", "N/A")
-                        rk = entity.get("RowKey", "N/A")
-                        print(f"  {i}. PartitionKey: {pk}, RowKey: {rk}")
-                    if len(entities) > 5:
-                        print(f"  ... and {len(entities) - 5} more entities")
-                else:
-                    print("  No entities found.")
+                for index, entity in enumerate(entities[:5], 1):
+                    partition_key = entity.get("PartitionKey", "N/A")
+                    row_key = entity.get("RowKey", "N/A")
+                    print(f"  {index}. PartitionKey: {partition_key}, RowKey: {row_key}")
+                if len(entities) > 5:
+                    print(f"  ... and {len(entities) - 5} more entities")
             else:
                 print("No entities found or empty response.")
 

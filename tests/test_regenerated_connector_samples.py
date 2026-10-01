@@ -122,6 +122,12 @@ def test_sample_validator_rejects_dictionary_access_on_collected_items() -> None
         ("items = [item async for item in client.get_items_async()]", []),
         ("if items and ready:\n    pass", []),
         ("if response and response.get('value'):\n    pass", []),
+        (
+            "items = [item async for item in client.get_items_async()]\n"
+            "items = items if items else []",
+            ["remove redundant fallback for collected items"],
+        ),
+        ("response = response if response else []", []),
     ],
 )
 def test_sample_validator_checks_consumer_principles(
@@ -147,6 +153,8 @@ def test_sample_validator_checks_consumer_principles(
          "list_conversations_async", "conversation(s)"),
         ("zendesk", "example_2_get_items", "ZendeskClient",
          "get_items_async", "item(s)"),
+        ("azuretables", "example_4_get_entities", "AzuretablesClient",
+         "get_entities_async", "entity(s)"),
     ],
 )
 async def test_pageable_samples_report_collected_items(
@@ -167,7 +175,11 @@ async def test_pageable_samples_report_collected_items(
     async def items() -> AsyncIterator[dict[str, str]]:
         """Yield distinct items to expose incorrect counts or lost data."""
         for index in range(item_count):
-            yield {"id": f"document-{index}"}
+            yield {
+                "id": f"document-{index}",
+                "PartitionKey": "sample-partition",
+                "RowKey": f"row-{index}",
+            }
 
     client = MagicMock()
     getattr(client, operation_name).return_value = items()
@@ -177,7 +189,9 @@ async def test_pageable_samples_report_collected_items(
     monkeypatch.setattr(module, client_name, MagicMock(return_value=context))
     if hasattr(module, "DefaultAzureCredential"):
         monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
-    for setting in ("COSMOS_DB_ACCOUNT", "DATABASE_ID", "CONTAINER_ID"):
+    for setting in (
+        "COSMOS_DB_ACCOUNT", "DATABASE_ID", "CONTAINER_ID", "STORAGE_ACCOUNT", "TABLE_NAME",
+    ):
         if hasattr(module, setting):
             monkeypatch.setattr(module, setting, "sample-value")
     monkeypatch.setenv("OFFICE365GROUPSMAIL_CONNECTION_URL", "https://example.com")
@@ -188,7 +202,14 @@ async def test_pageable_samples_report_collected_items(
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
-    if connector == "documentdb" and item_count == 0:
+    if connector == "azuretables":
+        if item_count == 0:
+            assert "No entities found or empty response." in output
+        else:
+            assert "RowKey: row-0" in output
+            assert "RowKey: row-1" in output
+            assert "No entities found" not in output
+    elif connector == "documentdb" and item_count == 0:
         assert "No documents found." in output
     elif connector == "documentdb" and function_name.endswith("consistency"):
         assert f"Documents retrieved: {item_count}" in output

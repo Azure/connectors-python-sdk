@@ -97,7 +97,6 @@ async def example_2_read_rows():
                 top=5,
                 orderby="Id desc",
             )]
-            rows = rows if rows else []
             print(f"Retrieved {len(rows)} row(s) from '{TABLE}'.")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
