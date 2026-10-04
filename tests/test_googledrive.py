@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.googledrive import (
     BlobMetadata,
     GoogledriveClient,
@@ -13,9 +14,7 @@ from azure.connectors.googledrive import (
     TablesList,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -62,55 +61,54 @@ class TestGoogledriveClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = GoogledriveClient("https://example.azure.com/connections/test")
+        client = GoogledriveClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "googledrive"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = GoogledriveClient("https://example.azure.com/connections/test/")
+        client = GoogledriveClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GoogledriveClient("")
+            GoogledriveClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GoogledriveClient(None)
+            GoogledriveClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'googledrive'."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "googledrive"
@@ -120,11 +118,11 @@ class TestGoogledriveClientLifecycle:
     """Tests for GoogledriveClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -132,12 +130,12 @@ class TestGoogledriveClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(GoogledriveClient, "close", new_callable=AsyncMock) as mock_close:
             async with GoogledriveClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, GoogledriveClient)
 
@@ -148,11 +146,11 @@ class TestGoogledriveClientMethods:
     """Success path tests for representative Google Drive methods."""
 
     @pytest.mark.asyncio
-    async def test_get_file_metadata_success(self, mock_token_provider):
+    async def test_get_file_metadata_success(self, mock_credential):
         """Test get_file_metadata_async returns parsed JSON."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id":"file123","name":"doc.txt"}')
 
@@ -170,11 +168,11 @@ class TestGoogledriveClientMethods:
             assert "/datasets/default/files/file123" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_file_content_by_path_success(self, mock_token_provider):
+    async def test_get_file_content_by_path_success(self, mock_credential):
         """Test get_file_content_by_path_async returns bytes content."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, content=b"google drive file content")
 
@@ -189,11 +187,11 @@ class TestGoogledriveClientMethods:
             assert result == b"google drive file content"
 
     @pytest.mark.asyncio
-    async def test_create_file_success(self, mock_token_provider):
+    async def test_create_file_success(self, mock_credential):
         """Test create_file_async sends query params and body."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"id":"new1","name":"created.txt"}')
 
@@ -238,13 +236,13 @@ class TestGoogledriveClientErrorHandling:
     )
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = GoogledriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

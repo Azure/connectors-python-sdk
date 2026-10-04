@@ -6,11 +6,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.powerbi import PowerbiClient, UpdateGoalRequest, QuerySpecification
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -20,55 +19,54 @@ class TestPowerbiClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = PowerbiClient("https://example.azure.com/connections/test")
+        client = PowerbiClient("https://example.azure.com/connections/test",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "powerbi"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = PowerbiClient("https://example.azure.com/connections/test/")
+        client = PowerbiClient("https://example.azure.com/connections/test/",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PowerbiClient("")
+            PowerbiClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PowerbiClient(None)
+            PowerbiClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'powerbi'."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "powerbi"
@@ -78,11 +76,11 @@ class TestPowerbiClientLifecycle:
     """Tests for PowerbiClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -90,12 +88,12 @@ class TestPowerbiClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(PowerbiClient, "close", new_callable=AsyncMock) as mock_close:
             async with PowerbiClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, PowerbiClient)
 
@@ -106,11 +104,11 @@ class TestListGroupsAsync:
     """Tests for list_groups_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list groups request."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=200, text='{"value": [{"id": "group-1"}]}')
@@ -132,11 +130,11 @@ class TestListGroupsAsync:
             assert "value" in result
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -151,11 +149,11 @@ class TestListGroupsAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
@@ -174,11 +172,11 @@ class TestListDatasetsAsync:
     """Tests for list_datasets_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list datasets request."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=200, text='{"value": [{"id": "dataset-1"}]}')
@@ -199,11 +197,11 @@ class TestListDatasetsAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
@@ -222,11 +220,11 @@ class TestExecuteDatasetQueryAsync:
     """Tests for execute_dataset_query_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful execute dataset query request."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         query = QuerySpecification()
@@ -255,11 +253,11 @@ class TestExecuteDatasetQueryAsync:
             assert "results" in result
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         query = QuerySpecification()
@@ -283,11 +281,11 @@ class TestRefreshDatasetAsync:
     """Tests for refresh_dataset_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful refresh dataset request."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=202, text="")
@@ -311,11 +309,11 @@ class TestRefreshDatasetAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -337,11 +335,11 @@ class TestUpdateGoalAsync:
     """Tests for update_goal_async method (PATCH with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_body(self, mock_token_provider):
+    async def test_success_sends_body(self, mock_credential):
         """Test PATCH sends input body."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = UpdateGoalRequest()
         mock_response = MockResponse(status=200, text='{"id": "goal-1"}')
@@ -367,11 +365,11 @@ class TestUpdateGoalAsync:
             assert body is payload
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test PATCH error path raises ConnectorException."""
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = UpdateGoalRequest()
         mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')

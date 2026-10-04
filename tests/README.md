@@ -75,7 +75,7 @@ Tests are organized into classes by functionality:
 
 Common fixtures are defined in [conftest.py](conftest.py):
 
-- `mock_token_provider`: A mock token provider for testing
+- `mock_credential`: A mock asynchronous Azure Core credential for testing
 - `mock_response_success`: A successful mock HTTP response
 - `mock_response_error`: An error mock HTTP response
 - `mock_response_empty`: An empty mock HTTP response
@@ -84,11 +84,11 @@ Common fixtures are defined in [conftest.py](conftest.py):
 
 ```python
 @pytest.mark.asyncio
-async def test_success_with_json_response(self, mock_token_provider):
+async def test_success_with_json_response(self, mock_credential):
     """Test successful query execution with JSON response."""
     client = KustoClient(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider
+        credential=mock_credential
     )
     
     mock_response = MockResponse(

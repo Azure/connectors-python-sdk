@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -345,8 +347,17 @@ class TwitterClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a TwitterClient.
@@ -354,17 +365,36 @@ class TwitterClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -375,6 +405,11 @@ class TwitterClient(ConnectorClientBase):
         self,
         user_name: str,
         max_results: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get user timeline
@@ -387,17 +422,21 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -416,6 +455,11 @@ class TwitterClient(ConnectorClientBase):
     async def home_timeline_async(
         self,
         max_results: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get home timeline
@@ -429,12 +473,16 @@ class TwitterClient(ConnectorClientBase):
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -455,6 +503,11 @@ class TwitterClient(ConnectorClientBase):
         search_query: str,
         max_results: Optional[int] = None,
         since_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Search tweets
@@ -467,22 +520,26 @@ class TwitterClient(ConnectorClientBase):
         value = str(search_query)
         if isinstance(search_query, bool):
             value = value.lower()
-        query_params.append(f"searchQuery={quote(value)}")
+        query_params.append(f"searchQuery={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if since_id is not None:
             value = str(since_id)
             if isinstance(since_id, bool):
                 value = value.lower()
-            query_params.append(f"sinceId={quote(value)}")
+            query_params.append(f"sinceId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -502,6 +559,11 @@ class TwitterClient(ConnectorClientBase):
         self,
         user_name: str,
         max_results: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get followers
@@ -513,17 +575,21 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -542,6 +608,11 @@ class TwitterClient(ConnectorClientBase):
     async def my_followers_async(
         self,
         max_results: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get my followers
@@ -554,12 +625,16 @@ class TwitterClient(ConnectorClientBase):
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -579,6 +654,11 @@ class TwitterClient(ConnectorClientBase):
         self,
         user_name: str,
         max_results: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get following
@@ -590,17 +670,21 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -619,6 +703,11 @@ class TwitterClient(ConnectorClientBase):
     async def my_following_async(
         self,
         max_results: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get my following
@@ -631,12 +720,16 @@ class TwitterClient(ConnectorClientBase):
             value = str(max_results)
             if isinstance(max_results, bool):
                 value = value.lower()
-            query_params.append(f"maxResults={quote(value)}")
+            query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -655,6 +748,11 @@ class TwitterClient(ConnectorClientBase):
     async def user_async(
         self,
         user_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get user
@@ -667,12 +765,16 @@ class TwitterClient(ConnectorClientBase):
         value = str(user_name)
         if isinstance(user_name, bool):
             value = value.lower()
-        query_params.append(f"userName={quote(value)}")
+        query_params.append(f"userName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -692,6 +794,11 @@ class TwitterClient(ConnectorClientBase):
         self,
         input: bytes,
         tweet_text: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Post a tweet
@@ -704,7 +811,7 @@ class TwitterClient(ConnectorClientBase):
             value = str(tweet_text)
             if isinstance(tweet_text, bool):
                 value = value.lower()
-            query_params.append(f"tweetText={quote(value)}")
+            query_params.append(f"tweetText={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -713,6 +820,10 @@ class TwitterClient(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -732,6 +843,11 @@ class TwitterClient(ConnectorClientBase):
         self,
         tweet_id: str,
         trim_user: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Retweet
@@ -743,17 +859,21 @@ class TwitterClient(ConnectorClientBase):
         value = str(tweet_id)
         if isinstance(tweet_id, bool):
             value = value.lower()
-        query_params.append(f"tweetId={quote(value)}")
+        query_params.append(f"tweetId={quote(value, safe='')}")
         if trim_user is not None:
             value = str(trim_user)
             if isinstance(trim_user, bool):
                 value = value.lower()
-            query_params.append(f"trimUser={quote(value)}")
+            query_params.append(f"trimUser={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.zeptomail import ZeptomailClient
 
 
@@ -18,16 +18,16 @@ async def main() -> None:
         print("Set ZEPTOMAIL_CONNECTION_URL to run this sample.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    try:
-        async with ZeptomailClient(
-            CONNECTION_RUNTIME_URL,
-            token_provider,
-        ) as client:
-            mail_agents = await client.get_mail_agent_async()
-            print(f"Mail agents: {mail_agents}")
-    except ConnectorException as ex:
-        print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with ZeptomailClient(
+                CONNECTION_RUNTIME_URL,
+                credential,
+            ) as client:
+                mail_agents = await client.get_mail_agent_async()
+                print(f"Mail agents: {mail_agents}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":

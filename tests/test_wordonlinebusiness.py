@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.wordonlinebusiness import (
     WordonlinebusinessClient,
     CreateFileItemInput,
@@ -13,8 +14,6 @@ from azure.connectors.wordonlinebusiness import (
     GetFiles,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
@@ -25,55 +24,54 @@ class TestWordonlinebusinessClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = WordonlinebusinessClient("https://example.azure.com/connections/test")
+        client = WordonlinebusinessClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "wordonlinebusiness"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = WordonlinebusinessClient("https://example.azure.com/connections/test/")
+        client = WordonlinebusinessClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WordonlinebusinessClient("")
+            WordonlinebusinessClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WordonlinebusinessClient(None)
+            WordonlinebusinessClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'wordonlinebusiness'."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "wordonlinebusiness"
@@ -83,11 +81,11 @@ class TestWordonlinebusinessClientLifecycle:
     """Tests for WordonlinebusinessClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -95,14 +93,14 @@ class TestWordonlinebusinessClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             WordonlinebusinessClient, 'close', new_callable=AsyncMock
         ) as mock_close:
             async with WordonlinebusinessClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, WordonlinebusinessClient)
 
@@ -113,11 +111,11 @@ class TestCreateFileItem:
     """Tests for create_file_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_create_file_item_success(self, mock_token_provider):
+    async def test_create_file_item_success(self, mock_credential):
         """Test successful template population."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -150,11 +148,11 @@ class TestCreateFileItem:
             assert isinstance(result, bytes)
 
     @pytest.mark.asyncio
-    async def test_create_file_item_empty_response(self, mock_token_provider):
+    async def test_create_file_item_empty_response(self, mock_credential):
         """Test template population with empty response."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -175,11 +173,11 @@ class TestCreateFileItem:
             assert result == b''
 
     @pytest.mark.asyncio
-    async def test_create_file_item_error_response(self, mock_token_provider):
+    async def test_create_file_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text="Bad Request")
@@ -205,11 +203,11 @@ class TestCreateWordFileWithContent:
     """Tests for create_word_file_with_content_async method."""
 
     @pytest.mark.asyncio
-    async def test_create_word_file_success(self, mock_token_provider):
+    async def test_create_word_file_success(self, mock_credential):
         """Test successful Word document creation."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -236,11 +234,11 @@ class TestCreateWordFileWithContent:
             assert result["id"] == "doc-123"
 
     @pytest.mark.asyncio
-    async def test_create_word_file_without_filename(self, mock_token_provider):
+    async def test_create_word_file_without_filename(self, mock_credential):
         """Test Word document creation without filename parameter."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -261,11 +259,11 @@ class TestCreateWordFileWithContent:
             assert result["id"] == "doc-456"
 
     @pytest.mark.asyncio
-    async def test_create_word_file_empty_response(self, mock_token_provider):
+    async def test_create_word_file_empty_response(self, mock_credential):
         """Test Word document creation with empty response."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -281,11 +279,11 @@ class TestCreateWordFileWithContent:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_create_word_file_error_response(self, mock_token_provider):
+    async def test_create_word_file_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=500, text="Internal Server Error")
@@ -302,11 +300,11 @@ class TestCreateWordFileWithContent:
             assert exc_info.value.status_code == 500
 
     @pytest.mark.asyncio
-    async def test_create_word_file_with_special_characters_in_name(self, mock_token_provider):
+    async def test_create_word_file_with_special_characters_in_name(self, mock_credential):
         """Test Word document creation with special characters in filename."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -334,11 +332,11 @@ class TestGetFilePDF:
     """Tests for get_file_pdf_async method."""
 
     @pytest.mark.asyncio
-    async def test_convert_to_pdf_success(self, mock_token_provider):
+    async def test_convert_to_pdf_success(self, mock_credential):
         """Test successful Word to PDF conversion."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -365,11 +363,11 @@ class TestGetFilePDF:
             assert isinstance(result, bytes)
 
     @pytest.mark.asyncio
-    async def test_convert_to_pdf_with_sensitivity_label(self, mock_token_provider):
+    async def test_convert_to_pdf_with_sensitivity_label(self, mock_credential):
         """Test PDF conversion with sensitivity label extraction."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="PDF_CONTENT")
@@ -392,11 +390,11 @@ class TestGetFilePDF:
             assert "fetchSensitivityLabelMetadata=true" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_convert_to_pdf_empty_response(self, mock_token_provider):
+    async def test_convert_to_pdf_empty_response(self, mock_credential):
         """Test PDF conversion with empty response."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -415,11 +413,11 @@ class TestGetFilePDF:
             assert result == b''
 
     @pytest.mark.asyncio
-    async def test_convert_to_pdf_error_response(self, mock_token_provider):
+    async def test_convert_to_pdf_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text="File not found")
@@ -439,11 +437,11 @@ class TestGetFilePDF:
             assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_get_drives_injects_personal_source(self, mock_token_provider):
+    async def test_get_drives_injects_personal_source(self, mock_credential):
         """Test drive discovery injects the personal source value."""
         client = WordonlinebusinessClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')

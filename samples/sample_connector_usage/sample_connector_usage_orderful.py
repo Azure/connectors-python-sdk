@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.orderful import OrderfulClient
 
 
@@ -18,13 +18,13 @@ async def main() -> None:
         print("Set ORDERFUL_CONNECTION_URL to run this sample.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    try:
-        async with OrderfulClient(CONNECTION_RUNTIME_URL, token_provider) as client:
-            await client.list_transactions_async()
-            print("Transactions requested.")
-    except ConnectorException as ex:
-        print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with OrderfulClient(CONNECTION_RUNTIME_URL, credential) as client:
+                await client.list_transactions_async()
+                print("Transactions requested.")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":

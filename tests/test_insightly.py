@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.insightly import (
     ContactRequest,
     InsightlyClient,
@@ -22,9 +23,7 @@ from azure.connectors.insightly import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -101,55 +100,54 @@ class TestInsightlyClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = InsightlyClient("https://example.azure.com/connections/test")
+        client = InsightlyClient("https://example.azure.com/connections/test",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "insightly"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = InsightlyClient("https://example.azure.com/connections/test/")
+        client = InsightlyClient("https://example.azure.com/connections/test/",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            InsightlyClient("")
+            InsightlyClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            InsightlyClient(None)
+            InsightlyClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'insightly'."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "insightly"
@@ -159,11 +157,11 @@ class TestInsightlyClientLifecycle:
     """Tests for InsightlyClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -171,12 +169,12 @@ class TestInsightlyClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(InsightlyClient, "close", new_callable=AsyncMock) as mock_close:
             async with InsightlyClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, InsightlyClient)
 
@@ -187,11 +185,11 @@ class TestInsightlyClientOperations:
     """Tests for InsightlyClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
-    async def test_list_tasks_success(self, mock_token_provider):
+    async def test_list_tasks_success(self, mock_credential):
         """Test successful task listing issues a GET to /Tasks."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"tasks": [{"TASK_ID": 1}]}')
 
@@ -209,11 +207,11 @@ class TestInsightlyClientOperations:
             assert result == {"tasks": [{"TASK_ID": 1}]}
 
     @pytest.mark.asyncio
-    async def test_add_task_success(self, mock_token_provider):
+    async def test_add_task_success(self, mock_credential):
         """Test successful task creation issues a POST to /Tasks with body."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"TASK_ID": 9}')
 
@@ -232,11 +230,11 @@ class TestInsightlyClientOperations:
             assert result == {"TASK_ID": 9}
 
     @pytest.mark.asyncio
-    async def test_update_task_success_includes_id_query(self, mock_token_provider):
+    async def test_update_task_success_includes_id_query(self, mock_credential):
         """Test task update issues a PUT to /Tasks with the id query parameter."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"TASK_ID": 5}')
 
@@ -255,11 +253,11 @@ class TestInsightlyClientOperations:
             assert result == {"TASK_ID": 5}
 
     @pytest.mark.asyncio
-    async def test_delete_task_success_targets_resource(self, mock_token_provider):
+    async def test_delete_task_success_targets_resource(self, mock_credential):
         """Test task deletion issues a DELETE to /Tasks/{id}."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204, text="")
 
@@ -277,11 +275,11 @@ class TestInsightlyClientOperations:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_follow_task_success_targets_follow(self, mock_token_provider):
+    async def test_follow_task_success_targets_follow(self, mock_credential):
         """Test following a task issues a POST to /Tasks/{id}/Follow."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"followed": true}')
 
@@ -299,11 +297,11 @@ class TestInsightlyClientOperations:
             assert result == {"followed": True}
 
     @pytest.mark.asyncio
-    async def test_add_organization_success(self, mock_token_provider):
+    async def test_add_organization_success(self, mock_credential):
         """Test organization creation issues a POST to /Organisations."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"ORGANISATION_ID": 3}')
 
@@ -321,11 +319,11 @@ class TestInsightlyClientOperations:
             assert result == {"ORGANISATION_ID": 3}
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -347,13 +345,13 @@ class TestInsightlyClientErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

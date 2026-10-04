@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List as TypingList
+from typing import Optional, Dict, List as TypingList, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -1175,8 +1177,17 @@ class TrelloClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a TrelloClient.
@@ -1184,17 +1195,36 @@ class TrelloClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -1217,6 +1247,11 @@ class TrelloClient(ConnectorClientBase):
         before: Optional[str] = None,
         filter: Optional[str] = None,
         fields: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List the cards in a board
@@ -1232,72 +1267,76 @@ class TrelloClient(ConnectorClientBase):
             value = str(actions)
             if isinstance(actions, bool):
                 value = value.lower()
-            query_params.append(f"actions={quote(value)}")
+            query_params.append(f"actions={quote(value, safe='')}")
         if attachments is not None:
             value = str(attachments)
             if isinstance(attachments, bool):
                 value = value.lower()
-            query_params.append(f"attachments={quote(value)}")
+            query_params.append(f"attachments={quote(value, safe='')}")
         if attachment_fields is not None:
             value = str(attachment_fields)
             if isinstance(attachment_fields, bool):
                 value = value.lower()
-            query_params.append(f"attachment_fields={quote(value)}")
+            query_params.append(f"attachment_fields={quote(value, safe='')}")
         if stickers is not None:
             value = str(stickers)
             if isinstance(stickers, bool):
                 value = value.lower()
-            query_params.append(f"stickers={quote(value)}")
+            query_params.append(f"stickers={quote(value, safe='')}")
         if members is not None:
             value = str(members)
             if isinstance(members, bool):
                 value = value.lower()
-            query_params.append(f"members={quote(value)}")
+            query_params.append(f"members={quote(value, safe='')}")
         if memeber_fields is not None:
             value = str(memeber_fields)
             if isinstance(memeber_fields, bool):
                 value = value.lower()
-            query_params.append(f"memeber_fields={quote(value)}")
+            query_params.append(f"memeber_fields={quote(value, safe='')}")
         if check_item_states is not None:
             value = str(check_item_states)
             if isinstance(check_item_states, bool):
                 value = value.lower()
-            query_params.append(f"checkItemStates={quote(value)}")
+            query_params.append(f"checkItemStates={quote(value, safe='')}")
         if checklists is not None:
             value = str(checklists)
             if isinstance(checklists, bool):
                 value = value.lower()
-            query_params.append(f"checklists={quote(value)}")
+            query_params.append(f"checklists={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if since is not None:
             value = str(since)
             if isinstance(since, bool):
                 value = value.lower()
-            query_params.append(f"since={quote(value)}")
+            query_params.append(f"since={quote(value, safe='')}")
         if before is not None:
             value = str(before)
             if isinstance(before, bool):
                 value = value.lower()
-            query_params.append(f"before={quote(value)}")
+            query_params.append(f"before={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"filter={quote(value)}")
+            query_params.append(f"filter={quote(value, safe='')}")
         if fields is not None:
             value = str(fields)
             if isinstance(fields, bool):
                 value = value.lower()
-            query_params.append(f"fields={quote(value)}")
+            query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1316,6 +1355,11 @@ class TrelloClient(ConnectorClientBase):
     async def list_cards_simple_async(
         self,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         A simple version of the list cards
@@ -1328,7 +1372,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1371,6 +1419,11 @@ class TrelloClient(ConnectorClientBase):
         stickers: Optional[bool] = None,
         sticker_fields: Optional[str] = None,
         fields: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a card by id
@@ -1385,127 +1438,131 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if actions is not None:
             value = str(actions)
             if isinstance(actions, bool):
                 value = value.lower()
-            query_params.append(f"actions={quote(value)}")
+            query_params.append(f"actions={quote(value, safe='')}")
         if actions_entities is not None:
             value = str(actions_entities)
             if isinstance(actions_entities, bool):
                 value = value.lower()
-            query_params.append(f"actions_entities={quote(value)}")
+            query_params.append(f"actions_entities={quote(value, safe='')}")
         if actions_display is not None:
             value = str(actions_display)
             if isinstance(actions_display, bool):
                 value = value.lower()
-            query_params.append(f"actions_display={quote(value)}")
+            query_params.append(f"actions_display={quote(value, safe='')}")
         if actions_limit is not None:
             value = str(actions_limit)
             if isinstance(actions_limit, bool):
                 value = value.lower()
-            query_params.append(f"actions_limit={quote(value)}")
+            query_params.append(f"actions_limit={quote(value, safe='')}")
         if action_fields is not None:
             value = str(action_fields)
             if isinstance(action_fields, bool):
                 value = value.lower()
-            query_params.append(f"action_fields={quote(value)}")
+            query_params.append(f"action_fields={quote(value, safe='')}")
         if action_member_creator_fields is not None:
             value = str(action_member_creator_fields)
             if isinstance(action_member_creator_fields, bool):
                 value = value.lower()
-            query_params.append(f"action_memberCreator_fields={quote(value)}")
+            query_params.append(f"action_memberCreator_fields={quote(value, safe='')}")
         if attachments is not None:
             value = str(attachments)
             if isinstance(attachments, bool):
                 value = value.lower()
-            query_params.append(f"attachments={quote(value)}")
+            query_params.append(f"attachments={quote(value, safe='')}")
         if attachment_fields is not None:
             value = str(attachment_fields)
             if isinstance(attachment_fields, bool):
                 value = value.lower()
-            query_params.append(f"attachment_fields={quote(value)}")
+            query_params.append(f"attachment_fields={quote(value, safe='')}")
         if members is not None:
             value = str(members)
             if isinstance(members, bool):
                 value = value.lower()
-            query_params.append(f"members={quote(value)}")
+            query_params.append(f"members={quote(value, safe='')}")
         if member_fields is not None:
             value = str(member_fields)
             if isinstance(member_fields, bool):
                 value = value.lower()
-            query_params.append(f"member_fields={quote(value)}")
+            query_params.append(f"member_fields={quote(value, safe='')}")
         if members_voted is not None:
             value = str(members_voted)
             if isinstance(members_voted, bool):
                 value = value.lower()
-            query_params.append(f"membersVoted={quote(value)}")
+            query_params.append(f"membersVoted={quote(value, safe='')}")
         if member_voted_fields is not None:
             value = str(member_voted_fields)
             if isinstance(member_voted_fields, bool):
                 value = value.lower()
-            query_params.append(f"memberVoted_fields={quote(value)}")
+            query_params.append(f"memberVoted_fields={quote(value, safe='')}")
         if check_item_states is not None:
             value = str(check_item_states)
             if isinstance(check_item_states, bool):
                 value = value.lower()
-            query_params.append(f"checkItemStates={quote(value)}")
+            query_params.append(f"checkItemStates={quote(value, safe='')}")
         if check_item_state_fields is not None:
             value = str(check_item_state_fields)
             if isinstance(check_item_state_fields, bool):
                 value = value.lower()
-            query_params.append(f"checkItemState_fields={quote(value)}")
+            query_params.append(f"checkItemState_fields={quote(value, safe='')}")
         if checklists is not None:
             value = str(checklists)
             if isinstance(checklists, bool):
                 value = value.lower()
-            query_params.append(f"checklists={quote(value)}")
+            query_params.append(f"checklists={quote(value, safe='')}")
         if checklist_fields is not None:
             value = str(checklist_fields)
             if isinstance(checklist_fields, bool):
                 value = value.lower()
-            query_params.append(f"checklist_fields={quote(value)}")
+            query_params.append(f"checklist_fields={quote(value, safe='')}")
         if board is not None:
             value = str(board)
             if isinstance(board, bool):
                 value = value.lower()
-            query_params.append(f"board={quote(value)}")
+            query_params.append(f"board={quote(value, safe='')}")
         if board_fields is not None:
             value = str(board_fields)
             if isinstance(board_fields, bool):
                 value = value.lower()
-            query_params.append(f"board_fields={quote(value)}")
+            query_params.append(f"board_fields={quote(value, safe='')}")
         if list is not None:
             value = str(list)
             if isinstance(list, bool):
                 value = value.lower()
-            query_params.append(f"list={quote(value)}")
+            query_params.append(f"list={quote(value, safe='')}")
         if list_fields is not None:
             value = str(list_fields)
             if isinstance(list_fields, bool):
                 value = value.lower()
-            query_params.append(f"list_fields={quote(value)}")
+            query_params.append(f"list_fields={quote(value, safe='')}")
         if stickers is not None:
             value = str(stickers)
             if isinstance(stickers, bool):
                 value = value.lower()
-            query_params.append(f"stickers={quote(value)}")
+            query_params.append(f"stickers={quote(value, safe='')}")
         if sticker_fields is not None:
             value = str(sticker_fields)
             if isinstance(sticker_fields, bool):
                 value = value.lower()
-            query_params.append(f"sticker_fields={quote(value)}")
+            query_params.append(f"sticker_fields={quote(value, safe='')}")
         if fields is not None:
             value = str(fields)
             if isinstance(fields, bool):
                 value = value.lower()
-            query_params.append(f"fields={quote(value)}")
+            query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1525,6 +1582,11 @@ class TrelloClient(ConnectorClientBase):
         self,
         card_id: str,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete a card
@@ -1539,12 +1601,16 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1574,6 +1640,11 @@ class TrelloClient(ConnectorClientBase):
         organization: Optional[bool] = None,
         organization_fields: Optional[str] = None,
         lists: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List boards
@@ -1586,67 +1657,71 @@ class TrelloClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"filter={quote(value)}")
+            query_params.append(f"filter={quote(value, safe='')}")
         if fields is not None:
             value = str(fields)
             if isinstance(fields, bool):
                 value = value.lower()
-            query_params.append(f"fields={quote(value)}")
+            query_params.append(f"fields={quote(value, safe='')}")
         if actions is not None:
             value = str(actions)
             if isinstance(actions, bool):
                 value = value.lower()
-            query_params.append(f"actions={quote(value)}")
+            query_params.append(f"actions={quote(value, safe='')}")
         if actions_entities is not None:
             value = str(actions_entities)
             if isinstance(actions_entities, bool):
                 value = value.lower()
-            query_params.append(f"actions_entities={quote(value)}")
+            query_params.append(f"actions_entities={quote(value, safe='')}")
         if actions_limit is not None:
             value = str(actions_limit)
             if isinstance(actions_limit, bool):
                 value = value.lower()
-            query_params.append(f"actions_limit={quote(value)}")
+            query_params.append(f"actions_limit={quote(value, safe='')}")
         if actions_format is not None:
             value = str(actions_format)
             if isinstance(actions_format, bool):
                 value = value.lower()
-            query_params.append(f"actions_format={quote(value)}")
+            query_params.append(f"actions_format={quote(value, safe='')}")
         if actions_since is not None:
             value = str(actions_since)
             if isinstance(actions_since, bool):
                 value = value.lower()
-            query_params.append(f"actions_since={quote(value)}")
+            query_params.append(f"actions_since={quote(value, safe='')}")
         if action_fields is not None:
             value = str(action_fields)
             if isinstance(action_fields, bool):
                 value = value.lower()
-            query_params.append(f"action_fields={quote(value)}")
+            query_params.append(f"action_fields={quote(value, safe='')}")
         if memberships is not None:
             value = str(memberships)
             if isinstance(memberships, bool):
                 value = value.lower()
-            query_params.append(f"memberships={quote(value)}")
+            query_params.append(f"memberships={quote(value, safe='')}")
         if organization is not None:
             value = str(organization)
             if isinstance(organization, bool):
                 value = value.lower()
-            query_params.append(f"organization={quote(value)}")
+            query_params.append(f"organization={quote(value, safe='')}")
         if organization_fields is not None:
             value = str(organization_fields)
             if isinstance(organization_fields, bool):
                 value = value.lower()
-            query_params.append(f"organization_fields={quote(value)}")
+            query_params.append(f"organization_fields={quote(value, safe='')}")
         if lists is not None:
             value = str(lists)
             if isinstance(lists, bool):
                 value = value.lower()
-            query_params.append(f"lists={quote(value)}")
+            query_params.append(f"lists={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1664,6 +1739,11 @@ class TrelloClient(ConnectorClientBase):
 
     async def list_boards_simple_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         A simple version of the list boards
@@ -1674,7 +1754,11 @@ class TrelloClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/simple/member/me/boards"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1730,6 +1814,11 @@ class TrelloClient(ConnectorClientBase):
         organization_memberships: Optional[str] = None,
         my_perfs: Optional[bool] = None,
         fields: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a board by Id
@@ -1745,192 +1834,196 @@ class TrelloClient(ConnectorClientBase):
             value = str(actions)
             if isinstance(actions, bool):
                 value = value.lower()
-            query_params.append(f"actions={quote(value)}")
+            query_params.append(f"actions={quote(value, safe='')}")
         if action_entities is not None:
             value = str(action_entities)
             if isinstance(action_entities, bool):
                 value = value.lower()
-            query_params.append(f"action_entities={quote(value)}")
+            query_params.append(f"action_entities={quote(value, safe='')}")
         if actions_display is not None:
             value = str(actions_display)
             if isinstance(actions_display, bool):
                 value = value.lower()
-            query_params.append(f"actions_display={quote(value)}")
+            query_params.append(f"actions_display={quote(value, safe='')}")
         if actions_format is not None:
             value = str(actions_format)
             if isinstance(actions_format, bool):
                 value = value.lower()
-            query_params.append(f"actions_format={quote(value)}")
+            query_params.append(f"actions_format={quote(value, safe='')}")
         if actions_since is not None:
             value = str(actions_since)
             if isinstance(actions_since, bool):
                 value = value.lower()
-            query_params.append(f"actions_since={quote(value)}")
+            query_params.append(f"actions_since={quote(value, safe='')}")
         if actions_limit is not None:
             value = str(actions_limit)
             if isinstance(actions_limit, bool):
                 value = value.lower()
-            query_params.append(f"actions_limit={quote(value)}")
+            query_params.append(f"actions_limit={quote(value, safe='')}")
         if action_fields is not None:
             value = str(action_fields)
             if isinstance(action_fields, bool):
                 value = value.lower()
-            query_params.append(f"action_fields={quote(value)}")
+            query_params.append(f"action_fields={quote(value, safe='')}")
         if action_member is not None:
             value = str(action_member)
             if isinstance(action_member, bool):
                 value = value.lower()
-            query_params.append(f"action_member={quote(value)}")
+            query_params.append(f"action_member={quote(value, safe='')}")
         if action_member_fields is not None:
             value = str(action_member_fields)
             if isinstance(action_member_fields, bool):
                 value = value.lower()
-            query_params.append(f"action_member_fields={quote(value)}")
+            query_params.append(f"action_member_fields={quote(value, safe='')}")
         if action_member_creator is not None:
             value = str(action_member_creator)
             if isinstance(action_member_creator, bool):
                 value = value.lower()
-            query_params.append(f"action_memberCreator={quote(value)}")
+            query_params.append(f"action_memberCreator={quote(value, safe='')}")
         if action_member_creator_fields is not None:
             value = str(action_member_creator_fields)
             if isinstance(action_member_creator_fields, bool):
                 value = value.lower()
-            query_params.append(f"action_memberCreator_fields={quote(value)}")
+            query_params.append(f"action_memberCreator_fields={quote(value, safe='')}")
         if cards is not None:
             value = str(cards)
             if isinstance(cards, bool):
                 value = value.lower()
-            query_params.append(f"cards={quote(value)}")
+            query_params.append(f"cards={quote(value, safe='')}")
         if card_fields is not None:
             value = str(card_fields)
             if isinstance(card_fields, bool):
                 value = value.lower()
-            query_params.append(f"card_fields={quote(value)}")
+            query_params.append(f"card_fields={quote(value, safe='')}")
         if card_attachments is not None:
             value = str(card_attachments)
             if isinstance(card_attachments, bool):
                 value = value.lower()
-            query_params.append(f"card_attachments={quote(value)}")
+            query_params.append(f"card_attachments={quote(value, safe='')}")
         if card_attachment_fields is not None:
             value = str(card_attachment_fields)
             if isinstance(card_attachment_fields, bool):
                 value = value.lower()
-            query_params.append(f"card_attachment_fields={quote(value)}")
+            query_params.append(f"card_attachment_fields={quote(value, safe='')}")
         if card_checklists is not None:
             value = str(card_checklists)
             if isinstance(card_checklists, bool):
                 value = value.lower()
-            query_params.append(f"card_checklists={quote(value)}")
+            query_params.append(f"card_checklists={quote(value, safe='')}")
         if card_stickers is not None:
             value = str(card_stickers)
             if isinstance(card_stickers, bool):
                 value = value.lower()
-            query_params.append(f"card_stickers={quote(value)}")
+            query_params.append(f"card_stickers={quote(value, safe='')}")
         if board_stars is not None:
             value = str(board_stars)
             if isinstance(board_stars, bool):
                 value = value.lower()
-            query_params.append(f"boardStars={quote(value)}")
+            query_params.append(f"boardStars={quote(value, safe='')}")
         if labels is not None:
             value = str(labels)
             if isinstance(labels, bool):
                 value = value.lower()
-            query_params.append(f"labels={quote(value)}")
+            query_params.append(f"labels={quote(value, safe='')}")
         if label_fields is not None:
             value = str(label_fields)
             if isinstance(label_fields, bool):
                 value = value.lower()
-            query_params.append(f"label_fields={quote(value)}")
+            query_params.append(f"label_fields={quote(value, safe='')}")
         if labels_limit is not None:
             value = str(labels_limit)
             if isinstance(labels_limit, bool):
                 value = value.lower()
-            query_params.append(f"labels_limit={quote(value)}")
+            query_params.append(f"labels_limit={quote(value, safe='')}")
         if lists is not None:
             value = str(lists)
             if isinstance(lists, bool):
                 value = value.lower()
-            query_params.append(f"lists={quote(value)}")
+            query_params.append(f"lists={quote(value, safe='')}")
         if list_fields is not None:
             value = str(list_fields)
             if isinstance(list_fields, bool):
                 value = value.lower()
-            query_params.append(f"list_fields={quote(value)}")
+            query_params.append(f"list_fields={quote(value, safe='')}")
         if memberships is not None:
             value = str(memberships)
             if isinstance(memberships, bool):
                 value = value.lower()
-            query_params.append(f"memberships={quote(value)}")
+            query_params.append(f"memberships={quote(value, safe='')}")
         if memberships_member is not None:
             value = str(memberships_member)
             if isinstance(memberships_member, bool):
                 value = value.lower()
-            query_params.append(f"memberships_member={quote(value)}")
+            query_params.append(f"memberships_member={quote(value, safe='')}")
         if memberships_member_fields is not None:
             value = str(memberships_member_fields)
             if isinstance(memberships_member_fields, bool):
                 value = value.lower()
-            query_params.append(f"memberships_member_fields={quote(value)}")
+            query_params.append(f"memberships_member_fields={quote(value, safe='')}")
         if members is not None:
             value = str(members)
             if isinstance(members, bool):
                 value = value.lower()
-            query_params.append(f"members={quote(value)}")
+            query_params.append(f"members={quote(value, safe='')}")
         if member_fields is not None:
             value = str(member_fields)
             if isinstance(member_fields, bool):
                 value = value.lower()
-            query_params.append(f"member_fields={quote(value)}")
+            query_params.append(f"member_fields={quote(value, safe='')}")
         if members_invited is not None:
             value = str(members_invited)
             if isinstance(members_invited, bool):
                 value = value.lower()
-            query_params.append(f"membersInvited={quote(value)}")
+            query_params.append(f"membersInvited={quote(value, safe='')}")
         if members_invited_fields is not None:
             value = str(members_invited_fields)
             if isinstance(members_invited_fields, bool):
                 value = value.lower()
-            query_params.append(f"membersInvited_fields={quote(value)}")
+            query_params.append(f"membersInvited_fields={quote(value, safe='')}")
         if checklists is not None:
             value = str(checklists)
             if isinstance(checklists, bool):
                 value = value.lower()
-            query_params.append(f"checklists={quote(value)}")
+            query_params.append(f"checklists={quote(value, safe='')}")
         if checklist_fields is not None:
             value = str(checklist_fields)
             if isinstance(checklist_fields, bool):
                 value = value.lower()
-            query_params.append(f"checklist_fields={quote(value)}")
+            query_params.append(f"checklist_fields={quote(value, safe='')}")
         if organization is not None:
             value = str(organization)
             if isinstance(organization, bool):
                 value = value.lower()
-            query_params.append(f"organization={quote(value)}")
+            query_params.append(f"organization={quote(value, safe='')}")
         if organization_fields is not None:
             value = str(organization_fields)
             if isinstance(organization_fields, bool):
                 value = value.lower()
-            query_params.append(f"organization_fields={quote(value)}")
+            query_params.append(f"organization_fields={quote(value, safe='')}")
         if organization_memberships is not None:
             value = str(organization_memberships)
             if isinstance(organization_memberships, bool):
                 value = value.lower()
-            query_params.append(f"organization_memberships={quote(value)}")
+            query_params.append(f"organization_memberships={quote(value, safe='')}")
         if my_perfs is not None:
             value = str(my_perfs)
             if isinstance(my_perfs, bool):
                 value = value.lower()
-            query_params.append(f"myPerfs={quote(value)}")
+            query_params.append(f"myPerfs={quote(value, safe='')}")
         if fields is not None:
             value = str(fields)
             if isinstance(fields, bool):
                 value = value.lower()
-            query_params.append(f"fields={quote(value)}")
+            query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1950,6 +2043,11 @@ class TrelloClient(ConnectorClientBase):
         self,
         input: UpdateBoard,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a board
@@ -1962,7 +2060,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1985,6 +2087,11 @@ class TrelloClient(ConnectorClientBase):
         card_fields: Optional[str] = None,
         filter: Optional[str] = None,
         fields: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List the card lists in a board
@@ -2000,27 +2107,31 @@ class TrelloClient(ConnectorClientBase):
             value = str(cards)
             if isinstance(cards, bool):
                 value = value.lower()
-            query_params.append(f"cards={quote(value)}")
+            query_params.append(f"cards={quote(value, safe='')}")
         if card_fields is not None:
             value = str(card_fields)
             if isinstance(card_fields, bool):
                 value = value.lower()
-            query_params.append(f"card_fields={quote(value)}")
+            query_params.append(f"card_fields={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"filter={quote(value)}")
+            query_params.append(f"filter={quote(value, safe='')}")
         if fields is not None:
             value = str(fields)
             if isinstance(fields, bool):
                 value = value.lower()
-            query_params.append(f"fields={quote(value)}")
+            query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2039,6 +2150,11 @@ class TrelloClient(ConnectorClientBase):
     async def list_lists_simple_async(
         self,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         A simple version of list lists
@@ -2051,7 +2167,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2076,6 +2196,11 @@ class TrelloClient(ConnectorClientBase):
         board: Optional[bool] = None,
         board_fields: Optional[str] = None,
         fields: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list by Id
@@ -2091,37 +2216,41 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if cards is not None:
             value = str(cards)
             if isinstance(cards, bool):
                 value = value.lower()
-            query_params.append(f"cards={quote(value)}")
+            query_params.append(f"cards={quote(value, safe='')}")
         if card_fields is not None:
             value = str(card_fields)
             if isinstance(card_fields, bool):
                 value = value.lower()
-            query_params.append(f"card_fields={quote(value)}")
+            query_params.append(f"card_fields={quote(value, safe='')}")
         if board is not None:
             value = str(board)
             if isinstance(board, bool):
                 value = value.lower()
-            query_params.append(f"board={quote(value)}")
+            query_params.append(f"board={quote(value, safe='')}")
         if board_fields is not None:
             value = str(board_fields)
             if isinstance(board_fields, bool):
                 value = value.lower()
-            query_params.append(f"board_fields={quote(value)}")
+            query_params.append(f"board_fields={quote(value, safe='')}")
         if fields is not None:
             value = str(fields)
             if isinstance(fields, bool):
                 value = value.lower()
-            query_params.append(f"fields={quote(value)}")
+            query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2146,6 +2275,11 @@ class TrelloClient(ConnectorClientBase):
         id_board: Optional[str] = None,
         pos: Optional[str] = None,
         subscribed: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a list
@@ -2160,37 +2294,41 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if name is not None:
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"name={quote(value)}")
+            query_params.append(f"name={quote(value, safe='')}")
         if closed is not None:
             value = str(closed)
             if isinstance(closed, bool):
                 value = value.lower()
-            query_params.append(f"closed={quote(value)}")
+            query_params.append(f"closed={quote(value, safe='')}")
         if id_board is not None:
             value = str(id_board)
             if isinstance(id_board, bool):
                 value = value.lower()
-            query_params.append(f"idBoard={quote(value)}")
+            query_params.append(f"idBoard={quote(value, safe='')}")
         if pos is not None:
             value = str(pos)
             if isinstance(pos, bool):
                 value = value.lower()
-            query_params.append(f"pos={quote(value)}")
+            query_params.append(f"pos={quote(value, safe='')}")
         if subscribed is not None:
             value = str(subscribed)
             if isinstance(subscribed, bool):
                 value = value.lower()
-            query_params.append(f"subscribed={quote(value)}")
+            query_params.append(f"subscribed={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2209,6 +2347,11 @@ class TrelloClient(ConnectorClientBase):
     async def get_user_profile_async(
         self,
         fields: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get your User Profile info
@@ -2221,12 +2364,16 @@ class TrelloClient(ConnectorClientBase):
             value = str(fields)
             if isinstance(fields, bool):
                 value = value.lower()
-            query_params.append(f"fields={quote(value)}")
+            query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2244,6 +2391,11 @@ class TrelloClient(ConnectorClientBase):
 
     async def list_teams_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List teams you are a member of
@@ -2255,7 +2407,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2274,6 +2430,11 @@ class TrelloClient(ConnectorClientBase):
     async def list_team_members_async(
         self,
         team_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List members of a team
@@ -2286,7 +2447,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2305,6 +2470,11 @@ class TrelloClient(ConnectorClientBase):
     async def list_board_members_async(
         self,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List members of a board
@@ -2317,7 +2487,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2336,6 +2510,11 @@ class TrelloClient(ConnectorClientBase):
     async def list_board_labels_async(
         self,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List labels of a board
@@ -2352,7 +2531,11 @@ class TrelloClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2371,6 +2554,11 @@ class TrelloClient(ConnectorClientBase):
     async def get_team_for_board_async(
         self,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the team for a board
@@ -2383,7 +2571,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2403,6 +2595,11 @@ class TrelloClient(ConnectorClientBase):
         self,
         card_id: str,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List members for a card
@@ -2417,12 +2614,16 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2442,6 +2643,11 @@ class TrelloClient(ConnectorClientBase):
         self,
         card_id: str,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List comments for a card
@@ -2456,12 +2662,16 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2482,6 +2692,11 @@ class TrelloClient(ConnectorClientBase):
         input: CommentPost,
         card_id: str,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add a comment to a card
@@ -2496,12 +2711,16 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2522,6 +2741,11 @@ class TrelloClient(ConnectorClientBase):
         card_id: str,
         board_id: str,
         member_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add member to a card
@@ -2536,16 +2760,20 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         value = str(member_id)
         if isinstance(member_id, bool):
             value = value.lower()
-        query_params.append(f"memberId={quote(value)}")
+        query_params.append(f"memberId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2564,6 +2792,11 @@ class TrelloClient(ConnectorClientBase):
     async def create_board_async(
         self,
         input: CreateBoard,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a board
@@ -2573,7 +2806,11 @@ class TrelloClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/boards"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2592,6 +2829,11 @@ class TrelloClient(ConnectorClientBase):
     async def create_list_async(
         self,
         input: CreateList,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a list
@@ -2601,7 +2843,11 @@ class TrelloClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/lists"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2620,6 +2866,11 @@ class TrelloClient(ConnectorClientBase):
     async def close_board_async(
         self,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Close a board
@@ -2632,7 +2883,11 @@ class TrelloClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2652,6 +2907,11 @@ class TrelloClient(ConnectorClientBase):
         self,
         input: CreateCard,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a card
@@ -2663,12 +2923,16 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2689,6 +2953,11 @@ class TrelloClient(ConnectorClientBase):
         input: UpdateCard,
         card_id: str,
         board_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a card
@@ -2703,12 +2972,16 @@ class TrelloClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"board_id={quote(value)}")
+        query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

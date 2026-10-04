@@ -6,15 +6,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.plumsail import (
     PlumsailClient,
     Pdf2TextRequest,
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -24,55 +23,54 @@ class TestPlumsailClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = PlumsailClient("https://example.azure.com/connections/test")
+        client = PlumsailClient("https://example.azure.com/connections/test",
+                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "plumsail"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = PlumsailClient("https://example.azure.com/connections/test/")
+        client = PlumsailClient("https://example.azure.com/connections/test/",
+                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PlumsailClient("")
+            PlumsailClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PlumsailClient(None)
+            PlumsailClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'plumsail'."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "plumsail"
@@ -82,11 +80,11 @@ class TestPlumsailClientLifecycle:
     """Tests for PlumsailClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -94,12 +92,12 @@ class TestPlumsailClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(PlumsailClient, "close", new_callable=AsyncMock) as mock_close:
             async with PlumsailClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, PlumsailClient)
 
@@ -110,11 +108,11 @@ class TestProfilesMeGetAsync:
     """Tests for profiles_me_get_async method (GET, no body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_get(self, mock_token_provider):
+    async def test_success_sends_get(self, mock_credential):
         """Test that the operation issues a GET and returns parsed JSON."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"email": "user@example.com"}')
 
@@ -135,11 +133,11 @@ class TestProfilesMeGetAsync:
             assert result["email"] == "user@example.com"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=401, text="Unauthorized")
 
@@ -159,11 +157,11 @@ class TestExtractTextFromPdfAsync:
     """Tests for flow_v1_documents_jobs_extract_text_from_pdf_async (POST with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_forwards_request_body(self, mock_token_provider):
+    async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         request = Pdf2TextRequest()
         mock_response = MockResponse(status=200, text='{"text": "hello"}')
@@ -185,11 +183,11 @@ class TestExtractTextFromPdfAsync:
             assert result["text"] == "hello"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = PlumsailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=400, text="Bad Request")
 
@@ -209,7 +207,7 @@ BASE_URL = "https://example.azure.com/connections/test"
 
 OPERATION_ARGS = {
     "flow_v1_documents_flow_schema_add_watermark_to_pdf": {"type_": "test"},
-    "flow_v1_documents_flow_schema_parse_csv": {"headers": "test"},
+    "flow_v1_documents_flow_schema_parse_csv": {"headers_parameter": "test"},
     "flow_v1_documents_flow_schema_reg_exp_match": {"pattern": "test"},
     "flow_v1_documents_flow_schema_split_pdf": {"type_": "test"},
     "flow_v1_documents_jobs_add_watermark_to_pdf": {"input": {}, "type_": "test"},
@@ -274,9 +272,9 @@ class TestPlumsailClientAllOperations:
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
-    async def test_all_operations_success(self, mock_token_provider, operation):
+    async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation issues a request and returns without error."""
-        client = PlumsailClient(BASE_URL, token_provider=mock_token_provider)
+        client = PlumsailClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(
@@ -298,11 +296,11 @@ class TestPlumsailClientAllOperationsErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = PlumsailClient(BASE_URL, token_provider=mock_token_provider)
+        client = PlumsailClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(

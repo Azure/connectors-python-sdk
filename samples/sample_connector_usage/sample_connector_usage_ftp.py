@@ -5,6 +5,8 @@
 import asyncio
 import os
 
+from azure.identity.aio import DefaultAzureCredential
+
 from azure.connectors.ftp import FtpClient
 
 
@@ -17,19 +19,20 @@ async def main() -> None:
     folder_path = os.getenv("FTP_FOLDER_PATH", "/inbound")
     file_name = os.getenv("FTP_FILE_NAME", "sample-from-sdk.txt")
 
-    async with FtpClient(connection_url) as client:
-        root_listing = await client.list_root_folder_async()
-        print("root listing", root_listing)
+    async with DefaultAzureCredential() as credential:
+        async with FtpClient(connection_url, credential) as client:
+            root_listing = await client.list_root_folder_async()
+            print("root listing", root_listing)
 
-        created = await client.create_file_async(
-            input=b"hello from azure-connectors ftp sample",
-            folder_path=folder_path,
-            name=file_name,
-        )
-        print("created file", created)
+            created = await client.create_file_async(
+                input=b"hello from azure-connectors ftp sample",
+                folder_path=folder_path,
+                name=file_name,
+            )
+            print("created file", created)
 
-        folder_items = await client.list_folder_async(id=folder_path)
-        print("folder items available for polling", folder_items)
+            folder_items = await client.list_folder_async(id=folder_path)
+            print("folder items available for polling", folder_items)
 
 
 if __name__ == "__main__":

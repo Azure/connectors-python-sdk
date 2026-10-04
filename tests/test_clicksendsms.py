@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.clicksendsms import (
     ClicksendsmsClient,
     CreateListContactInput,
@@ -22,9 +23,7 @@ from azure.connectors.clicksendsms import (
     UploadMediaInput,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -34,55 +33,54 @@ class TestClicksendsmsClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ClicksendsmsClient("https://example.azure.com/connections/test")
+        client = ClicksendsmsClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "clicksendsms"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ClicksendsmsClient("https://example.azure.com/connections/test/")
+        client = ClicksendsmsClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = ClicksendsmsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = ClicksendsmsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ClicksendsmsClient("")
+            ClicksendsmsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ClicksendsmsClient(None)
+            ClicksendsmsClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'clicksendsms'."""
         client = ClicksendsmsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "clicksendsms"
@@ -92,11 +90,11 @@ class TestClicksendsmsClientLifecycle:
     """Tests for ClicksendsmsClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = ClicksendsmsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -104,12 +102,12 @@ class TestClicksendsmsClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(ClicksendsmsClient, "close", new_callable=AsyncMock) as mock_close:
             async with ClicksendsmsClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, ClicksendsmsClient)
 
@@ -119,16 +117,16 @@ class TestClicksendsmsClientLifecycle:
 class TestClicksendsmsClientOperations:
     """Tests for ClicksendsmsClient operations against expected HTTP calls."""
 
-    def _make_client(self, mock_token_provider):
+    def _make_client(self, mock_credential):
         return ClicksendsmsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
     @pytest.mark.asyncio
-    async def test_sms_send_success(self, mock_token_provider):
+    async def test_sms_send_success(self, mock_credential):
         """Test sms_send issues a POST to the sms/send route with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = SmsSendInput(messages=[{"to": "+61411111111", "body": "hi"}])
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -144,9 +142,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_create_list_success(self, mock_token_provider):
+    async def test_create_list_success(self, mock_credential):
         """Test create_list issues a POST to the lists route with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = CreateListInput(list_name="My List")
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -162,9 +160,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_get_contact_lists_success(self, mock_token_provider):
+    async def test_get_contact_lists_success(self, mock_credential):
         """Test get_contact_lists issues a GET to the lists route with query params."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
@@ -181,9 +179,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_send_voice_success(self, mock_token_provider):
+    async def test_send_voice_success(self, mock_credential):
         """Test send_voice issues a POST to the voice/send route with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = SendVoiceInput(messages=[{"to": "+61411111111", "body": "hi"}])
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -199,9 +197,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_delete_list_success(self, mock_token_provider):
+    async def test_delete_list_success(self, mock_credential):
         """Test delete_list issues a DELETE to the lists/{id} route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
@@ -215,9 +213,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_create_list_contact_success(self, mock_token_provider):
+    async def test_create_list_contact_success(self, mock_credential):
         """Test create_list_contact issues a POST to the list contacts route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = CreateListContactInput(first_name="Ada", phone_number="+61411111111")
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -233,9 +231,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_view_list_contacts_success(self, mock_token_provider):
+    async def test_view_list_contacts_success(self, mock_credential):
         """Test view_list_contacts issues a GET to the list contacts route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
@@ -249,9 +247,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_delete_list_contact_success(self, mock_token_provider):
+    async def test_delete_list_contact_success(self, mock_credential):
         """Test delete_list_contact issues a DELETE to the single contact route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
@@ -265,9 +263,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_send_mms_success(self, mock_token_provider):
+    async def test_send_mms_success(self, mock_credential):
         """Test send_mms issues a POST to the mms/send route with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = SendMmsInput(messages=[{"to": "+61411111111"}], media_file="url")
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -283,9 +281,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_send_fax_success(self, mock_token_provider):
+    async def test_send_fax_success(self, mock_credential):
         """Test send_fax issues a POST to the fax/send route with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = SendFaxInput(messages=[{"to": "+61411111111"}], file_url="url")
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -301,9 +299,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_upload_media_success(self, mock_token_provider):
+    async def test_upload_media_success(self, mock_credential):
         """Test upload_media issues a POST to the uploads route with the convert query."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = UploadMediaInput(content="base64==")
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -321,9 +319,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_search_contact_list_success(self, mock_token_provider):
+    async def test_search_contact_list_success(self, mock_credential):
         """Test search_contact_list issues a GET to the search route with the q query."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
@@ -339,9 +337,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_send_letter_success(self, mock_token_provider):
+    async def test_send_letter_success(self, mock_credential):
         """Test send_letter issues a POST to the letters route with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = SendLetterInput(file_url="url", recipients=[{"address_name": "Ada"}])
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -357,9 +355,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_send_postcard_success(self, mock_token_provider):
+    async def test_send_postcard_success(self, mock_credential):
         """Test send_postcard issues a POST to the postcards route with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = SendPostcardInput(recipients=[{"address_name": "Ada"}], file_urls=["url"])
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
@@ -375,9 +373,9 @@ class TestClicksendsmsClientOperations:
             assert result == {"data": {}}
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
@@ -412,11 +410,11 @@ class TestClicksendsmsClientErrorHandling:
             "send_postcard",
         ],
     )
-    async def test_error_response_raises_exception(self, mock_token_provider, operation):
+    async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = ClicksendsmsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

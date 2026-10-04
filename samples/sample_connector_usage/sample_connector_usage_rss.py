@@ -5,6 +5,8 @@
 import asyncio
 import os
 
+from azure.identity.aio import DefaultAzureCredential
+
 from azure.connectors.rss import RssClient
 
 
@@ -16,19 +18,20 @@ async def main() -> None:
 
     feed_url = os.getenv("RSS_FEED_URL", "https://devblogs.microsoft.com/python/feed/")
 
-    async with RssClient(connection_url) as client:
-        items = await client.list_feed_items_async(
-            feed_url=feed_url,
-            since_property="PublishDate",
-        )
-        print(f"Retrieved {len(items or [])} item(s) from '{feed_url}'.")
+    async with DefaultAzureCredential() as credential:
+        async with RssClient(connection_url, credential) as client:
+            items = await client.list_feed_items_async(
+                feed_url=feed_url,
+                since_property="PublishDate",
+            )
+            print(f"Retrieved {len(items or [])} item(s) from '{feed_url}'.")
 
-        latest_items = await client.list_feed_items_async(
-            feed_url=feed_url,
-            since_property="PublishDate",
-        )
-        values = (latest_items or {}).get("value", [])
-        print(f"Polling query returned {len(values)} item(s).")
+            latest_items = await client.list_feed_items_async(
+                feed_url=feed_url,
+                since_property="PublishDate",
+            )
+            values = (latest_items or {}).get("value", [])
+            print(f"Polling query returned {len(values)} item(s).")
 
 
 if __name__ == "__main__":

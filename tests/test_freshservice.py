@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.freshservice import (
     AddNoteRequest,
     AddNoteResponse,
@@ -21,9 +22,7 @@ from azure.connectors.freshservice import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -52,55 +51,54 @@ class TestFreshserviceClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = FreshserviceClient("https://example.azure.com/connections/test")
+        client = FreshserviceClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "freshservice"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = FreshserviceClient("https://example.azure.com/connections/test/")
+        client = FreshserviceClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            FreshserviceClient("")
+            FreshserviceClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            FreshserviceClient(None)
+            FreshserviceClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'freshservice'."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "freshservice"
@@ -110,11 +108,11 @@ class TestFreshserviceClientLifecycle:
     """Tests for FreshserviceClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -122,12 +120,12 @@ class TestFreshserviceClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(FreshserviceClient, "close", new_callable=AsyncMock) as mock_close:
             async with FreshserviceClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, FreshserviceClient)
 
@@ -138,11 +136,11 @@ class TestFreshserviceClientOperations:
     """Tests for FreshserviceClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
-    async def test_create_ticket_success(self, mock_token_provider):
+    async def test_create_ticket_success(self, mock_credential):
         """Test ticket creation issues a POST to /api/v2/tickets with body."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"ticket": {"id": 9}}')
 
@@ -161,11 +159,11 @@ class TestFreshserviceClientOperations:
             assert result == {"ticket": {"id": 9}}
 
     @pytest.mark.asyncio
-    async def test_update_ticket_success_targets_resource(self, mock_token_provider):
+    async def test_update_ticket_success_targets_resource(self, mock_credential):
         """Test ticket update issues a PUT to /api/v2/tickets/{id}."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"ticket": {"id": 5}}')
 
@@ -184,11 +182,11 @@ class TestFreshserviceClientOperations:
             assert result == {"ticket": {"id": 5}}
 
     @pytest.mark.asyncio
-    async def test_add_note_success_targets_notes(self, mock_token_provider):
+    async def test_add_note_success_targets_notes(self, mock_credential):
         """Test adding a note issues a POST to /api/v2/tickets/{id}/notes."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"conversation": {"id": 3}}')
 
@@ -207,11 +205,11 @@ class TestFreshserviceClientOperations:
             assert result == {"conversation": {"id": 3}}
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -233,13 +231,13 @@ class TestFreshserviceClientErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

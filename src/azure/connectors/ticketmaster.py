@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -302,8 +304,17 @@ class TicketmasterClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a TicketmasterClient.
@@ -311,17 +322,36 @@ class TicketmasterClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -377,6 +407,11 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Event search
@@ -393,107 +428,107 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(size)
             if isinstance(size, bool):
                 value = value.lower()
-            query_params.append(f"size={quote(value)}")
+            query_params.append(f"size={quote(value, safe='')}")
         if id is not None:
             value = str(id)
             if isinstance(id, bool):
                 value = value.lower()
-            query_params.append(f"id={quote(value)}")
+            query_params.append(f"id={quote(value, safe='')}")
         if keyword is not None:
             value = str(keyword)
             if isinstance(keyword, bool):
                 value = value.lower()
-            query_params.append(f"keyword={quote(value)}")
+            query_params.append(f"keyword={quote(value, safe='')}")
         if attraction_id is not None:
             value = str(attraction_id)
             if isinstance(attraction_id, bool):
                 value = value.lower()
-            query_params.append(f"attractionId={quote(value)}")
+            query_params.append(f"attractionId={quote(value, safe='')}")
         if venue_id is not None:
             value = str(venue_id)
             if isinstance(venue_id, bool):
                 value = value.lower()
-            query_params.append(f"venueId={quote(value)}")
+            query_params.append(f"venueId={quote(value, safe='')}")
         if postal_code is not None:
             value = str(postal_code)
             if isinstance(postal_code, bool):
                 value = value.lower()
-            query_params.append(f"postalCode={quote(value)}")
+            query_params.append(f"postalCode={quote(value, safe='')}")
         if latlong is not None:
             value = str(latlong)
             if isinstance(latlong, bool):
                 value = value.lower()
-            query_params.append(f"latlong={quote(value)}")
+            query_params.append(f"latlong={quote(value, safe='')}")
         if radius is not None:
             value = str(radius)
             if isinstance(radius, bool):
                 value = value.lower()
-            query_params.append(f"radius={quote(value)}")
+            query_params.append(f"radius={quote(value, safe='')}")
         if unit is not None:
             value = str(unit)
             if isinstance(unit, bool):
                 value = value.lower()
-            query_params.append(f"unit={quote(value)}")
+            query_params.append(f"unit={quote(value, safe='')}")
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if market_id is not None:
             value = str(market_id)
             if isinstance(market_id, bool):
                 value = value.lower()
-            query_params.append(f"marketId={quote(value)}")
+            query_params.append(f"marketId={quote(value, safe='')}")
         if start_date_time is not None:
             value = str(start_date_time)
             if isinstance(start_date_time, bool):
                 value = value.lower()
-            query_params.append(f"startDateTime={quote(value)}")
+            query_params.append(f"startDateTime={quote(value, safe='')}")
         if end_date_time is not None:
             value = str(end_date_time)
             if isinstance(end_date_time, bool):
                 value = value.lower()
-            query_params.append(f"endDateTime={quote(value)}")
+            query_params.append(f"endDateTime={quote(value, safe='')}")
         if include_t_b_a is not None:
             value = str(include_t_b_a)
             if isinstance(include_t_b_a, bool):
                 value = value.lower()
-            query_params.append(f"includeTBA={quote(value)}")
+            query_params.append(f"includeTBA={quote(value, safe='')}")
         if include_t_b_d is not None:
             value = str(include_t_b_d)
             if isinstance(include_t_b_d, bool):
                 value = value.lower()
-            query_params.append(f"includeTBD={quote(value)}")
+            query_params.append(f"includeTBD={quote(value, safe='')}")
         if include_test is not None:
             value = str(include_test)
             if isinstance(include_test, bool):
                 value = value.lower()
-            query_params.append(f"includeTest={quote(value)}")
+            query_params.append(f"includeTest={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if onsale_start_date_time is not None:
             value = str(onsale_start_date_time)
             if isinstance(onsale_start_date_time, bool):
                 value = value.lower()
-            query_params.append(f"onsaleStartDateTime={quote(value)}")
+            query_params.append(f"onsaleStartDateTime={quote(value, safe='')}")
         if onsale_end_date_time is not None:
             value = str(onsale_end_date_time)
             if isinstance(onsale_end_date_time, bool):
                 value = value.lower()
-            query_params.append(f"onsaleEndDateTime={quote(value)}")
+            query_params.append(f"onsaleEndDateTime={quote(value, safe='')}")
         if city is not None:
             if isinstance(city, list):
                 joined_parts = []
@@ -503,22 +538,22 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"city={quote(joined)}")
+                query_params.append(f"city={quote(joined, safe='')}")
             else:
                 value = str(city)
                 if isinstance(city, bool):
                     value = value.lower()
-                query_params.append(f"city={quote(value)}")
+                query_params.append(f"city={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if state_code is not None:
             value = str(state_code)
             if isinstance(state_code, bool):
                 value = value.lower()
-            query_params.append(f"stateCode={quote(value)}")
+            query_params.append(f"stateCode={quote(value, safe='')}")
         if classification_name is not None:
             if isinstance(classification_name, list):
                 joined_parts = []
@@ -528,12 +563,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"classificationName={quote(joined)}")
+                query_params.append(f"classificationName={quote(joined, safe='')}")
             else:
                 value = str(classification_name)
                 if isinstance(classification_name, bool):
                     value = value.lower()
-                query_params.append(f"classificationName={quote(value)}")
+                query_params.append(f"classificationName={quote(value, safe='')}")
         if classification_id is not None:
             if isinstance(classification_id, list):
                 joined_parts = []
@@ -543,17 +578,17 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"classificationId={quote(joined)}")
+                query_params.append(f"classificationId={quote(joined, safe='')}")
             else:
                 value = str(classification_id)
                 if isinstance(classification_id, bool):
                     value = value.lower()
-                query_params.append(f"classificationId={quote(value)}")
+                query_params.append(f"classificationId={quote(value, safe='')}")
         if dma_id is not None:
             value = str(dma_id)
             if isinstance(dma_id, bool):
                 value = value.lower()
-            query_params.append(f"dmaId={quote(value)}")
+            query_params.append(f"dmaId={quote(value, safe='')}")
         if local_start_date_time is not None:
             if isinstance(local_start_date_time, list):
                 joined_parts = []
@@ -563,12 +598,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"localStartDateTime={quote(joined)}")
+                query_params.append(f"localStartDateTime={quote(joined, safe='')}")
             else:
                 value = str(local_start_date_time)
                 if isinstance(local_start_date_time, bool):
                     value = value.lower()
-                query_params.append(f"localStartDateTime={quote(value)}")
+                query_params.append(f"localStartDateTime={quote(value, safe='')}")
         if local_start_end_date_time is not None:
             if isinstance(local_start_end_date_time, list):
                 joined_parts = []
@@ -578,12 +613,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"localStartEndDateTime={quote(joined)}")
+                query_params.append(f"localStartEndDateTime={quote(joined, safe='')}")
             else:
                 value = str(local_start_end_date_time)
                 if isinstance(local_start_end_date_time, bool):
                     value = value.lower()
-                query_params.append(f"localStartEndDateTime={quote(value)}")
+                query_params.append(f"localStartEndDateTime={quote(value, safe='')}")
         if start_end_date_time is not None:
             if isinstance(start_end_date_time, list):
                 joined_parts = []
@@ -593,12 +628,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"startEndDateTime={quote(joined)}")
+                query_params.append(f"startEndDateTime={quote(joined, safe='')}")
             else:
                 value = str(start_end_date_time)
                 if isinstance(start_end_date_time, bool):
                     value = value.lower()
-                query_params.append(f"startEndDateTime={quote(value)}")
+                query_params.append(f"startEndDateTime={quote(value, safe='')}")
         if public_visibility_start_date_time is not None:
             if isinstance(public_visibility_start_date_time, list):
                 joined_parts = []
@@ -608,12 +643,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"publicVisibilityStartDateTime={quote(joined)}")
+                query_params.append(f"publicVisibilityStartDateTime={quote(joined, safe='')}")
             else:
                 value = str(public_visibility_start_date_time)
                 if isinstance(public_visibility_start_date_time, bool):
                     value = value.lower()
-                query_params.append(f"publicVisibilityStartDateTime={quote(value)}")
+                query_params.append(f"publicVisibilityStartDateTime={quote(value, safe='')}")
         if pre_sale_date_time is not None:
             if isinstance(pre_sale_date_time, list):
                 joined_parts = []
@@ -623,22 +658,22 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"preSaleDateTime={quote(joined)}")
+                query_params.append(f"preSaleDateTime={quote(joined, safe='')}")
             else:
                 value = str(pre_sale_date_time)
                 if isinstance(pre_sale_date_time, bool):
                     value = value.lower()
-                query_params.append(f"preSaleDateTime={quote(value)}")
+                query_params.append(f"preSaleDateTime={quote(value, safe='')}")
         if onsale_on_start_date is not None:
             value = str(onsale_on_start_date)
             if isinstance(onsale_on_start_date, bool):
                 value = value.lower()
-            query_params.append(f"onsaleOnStartDate={quote(value)}")
+            query_params.append(f"onsaleOnStartDate={quote(value, safe='')}")
         if onsale_on_after_start_date is not None:
             value = str(onsale_on_after_start_date)
             if isinstance(onsale_on_after_start_date, bool):
                 value = value.lower()
-            query_params.append(f"onsaleOnAfterStartDate={quote(value)}")
+            query_params.append(f"onsaleOnAfterStartDate={quote(value, safe='')}")
         if collection_id is not None:
             if isinstance(collection_id, list):
                 joined_parts = []
@@ -648,12 +683,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"collectionId={quote(joined)}")
+                query_params.append(f"collectionId={quote(joined, safe='')}")
             else:
                 value = str(collection_id)
                 if isinstance(collection_id, bool):
                     value = value.lower()
-                query_params.append(f"collectionId={quote(value)}")
+                query_params.append(f"collectionId={quote(value, safe='')}")
         if segment_id is not None:
             if isinstance(segment_id, list):
                 joined_parts = []
@@ -663,12 +698,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"segmentId={quote(joined)}")
+                query_params.append(f"segmentId={quote(joined, safe='')}")
             else:
                 value = str(segment_id)
                 if isinstance(segment_id, bool):
                     value = value.lower()
-                query_params.append(f"segmentId={quote(value)}")
+                query_params.append(f"segmentId={quote(value, safe='')}")
         if segment_name is not None:
             if isinstance(segment_name, list):
                 joined_parts = []
@@ -678,22 +713,22 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"segmentName={quote(joined)}")
+                query_params.append(f"segmentName={quote(joined, safe='')}")
             else:
                 value = str(segment_name)
                 if isinstance(segment_name, bool):
                     value = value.lower()
-                query_params.append(f"segmentName={quote(value)}")
+                query_params.append(f"segmentName={quote(value, safe='')}")
         if include_family is not None:
             value = str(include_family)
             if isinstance(include_family, bool):
                 value = value.lower()
-            query_params.append(f"includeFamily={quote(value)}")
+            query_params.append(f"includeFamily={quote(value, safe='')}")
         if promoter_id is not None:
             value = str(promoter_id)
             if isinstance(promoter_id, bool):
                 value = value.lower()
-            query_params.append(f"promoterId={quote(value)}")
+            query_params.append(f"promoterId={quote(value, safe='')}")
         if genre_id is not None:
             if isinstance(genre_id, list):
                 joined_parts = []
@@ -703,12 +738,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"genreId={quote(joined)}")
+                query_params.append(f"genreId={quote(joined, safe='')}")
             else:
                 value = str(genre_id)
                 if isinstance(genre_id, bool):
                     value = value.lower()
-                query_params.append(f"genreId={quote(value)}")
+                query_params.append(f"genreId={quote(value, safe='')}")
         if sub_genre_id is not None:
             if isinstance(sub_genre_id, list):
                 joined_parts = []
@@ -718,12 +753,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"subGenreId={quote(joined)}")
+                query_params.append(f"subGenreId={quote(joined, safe='')}")
             else:
                 value = str(sub_genre_id)
                 if isinstance(sub_genre_id, bool):
                     value = value.lower()
-                query_params.append(f"subGenreId={quote(value)}")
+                query_params.append(f"subGenreId={quote(value, safe='')}")
         if type_id is not None:
             if isinstance(type_id, list):
                 joined_parts = []
@@ -733,12 +768,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"typeId={quote(joined)}")
+                query_params.append(f"typeId={quote(joined, safe='')}")
             else:
                 value = str(type_id)
                 if isinstance(type_id, bool):
                     value = value.lower()
-                query_params.append(f"typeId={quote(value)}")
+                query_params.append(f"typeId={quote(value, safe='')}")
         if sub_type_id is not None:
             if isinstance(sub_type_id, list):
                 joined_parts = []
@@ -748,27 +783,27 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"subTypeId={quote(joined)}")
+                query_params.append(f"subTypeId={quote(joined, safe='')}")
             else:
                 value = str(sub_type_id)
                 if isinstance(sub_type_id, bool):
                     value = value.lower()
-                query_params.append(f"subTypeId={quote(value)}")
+                query_params.append(f"subTypeId={quote(value, safe='')}")
         if geo_point is not None:
             value = str(geo_point)
             if isinstance(geo_point, bool):
                 value = value.lower()
-            query_params.append(f"geoPoint={quote(value)}")
+            query_params.append(f"geoPoint={quote(value, safe='')}")
         if preferred_country is not None:
             value = str(preferred_country)
             if isinstance(preferred_country, bool):
                 value = value.lower()
-            query_params.append(f"preferredCountry={quote(value)}")
+            query_params.append(f"preferredCountry={quote(value, safe='')}")
         if include_spellcheck is not None:
             value = str(include_spellcheck)
             if isinstance(include_spellcheck, bool):
                 value = value.lower()
-            query_params.append(f"includeSpellcheck={quote(value)}")
+            query_params.append(f"includeSpellcheck={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -778,17 +813,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -809,6 +848,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get event details
@@ -827,7 +871,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -837,17 +881,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -868,6 +916,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get event images
@@ -885,7 +938,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -895,17 +948,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -943,6 +1000,11 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Attraction search
@@ -959,42 +1021,42 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(id)
             if isinstance(id, bool):
                 value = value.lower()
-            query_params.append(f"id={quote(value)}")
+            query_params.append(f"id={quote(value, safe='')}")
         if keyword is not None:
             value = str(keyword)
             if isinstance(keyword, bool):
                 value = value.lower()
-            query_params.append(f"keyword={quote(value)}")
+            query_params.append(f"keyword={quote(value, safe='')}")
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if include_test is not None:
             value = str(include_test)
             if isinstance(include_test, bool):
                 value = value.lower()
-            query_params.append(f"includeTest={quote(value)}")
+            query_params.append(f"includeTest={quote(value, safe='')}")
         if size is not None:
             value = str(size)
             if isinstance(size, bool):
                 value = value.lower()
-            query_params.append(f"size={quote(value)}")
+            query_params.append(f"size={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if classification_name is not None:
             if isinstance(classification_name, list):
                 joined_parts = []
@@ -1004,12 +1066,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"classificationName={quote(joined)}")
+                query_params.append(f"classificationName={quote(joined, safe='')}")
             else:
                 value = str(classification_name)
                 if isinstance(classification_name, bool):
                     value = value.lower()
-                query_params.append(f"classificationName={quote(value)}")
+                query_params.append(f"classificationName={quote(value, safe='')}")
         if classification_id is not None:
             if isinstance(classification_id, list):
                 joined_parts = []
@@ -1019,17 +1081,17 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"classificationId={quote(joined)}")
+                query_params.append(f"classificationId={quote(joined, safe='')}")
             else:
                 value = str(classification_id)
                 if isinstance(classification_id, bool):
                     value = value.lower()
-                query_params.append(f"classificationId={quote(value)}")
+                query_params.append(f"classificationId={quote(value, safe='')}")
         if include_family is not None:
             value = str(include_family)
             if isinstance(include_family, bool):
                 value = value.lower()
-            query_params.append(f"includeFamily={quote(value)}")
+            query_params.append(f"includeFamily={quote(value, safe='')}")
         if segment_id is not None:
             if isinstance(segment_id, list):
                 joined_parts = []
@@ -1039,12 +1101,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"segmentId={quote(joined)}")
+                query_params.append(f"segmentId={quote(joined, safe='')}")
             else:
                 value = str(segment_id)
                 if isinstance(segment_id, bool):
                     value = value.lower()
-                query_params.append(f"segmentId={quote(value)}")
+                query_params.append(f"segmentId={quote(value, safe='')}")
         if genre_id is not None:
             if isinstance(genre_id, list):
                 joined_parts = []
@@ -1054,12 +1116,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"genreId={quote(joined)}")
+                query_params.append(f"genreId={quote(joined, safe='')}")
             else:
                 value = str(genre_id)
                 if isinstance(genre_id, bool):
                     value = value.lower()
-                query_params.append(f"genreId={quote(value)}")
+                query_params.append(f"genreId={quote(value, safe='')}")
         if sub_genre_id is not None:
             if isinstance(sub_genre_id, list):
                 joined_parts = []
@@ -1069,12 +1131,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"subGenreId={quote(joined)}")
+                query_params.append(f"subGenreId={quote(joined, safe='')}")
             else:
                 value = str(sub_genre_id)
                 if isinstance(sub_genre_id, bool):
                     value = value.lower()
-                query_params.append(f"subGenreId={quote(value)}")
+                query_params.append(f"subGenreId={quote(value, safe='')}")
         if type_id is not None:
             if isinstance(type_id, list):
                 joined_parts = []
@@ -1084,12 +1146,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"typeId={quote(joined)}")
+                query_params.append(f"typeId={quote(joined, safe='')}")
             else:
                 value = str(type_id)
                 if isinstance(type_id, bool):
                     value = value.lower()
-                query_params.append(f"typeId={quote(value)}")
+                query_params.append(f"typeId={quote(value, safe='')}")
         if sub_type_id is not None:
             if isinstance(sub_type_id, list):
                 joined_parts = []
@@ -1099,27 +1161,27 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"subTypeId={quote(joined)}")
+                query_params.append(f"subTypeId={quote(joined, safe='')}")
             else:
                 value = str(sub_type_id)
                 if isinstance(sub_type_id, bool):
                     value = value.lower()
-                query_params.append(f"subTypeId={quote(value)}")
+                query_params.append(f"subTypeId={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if preferred_country is not None:
             value = str(preferred_country)
             if isinstance(preferred_country, bool):
                 value = value.lower()
-            query_params.append(f"preferredCountry={quote(value)}")
+            query_params.append(f"preferredCountry={quote(value, safe='')}")
         if include_spellcheck is not None:
             value = str(include_spellcheck)
             if isinstance(include_spellcheck, bool):
                 value = value.lower()
-            query_params.append(f"includeSpellcheck={quote(value)}")
+            query_params.append(f"includeSpellcheck={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1129,17 +1191,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1160,6 +1226,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get attraction details
@@ -1177,7 +1248,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1187,17 +1258,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1227,6 +1302,11 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Classification search
@@ -1243,57 +1323,57 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(id)
             if isinstance(id, bool):
                 value = value.lower()
-            query_params.append(f"id={quote(value)}")
+            query_params.append(f"id={quote(value, safe='')}")
         if keyword is not None:
             value = str(keyword)
             if isinstance(keyword, bool):
                 value = value.lower()
-            query_params.append(f"keyword={quote(value)}")
+            query_params.append(f"keyword={quote(value, safe='')}")
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if include_test is not None:
             value = str(include_test)
             if isinstance(include_test, bool):
                 value = value.lower()
-            query_params.append(f"includeTest={quote(value)}")
+            query_params.append(f"includeTest={quote(value, safe='')}")
         if size is not None:
             value = str(size)
             if isinstance(size, bool):
                 value = value.lower()
-            query_params.append(f"size={quote(value)}")
+            query_params.append(f"size={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if preferred_country is not None:
             value = str(preferred_country)
             if isinstance(preferred_country, bool):
                 value = value.lower()
-            query_params.append(f"preferredCountry={quote(value)}")
+            query_params.append(f"preferredCountry={quote(value, safe='')}")
         if include_spellcheck is not None:
             value = str(include_spellcheck)
             if isinstance(include_spellcheck, bool):
                 value = value.lower()
-            query_params.append(f"includeSpellcheck={quote(value)}")
+            query_params.append(f"includeSpellcheck={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1303,17 +1383,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1334,6 +1418,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get classification details
@@ -1351,7 +1440,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1361,17 +1450,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1392,6 +1485,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get genre details
@@ -1408,7 +1506,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1418,17 +1516,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1449,6 +1551,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get segment details
@@ -1465,7 +1572,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1475,17 +1582,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1506,6 +1617,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get sub-genre details
@@ -1526,7 +1642,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1536,17 +1652,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1581,6 +1701,11 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Venue search
@@ -1594,82 +1719,82 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(id)
             if isinstance(id, bool):
                 value = value.lower()
-            query_params.append(f"id={quote(value)}")
+            query_params.append(f"id={quote(value, safe='')}")
         if keyword is not None:
             value = str(keyword)
             if isinstance(keyword, bool):
                 value = value.lower()
-            query_params.append(f"keyword={quote(value)}")
+            query_params.append(f"keyword={quote(value, safe='')}")
         if latlong is not None:
             value = str(latlong)
             if isinstance(latlong, bool):
                 value = value.lower()
-            query_params.append(f"latlong={quote(value)}")
+            query_params.append(f"latlong={quote(value, safe='')}")
         if radius is not None:
             value = str(radius)
             if isinstance(radius, bool):
                 value = value.lower()
-            query_params.append(f"radius={quote(value)}")
+            query_params.append(f"radius={quote(value, safe='')}")
         if unit is not None:
             value = str(unit)
             if isinstance(unit, bool):
                 value = value.lower()
-            query_params.append(f"unit={quote(value)}")
+            query_params.append(f"unit={quote(value, safe='')}")
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if include_test is not None:
             value = str(include_test)
             if isinstance(include_test, bool):
                 value = value.lower()
-            query_params.append(f"includeTest={quote(value)}")
+            query_params.append(f"includeTest={quote(value, safe='')}")
         if size is not None:
             value = str(size)
             if isinstance(size, bool):
                 value = value.lower()
-            query_params.append(f"size={quote(value)}")
+            query_params.append(f"size={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if state_code is not None:
             value = str(state_code)
             if isinstance(state_code, bool):
                 value = value.lower()
-            query_params.append(f"stateCode={quote(value)}")
+            query_params.append(f"stateCode={quote(value, safe='')}")
         if geo_point is not None:
             value = str(geo_point)
             if isinstance(geo_point, bool):
                 value = value.lower()
-            query_params.append(f"geoPoint={quote(value)}")
+            query_params.append(f"geoPoint={quote(value, safe='')}")
         if preferred_country is not None:
             value = str(preferred_country)
             if isinstance(preferred_country, bool):
                 value = value.lower()
-            query_params.append(f"preferredCountry={quote(value)}")
+            query_params.append(f"preferredCountry={quote(value, safe='')}")
         if include_spellcheck is not None:
             value = str(include_spellcheck)
             if isinstance(include_spellcheck, bool):
                 value = value.lower()
-            query_params.append(f"includeSpellcheck={quote(value)}")
+            query_params.append(f"includeSpellcheck={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1679,17 +1804,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1710,6 +1839,11 @@ class TicketmasterClient(ConnectorClientBase):
         id: str,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get venue details
@@ -1727,7 +1861,7 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1737,17 +1871,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1784,6 +1922,11 @@ class TicketmasterClient(ConnectorClientBase):
         local_start_end_date_time: Optional[List[str]] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find suggestions
@@ -1798,57 +1941,57 @@ class TicketmasterClient(ConnectorClientBase):
             value = str(keyword)
             if isinstance(keyword, bool):
                 value = value.lower()
-            query_params.append(f"keyword={quote(value)}")
+            query_params.append(f"keyword={quote(value, safe='')}")
         if latlong is not None:
             value = str(latlong)
             if isinstance(latlong, bool):
                 value = value.lower()
-            query_params.append(f"latlong={quote(value)}")
+            query_params.append(f"latlong={quote(value, safe='')}")
         if radius is not None:
             value = str(radius)
             if isinstance(radius, bool):
                 value = value.lower()
-            query_params.append(f"radius={quote(value)}")
+            query_params.append(f"radius={quote(value, safe='')}")
         if unit is not None:
             value = str(unit)
             if isinstance(unit, bool):
                 value = value.lower()
-            query_params.append(f"unit={quote(value)}")
+            query_params.append(f"unit={quote(value, safe='')}")
         if source is not None:
             value = str(source)
             if isinstance(source, bool):
                 value = value.lower()
-            query_params.append(f"source={quote(value)}")
+            query_params.append(f"source={quote(value, safe='')}")
         if locale is not None:
             value = str(locale)
             if isinstance(locale, bool):
                 value = value.lower()
-            query_params.append(f"locale={quote(value)}")
+            query_params.append(f"locale={quote(value, safe='')}")
         if include_t_b_a is not None:
             value = str(include_t_b_a)
             if isinstance(include_t_b_a, bool):
                 value = value.lower()
-            query_params.append(f"includeTBA={quote(value)}")
+            query_params.append(f"includeTBA={quote(value, safe='')}")
         if include_t_b_d is not None:
             value = str(include_t_b_d)
             if isinstance(include_t_b_d, bool):
                 value = value.lower()
-            query_params.append(f"includeTBD={quote(value)}")
+            query_params.append(f"includeTBD={quote(value, safe='')}")
         if include_test is not None:
             value = str(include_test)
             if isinstance(include_test, bool):
                 value = value.lower()
-            query_params.append(f"includeTest={quote(value)}")
+            query_params.append(f"includeTest={quote(value, safe='')}")
         if size is not None:
             value = str(size)
             if isinstance(size, bool):
                 value = value.lower()
-            query_params.append(f"size={quote(value)}")
+            query_params.append(f"size={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if segment_id is not None:
             if isinstance(segment_id, list):
                 joined_parts = []
@@ -1858,17 +2001,17 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"segmentId={quote(joined)}")
+                query_params.append(f"segmentId={quote(joined, safe='')}")
             else:
                 value = str(segment_id)
                 if isinstance(segment_id, bool):
                     value = value.lower()
-                query_params.append(f"segmentId={quote(value)}")
+                query_params.append(f"segmentId={quote(value, safe='')}")
         if geo_point is not None:
             value = str(geo_point)
             if isinstance(geo_point, bool):
                 value = value.lower()
-            query_params.append(f"geoPoint={quote(value)}")
+            query_params.append(f"geoPoint={quote(value, safe='')}")
         if resource is not None:
             if isinstance(resource, list):
                 joined_parts = []
@@ -1878,17 +2021,17 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"resource={quote(joined)}")
+                query_params.append(f"resource={quote(joined, safe='')}")
             else:
                 value = str(resource)
                 if isinstance(resource, bool):
                     value = value.lower()
-                query_params.append(f"resource={quote(value)}")
+                query_params.append(f"resource={quote(value, safe='')}")
         if preferred_country is not None:
             value = str(preferred_country)
             if isinstance(preferred_country, bool):
                 value = value.lower()
-            query_params.append(f"preferredCountry={quote(value)}")
+            query_params.append(f"preferredCountry={quote(value, safe='')}")
         if start_end_date_time is not None:
             if isinstance(start_end_date_time, list):
                 joined_parts = []
@@ -1898,12 +2041,12 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"startEndDateTime={quote(joined)}")
+                query_params.append(f"startEndDateTime={quote(joined, safe='')}")
             else:
                 value = str(start_end_date_time)
                 if isinstance(start_end_date_time, bool):
                     value = value.lower()
-                query_params.append(f"startEndDateTime={quote(value)}")
+                query_params.append(f"startEndDateTime={quote(value, safe='')}")
         if local_start_end_date_time is not None:
             if isinstance(local_start_end_date_time, list):
                 joined_parts = []
@@ -1913,17 +2056,17 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"localStartEndDateTime={quote(joined)}")
+                query_params.append(f"localStartEndDateTime={quote(joined, safe='')}")
             else:
                 value = str(local_start_end_date_time)
                 if isinstance(local_start_end_date_time, bool):
                     value = value.lower()
-                query_params.append(f"localStartEndDateTime={quote(value)}")
+                query_params.append(f"localStartEndDateTime={quote(value, safe='')}")
         if include_spellcheck is not None:
             value = str(include_spellcheck)
             if isinstance(include_spellcheck, bool):
                 value = value.lower()
-            query_params.append(f"includeSpellcheck={quote(value)}")
+            query_params.append(f"includeSpellcheck={quote(value, safe='')}")
         if domain is not None:
             if isinstance(domain, list):
                 joined_parts = []
@@ -1933,17 +2076,21 @@ class TicketmasterClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"domain={quote(joined)}")
+                query_params.append(f"domain={quote(joined, safe='')}")
             else:
                 value = str(domain)
                 if isinstance(domain, bool):
                     value = value.lower()
-                query_params.append(f"domain={quote(value)}")
+                query_params.append(f"domain={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

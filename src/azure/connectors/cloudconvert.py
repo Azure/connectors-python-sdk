@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Any, Dict
+from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -117,8 +119,17 @@ class CloudconvertClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a CloudconvertClient.
@@ -126,17 +137,36 @@ class CloudconvertClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -146,6 +176,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def convert_file_async(
         self,
         input: ConvertFileInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert File
@@ -155,7 +190,11 @@ class CloudconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/flow/jobs/convertfile"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -171,6 +210,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def optimize_file_async(
         self,
         input: OptimizeFileInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Compress File
@@ -180,7 +224,11 @@ class CloudconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/flow/jobs/optimize"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -196,6 +244,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def capture_website_async(
         self,
         input: CaptureWebsiteInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Create Website Screenshot
@@ -207,7 +260,11 @@ class CloudconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -223,6 +280,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def merge_files_async(
         self,
         input: MergeFilesInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Merge Files
@@ -232,7 +294,11 @@ class CloudconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/flow/jobs/merge"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -249,6 +315,11 @@ class CloudconvertClient(ConnectorClientBase):
         self,
         input_format: Optional[str] = None,
         output_format: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Convert Options
@@ -259,17 +330,21 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(input_format)
             if isinstance(input_format, bool):
                 value = value.lower()
-            query_params.append(f"input_format={quote(value)}")
+            query_params.append(f"input_format={quote(value, safe='')}")
         if output_format is not None:
             value = str(output_format)
             if isinstance(output_format, bool):
                 value = value.lower()
-            query_params.append(f"output_format={quote(value)}")
+            query_params.append(f"output_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -288,6 +363,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def get_optimize_options_async(
         self,
         input_format: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Optimize Options
@@ -298,12 +378,16 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(input_format)
             if isinstance(input_format, bool):
                 value = value.lower()
-            query_params.append(f"input_format={quote(value)}")
+            query_params.append(f"input_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -322,6 +406,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def get_capture_website_options_async(
         self,
         output_format: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Capture Website Options
@@ -334,12 +423,16 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(output_format)
             if isinstance(output_format, bool):
                 value = value.lower()
-            query_params.append(f"output_format={quote(value)}")
+            query_params.append(f"output_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -358,6 +451,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def get_merge_inputs_async(
         self,
         number_of_inputs: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Merge Inputs
@@ -368,12 +466,16 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(number_of_inputs)
             if isinstance(number_of_inputs, bool):
                 value = value.lower()
-            query_params.append(f"number_of_inputs={quote(value)}")
+            query_params.append(f"number_of_inputs={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -392,6 +494,11 @@ class CloudconvertClient(ConnectorClientBase):
     async def get_merge_options_async(
         self,
         output_format: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Merge Options
@@ -402,12 +509,16 @@ class CloudconvertClient(ConnectorClientBase):
             value = str(output_format)
             if isinstance(output_format, bool):
                 value = value.lower()
-            query_params.append(f"output_format={quote(value)}")
+            query_params.append(f"output_format={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

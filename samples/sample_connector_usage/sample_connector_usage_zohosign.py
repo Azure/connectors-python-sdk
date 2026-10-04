@@ -7,7 +7,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.zohosign import ZohosignClient
 
 
@@ -17,10 +17,10 @@ REQUEST_ID = os.environ.get("ZOHOSIGN_REQUEST_ID", "")
 
 async def list_templates() -> None:
     """List available Zoho Sign templates."""
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    async with ZohosignClient(CONNECTION_RUNTIME_URL, token_provider) as client:
-        templates = await client.get_templates_async()
-        print(f"Templates: {templates}")
+    async with DefaultAzureCredential() as credential:
+        async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            templates = await client.get_templates_async()
+            print(f"Templates: {templates}")
 
 
 async def get_document() -> None:
@@ -29,10 +29,10 @@ async def get_document() -> None:
         print("Set ZOHOSIGN_REQUEST_ID to retrieve a document request.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    async with ZohosignClient(CONNECTION_RUNTIME_URL, token_provider) as client:
-        document = await client.get_document_async(request_id=int(REQUEST_ID))
-        print(f"Document: {document}")
+    async with DefaultAzureCredential() as credential:
+        async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            document = await client.get_document_async(request_id=int(REQUEST_ID))
+            print(f"Document: {document}")
 
 
 async def main() -> None:

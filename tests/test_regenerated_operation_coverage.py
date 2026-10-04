@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import inspect
 from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, patch
@@ -155,19 +156,24 @@ async def test_newly_generated_operation_success_contract(
     expected_method: str,
     expected_path: str,
     expects_body: bool,
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test a newly generated operation's route, body, and response."""
     client = client_type(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
+    )
+    generated_method = getattr(client, f"{operation}_async")
+    is_pageable = inspect.isasyncgenfunction(generated_method)
+    response_text = (
+        '{"value": [{"ok": true}]}' if is_pageable else '{"ok": true}'
     )
 
     with patch.object(
         client._http_client,
         "send_async",
         new_callable=AsyncMock,
-        return_value=MockResponse(status=200, text='{"ok": true}'),
+        return_value=MockResponse(status=200, text=response_text),
     ) as mock_send:
         result = await invoke_generated_operation(
             client,
@@ -180,7 +186,10 @@ async def test_newly_generated_operation_success_contract(
     assert method == expected_method
     assert expected_path in request_url
     assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-    assert result == {"ok": True}
+    if is_pageable:
+        assert result == [{"ok": True}]
+    else:
+        assert result == {"ok": True}
 
 
 @pytest.mark.parametrize(
@@ -196,12 +205,12 @@ async def test_newly_generated_operation_rejects_error_response(
     expected_method: str,
     expected_path: str,
     expects_body: bool,
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test a newly generated operation raises for an error response."""
     client = client_type(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
 
     with patch.object(

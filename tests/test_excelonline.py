@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.excelonline import (
     CreateWorksheetInput,
     ExcelonlineClient,
@@ -18,11 +19,10 @@ from azure.connectors.excelonline import (
     WorksheetMetadata,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: ExcelonlineClient, operation: str):
@@ -41,12 +41,12 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             id_column="ID",
         )
     if operation == "get_items":
-        return await client.get_items_async(
+        return await resolve_generated_result(client.get_items_async(
             drive="drive123",
             file="file123",
             table="Table1",
             top="10",
-        )
+        ))
     if operation == "get_item":
         return await client.get_item_async(
             drive="drive123",
@@ -104,55 +104,54 @@ class TestExcelonlineClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ExcelonlineClient("https://example.azure.com/connections/test")
+        client = ExcelonlineClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "excelonline"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ExcelonlineClient("https://example.azure.com/connections/test/")
+        client = ExcelonlineClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ExcelonlineClient("")
+            ExcelonlineClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ExcelonlineClient(None)
+            ExcelonlineClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'excelonline'."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "excelonline"
@@ -162,11 +161,11 @@ class TestExcelonlineClientLifecycle:
     """Tests for ExcelonlineClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -174,12 +173,12 @@ class TestExcelonlineClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(ExcelonlineClient, "close", new_callable=AsyncMock) as mock_close:
             async with ExcelonlineClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, ExcelonlineClient)
 
@@ -190,11 +189,11 @@ class TestExcelonlineClientMethods:
     """Success path tests for representative Excel Online operations."""
 
     @pytest.mark.asyncio
-    async def test_create_table_success(self, mock_token_provider):
+    async def test_create_table_success(self, mock_credential):
         """Test create_table_async serializes body and source query param."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"name":"Table1"}')
 
@@ -215,11 +214,11 @@ class TestExcelonlineClientMethods:
             assert isinstance(mock_send.call_args.kwargs["body"], TableToCreate)
 
     @pytest.mark.asyncio
-    async def test_get_items_success(self, mock_token_provider):
+    async def test_get_items_success(self, mock_credential):
         """Test get_items_async emits OData query options."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[{"Name":"Item1"}]}')
 
@@ -229,25 +228,25 @@ class TestExcelonlineClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_items_async(
+            result = await resolve_generated_result(client.get_items_async(
                 drive="drive123",
                 file="file123",
                 table="Table1",
                 filter="Name eq 'Item1'",
                 top="10",
-            )
+            ))
 
-            assert len(result["value"]) == 1
+            assert len(result) == 1
             call_path = mock_send.call_args[0][1]
             assert "$filter=Name%20eq%20%27Item1%27" in call_path
             assert "$top=10" in call_path
 
     @pytest.mark.asyncio
-    async def test_patch_item_success(self, mock_token_provider):
+    async def test_patch_item_success(self, mock_credential):
         """Test patch_item_async sends PATCH with body and idColumn."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"Name":"Updated"}')
 
@@ -271,11 +270,11 @@ class TestExcelonlineClientMethods:
             assert isinstance(mock_send.call_args.kwargs["body"], Item)
 
     @pytest.mark.asyncio
-    async def test_get_all_worksheets_success(self, mock_token_provider):
+    async def test_get_all_worksheets_success(self, mock_credential):
         """Test get_all_worksheets_async uses codeless worksheets endpoint."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[{"name":"Sheet1"}]}')
 
@@ -291,11 +290,11 @@ class TestExcelonlineClientMethods:
             assert "/workbook/worksheets" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_add_row_success(self, mock_token_provider):
+    async def test_add_row_success(self, mock_credential):
         """Test add_row_async sends row payload."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"index":1}')
 
@@ -338,13 +337,13 @@ class TestExcelonlineClientErrorHandling:
     )
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

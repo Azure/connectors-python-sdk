@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.mailchimp import (
     MailchimpClient,
     NewCampaignRequest,
@@ -16,9 +17,7 @@ from azure.connectors.mailchimp import (
     UpdateMemberInListRequest,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -28,55 +27,54 @@ class TestMailchimpClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = MailchimpClient("https://example.azure.com/connections/test")
+        client = MailchimpClient("https://example.azure.com/connections/test",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "mailchimp"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = MailchimpClient("https://example.azure.com/connections/test/")
+        client = MailchimpClient("https://example.azure.com/connections/test/",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MailchimpClient("")
+            MailchimpClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MailchimpClient(None)
+            MailchimpClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'mailchimp'."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "mailchimp"
@@ -86,11 +84,11 @@ class TestMailchimpClientLifecycle:
     """Tests for MailchimpClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -98,12 +96,12 @@ class TestMailchimpClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(MailchimpClient, "close", new_callable=AsyncMock) as mock_close:
             async with MailchimpClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, MailchimpClient)
 
@@ -114,11 +112,11 @@ class TestMailchimpClientOperations:
     """Tests for MailchimpClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
-    async def test_get_campaigns_success(self, mock_token_provider):
+    async def test_get_campaigns_success(self, mock_credential):
         """Test list campaigns issues a GET to the campaigns route."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"campaigns": []}')
 
@@ -136,11 +134,11 @@ class TestMailchimpClientOperations:
             assert result == {"campaigns": []}
 
     @pytest.mark.asyncio
-    async def test_sendcampaign_success(self, mock_token_provider):
+    async def test_sendcampaign_success(self, mock_credential):
         """Test send campaign issues a POST to the send action route."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204, text="")
 
@@ -158,11 +156,11 @@ class TestMailchimpClientOperations:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_lists_success(self, mock_token_provider):
+    async def test_get_lists_success(self, mock_credential):
         """Test get all lists issues a GET to the lists route."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"lists": []}')
 
@@ -182,11 +180,11 @@ class TestMailchimpClientOperations:
             assert result == {"lists": []}
 
     @pytest.mark.asyncio
-    async def test_newlist_success(self, mock_token_provider):
+    async def test_newlist_success(self, mock_credential):
         """Test new list issues a POST to the lists route with a body."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "abc"}')
 
@@ -205,11 +203,11 @@ class TestMailchimpClientOperations:
             assert result == {"id": "abc"}
 
     @pytest.mark.asyncio
-    async def test_add_members_success(self, mock_token_provider):
+    async def test_add_members_success(self, mock_credential):
         """Test batch subscribe issues a POST to the list route with a body."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"new_members": []}')
 
@@ -231,11 +229,11 @@ class TestMailchimpClientOperations:
             assert result == {"new_members": []}
 
     @pytest.mark.asyncio
-    async def test_get_list_members_success(self, mock_token_provider):
+    async def test_get_list_members_success(self, mock_credential):
         """Test show list members issues a GET to the members route."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"members": []}')
 
@@ -253,11 +251,11 @@ class TestMailchimpClientOperations:
             assert result == {"members": []}
 
     @pytest.mark.asyncio
-    async def test_addmember_success(self, mock_token_provider):
+    async def test_addmember_success(self, mock_credential):
         """Test add member issues a POST to the members route with a body."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "m1"}')
 
@@ -279,11 +277,11 @@ class TestMailchimpClientOperations:
             assert result == {"id": "m1"}
 
     @pytest.mark.asyncio
-    async def test_newcampaign_success(self, mock_token_provider):
+    async def test_newcampaign_success(self, mock_credential):
         """Test new campaign issues a POST to the v2 campaigns route with a body."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "camp1"}')
 
@@ -302,11 +300,11 @@ class TestMailchimpClientOperations:
             assert result == {"id": "camp1"}
 
     @pytest.mark.asyncio
-    async def test_removemember_success(self, mock_token_provider):
+    async def test_removemember_success(self, mock_credential):
         """Test remove member issues a DELETE to the members route."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204, text="")
 
@@ -325,11 +323,11 @@ class TestMailchimpClientOperations:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_updatemember_success(self, mock_token_provider):
+    async def test_updatemember_success(self, mock_credential):
         """Test update member issues a PATCH to the members route with a body."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "m1"}')
 
@@ -352,11 +350,11 @@ class TestMailchimpClientOperations:
             assert result == {"id": "m1"}
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -390,11 +388,11 @@ class TestMailchimpClientErrorHandling:
             "updatemember",
         ],
     )
-    async def test_error_response_raises_exception(self, mock_token_provider, operation):
+    async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = MailchimpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

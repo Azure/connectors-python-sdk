@@ -5,6 +5,8 @@
 import asyncio
 import os
 
+from azure.identity.aio import DefaultAzureCredential
+
 from azure.connectors.office365groupsmail import Office365groupsmailClient
 
 
@@ -18,14 +20,20 @@ async def main() -> None:
     if not group_id:
         raise ValueError("Set OFFICE365GROUPSMAIL_GROUP_ID environment variable")
 
-    async with Office365groupsmailClient(connection_url) as client:
-        conversations = await client.list_conversations_async(group_id=group_id)
-        conversation_count = len((conversations or {}).get("value", []))
-        print(f"Found {conversation_count} conversation(s) in group '{group_id}'.")
+    async with DefaultAzureCredential() as credential:
+        async with Office365groupsmailClient(connection_url, credential) as client:
+            conversations = [
+                conversation
+                async for conversation in client.list_conversations_async(
+                    group_id=group_id
+                )
+            ]
+            conversation_count = len(conversations)
+            print(f"Found {conversation_count} conversation(s) in group '{group_id}'.")
 
-        groups = await client.list_groups_async()
-        group_count = len((groups or {}).get("value", []))
-        print(f"Current user is in {group_count} Office 365 group(s).")
+            groups = await client.list_groups_async()
+            group_count = len((groups or {}).get("value", []))
+            print(f"Current user is in {group_count} Office 365 group(s).")
 
 
 if __name__ == "__main__":

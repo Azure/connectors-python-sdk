@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.pipedrive import (
     AddActivityRequest,
     AddDealRequest,
@@ -14,9 +15,7 @@ from azure.connectors.pipedrive import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -52,55 +51,54 @@ class TestPipedriveClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = PipedriveClient("https://example.azure.com/connections/test")
+        client = PipedriveClient("https://example.azure.com/connections/test",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "pipedrive"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = PipedriveClient("https://example.azure.com/connections/test/")
+        client = PipedriveClient("https://example.azure.com/connections/test/",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PipedriveClient("")
+            PipedriveClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PipedriveClient(None)
+            PipedriveClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'pipedrive'."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "pipedrive"
@@ -110,11 +108,11 @@ class TestPipedriveClientLifecycle:
     """Tests for PipedriveClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -122,12 +120,12 @@ class TestPipedriveClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(PipedriveClient, "close", new_callable=AsyncMock) as mock_close:
             async with PipedriveClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, PipedriveClient)
 
@@ -138,11 +136,11 @@ class TestPipedriveClientMethods:
     """Success path tests for Pipedrive methods."""
 
     @pytest.mark.asyncio
-    async def test_get_deal_success(self, mock_token_provider):
+    async def test_get_deal_success(self, mock_credential):
         """Test get_deal_async targets the single-deal endpoint."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data":{"id":42}}')
 
@@ -159,11 +157,11 @@ class TestPipedriveClientMethods:
             assert "/v1/deals/42" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_update_deal_status_success(self, mock_token_provider):
+    async def test_update_deal_status_success(self, mock_credential):
         """Test update_deal_status_async sends the body via PUT."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data":{"id":42}}')
         body = UpdateDealStatusRequest()
@@ -181,11 +179,11 @@ class TestPipedriveClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_add_activity_success(self, mock_token_provider):
+    async def test_add_activity_success(self, mock_credential):
         """Test add_activity_async posts the body to the activities endpoint."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"data":{"id":7}}')
         body = AddActivityRequest()
@@ -204,11 +202,11 @@ class TestPipedriveClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_get_stage_success(self, mock_token_provider):
+    async def test_get_stage_success(self, mock_credential):
         """Test get_stage_async targets the single-stage endpoint."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data":{"id":3}}')
 
@@ -225,11 +223,11 @@ class TestPipedriveClientMethods:
             assert "/v1/stages/3" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_add_deal_success(self, mock_token_provider):
+    async def test_add_deal_success(self, mock_credential):
         """Test add_deal_async posts the body to the v2 deals endpoint."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"data":{"id":99}}')
         body = AddDealRequest()
@@ -248,11 +246,11 @@ class TestPipedriveClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_update_deal_stage_success(self, mock_token_provider):
+    async def test_update_deal_stage_success(self, mock_credential):
         """Test update_deal_stage_async sends the body via PUT to the v2 endpoint."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data":{"id":42}}')
         body = UpdateDealStageRequest()
@@ -270,11 +268,11 @@ class TestPipedriveClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_list_deals_success(self, mock_token_provider):
+    async def test_list_deals_success(self, mock_credential):
         """Test list_deals_async targets the deals collection endpoint."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data":[{"id":1}]}')
 
@@ -291,11 +289,11 @@ class TestPipedriveClientMethods:
             assert "/v1/deals" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_list_deals_empty_returns_none(self, mock_token_provider):
+    async def test_list_deals_empty_returns_none(self, mock_credential):
         """Test list_deals_async returns None for an empty body."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -328,13 +326,13 @@ class TestPipedriveClientErrorHandling:
     )
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = PipedriveClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

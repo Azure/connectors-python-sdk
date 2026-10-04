@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -4255,8 +4257,17 @@ class ImpexiumClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a ImpexiumClient.
@@ -4264,17 +4275,36 @@ class ImpexiumClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -4287,6 +4317,11 @@ class ImpexiumClient(ConnectorClientBase):
         abandoned_from: str,
         product_code: Optional[str] = None,
         customer_record_number: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Abandoned Checkouts
@@ -4305,22 +4340,26 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(abandoned_from)
         if isinstance(abandoned_from, bool):
             value = value.lower()
-        query_params.append(f"abandonedFrom={quote(value)}")
+        query_params.append(f"abandonedFrom={quote(value, safe='')}")
         if product_code is not None:
             value = str(product_code)
             if isinstance(product_code, bool):
                 value = value.lower()
-            query_params.append(f"productCode={quote(value)}")
+            query_params.append(f"productCode={quote(value, safe='')}")
         if customer_record_number is not None:
             value = str(customer_record_number)
             if isinstance(customer_record_number, bool):
                 value = value.lower()
-            query_params.append(f"customerRecordNumber={quote(value)}")
+            query_params.append(f"customerRecordNumber={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4340,6 +4379,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         exhibit_code: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List All Exhibitors
@@ -4357,7 +4401,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4382,6 +4430,11 @@ class ImpexiumClient(ConnectorClientBase):
         changed_since: Optional[str] = None,
         tag: Optional[str] = None,
         include_prices: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List of Exams
@@ -4397,37 +4450,41 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(code)
             if isinstance(code, bool):
                 value = value.lower()
-            query_params.append(f"Code={quote(value)}")
+            query_params.append(f"Code={quote(value, safe='')}")
         if category_name is not None:
             value = str(category_name)
             if isinstance(category_name, bool):
                 value = value.lower()
-            query_params.append(f"categoryName={quote(value)}")
+            query_params.append(f"categoryName={quote(value, safe='')}")
         if is_public is not None:
             value = str(is_public)
             if isinstance(is_public, bool):
                 value = value.lower()
-            query_params.append(f"isPublic={quote(value)}")
+            query_params.append(f"isPublic={quote(value, safe='')}")
         if changed_since is not None:
             value = str(changed_since)
             if isinstance(changed_since, bool):
                 value = value.lower()
-            query_params.append(f"changedSince={quote(value)}")
+            query_params.append(f"changedSince={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if include_prices is not None:
             value = str(include_prices)
             if isinstance(include_prices, bool):
                 value = value.lower()
-            query_params.append(f"includePrices={quote(value)}")
+            query_params.append(f"includePrices={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4450,6 +4507,11 @@ class ImpexiumClient(ConnectorClientBase):
         session_code: Optional[str] = None,
         include_details: Optional[bool] = None,
         registered_since: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List Registrants
@@ -4470,22 +4532,26 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(session_code)
             if isinstance(session_code, bool):
                 value = value.lower()
-            query_params.append(f"sessionCode={quote(value)}")
+            query_params.append(f"sessionCode={quote(value, safe='')}")
         if include_details is not None:
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if registered_since is not None:
             value = str(registered_since)
             if isinstance(registered_since, bool):
                 value = value.lower()
-            query_params.append(f"registeredSince={quote(value)}")
+            query_params.append(f"registeredSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4505,6 +4571,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         code: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Course Attendees
@@ -4522,7 +4593,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4542,6 +4617,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddExamScoresInput,
         exam_code: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Exam Scores
@@ -4554,7 +4634,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4574,6 +4658,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         name: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Members by Name
@@ -4592,7 +4681,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4615,6 +4708,11 @@ class ImpexiumClient(ConnectorClientBase):
         product_code: Optional[str] = None,
         purchased_since: Optional[str] = None,
         product_category_code: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Purchases for an Individual
@@ -4635,22 +4733,26 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(product_code)
             if isinstance(product_code, bool):
                 value = value.lower()
-            query_params.append(f"productCode={quote(value)}")
+            query_params.append(f"productCode={quote(value, safe='')}")
         if purchased_since is not None:
             value = str(purchased_since)
             if isinstance(purchased_since, bool):
                 value = value.lower()
-            query_params.append(f"purchasedSince={quote(value)}")
+            query_params.append(f"purchasedSince={quote(value, safe='')}")
         if product_category_code is not None:
             value = str(product_category_code)
             if isinstance(product_category_code, bool):
                 value = value.lower()
-            query_params.append(f"productCategoryCode={quote(value)}")
+            query_params.append(f"productCategoryCode={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4670,6 +4772,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddOrUpdateAListOfCustomFieldsPerOrganizationInput,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add or Update a List of Custom Fields Per Organization
@@ -4686,7 +4793,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4706,6 +4817,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: CommitteeNomineeSaveData,
         code: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Nominee
@@ -4718,7 +4834,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4732,6 +4852,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_individual_custom_field_values_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Individual Custom Field Values
@@ -4744,7 +4869,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4764,6 +4893,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: CustomFieldData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update Individual Custom Field Values
@@ -4776,7 +4910,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4793,6 +4931,11 @@ class ImpexiumClient(ConnectorClientBase):
         page_number: int,
         include_details: Optional[bool] = None,
         cancelled_since: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List All Event Cancellations by Event
@@ -4813,17 +4956,21 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if cancelled_since is not None:
             value = str(cancelled_since)
             if isinstance(cancelled_since, bool):
                 value = value.lower()
-            query_params.append(f"cancelledSince={quote(value)}")
+            query_params.append(f"cancelledSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4846,6 +4993,11 @@ class ImpexiumClient(ConnectorClientBase):
         include_line_items: Optional[bool] = None,
         from_date: Optional[str] = None,
         to_date: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get All Open Orders for an Individual
@@ -4867,22 +5019,26 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_line_items)
             if isinstance(include_line_items, bool):
                 value = value.lower()
-            query_params.append(f"includeLineItems={quote(value)}")
+            query_params.append(f"includeLineItems={quote(value, safe='')}")
         if from_date is not None:
             value = str(from_date)
             if isinstance(from_date, bool):
                 value = value.lower()
-            query_params.append(f"fromDate={quote(value)}")
+            query_params.append(f"fromDate={quote(value, safe='')}")
         if to_date is not None:
             value = str(to_date)
             if isinstance(to_date, bool):
                 value = value.lower()
-            query_params.append(f"toDate={quote(value)}")
+            query_params.append(f"toDate={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4902,6 +5058,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         user_id_or_email: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List Completed User Tasks by User ID or Email
@@ -4920,7 +5081,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4940,6 +5105,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         user_id_or_email: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List Pending User Tasks by User ID or Email
@@ -4958,7 +5128,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4978,6 +5152,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: BaseNoteData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Note to Sales Opportunity
@@ -4990,7 +5169,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5005,6 +5188,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: ActivityData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Activity to Sales Opportunity
@@ -5017,7 +5205,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5032,6 +5224,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: TaskSaveData,
         task_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update Task by Task Number
@@ -5044,7 +5241,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5063,6 +5264,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def list_all_countries_async(
         self,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List All Countries
@@ -5075,7 +5281,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5095,6 +5305,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         country_id: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get All States by Country
@@ -5113,7 +5328,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5132,6 +5351,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def list_all_exhibits_async(
         self,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List All Exhibits
@@ -5144,7 +5368,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5164,6 +5392,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         record_number: str,
         category_code: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a Category for an Organization
@@ -5181,7 +5414,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5195,6 +5432,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def add_customer_request_async(
         self,
         input: RequestSaveData,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Customer Request
@@ -5204,7 +5446,11 @@ class ImpexiumClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/api/v1/Requests"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5218,6 +5464,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def update_customer_request_async(
         self,
         input: RequestUpdateData,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update Customer Request
@@ -5227,7 +5478,11 @@ class ImpexiumClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/api/v1/Requests"
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5247,6 +5502,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddCategoriesForAnOrganizationInput,
         record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Categories for an Organization
@@ -5263,7 +5523,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5277,6 +5541,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def list_of_customer_relationships_async(
         self,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List of Customer Relationships
@@ -5293,7 +5562,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5312,6 +5585,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def list_all_open_customer_request_async(
         self,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List All Open Customer Request
@@ -5324,7 +5602,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5343,6 +5625,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_organization_inactive_memberships_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Organization Inactive Memberships
@@ -5360,7 +5647,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5380,6 +5671,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         table_name: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete Record From Custom Data Table
@@ -5396,7 +5692,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5411,6 +5711,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: UserTaskData,
         user_id_or_email: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update User Task Progress or Mark as Completed
@@ -5423,7 +5728,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5444,6 +5753,11 @@ class ImpexiumClient(ConnectorClientBase):
         first_name: str,
         page_number: int,
         include_email: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Members (Individuals) by First Name
@@ -5465,12 +5779,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5491,6 +5809,11 @@ class ImpexiumClient(ConnectorClientBase):
         last_name: str,
         page_number: int,
         include_email: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Members (Individuals) by Last Name
@@ -5512,12 +5835,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5537,6 +5864,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: UserTaskData,
         user_id_or_email: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Create a new task or Assign Task to a User
@@ -5549,7 +5881,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5564,6 +5900,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         record_number: str,
         category_code: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a Category for an Individual
@@ -5581,7 +5922,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5596,6 +5941,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: NotificationData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Notification to Individual
@@ -5608,7 +5958,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5623,6 +5977,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddCategoriesForAnIndividualInput,
         record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Categories for an Individual
@@ -5639,7 +5998,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5653,6 +6016,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def add_a_new_task_async(
         self,
         input: TaskSaveData,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add a New Task
@@ -5662,7 +6030,11 @@ class ImpexiumClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/api/v1/tasks"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5700,6 +6072,11 @@ class ImpexiumClient(ConnectorClientBase):
         include_custom_fields: Optional[bool] = None,
         expiring_from: Optional[str] = None,
         expiring_to: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List of All Organization Members
@@ -5720,102 +6097,106 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(zip_code)
             if isinstance(zip_code, bool):
                 value = value.lower()
-            query_params.append(f"zipCode={quote(value)}")
+            query_params.append(f"zipCode={quote(value, safe='')}")
         if radius is not None:
             value = str(radius)
             if isinstance(radius, bool):
                 value = value.lower()
-            query_params.append(f"Radius={quote(value)}")
+            query_params.append(f"Radius={quote(value, safe='')}")
         if state_abbreviation is not None:
             value = str(state_abbreviation)
             if isinstance(state_abbreviation, bool):
                 value = value.lower()
-            query_params.append(f"stateAbbreviation={quote(value)}")
+            query_params.append(f"stateAbbreviation={quote(value, safe='')}")
         if congressional_district is not None:
             value = str(congressional_district)
             if isinstance(congressional_district, bool):
                 value = value.lower()
-            query_params.append(f"congressionalDistrict={quote(value)}")
+            query_params.append(f"congressionalDistrict={quote(value, safe='')}")
         if membership_type_code is not None:
             value = str(membership_type_code)
             if isinstance(membership_type_code, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCode={quote(value)}")
+            query_params.append(f"membershipTypeCode={quote(value, safe='')}")
         if membership_type_category is not None:
             value = str(membership_type_category)
             if isinstance(membership_type_category, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCategory={quote(value)}")
+            query_params.append(f"membershipTypeCategory={quote(value, safe='')}")
         if city is not None:
             value = str(city)
             if isinstance(city, bool):
                 value = value.lower()
-            query_params.append(f"City={quote(value)}")
+            query_params.append(f"City={quote(value, safe='')}")
         if name is not None:
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if latitude is not None:
             value = str(latitude)
             if isinstance(latitude, bool):
                 value = value.lower()
-            query_params.append(f"Latitude={quote(value)}")
+            query_params.append(f"Latitude={quote(value, safe='')}")
         if longitude is not None:
             value = str(longitude)
             if isinstance(longitude, bool):
                 value = value.lower()
-            query_params.append(f"Longitude={quote(value)}")
+            query_params.append(f"Longitude={quote(value, safe='')}")
         if domain is not None:
             value = str(domain)
             if isinstance(domain, bool):
                 value = value.lower()
-            query_params.append(f"Domain={quote(value)}")
+            query_params.append(f"Domain={quote(value, safe='')}")
         if include_membership is not None:
             value = str(include_membership)
             if isinstance(include_membership, bool):
                 value = value.lower()
-            query_params.append(f"includeMembership={quote(value)}")
+            query_params.append(f"includeMembership={quote(value, safe='')}")
         if include_address is not None:
             value = str(include_address)
             if isinstance(include_address, bool):
                 value = value.lower()
-            query_params.append(f"includeAddress={quote(value)}")
+            query_params.append(f"includeAddress={quote(value, safe='')}")
         if include_phone is not None:
             value = str(include_phone)
             if isinstance(include_phone, bool):
                 value = value.lower()
-            query_params.append(f"includePhone={quote(value)}")
+            query_params.append(f"includePhone={quote(value, safe='')}")
         if include_email is not None:
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if include_custom_fields is not None:
             value = str(include_custom_fields)
             if isinstance(include_custom_fields, bool):
                 value = value.lower()
-            query_params.append(f"includeCustomFields={quote(value)}")
+            query_params.append(f"includeCustomFields={quote(value, safe='')}")
         if expiring_from is not None:
             value = str(expiring_from)
             if isinstance(expiring_from, bool):
                 value = value.lower()
-            query_params.append(f"expiringFrom={quote(value)}")
+            query_params.append(f"expiringFrom={quote(value, safe='')}")
         if expiring_to is not None:
             value = str(expiring_to)
             if isinstance(expiring_to, bool):
                 value = value.lower()
-            query_params.append(f"expiringTo={quote(value)}")
+            query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5849,6 +6230,11 @@ class ImpexiumClient(ConnectorClientBase):
         include_membership_renewal_url: Optional[bool] = None,
         expiring_from: Optional[str] = None,
         expiring_to: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List of All Individual Members
@@ -5869,82 +6255,86 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(zip_code)
             if isinstance(zip_code, bool):
                 value = value.lower()
-            query_params.append(f"zipCode={quote(value)}")
+            query_params.append(f"zipCode={quote(value, safe='')}")
         if radius is not None:
             value = str(radius)
             if isinstance(radius, bool):
                 value = value.lower()
-            query_params.append(f"Radius={quote(value)}")
+            query_params.append(f"Radius={quote(value, safe='')}")
         if membership_type_code is not None:
             value = str(membership_type_code)
             if isinstance(membership_type_code, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCode={quote(value)}")
+            query_params.append(f"membershipTypeCode={quote(value, safe='')}")
         if membership_type_category is not None:
             value = str(membership_type_category)
             if isinstance(membership_type_category, bool):
                 value = value.lower()
-            query_params.append(f"membershipTypeCategory={quote(value)}")
+            query_params.append(f"membershipTypeCategory={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if include_membership is not None:
             value = str(include_membership)
             if isinstance(include_membership, bool):
                 value = value.lower()
-            query_params.append(f"includeMembership={quote(value)}")
+            query_params.append(f"includeMembership={quote(value, safe='')}")
         if include_address is not None:
             value = str(include_address)
             if isinstance(include_address, bool):
                 value = value.lower()
-            query_params.append(f"includeAddress={quote(value)}")
+            query_params.append(f"includeAddress={quote(value, safe='')}")
         if include_phone is not None:
             value = str(include_phone)
             if isinstance(include_phone, bool):
                 value = value.lower()
-            query_params.append(f"includePhone={quote(value)}")
+            query_params.append(f"includePhone={quote(value, safe='')}")
         if include_email is not None:
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if include_link is not None:
             value = str(include_link)
             if isinstance(include_link, bool):
                 value = value.lower()
-            query_params.append(f"includeLink={quote(value)}")
+            query_params.append(f"includeLink={quote(value, safe='')}")
         if include_custom_fields is not None:
             value = str(include_custom_fields)
             if isinstance(include_custom_fields, bool):
                 value = value.lower()
-            query_params.append(f"includeCustomFields={quote(value)}")
+            query_params.append(f"includeCustomFields={quote(value, safe='')}")
         if include_categories is not None:
             value = str(include_categories)
             if isinstance(include_categories, bool):
                 value = value.lower()
-            query_params.append(f"includeCategories={quote(value)}")
+            query_params.append(f"includeCategories={quote(value, safe='')}")
         if include_membership_renewal_url is not None:
             value = str(include_membership_renewal_url)
             if isinstance(include_membership_renewal_url, bool):
                 value = value.lower()
-            query_params.append(f"includeMembershipRenewalUrl={quote(value)}")
+            query_params.append(f"includeMembershipRenewalUrl={quote(value, safe='')}")
         if expiring_from is not None:
             value = str(expiring_from)
             if isinstance(expiring_from, bool):
                 value = value.lower()
-            query_params.append(f"expiringFrom={quote(value)}")
+            query_params.append(f"expiringFrom={quote(value, safe='')}")
         if expiring_to is not None:
             value = str(expiring_to)
             if isinstance(expiring_to, bool):
                 value = value.lower()
-            query_params.append(f"expiringTo={quote(value)}")
+            query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5964,6 +6354,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         id_or_record_number: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get List of Active Certifications for an Organization
@@ -5981,7 +6376,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6001,6 +6400,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         id_or_record_number: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get List of Active Certifications for an Individual
@@ -6018,7 +6422,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6037,6 +6445,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_individual_inactive_memberships_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Individual Inactive Memberships
@@ -6054,7 +6467,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6074,6 +6491,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: ActivityData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Activity to Organization
@@ -6086,7 +6508,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6103,6 +6529,11 @@ class ImpexiumClient(ConnectorClientBase):
         event_code: str,
         customer_id_or_record_number: str,
         registration_number: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Register an Individual for a Free Session
@@ -6124,12 +6555,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(registration_number)
             if isinstance(registration_number, bool):
                 value = value.lower()
-            query_params.append(f"registrationNumber={quote(value)}")
+            query_params.append(f"registrationNumber={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6144,6 +6579,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         id: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a List of Licenses
@@ -6161,7 +6601,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6181,6 +6625,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         page_number: int,
         year: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List All Awards
@@ -6196,12 +6645,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(year)
             if isinstance(year, bool):
                 value = value.lower()
-            query_params.append(f"Year={quote(value)}")
+            query_params.append(f"Year={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6222,6 +6675,11 @@ class ImpexiumClient(ConnectorClientBase):
         name: str,
         page_number: int,
         include_email: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Members (Individuals) by Name
@@ -6243,12 +6701,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6267,6 +6729,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_a_list_of_all_services_of_an_organization_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a List of All Services of an Organization
@@ -6279,7 +6746,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6299,6 +6770,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: ServiceData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add a Service to an Organization
@@ -6311,7 +6787,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6332,6 +6812,11 @@ class ImpexiumClient(ConnectorClientBase):
         input: PhoneSaveData,
         id_or_record_number: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update Phone for an Individual
@@ -6349,7 +6834,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6370,6 +6859,11 @@ class ImpexiumClient(ConnectorClientBase):
         input: PhoneSaveData,
         id_or_record_number: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update Phone for an Organization
@@ -6387,7 +6881,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6407,6 +6905,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: DeleteAnIndividualWebLinkInput,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete an Individual Web Link
@@ -6423,7 +6926,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=input
+            "DELETE", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6438,6 +6945,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddWebLinkForIndividualInput,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Web Link for Individual
@@ -6454,7 +6966,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6469,6 +6985,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: PhoneSaveData,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Phone to Organization
@@ -6485,7 +7006,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6506,6 +7031,11 @@ class ImpexiumClient(ConnectorClientBase):
         code: str,
         page_number: int,
         term: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Nominees by Committee
@@ -6526,12 +7056,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(term)
             if isinstance(term, bool):
                 value = value.lower()
-            query_params.append(f"Term={quote(value)}")
+            query_params.append(f"Term={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6551,6 +7085,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         id: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Organization's Active Subscriptions
@@ -6568,7 +7107,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6588,6 +7131,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: DeleteAnOrganizationWebLinkInput,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete an Organization Web Link
@@ -6604,7 +7152,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=input
+            "DELETE", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6619,6 +7171,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddWebLinkForOrganizationInput,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Web Link for Organization
@@ -6635,7 +7192,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6650,6 +7211,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: EmailData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Email to Organization
@@ -6662,7 +7228,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6679,6 +7249,11 @@ class ImpexiumClient(ConnectorClientBase):
         page_number: int,
         relationship_name: Optional[str] = None,
         includes_details: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Organization's Relationships
@@ -6699,17 +7274,21 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(relationship_name)
             if isinstance(relationship_name, bool):
                 value = value.lower()
-            query_params.append(f"relationshipName.={quote(value)}")
+            query_params.append(f"relationshipName.={quote(value, safe='')}")
         if includes_details is not None:
             value = str(includes_details)
             if isinstance(includes_details, bool):
                 value = value.lower()
-            query_params.append(f"includesDetails={quote(value)}")
+            query_params.append(f"includesDetails={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6729,6 +7308,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddressSaveData,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add or Update Address to Organization
@@ -6745,7 +7329,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6765,6 +7353,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddOrUpdateAListOfCustomFieldsPerIndividualInput,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add or Update a List of Custom Fields Per Individual
@@ -6781,7 +7374,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6800,6 +7397,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_upcoming_events_async(
         self,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Upcoming Events
@@ -6812,7 +7414,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6832,6 +7438,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: PhoneSaveData,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Phone to Individual
@@ -6848,7 +7459,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6869,6 +7484,11 @@ class ImpexiumClient(ConnectorClientBase):
         id: str,
         page_number: int,
         include_inactive: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Committee Information for an Individual
@@ -6889,12 +7509,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_inactive)
             if isinstance(include_inactive, bool):
                 value = value.lower()
-            query_params.append(f"includeInactive={quote(value)}")
+            query_params.append(f"includeInactive={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6913,6 +7537,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_organization_custom_field_values_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Organization Custom Field Values
@@ -6925,7 +7554,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6944,6 +7577,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_organization_active_memberships_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Organization Active Memberships
@@ -6961,7 +7599,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6983,6 +7625,11 @@ class ImpexiumClient(ConnectorClientBase):
         code: Optional[str] = None,
         name: Optional[str] = None,
         tag: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get All Events
@@ -6998,22 +7645,26 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(code)
             if isinstance(code, bool):
                 value = value.lower()
-            query_params.append(f"Code={quote(value)}")
+            query_params.append(f"Code={quote(value, safe='')}")
         if name is not None:
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if tag is not None:
             value = str(tag)
             if isinstance(tag, bool):
                 value = value.lower()
-            query_params.append(f"Tag={quote(value)}")
+            query_params.append(f"Tag={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7032,6 +7683,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_individual_active_memberships_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Individual Active Memberships
@@ -7044,7 +7700,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7065,6 +7725,11 @@ class ImpexiumClient(ConnectorClientBase):
         id_or_record_number: str,
         page_number: int,
         event_code: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get All Event Registrations Information for an Individual
@@ -7085,12 +7750,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(event_code)
             if isinstance(event_code, bool):
                 value = value.lower()
-            query_params.append(f"eventCode={quote(value)}")
+            query_params.append(f"eventCode={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7112,6 +7781,11 @@ class ImpexiumClient(ConnectorClientBase):
         page_number: int,
         relationship_name: Optional[str] = None,
         include_details: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Individual's Relationships
@@ -7132,17 +7806,21 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(relationship_name)
             if isinstance(relationship_name, bool):
                 value = value.lower()
-            query_params.append(f"relationshipName={quote(value)}")
+            query_params.append(f"relationshipName={quote(value, safe='')}")
         if include_details is not None:
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7163,6 +7841,11 @@ class ImpexiumClient(ConnectorClientBase):
         input: UpdateAnIndividualEmailInput,
         id_or_record_number: str,
         current_email_address: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update an Individual Email
@@ -7180,7 +7863,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7195,6 +7882,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: SaveRelationshipForOrganizationInput,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Save Relationship for Organization
@@ -7207,7 +7899,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7222,6 +7918,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddIndividualInput,
         create_user: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Individual
@@ -7234,12 +7935,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(create_user)
             if isinstance(create_user, bool):
                 value = value.lower()
-            query_params.append(f"createUser={quote(value)}")
+            query_params.append(f"createUser={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7259,6 +7964,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddEmailToIndividualInput,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Email to Individual
@@ -7275,7 +7985,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7295,6 +8009,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddressSaveData,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add or Update Address to Individual
@@ -7311,7 +8030,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7333,6 +8056,11 @@ class ImpexiumClient(ConnectorClientBase):
         last_name: str,
         page_number: int,
         include_email: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Members (Individuals) by First Name and Last Name
@@ -7355,12 +8083,16 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(include_email)
             if isinstance(include_email, bool):
                 value = value.lower()
-            query_params.append(f"includeEmail={quote(value)}")
+            query_params.append(f"includeEmail={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7382,6 +8114,11 @@ class ImpexiumClient(ConnectorClientBase):
         page_number: int,
         term: Optional[int] = None,
         position_codes: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Get Committee Members by committee ID or code
@@ -7402,17 +8139,21 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(term)
             if isinstance(term, bool):
                 value = value.lower()
-            query_params.append(f"Term={quote(value)}")
+            query_params.append(f"Term={quote(value, safe='')}")
         if position_codes is not None:
             value = str(position_codes)
             if isinstance(position_codes, bool):
                 value = value.lower()
-            query_params.append(f"positionCodes={quote(value)}")
+            query_params.append(f"positionCodes={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7427,6 +8168,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddActivityInput,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Activity
@@ -7439,7 +8185,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7454,6 +8204,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         id_or_record_number_or_email: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Individual by Id or Email or Record Number
@@ -7475,7 +8230,11 @@ class ImpexiumClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7495,6 +8254,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AddRelationshipToIndividualInput,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Relationship to Individual
@@ -7507,7 +8271,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7522,6 +8290,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: EducationCreditData,
         id_or_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Education Credits to Individual
@@ -7538,7 +8311,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7553,6 +8330,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: NoteData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Note to Individual
@@ -7565,7 +8347,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7580,6 +8366,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         page_number: int,
         name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lookup Individuals
@@ -7595,12 +8386,16 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7620,6 +8415,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: CommitteeMemberCreateData,
         code: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Individual to Committee
@@ -7632,7 +8432,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7654,6 +8458,11 @@ class ImpexiumClient(ConnectorClientBase):
         code: str,
         member_record_number: str,
         current_position_code: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update Committee Member
@@ -7672,7 +8481,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7686,6 +8499,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def add_organization_async(
         self,
         input: AddOrganizationInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Organization
@@ -7695,7 +8513,11 @@ class ImpexiumClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/api/v1/Organizations"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7715,6 +8537,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: UpdateOrganizationInput,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update Organization
@@ -7727,7 +8554,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7747,6 +8578,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         id_or_recordnumber: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Organization by Id or Record Number
@@ -7768,7 +8604,11 @@ class ImpexiumClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7788,6 +8628,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: NoteData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Note to Organization
@@ -7800,7 +8645,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7815,6 +8664,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         page_number: int,
         name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lookup Organizations
@@ -7830,12 +8684,16 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7858,6 +8716,11 @@ class ImpexiumClient(ConnectorClientBase):
         name: Optional[str] = None,
         term: Optional[int] = None,
         active_only: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get All Committees
@@ -7873,27 +8736,31 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(code)
             if isinstance(code, bool):
                 value = value.lower()
-            query_params.append(f"Code={quote(value)}")
+            query_params.append(f"Code={quote(value, safe='')}")
         if name is not None:
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if term is not None:
             value = str(term)
             if isinstance(term, bool):
                 value = value.lower()
-            query_params.append(f"Term={quote(value)}")
+            query_params.append(f"Term={quote(value, safe='')}")
         if active_only is not None:
             value = str(active_only)
             if isinstance(active_only, bool):
                 value = value.lower()
-            query_params.append(f"activeOnly={quote(value)}")
+            query_params.append(f"activeOnly={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7912,6 +8779,11 @@ class ImpexiumClient(ConnectorClientBase):
     async def get_positions_by_committee_async(
         self,
         code: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Positions by Committee
@@ -7924,7 +8796,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7944,6 +8820,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         code: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Sub-Committees
@@ -7961,7 +8842,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -7981,6 +8866,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         id: str,
         page_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Individual's Active Subscriptions
@@ -7999,7 +8889,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -8021,6 +8915,11 @@ class ImpexiumClient(ConnectorClientBase):
         name: Optional[str] = None,
         include_details: Optional[bool] = None,
         old_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List all Individuals
@@ -8036,22 +8935,26 @@ class ImpexiumClient(ConnectorClientBase):
             value = str(name)
             if isinstance(name, bool):
                 value = value.lower()
-            query_params.append(f"Name={quote(value)}")
+            query_params.append(f"Name={quote(value, safe='')}")
         if include_details is not None:
             value = str(include_details)
             if isinstance(include_details, bool):
                 value = value.lower()
-            query_params.append(f"includeDetails={quote(value)}")
+            query_params.append(f"includeDetails={quote(value, safe='')}")
         if old_id is not None:
             value = str(old_id)
             if isinstance(old_id, bool):
                 value = value.lower()
-            query_params.append(f"oldID={quote(value)}")
+            query_params.append(f"oldID={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -8071,6 +8974,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         page_number: str,
         phone_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find Customer by Phone Number
@@ -8088,12 +8996,16 @@ class ImpexiumClient(ConnectorClientBase):
         value = str(phone_number)
         if isinstance(phone_number, bool):
             value = value.lower()
-        query_params.append(f"phoneNumber={quote(value)}")
+        query_params.append(f"phoneNumber={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -8113,6 +9025,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: MarkRegistrantAttendedInput,
         record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Mark Registrant as Attended
@@ -8130,7 +9047,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -8145,6 +9066,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         input: AwardNominationData,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add Award Nomination
@@ -8157,7 +9083,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -8173,6 +9103,11 @@ class ImpexiumClient(ConnectorClientBase):
         input: UpdateAwardNominationData,
         id: str,
         nominee_record_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update Award Nomination
@@ -8190,7 +9125,11 @@ class ImpexiumClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -8205,6 +9144,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         page_number: int,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List Award Individual Recipients
@@ -8227,7 +9171,11 @@ class ImpexiumClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -8247,6 +9195,11 @@ class ImpexiumClient(ConnectorClientBase):
         self,
         page_number: int,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List Award Organization Recipients
@@ -8269,7 +9222,11 @@ class ImpexiumClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

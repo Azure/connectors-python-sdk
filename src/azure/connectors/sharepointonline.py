@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
+
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -352,6 +354,11 @@ class ItemsList:
 
     value: Optional[List[Item]] = None
     """List of Items"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -464,7 +471,7 @@ class Item:
     Response for Get file properties
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -582,7 +589,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -631,6 +638,19 @@ class TableMetadata:
 
 
 @dataclass
+class ObjectEntity:
+    """
+    Response for Get thumbnail size options
+    """
+
+    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
 class SPListEntity:
     """
     Response for Returns User fields for a list
@@ -643,19 +663,6 @@ class SPListEntity:
         metadata={"wire_name": "EntityType"},
     )
     """What type of entity (field) this is"""
-
-
-@dataclass
-class ObjectEntity:
-    """
-    Response for Get SPViewScope options to use for folder querying behavior
-    """
-
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
-    """
-    Dynamic properties determined at runtime
-    (similar to .NET [JsonExtensionData])
-    """
 
 
 @dataclass
@@ -779,7 +786,7 @@ class CreateNewDocumentSetParameters:
         metadata={"wire_name": "contentTypeId"},
     )
     """Example: 0x0120D520"""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -1252,7 +1259,7 @@ class SharePointHttpRequestBodyParameters:
     """Http Method"""
     uri: Optional[str] = None
     """Example: _api/web/lists/getbytitle('Documents')"""
-    headers: Optional[Dict[str, Any]] = None
+    headers: Optional[Dict[str, str]] = None
     """Enter JSON object of request headers"""
     body: Optional[str] = None
     """Enter request content in JSON"""
@@ -1545,8 +1552,17 @@ class SharepointonlineClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a SharepointonlineClient.
@@ -1554,22 +1570,80 @@ class SharepointonlineClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
     def connector_name(self) -> str:
         return "sharepointonline"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     async def create_agreements_solution_document_async(
         self,
@@ -1577,6 +1651,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         template: str,
         document_name: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Agreements Solution - Generate document within Agreements Solution
@@ -1600,12 +1679,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(document_name)
             if isinstance(document_name, bool):
                 value = value.lower()
-            query_params.append(f"documentName={quote(value)}")
+            query_params.append(f"documentName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1624,6 +1707,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_all_tables_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all lists and libraries
@@ -1638,7 +1726,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1658,6 +1750,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         joining_site_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Approve hub site join request
@@ -1676,12 +1773,16 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(joining_site_id)
         if isinstance(joining_site_id, bool):
             value = value.lower()
-        query_params.append(f"joiningSiteId={quote(value)}")
+        query_params.append(f"joiningSiteId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1701,6 +1802,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         approval_correlation_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Cancel hub site join request
@@ -1720,12 +1826,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(approval_correlation_id)
             if isinstance(approval_correlation_id, bool):
                 value = value.lower()
-            query_params.append(f"approvalCorrelationId={quote(value)}")
+            query_params.append(f"approvalCorrelationId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1742,6 +1852,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create sharing link for a file or folder
@@ -1766,7 +1881,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1788,6 +1907,11 @@ class SharepointonlineClient(ConnectorClientBase):
         source: str,
         destination: str,
         overwrite: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Copy file (deprecated)
@@ -1805,21 +1929,25 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1839,6 +1967,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: CopyFileParameters,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Copy file
@@ -1855,7 +1988,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1875,6 +2012,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: CopyFolderParameters,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Copy folder
@@ -1891,7 +2033,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1913,6 +2059,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         folder_path: str,
         name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create file
@@ -1929,11 +2080,11 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1942,6 +2093,10 @@ class SharepointonlineClient(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1961,6 +2116,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get file metadata
@@ -1978,7 +2138,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1999,6 +2163,11 @@ class SharepointonlineClient(ConnectorClientBase):
         input: bytes,
         dataset: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update file
@@ -2018,6 +2187,10 @@ class SharepointonlineClient(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2037,6 +2210,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete file
@@ -2052,7 +2230,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2068,6 +2250,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         id: str,
         infer_content_type: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Get file content
@@ -2088,12 +2275,66 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        return response.content
+
+    async def get_file_thumbnail_async(
+        self,
+        dataset: str,
+        id: str,
+        size: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Get file thumbnail
+
+        Gets the thumbnail of a file by its file identifier.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/datasets"
+            f"/{quote(quote(str(dataset), safe=''), safe='')}"
+            f"/files"
+            f"/{quote(str(id), safe='')}"
+            f"/thumbnail"
+        )
+        query_params = []
+        value = str(size)
+        if isinstance(size, bool):
+            value = value.lower()
+        query_params.append(f"size={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2109,6 +2350,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def list_root_folder_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List root folder
@@ -2121,7 +2367,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2141,6 +2391,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List folder
@@ -2156,7 +2411,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2176,6 +2435,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         path: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get file metadata using path
@@ -2195,12 +2459,16 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2221,6 +2489,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         path: str,
         infer_content_type: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Get file content using path
@@ -2238,17 +2511,21 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2265,6 +2542,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get folder metadata
@@ -2282,12 +2564,16 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(id)
         if isinstance(id, bool):
             value = value.lower()
-        query_params.append(f"id={quote(value)}")
+        query_params.append(f"id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2307,6 +2593,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         path: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get folder metadata using path
@@ -2325,12 +2616,16 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2350,6 +2645,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: SharePointHttpRequestBodyParameters,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Send an HTTP request to SharePoint
@@ -2366,7 +2666,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2383,6 +2687,11 @@ class SharepointonlineClient(ConnectorClientBase):
         hub_site_id: str,
         approval_token: Optional[str] = None,
         approval_correlation_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Join hub site
@@ -2402,22 +2711,26 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(hub_site_id)
         if isinstance(hub_site_id, bool):
             value = value.lower()
-        query_params.append(f"hubSiteId={quote(value)}")
+        query_params.append(f"hubSiteId={quote(value, safe='')}")
         if approval_token is not None:
             value = str(approval_token)
             if isinstance(approval_token, bool):
                 value = value.lower()
-            query_params.append(f"approvalToken={quote(value)}")
+            query_params.append(f"approvalToken={quote(value, safe='')}")
         if approval_correlation_id is not None:
             value = str(approval_correlation_id)
             if isinstance(approval_correlation_id, bool):
                 value = value.lower()
-            query_params.append(f"approvalCorrelationId={quote(value)}")
+            query_params.append(f"approvalCorrelationId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2432,6 +2745,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: MoveFileParameters,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Move file
@@ -2448,7 +2766,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2468,6 +2790,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         input: MoveFolderParameters,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Move folder
@@ -2484,7 +2811,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2504,6 +2835,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         approval_correlation_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Set hub site join status to pending
@@ -2524,12 +2860,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(approval_correlation_id)
             if isinstance(approval_correlation_id, bool):
                 value = value.lower()
-            query_params.append(f"approvalCorrelationId={quote(value)}")
+            query_params.append(f"approvalCorrelationId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2543,6 +2883,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_tables_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get lists
@@ -2555,7 +2900,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2576,6 +2925,11 @@ class SharepointonlineClient(ConnectorClientBase):
         input: CreateNewDocumentSetParameters,
         dataset: str,
         table: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create new document set
@@ -2592,7 +2946,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2614,6 +2972,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create new folder
@@ -2633,12 +2996,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2661,6 +3028,11 @@ class SharepointonlineClient(ConnectorClientBase):
         entity_id: str,
         search_value: str,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Resolve person
@@ -2683,17 +3055,21 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(search_value)
         if isinstance(search_value, bool):
             value = value.lower()
-        query_params.append(f"searchValue={quote(value)}")
+        query_params.append(f"searchValue={quote(value, safe='')}")
         if view is not None:
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2714,6 +3090,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         form: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get form metadata (preview)
@@ -2736,7 +3117,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2759,6 +3144,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         form: str,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Generate a document from a form (preview)
@@ -2784,12 +3174,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2815,7 +3209,12 @@ class SharepointonlineClient(ConnectorClientBase):
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get files (properties only)
 
@@ -2825,6 +3224,9 @@ class SharepointonlineClient(ConnectorClientBase):
         work with the output from this action. When using this with the
         On-Premises Data Gateway, the name of the library to connect to may
         need to be entered manually.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2839,51 +3241,66 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
                 value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
+            query_params.append(f"folderPath={quote(value, safe='')}")
         if view_scope_option is not None:
             value = str(view_scope_option)
             if isinstance(view_scope_option, bool):
                 value = value.lower()
-            query_params.append(f"viewScopeOption={quote(value)}")
+            query_params.append(f"viewScopeOption={quote(value, safe='')}")
         if view is not None:
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_items_async(
         self,
@@ -2895,11 +3312,19 @@ class SharepointonlineClient(ConnectorClientBase):
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get items
 
         Gets items from a SharePoint list.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2914,51 +3339,66 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
                 value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
+            query_params.append(f"folderPath={quote(value, safe='')}")
         if view_scope_option is not None:
             value = str(view_scope_option)
             if isinstance(view_scope_option, bool):
                 value = value.lower()
-            query_params.append(f"viewScopeOption={quote(value)}")
+            query_params.append(f"viewScopeOption={quote(value, safe='')}")
         if view is not None:
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def post_item_async(
         self,
@@ -2966,6 +3406,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create item
@@ -2985,12 +3430,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3012,6 +3461,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: int,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get item
@@ -3032,12 +3486,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3058,6 +3516,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete item
@@ -3075,7 +3538,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3093,6 +3560,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: int,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update item
@@ -3113,12 +3585,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3141,6 +3617,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: int,
         approval_type: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create an approval request for an item or file
@@ -3161,12 +3642,16 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(approval_type)
         if isinstance(approval_type, bool):
             value = value.lower()
-        query_params.append(f"approvalType={quote(value)}")
+        query_params.append(f"approvalType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3191,6 +3676,11 @@ class SharepointonlineClient(ConnectorClientBase):
         until: Optional[str] = None,
         include_drafts: Optional[bool] = None,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get changes for an item or a file (properties only)
@@ -3212,27 +3702,31 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(since)
         if isinstance(since, bool):
             value = value.lower()
-        query_params.append(f"since={quote(value)}")
+        query_params.append(f"since={quote(value, safe='')}")
         if until is not None:
             value = str(until)
             if isinstance(until, bool):
                 value = value.lower()
-            query_params.append(f"until={quote(value)}")
+            query_params.append(f"until={quote(value, safe='')}")
         if include_drafts is not None:
             value = str(include_drafts)
             if isinstance(include_drafts, bool):
                 value = value.lower()
-            query_params.append(f"includeDrafts={quote(value)}")
+            query_params.append(f"includeDrafts={quote(value, safe='')}")
         if view is not None:
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3254,6 +3748,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Check in file
@@ -3273,7 +3772,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3289,6 +3792,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Check out file
@@ -3309,7 +3817,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3325,6 +3837,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Discard check out
@@ -3348,7 +3865,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3365,6 +3886,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: int,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get file properties
@@ -3391,12 +3917,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3418,6 +3948,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Grant access to an item or a folder
@@ -3436,7 +3971,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3454,6 +3993,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         id: int,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update file properties
@@ -3478,12 +4022,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3505,6 +4053,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update file properties using AI Builder model results
@@ -3524,7 +4077,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3548,6 +4105,11 @@ class SharepointonlineClient(ConnectorClientBase):
         approval_action: str,
         comments: Optional[str] = None,
         entity_tag: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Set content approval status
@@ -3571,22 +4133,26 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(approval_action)
         if isinstance(approval_action, bool):
             value = value.lower()
-        query_params.append(f"approvalAction={quote(value)}")
+        query_params.append(f"approvalAction={quote(value, safe='')}")
         if comments is not None:
             value = str(comments)
             if isinstance(comments, bool):
                 value = value.lower()
-            query_params.append(f"comments={quote(value)}")
+            query_params.append(f"comments={quote(value, safe='')}")
         if entity_tag is not None:
             value = str(entity_tag)
             if isinstance(entity_tag, bool):
                 value = value.lower()
-            query_params.append(f"entityTag={quote(value)}")
+            query_params.append(f"entityTag={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3607,6 +4173,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Stop sharing an item or a file
@@ -3626,7 +4197,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3642,6 +4217,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         item_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get attachments
@@ -3662,7 +4242,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3685,6 +4269,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         item_id: int,
         display_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add attachment
@@ -3705,7 +4294,7 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(display_name)
         if isinstance(display_name, bool):
             value = value.lower()
-        query_params.append(f"displayName={quote(value)}")
+        query_params.append(f"displayName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3714,6 +4303,10 @@ class SharepointonlineClient(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3735,6 +4328,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         item_id: int,
         attachment_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete attachment
@@ -3754,7 +4352,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3771,6 +4373,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         item_id: int,
         attachment_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Get attachment content
@@ -3792,7 +4399,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3814,6 +4425,11 @@ class SharepointonlineClient(ConnectorClientBase):
         folder_path: Optional[str] = None,
         file_name: Optional[str] = None,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Generate document using Microsoft Syntex (preview)
@@ -3838,22 +4454,26 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(folder_path)
             if isinstance(folder_path, bool):
                 value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
+            query_params.append(f"folderPath={quote(value, safe='')}")
         if file_name is not None:
             value = str(file_name)
             if isinstance(file_name, bool):
                 value = value.lower()
-            query_params.append(f"fileName={quote(value)}")
+            query_params.append(f"fileName={quote(value, safe='')}")
         if view is not None:
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3873,6 +4493,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list views
@@ -3889,7 +4514,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3911,6 +4540,11 @@ class SharepointonlineClient(ConnectorClientBase):
         source: str,
         destination: str,
         overwrite: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Extract folder
@@ -3928,21 +4562,25 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3960,6 +4598,11 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def get_data_sets_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get datasets
@@ -3969,7 +4612,11 @@ class SharepointonlineClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/datasets"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3988,6 +4635,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_agreements_solution_templates_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Agreements Solution - Get Templates
@@ -4003,7 +4655,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4023,6 +4679,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         template: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Agreements Solution - Get template fields
@@ -4040,7 +4701,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4059,6 +4724,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_tables_for_libraries_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get libraries
@@ -4074,7 +4744,47 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def get_thumbnail_size_options_async(
+        self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get thumbnail size options
+
+        Internal operation to get thumbnail size options.
+        """
+        request_url = f"{self._connection_runtime_url}/getThumbnailSizeOptions"
+
+        response = await self.http_client.send_async(
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4096,6 +4806,11 @@ class SharepointonlineClient(ConnectorClientBase):
         table: str,
         view: Optional[str] = None,
         content_type_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list metadata
@@ -4115,17 +4830,21 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if content_type_id is not None:
             value = str(content_type_id)
             if isinstance(content_type_id, bool):
                 value = value.lower()
-            query_params.append(f"contentTypeId={quote(value)}")
+            query_params.append(f"contentTypeId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4144,6 +4863,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_tables_for_lists_and_libraries_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get lists and libraries
@@ -4159,7 +4883,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4180,6 +4908,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         view: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Returns User fields for a list
@@ -4200,12 +4933,16 @@ class SharepointonlineClient(ConnectorClientBase):
             value = str(view)
             if isinstance(view, bool):
                 value = value.lower()
-            query_params.append(f"view={quote(value)}")
+            query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4225,6 +4962,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list forms
@@ -4241,7 +4983,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4261,6 +5007,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document generation forms
@@ -4278,7 +5029,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4299,6 +5054,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         form: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document generation form fields
@@ -4317,7 +5077,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4335,6 +5099,11 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def get_view_scope_options_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get SPViewScope options to use for folder querying behavior
@@ -4346,7 +5115,11 @@ class SharepointonlineClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/getViewScopeOptions"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4365,6 +5138,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_tables_for_lightweight_approval_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get lists and libraries where lightweight approvals is enabled
@@ -4380,7 +5158,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4398,6 +5180,11 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def get_approval_types_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get available approval request types
@@ -4407,7 +5194,11 @@ class SharepointonlineClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/getApprovalTypes"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4426,6 +5217,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_approval_schema_async(
         self,
         approval_type: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the appropriate creation schema for the approval request type
@@ -4438,12 +5234,16 @@ class SharepointonlineClient(ConnectorClientBase):
         value = str(approval_type)
         if isinstance(approval_type, bool):
             value = value.lower()
-        query_params.append(f"approvalType={quote(value)}")
+        query_params.append(f"approvalType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4463,6 +5263,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get metadata about the return type of the GetItemChanges operation
@@ -4481,7 +5286,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4500,6 +5309,11 @@ class SharepointonlineClient(ConnectorClientBase):
     async def get_tables_for_approval_async(
         self,
         dataset: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get libraries where Content Approval is supported
@@ -4515,7 +5329,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4533,6 +5351,11 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def get_day_of_week_options_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         When to send updates
@@ -4542,7 +5365,11 @@ class SharepointonlineClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/getDayOfWeekOptions"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4562,6 +5389,11 @@ class SharepointonlineClient(ConnectorClientBase):
         self,
         dataset: str,
         table: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document library templates
@@ -4578,7 +5410,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4599,6 +5435,11 @@ class SharepointonlineClient(ConnectorClientBase):
         dataset: str,
         table: str,
         template: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get placeholders from template
@@ -4617,7 +5458,11 @@ class SharepointonlineClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -1816,8 +1818,17 @@ class DocusignClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a DocusignClient.
@@ -1825,17 +1836,36 @@ class DocusignClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -1846,6 +1876,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document generation form fields from envelope
@@ -1862,7 +1897,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1884,6 +1923,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_guid: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update document generation form fields from envelope
@@ -1902,12 +1946,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(document_guid)
         if isinstance(document_guid, bool):
             value = value.lower()
-        query_params.append(f"documentGuid={quote(value)}")
+        query_params.append(f"documentGuid={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1922,6 +1970,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         template_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document generation form fields from template (bulk send templates
@@ -1939,7 +1992,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1960,6 +2017,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         voided_reason: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Void the envelope
@@ -1978,12 +2040,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(voided_reason)
         if isinstance(voided_reason, bool):
             value = value.lower()
-        query_params.append(f"voidedReason={quote(value)}")
+        query_params.append(f"voidedReason={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2002,6 +2068,11 @@ class DocusignClient(ConnectorClientBase):
     async def resend_envelope_async(
         self,
         envelope_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Resend the envelope
@@ -2020,7 +2091,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2044,6 +2119,11 @@ class DocusignClient(ConnectorClientBase):
         reminder_delay: str,
         reminder_frequency: str,
         expire_after: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add reminders for an envelope
@@ -2062,25 +2142,29 @@ class DocusignClient(ConnectorClientBase):
         value = str(reminder_enabled)
         if isinstance(reminder_enabled, bool):
             value = value.lower()
-        query_params.append(f"reminderEnabled={quote(value)}")
+        query_params.append(f"reminderEnabled={quote(value, safe='')}")
         value = str(reminder_delay)
         if isinstance(reminder_delay, bool):
             value = value.lower()
-        query_params.append(f"reminderDelay={quote(value)}")
+        query_params.append(f"reminderDelay={quote(value, safe='')}")
         value = str(reminder_frequency)
         if isinstance(reminder_frequency, bool):
             value = value.lower()
-        query_params.append(f"reminderFrequency={quote(value)}")
+        query_params.append(f"reminderFrequency={quote(value, safe='')}")
         if expire_after is not None:
             value = str(expire_after)
             if isinstance(expire_after, bool):
                 value = value.lower()
-            query_params.append(f"expireAfter={quote(value)}")
+            query_params.append(f"expireAfter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2101,6 +2185,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document tabs from envelope
@@ -2119,7 +2208,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2141,6 +2234,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update envelope prefill tabs
@@ -2159,7 +2257,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2175,6 +2277,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         template_id: str,
         document_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document tabs from template
@@ -2193,7 +2300,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2214,6 +2325,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document custom fields from envelope
@@ -2232,7 +2348,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2256,6 +2376,11 @@ class DocusignClient(ConnectorClientBase):
         status: str,
         email_body: Optional[str] = None,
         merge_roles_on_draft: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create envelope using composite templates
@@ -2273,26 +2398,30 @@ class DocusignClient(ConnectorClientBase):
         value = str(email_subject)
         if isinstance(email_subject, bool):
             value = value.lower()
-        query_params.append(f"emailSubject={quote(value)}")
+        query_params.append(f"emailSubject={quote(value, safe='')}")
         if email_body is not None:
             value = str(email_body)
             if isinstance(email_body, bool):
                 value = value.lower()
-            query_params.append(f"emailBody={quote(value)}")
+            query_params.append(f"emailBody={quote(value, safe='')}")
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         if merge_roles_on_draft is not None:
             value = str(merge_roles_on_draft)
             if isinstance(merge_roles_on_draft, bool):
                 value = value.lower()
-            query_params.append(f"merge_roles_on_draft={quote(value)}")
+            query_params.append(f"merge_roles_on_draft={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2324,6 +2453,11 @@ class DocusignClient(ConnectorClientBase):
         skip: Optional[int] = None,
         from_date: Optional[str] = None,
         to_date: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List envelopes
@@ -2347,72 +2481,76 @@ class DocusignClient(ConnectorClientBase):
             value = str(recipient_name)
             if isinstance(recipient_name, bool):
                 value = value.lower()
-            query_params.append(f"recipientName={quote(value)}")
+            query_params.append(f"recipientName={quote(value, safe='')}")
         if recipient_email_id is not None:
             value = str(recipient_email_id)
             if isinstance(recipient_email_id, bool):
                 value = value.lower()
-            query_params.append(f"recipientEmailId={quote(value)}")
+            query_params.append(f"recipientEmailId={quote(value, safe='')}")
         if envelope_title is not None:
             value = str(envelope_title)
             if isinstance(envelope_title, bool):
                 value = value.lower()
-            query_params.append(f"envelopeTitle={quote(value)}")
+            query_params.append(f"envelopeTitle={quote(value, safe='')}")
         if custom_field_name is not None:
             value = str(custom_field_name)
             if isinstance(custom_field_name, bool):
                 value = value.lower()
-            query_params.append(f"customFieldName={quote(value)}")
+            query_params.append(f"customFieldName={quote(value, safe='')}")
         if custom_field_value is not None:
             value = str(custom_field_value)
             if isinstance(custom_field_value, bool):
                 value = value.lower()
-            query_params.append(f"customFieldValue={quote(value)}")
+            query_params.append(f"customFieldValue={quote(value, safe='')}")
         if search_text is not None:
             value = str(search_text)
             if isinstance(search_text, bool):
                 value = value.lower()
-            query_params.append(f"search_text={quote(value)}")
+            query_params.append(f"search_text={quote(value, safe='')}")
         if envelope_status is not None:
             value = str(envelope_status)
             if isinstance(envelope_status, bool):
                 value = value.lower()
-            query_params.append(f"envelopeStatus={quote(value)}")
+            query_params.append(f"envelopeStatus={quote(value, safe='')}")
         if folder_ids is not None:
             value = str(folder_ids)
             if isinstance(folder_ids, bool):
                 value = value.lower()
-            query_params.append(f"folder_ids={quote(value)}")
+            query_params.append(f"folder_ids={quote(value, safe='')}")
         if order_by is not None:
             value = str(order_by)
             if isinstance(order_by, bool):
                 value = value.lower()
-            query_params.append(f"order_by={quote(value)}")
+            query_params.append(f"order_by={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"top={quote(value)}")
+            query_params.append(f"top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"skip={quote(value)}")
+            query_params.append(f"skip={quote(value, safe='')}")
         if from_date is not None:
             value = str(from_date)
             if isinstance(from_date, bool):
                 value = value.lower()
-            query_params.append(f"from_date={quote(value)}")
+            query_params.append(f"from_date={quote(value, safe='')}")
         if to_date is not None:
             value = str(to_date)
             if isinstance(to_date, bool):
                 value = value.lower()
-            query_params.append(f"to_date={quote(value)}")
+            query_params.append(f"to_date={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2433,6 +2571,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         template_id: str,
         status: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create envelope using template
@@ -2450,16 +2593,20 @@ class DocusignClient(ConnectorClientBase):
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2483,6 +2630,11 @@ class DocusignClient(ConnectorClientBase):
         template_id: str,
         email_subject: Optional[str] = None,
         email_body: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create envelope using template with recipients
@@ -2498,26 +2650,30 @@ class DocusignClient(ConnectorClientBase):
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         if email_subject is not None:
             value = str(email_subject)
             if isinstance(email_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailSubject={quote(value)}")
+            query_params.append(f"emailSubject={quote(value, safe='')}")
         if email_body is not None:
             value = str(email_body)
             if isinstance(email_body, bool):
                 value = value.lower()
-            query_params.append(f"emailBody={quote(value)}")
+            query_params.append(f"emailBody={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2540,6 +2696,11 @@ class DocusignClient(ConnectorClientBase):
         template_id: str,
         merge_roles_on_draft: Optional[str] = None,
         email_subject: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create envelope using template with recipients and tabs
@@ -2557,22 +2718,26 @@ class DocusignClient(ConnectorClientBase):
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         if merge_roles_on_draft is not None:
             value = str(merge_roles_on_draft)
             if isinstance(merge_roles_on_draft, bool):
                 value = value.lower()
-            query_params.append(f"merge_roles_on_draft={quote(value)}")
+            query_params.append(f"merge_roles_on_draft={quote(value, safe='')}")
         if email_subject is not None:
             value = str(email_subject)
             if isinstance(email_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailSubject={quote(value)}")
+            query_params.append(f"emailSubject={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2592,6 +2757,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send envelope
@@ -2607,7 +2777,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2628,6 +2802,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         field_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get envelope custom field info
@@ -2646,12 +2825,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(field_name)
         if isinstance(field_name, bool):
             value = value.lower()
-        query_params.append(f"fieldName={quote(value)}")
+        query_params.append(f"fieldName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2675,6 +2858,11 @@ class DocusignClient(ConnectorClientBase):
         field_type: str,
         name: str,
         value: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update envelope custom field
@@ -2693,24 +2881,28 @@ class DocusignClient(ConnectorClientBase):
         value = str(field_id)
         if isinstance(field_id, bool):
             value = value.lower()
-        query_params.append(f"fieldId={quote(value)}")
+        query_params.append(f"fieldId={quote(value, safe='')}")
         value = str(field_type)
         if isinstance(field_type, bool):
             value = value.lower()
-        query_params.append(f"fieldType={quote(value)}")
+        query_params.append(f"fieldType={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         value = str(value)
         if isinstance(value, bool):
             value = value.lower()
-        query_params.append(f"value={quote(value)}")
+        query_params.append(f"value={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2733,6 +2925,11 @@ class DocusignClient(ConnectorClientBase):
         envelope_id: str,
         open_in: str,
         return_url: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Generate Embedded Sender URL
@@ -2752,16 +2949,20 @@ class DocusignClient(ConnectorClientBase):
         value = str(open_in)
         if isinstance(open_in, bool):
             value = value.lower()
-        query_params.append(f"openIn={quote(value)}")
+        query_params.append(f"openIn={quote(value, safe='')}")
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2781,6 +2982,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List recipients from an envelope
@@ -2797,7 +3003,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2819,6 +3029,11 @@ class DocusignClient(ConnectorClientBase):
         envelope_id: str,
         folder_id: str,
         remove_recipient_from_envelope_recipient_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Remove recipient from an envelope
@@ -2837,16 +3052,20 @@ class DocusignClient(ConnectorClientBase):
         value = str(folder_id)
         if isinstance(folder_id, bool):
             value = value.lower()
-        query_params.append(f"folderId={quote(value)}")
+        query_params.append(f"folderId={quote(value, safe='')}")
         value = str(remove_recipient_from_envelope_recipient_id)
         if isinstance(remove_recipient_from_envelope_recipient_id, bool):
             value = value.lower()
-        query_params.append(f"RemoveRecipientFromEnvelopeRecipientId={quote(value)}")
+        query_params.append(f"RemoveRecipientFromEnvelopeRecipientId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2870,6 +3089,11 @@ class DocusignClient(ConnectorClientBase):
         area_code: Optional[str] = None,
         phone_number: Optional[str] = None,
         recipient_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get recipient info from envelope
@@ -2889,27 +3113,31 @@ class DocusignClient(ConnectorClientBase):
             value = str(recipient_email)
             if isinstance(recipient_email, bool):
                 value = value.lower()
-            query_params.append(f"recipientEmail={quote(value)}")
+            query_params.append(f"recipientEmail={quote(value, safe='')}")
         if area_code is not None:
             value = str(area_code)
             if isinstance(area_code, bool):
                 value = value.lower()
-            query_params.append(f"areaCode={quote(value)}")
+            query_params.append(f"areaCode={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phoneNumber={quote(value)}")
+            query_params.append(f"phoneNumber={quote(value, safe='')}")
         if recipient_id is not None:
             value = str(recipient_id)
             if isinstance(recipient_id, bool):
                 value = value.lower()
-            query_params.append(f"recipientId={quote(value)}")
+            query_params.append(f"recipientId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2929,6 +3157,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get audit event list
@@ -2945,7 +3178,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2969,6 +3206,11 @@ class DocusignClient(ConnectorClientBase):
         recipient_id: str,
         recipient_type: str,
         verification_type: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add verification type to a recipient
@@ -2988,20 +3230,24 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_id)
         if isinstance(recipient_id, bool):
             value = value.lower()
-        query_params.append(f"recipientId={quote(value)}")
+        query_params.append(f"recipientId={quote(value, safe='')}")
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         value = str(verification_type)
         if isinstance(verification_type, bool):
             value = value.lower()
-        query_params.append(f"verificationType={quote(value)}")
+        query_params.append(f"verificationType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3036,6 +3282,11 @@ class DocusignClient(ConnectorClientBase):
         country_code: Optional[str] = None,
         phone_number: Optional[str] = None,
         signing_group_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update recipient on an envelope
@@ -3055,76 +3306,80 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_id)
         if isinstance(recipient_id, bool):
             value = value.lower()
-        query_params.append(f"recipientId={quote(value)}")
+        query_params.append(f"recipientId={quote(value, safe='')}")
         if signature_type is not None:
             value = str(signature_type)
             if isinstance(signature_type, bool):
                 value = value.lower()
-            query_params.append(f"signatureType={quote(value)}")
+            query_params.append(f"signatureType={quote(value, safe='')}")
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         if client_user_id is not None:
             value = str(client_user_id)
             if isinstance(client_user_id, bool):
                 value = value.lower()
-            query_params.append(f"clientUserId={quote(value)}")
+            query_params.append(f"clientUserId={quote(value, safe='')}")
         if embedded_recipient_start_u_r_l is not None:
             value = str(embedded_recipient_start_u_r_l)
             if isinstance(embedded_recipient_start_u_r_l, bool):
                 value = value.lower()
-            query_params.append(f"embeddedRecipientStartURL={quote(value)}")
+            query_params.append(f"embeddedRecipientStartURL={quote(value, safe='')}")
         if routing_order is not None:
             value = str(routing_order)
             if isinstance(routing_order, bool):
                 value = value.lower()
-            query_params.append(f"routingOrder={quote(value)}")
+            query_params.append(f"routingOrder={quote(value, safe='')}")
         if email_notification_language is not None:
             value = str(email_notification_language)
             if isinstance(email_notification_language, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationLanguage={quote(value)}")
+            query_params.append(f"emailNotificationLanguage={quote(value, safe='')}")
         if email_notification_subject is not None:
             value = str(email_notification_subject)
             if isinstance(email_notification_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationSubject={quote(value)}")
+            query_params.append(f"emailNotificationSubject={quote(value, safe='')}")
         if email_notification_body is not None:
             value = str(email_notification_body)
             if isinstance(email_notification_body, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationBody={quote(value)}")
+            query_params.append(f"emailNotificationBody={quote(value, safe='')}")
         if note is not None:
             value = str(note)
             if isinstance(note, bool):
                 value = value.lower()
-            query_params.append(f"note={quote(value)}")
+            query_params.append(f"note={quote(value, safe='')}")
         if role_name is not None:
             value = str(role_name)
             if isinstance(role_name, bool):
                 value = value.lower()
-            query_params.append(f"roleName={quote(value)}")
+            query_params.append(f"roleName={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phoneNumber={quote(value)}")
+            query_params.append(f"phoneNumber={quote(value, safe='')}")
         if signing_group_id is not None:
             value = str(signing_group_id)
             if isinstance(signing_group_id, bool):
                 value = value.lower()
-            query_params.append(f"signingGroupId={quote(value)}")
+            query_params.append(f"signingGroupId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3147,6 +3402,11 @@ class DocusignClient(ConnectorClientBase):
         envelope_id: str,
         template_id: str,
         preserve_template_recipient: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Apply a template to documents
@@ -3165,17 +3425,21 @@ class DocusignClient(ConnectorClientBase):
         value = str(template_id)
         if isinstance(template_id, bool):
             value = value.lower()
-        query_params.append(f"templateId={quote(value)}")
+        query_params.append(f"templateId={quote(value, safe='')}")
         if preserve_template_recipient is not None:
             value = str(preserve_template_recipient)
             if isinstance(preserve_template_recipient, bool):
                 value = value.lower()
-            query_params.append(f"preserve_template_recipient={quote(value)}")
+            query_params.append(f"preserve_template_recipient={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3191,6 +3455,11 @@ class DocusignClient(ConnectorClientBase):
         input: CreateBulkSendListInput,
         account_id: str,
         name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create bulk send list
@@ -3205,12 +3474,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3231,6 +3504,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         bulk_send_list_id: str,
         envelope_or_template_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Bulk send envelope using template
@@ -3249,12 +3527,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(envelope_or_template_id)
         if isinstance(envelope_or_template_id, bool):
             value = value.lower()
-        query_params.append(f"envelopeOrTemplateId={quote(value)}")
+        query_params.append(f"envelopeOrTemplateId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3272,6 +3554,11 @@ class DocusignClient(ConnectorClientBase):
 
     async def get_login_accounts_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Login
@@ -3281,7 +3568,11 @@ class DocusignClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/oauth/userinfo"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3300,6 +3591,11 @@ class DocusignClient(ConnectorClientBase):
     async def get_envelope_templates_async(
         self,
         account_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List templates
@@ -3312,7 +3608,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3333,6 +3633,11 @@ class DocusignClient(ConnectorClientBase):
         input: AddDocumentsToEnvelopeInput,
         account_id: str,
         envelope_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add documents to an envelope
@@ -3349,7 +3654,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3369,6 +3678,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         template_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List documents from a template
@@ -3385,7 +3699,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3405,6 +3723,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         envelope_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List documents from an envelope
@@ -3421,7 +3744,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3442,6 +3769,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         document_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get document info from envelope
@@ -3460,12 +3792,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(document_name)
         if isinstance(document_name, bool):
             value = value.lower()
-        query_params.append(f"documentName={quote(value)}")
+        query_params.append(f"documentName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3487,6 +3823,11 @@ class DocusignClient(ConnectorClientBase):
         envelope_id: str,
         recipient_id: str,
         tab_label: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get info for recipient tab
@@ -3507,12 +3848,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(tab_label)
         if isinstance(tab_label, bool):
             value = value.lower()
-        query_params.append(f"tabLabel={quote(value)}")
+        query_params.append(f"tabLabel={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3535,6 +3880,11 @@ class DocusignClient(ConnectorClientBase):
         envelope_id: str,
         recipient_id: str,
         tab_type: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add tabs for a recipient on an envelope
@@ -3555,12 +3905,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(tab_type)
         if isinstance(tab_type, bool):
             value = value.lower()
-        query_params.append(f"tabType={quote(value)}")
+        query_params.append(f"tabType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3582,6 +3936,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         recipient_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update recipient tab values on an envelope
@@ -3600,7 +3959,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3616,6 +3979,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         envelope_id: str,
         recipient_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get recipient tabs from envelope
@@ -3634,7 +4002,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3656,6 +4028,11 @@ class DocusignClient(ConnectorClientBase):
         account_id: str,
         workflow_id: str,
         instance_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Start Docusign workflow
@@ -3674,12 +4051,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(instance_name)
         if isinstance(instance_name, bool):
             value = value.lower()
-        query_params.append(f"instanceName={quote(value)}")
+        query_params.append(f"instanceName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3698,6 +4079,11 @@ class DocusignClient(ConnectorClientBase):
     async def build_number_async(
         self,
         input: BuildNumberSchema,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Show build Number (For reference only. Do not include in a flow for
@@ -3708,7 +4094,11 @@ class DocusignClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/build_number"
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3744,6 +4134,11 @@ class DocusignClient(ConnectorClientBase):
         signing_group_id: Optional[str] = None,
         signature_type: Optional[str] = None,
         workflow_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add recipient to an envelope
@@ -3763,82 +4158,86 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         if client_user_id is not None:
             value = str(client_user_id)
             if isinstance(client_user_id, bool):
                 value = value.lower()
-            query_params.append(f"clientUserId={quote(value)}")
+            query_params.append(f"clientUserId={quote(value, safe='')}")
         if recipient_id is not None:
             value = str(recipient_id)
             if isinstance(recipient_id, bool):
                 value = value.lower()
-            query_params.append(f"recipientId={quote(value)}")
+            query_params.append(f"recipientId={quote(value, safe='')}")
         if embedded_recipient_start_u_r_l is not None:
             value = str(embedded_recipient_start_u_r_l)
             if isinstance(embedded_recipient_start_u_r_l, bool):
                 value = value.lower()
-            query_params.append(f"embeddedRecipientStartURL={quote(value)}")
+            query_params.append(f"embeddedRecipientStartURL={quote(value, safe='')}")
         if routing_order is not None:
             value = str(routing_order)
             if isinstance(routing_order, bool):
                 value = value.lower()
-            query_params.append(f"routingOrder={quote(value)}")
+            query_params.append(f"routingOrder={quote(value, safe='')}")
         if email_notification_language is not None:
             value = str(email_notification_language)
             if isinstance(email_notification_language, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationLanguage={quote(value)}")
+            query_params.append(f"emailNotificationLanguage={quote(value, safe='')}")
         if email_notification_subject is not None:
             value = str(email_notification_subject)
             if isinstance(email_notification_subject, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationSubject={quote(value)}")
+            query_params.append(f"emailNotificationSubject={quote(value, safe='')}")
         if email_notification_body is not None:
             value = str(email_notification_body)
             if isinstance(email_notification_body, bool):
                 value = value.lower()
-            query_params.append(f"emailNotificationBody={quote(value)}")
+            query_params.append(f"emailNotificationBody={quote(value, safe='')}")
         if note is not None:
             value = str(note)
             if isinstance(note, bool):
                 value = value.lower()
-            query_params.append(f"note={quote(value)}")
+            query_params.append(f"note={quote(value, safe='')}")
         if role_name is not None:
             value = str(role_name)
             if isinstance(role_name, bool):
                 value = value.lower()
-            query_params.append(f"roleName={quote(value)}")
+            query_params.append(f"roleName={quote(value, safe='')}")
         if country_code is not None:
             value = str(country_code)
             if isinstance(country_code, bool):
                 value = value.lower()
-            query_params.append(f"countryCode={quote(value)}")
+            query_params.append(f"countryCode={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phoneNumber={quote(value)}")
+            query_params.append(f"phoneNumber={quote(value, safe='')}")
         if signing_group_id is not None:
             value = str(signing_group_id)
             if isinstance(signing_group_id, bool):
                 value = value.lower()
-            query_params.append(f"signingGroupId={quote(value)}")
+            query_params.append(f"signingGroupId={quote(value, safe='')}")
         if signature_type is not None:
             value = str(signature_type)
             if isinstance(signature_type, bool):
                 value = value.lower()
-            query_params.append(f"signatureType={quote(value)}")
+            query_params.append(f"signatureType={quote(value, safe='')}")
         if workflow_id is not None:
             value = str(workflow_id)
             if isinstance(workflow_id, bool):
                 value = value.lower()
-            query_params.append(f"workflowId={quote(value)}")
+            query_params.append(f"workflowId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3859,6 +4258,11 @@ class DocusignClient(ConnectorClientBase):
         input: CombinedEmailBodyAndCustomFields,
         account_id: str,
         email_subject: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create envelope
@@ -3876,12 +4280,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(email_subject)
         if isinstance(email_subject, bool):
             value = value.lower()
-        query_params.append(f"emailSubject={quote(value)}")
+        query_params.append(f"emailSubject={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3905,6 +4313,11 @@ class DocusignClient(ConnectorClientBase):
         is_in_person_signer: str,
         authentication_method: str,
         return_url: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Generate Embedded Signing URL
@@ -3924,20 +4337,24 @@ class DocusignClient(ConnectorClientBase):
         value = str(is_in_person_signer)
         if isinstance(is_in_person_signer, bool):
             value = value.lower()
-        query_params.append(f"isInPersonSigner={quote(value)}")
+        query_params.append(f"isInPersonSigner={quote(value, safe='')}")
         value = str(authentication_method)
         if isinstance(authentication_method, bool):
             value = value.lower()
-        query_params.append(f"authenticationMethod={quote(value)}")
+        query_params.append(f"authenticationMethod={quote(value, safe='')}")
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3959,6 +4376,11 @@ class DocusignClient(ConnectorClientBase):
         envelope_id: str,
         document_id: str,
         language: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get documents from an envelope
@@ -3980,12 +4402,16 @@ class DocusignClient(ConnectorClientBase):
             value = str(language)
             if isinstance(language, bool):
                 value = value.lower()
-            query_params.append(f"language={quote(value)}")
+            query_params.append(f"language={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4003,6 +4429,11 @@ class DocusignClient(ConnectorClientBase):
 
     async def get_organizations_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get organizations
@@ -4018,7 +4449,11 @@ class DocusignClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4037,6 +4472,11 @@ class DocusignClient(ConnectorClientBase):
     async def get_account_custom_fields_async(
         self,
         account_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Get account custom fields
@@ -4051,7 +4491,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4065,6 +4509,11 @@ class DocusignClient(ConnectorClientBase):
     async def get_folder_list_async(
         self,
         account_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List folders
@@ -4077,7 +4526,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4097,6 +4550,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         folder_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List envelopes
@@ -4112,7 +4570,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4130,6 +4592,11 @@ class DocusignClient(ConnectorClientBase):
 
     async def static_response_for_recipient_types_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForRecipientTypes
@@ -4139,7 +4606,11 @@ class DocusignClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/recipient_types"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4157,6 +4628,11 @@ class DocusignClient(ConnectorClientBase):
 
     async def static_response_for_signature_types_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForSignatureTypes
@@ -4166,7 +4642,11 @@ class DocusignClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/signature_types"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4185,6 +4665,11 @@ class DocusignClient(ConnectorClientBase):
     async def get_signing_groups_async(
         self,
         account_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         GetSigningGroups
@@ -4197,7 +4682,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4215,6 +4704,11 @@ class DocusignClient(ConnectorClientBase):
 
     async def static_response_for_tab_types_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForTabTypes
@@ -4224,7 +4718,11 @@ class DocusignClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/tab_types"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4243,6 +4741,11 @@ class DocusignClient(ConnectorClientBase):
     async def get_maestro_workflow_definitions_async(
         self,
         account_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Maestro Workflow Definitions
@@ -4255,7 +4758,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4274,6 +4781,11 @@ class DocusignClient(ConnectorClientBase):
     async def get_all_workflow_i_ds_async(
         self,
         account_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get All Workflow Ids
@@ -4288,7 +4800,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4308,6 +4824,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         workflow_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Maestro Workflow Definition
@@ -4323,7 +4844,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4343,6 +4868,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         template_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the signers of a template in dynamic schema format
@@ -4360,7 +4890,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4380,6 +4914,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         account_id: str,
         template_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the signers of a template in dynamic schema format
@@ -4396,7 +4935,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4416,6 +4959,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         recipient_type: str,
         signature_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForRecipientTypeSchema
@@ -4427,17 +4975,21 @@ class DocusignClient(ConnectorClientBase):
         value = str(recipient_type)
         if isinstance(recipient_type, bool):
             value = value.lower()
-        query_params.append(f"recipientType={quote(value)}")
+        query_params.append(f"recipientType={quote(value, safe='')}")
         if signature_type is not None:
             value = str(signature_type)
             if isinstance(signature_type, bool):
                 value = value.lower()
-            query_params.append(f"signatureType={quote(value)}")
+            query_params.append(f"signatureType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4456,6 +5008,11 @@ class DocusignClient(ConnectorClientBase):
     async def static_response_for_verification_type_schema_async(
         self,
         verification_type: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForVerificationTypeSchema
@@ -4467,12 +5024,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(verification_type)
         if isinstance(verification_type, bool):
             value = value.lower()
-        query_params.append(f"verificationType={quote(value)}")
+        query_params.append(f"verificationType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4491,6 +5052,11 @@ class DocusignClient(ConnectorClientBase):
     async def static_response_for_embedded_sender_schema_async(
         self,
         return_url: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForEmbeddedSenderSchema
@@ -4502,12 +5068,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4527,6 +5097,11 @@ class DocusignClient(ConnectorClientBase):
         self,
         return_url: str,
         is_in_person_signer: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForEmbeddedSigningSchema
@@ -4540,16 +5115,20 @@ class DocusignClient(ConnectorClientBase):
         value = str(return_url)
         if isinstance(return_url, bool):
             value = value.lower()
-        query_params.append(f"returnUrl={quote(value)}")
+        query_params.append(f"returnUrl={quote(value, safe='')}")
         value = str(is_in_person_signer)
         if isinstance(is_in_person_signer, bool):
             value = value.lower()
-        query_params.append(f"isInPersonSigner={quote(value)}")
+        query_params.append(f"isInPersonSigner={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4567,6 +5146,11 @@ class DocusignClient(ConnectorClientBase):
 
     async def static_response_for_build_number_schema_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForBuildNumberSchema
@@ -4576,7 +5160,11 @@ class DocusignClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/build_number_schema"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4595,6 +5183,11 @@ class DocusignClient(ConnectorClientBase):
     async def get_custom_fields_async(
         self,
         account_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Get custom fields from an account
@@ -4607,7 +5200,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4621,6 +5218,11 @@ class DocusignClient(ConnectorClientBase):
     async def static_response_for_anchor_tab_schema_async(
         self,
         tab_type: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForAnchorTabSchema
@@ -4632,12 +5234,16 @@ class DocusignClient(ConnectorClientBase):
         value = str(tab_type)
         if isinstance(tab_type, bool):
             value = value.lower()
-        query_params.append(f"tabType={quote(value)}")
+        query_params.append(f"tabType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4655,6 +5261,11 @@ class DocusignClient(ConnectorClientBase):
 
     async def static_response_for_composite_templates_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         StaticResponseForCompositeTemplates
@@ -4666,7 +5277,11 @@ class DocusignClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

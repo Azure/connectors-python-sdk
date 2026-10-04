@@ -9,26 +9,20 @@ and strongly-typed generated connector clients.
 """
 
 from .client_base import ConnectorClientBase
-from .options import ConnectorClientOptions
-from .authentication import (
-    TokenProvider,
-    ManagedIdentityTokenProvider,
-    ConnectionStringTokenProvider,
-    AzureIdentityTokenProvider,
-)
 from .exceptions import ConnectorException
+from .http_client import ConnectorHttpClient, ConnectorResponse
+from .response import ConnectorResponseHook, ConnectorResponseSnapshot
 from .trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 
 __version__ = "0.1.0"
 
 __all__ = [
     "ConnectorClientBase",
-    "ConnectorClientOptions",
-    "TokenProvider",
-    "ManagedIdentityTokenProvider",
-    "ConnectionStringTokenProvider",
-    "AzureIdentityTokenProvider",
     "ConnectorException",
+    "ConnectorHttpClient",
+    "ConnectorResponse",
+    "ConnectorResponseHook",
+    "ConnectorResponseSnapshot",
     "TriggerCallbackPayload",
     "TriggerCallbackBody",
 ]

@@ -5,6 +5,7 @@
 import json
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.wdatp import (
     WdatpClient,
     AdvancedHuntingInput,
@@ -18,11 +19,10 @@ from azure.connectors.wdatp import (
     MachineTagInput,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestWdatpClientInitialization:
@@ -30,55 +30,54 @@ class TestWdatpClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = WdatpClient("https://example.azure.com/connections/test")
+        client = WdatpClient("https://example.azure.com/connections/test",
+                             AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "wdatp"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = WdatpClient("https://example.azure.com/connections/test/")
+        client = WdatpClient("https://example.azure.com/connections/test/",
+                             AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WdatpClient("")
+            WdatpClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WdatpClient(None)
+            WdatpClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'wdatp'."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "wdatp"
@@ -88,11 +87,11 @@ class TestWdatpClientLifecycle:
     """Tests for WdatpClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -100,12 +99,12 @@ class TestWdatpClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(WdatpClient, 'close', new_callable=AsyncMock) as mock_close:
             async with WdatpClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, WdatpClient)
 
@@ -116,11 +115,11 @@ class TestAdvancedHunting:
     """Tests for advanced_hunting_async method."""
 
     @pytest.mark.asyncio
-    async def test_advanced_hunting_success(self, mock_token_provider):
+    async def test_advanced_hunting_success(self, mock_credential):
         """Test successful advanced hunting query."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {
@@ -141,11 +140,11 @@ class TestAdvancedHunting:
             assert result["results"][0]["DeviceName"] == "Device1"
 
     @pytest.mark.asyncio
-    async def test_advanced_hunting_error(self, mock_token_provider):
+    async def test_advanced_hunting_error(self, mock_credential):
         """Test advanced hunting error response."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(400, "Invalid query")
@@ -161,11 +160,11 @@ class TestGetAlerts:
     """Tests for get_alerts_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_alerts_success(self, mock_token_provider):
+    async def test_get_alerts_success(self, mock_credential):
         """Test successful alerts retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {
@@ -179,43 +178,43 @@ class TestGetAlerts:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_alerts_async()
+            result = await resolve_generated_result(client.get_alerts_async())
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "api/alerts" in call_args[0][1]
-            assert result["count"] == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_get_alerts_with_filter(self, mock_token_provider):
+    async def test_get_alerts_with_filter(self, mock_credential):
         """Test get alerts with filter parameter."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(200, '{"count": 0, "value": []}')
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.get_alerts_async(filter="severity eq 'High'")
+            await resolve_generated_result(client.get_alerts_async(filter="severity eq 'High'"))
 
             call_args = mock_send.call_args
             assert "$filter=" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_alerts_with_pagination(self, mock_token_provider):
+    async def test_get_alerts_with_pagination(self, mock_credential):
         """Test get alerts with pagination parameters."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(200, '{"count": 0, "value": []}')
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.get_alerts_async(top="10", skip="5")
+            await resolve_generated_result(client.get_alerts_async(top="10", skip="5"))
 
             call_args = mock_send.call_args
             assert "$top=10" in call_args[0][1]
@@ -226,11 +225,11 @@ class TestGetSingleAlert:
     """Tests for get_single_alert_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_single_alert_success(self, mock_token_provider):
+    async def test_get_single_alert_success(self, mock_credential):
         """Test successful single alert retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "alert-123", "title": "Test Alert", "severity": "High"}
@@ -245,11 +244,11 @@ class TestGetSingleAlert:
             assert result["id"] == "alert-123"
 
     @pytest.mark.asyncio
-    async def test_get_single_alert_not_found(self, mock_token_provider):
+    async def test_get_single_alert_not_found(self, mock_credential):
         """Test get single alert not found."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(404, "Alert not found")
@@ -264,11 +263,11 @@ class TestPatchAlert:
     """Tests for patch_alert_async method."""
 
     @pytest.mark.asyncio
-    async def test_patch_alert_success(self, mock_token_provider):
+    async def test_patch_alert_success(self, mock_credential):
         """Test successful alert update."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "alert-123", "status": "Resolved"}
@@ -289,11 +288,11 @@ class TestGetMachines:
     """Tests for get_machines_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_machines_success(self, mock_token_provider):
+    async def test_get_machines_success(self, mock_credential):
         """Test successful machines retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {
@@ -307,22 +306,22 @@ class TestGetMachines:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_machines_async()
+            result = await resolve_generated_result(client.get_machines_async())
 
             call_args = mock_send.call_args
             assert "api/machines" in call_args[0][1]
-            assert result["count"] == 2
+            assert len(result) == 2
 
 
 class TestGetSingleMachine:
     """Tests for get_single_machine_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_single_machine_success(self, mock_token_provider):
+    async def test_get_single_machine_success(self, mock_credential):
         """Test successful single machine retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "machine-123", "computerDnsName": "TestPC"}
@@ -341,11 +340,11 @@ class TestIsolateMachine:
     """Tests for isolate_machine_async method."""
 
     @pytest.mark.asyncio
-    async def test_isolate_machine_success(self, mock_token_provider):
+    async def test_isolate_machine_success(self, mock_credential):
         """Test successful machine isolation."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "action-123", "type": "Isolate", "status": "InProgress"}
@@ -369,11 +368,11 @@ class TestUnisolateMachine:
     """Tests for unisolate_machine_async method."""
 
     @pytest.mark.asyncio
-    async def test_unisolate_machine_success(self, mock_token_provider):
+    async def test_unisolate_machine_success(self, mock_credential):
         """Test successful machine unisolation."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "action-124", "type": "Unisolate", "status": "InProgress"}
@@ -395,11 +394,11 @@ class TestRunAntivirusScan:
     """Tests for run_antivirus_scan_async method."""
 
     @pytest.mark.asyncio
-    async def test_run_antivirus_scan_success(self, mock_token_provider):
+    async def test_run_antivirus_scan_success(self, mock_credential):
         """Test successful antivirus scan initiation."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "action-125", "type": "RunAntiVirusScan", "status": "InProgress"}
@@ -421,11 +420,11 @@ class TestCollectInvestigationPackage:
     """Tests for collect_investigation_package_async method."""
 
     @pytest.mark.asyncio
-    async def test_collect_investigation_package_success(self, mock_token_provider):
+    async def test_collect_investigation_package_success(self, mock_credential):
         """Test successful investigation package collection."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "action-126", "type": "CollectInvestigationPackage"}
@@ -447,11 +446,11 @@ class TestGetMachineActions:
     """Tests for get_machine_actions_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_machine_actions_success(self, mock_token_provider):
+    async def test_get_machine_actions_success(self, mock_credential):
         """Test successful machine actions retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {
@@ -462,22 +461,22 @@ class TestGetMachineActions:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_machine_actions_async()
+            result = await resolve_generated_result(client.get_machine_actions_async())
 
             call_args = mock_send.call_args
             assert "api/machineactions" in call_args[0][1]
-            assert result["count"] == 1
+            assert len(result) == 1
 
 
 class TestGetInvestigations:
     """Tests for get_investigations_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_investigations_success(self, mock_token_provider):
+    async def test_get_investigations_success(self, mock_credential):
         """Test successful investigations retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {
@@ -488,22 +487,22 @@ class TestGetInvestigations:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_investigations_async()
+            result = await resolve_generated_result(client.get_investigations_async())
 
             call_args = mock_send.call_args
             assert "api/investigations" in call_args[0][1]
-            assert result["count"] == 1
+            assert len(result) == 1
 
 
 class TestStartInvestigation:
     """Tests for start_investigation_async method."""
 
     @pytest.mark.asyncio
-    async def test_start_investigation_success(self, mock_token_provider):
+    async def test_start_investigation_success(self, mock_credential):
         """Test successful investigation start."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "inv-123", "state": "Running"}
@@ -525,11 +524,11 @@ class TestMachineTag:
     """Tests for machine_tag_async method."""
 
     @pytest.mark.asyncio
-    async def test_add_machine_tag_success(self, mock_token_provider):
+    async def test_add_machine_tag_success(self, mock_credential):
         """Test successful machine tag addition."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "machine-123", "machineTags": ["HighValue"]}
@@ -552,11 +551,11 @@ class TestGetFileStats:
     """Tests for get_file_stats_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_file_stats_success(self, mock_token_provider):
+    async def test_get_file_stats_success(self, mock_credential):
         """Test successful file statistics retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"sha1": "abc123", "globallyPrevalence": 100}
@@ -575,11 +574,11 @@ class TestGetDomainStats:
     """Tests for get_domain_stats_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_domain_stats_success(self, mock_token_provider):
+    async def test_get_domain_stats_success(self, mock_credential):
         """Test successful domain statistics retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"host": "example.com", "organizationPrevalence": 50}
@@ -598,11 +597,11 @@ class TestGetIpStats:
     """Tests for get_ip_stats_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_ip_stats_success(self, mock_token_provider):
+    async def test_get_ip_stats_success(self, mock_credential):
         """Test successful IP statistics retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"ipAddress": "192.168.1.1", "organizationPrevalence": 25}
@@ -621,11 +620,11 @@ class TestRestrictAppExecution:
     """Tests for restrict_app_execution_async method."""
 
     @pytest.mark.asyncio
-    async def test_restrict_app_execution_success(self, mock_token_provider):
+    async def test_restrict_app_execution_success(self, mock_credential):
         """Test successful app execution restriction."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {"id": "action-127", "type": "RestrictCodeExecution"}
@@ -647,11 +646,11 @@ class TestGetRemediationActivities:
     """Tests for get_remediation_activities_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_remediation_activities_success(self, mock_token_provider):
+    async def test_get_remediation_activities_success(self, mock_credential):
         """Test successful remediation activities retrieval."""
         client = WdatpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         response_data = {
@@ -662,8 +661,8 @@ class TestGetRemediationActivities:
         with patch.object(
             client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_remediation_activities_async()
+            result = await resolve_generated_result(client.get_remediation_activities_async())
 
             call_args = mock_send.call_args
             assert "api/remediationtasks" in call_args[0][1]
-            assert result["count"] == 1
+            assert len(result) == 1

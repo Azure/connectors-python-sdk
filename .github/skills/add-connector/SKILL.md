@@ -56,13 +56,11 @@ from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
-from azure.connectors.sdk import (
-    ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
-    ConnectorException,
-)
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
+from azure.connectors.sdk import ConnectorClientBase, ConnectorException
 
 
 # Type Definitions
@@ -111,17 +109,15 @@ Create `tests/test_{connector_name}.py` following this template:
 
 """Unit tests for {ClientClassName}."""
 
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.{connector_name} import (
     {ClientClassName},
     # Import all public dataclasses from the connector
 )
-from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
-    ConnectorException,
-)
+from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 
 
@@ -130,55 +126,59 @@ class Test{ClientClassName}Initialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = {ClientClassName}("https://example.azure.com/connections/test")
+        client = {ClientClassName}(
+            "https://example.azure.com/connections/test",
+            AzureKeyCredential("test-key"),
+        )
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "{connector_name}"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = {ClientClassName}("https://example.azure.com/connections/test/")
+        client = {ClientClassName}(
+            "https://example.azure.com/connections/test/",
+            AzureKeyCredential("test-key"),
+        )
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
-        """Test initialization with custom token provider."""
+    def test_init_with_custom_credential(self, mock_credential):
+        """Test initialization with custom Azure Core credential."""
         client = {ClientClassName}(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = {ClientClassName}(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
 
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            {ClientClassName}("")
+            {ClientClassName}("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            {ClientClassName}(None)
+            {ClientClassName}(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns '{connector_name}'."""
         client = {ClientClassName}(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "{connector_name}"
@@ -188,11 +188,11 @@ class Test{ClientClassName}Lifecycle:
     """Tests for {ClientClassName} lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = {ClientClassName}(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -200,12 +200,12 @@ class Test{ClientClassName}Lifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object({ClientClassName}, 'close', new_callable=AsyncMock) as mock_close:
             async with {ClientClassName}(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, {ClientClassName})
 
@@ -219,12 +219,12 @@ class Test{ClientClassName}Lifecycle:
 #     """Tests for {method_name}_async method."""
 #
 #     @pytest.mark.asyncio
-#     async def test_success(self, mock_token_provider):
+#     async def test_success(self, mock_credential):
 #         """Test successful request."""
 #         ...
 #
 #     @pytest.mark.asyncio
-#     async def test_error_response_raises_exception(self, mock_token_provider):
+#     async def test_error_response_raises_exception(self, mock_credential):
 #         """Test that error response raises ConnectorException."""
 #         ...
 ```

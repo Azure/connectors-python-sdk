@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.yammer import (
     YammerClient,
     Network,
@@ -17,12 +18,11 @@ from azure.connectors.yammer import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestYammerClientInitialization:
@@ -30,67 +30,64 @@ class TestYammerClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = YammerClient("https://example.azure.com/connections/test")
+        client = YammerClient("https://example.azure.com/connections/test",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == (
             "https://example.azure.com/connections/test"
         )
         assert client.connector_name == "yammer"
         assert isinstance(
-            client._http_client._token_provider, ManagedIdentityTokenProvider
+            client._http_client._credential, AzureKeyCredential
         )
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = YammerClient("https://example.azure.com/connections/test/")
+        client = YammerClient("https://example.azure.com/connections/test/",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == (
             "https://example.azure.com/connections/test"
         )
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(
-            timeout_seconds=60.0, max_retry_attempts=5
-        )
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            YammerClient("")
+            YammerClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            YammerClient(None)
+            YammerClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'yammer'."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "yammer"
@@ -100,11 +97,11 @@ class TestYammerClientLifecycle:
     """Tests for YammerClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -114,14 +111,14 @@ class TestYammerClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             YammerClient, 'close', new_callable=AsyncMock
         ) as mock_close:
             async with YammerClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, YammerClient)
 
@@ -132,11 +129,11 @@ class TestGetNetworks:
     """Tests for get_networks_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -160,11 +157,11 @@ class TestGetNetworks:
             assert result[0]["name"] == "Contoso"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
@@ -185,11 +182,11 @@ class TestGetGroups:
     """Tests for get_groups_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -212,11 +209,11 @@ class TestGetGroups:
             assert len(result) == 1
 
     @pytest.mark.asyncio
-    async def test_with_query_parameters(self, mock_token_provider):
+    async def test_with_query_parameters(self, mock_credential):
         """Test GET request with query parameters."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='[]')
@@ -244,11 +241,11 @@ class TestGetUserDetailsById:
     """Tests for get_user_details_by_id_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -275,11 +272,11 @@ class TestLikeMessage:
     """Tests for like_message_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful POST request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -303,11 +300,11 @@ class TestGetAllMessages:
     """Tests for get_all_messages_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -321,7 +318,7 @@ class TestGetAllMessages:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_all_messages_async()
+            _ = await resolve_generated_result(client.get_all_messages_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -329,11 +326,11 @@ class TestGetAllMessages:
             assert "/v3/messages.json" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_with_pagination_params(self, mock_token_provider):
+    async def test_with_pagination_params(self, mock_credential):
         """Test GET request with pagination parameters."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')
@@ -344,13 +341,13 @@ class TestGetAllMessages:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_all_messages_async(
+            await resolve_generated_result(client.get_all_messages_async(
                 network_id="net123",
                 older_than="100",
                 newer_than="50",
                 threaded="true",
                 limit="20"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -365,11 +362,11 @@ class TestGetMessagesFollowing:
     """Tests for get_messages_following_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -383,7 +380,7 @@ class TestGetMessagesFollowing:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_messages_following_async()
+            _ = await resolve_generated_result(client.get_messages_following_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -395,11 +392,11 @@ class TestGetMessagesInGroup:
     """Tests for get_messages_in_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -413,7 +410,7 @@ class TestGetMessagesInGroup:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_messages_in_group_async(group_id="123")
+            _ = await resolve_generated_result(client.get_messages_in_group_async(group_id="123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -425,11 +422,11 @@ class TestGetMessagesInThread:
     """Tests for get_messages_in_thread_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -443,7 +440,7 @@ class TestGetMessagesInThread:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.get_messages_in_thread_async(thread_id="456")
+            _ = await resolve_generated_result(client.get_messages_in_thread_async(thread_id="456"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -474,11 +471,11 @@ class TestPostMessage:
     """Tests for post_message_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful POST request."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -505,11 +502,11 @@ class TestPostMessage:
             assert "/v2/messages.json" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_with_network_id(self, mock_token_provider):
+    async def test_with_network_id(self, mock_credential):
         """Test POST request with network_id parameter."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=201, text='{"id": 789}')
@@ -531,11 +528,11 @@ class TestPostMessage:
             assert "network_id=net123" in url
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -676,22 +673,22 @@ class TestEdgeCases:
     """Tests for edge cases and special scenarios."""
 
     @pytest.mark.asyncio
-    async def test_http_client_property_access(self, mock_token_provider):
+    async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.http_client is not None
         assert client._http_client is client.http_client
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -706,11 +703,11 @@ class TestEdgeCases:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_multiple_consecutive_calls(self, mock_token_provider):
+    async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='[]')
@@ -727,11 +724,11 @@ class TestEdgeCases:
             assert mock_send.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_server_error_raises_exception(self, mock_token_provider):
+    async def test_server_error_raises_exception(self, mock_credential):
         """Test that 500 server error raises ConnectorException."""
         client = YammerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -745,6 +742,6 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_messages_async()
+                await resolve_generated_result(client.get_all_messages_async())
 
             assert exc_info.value.status_code == 500

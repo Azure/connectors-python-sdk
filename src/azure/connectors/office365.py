@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
+
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -545,6 +547,11 @@ class EntityListResponseContactResponse:
 
     value: Optional[List[ContactResponse]] = None
     """List of values"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -2910,7 +2917,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -4078,8 +4085,17 @@ class Office365Client(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a Office365Client.
@@ -4087,25 +4103,88 @@ class Office365Client(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
     def connector_name(self) -> str:
         return "office365"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def get_outlook_category_names_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Outlook category names
@@ -4115,7 +4194,11 @@ class Office365Client(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/Categories"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4137,6 +4220,11 @@ class Office365Client(ConnectorClientBase):
         message_id: Optional[str] = None,
         draft_type: Optional[str] = None,
         comment: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Draft an email message
@@ -4149,22 +4237,26 @@ class Office365Client(ConnectorClientBase):
             value = str(message_id)
             if isinstance(message_id, bool):
                 value = value.lower()
-            query_params.append(f"messageId={quote(value)}")
+            query_params.append(f"messageId={quote(value, safe='')}")
         if draft_type is not None:
             value = str(draft_type)
             if isinstance(draft_type, bool):
                 value = value.lower()
-            query_params.append(f"draftType={quote(value)}")
+            query_params.append(f"draftType={quote(value, safe='')}")
         if comment is not None:
             value = str(comment)
             if isinstance(comment, bool):
                 value = value.lower()
-            query_params.append(f"comment={quote(value)}")
+            query_params.append(f"comment={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4184,6 +4276,11 @@ class Office365Client(ConnectorClientBase):
         self,
         input: DraftEmailInput,
         message_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Updates an email Draft message
@@ -4195,12 +4292,16 @@ class Office365Client(ConnectorClientBase):
         value = str(message_id)
         if isinstance(message_id, bool):
             value = value.lower()
-        query_params.append(f"messageId={quote(value)}")
+        query_params.append(f"messageId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4214,6 +4315,11 @@ class Office365Client(ConnectorClientBase):
     async def send_draft_email_async(
         self,
         message_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Send a Draft message
@@ -4226,7 +4332,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4241,6 +4351,11 @@ class Office365Client(ConnectorClientBase):
         self,
         message_id: str,
         category: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Assigns an Outlook category
@@ -4252,16 +4367,20 @@ class Office365Client(ConnectorClientBase):
         value = str(message_id)
         if isinstance(message_id, bool):
             value = value.lower()
-        query_params.append(f"messageId={quote(value)}")
+        query_params.append(f"messageId={quote(value, safe='')}")
         value = str(category)
         if isinstance(category, bool):
             value = value.lower()
-        query_params.append(f"category={quote(value)}")
+        query_params.append(f"category={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4276,6 +4395,11 @@ class Office365Client(ConnectorClientBase):
         self,
         input: AssignCategoryBulkInput,
         category_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Assign a category to multiple emails
@@ -4288,7 +4412,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4307,6 +4435,11 @@ class Office365Client(ConnectorClientBase):
     async def send_mail_with_options_async(
         self,
         input: OptionsEmailSubscription,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send email with options
@@ -4322,7 +4455,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4341,6 +4478,11 @@ class Office365Client(ConnectorClientBase):
     async def send_approval_mail_async(
         self,
         input: ApprovalEmailSubscription,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send approval email
@@ -4355,7 +4497,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4376,6 +4522,11 @@ class Office365Client(ConnectorClientBase):
         input: bytes,
         folder: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Update my contact's photo
@@ -4401,6 +4552,10 @@ class Office365Client(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4414,6 +4569,11 @@ class Office365Client(ConnectorClientBase):
     async def http_request_async(
         self,
         input: bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send an HTTP request
@@ -4431,6 +4591,10 @@ class Office365Client(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4450,6 +4614,11 @@ class Office365Client(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Email Management MCP Server (deprecated)
@@ -4462,12 +4631,16 @@ class Office365Client(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4487,6 +4660,11 @@ class Office365Client(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Meeting Management MCP Server (deprecated)
@@ -4499,12 +4677,16 @@ class Office365Client(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4524,6 +4706,11 @@ class Office365Client(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Contact Management MCP Server
@@ -4536,12 +4723,16 @@ class Office365Client(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4561,6 +4752,11 @@ class Office365Client(ConnectorClientBase):
         self,
         calendar: str,
         event: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete event
@@ -4579,7 +4775,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4594,6 +4794,11 @@ class Office365Client(ConnectorClientBase):
         self,
         table: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get event
@@ -4612,7 +4817,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4635,6 +4844,11 @@ class Office365Client(ConnectorClientBase):
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get events
@@ -4655,27 +4869,31 @@ class Office365Client(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4693,6 +4911,11 @@ class Office365Client(ConnectorClientBase):
 
     async def calendar_get_tables_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get calendars
@@ -4710,7 +4933,11 @@ class Office365Client(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4731,6 +4958,11 @@ class Office365Client(ConnectorClientBase):
         input: GraphCalendarEventClient,
         table: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update event
@@ -4749,7 +4981,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4769,6 +5005,11 @@ class Office365Client(ConnectorClientBase):
         self,
         input: GraphCalendarEventClient,
         table: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create event
@@ -4786,7 +5027,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4806,6 +5051,11 @@ class Office365Client(ConnectorClientBase):
         self,
         folder: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete contact
@@ -4824,7 +5074,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4839,6 +5093,11 @@ class Office365Client(ConnectorClientBase):
         self,
         folder: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get contact
@@ -4857,7 +5116,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4880,11 +5143,19 @@ class Office365Client(ConnectorClientBase):
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get contacts
 
         This operation gets contacts from a contacts folder.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4900,44 +5171,64 @@ class Office365Client(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def contact_get_tables_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get contact folders
@@ -4949,7 +5240,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4970,6 +5265,11 @@ class Office365Client(ConnectorClientBase):
         input: Contact,
         folder: str,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update contact
@@ -4988,7 +5288,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5008,6 +5312,11 @@ class Office365Client(ConnectorClientBase):
         self,
         input: Contact,
         folder: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create contact
@@ -5025,7 +5334,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5045,6 +5358,11 @@ class Office365Client(ConnectorClientBase):
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete email
@@ -5060,12 +5378,16 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5080,6 +5402,11 @@ class Office365Client(ConnectorClientBase):
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Export email
@@ -5100,12 +5427,16 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5121,6 +5452,11 @@ class Office365Client(ConnectorClientBase):
     async def find_meeting_times_async(
         self,
         input: FindMeetingTimesInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find meeting times
@@ -5133,7 +5469,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5154,6 +5494,11 @@ class Office365Client(ConnectorClientBase):
         input: UpdateEmailFlag,
         message_id: str,
         mailbox_address: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Flag email
@@ -5174,12 +5519,16 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5197,6 +5546,11 @@ class Office365Client(ConnectorClientBase):
         mailbox_address: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Forward an email
@@ -5217,22 +5571,26 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5250,6 +5608,11 @@ class Office365Client(ConnectorClientBase):
         mailbox_address: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Attachment
@@ -5271,22 +5634,26 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5310,6 +5677,11 @@ class Office365Client(ConnectorClientBase):
         internet_message_id: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get email
@@ -5325,32 +5697,36 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if include_attachments is not None:
             value = str(include_attachments)
             if isinstance(include_attachments, bool):
                 value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
+            query_params.append(f"includeAttachments={quote(value, safe='')}")
         if internet_message_id is not None:
             value = str(internet_message_id)
             if isinstance(internet_message_id, bool):
                 value = value.lower()
-            query_params.append(f"internetMessageId={quote(value)}")
+            query_params.append(f"internetMessageId={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5381,6 +5757,11 @@ class Office365Client(ConnectorClientBase):
         include_attachments: Optional[bool] = None,
         search_query: Optional[str] = None,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get emails
@@ -5398,72 +5779,76 @@ class Office365Client(ConnectorClientBase):
             value = str(folder_path)
             if isinstance(folder_path, bool):
                 value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
+            query_params.append(f"folderPath={quote(value, safe='')}")
         if to is not None:
             value = str(to)
             if isinstance(to, bool):
                 value = value.lower()
-            query_params.append(f"to={quote(value)}")
+            query_params.append(f"to={quote(value, safe='')}")
         if cc is not None:
             value = str(cc)
             if isinstance(cc, bool):
                 value = value.lower()
-            query_params.append(f"cc={quote(value)}")
+            query_params.append(f"cc={quote(value, safe='')}")
         if to_or_cc is not None:
             value = str(to_or_cc)
             if isinstance(to_or_cc, bool):
                 value = value.lower()
-            query_params.append(f"toOrCc={quote(value)}")
+            query_params.append(f"toOrCc={quote(value, safe='')}")
         if from_ is not None:
             value = str(from_)
             if isinstance(from_, bool):
                 value = value.lower()
-            query_params.append(f"from={quote(value)}")
+            query_params.append(f"from={quote(value, safe='')}")
         if importance is not None:
             value = str(importance)
             if isinstance(importance, bool):
                 value = value.lower()
-            query_params.append(f"importance={quote(value)}")
+            query_params.append(f"importance={quote(value, safe='')}")
         if fetch_only_with_attachment is not None:
             value = str(fetch_only_with_attachment)
             if isinstance(fetch_only_with_attachment, bool):
                 value = value.lower()
-            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
+            query_params.append(f"fetchOnlyWithAttachment={quote(value, safe='')}")
         if subject_filter is not None:
             value = str(subject_filter)
             if isinstance(subject_filter, bool):
                 value = value.lower()
-            query_params.append(f"subjectFilter={quote(value)}")
+            query_params.append(f"subjectFilter={quote(value, safe='')}")
         if fetch_only_unread is not None:
             value = str(fetch_only_unread)
             if isinstance(fetch_only_unread, bool):
                 value = value.lower()
-            query_params.append(f"fetchOnlyUnread={quote(value)}")
+            query_params.append(f"fetchOnlyUnread={quote(value, safe='')}")
         if mailbox_address is not None:
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if include_attachments is not None:
             value = str(include_attachments)
             if isinstance(include_attachments, bool):
                 value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
+            query_params.append(f"includeAttachments={quote(value, safe='')}")
         if search_query is not None:
             value = str(search_query)
             if isinstance(search_query, bool):
                 value = value.lower()
-            query_params.append(f"searchQuery={quote(value)}")
+            query_params.append(f"searchQuery={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"top={quote(value)}")
+            query_params.append(f"top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5489,6 +5874,11 @@ class Office365Client(ConnectorClientBase):
         top: Optional[int] = None,
         skip: Optional[int] = None,
         search: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get calendar view of events
@@ -5504,45 +5894,49 @@ class Office365Client(ConnectorClientBase):
         value = str(calendar_id)
         if isinstance(calendar_id, bool):
             value = value.lower()
-        query_params.append(f"calendarId={quote(value)}")
+        query_params.append(f"calendarId={quote(value, safe='')}")
         value = str(start_date_time_utc)
         if isinstance(start_date_time_utc, bool):
             value = value.lower()
-        query_params.append(f"startDateTimeUtc={quote(value)}")
+        query_params.append(f"startDateTimeUtc={quote(value, safe='')}")
         value = str(end_date_time_utc)
         if isinstance(end_date_time_utc, bool):
             value = value.lower()
-        query_params.append(f"endDateTimeUtc={quote(value)}")
+        query_params.append(f"endDateTimeUtc={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
-            query_params.append(f"search={quote(value)}")
+            query_params.append(f"search={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5561,6 +5955,11 @@ class Office365Client(ConnectorClientBase):
     async def get_mail_tips_async(
         self,
         input: GetMailTipsInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get mail tips for a mailbox
@@ -5573,7 +5972,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5591,6 +5994,11 @@ class Office365Client(ConnectorClientBase):
 
     async def get_room_lists_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get room lists
@@ -5602,7 +6010,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5620,6 +6032,11 @@ class Office365Client(ConnectorClientBase):
 
     async def get_rooms_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get rooms
@@ -5631,7 +6048,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5650,6 +6071,11 @@ class Office365Client(ConnectorClientBase):
     async def get_rooms_in_room_list_async(
         self,
         room_list: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get rooms in room list
@@ -5665,7 +6091,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5686,6 +6116,11 @@ class Office365Client(ConnectorClientBase):
         input: MarkAsReadInput,
         message_id: str,
         mailbox_address: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Mark as read or unread
@@ -5707,12 +6142,16 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5728,6 +6167,11 @@ class Office365Client(ConnectorClientBase):
         message_id: str,
         folder_path: str,
         mailbox_address: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Move email
@@ -5743,17 +6187,21 @@ class Office365Client(ConnectorClientBase):
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         if mailbox_address is not None:
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5774,6 +6222,11 @@ class Office365Client(ConnectorClientBase):
         input: ReplyEmailInput,
         message_id: str,
         mailbox_address: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Reply to email
@@ -5789,12 +6242,16 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5810,6 +6267,11 @@ class Office365Client(ConnectorClientBase):
         input: ResponseToEventInvite,
         event_id: str,
         response: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Respond to an event invite
@@ -5827,7 +6289,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         http_response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= http_response.status < 300):
@@ -5841,6 +6307,11 @@ class Office365Client(ConnectorClientBase):
     async def send_email_async(
         self,
         input: SendEmailInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Send an email
@@ -5850,7 +6321,11 @@ class Office365Client(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v2/Mail"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5864,6 +6339,11 @@ class Office365Client(ConnectorClientBase):
     async def set_automatic_replies_setting_async(
         self,
         input: SetAutomaticRepliesSettingInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Set up automatic replies
@@ -5875,7 +6355,11 @@ class Office365Client(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5894,6 +6378,11 @@ class Office365Client(ConnectorClientBase):
     async def shared_mailbox_send_email_async(
         self,
         input: SharedMailboxSendEmailInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Send an email from a shared mailbox
@@ -5905,7 +6394,11 @@ class Office365Client(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

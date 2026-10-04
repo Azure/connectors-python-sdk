@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -805,8 +807,17 @@ class WebexClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a WebexClient.
@@ -814,17 +825,36 @@ class WebexClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -834,6 +864,11 @@ class WebexClient(ConnectorClientBase):
     async def create_space_member_async(
         self,
         input: CreateSpaceMemberInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Member to Space
@@ -843,7 +878,11 @@ class WebexClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/memberships"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -866,6 +905,11 @@ class WebexClient(ConnectorClientBase):
         before_message: Optional[str] = None,
         before: Optional[str] = None,
         max: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Messages
@@ -877,32 +921,36 @@ class WebexClient(ConnectorClientBase):
         value = str(room_id)
         if isinstance(room_id, bool):
             value = value.lower()
-        query_params.append(f"roomId={quote(value)}")
+        query_params.append(f"roomId={quote(value, safe='')}")
         if mentioned_people is not None:
             value = str(mentioned_people)
             if isinstance(mentioned_people, bool):
                 value = value.lower()
-            query_params.append(f"mentionedPeople={quote(value)}")
+            query_params.append(f"mentionedPeople={quote(value, safe='')}")
         if before_message is not None:
             value = str(before_message)
             if isinstance(before_message, bool):
                 value = value.lower()
-            query_params.append(f"beforeMessage={quote(value)}")
+            query_params.append(f"beforeMessage={quote(value, safe='')}")
         if before is not None:
             value = str(before)
             if isinstance(before, bool):
                 value = value.lower()
-            query_params.append(f"before={quote(value)}")
+            query_params.append(f"before={quote(value, safe='')}")
         if max is not None:
             value = str(max)
             if isinstance(max, bool):
                 value = value.lower()
-            query_params.append(f"max={quote(value)}")
+            query_params.append(f"max={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -921,6 +969,11 @@ class WebexClient(ConnectorClientBase):
     async def send_message_async(
         self,
         input: SendMessageInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send a Message
@@ -930,7 +983,11 @@ class WebexClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/messages"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -949,6 +1006,11 @@ class WebexClient(ConnectorClientBase):
     async def get_message_details_async(
         self,
         message_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Message Details
@@ -961,7 +1023,11 @@ class WebexClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -981,6 +1047,11 @@ class WebexClient(ConnectorClientBase):
         self,
         id: Optional[str] = None,
         email: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get People
@@ -993,17 +1064,21 @@ class WebexClient(ConnectorClientBase):
             value = str(id)
             if isinstance(id, bool):
                 value = value.lower()
-            query_params.append(f"id={quote(value)}")
+            query_params.append(f"id={quote(value, safe='')}")
         if email is not None:
             value = str(email)
             if isinstance(email, bool):
                 value = value.lower()
-            query_params.append(f"email={quote(value)}")
+            query_params.append(f"email={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1021,6 +1096,11 @@ class WebexClient(ConnectorClientBase):
 
     async def get_my_own_details_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get My Own Details
@@ -1030,7 +1110,11 @@ class WebexClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/people/me"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1051,6 +1135,11 @@ class WebexClient(ConnectorClientBase):
         max: Optional[int] = None,
         type_: Optional[str] = None,
         sort_by: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Spaces List
@@ -1063,22 +1152,26 @@ class WebexClient(ConnectorClientBase):
             value = str(max)
             if isinstance(max, bool):
                 value = value.lower()
-            query_params.append(f"max={quote(value)}")
+            query_params.append(f"max={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort_by is not None:
             value = str(sort_by)
             if isinstance(sort_by, bool):
                 value = value.lower()
-            query_params.append(f"sortBy={quote(value)}")
+            query_params.append(f"sortBy={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1097,6 +1190,11 @@ class WebexClient(ConnectorClientBase):
     async def create_space_async(
         self,
         input: CreateSpaceInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create Space
@@ -1106,7 +1204,11 @@ class WebexClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/rooms"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1125,6 +1227,11 @@ class WebexClient(ConnectorClientBase):
     async def get_space_detail_async(
         self,
         room_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Space Details
@@ -1137,7 +1244,11 @@ class WebexClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1156,6 +1267,11 @@ class WebexClient(ConnectorClientBase):
     async def create_team_member_async(
         self,
         input: CreateTeamMemberInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Member to Team
@@ -1165,7 +1281,11 @@ class WebexClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/team/memberships"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

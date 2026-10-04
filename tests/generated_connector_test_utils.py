@@ -11,14 +11,22 @@ from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from azure.core.credentials import AzureKeyCredential
 
-from azure.connectors.sdk import ConnectorException, ManagedIdentityTokenProvider
+from azure.connectors.sdk import ConnectorException
 from azure.connectors.sdk.serialization import (
     ADDITIONAL_PROPERTIES_FIELD,
     WIRE_NAME_METADATA_KEY,
     to_wire,
 )
 from tests.conftest import MockResponse
+
+_REQUEST_CONTROL_PARAMETER_NAMES = {
+    "client_request_id",
+    "headers",
+    "response_hook",
+    "timeout",
+}
 
 
 def get_generated_operations(client_type: type[Any]) -> set[str]:
@@ -27,8 +35,19 @@ def get_generated_operations(client_type: type[Any]) -> set[str]:
         name.removesuffix("_async")
         for name in dir(client_type)
         if name.endswith("_async")
-        and inspect.iscoroutinefunction(getattr(client_type, name))
+        and (
+            inspect.iscoroutinefunction(getattr(client_type, name))
+            or inspect.isasyncgenfunction(getattr(client_type, name))
+        )
     }
+
+
+async def resolve_generated_result(result: Any) -> Any:
+    """Resolve a generated coroutine or collect a generated async iterator."""
+    if inspect.isasyncgen(result):
+        return [item async for item in result]
+
+    return await result
 
 
 async def invoke_generated_operation(
@@ -43,9 +62,10 @@ async def invoke_generated_operation(
     arguments = {
         parameter.name: _representative_value(type_hints[parameter.name])
         for parameter in inspect.signature(method).parameters.values()
-        if include_optional_parameters or parameter.default is inspect.Parameter.empty
+        if parameter.name not in _REQUEST_CONTROL_PARAMETER_NAMES
+        and (include_optional_parameters or parameter.default is inspect.Parameter.empty)
     }
-    return await method(**arguments)
+    return await resolve_generated_result(method(**arguments))
 
 
 class GeneratedConnectorContractTests:
@@ -57,26 +77,30 @@ class GeneratedConnectorContractTests:
     operation_contracts: dict[str, tuple[str, bool]]
 
     def test_init_with_defaults(self) -> None:
-        """Test initialization with default authentication."""
-        client = self.client_type("https://example.azure.com/connections/test/")
+        """Test initialization with an Azure Core credential."""
+        credential = AzureKeyCredential("test-key")
+        client = self.client_type(
+            "https://example.azure.com/connections/test/",
+            credential,
+        )
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == self.connector_name
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert client._http_client._credential is credential
 
     @pytest.mark.parametrize("connection_runtime_url", ["", None])
     def test_init_with_invalid_url_raises_error(self, connection_runtime_url: str | None) -> None:
         """Test invalid runtime URLs are rejected."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            self.client_type(connection_runtime_url)
+            self.client_type(connection_runtime_url, AzureKeyCredential("test-key"))
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider: Any) -> None:
+    async def test_context_manager(self, mock_credential: Any) -> None:
         """Test async context manager cleanup."""
         with patch.object(self.client_type, "close", new_callable=AsyncMock) as mock_close:
             async with self.client_type(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, self.client_type)
 
@@ -123,19 +147,24 @@ class GeneratedConnectorContractTests:
             assert to_wire(instance) == expected, model_type.__name__
 
     @pytest.mark.asyncio
-    async def test_generated_operation_success_contracts(self, mock_token_provider: Any) -> None:
+    async def test_generated_operation_success_contracts(self, mock_credential: Any) -> None:
         """Test every generated operation's successful HTTP contract."""
         for operation, (expected_method, expects_body) in self.operation_contracts.items():
             client = self.client_type(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
+            )
+            generated_method = getattr(client, f"{operation}_async")
+            is_pageable = inspect.isasyncgenfunction(generated_method)
+            response_text = (
+                '{"value": [{"ok": true}]}' if is_pageable else '{"ok": true}'
             )
 
             with patch.object(
                 client._http_client,
                 "send_async",
                 new_callable=AsyncMock,
-                return_value=MockResponse(status=200, text='{"ok": true}'),
+                return_value=MockResponse(status=200, text=response_text),
             ) as mock_send:
                 result = await invoke_generated_operation(
                     client,
@@ -160,18 +189,20 @@ class GeneratedConnectorContractTests:
             )["return"]
             if return_type is type(None):
                 assert result is None, operation
+            elif is_pageable:
+                assert result == [{"ok": True}], operation
             elif return_type is bytes:
                 assert result == b'{"ok": true}', operation
             else:
                 assert result == {"ok": True}, operation
 
     @pytest.mark.asyncio
-    async def test_non_success_responses_raise_exception(self, mock_token_provider: Any) -> None:
+    async def test_non_success_responses_raise_exception(self, mock_credential: Any) -> None:
         """Test every generated operation raises for a non-success response."""
         for operation in self.operation_contracts:
             client = self.client_type(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             )
 
             with patch.object(

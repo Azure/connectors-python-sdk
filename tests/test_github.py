@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.github import (
     CreateRepositorySecretRequest,
     GithubClient,
@@ -15,9 +16,7 @@ from azure.connectors.github import (
     RequestReviewersBody,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -27,55 +26,54 @@ class TestGithubClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = GithubClient("https://example.azure.com/connections/test")
+        client = GithubClient("https://example.azure.com/connections/test",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "github"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = GithubClient("https://example.azure.com/connections/test/")
+        client = GithubClient("https://example.azure.com/connections/test/",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GithubClient("")
+            GithubClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GithubClient(None)
+            GithubClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'github'."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "github"
@@ -85,11 +83,11 @@ class TestGithubClientLifecycle:
     """Tests for GithubClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -97,12 +95,12 @@ class TestGithubClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(GithubClient, "close", new_callable=AsyncMock) as mock_close:
             async with GithubClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, GithubClient)
 
@@ -113,11 +111,11 @@ class TestInvokeMcpServerAsync:
     """Tests for invoke_mcp_server_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_uses_acronym_aware_name(self, mock_token_provider):
+    async def test_success_uses_acronym_aware_name(self, mock_credential):
         """Test invoking the MCP server through its acronym-aware method name."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = QueryRequest(jsonrpc="2.0", id="request-1", method="tools/list")
         mock_response = MockResponse(status=200, text="")
@@ -134,15 +132,19 @@ class TestInvokeMcpServerAsync:
                 "POST",
                 "https://example.azure.com/connections/test/mcp",
                 body=payload,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert not hasattr(GithubClient, "invoke_m_c_p_server_async")
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test MCP server errors raise ConnectorException."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
@@ -160,11 +162,11 @@ class TestGetUserAsync:
     """Tests for get_user_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful authenticated user retrieval."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(
             status=200,
@@ -187,11 +189,11 @@ class TestGetUserAsync:
             assert result.get("login") == "octocat"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test get user error path."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(
             status=401,
@@ -212,11 +214,11 @@ class TestCreateIssueAsync:
     """Tests for create_issue_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful issue creation."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = IssueBasicDetailsModel(
             title="Connector SDK test issue",
@@ -249,11 +251,11 @@ class TestCreateIssueAsync:
             assert result.get("number") == 123
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test create issue error path."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = IssueBasicDetailsModel(title="", body="")
         mock_response = MockResponse(
@@ -279,11 +281,11 @@ class TestGetIssuesAsync:
     """Tests for get_issues_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful issue listing with filters."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(
             status=200,
@@ -313,11 +315,11 @@ class TestGetIssuesAsync:
             assert result[0].get("number") == 1
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test get issues error path."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(
             status=404,
@@ -341,11 +343,11 @@ class TestCreateUpdateRepositorySecretAsync:
     """Tests for create_update_repository_secret_async method (PUT)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_body(self, mock_token_provider):
+    async def test_success_sends_body(self, mock_credential):
         """Test PUT sends the encrypted secret payload."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateRepositorySecretRequest(
             encrypted_value="encrypted-value",
@@ -371,15 +373,19 @@ class TestCreateUpdateRepositorySecretAsync:
                 "https://example.azure.com/connections/test/repos/octocat/"
                 "hello%20world/actions/secrets/API%20TOKEN",
                 body=payload,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test PUT error path raises ConnectorException."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateRepositorySecretRequest(
             encrypted_value="invalid-value",
@@ -408,11 +414,11 @@ class TestUpdatePullRequestAsync:
     """Tests for update_pull_request_async method (PATCH with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+    async def test_success_sends_body_and_returns_result(self, mock_credential):
         """Test PATCH sends input body and returns updated PR."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = PullRequestUpdateRequest(title="Updated title", state="closed")
         mock_response = MockResponse(
@@ -442,11 +448,11 @@ class TestUpdatePullRequestAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test PATCH error path raises ConnectorException."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = PullRequestUpdateRequest(title="")
         mock_response = MockResponse(
@@ -473,11 +479,11 @@ class TestRemoveReviewersPullRequestAsync:
     """Tests for remove_reviewers_pull_request_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful DELETE of PR reviewers."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = RequestReviewersBody(reviewers=["alice"])
         mock_response = MockResponse(status=200, text='{"number": 42}')
@@ -500,11 +506,11 @@ class TestRemoveReviewersPullRequestAsync:
             assert method == "DELETE"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test DELETE error path raises ConnectorException."""
         client = GithubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = RequestReviewersBody(reviewers=["alice"])
         mock_response = MockResponse(status=404, text='{"message": "Not Found"}')

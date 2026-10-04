@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -861,8 +863,17 @@ class TextrequestClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a TextrequestClient.
@@ -870,17 +881,36 @@ class TextrequestClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -893,6 +923,11 @@ class TextrequestClient(ConnectorClientBase):
         phone_number: str,
         page: int,
         page_size: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a conversation's messages by a contact's phone number
@@ -911,16 +946,20 @@ class TextrequestClient(ConnectorClientBase):
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -941,6 +980,11 @@ class TextrequestClient(ConnectorClientBase):
         input: SendMessageByPhoneNumberInput,
         dashboard_id: int,
         phone_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send a message to the contact with the given phone number
@@ -958,7 +1002,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -978,6 +1026,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         phone_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Archive a Conversation
@@ -1002,7 +1055,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1022,6 +1079,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         phone_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Unarchive a Conversation
@@ -1042,7 +1104,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1062,6 +1128,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         phone_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets the contact with the specified phone number
@@ -1077,7 +1148,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1097,6 +1172,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         phone_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Deletes the contact with the specified phone number
@@ -1112,7 +1192,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1133,6 +1217,11 @@ class TextrequestClient(ConnectorClientBase):
         input: CreateContactInput,
         dashboard_id: int,
         phone_number: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create or update a contact
@@ -1149,7 +1238,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1192,6 +1285,11 @@ class TextrequestClient(ConnectorClientBase):
         custom_field_value2: Optional[str] = None,
         custom_field_id3: Optional[str] = None,
         custom_field_value3: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all contacts that match the specified filtering criterion
@@ -1209,125 +1307,129 @@ class TextrequestClient(ConnectorClientBase):
             value = str(contact_phone_number)
             if isinstance(contact_phone_number, bool):
                 value = value.lower()
-            query_params.append(f"contact_phone_number={quote(value)}")
+            query_params.append(f"contact_phone_number={quote(value, safe='')}")
         if last_message_timestamp_before_utc is not None:
             value = str(last_message_timestamp_before_utc)
             if isinstance(last_message_timestamp_before_utc, bool):
                 value = value.lower()
-            query_params.append(f"last_message_timestamp_before_utc={quote(value)}")
+            query_params.append(f"last_message_timestamp_before_utc={quote(value, safe='')}")
         if last_message_timestamp_after_utc is not None:
             value = str(last_message_timestamp_after_utc)
             if isinstance(last_message_timestamp_after_utc, bool):
                 value = value.lower()
-            query_params.append(f"last_message_timestamp_after_utc={quote(value)}")
+            query_params.append(f"last_message_timestamp_after_utc={quote(value, safe='')}")
         if contact_created_before is not None:
             value = str(contact_created_before)
             if isinstance(contact_created_before, bool):
                 value = value.lower()
-            query_params.append(f"contact_created_before={quote(value)}")
+            query_params.append(f"contact_created_before={quote(value, safe='')}")
         if contact_created_after is not None:
             value = str(contact_created_after)
             if isinstance(contact_created_after, bool):
                 value = value.lower()
-            query_params.append(f"contact_created_after={quote(value)}")
+            query_params.append(f"contact_created_after={quote(value, safe='')}")
         if is_resolved is not None:
             value = str(is_resolved)
             if isinstance(is_resolved, bool):
                 value = value.lower()
-            query_params.append(f"is_resolved={quote(value)}")
+            query_params.append(f"is_resolved={quote(value, safe='')}")
         if is_blocked is not None:
             value = str(is_blocked)
             if isinstance(is_blocked, bool):
                 value = value.lower()
-            query_params.append(f"is_blocked={quote(value)}")
+            query_params.append(f"is_blocked={quote(value, safe='')}")
         if is_archived is not None:
             value = str(is_archived)
             if isinstance(is_archived, bool):
                 value = value.lower()
-            query_params.append(f"is_archived={quote(value)}")
+            query_params.append(f"is_archived={quote(value, safe='')}")
         if is_suppressed is not None:
             value = str(is_suppressed)
             if isinstance(is_suppressed, bool):
                 value = value.lower()
-            query_params.append(f"is_suppressed={quote(value)}")
+            query_params.append(f"is_suppressed={quote(value, safe='')}")
         if has_opted_out is not None:
             value = str(has_opted_out)
             if isinstance(has_opted_out, bool):
                 value = value.lower()
-            query_params.append(f"has_opted_out={quote(value)}")
+            query_params.append(f"has_opted_out={quote(value, safe='')}")
         if last_message_sent_before is not None:
             value = str(last_message_sent_before)
             if isinstance(last_message_sent_before, bool):
                 value = value.lower()
-            query_params.append(f"last_message_sent_before={quote(value)}")
+            query_params.append(f"last_message_sent_before={quote(value, safe='')}")
         if last_message_sent_after is not None:
             value = str(last_message_sent_after)
             if isinstance(last_message_sent_after, bool):
                 value = value.lower()
-            query_params.append(f"last_message_sent_after={quote(value)}")
+            query_params.append(f"last_message_sent_after={quote(value, safe='')}")
         if last_message_received_before is not None:
             value = str(last_message_received_before)
             if isinstance(last_message_received_before, bool):
                 value = value.lower()
-            query_params.append(f"last_message_received_before={quote(value)}")
+            query_params.append(f"last_message_received_before={quote(value, safe='')}")
         if last_message_received_after is not None:
             value = str(last_message_received_after)
             if isinstance(last_message_received_after, bool):
                 value = value.lower()
-            query_params.append(f"last_message_received_after={quote(value)}")
+            query_params.append(f"last_message_received_after={quote(value, safe='')}")
         if tags is not None:
             value = str(tags)
             if isinstance(tags, bool):
                 value = value.lower()
-            query_params.append(f"tags={quote(value)}")
+            query_params.append(f"tags={quote(value, safe='')}")
         if groups is not None:
             value = str(groups)
             if isinstance(groups, bool):
                 value = value.lower()
-            query_params.append(f"groups={quote(value)}")
+            query_params.append(f"groups={quote(value, safe='')}")
         if custom_field_id1 is not None:
             value = str(custom_field_id1)
             if isinstance(custom_field_id1, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_id_1={quote(value)}")
+            query_params.append(f"custom_field_id_1={quote(value, safe='')}")
         if custom_field_value1 is not None:
             value = str(custom_field_value1)
             if isinstance(custom_field_value1, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_value_1={quote(value)}")
+            query_params.append(f"custom_field_value_1={quote(value, safe='')}")
         if custom_field_id2 is not None:
             value = str(custom_field_id2)
             if isinstance(custom_field_id2, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_id_2={quote(value)}")
+            query_params.append(f"custom_field_id_2={quote(value, safe='')}")
         if custom_field_value2 is not None:
             value = str(custom_field_value2)
             if isinstance(custom_field_value2, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_value_2={quote(value)}")
+            query_params.append(f"custom_field_value_2={quote(value, safe='')}")
         if custom_field_id3 is not None:
             value = str(custom_field_id3)
             if isinstance(custom_field_id3, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_id_3={quote(value)}")
+            query_params.append(f"custom_field_id_3={quote(value, safe='')}")
         if custom_field_value3 is not None:
             value = str(custom_field_value3)
             if isinstance(custom_field_value3, bool):
                 value = value.lower()
-            query_params.append(f"custom_field_value_3={quote(value)}")
+            query_params.append(f"custom_field_value_3={quote(value, safe='')}")
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1347,6 +1449,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         input: BulkUpdateContactsInput,
         dashboard_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Bulk update contacts
@@ -1361,7 +1468,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1381,6 +1492,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         group_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a group by its id
@@ -1396,7 +1512,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1416,6 +1536,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         group_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Deletes the group with the specified id
@@ -1433,7 +1558,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1454,6 +1583,11 @@ class TextrequestClient(ConnectorClientBase):
         input: UpdateGroupInput,
         dashboard_id: int,
         group_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Updates a group with the given id
@@ -1470,7 +1604,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1491,6 +1629,11 @@ class TextrequestClient(ConnectorClientBase):
         dashboard_id: int,
         page: int,
         page_size: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets all groups
@@ -1505,16 +1648,20 @@ class TextrequestClient(ConnectorClientBase):
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1534,6 +1681,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         input: CreateGroupInput,
         dashboard_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Creates a new group
@@ -1546,7 +1698,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1567,6 +1723,11 @@ class TextrequestClient(ConnectorClientBase):
         dashboard_id: int,
         page: int,
         page_size: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets all tags
@@ -1582,16 +1743,20 @@ class TextrequestClient(ConnectorClientBase):
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1610,6 +1775,11 @@ class TextrequestClient(ConnectorClientBase):
     async def get_custom_fields_async(
         self,
         dashboard_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets all custom fields
@@ -1623,7 +1793,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1643,6 +1817,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         payment_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets the payment with the specified id
@@ -1658,7 +1837,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1678,6 +1861,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         payment_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Mark a payment as paid
@@ -1699,7 +1887,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1719,6 +1911,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         payment_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send a follow-up text reminding the user to pay the specified payment
@@ -1737,7 +1934,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1757,6 +1958,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         dashboard_id: int,
         payment_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Cancels the specified payment
@@ -1775,7 +1981,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1800,6 +2010,11 @@ class TextrequestClient(ConnectorClientBase):
         phone_number: Optional[str] = None,
         sort_type: Optional[str] = None,
         sort_direction: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets all payments
@@ -1816,35 +2031,39 @@ class TextrequestClient(ConnectorClientBase):
             value = str(reference_number)
             if isinstance(reference_number, bool):
                 value = value.lower()
-            query_params.append(f"reference_number={quote(value)}")
+            query_params.append(f"reference_number={quote(value, safe='')}")
         if phone_number is not None:
             value = str(phone_number)
             if isinstance(phone_number, bool):
                 value = value.lower()
-            query_params.append(f"phone_number={quote(value)}")
+            query_params.append(f"phone_number={quote(value, safe='')}")
         if sort_type is not None:
             value = str(sort_type)
             if isinstance(sort_type, bool):
                 value = value.lower()
-            query_params.append(f"sort_type={quote(value)}")
+            query_params.append(f"sort_type={quote(value, safe='')}")
         if sort_direction is not None:
             value = str(sort_direction)
             if isinstance(sort_direction, bool):
                 value = value.lower()
-            query_params.append(f"sort_direction={quote(value)}")
+            query_params.append(f"sort_direction={quote(value, safe='')}")
         value = str(page)
         if isinstance(page, bool):
             value = value.lower()
-        query_params.append(f"page={quote(value)}")
+        query_params.append(f"page={quote(value, safe='')}")
         value = str(page_size)
         if isinstance(page_size, bool):
             value = value.lower()
-        query_params.append(f"page_size={quote(value)}")
+        query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1864,6 +2083,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         input: CreatePaymentInput,
         dashboard_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Creates a new payment
@@ -1877,7 +2101,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1896,6 +2124,11 @@ class TextrequestClient(ConnectorClientBase):
     async def get_dashboard_async(
         self,
         dashboard_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get info on this specific dashboard
@@ -1908,7 +2141,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1927,6 +2164,11 @@ class TextrequestClient(ConnectorClientBase):
     async def delete_dashboard_async(
         self,
         dashboard_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Deletes the specified dashboard
@@ -1939,7 +2181,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1959,6 +2205,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         input: UpdateDashboardsNameInput,
         dashboard_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a specific dashboard's name
@@ -1974,7 +2225,11 @@ class TextrequestClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1999,6 +2254,11 @@ class TextrequestClient(ConnectorClientBase):
         search: Optional[str] = None,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets all conversations for this dashboard
@@ -2015,37 +2275,41 @@ class TextrequestClient(ConnectorClientBase):
             value = str(tags)
             if isinstance(tags, bool):
                 value = value.lower()
-            query_params.append(f"tags={quote(value)}")
+            query_params.append(f"tags={quote(value, safe='')}")
         if show_unresolved_only is not None:
             value = str(show_unresolved_only)
             if isinstance(show_unresolved_only, bool):
                 value = value.lower()
-            query_params.append(f"show_unresolved_only={quote(value)}")
+            query_params.append(f"show_unresolved_only={quote(value, safe='')}")
         if include_archived is not None:
             value = str(include_archived)
             if isinstance(include_archived, bool):
                 value = value.lower()
-            query_params.append(f"include_archived={quote(value)}")
+            query_params.append(f"include_archived={quote(value, safe='')}")
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
-            query_params.append(f"search={quote(value)}")
+            query_params.append(f"search={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if page_size is not None:
             value = str(page_size)
             if isinstance(page_size, bool):
                 value = value.lower()
-            query_params.append(f"page_size={quote(value)}")
+            query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2065,6 +2329,11 @@ class TextrequestClient(ConnectorClientBase):
         self,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all dashboards in an account
@@ -2077,17 +2346,21 @@ class TextrequestClient(ConnectorClientBase):
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if page_size is not None:
             value = str(page_size)
             if isinstance(page_size, bool):
                 value = value.lower()
-            query_params.append(f"page_size={quote(value)}")
+            query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2106,6 +2379,11 @@ class TextrequestClient(ConnectorClientBase):
     async def create_dashboard_async(
         self,
         input: CreateDashboardInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a new dashboard with the given name and phone number
@@ -2120,7 +2398,11 @@ class TextrequestClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/dashboards"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

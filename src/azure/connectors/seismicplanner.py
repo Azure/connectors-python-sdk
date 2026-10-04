@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -1480,8 +1482,17 @@ class SeismicplannerClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a SeismicplannerClient.
@@ -1489,17 +1500,36 @@ class SeismicplannerClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -1514,6 +1544,11 @@ class SeismicplannerClient(ConnectorClientBase):
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
         sort: Optional[List[str]] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get comments
@@ -1542,22 +1577,22 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"creatorIds={quote(joined)}")
+                query_params.append(f"creatorIds={quote(joined, safe='')}")
             else:
                 value = str(creator_ids)
                 if isinstance(creator_ids, bool):
                     value = value.lower()
-                query_params.append(f"creatorIds={quote(value)}")
+                query_params.append(f"creatorIds={quote(value, safe='')}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
                 value = value.lower()
-            query_params.append(f"cursor={quote(value)}")
+            query_params.append(f"cursor={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if sort is not None:
             if isinstance(sort, list):
                 joined_parts = []
@@ -1567,17 +1602,21 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"sort={quote(joined)}")
+                query_params.append(f"sort={quote(joined, safe='')}")
             else:
                 value = str(sort)
                 if isinstance(sort, bool):
                     value = value.lower()
-                query_params.append(f"sort={quote(value)}")
+                query_params.append(f"sort={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1598,6 +1637,11 @@ class SeismicplannerClient(ConnectorClientBase):
         input: CreateCommentModel,
         space_id: str,
         node_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create comment
@@ -1617,7 +1661,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1638,6 +1686,11 @@ class SeismicplannerClient(ConnectorClientBase):
         space_id: str,
         node_id: str,
         comment_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get comment
@@ -1658,7 +1711,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1679,6 +1736,11 @@ class SeismicplannerClient(ConnectorClientBase):
         space_id: str,
         node_id: str,
         comment_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete comment
@@ -1699,7 +1761,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1716,6 +1782,11 @@ class SeismicplannerClient(ConnectorClientBase):
         space_id: str,
         node_id: str,
         comment_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update comment
@@ -1736,7 +1807,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1770,6 +1845,11 @@ class SeismicplannerClient(ConnectorClientBase):
         custom_properties: Optional[str] = None,
         follower_ids: Optional[List[str]] = None,
         include_associations: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get projects
@@ -1786,22 +1866,22 @@ class SeismicplannerClient(ConnectorClientBase):
             value = str(planned_end_date_from)
             if isinstance(planned_end_date_from, bool):
                 value = value.lower()
-            query_params.append(f"plannedEndDateFrom={quote(value)}")
+            query_params.append(f"plannedEndDateFrom={quote(value, safe='')}")
         if planned_end_date_to is not None:
             value = str(planned_end_date_to)
             if isinstance(planned_end_date_to, bool):
                 value = value.lower()
-            query_params.append(f"plannedEndDateTo={quote(value)}")
+            query_params.append(f"plannedEndDateTo={quote(value, safe='')}")
         if planned_start_date_from is not None:
             value = str(planned_start_date_from)
             if isinstance(planned_start_date_from, bool):
                 value = value.lower()
-            query_params.append(f"plannedStartDateFrom={quote(value)}")
+            query_params.append(f"plannedStartDateFrom={quote(value, safe='')}")
         if planned_start_date_to is not None:
             value = str(planned_start_date_to)
             if isinstance(planned_start_date_to, bool):
                 value = value.lower()
-            query_params.append(f"plannedStartDateTo={quote(value)}")
+            query_params.append(f"plannedStartDateTo={quote(value, safe='')}")
         if ids is not None:
             if isinstance(ids, list):
                 joined_parts = []
@@ -1811,17 +1891,17 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"ids={quote(joined)}")
+                query_params.append(f"ids={quote(joined, safe='')}")
             else:
                 value = str(ids)
                 if isinstance(ids, bool):
                     value = value.lower()
-                query_params.append(f"ids={quote(value)}")
+                query_params.append(f"ids={quote(value, safe='')}")
         if title is not None:
             value = str(title)
             if isinstance(title, bool):
                 value = value.lower()
-            query_params.append(f"title={quote(value)}")
+            query_params.append(f"title={quote(value, safe='')}")
         if manager_ids is not None:
             if isinstance(manager_ids, list):
                 joined_parts = []
@@ -1831,12 +1911,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"managerIds={quote(joined)}")
+                query_params.append(f"managerIds={quote(joined, safe='')}")
             else:
                 value = str(manager_ids)
                 if isinstance(manager_ids, bool):
                     value = value.lower()
-                query_params.append(f"managerIds={quote(value)}")
+                query_params.append(f"managerIds={quote(value, safe='')}")
         if creator_ids is not None:
             if isinstance(creator_ids, list):
                 joined_parts = []
@@ -1846,12 +1926,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"creatorIds={quote(joined)}")
+                query_params.append(f"creatorIds={quote(joined, safe='')}")
             else:
                 value = str(creator_ids)
                 if isinstance(creator_ids, bool):
                     value = value.lower()
-                query_params.append(f"creatorIds={quote(value)}")
+                query_params.append(f"creatorIds={quote(value, safe='')}")
         if associated_node_ids is not None:
             if isinstance(associated_node_ids, list):
                 joined_parts = []
@@ -1861,22 +1941,22 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"associatedNodeIds={quote(joined)}")
+                query_params.append(f"associatedNodeIds={quote(joined, safe='')}")
             else:
                 value = str(associated_node_ids)
                 if isinstance(associated_node_ids, bool):
                     value = value.lower()
-                query_params.append(f"associatedNodeIds={quote(value)}")
+                query_params.append(f"associatedNodeIds={quote(value, safe='')}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
                 value = value.lower()
-            query_params.append(f"cursor={quote(value)}")
+            query_params.append(f"cursor={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if sort is not None:
             if isinstance(sort, list):
                 joined_parts = []
@@ -1886,17 +1966,17 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"sort={quote(joined)}")
+                query_params.append(f"sort={quote(joined, safe='')}")
             else:
                 value = str(sort)
                 if isinstance(sort, bool):
                     value = value.lower()
-                query_params.append(f"sort={quote(value)}")
+                query_params.append(f"sort={quote(value, safe='')}")
         if custom_properties is not None:
             value = str(custom_properties)
             if isinstance(custom_properties, bool):
                 value = value.lower()
-            query_params.append(f"customProperties={quote(value)}")
+            query_params.append(f"customProperties={quote(value, safe='')}")
         if follower_ids is not None:
             if isinstance(follower_ids, list):
                 joined_parts = []
@@ -1906,22 +1986,26 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"followerIds={quote(joined)}")
+                query_params.append(f"followerIds={quote(joined, safe='')}")
             else:
                 value = str(follower_ids)
                 if isinstance(follower_ids, bool):
                     value = value.lower()
-                query_params.append(f"followerIds={quote(value)}")
+                query_params.append(f"followerIds={quote(value, safe='')}")
         if include_associations is not None:
             value = str(include_associations)
             if isinstance(include_associations, bool):
                 value = value.lower()
-            query_params.append(f"includeAssociations={quote(value)}")
+            query_params.append(f"includeAssociations={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1942,6 +2026,11 @@ class SeismicplannerClient(ConnectorClientBase):
         space_id: str,
         ids: List[str],
         delete_tasks: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete projects
@@ -1962,22 +2051,26 @@ class SeismicplannerClient(ConnectorClientBase):
                     value = value.lower()
                 joined_parts.append(value)
             joined = ','.join(joined_parts)
-            query_params.append(f"ids={quote(joined)}")
+            query_params.append(f"ids={quote(joined, safe='')}")
         else:
             value = str(ids)
             if isinstance(ids, bool):
                 value = value.lower()
-            query_params.append(f"ids={quote(value)}")
+            query_params.append(f"ids={quote(value, safe='')}")
         if delete_tasks is not None:
             value = str(delete_tasks)
             if isinstance(delete_tasks, bool):
                 value = value.lower()
-            query_params.append(f"deleteTasks={quote(value)}")
+            query_params.append(f"deleteTasks={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1997,6 +2090,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         input: CreateProject,
         space_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create project
@@ -2009,7 +2107,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2031,6 +2133,11 @@ class SeismicplannerClient(ConnectorClientBase):
         project_id: str,
         associated_nodes_depth: Optional[int] = None,
         include_works: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get project
@@ -2051,17 +2158,21 @@ class SeismicplannerClient(ConnectorClientBase):
             value = str(associated_nodes_depth)
             if isinstance(associated_nodes_depth, bool):
                 value = value.lower()
-            query_params.append(f"associatedNodesDepth={quote(value)}")
+            query_params.append(f"associatedNodesDepth={quote(value, safe='')}")
         if include_works is not None:
             value = str(include_works)
             if isinstance(include_works, bool):
                 value = value.lower()
-            query_params.append(f"includeWorks={quote(value)}")
+            query_params.append(f"includeWorks={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2082,6 +2193,11 @@ class SeismicplannerClient(ConnectorClientBase):
         space_id: str,
         project_id: str,
         delete_tasks: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete project
@@ -2102,12 +2218,16 @@ class SeismicplannerClient(ConnectorClientBase):
             value = str(delete_tasks)
             if isinstance(delete_tasks, bool):
                 value = value.lower()
-            query_params.append(f"deleteTasks={quote(value)}")
+            query_params.append(f"deleteTasks={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2128,6 +2248,11 @@ class SeismicplannerClient(ConnectorClientBase):
         input: UpdateProject,
         space_id: str,
         project_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a project
@@ -2145,7 +2270,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2191,6 +2320,11 @@ class SeismicplannerClient(ConnectorClientBase):
         associated_node_ids: Optional[List[str]] = None,
         content_refs: Optional[List[str]] = None,
         include_request_form_custom_properties: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get requests
@@ -2207,42 +2341,42 @@ class SeismicplannerClient(ConnectorClientBase):
             value = str(planned_end_date_from)
             if isinstance(planned_end_date_from, bool):
                 value = value.lower()
-            query_params.append(f"plannedEndDateFrom={quote(value)}")
+            query_params.append(f"plannedEndDateFrom={quote(value, safe='')}")
         if planned_end_date_to is not None:
             value = str(planned_end_date_to)
             if isinstance(planned_end_date_to, bool):
                 value = value.lower()
-            query_params.append(f"plannedEndDateTo={quote(value)}")
+            query_params.append(f"plannedEndDateTo={quote(value, safe='')}")
         if planned_start_date_from is not None:
             value = str(planned_start_date_from)
             if isinstance(planned_start_date_from, bool):
                 value = value.lower()
-            query_params.append(f"plannedStartDateFrom={quote(value)}")
+            query_params.append(f"plannedStartDateFrom={quote(value, safe='')}")
         if planned_start_date_to is not None:
             value = str(planned_start_date_to)
             if isinstance(planned_start_date_to, bool):
                 value = value.lower()
-            query_params.append(f"plannedStartDateTo={quote(value)}")
+            query_params.append(f"plannedStartDateTo={quote(value, safe='')}")
         if created_at_from is not None:
             value = str(created_at_from)
             if isinstance(created_at_from, bool):
                 value = value.lower()
-            query_params.append(f"createdAtFrom={quote(value)}")
+            query_params.append(f"createdAtFrom={quote(value, safe='')}")
         if created_at_to is not None:
             value = str(created_at_to)
             if isinstance(created_at_to, bool):
                 value = value.lower()
-            query_params.append(f"createdAtTo={quote(value)}")
+            query_params.append(f"createdAtTo={quote(value, safe='')}")
         if updated_at_from is not None:
             value = str(updated_at_from)
             if isinstance(updated_at_from, bool):
                 value = value.lower()
-            query_params.append(f"updatedAtFrom={quote(value)}")
+            query_params.append(f"updatedAtFrom={quote(value, safe='')}")
         if updated_at_to is not None:
             value = str(updated_at_to)
             if isinstance(updated_at_to, bool):
                 value = value.lower()
-            query_params.append(f"updatedAtTo={quote(value)}")
+            query_params.append(f"updatedAtTo={quote(value, safe='')}")
         if ids is not None:
             if isinstance(ids, list):
                 joined_parts = []
@@ -2252,17 +2386,17 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"ids={quote(joined)}")
+                query_params.append(f"ids={quote(joined, safe='')}")
             else:
                 value = str(ids)
                 if isinstance(ids, bool):
                     value = value.lower()
-                query_params.append(f"ids={quote(value)}")
+                query_params.append(f"ids={quote(value, safe='')}")
         if title is not None:
             value = str(title)
             if isinstance(title, bool):
                 value = value.lower()
-            query_params.append(f"title={quote(value)}")
+            query_params.append(f"title={quote(value, safe='')}")
         if assignee_ids is not None:
             if isinstance(assignee_ids, list):
                 joined_parts = []
@@ -2272,12 +2406,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"assigneeIds={quote(joined)}")
+                query_params.append(f"assigneeIds={quote(joined, safe='')}")
             else:
                 value = str(assignee_ids)
                 if isinstance(assignee_ids, bool):
                     value = value.lower()
-                query_params.append(f"assigneeIds={quote(value)}")
+                query_params.append(f"assigneeIds={quote(value, safe='')}")
         if priorities is not None:
             if isinstance(priorities, list):
                 joined_parts = []
@@ -2287,17 +2421,17 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"priorities={quote(joined)}")
+                query_params.append(f"priorities={quote(joined, safe='')}")
             else:
                 value = str(priorities)
                 if isinstance(priorities, bool):
                     value = value.lower()
-                query_params.append(f"priorities={quote(value)}")
+                query_params.append(f"priorities={quote(value, safe='')}")
         if keywords is not None:
             value = str(keywords)
             if isinstance(keywords, bool):
                 value = value.lower()
-            query_params.append(f"keywords={quote(value)}")
+            query_params.append(f"keywords={quote(value, safe='')}")
         if assigner_ids is not None:
             if isinstance(assigner_ids, list):
                 joined_parts = []
@@ -2307,12 +2441,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"assignerIds={quote(joined)}")
+                query_params.append(f"assignerIds={quote(joined, safe='')}")
             else:
                 value = str(assigner_ids)
                 if isinstance(assigner_ids, bool):
                     value = value.lower()
-                query_params.append(f"assignerIds={quote(value)}")
+                query_params.append(f"assignerIds={quote(value, safe='')}")
         if creator_ids is not None:
             if isinstance(creator_ids, list):
                 joined_parts = []
@@ -2322,12 +2456,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"creatorIds={quote(joined)}")
+                query_params.append(f"creatorIds={quote(joined, safe='')}")
             else:
                 value = str(creator_ids)
                 if isinstance(creator_ids, bool):
                     value = value.lower()
-                query_params.append(f"creatorIds={quote(value)}")
+                query_params.append(f"creatorIds={quote(value, safe='')}")
         if step_ids is not None:
             if isinstance(step_ids, list):
                 joined_parts = []
@@ -2337,27 +2471,27 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"stepIds={quote(joined)}")
+                query_params.append(f"stepIds={quote(joined, safe='')}")
             else:
                 value = str(step_ids)
                 if isinstance(step_ids, bool):
                     value = value.lower()
-                query_params.append(f"stepIds={quote(value)}")
+                query_params.append(f"stepIds={quote(value, safe='')}")
         if status_schema_id is not None:
             value = str(status_schema_id)
             if isinstance(status_schema_id, bool):
                 value = value.lower()
-            query_params.append(f"statusSchemaId={quote(value)}")
+            query_params.append(f"statusSchemaId={quote(value, safe='')}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
                 value = value.lower()
-            query_params.append(f"cursor={quote(value)}")
+            query_params.append(f"cursor={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if sort is not None:
             if isinstance(sort, list):
                 joined_parts = []
@@ -2367,27 +2501,27 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"sort={quote(joined)}")
+                query_params.append(f"sort={quote(joined, safe='')}")
             else:
                 value = str(sort)
                 if isinstance(sort, bool):
                     value = value.lower()
-                query_params.append(f"sort={quote(value)}")
+                query_params.append(f"sort={quote(value, safe='')}")
         if project_id is not None:
             value = str(project_id)
             if isinstance(project_id, bool):
                 value = value.lower()
-            query_params.append(f"projectId={quote(value)}")
+            query_params.append(f"projectId={quote(value, safe='')}")
         if has_project is not None:
             value = str(has_project)
             if isinstance(has_project, bool):
                 value = value.lower()
-            query_params.append(f"hasProject={quote(value)}")
+            query_params.append(f"hasProject={quote(value, safe='')}")
         if custom_properties is not None:
             value = str(custom_properties)
             if isinstance(custom_properties, bool):
                 value = value.lower()
-            query_params.append(f"customProperties={quote(value)}")
+            query_params.append(f"customProperties={quote(value, safe='')}")
         if follower_ids is not None:
             if isinstance(follower_ids, list):
                 joined_parts = []
@@ -2397,12 +2531,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"followerIds={quote(joined)}")
+                query_params.append(f"followerIds={quote(joined, safe='')}")
             else:
                 value = str(follower_ids)
                 if isinstance(follower_ids, bool):
                     value = value.lower()
-                query_params.append(f"followerIds={quote(value)}")
+                query_params.append(f"followerIds={quote(value, safe='')}")
         if associated_node_ids is not None:
             if isinstance(associated_node_ids, list):
                 joined_parts = []
@@ -2412,12 +2546,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"associatedNodeIds={quote(joined)}")
+                query_params.append(f"associatedNodeIds={quote(joined, safe='')}")
             else:
                 value = str(associated_node_ids)
                 if isinstance(associated_node_ids, bool):
                     value = value.lower()
-                query_params.append(f"associatedNodeIds={quote(value)}")
+                query_params.append(f"associatedNodeIds={quote(value, safe='')}")
         if content_refs is not None:
             if isinstance(content_refs, list):
                 joined_parts = []
@@ -2427,22 +2561,26 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"contentRefs={quote(joined)}")
+                query_params.append(f"contentRefs={quote(joined, safe='')}")
             else:
                 value = str(content_refs)
                 if isinstance(content_refs, bool):
                     value = value.lower()
-                query_params.append(f"contentRefs={quote(value)}")
+                query_params.append(f"contentRefs={quote(value, safe='')}")
         if include_request_form_custom_properties is not None:
             value = str(include_request_form_custom_properties)
             if isinstance(include_request_form_custom_properties, bool):
                 value = value.lower()
-            query_params.append(f"includeRequestFormCustomProperties={quote(value)}")
+            query_params.append(f"includeRequestFormCustomProperties={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2462,6 +2600,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         input: DeleteRequest,
         space_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete requests
@@ -2474,7 +2617,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=input
+            "DELETE", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2494,6 +2641,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         input: CreateRequest,
         space_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create request
@@ -2506,7 +2658,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2526,6 +2682,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get request
@@ -2543,7 +2704,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2563,6 +2728,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete request
@@ -2580,7 +2750,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2596,6 +2770,11 @@ class SeismicplannerClient(ConnectorClientBase):
         input: UpdateRequest,
         space_id: str,
         request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update request
@@ -2613,7 +2792,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2638,6 +2821,11 @@ class SeismicplannerClient(ConnectorClientBase):
         creator_ids: Optional[List[str]] = None,
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get status schemas
@@ -2656,12 +2844,12 @@ class SeismicplannerClient(ConnectorClientBase):
             value = str(is_default)
             if isinstance(is_default, bool):
                 value = value.lower()
-            query_params.append(f"isDefault={quote(value)}")
+            query_params.append(f"isDefault={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if ids is not None:
             if isinstance(ids, list):
                 joined_parts = []
@@ -2671,12 +2859,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"ids={quote(joined)}")
+                query_params.append(f"ids={quote(joined, safe='')}")
             else:
                 value = str(ids)
                 if isinstance(ids, bool):
                     value = value.lower()
-                query_params.append(f"ids={quote(value)}")
+                query_params.append(f"ids={quote(value, safe='')}")
         if creator_ids is not None:
             if isinstance(creator_ids, list):
                 joined_parts = []
@@ -2686,27 +2874,31 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"creatorIds={quote(joined)}")
+                query_params.append(f"creatorIds={quote(joined, safe='')}")
             else:
                 value = str(creator_ids)
                 if isinstance(creator_ids, bool):
                     value = value.lower()
-                query_params.append(f"creatorIds={quote(value)}")
+                query_params.append(f"creatorIds={quote(value, safe='')}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
                 value = value.lower()
-            query_params.append(f"cursor={quote(value)}")
+            query_params.append(f"cursor={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2726,6 +2918,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         status_schema_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get status schema
@@ -2745,7 +2942,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2793,6 +2994,11 @@ class SeismicplannerClient(ConnectorClientBase):
         creator_ids: Optional[List[str]] = None,
         include_associations: Optional[bool] = None,
         parent_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get tasks
@@ -2809,42 +3015,42 @@ class SeismicplannerClient(ConnectorClientBase):
             value = str(planned_end_date_from)
             if isinstance(planned_end_date_from, bool):
                 value = value.lower()
-            query_params.append(f"plannedEndDateFrom={quote(value)}")
+            query_params.append(f"plannedEndDateFrom={quote(value, safe='')}")
         if planned_end_date_to is not None:
             value = str(planned_end_date_to)
             if isinstance(planned_end_date_to, bool):
                 value = value.lower()
-            query_params.append(f"plannedEndDateTo={quote(value)}")
+            query_params.append(f"plannedEndDateTo={quote(value, safe='')}")
         if planned_start_date_from is not None:
             value = str(planned_start_date_from)
             if isinstance(planned_start_date_from, bool):
                 value = value.lower()
-            query_params.append(f"plannedStartDateFrom={quote(value)}")
+            query_params.append(f"plannedStartDateFrom={quote(value, safe='')}")
         if planned_start_date_to is not None:
             value = str(planned_start_date_to)
             if isinstance(planned_start_date_to, bool):
                 value = value.lower()
-            query_params.append(f"plannedStartDateTo={quote(value)}")
+            query_params.append(f"plannedStartDateTo={quote(value, safe='')}")
         if created_at_from is not None:
             value = str(created_at_from)
             if isinstance(created_at_from, bool):
                 value = value.lower()
-            query_params.append(f"createdAtFrom={quote(value)}")
+            query_params.append(f"createdAtFrom={quote(value, safe='')}")
         if created_at_to is not None:
             value = str(created_at_to)
             if isinstance(created_at_to, bool):
                 value = value.lower()
-            query_params.append(f"createdAtTo={quote(value)}")
+            query_params.append(f"createdAtTo={quote(value, safe='')}")
         if updated_at_from is not None:
             value = str(updated_at_from)
             if isinstance(updated_at_from, bool):
                 value = value.lower()
-            query_params.append(f"updatedAtFrom={quote(value)}")
+            query_params.append(f"updatedAtFrom={quote(value, safe='')}")
         if updated_at_to is not None:
             value = str(updated_at_to)
             if isinstance(updated_at_to, bool):
                 value = value.lower()
-            query_params.append(f"updatedAtTo={quote(value)}")
+            query_params.append(f"updatedAtTo={quote(value, safe='')}")
         if ids is not None:
             if isinstance(ids, list):
                 joined_parts = []
@@ -2854,22 +3060,22 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"ids={quote(joined)}")
+                query_params.append(f"ids={quote(joined, safe='')}")
             else:
                 value = str(ids)
                 if isinstance(ids, bool):
                     value = value.lower()
-                query_params.append(f"ids={quote(value)}")
+                query_params.append(f"ids={quote(value, safe='')}")
         if title is not None:
             value = str(title)
             if isinstance(title, bool):
                 value = value.lower()
-            query_params.append(f"title={quote(value)}")
+            query_params.append(f"title={quote(value, safe='')}")
         if description is not None:
             value = str(description)
             if isinstance(description, bool):
                 value = value.lower()
-            query_params.append(f"description={quote(value)}")
+            query_params.append(f"description={quote(value, safe='')}")
         if assignee_ids is not None:
             if isinstance(assignee_ids, list):
                 joined_parts = []
@@ -2879,12 +3085,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"assigneeIds={quote(joined)}")
+                query_params.append(f"assigneeIds={quote(joined, safe='')}")
             else:
                 value = str(assignee_ids)
                 if isinstance(assignee_ids, bool):
                     value = value.lower()
-                query_params.append(f"assigneeIds={quote(value)}")
+                query_params.append(f"assigneeIds={quote(value, safe='')}")
         if priorities is not None:
             if isinstance(priorities, list):
                 joined_parts = []
@@ -2894,17 +3100,17 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"priorities={quote(joined)}")
+                query_params.append(f"priorities={quote(joined, safe='')}")
             else:
                 value = str(priorities)
                 if isinstance(priorities, bool):
                     value = value.lower()
-                query_params.append(f"priorities={quote(value)}")
+                query_params.append(f"priorities={quote(value, safe='')}")
         if keywords is not None:
             value = str(keywords)
             if isinstance(keywords, bool):
                 value = value.lower()
-            query_params.append(f"keywords={quote(value)}")
+            query_params.append(f"keywords={quote(value, safe='')}")
         if assigner_ids is not None:
             if isinstance(assigner_ids, list):
                 joined_parts = []
@@ -2914,12 +3120,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"assignerIds={quote(joined)}")
+                query_params.append(f"assignerIds={quote(joined, safe='')}")
             else:
                 value = str(assigner_ids)
                 if isinstance(assigner_ids, bool):
                     value = value.lower()
-                query_params.append(f"assignerIds={quote(value)}")
+                query_params.append(f"assignerIds={quote(value, safe='')}")
         if step_ids is not None:
             if isinstance(step_ids, list):
                 joined_parts = []
@@ -2929,27 +3135,27 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"stepIds={quote(joined)}")
+                query_params.append(f"stepIds={quote(joined, safe='')}")
             else:
                 value = str(step_ids)
                 if isinstance(step_ids, bool):
                     value = value.lower()
-                query_params.append(f"stepIds={quote(value)}")
+                query_params.append(f"stepIds={quote(value, safe='')}")
         if status_schema_id is not None:
             value = str(status_schema_id)
             if isinstance(status_schema_id, bool):
                 value = value.lower()
-            query_params.append(f"statusSchemaId={quote(value)}")
+            query_params.append(f"statusSchemaId={quote(value, safe='')}")
         if cursor is not None:
             value = str(cursor)
             if isinstance(cursor, bool):
                 value = value.lower()
-            query_params.append(f"cursor={quote(value)}")
+            query_params.append(f"cursor={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if sort is not None:
             if isinstance(sort, list):
                 joined_parts = []
@@ -2959,32 +3165,32 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"sort={quote(joined)}")
+                query_params.append(f"sort={quote(joined, safe='')}")
             else:
                 value = str(sort)
                 if isinstance(sort, bool):
                     value = value.lower()
-                query_params.append(f"sort={quote(value)}")
+                query_params.append(f"sort={quote(value, safe='')}")
         if recursive is not None:
             value = str(recursive)
             if isinstance(recursive, bool):
                 value = value.lower()
-            query_params.append(f"recursive={quote(value)}")
+            query_params.append(f"recursive={quote(value, safe='')}")
         if project_id is not None:
             value = str(project_id)
             if isinstance(project_id, bool):
                 value = value.lower()
-            query_params.append(f"projectId={quote(value)}")
+            query_params.append(f"projectId={quote(value, safe='')}")
         if has_project is not None:
             value = str(has_project)
             if isinstance(has_project, bool):
                 value = value.lower()
-            query_params.append(f"hasProject={quote(value)}")
+            query_params.append(f"hasProject={quote(value, safe='')}")
         if custom_properties is not None:
             value = str(custom_properties)
             if isinstance(custom_properties, bool):
                 value = value.lower()
-            query_params.append(f"customProperties={quote(value)}")
+            query_params.append(f"customProperties={quote(value, safe='')}")
         if follower_ids is not None:
             if isinstance(follower_ids, list):
                 joined_parts = []
@@ -2994,12 +3200,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"followerIds={quote(joined)}")
+                query_params.append(f"followerIds={quote(joined, safe='')}")
             else:
                 value = str(follower_ids)
                 if isinstance(follower_ids, bool):
                     value = value.lower()
-                query_params.append(f"followerIds={quote(value)}")
+                query_params.append(f"followerIds={quote(value, safe='')}")
         if associated_node_ids is not None:
             if isinstance(associated_node_ids, list):
                 joined_parts = []
@@ -3009,12 +3215,12 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"associatedNodeIds={quote(joined)}")
+                query_params.append(f"associatedNodeIds={quote(joined, safe='')}")
             else:
                 value = str(associated_node_ids)
                 if isinstance(associated_node_ids, bool):
                     value = value.lower()
-                query_params.append(f"associatedNodeIds={quote(value)}")
+                query_params.append(f"associatedNodeIds={quote(value, safe='')}")
         if creator_ids is not None:
             if isinstance(creator_ids, list):
                 joined_parts = []
@@ -3024,27 +3230,31 @@ class SeismicplannerClient(ConnectorClientBase):
                         value = value.lower()
                     joined_parts.append(value)
                 joined = ','.join(joined_parts)
-                query_params.append(f"creatorIds={quote(joined)}")
+                query_params.append(f"creatorIds={quote(joined, safe='')}")
             else:
                 value = str(creator_ids)
                 if isinstance(creator_ids, bool):
                     value = value.lower()
-                query_params.append(f"creatorIds={quote(value)}")
+                query_params.append(f"creatorIds={quote(value, safe='')}")
         if include_associations is not None:
             value = str(include_associations)
             if isinstance(include_associations, bool):
                 value = value.lower()
-            query_params.append(f"includeAssociations={quote(value)}")
+            query_params.append(f"includeAssociations={quote(value, safe='')}")
         if parent_id is not None:
             value = str(parent_id)
             if isinstance(parent_id, bool):
                 value = value.lower()
-            query_params.append(f"parentId={quote(value)}")
+            query_params.append(f"parentId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3064,6 +3274,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         input: CreateTask,
         space_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create task
@@ -3076,7 +3291,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3096,6 +3315,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         task_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get task
@@ -3113,7 +3337,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3133,6 +3361,11 @@ class SeismicplannerClient(ConnectorClientBase):
         self,
         space_id: str,
         task_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete task
@@ -3150,7 +3383,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3171,6 +3408,11 @@ class SeismicplannerClient(ConnectorClientBase):
         input: UpdateTask,
         space_id: str,
         task_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update task
@@ -3188,7 +3430,11 @@ class SeismicplannerClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

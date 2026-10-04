@@ -26,8 +26,8 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 ### Completed
 
-- [x] Core SDK abstractions (`ConnectorClientBase`, `TokenProvider`, `ConnectorHttpClient`)
-- [x] Authentication providers (Managed Identity, Azure Identity, Connection String)
+- [x] Core SDK abstractions (`ConnectorClientBase`, `ConnectorHttpClient`)
+- [x] Azure Core credentials (async Azure Identity and API key)
 - [x] HTTP client with retry logic and exponential backoff
 - [x] Async/await support throughout
 - [x] Type hints and dataclass models

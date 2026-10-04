@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.eventbrite import EventbriteClient
 
 
@@ -18,13 +18,13 @@ async def main() -> None:
         print("Set EVENTBRITE_CONNECTION_URL to run this sample.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    try:
-        async with EventbriteClient(CONNECTION_RUNTIME_URL, token_provider) as client:
-            categories = await client.get_categories_async()
-            print(f"Categories: {categories}")
-    except ConnectorException as ex:
-        print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with EventbriteClient(CONNECTION_RUNTIME_URL, credential) as client:
+                categories = await client.get_categories_async()
+                print(f"Categories: {categories}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":

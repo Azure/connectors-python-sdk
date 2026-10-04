@@ -7,6 +7,7 @@ import inspect
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.sql import (
     SqlClient,
     DatabasesList,
@@ -26,11 +27,10 @@ from azure.connectors.sql import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: SqlClient, operation: str):
@@ -57,7 +57,9 @@ async def _invoke_operation(client: SqlClient, operation: str):
             server="srv", database="db", table="tbl", id="1"
         )
     if operation == "get_items":
-        return await client.get_items_async(server="srv", database="db", table="tbl")
+        return await resolve_generated_result(
+            client.get_items_async(server="srv", database="db", table="tbl")
+        )
     if operation == "get_tables":
         return await client.get_tables_async(server="srv", database="db")
     if operation == "patch_item":
@@ -77,7 +79,9 @@ async def _invoke_operation(client: SqlClient, operation: str):
     if operation == "get_databases":
         return await client.get_databases_async(server="srv")
     if operation == "get_tables_for_delete_item":
-        return await client.get_tables_for_delete_item_async(server="srv", database="db")
+        return await resolve_generated_result(
+            client.get_tables_for_delete_item_async(server="srv", database="db")
+        )
     if operation == "get_procedures_v2":
         return await client.get_procedures_v2_async(server="srv", database="db")
     if operation == "get_procedure_v2":
@@ -85,23 +89,29 @@ async def _invoke_operation(client: SqlClient, operation: str):
             server="srv", database="db", procedure="proc"
         )
     if operation == "get_tables_for_get_item":
-        return await client.get_tables_for_get_item_async(server="srv", database="db")
+        return await resolve_generated_result(
+            client.get_tables_for_get_item_async(server="srv", database="db")
+        )
     if operation == "get_tables_for_get_on_new_items":
-        return await client.get_tables_for_get_on_new_items_async(
+        return await resolve_generated_result(client.get_tables_for_get_on_new_items_async(
             server="srv", database="db"
-        )
+        ))
     if operation == "get_tables_for_get_on_updated_items":
-        return await client.get_tables_for_get_on_updated_items_async(
+        return await resolve_generated_result(client.get_tables_for_get_on_updated_items_async(
             server="srv", database="db"
-        )
+        ))
     if operation == "get_tables_for_patch_item":
-        return await client.get_tables_for_patch_item_async(server="srv", database="db")
+        return await resolve_generated_result(
+            client.get_tables_for_patch_item_async(server="srv", database="db")
+        )
     if operation == "get_table_for_patch":
         return await client.get_table_for_patch_async(
             server="srv", database="db", table="tbl"
         )
     if operation == "get_tables_for_post_item":
-        return await client.get_tables_for_post_item_async(server="srv", database="db")
+        return await resolve_generated_result(
+            client.get_tables_for_post_item_async(server="srv", database="db")
+        )
     if operation == "get_table":
         return await client.get_table_async(server="srv", database="db", table="tbl")
     if operation == "get_pass_through_native_query_metadata":
@@ -150,55 +160,54 @@ class TestSqlClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = SqlClient("https://example.azure.com/connections/test")
+        client = SqlClient("https://example.azure.com/connections/test",
+                           AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "sql"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = SqlClient("https://example.azure.com/connections/test/")
+        client = SqlClient("https://example.azure.com/connections/test/",
+                           AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SqlClient("")
+            SqlClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SqlClient(None)
+            SqlClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'sql'."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "sql"
@@ -208,11 +217,11 @@ class TestSqlClientLifecycle:
     """Tests for SqlClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -220,12 +229,12 @@ class TestSqlClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(SqlClient, "close", new_callable=AsyncMock) as mock_close:
             async with SqlClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, SqlClient)
 
@@ -236,11 +245,11 @@ class TestSqlClientMethods:
     """Success path tests for representative SQL methods."""
 
     @pytest.mark.asyncio
-    async def test_get_servers_success(self, mock_token_provider):
+    async def test_get_servers_success(self, mock_credential):
         """Test get_servers_async returns parsed JSON and targets /servers."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[{"name":"srv1"}]}')
 
@@ -256,11 +265,11 @@ class TestSqlClientMethods:
             assert mock_send.call_args[0][1].endswith("/servers")
 
     @pytest.mark.asyncio
-    async def test_get_databases_sends_server_query(self, mock_token_provider):
+    async def test_get_databases_sends_server_query(self, mock_credential):
         """Test get_databases_async appends the server query parameter."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[]}')
 
@@ -277,11 +286,11 @@ class TestSqlClientMethods:
             assert "server=srv1" in request_url
 
     @pytest.mark.asyncio
-    async def test_get_items_success(self, mock_token_provider):
+    async def test_get_items_success(self, mock_credential):
         """Test get_items_async targets the v2 items endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[{"dynamicProperties":{}}]}')
 
@@ -291,19 +300,19 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_items_async(
+            result = await resolve_generated_result(client.get_items_async(
                 server="srv", database="db", table="tbl"
-            )
+            ))
 
-            assert "value" in result
+            assert result
             assert "/v2/datasets/srv,db/tables/tbl/items" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_items_appends_odata_query_params(self, mock_token_provider):
+    async def test_get_items_appends_odata_query_params(self, mock_credential):
         """Test get_items_async serializes OData query parameters."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[]}')
 
@@ -313,24 +322,24 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(
+            await resolve_generated_result(client.get_items_async(
                 server="srv",
                 database="db",
                 table="tbl",
                 filter="Id eq 1",
                 top="10",
-            )
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert "$filter=Id%20eq%201" in request_url
             assert "$top=10" in request_url
 
     @pytest.mark.asyncio
-    async def test_post_item_sends_body(self, mock_token_provider):
+    async def test_post_item_sends_body(self, mock_credential):
         """Test post_item_async sends the input body to the items endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id":"1"}')
 
@@ -352,11 +361,11 @@ class TestSqlClientMethods:
             assert "/v2/datasets/srv,db/tables/tbl/items" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_patch_item_uses_patch_verb(self, mock_token_provider):
+    async def test_patch_item_uses_patch_verb(self, mock_credential):
         """Test patch_item_async issues a PATCH and forwards the body."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id":"1"}')
         body = PatchItemInput()
@@ -380,11 +389,11 @@ class TestSqlClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_delete_item_uses_delete_verb(self, mock_token_provider):
+    async def test_delete_item_uses_delete_verb(self, mock_credential):
         """Test delete_item_async issues a DELETE and returns None."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -403,11 +412,11 @@ class TestSqlClientMethods:
             assert "/v2/datasets/srv,db/tables/tbl/items/1" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_execute_procedure_sends_body(self, mock_token_provider):
+    async def test_execute_procedure_sends_body(self, mock_credential):
         """Test execute_procedure_async posts the input to the procedures endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"ResultSets":{}}')
 
@@ -428,11 +437,11 @@ class TestSqlClientMethods:
             assert "/v2/datasets/srv,db/procedures/proc" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_execute_pass_through_native_query_success(self, mock_token_provider):
+    async def test_execute_pass_through_native_query_success(self, mock_credential):
         """Test execute_pass_through_native_query_async posts to the query endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"resultSets":{}}')
 
@@ -452,11 +461,11 @@ class TestSqlClientMethods:
             assert "/v2/datasets/srv,db/query/sql" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_procedures_v2_success(self, mock_token_provider):
+    async def test_get_procedures_v2_success(self, mock_credential):
         """Test get_procedures_v2_async targets the v2 procedures endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[]}')
 
@@ -471,11 +480,11 @@ class TestSqlClientMethods:
             assert "/v2/datasets/srv,db/procedures" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_table_success(self, mock_token_provider):
+    async def test_get_table_success(self, mock_credential):
         """Test get_table_async targets the current v2 metadata endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"name":"tbl"}')
 
@@ -491,10 +500,10 @@ class TestSqlClientMethods:
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
-    async def test_all_operations_success(self, mock_token_provider, operation):
+    async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation issues a request and returns without error."""
         base_url = "https://example.azure.com/connections/test"
-        client = SqlClient(base_url, token_provider=mock_token_provider)
+        client = SqlClient(base_url, credential=mock_credential)
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(
@@ -516,13 +525,13 @@ class TestSqlClientErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
@@ -654,10 +663,23 @@ class TestSqlTriggerOperations:
             ),
             "post_item_async": ("self", "input", "server", "database", "table"),
         }
+        request_control_parameters = (
+            "timeout",
+            "headers",
+            "client_request_id",
+            "response_hook",
+        )
+        expected_signatures = {
+            name: parameters + request_control_parameters
+            for name, parameters in expected_signatures.items()
+        }
         actual_signatures = {
             name: tuple(inspect.signature(method).parameters)
             for name, method in vars(SqlClient).items()
-            if inspect.iscoroutinefunction(method)
+            if (
+                inspect.iscoroutinefunction(method)
+                or inspect.isasyncgenfunction(method)
+            )
         }
 
         assert actual_signatures == expected_signatures

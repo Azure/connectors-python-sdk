@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.azuread import (
     AzureadClient,
     CreateOffice365GroupInput,
@@ -21,11 +22,10 @@ from azure.connectors.azuread import (
     GetMemberGroupsRequest,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestAzureadClientInitialization:
@@ -33,55 +33,54 @@ class TestAzureadClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzureadClient("https://example.azure.com/connections/test")
+        client = AzureadClient("https://example.azure.com/connections/test",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "azuread"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzureadClient("https://example.azure.com/connections/test/")
+        client = AzureadClient("https://example.azure.com/connections/test/",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureadClient("")
+            AzureadClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureadClient(None)
+            AzureadClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azuread'."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "azuread"
@@ -91,11 +90,11 @@ class TestAzureadClientLifecycle:
     """Tests for AzureadClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -103,12 +102,12 @@ class TestAzureadClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(AzureadClient, 'close', new_callable=AsyncMock) as mock_close:
             async with AzureadClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, AzureadClient)
 
@@ -119,11 +118,11 @@ class TestCreateOffice365Group:
     """Tests for create_office365_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -155,11 +154,11 @@ class TestCreateOffice365Group:
             assert result["displayName"] == "Engineering Team"
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=201, text="")
@@ -175,11 +174,11 @@ class TestCreateOffice365Group:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid group configuration"}')
@@ -201,11 +200,11 @@ class TestCreateSecurityGroup:
     """Tests for create_security_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -236,11 +235,11 @@ class TestCreateSecurityGroup:
             assert result["securityEnabled"] is True
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=403, text='{"error": "Insufficient permissions"}')
@@ -258,11 +257,11 @@ class TestCreateSecurityGroup:
             assert exc_info.value.status_code == 403
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=201, text="")
@@ -282,11 +281,11 @@ class TestCreateUser:
     """Tests for create_user_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -322,11 +321,11 @@ class TestCreateUser:
             assert result["displayName"] == "John Doe"
 
     @pytest.mark.asyncio
-    async def test_with_all_optional_fields(self, mock_token_provider):
+    async def test_with_all_optional_fields(self, mock_credential):
         """Test with all optional fields populated."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=201, text='{"id": "user-full"}')
@@ -355,11 +354,11 @@ class TestCreateUser:
             assert result["id"] == "user-full"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=409, text='{"error": "User already exists"}')
@@ -380,11 +379,11 @@ class TestCreateUser:
             assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=201, text="")
@@ -404,11 +403,11 @@ class TestRemoveMemberFromGroup:
     """Tests for remove_member_from_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful DELETE request."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -430,11 +429,11 @@ class TestRemoveMemberFromGroup:
             assert "/v1.0/groups/group-abc123/members/user-xyz789/$ref" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_with_different_ids(self, mock_token_provider):
+    async def test_with_different_ids(self, mock_credential):
         """Test with different group and member IDs."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -455,11 +454,11 @@ class TestRemoveMemberFromGroup:
             assert "8a9bf2d1-c322-5933-7bbf-4g7c9bf6f06c" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Member not found"}')
@@ -483,11 +482,11 @@ class TestCreateGroup:
     """Tests for create_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -520,11 +519,11 @@ class TestCreateGroup:
             assert result["id"] == "generic-group123"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid request"}')
@@ -542,11 +541,11 @@ class TestCreateGroup:
             assert exc_info.value.status_code == 400
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=201, text="")
@@ -698,22 +697,22 @@ class TestEdgeCases:
     """Tests for edge cases and special scenarios."""
 
     @pytest.mark.asyncio
-    async def test_http_client_property_access(self, mock_token_provider):
+    async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.http_client is not None
         assert client._http_client is client.http_client
 
     @pytest.mark.asyncio
-    async def test_special_characters_in_group_id(self, mock_token_provider):
+    async def test_special_characters_in_group_id(self, mock_credential):
         """Test with special characters in group ID."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -733,11 +732,11 @@ class TestEdgeCases:
             assert "5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_multiple_consecutive_calls(self, mock_token_provider):
+    async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=201, text='{"id": "test"}')
@@ -761,11 +760,11 @@ class TestGetGroup:
     """Tests for get_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request returns group."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -789,11 +788,11 @@ class TestGetGroup:
             assert result["displayName"] == "Engineering"
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -808,11 +807,11 @@ class TestGetGroup:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Group not found"}')
@@ -833,11 +832,11 @@ class TestGetUser:
     """Tests for get_user_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request returns user."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -864,11 +863,11 @@ class TestGetUser:
             assert result["displayName"] == "John Doe"
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -883,11 +882,11 @@ class TestGetUser:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "User not found"}')
@@ -908,11 +907,11 @@ class TestUpdateUser:
     """Tests for update_user_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful PATCH request."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -935,11 +934,11 @@ class TestUpdateUser:
             assert "/v1.0/users/user-123" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_with_all_fields(self, mock_token_provider):
+    async def test_with_all_fields(self, mock_credential):
         """Test update with all optional fields."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -968,11 +967,11 @@ class TestUpdateUser:
             await client.update_user_async(input=user_input, id="user-123")
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid user data"}')
@@ -994,11 +993,11 @@ class TestRefreshTokens:
     """Tests for refresh_tokens_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful POST request to revoke sign-in sessions."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -1017,11 +1016,11 @@ class TestRefreshTokens:
             assert "/v1.0/users/user-123/revokeSignInSessions" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "User not found"}')
@@ -1042,11 +1041,11 @@ class TestGetGroupMembers:
     """Tests for get_group_members_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_members(self, mock_token_provider):
+    async def test_success_with_members(self, mock_credential):
         """Test successful GET request returns group members."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -1063,45 +1062,58 @@ class TestGetGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_group_members_async(id="group-123")
+            result = await resolve_generated_result(client.get_group_members_async(id="group-123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/v1.0/groups/group-123/members" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_with_top_parameter(self, mock_token_provider):
-        """Test GET request with top query parameter."""
+    async def test_with_top_parameter(self, mock_credential):
+        """Test GET request with top query parameter and continuation."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential,
         )
-
-        mock_response = MockResponse(
-            status=200,
-            text='{"value": [{"id": "user1"}], "nextLink": "https://graph.microsoft.com/next"}'
-        )
+        first_member = {"id": "user1"}
+        second_member = {"id": "user2"}
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"value": [{"id": "user1"}], '
+                    '"@odata.nextLink": "https://graph.microsoft.com/next"}'
+                ),
+            ),
+            MockResponse(
+                status=200,
+                text='{"value": [{"id": "user2"}]}',
+            ),
+        ]
 
         with patch.object(
             client._http_client,
-            'send_async',
+            "send_async",
             new_callable=AsyncMock,
-            return_value=mock_response
+            side_effect=responses,
         ) as mock_send:
-            result = await client.get_group_members_async(id="group-123", top="10")
+            result = await resolve_generated_result(
+                client.get_group_members_async(id="group-123", top="10")
+            )
 
-            call_args = mock_send.call_args
-            assert "$top=10" in call_args[0][1]
-            assert result["nextLink"] is not None
+        assert "$top=10" in mock_send.call_args_list[0].args[1]
+        assert result == [first_member, second_member]
+        assert mock_send.call_count == 2
+        assert mock_send.call_args_list[1].args[1].endswith("/next")
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -1112,15 +1124,15 @@ class TestGetGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_group_members_async(id="group-123")
-            assert result is None
+            result = await resolve_generated_result(client.get_group_members_async(id="group-123"))
+            assert result == []
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Group not found"}')
@@ -1132,7 +1144,9 @@ class TestGetGroupMembers:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_group_members_async(id="nonexistent-group")
+                await resolve_generated_result(
+                    client.get_group_members_async(id="nonexistent-group")
+                )
 
             assert exc_info.value.status_code == 404
 
@@ -1141,11 +1155,11 @@ class TestAddUserToGroup:
     """Tests for add_user_to_group_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful POST request to add user to group."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -1165,11 +1179,11 @@ class TestAddUserToGroup:
             assert "/v1.0/groups/group-123/members/$ref" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "User already in group"}')
@@ -1191,11 +1205,11 @@ class TestAssignManager:
     """Tests for assign_manager_async method (void operation)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful PUT request to assign manager."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -1215,11 +1229,11 @@ class TestAssignManager:
             assert "/v1.0/users/user-123/manager/$ref" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "User not found"}')
@@ -1241,11 +1255,11 @@ class TestCheckMemberGroups:
     """Tests for check_member_groups_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_user_is_member(self, mock_token_provider):
+    async def test_success_user_is_member(self, mock_credential):
         """Test successful check when user is member of group."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -1269,11 +1283,11 @@ class TestCheckMemberGroups:
             assert "group-123" in result["value"]
 
     @pytest.mark.asyncio
-    async def test_success_user_is_not_member(self, mock_token_provider):
+    async def test_success_user_is_not_member(self, mock_credential):
         """Test successful check when user is not member of any group."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')
@@ -1289,11 +1303,11 @@ class TestCheckMemberGroups:
             assert result["value"] == []
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -1309,11 +1323,11 @@ class TestCheckMemberGroups:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "User not found"}')
@@ -1335,11 +1349,11 @@ class TestGetMemberGroups:
     """Tests for get_member_groups_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_groups(self, mock_token_provider):
+    async def test_success_with_groups(self, mock_credential):
         """Test successful POST request returns user's groups."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -1363,11 +1377,11 @@ class TestGetMemberGroups:
             assert len(result["value"]) == 3
 
     @pytest.mark.asyncio
-    async def test_with_security_enabled_only(self, mock_token_provider):
+    async def test_with_security_enabled_only(self, mock_credential):
         """Test with security_enabled_only filter."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": ["sec-group-1"]}')
@@ -1383,11 +1397,11 @@ class TestGetMemberGroups:
             assert len(result["value"]) == 1
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -1403,11 +1417,11 @@ class TestGetMemberGroups:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=403, text='{"error": "Insufficient permissions"}')

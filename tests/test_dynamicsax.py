@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.dynamicsax import (
     AxOnlineProcedureResult,
     BusinessEventSubscription,
@@ -27,11 +28,10 @@ from azure.connectors.dynamicsax import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 BASE_URL = "https://example.azure.com/connections/test"
 
@@ -78,12 +78,14 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: DynamicsaxClient, operation: str):
     """Invoke a Dynamics AX operation by name for shared parametrized tests."""
-    return await getattr(client, f"{operation}_async")(**OPERATION_ARGS[operation])
+    return await resolve_generated_result(
+        getattr(client, f"{operation}_async")(**OPERATION_ARGS[operation])
+    )
 
 
-def _make_client(token_provider=None):
+def _make_client(credential=None):
     """Create a client for testing."""
-    return DynamicsaxClient(BASE_URL, token_provider=token_provider)
+    return DynamicsaxClient(BASE_URL, credential=credential)
 
 
 class TestDynamicsaxClientInitialization:
@@ -91,50 +93,47 @@ class TestDynamicsaxClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = DynamicsaxClient(BASE_URL)
+        client = DynamicsaxClient(BASE_URL, AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == BASE_URL
         assert client.connector_name == "dynamicsax"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = DynamicsaxClient(BASE_URL + "/")
+        client = DynamicsaxClient(BASE_URL + "/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == BASE_URL
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = DynamicsaxClient(
             BASE_URL,
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DynamicsaxClient("")
+            DynamicsaxClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DynamicsaxClient(None)
+            DynamicsaxClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'dynamicsax'."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
 
         assert client.connector_name == "dynamicsax"
 
@@ -143,19 +142,19 @@ class TestDynamicsaxClientLifecycle:
     """Tests for DynamicsaxClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
             await client.close()
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(DynamicsaxClient, "close", new_callable=AsyncMock) as mock_close:
-            async with _make_client(token_provider=mock_token_provider) as client:
+            async with _make_client(credential=mock_credential) as client:
                 assert isinstance(client, DynamicsaxClient)
 
             mock_close.assert_called_once()
@@ -165,9 +164,9 @@ class TestDynamicsaxClientMethods:
     """Success path tests for Dynamics AX methods."""
 
     @pytest.mark.asyncio
-    async def test_get_data_sets_success(self, mock_token_provider):
+    async def test_get_data_sets_success(self, mock_credential):
         """Test get_data_sets_async returns parsed JSON targeting /datasets."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text='{"value":[{"name":"instance-1"}]}')
 
         with patch.object(
@@ -183,9 +182,9 @@ class TestDynamicsaxClientMethods:
             assert mock_send.call_args[0][1].endswith("/datasets")
 
     @pytest.mark.asyncio
-    async def test_get_items_targets_items_endpoint(self, mock_token_provider):
+    async def test_get_items_targets_items_endpoint(self, mock_credential):
         """Test get_items_async targets the datasets/tables/items endpoint."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text='{"value":[]}')
 
         with patch.object(
@@ -194,15 +193,15 @@ class TestDynamicsaxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(dataset="ds", table="tbl")
+            await resolve_generated_result(client.get_items_async(dataset="ds", table="tbl"))
 
             request_url = mock_send.call_args[0][1]
             assert "/datasets/ds/tables/tbl/items" in request_url
 
     @pytest.mark.asyncio
-    async def test_get_items_appends_odata_query_params(self, mock_token_provider):
+    async def test_get_items_appends_odata_query_params(self, mock_credential):
         """Test get_items_async appends OData query params with $ prefix."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text='{"value":[]}')
 
         with patch.object(
@@ -211,21 +210,21 @@ class TestDynamicsaxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(
+            await resolve_generated_result(client.get_items_async(
                 dataset="ds",
                 table="tbl",
                 filter="Name eq 'x'",
                 top="5",
-            )
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert "$filter=" in request_url
             assert "$top=5" in request_url
 
     @pytest.mark.asyncio
-    async def test_post_item_sends_body(self, mock_token_provider):
+    async def test_post_item_sends_body(self, mock_credential):
         """Test post_item_async posts the input to the items endpoint."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text='{"id":"1"}')
         item_input = PostItemInput()
 
@@ -242,9 +241,9 @@ class TestDynamicsaxClientMethods:
             assert mock_send.call_args.kwargs["body"] is item_input
 
     @pytest.mark.asyncio
-    async def test_patch_item_sends_body(self, mock_token_provider):
+    async def test_patch_item_sends_body(self, mock_credential):
         """Test patch_item_async patches the item with the provided body."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text='{"id":"1"}')
         item_input = PatchItemInput()
 
@@ -266,9 +265,9 @@ class TestDynamicsaxClientMethods:
             assert mock_send.call_args.kwargs["body"] is item_input
 
     @pytest.mark.asyncio
-    async def test_delete_item_returns_none(self, mock_token_provider):
+    async def test_delete_item_returns_none(self, mock_credential):
         """Test delete_item_async issues a DELETE and returns None."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
@@ -283,9 +282,9 @@ class TestDynamicsaxClientMethods:
             assert mock_send.call_args[0][0] == "DELETE"
 
     @pytest.mark.asyncio
-    async def test_get_table_targets_metadata_endpoint(self, mock_token_provider):
+    async def test_get_table_targets_metadata_endpoint(self, mock_credential):
         """Test get_table_async targets the $metadata.json endpoint."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text='{"name":"tbl"}')
 
         with patch.object(
@@ -301,10 +300,15 @@ class TestDynamicsaxClientMethods:
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
-    async def test_all_operations_success(self, mock_token_provider, operation):
+    async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation returns the expected success result."""
-        client = _make_client(token_provider=mock_token_provider)
-        mock_response = MockResponse(status=200, text='{"value":"ok"}')
+        client = _make_client(credential=mock_credential)
+        response_text = (
+            '{"value":[{"value":"ok"}]}'
+            if operation == "get_items"
+            else '{"value":"ok"}'
+        )
+        mock_response = MockResponse(status=200, text=response_text)
 
         with patch.object(
             client._http_client,
@@ -316,14 +320,16 @@ class TestDynamicsaxClientMethods:
 
             if operation in NO_JSON_OPERATIONS:
                 assert result is None
+            elif operation == "get_items":
+                assert result == [{"value": "ok"}]
             else:
                 assert result == {"value": "ok"}
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", sorted(NO_JSON_OPERATIONS))
-    async def test_no_json_operations_ignore_body(self, mock_token_provider, operation):
+    async def test_no_json_operations_ignore_body(self, mock_credential, operation):
         """Test no-json operations return None even when a body is present."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=200, text='{"unexpected":"body"}')
 
         with patch.object(
@@ -344,11 +350,11 @@ class TestDynamicsaxClientErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = _make_client(token_provider=mock_token_provider)
+        client = _make_client(credential=mock_credential)
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(

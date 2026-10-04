@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
+
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -263,8 +265,17 @@ class AzuremonitorlogsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a AzuremonitorlogsClient.
@@ -272,22 +283,80 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
     def connector_name(self) -> str:
         return "azuremonitorlogs"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     async def query_data_async(
         self,
@@ -296,6 +365,11 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         resourcegroups: str,
         resourcetype: str,
         resourcename: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Run query and list results
@@ -308,24 +382,28 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         value = str(subscriptions)
         if isinstance(subscriptions, bool):
             value = value.lower()
-        query_params.append(f"subscriptions={quote(value)}")
+        query_params.append(f"subscriptions={quote(value, safe='')}")
         value = str(resourcegroups)
         if isinstance(resourcegroups, bool):
             value = value.lower()
-        query_params.append(f"resourcegroups={quote(value)}")
+        query_params.append(f"resourcegroups={quote(value, safe='')}")
         value = str(resourcetype)
         if isinstance(resourcetype, bool):
             value = value.lower()
-        query_params.append(f"resourcetype={quote(value)}")
+        query_params.append(f"resourcetype={quote(value, safe='')}")
         value = str(resourcename)
         if isinstance(resourcename, bool):
             value = value.lower()
-        query_params.append(f"resourcename={quote(value)}")
+        query_params.append(f"resourcename={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -349,6 +427,11 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         resourcetype: str,
         resourcename: str,
         vis_type: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Run query and visualize results
@@ -362,28 +445,32 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         value = str(subscriptions)
         if isinstance(subscriptions, bool):
             value = value.lower()
-        query_params.append(f"subscriptions={quote(value)}")
+        query_params.append(f"subscriptions={quote(value, safe='')}")
         value = str(resourcegroups)
         if isinstance(resourcegroups, bool):
             value = value.lower()
-        query_params.append(f"resourcegroups={quote(value)}")
+        query_params.append(f"resourcegroups={quote(value, safe='')}")
         value = str(resourcetype)
         if isinstance(resourcetype, bool):
             value = value.lower()
-        query_params.append(f"resourcetype={quote(value)}")
+        query_params.append(f"resourcetype={quote(value, safe='')}")
         value = str(resourcename)
         if isinstance(resourcename, bool):
             value = value.lower()
-        query_params.append(f"resourcename={quote(value)}")
+        query_params.append(f"resourcename={quote(value, safe='')}")
         value = str(vis_type)
         if isinstance(vis_type, bool):
             value = value.lower()
-        query_params.append(f"visType={quote(value)}")
+        query_params.append(f"visType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -401,110 +488,179 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
     async def list_subscriptions_async(
         self,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List subscriptions
 
         Gets a list of all the subscriptions to which the principal has access.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/listSubscriptions"
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def list_resource_groups_async(
         self,
         subscriptions: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List resource groups
 
         Lists all the resource groups within the subscription.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/listResourceGroups"
         query_params = []
         value = str(subscriptions)
         if isinstance(subscriptions, bool):
             value = value.lower()
-        query_params.append(f"subscriptions={quote(value)}")
+        query_params.append(f"subscriptions={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def list_resources_async(
         self,
         subscriptions: str,
         resourcegroups: str,
         resourcetype: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List resources
 
         Lists all the resource groups within the resource group.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/listResources"
         query_params = []
         value = str(subscriptions)
         if isinstance(subscriptions, bool):
             value = value.lower()
-        query_params.append(f"subscriptions={quote(value)}")
+        query_params.append(f"subscriptions={quote(value, safe='')}")
         value = str(resourcegroups)
         if isinstance(resourcegroups, bool):
             value = value.lower()
-        query_params.append(f"resourcegroups={quote(value)}")
+        query_params.append(f"resourcegroups={quote(value, safe='')}")
         value = str(resourcetype)
         if isinstance(resourcetype, bool):
             value = value.lower()
-        query_params.append(f"resourcetype={quote(value)}")
+        query_params.append(f"resourcetype={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def query_schema_async(
         self,
@@ -513,6 +669,11 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         resourcegroups: str,
         resourcetype: str,
         resourcename: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get query schema
@@ -524,24 +685,28 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         value = str(subscriptions)
         if isinstance(subscriptions, bool):
             value = value.lower()
-        query_params.append(f"subscriptions={quote(value)}")
+        query_params.append(f"subscriptions={quote(value, safe='')}")
         value = str(resourcegroups)
         if isinstance(resourcegroups, bool):
             value = value.lower()
-        query_params.append(f"resourcegroups={quote(value)}")
+        query_params.append(f"resourcegroups={quote(value, safe='')}")
         value = str(resourcetype)
         if isinstance(resourcetype, bool):
             value = value.lower()
-        query_params.append(f"resourcetype={quote(value)}")
+        query_params.append(f"resourcetype={quote(value, safe='')}")
         value = str(resourcename)
         if isinstance(resourcename, bool):
             value = value.lower()
-        query_params.append(f"resourcename={quote(value)}")
+        query_params.append(f"resourcename={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -560,6 +725,11 @@ class AzuremonitorlogsClient(ConnectorClientBase):
     async def get_time_range_selection_control_async(
         self,
         timerangetype: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Returns the control schema according to to the given time range type
@@ -573,12 +743,16 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         value = str(timerangetype)
         if isinstance(timerangetype, bool):
             value = value.lower()
-        query_params.append(f"timerangetype={quote(value)}")
+        query_params.append(f"timerangetype={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

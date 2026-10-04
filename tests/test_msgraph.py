@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.msgraphgroupsanduser import (
     MsgraphgroupsanduserClient,
     ListUsersResponse,
@@ -22,53 +23,54 @@ class TestMsgraphClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default values."""
-        client = MsgraphgroupsanduserClient("https://example.azure.com/connections/test")
+        client = MsgraphgroupsanduserClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
-        assert client._http_client._token_provider is not None
-        assert client._options is not None
+        assert client._http_client._credential is not None
 
     def test_init_with_trailing_slash_removes_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = MsgraphgroupsanduserClient("https://example.azure.com/connections/test/")
+        client = MsgraphgroupsanduserClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        from azure.connectors.sdk import ConnectorClientOptions
-        options = ConnectorClientOptions(timeout_seconds=60.0)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
 
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
 
-        assert client._options is options
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MsgraphgroupsanduserClient("")
+            MsgraphgroupsanduserClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MsgraphgroupsanduserClient(None)
+            MsgraphgroupsanduserClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self):
         """Test connector_name property returns correct value."""
-        client = MsgraphgroupsanduserClient("https://example.azure.com/connections/test")
+        client = MsgraphgroupsanduserClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client.connector_name == "msgraphgroupsanduser"
 
@@ -79,7 +81,8 @@ class TestMsgraphClientLifecycle:
     @pytest.mark.asyncio
     async def test_close(self):
         """Test close method."""
-        client = MsgraphgroupsanduserClient("https://example.azure.com/connections/test")
+        client = MsgraphgroupsanduserClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
@@ -88,7 +91,8 @@ class TestMsgraphClientLifecycle:
     @pytest.mark.asyncio
     async def test_async_context_manager(self):
         """Test async context manager usage."""
-        client = MsgraphgroupsanduserClient("https://example.azure.com/connections/test")
+        client = MsgraphgroupsanduserClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             async with client:
@@ -101,11 +105,11 @@ class TestListUsers:
     """Tests for list_users_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider, mock_response_success):
+    async def test_success_with_json_response(self, mock_credential, mock_response_success):
         """Test successful list users with JSON response."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = (
@@ -126,15 +130,19 @@ class TestListUsers:
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/v1.0/users",
-                body=None
+                body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
 
     @pytest.mark.asyncio
-    async def test_success_with_empty_response(self, mock_token_provider, mock_response_empty):
+    async def test_success_with_empty_response(self, mock_credential, mock_response_empty):
         """Test list users with empty response."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -148,11 +156,11 @@ class TestListUsers:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_raises_exception(self, mock_token_provider, mock_response_error):
+    async def test_error_raises_exception(self, mock_credential, mock_response_error):
         """Test that error response raises ConnectorException."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -171,11 +179,11 @@ class TestListGroupsByDisplayNameSearch:
     """Tests for list_groups_by_display_name_search_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_search_and_count(self, mock_token_provider, mock_response_success):
+    async def test_success_with_search_and_count(self, mock_credential, mock_response_success):
         """Test successful search with search term and count."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = (
@@ -200,11 +208,11 @@ class TestListGroupsByDisplayNameSearch:
             assert "$search=Test" in call_path
 
     @pytest.mark.asyncio
-    async def test_success_with_count_only(self, mock_token_provider, mock_response_success):
+    async def test_success_with_count_only(self, mock_credential, mock_response_success):
         """Test successful search with count only."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{"value": []}'
@@ -222,11 +230,11 @@ class TestListGroupsByDisplayNameSearch:
             assert "$search" not in call_path
 
     @pytest.mark.asyncio
-    async def test_url_encodes_search_parameter(self, mock_token_provider, mock_response_success):
+    async def test_url_encodes_search_parameter(self, mock_credential, mock_response_success):
         """Test that search parameter is URL encoded."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'
@@ -245,11 +253,11 @@ class TestListGroupsByDisplayNameSearch:
             assert "$search=Test%20Group%20Name" in call_path
 
     @pytest.mark.asyncio
-    async def test_error_raises_exception(self, mock_token_provider, mock_response_error):
+    async def test_error_raises_exception(self, mock_credential, mock_response_error):
         """Test that error response raises ConnectorException."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -268,11 +276,11 @@ class TestListSubscribedSkus:
     """Tests for list_subscribed_skus_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider, mock_response_success):
+    async def test_success_with_json_response(self, mock_credential, mock_response_success):
         """Test successful list subscribed SKUs."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = (
@@ -292,15 +300,19 @@ class TestListSubscribedSkus:
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/v1.0/subscribedSkus",
-                body=None
+                body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
 
     @pytest.mark.asyncio
-    async def test_error_raises_exception(self, mock_token_provider, mock_response_error):
+    async def test_error_raises_exception(self, mock_credential, mock_response_error):
         """Test that error response raises ConnectorException."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -319,11 +331,11 @@ class TestListDirectGroupMembers:
     """Tests for list_direct_group_members_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_all_parameters(self, mock_token_provider, mock_response_success):
+    async def test_success_with_all_parameters(self, mock_credential, mock_response_success):
         """Test successful list with all query parameters."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = (
@@ -352,12 +364,12 @@ class TestListDirectGroupMembers:
 
     @pytest.mark.asyncio
     async def test_success_with_group_id_and_count_only(
-        self, mock_token_provider, mock_response_success
+        self, mock_credential, mock_response_success
     ):
         """Test successful list with required parameters only."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{"value": []}'
@@ -379,11 +391,11 @@ class TestListDirectGroupMembers:
             assert "$select" not in call_path
 
     @pytest.mark.asyncio
-    async def test_group_id_in_path(self, mock_token_provider, mock_response_success):
+    async def test_group_id_in_path(self, mock_credential, mock_response_success):
         """Test that group_id is properly inserted into path."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'
@@ -402,11 +414,11 @@ class TestListDirectGroupMembers:
             assert "groups/test-group-id/members" in call_path
 
     @pytest.mark.asyncio
-    async def test_error_raises_exception(self, mock_token_provider, mock_response_error):
+    async def test_error_raises_exception(self, mock_credential, mock_response_error):
         """Test that error response raises ConnectorException."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -427,11 +439,11 @@ class TestGetMemberLicenseDetails:
     """Tests for get_member_license_details_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_select_parameter(self, mock_token_provider, mock_response_success):
+    async def test_success_with_select_parameter(self, mock_credential, mock_response_success):
         """Test successful get with select parameter."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{"value": [{"skuId": "sku1", "servicePlans": []}]}'
@@ -455,12 +467,12 @@ class TestGetMemberLicenseDetails:
 
     @pytest.mark.asyncio
     async def test_success_without_select_parameter(
-        self, mock_token_provider, mock_response_success
+        self, mock_credential, mock_response_success
     ):
         """Test successful get without select parameter."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{"value": []}'
@@ -479,11 +491,11 @@ class TestGetMemberLicenseDetails:
             assert "$select" not in call_path
 
     @pytest.mark.asyncio
-    async def test_error_raises_exception(self, mock_token_provider, mock_response_error):
+    async def test_error_raises_exception(self, mock_credential, mock_response_error):
         """Test that error response raises ConnectorException."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -502,11 +514,11 @@ class TestGetGroupProperties:
     """Tests for get_group_properties_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider, mock_response_success):
+    async def test_success_with_json_response(self, mock_credential, mock_response_success):
         """Test successful get group properties."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = (
@@ -528,15 +540,19 @@ class TestGetGroupProperties:
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/v1.0/groups/group-123",
-                body=None
+                body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
 
     @pytest.mark.asyncio
-    async def test_group_id_in_path(self, mock_token_provider, mock_response_success):
+    async def test_group_id_in_path(self, mock_credential, mock_response_success):
         """Test that group_id is properly inserted into path."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'
@@ -553,11 +569,11 @@ class TestGetGroupProperties:
             assert "groups/my-group-id" in call_path
 
     @pytest.mark.asyncio
-    async def test_error_raises_exception(self, mock_token_provider, mock_response_error):
+    async def test_error_raises_exception(self, mock_credential, mock_response_error):
         """Test that error response raises ConnectorException."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -577,12 +593,12 @@ class TestGetMemberGroups:
 
     @pytest.mark.asyncio
     async def test_success_with_security_enabled_only_true(
-        self, mock_token_provider, mock_response_success
+        self, mock_credential, mock_response_success
     ):
         """Test successful get with security_enabled_only = true."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{"value": ["group-1", "group-2", "group-3"]}'
@@ -605,17 +621,21 @@ class TestGetMemberGroups:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/v1.0/users/user-123/getMemberGroups",
-                body=input_data
+                body=input_data,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
 
     @pytest.mark.asyncio
     async def test_success_with_security_enabled_only_false(
-        self, mock_token_provider, mock_response_success
+        self, mock_credential, mock_response_success
     ):
         """Test successful get with security_enabled_only = false."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{"value": []}'
@@ -637,11 +657,11 @@ class TestGetMemberGroups:
             assert result["value"] == []
 
     @pytest.mark.asyncio
-    async def test_member_id_in_path(self, mock_token_provider, mock_response_success):
+    async def test_member_id_in_path(self, mock_credential, mock_response_success):
         """Test that member_id is properly inserted into path."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'
@@ -663,11 +683,11 @@ class TestGetMemberGroups:
             assert "users/member-789/getMemberGroups" in call_path
 
     @pytest.mark.asyncio
-    async def test_error_raises_exception(self, mock_token_provider, mock_response_error):
+    async def test_error_raises_exception(self, mock_credential, mock_response_error):
         """Test that error response raises ConnectorException."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         input_data = GetMemberGroupsInput(security_enabled_only=True)
@@ -774,11 +794,11 @@ class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
 
     @pytest.mark.asyncio
-    async def test_multiple_consecutive_calls(self, mock_token_provider, mock_response_success):
+    async def test_multiple_consecutive_calls(self, mock_credential, mock_response_success):
         """Test multiple consecutive API calls."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{"value": []}'
@@ -798,13 +818,13 @@ class TestEdgeCases:
             assert result3 is not None
 
     @pytest.mark.asyncio
-    async def test_json_parse_error_returns_none(self, mock_token_provider):
+    async def test_json_parse_error_returns_none(self, mock_credential):
         """Test that invalid JSON returns None gracefully."""
         from tests.conftest import MockResponse
 
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='invalid json{')
@@ -819,11 +839,11 @@ class TestEdgeCases:
                 await client.list_users_async()
 
     @pytest.mark.asyncio
-    async def test_boolean_parameter_conversion(self, mock_token_provider, mock_response_success):
+    async def test_boolean_parameter_conversion(self, mock_credential, mock_response_success):
         """Test that boolean parameters are converted to lowercase strings."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'
@@ -841,12 +861,12 @@ class TestEdgeCases:
 
     @pytest.mark.asyncio
     async def test_empty_string_parameters_excluded(
-        self, mock_token_provider, mock_response_success
+        self, mock_credential, mock_response_success
     ):
         """Test that None optional parameters are not added to query string."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'
@@ -868,11 +888,11 @@ class TestEdgeCases:
             assert "$select" not in call_path
 
     @pytest.mark.asyncio
-    async def test_special_characters_in_ids(self, mock_token_provider, mock_response_success):
+    async def test_special_characters_in_ids(self, mock_credential, mock_response_success):
         """Test that IDs with special characters are handled correctly."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'
@@ -890,11 +910,11 @@ class TestEdgeCases:
             assert "groups/abc-123-def-456" in call_path
 
     @pytest.mark.asyncio
-    async def test_http_methods_used_correctly(self, mock_token_provider, mock_response_success):
+    async def test_http_methods_used_correctly(self, mock_credential, mock_response_success):
         """Test that correct HTTP methods are used for different operations."""
         client = MsgraphgroupsanduserClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_success.text = '{}'

@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.jedoxodatahub import JedoxodatahubClient
 
 
@@ -18,16 +18,16 @@ async def main() -> None:
         print("Set JEDOXODATAHUB_CONNECTION_URL to run this sample.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    try:
-        async with JedoxodatahubClient(
-            CONNECTION_RUNTIME_URL,
-            token_provider,
-        ) as client:
-            databases = await client.databases_async()
-            print(f"Databases: {databases}")
-    except ConnectorException as ex:
-        print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with JedoxodatahubClient(
+                CONNECTION_RUNTIME_URL,
+                credential,
+            ) as client:
+                databases = await client.databases_async()
+                print(f"Databases: {databases}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.commondataservice import (
     TRIGGER_OPERATIONS,
     AssociateRecordsPatchItemInput,
@@ -13,8 +14,6 @@ from azure.connectors.commondataservice import (
     PostItemInput,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from azure.connectors.sdk.serialization import to_wire
@@ -26,55 +25,54 @@ class TestCommondataserviceClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = CommondataserviceClient("https://example.azure.com/connections/test")
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "commondataservice"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = CommondataserviceClient("https://example.azure.com/connections/test/")
+        client = CommondataserviceClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = CommondataserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = CommondataserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            CommondataserviceClient("")
+            CommondataserviceClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            CommondataserviceClient(None)
+            CommondataserviceClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'commondataservice'."""
         client = CommondataserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "commondataservice"
@@ -96,11 +94,11 @@ class TestCommondataserviceClientLifecycle:
     """Tests for CommondataserviceClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = CommondataserviceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -108,25 +106,25 @@ class TestCommondataserviceClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             CommondataserviceClient, 'close', new_callable=AsyncMock
         ) as mock_close:
             async with CommondataserviceClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, CommondataserviceClient)
 
             mock_close.assert_called_once()
 
 
-def _make_client(mock_token_provider):
+def _make_client(mock_credential):
     """Create a client with a mocked token provider for method tests."""
     return CommondataserviceClient(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
 
 
@@ -134,9 +132,9 @@ class TestGetItem:
     """Tests for get_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_item_success(self, mock_token_provider):
+    async def test_get_item_success(self, mock_credential):
         """Test successful get item."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"itemInternalId": "1"}')
 
         with patch.object(
@@ -152,9 +150,9 @@ class TestGetItem:
             assert result["itemInternalId"] == "1"
 
     @pytest.mark.asyncio
-    async def test_get_item_error_response(self, mock_token_provider):
+    async def test_get_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -172,9 +170,9 @@ class TestGetItems:
     """Tests for get_items_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_items_success(self, mock_token_provider):
+    async def test_get_items_success(self, mock_credential):
         """Test successful list items."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
@@ -195,9 +193,9 @@ class TestGetItems:
             assert result == []
 
     @pytest.mark.asyncio
-    async def test_get_items_follows_odata_next_link(self, mock_token_provider):
+    async def test_get_items_follows_odata_next_link(self, mock_credential):
         """Test list items follows the exact connector continuation URL."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         next_link = (
             "https://example.azure.com/connections/test/v2/datasets/default/"
             "tables/accounts/items?$skiptoken=page2"
@@ -232,10 +230,10 @@ class TestGetItems:
     @pytest.mark.asyncio
     async def test_get_items_resolves_query_only_next_link_against_current_url(
         self,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test query-only continuations retain the current collection path."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         next_link = "?$skiptoken=page2"
         responses = [
             MockResponse(
@@ -270,10 +268,10 @@ class TestGetItems:
     @pytest.mark.asyncio
     async def test_get_items_resolves_leading_slash_next_link_against_runtime(
         self,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test leading-slash continuations stay on the connection runtime."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         next_link = "/continuation/items?$skiptoken=page2"
         responses = [
             MockResponse(
@@ -307,10 +305,10 @@ class TestGetItems:
     @pytest.mark.asyncio
     async def test_get_items_routes_bare_token_through_next_link_endpoint(
         self,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test list items encodes a bare continuation token in the nextLink route."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         next_link = "accounts?$select=name%2Crevenue&$skiptoken=page 2"
         responses = [
             MockResponse(
@@ -343,10 +341,10 @@ class TestGetItems:
 
     def test_resolve_pagination_url_routes_cross_host_through_runtime(
         self,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test cross-host pagination URLs retain only their path and query."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
 
         result = client._resolve_pagination_url(
             "https://other.example.com/continuation/items?$skiptoken=page2",
@@ -360,10 +358,10 @@ class TestGetItems:
 
     def test_resolve_pagination_url_reports_origin_without_opaque_state(
         self,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test scheme mismatches identify only the sanitized origin."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
 
         with pytest.raises(ValueError) as exc_info:
             client._resolve_pagination_url(
@@ -391,14 +389,14 @@ class TestGetItems:
     )
     def test_resolve_pagination_url_preserves_explicit_port_zero(
         self,
-        mock_token_provider,
+        mock_credential,
         connection_runtime_url,
         next_link,
     ):
         """Test explicit port zero is validated rather than defaulted."""
         client = CommondataserviceClient(
             connection_runtime_url,
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with pytest.raises(ValueError, match="scheme and port"):
@@ -422,14 +420,14 @@ class TestGetItems:
     )
     def test_resolve_pagination_url_rejects_missing_hostname(
         self,
-        mock_token_provider,
+        mock_credential,
         connection_runtime_url,
         next_link,
     ):
         """Test both continuation and runtime URLs require hostnames."""
         client = CommondataserviceClient(
             connection_runtime_url,
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with pytest.raises(ValueError, match="must include a hostname"):
@@ -439,9 +437,9 @@ class TestGetItems:
             )
 
     @pytest.mark.asyncio
-    async def test_get_items_with_query_params(self, mock_token_provider):
+    async def test_get_items_with_query_params(self, mock_credential):
         """Test list items serializes OData query parameters."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
@@ -468,9 +466,9 @@ class TestGetItems:
             assert "%24expand=" in url or "$expand=" in url
 
     @pytest.mark.asyncio
-    async def test_get_items_error_response(self, mock_token_provider):
+    async def test_get_items_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
@@ -490,9 +488,9 @@ class TestPatchItem:
     """Tests for patch_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_patch_item_success(self, mock_token_provider):
+    async def test_patch_item_success(self, mock_credential):
         """Test successful patch item."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"itemInternalId": "1"}')
         body = PatchItemInput()
 
@@ -515,9 +513,9 @@ class TestPatchItem:
             assert result["itemInternalId"] == "1"
 
     @pytest.mark.asyncio
-    async def test_patch_item_error_response(self, mock_token_provider):
+    async def test_patch_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
@@ -540,9 +538,9 @@ class TestPostItem:
     """Tests for post_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_post_item_success(self, mock_token_provider):
+    async def test_post_item_success(self, mock_credential):
         """Test successful post item."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=201, text='{"itemInternalId": "new"}')
         body = PostItemInput()
 
@@ -564,9 +562,9 @@ class TestPostItem:
             assert result["itemInternalId"] == "new"
 
     @pytest.mark.asyncio
-    async def test_post_item_error_response(self, mock_token_provider):
+    async def test_post_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
@@ -588,9 +586,9 @@ class TestGetDataSets:
     """Tests for get_data_sets_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_data_sets_success(self, mock_token_provider):
+    async def test_get_data_sets_success(self, mock_credential):
         """Test successful get data sets."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
@@ -605,9 +603,9 @@ class TestGetDataSets:
             assert "/v2/datasets" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_data_sets_error_response(self, mock_token_provider):
+    async def test_get_data_sets_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
@@ -625,9 +623,9 @@ class TestGetMetadataForPatchItem:
     """Tests for get_metadata_for_patch_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_metadata_for_patch_item_success(self, mock_token_provider):
+    async def test_get_metadata_for_patch_item_success(self, mock_credential):
         """Test successful get patch metadata."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"name": "accounts"}')
 
         with patch.object(
@@ -645,9 +643,9 @@ class TestGetMetadataForPatchItem:
             )
 
     @pytest.mark.asyncio
-    async def test_get_metadata_for_patch_item_error_response(self, mock_token_provider):
+    async def test_get_metadata_for_patch_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -665,9 +663,9 @@ class TestGetMetadataForPostItem:
     """Tests for get_metadata_for_post_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_metadata_for_post_item_success(self, mock_token_provider):
+    async def test_get_metadata_for_post_item_success(self, mock_credential):
         """Test successful get post metadata."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"name": "accounts"}')
 
         with patch.object(
@@ -685,9 +683,9 @@ class TestGetMetadataForPostItem:
             )
 
     @pytest.mark.asyncio
-    async def test_get_metadata_for_post_item_error_response(self, mock_token_provider):
+    async def test_get_metadata_for_post_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -705,9 +703,9 @@ class TestGetTable:
     """Tests for get_table_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_table_success(self, mock_token_provider):
+    async def test_get_table_success(self, mock_credential):
         """Test successful get table metadata."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"name": "accounts"}')
 
         with patch.object(
@@ -723,9 +721,9 @@ class TestGetTable:
             assert result["name"] == "accounts"
 
     @pytest.mark.asyncio
-    async def test_get_table_error_response(self, mock_token_provider):
+    async def test_get_table_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -743,9 +741,9 @@ class TestGetTables:
     """Tests for get_tables_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_tables_success(self, mock_token_provider):
+    async def test_get_tables_success(self, mock_credential):
         """Test successful table listing."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"Name": "accounts"}]}',
@@ -765,9 +763,9 @@ class TestGetTables:
             assert result == {"value": [{"Name": "accounts"}]}
 
     @pytest.mark.asyncio
-    async def test_get_tables_error_response(self, mock_token_provider):
+    async def test_get_tables_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
@@ -785,9 +783,9 @@ class TestGetDataSetsMetadata:
     """Tests for get_data_sets_metadata_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_data_sets_metadata_success(self, mock_token_provider):
+    async def test_get_data_sets_metadata_success(self, mock_credential):
         """Test successful get datasets metadata."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"tabular": {}}')
 
         with patch.object(
@@ -803,9 +801,9 @@ class TestGetDataSetsMetadata:
             assert result == {"tabular": {}}
 
     @pytest.mark.asyncio
-    async def test_get_data_sets_metadata_error_response(self, mock_token_provider):
+    async def test_get_data_sets_metadata_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
@@ -823,9 +821,9 @@ class TestGetNextPage:
     """Tests for get_next_page_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_next_page_success(self, mock_token_provider):
+    async def test_get_next_page_success(self, mock_credential):
         """Test successful follow of nextLink returns the page payload."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(
             status=200,
             text='{"value": [{"id": 1}], "@odata.nextLink": "token456"}',
@@ -850,9 +848,9 @@ class TestGetNextPage:
             }
 
     @pytest.mark.asyncio
-    async def test_get_next_page_empty_body_returns_none(self, mock_token_provider):
+    async def test_get_next_page_empty_body_returns_none(self, mock_credential):
         """Test that an empty response body returns None."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
@@ -865,9 +863,9 @@ class TestGetNextPage:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_next_page_error_response(self, mock_token_provider):
+    async def test_get_next_page_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -885,9 +883,9 @@ class TestAssociateRecordsPatchItem:
     """Tests for associate_records_patch_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_associate_records_success(self, mock_token_provider):
+    async def test_associate_records_success(self, mock_credential):
         """Test successful associate records."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{}')
 
         with patch.object(
@@ -909,9 +907,9 @@ class TestAssociateRecordsPatchItem:
             assert "/Relationship" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_associate_records_error_response(self, mock_token_provider):
+    async def test_associate_records_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
@@ -935,9 +933,9 @@ class TestCreateAttachment:
     """Tests for create_attachment_async method."""
 
     @pytest.mark.asyncio
-    async def test_create_attachment_success(self, mock_token_provider):
+    async def test_create_attachment_success(self, mock_credential):
         """Test successful create attachment."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"annotationid": "abc"}')
 
         with patch.object(
@@ -964,9 +962,9 @@ class TestCreateAttachment:
             assert result == {"annotationid": "abc"}
 
     @pytest.mark.asyncio
-    async def test_create_attachment_error_response(self, mock_token_provider):
+    async def test_create_attachment_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=403, text="Forbidden")
 
         with patch.object(
@@ -990,9 +988,9 @@ class TestGetItemAttachments:
     """Tests for get_item_attachments_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_item_attachments_success(self, mock_token_provider):
+    async def test_get_item_attachments_success(self, mock_credential):
         """Test successful get item attachments."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
@@ -1009,9 +1007,9 @@ class TestGetItemAttachments:
             assert call_args[0][1].endswith("/attachments")
 
     @pytest.mark.asyncio
-    async def test_get_item_attachments_error_response(self, mock_token_provider):
+    async def test_get_item_attachments_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1031,9 +1029,9 @@ class TestGetAttachmentContent:
     """Tests for get_attachment_content_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_attachment_content_success(self, mock_token_provider):
+    async def test_get_attachment_content_success(self, mock_credential):
         """Test successful get attachment content returns bytes."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, content=b"binary-data")
 
         with patch.object(
@@ -1051,9 +1049,9 @@ class TestGetAttachmentContent:
             assert result == b"binary-data"
 
     @pytest.mark.asyncio
-    async def test_get_attachment_content_error_response(self, mock_token_provider):
+    async def test_get_attachment_content_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1073,9 +1071,9 @@ class TestDeleteAttachment:
     """Tests for delete_attachment_async method."""
 
     @pytest.mark.asyncio
-    async def test_delete_attachment_success(self, mock_token_provider):
+    async def test_delete_attachment_success(self, mock_credential):
         """Test successful delete attachment."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
@@ -1092,9 +1090,9 @@ class TestDeleteAttachment:
             assert call_args[0][1].endswith("/attachments/att1")
 
     @pytest.mark.asyncio
-    async def test_delete_attachment_error_response(self, mock_token_provider):
+    async def test_delete_attachment_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1114,9 +1112,9 @@ class TestDeleteItem:
     """Tests for delete_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_delete_item_success(self, mock_token_provider):
+    async def test_delete_item_success(self, mock_credential):
         """Test successful delete item."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
@@ -1131,9 +1129,9 @@ class TestDeleteItem:
             assert call_args[0][1].endswith("/items/1")
 
     @pytest.mark.asyncio
-    async def test_delete_item_error_response(self, mock_token_provider):
+    async def test_delete_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1153,9 +1151,9 @@ class TestDisassociateRecordsPostItem:
     """Tests for disassociate_records_post_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_disassociate_records_success(self, mock_token_provider):
+    async def test_disassociate_records_success(self, mock_credential):
         """Test successful disassociate records from multi-valued relationship."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{}')
 
         with patch.object(
@@ -1177,9 +1175,9 @@ class TestDisassociateRecordsPostItem:
             assert call_args[0][1].endswith("/RelatedId/2")
 
     @pytest.mark.asyncio
-    async def test_disassociate_records_error_response(self, mock_token_provider):
+    async def test_disassociate_records_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
@@ -1203,9 +1201,9 @@ class TestDisassociateSingleValueRecordDeleteItem:
     """Tests for disassociate_single_value_record_delete_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_disassociate_single_value_success(self, mock_token_provider):
+    async def test_disassociate_single_value_success(self, mock_credential):
         """Test successful disassociate from single-valued relationship."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{}')
 
         with patch.object(
@@ -1225,9 +1223,9 @@ class TestDisassociateSingleValueRecordDeleteItem:
             assert call_args[0][1].endswith("/Relationship/primarycontactid")
 
     @pytest.mark.asyncio
-    async def test_disassociate_single_value_error_response(self, mock_token_provider):
+    async def test_disassociate_single_value_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1250,9 +1248,9 @@ class TestGetCollectionRelationships:
     """Tests for get_collection_relationships_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_collection_relationships_success(self, mock_token_provider):
+    async def test_get_collection_relationships_success(self, mock_credential):
         """Test successful get collection relationships."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
@@ -1275,9 +1273,9 @@ class TestGetCollectionRelationships:
             assert call_args[0][1].endswith("/TargetTable/task")
 
     @pytest.mark.asyncio
-    async def test_get_collection_relationships_error_response(self, mock_token_provider):
+    async def test_get_collection_relationships_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1302,9 +1300,9 @@ class TestGetMultiSelectMetadata:
     """Tests for get_multi_select_metadata_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_multi_select_metadata_success(self, mock_token_provider):
+    async def test_get_multi_select_metadata_success(self, mock_credential):
         """Test successful get multi-select metadata."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"name": "col"}')
 
         with patch.object(
@@ -1321,9 +1319,9 @@ class TestGetMultiSelectMetadata:
             assert call_args[0][1].endswith("/MultiSelect")
 
     @pytest.mark.asyncio
-    async def test_get_multi_select_metadata_error_response(self, mock_token_provider):
+    async def test_get_multi_select_metadata_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1343,9 +1341,9 @@ class TestGetOptionSetMetadata:
     """Tests for get_option_set_metadata_async method."""
 
     @pytest.mark.asyncio
-    async def test_get_option_set_metadata_success(self, mock_token_provider):
+    async def test_get_option_set_metadata_success(self, mock_credential):
         """Test successful get option set metadata."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"name": "col"}')
 
         with patch.object(
@@ -1363,9 +1361,9 @@ class TestGetOptionSetMetadata:
             assert call_args[0][1].endswith("/Picklist")
 
     @pytest.mark.asyncio
-    async def test_get_option_set_metadata_error_response(self, mock_token_provider):
+    async def test_get_option_set_metadata_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
@@ -1393,9 +1391,9 @@ class TestPathParameterEncoding:
     """
 
     @pytest.mark.asyncio
-    async def test_get_items_double_encodes_dataset_environment_url(self, mock_token_provider):
+    async def test_get_items_double_encodes_dataset_environment_url(self, mock_credential):
         """Test that the environment URL dataset is double-encoded, not single-encoded."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
@@ -1420,9 +1418,9 @@ class TestPathParameterEncoding:
             assert "https%3A%2F%2Forg12345.crm.dynamics.com" not in url
 
     @pytest.mark.asyncio
-    async def test_get_item_double_encodes_all_segments(self, mock_token_provider):
+    async def test_get_item_double_encodes_all_segments(self, mock_credential):
         """Test that dataset, table, and id segments are all double-encoded."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"name": "row"}')
 
         with patch.object(
@@ -1448,9 +1446,9 @@ class TestPathParameterEncoding:
             assert "https%253A%252F%252Forg12345.crm.dynamics.com" in url
 
     @pytest.mark.asyncio
-    async def test_post_item_double_encodes_dataset_environment_url(self, mock_token_provider):
+    async def test_post_item_double_encodes_dataset_environment_url(self, mock_credential):
         """Test that post_item double-encodes the environment URL dataset segment."""
-        client = _make_client(mock_token_provider)
+        client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"accountid": "1"}')
 
         with patch.object(

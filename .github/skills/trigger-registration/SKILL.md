@@ -295,74 +295,54 @@ az functionapp log tail -g $resourceGroup -n $functionAppName
 
 ## Using the SDK for Actions (Beyond Triggers)
 
-The `azure-connectors` package provides typed async clients for calling connector actions directly from any Python application — Azure Functions, Flask, FastAPI, Django, scripts, etc.
+The `azure-connectors` package provides typed async clients for calling connector actions directly from Python applications. Generated clients require a caller-owned asynchronous Azure Identity credential or an `AzureKeyCredential`.
 
 ### Example: Send an email
 
 ```python
-import asyncio
-from azure.connectors.office365 import Office365Client
-from azure.connectors.sdk import ManagedIdentityTokenProvider
+from azure.identity.aio import DefaultAzureCredential
 
-async def main():
-    # Connection runtime URL from Connector Namespace
-    connection_url = "https://..."
-    token_provider = ManagedIdentityTokenProvider()
+from azure.connectors.office365 import Office365Client, SendEmailInput
 
-    async with Office365Client(connection_url, token_provider) as client:
-        await client.send_email_async(
-            to="recipient@example.com",
-            subject="Hello from Python SDK",
-            body="<p>Sent from any Python app!</p>",
-        )
 
-asyncio.run(main())
+async def main(connection_url: str):
+    async with DefaultAzureCredential() as credential:
+        async with Office365Client(connection_url, credential) as client:
+            await client.send_email_async(
+                input=SendEmailInput(
+                    to="recipient@example.com",
+                    subject="Hello from Python SDK",
+                    body="<p>Sent from any Python app.</p>",
+                )
+            )
 ```
 
 ### Example: List SharePoint items
 
 ```python
+from azure.identity.aio import DefaultAzureCredential
+
 from azure.connectors.sharepointonline import SharepointonlineClient
 
-async def list_items():
-    async with SharepointonlineClient(connection_url, token_provider) as client:
-        items = await client.get_items_async(
-            dataset="https://contoso.sharepoint.com/sites/MySite",
-            table="MyList"
-        )
-        for item in items.get("value", []):
-            print(f"Item: {item.get('Title')}")
-```
 
-### Example: List Teams
+async def list_items(connection_url: str):
+    async with DefaultAzureCredential() as credential:
+        async with SharepointonlineClient(connection_url, credential) as client:
+            items = [
+                item
+                async for item in client.get_items_async(
+                    dataset="https://contoso.sharepoint.com/sites/MySite",
+                    table="MyList",
+                )
+            ]
 
-```python
-from azure.connectors.teams import TeamsClient
-
-async def list_teams():
-    async with TeamsClient(connection_url, token_provider) as client:
-        teams = await client.get_all_teams_async()
-        for team in teams.get("value", []):
-            print(f"Team: {team.get('displayName')}")
+    for item in items:
+        print(f"Item: {item.get('Title')}")
 ```
 
 ### Authentication Options
 
-```python
-from azure.connectors.sdk import ManagedIdentityTokenProvider, ConnectionStringTokenProvider
-
-# System-assigned managed identity (recommended for Azure)
-token_provider = ManagedIdentityTokenProvider()
-
-# User-assigned managed identity
-token_provider = ManagedIdentityTokenProvider(client_id="your-client-id")
-
-# Azure Identity credentials (DefaultAzureCredential, AzureCliCredential, etc.)
-from azure.identity.aio import DefaultAzureCredential
-credential = DefaultAzureCredential()
-client = Office365Client(connection_url, credential)
-```
-
+Use `DefaultAzureCredential` or `ManagedIdentityCredential` from `azure.identity.aio` for token authentication. Use `AzureKeyCredential` from `azure.core.credentials` when the connection runtime expects an API key. The caller owns asynchronous credentials and must close them.
 ### E2E Validated Connectors
 
 | Connector | Package | Status |

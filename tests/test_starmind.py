@@ -6,8 +6,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 import azure.connectors.starmind as starmind_module
-from azure.connectors.sdk import ConnectorException, ManagedIdentityTokenProvider
+from azure.connectors.sdk import ConnectorException
 from azure.connectors.starmind import (
     FindExpertsInput,
     PostQuestionDraftInput,
@@ -39,25 +40,26 @@ class TestStarmindClient:
 
     def test_init_with_defaults(self):
         """Test initialization with default authentication."""
-        client = StarmindClient("https://example.azure.com/connections/test/")
+        client = StarmindClient("https://example.azure.com/connections/test/",
+                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "starmind"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     @pytest.mark.parametrize("connection_runtime_url", ["", None])
     def test_init_with_invalid_url_raises_error(self, connection_runtime_url):
         """Test invalid runtime URLs are rejected."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            StarmindClient(connection_runtime_url)
+            StarmindClient(connection_runtime_url, AzureKeyCredential("test-key"))
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager cleanup."""
         with patch.object(StarmindClient, "close", new_callable=AsyncMock) as mock_close:
             async with StarmindClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, StarmindClient)
 
@@ -81,12 +83,12 @@ class TestStarmindClient:
         expected_method,
         expected_url_suffix,
         expects_body,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation's successful HTTP contract."""
         client = StarmindClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -104,11 +106,11 @@ class TestStarmindClient:
         assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_find_experts_success(self, mock_token_provider):
+    async def test_find_experts_success(self, mock_credential):
         """Test expert search sends the generated query body."""
         client = StarmindClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -127,11 +129,11 @@ class TestStarmindClient:
         assert result == {"experts": []}
 
     @pytest.mark.asyncio
-    async def test_post_question_draft_success(self, mock_token_provider):
+    async def test_post_question_draft_success(self, mock_credential):
         """Test posting a question draft uses the questions route."""
         client = StarmindClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -155,12 +157,12 @@ class TestStarmindClient:
     async def test_non_success_response_raises_exception(
         self,
         operation,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation raises for a non-success response."""
         client = StarmindClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(

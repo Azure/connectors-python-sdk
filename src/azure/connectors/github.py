@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -1086,8 +1088,17 @@ class GithubClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a GithubClient.
@@ -1095,17 +1106,36 @@ class GithubClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -1117,6 +1147,11 @@ class GithubClient(ConnectorClientBase):
         input: IssueBasicDetailsModel,
         repository_owner: str,
         repository_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create an issue
@@ -1132,7 +1167,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1163,6 +1202,11 @@ class GithubClient(ConnectorClientBase):
         since: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all issues of a repository
@@ -1181,62 +1225,66 @@ class GithubClient(ConnectorClientBase):
             value = str(milestone)
             if isinstance(milestone, bool):
                 value = value.lower()
-            query_params.append(f"milestone={quote(value)}")
+            query_params.append(f"milestone={quote(value, safe='')}")
         if state is not None:
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if assignee is not None:
             value = str(assignee)
             if isinstance(assignee, bool):
                 value = value.lower()
-            query_params.append(f"assignee={quote(value)}")
+            query_params.append(f"assignee={quote(value, safe='')}")
         if creator is not None:
             value = str(creator)
             if isinstance(creator, bool):
                 value = value.lower()
-            query_params.append(f"creator={quote(value)}")
+            query_params.append(f"creator={quote(value, safe='')}")
         if mentioned is not None:
             value = str(mentioned)
             if isinstance(mentioned, bool):
                 value = value.lower()
-            query_params.append(f"mentioned={quote(value)}")
+            query_params.append(f"mentioned={quote(value, safe='')}")
         if labels is not None:
             value = str(labels)
             if isinstance(labels, bool):
                 value = value.lower()
-            query_params.append(f"labels={quote(value)}")
+            query_params.append(f"labels={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if since is not None:
             value = str(since)
             if isinstance(since, bool):
                 value = value.lower()
-            query_params.append(f"since={quote(value)}")
+            query_params.append(f"since={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1256,6 +1304,11 @@ class GithubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a repository public key
@@ -1274,7 +1327,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1296,6 +1353,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         secret_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Create or update a repository secret
@@ -1314,7 +1376,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1330,6 +1396,11 @@ class GithubClient(ConnectorClientBase):
         input: CreateRepositoryUsingTemplateRequest,
         template_owner: str,
         template_repository: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a repository using a template
@@ -1347,7 +1418,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1366,6 +1441,11 @@ class GithubClient(ConnectorClientBase):
     async def get_repository_by_id_async(
         self,
         repository_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a repository by Id
@@ -1378,7 +1458,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1399,6 +1483,11 @@ class GithubClient(ConnectorClientBase):
         input: CreateReferenceRequest,
         repository_owner: str,
         repository_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a reference
@@ -1417,7 +1506,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1438,6 +1531,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         reference: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a reference
@@ -1458,7 +1556,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1480,6 +1582,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Merge a pull request
@@ -1497,7 +1604,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1518,6 +1629,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a pull request
@@ -1534,7 +1650,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1556,6 +1676,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a pull request
@@ -1576,7 +1701,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1597,6 +1726,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the list of files from a pull request
@@ -1615,7 +1749,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1637,6 +1775,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Request reviewers for a pull request
@@ -1655,7 +1798,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1672,6 +1819,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         pull_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Remove requested reviewers from a pull request
@@ -1690,7 +1842,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=input
+            "DELETE", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1706,6 +1862,11 @@ class GithubClient(ConnectorClientBase):
         input: PullRequestCreateRequest,
         repository_owner: str,
         repository_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a pull request
@@ -1725,7 +1886,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1752,6 +1917,11 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all Pull Requests of A Repository
@@ -1770,42 +1940,46 @@ class GithubClient(ConnectorClientBase):
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if head is not None:
             value = str(head)
             if isinstance(head, bool):
                 value = value.lower()
-            query_params.append(f"head={quote(value)}")
+            query_params.append(f"head={quote(value, safe='')}")
         if base is not None:
             value = str(base)
             if isinstance(base, bool):
                 value = value.lower()
-            query_params.append(f"base={quote(value)}")
+            query_params.append(f"base={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1826,6 +2000,11 @@ class GithubClient(ConnectorClientBase):
         input: RepositoryDispatchEvent,
         repository_owner: str,
         repository_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Create a repository dispatch event
@@ -1845,7 +2024,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1862,6 +2045,11 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         base: str,
         head: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Compare two commits
@@ -1882,7 +2070,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1903,6 +2095,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_id: int,
         secret_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Add selected repository to an organization secret
@@ -1927,7 +2124,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1943,6 +2144,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_id: int,
         secret_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Remove selected repository from an organization secret
@@ -1967,7 +2173,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1983,6 +2193,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         webhook_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Deletes a GitHub Webhook
@@ -1999,7 +2214,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2015,6 +2234,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         issue_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a particular issue of a repository
@@ -2031,7 +2255,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2053,6 +2281,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         issue_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update an Issue
@@ -2069,7 +2302,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2091,6 +2328,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         milestone_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a milestone
@@ -2107,7 +2349,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2125,6 +2371,11 @@ class GithubClient(ConnectorClientBase):
 
     async def get_user_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the authenticated user
@@ -2134,7 +2385,11 @@ class GithubClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/user"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2153,6 +2408,11 @@ class GithubClient(ConnectorClientBase):
     async def search_github_with_query_async(
         self,
         input: GraphQlQuery,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Search Github using Query
@@ -2162,7 +2422,11 @@ class GithubClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/graphql"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2179,6 +2443,11 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lists the available assignees for issues in a repository
@@ -2197,17 +2466,21 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2229,6 +2502,11 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List repository collaborators
@@ -2247,17 +2525,21 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2278,6 +2560,11 @@ class GithubClient(ConnectorClientBase):
         repository_owner: str,
         repository_name: str,
         user_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Check if a user is a repository collaborator
@@ -2294,7 +2581,11 @@ class GithubClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2319,6 +2610,11 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all milestones of a repository
@@ -2337,32 +2633,36 @@ class GithubClient(ConnectorClientBase):
             value = str(state)
             if isinstance(state, bool):
                 value = value.lower()
-            query_params.append(f"state={quote(value)}")
+            query_params.append(f"state={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2384,6 +2684,11 @@ class GithubClient(ConnectorClientBase):
         repository_name: str,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all labels for a repository
@@ -2402,17 +2707,21 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2435,6 +2744,11 @@ class GithubClient(ConnectorClientBase):
         issue_number: int,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all labels for an issue
@@ -2455,17 +2769,21 @@ class GithubClient(ConnectorClientBase):
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2489,6 +2807,11 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all public repositories for a user
@@ -2504,32 +2827,36 @@ class GithubClient(ConnectorClientBase):
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2553,6 +2880,11 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all public repositories for an organization
@@ -2568,32 +2900,36 @@ class GithubClient(ConnectorClientBase):
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2620,6 +2956,11 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Lists all repositories for the authenticated user
@@ -2633,52 +2974,56 @@ class GithubClient(ConnectorClientBase):
             value = str(visibility)
             if isinstance(visibility, bool):
                 value = value.lower()
-            query_params.append(f"visibility={quote(value)}")
+            query_params.append(f"visibility={quote(value, safe='')}")
         if affiliation is not None:
             value = str(affiliation)
             if isinstance(affiliation, bool):
                 value = value.lower()
-            query_params.append(f"affiliation={quote(value)}")
+            query_params.append(f"affiliation={quote(value, safe='')}")
         if since is not None:
             value = str(since)
             if isinstance(since, bool):
                 value = value.lower()
-            query_params.append(f"since={quote(value)}")
+            query_params.append(f"since={quote(value, safe='')}")
         if before is not None:
             value = str(before)
             if isinstance(before, bool):
                 value = value.lower()
-            query_params.append(f"before={quote(value)}")
+            query_params.append(f"before={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if direction is not None:
             value = str(direction)
             if isinstance(direction, bool):
                 value = value.lower()
-            query_params.append(f"direction={quote(value)}")
+            query_params.append(f"direction={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2701,6 +3046,11 @@ class GithubClient(ConnectorClientBase):
         order: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Find issues by state and keyword
@@ -2712,32 +3062,36 @@ class GithubClient(ConnectorClientBase):
         value = str(q)
         if isinstance(q, bool):
             value = value.lower()
-        query_params.append(f"q={quote(value)}")
+        query_params.append(f"q={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if order is not None:
             value = str(order)
             if isinstance(order, bool):
                 value = value.lower()
-            query_params.append(f"order={quote(value)}")
+            query_params.append(f"order={quote(value, safe='')}")
         if per_page is not None:
             value = str(per_page)
             if isinstance(per_page, bool):
                 value = value.lower()
-            query_params.append(f"per_page={quote(value)}")
+            query_params.append(f"per_page={quote(value, safe='')}")
         if page is not None:
             value = str(page)
             if isinstance(page, bool):
                 value = value.lower()
-            query_params.append(f"page={quote(value)}")
+            query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2756,6 +3110,11 @@ class GithubClient(ConnectorClientBase):
     async def invoke_mcp_server_async(
         self,
         input: QueryRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Github MCP Server
@@ -2765,7 +3124,11 @@ class GithubClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/mcp"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

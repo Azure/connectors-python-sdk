@@ -7,17 +7,17 @@ import inspect
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.zendesk import (
     Item,
     ZendeskClient,
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: ZendeskClient, operation: str):
@@ -25,7 +25,7 @@ async def _invoke_operation(client: ZendeskClient, operation: str):
     if operation == "get_tables":
         return await client.get_tables_async()
     if operation == "get_items":
-        return await client.get_items_async(table="tickets")
+        return await resolve_generated_result(client.get_items_async(table="tickets"))
     if operation == "post_item":
         return await client.post_item_async(input=Item(), table="tickets")
     if operation == "get_item":
@@ -47,55 +47,54 @@ class TestZendeskClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ZendeskClient("https://example.azure.com/connections/test")
+        client = ZendeskClient("https://example.azure.com/connections/test",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "zendesk"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ZendeskClient("https://example.azure.com/connections/test/")
+        client = ZendeskClient("https://example.azure.com/connections/test/",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ZendeskClient("")
+            ZendeskClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ZendeskClient(None)
+            ZendeskClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'zendesk'."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "zendesk"
@@ -105,11 +104,11 @@ class TestZendeskClientLifecycle:
     """Tests for ZendeskClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -117,12 +116,12 @@ class TestZendeskClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(ZendeskClient, "close", new_callable=AsyncMock) as mock_close:
             async with ZendeskClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, ZendeskClient)
 
@@ -133,11 +132,11 @@ class TestZendeskClientMethods:
     """Success path tests for Zendesk methods."""
 
     @pytest.mark.asyncio
-    async def test_get_tables_success(self, mock_token_provider):
+    async def test_get_tables_success(self, mock_credential):
         """Test get_tables_async returns parsed JSON from the datasets endpoint."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[{"name":"tickets"}]}')
 
@@ -154,11 +153,11 @@ class TestZendeskClientMethods:
             assert "/datasets/default/tables" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_items_includes_query_params(self, mock_token_provider):
+    async def test_get_items_includes_query_params(self, mock_credential):
         """Test get_items_async serializes OData query parameters."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[]}')
 
@@ -168,11 +167,11 @@ class TestZendeskClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(
+            await resolve_generated_result(client.get_items_async(
                 table="tickets",
                 filter="status eq 'open'",
                 top="10",
-            )
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
@@ -181,11 +180,11 @@ class TestZendeskClientMethods:
             assert "$top=10" in request_url
 
     @pytest.mark.asyncio
-    async def test_post_item_success(self, mock_token_provider):
+    async def test_post_item_success(self, mock_credential):
         """Test post_item_async posts the body to the items endpoint."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"dynamic_properties":{"id":1}}')
         body = Item()
@@ -204,11 +203,11 @@ class TestZendeskClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_get_item_success(self, mock_token_provider):
+    async def test_get_item_success(self, mock_credential):
         """Test get_item_async targets the single-item endpoint."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"dynamic_properties":{"id":42}}')
 
@@ -225,11 +224,11 @@ class TestZendeskClientMethods:
             assert "/datasets/default/tables/tickets/items/42" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_delete_item_returns_none(self, mock_token_provider):
+    async def test_delete_item_returns_none(self, mock_credential):
         """Test delete_item_async issues a DELETE and returns None."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -246,11 +245,11 @@ class TestZendeskClientMethods:
             assert "/datasets/default/tables/tickets/items/42" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_patch_item_success(self, mock_token_provider):
+    async def test_patch_item_success(self, mock_credential):
         """Test patch_item_async sends the body via PATCH."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"dynamic_properties":{"id":42}}')
         body = Item()
@@ -269,11 +268,11 @@ class TestZendeskClientMethods:
             assert mock_send.call_args.kwargs["body"] is body
 
     @pytest.mark.asyncio
-    async def test_search_articles_includes_query_params(self, mock_token_provider):
+    async def test_search_articles_includes_query_params(self, mock_credential):
         """Test search_articles_async serializes the help center query parameters."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"results":[]}')
 
@@ -292,11 +291,11 @@ class TestZendeskClientMethods:
             assert "locale=en-us" in request_url
 
     @pytest.mark.asyncio
-    async def test_get_table_success(self, mock_token_provider):
+    async def test_get_table_success(self, mock_credential):
         """Test get_table_async targets the metadata endpoint."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"name":"tickets"}')
 
@@ -313,11 +312,11 @@ class TestZendeskClientMethods:
             assert "/$metadata.json/datasets/default/tables/tickets" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_tables_empty_returns_none(self, mock_token_provider):
+    async def test_get_tables_empty_returns_none(self, mock_credential):
         """Test get_tables_async returns None for an empty body."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -351,13 +350,13 @@ class TestZendeskClientErrorHandling:
     )
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
@@ -388,11 +387,11 @@ class TestZendeskClientSignatures:
         assert signature.parameters["locale"].default is None
 
     @pytest.mark.asyncio
-    async def test_search_articles_missing_query_raises_type_error(self, mock_token_provider):
+    async def test_search_articles_missing_query_raises_type_error(self, mock_credential):
         """Test omitting the required query param raises TypeError."""
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with pytest.raises(TypeError):
@@ -416,7 +415,11 @@ class TestZendeskClientSignatures:
         signature = inspect.signature(getattr(ZendeskClient, method_name))
 
         assert signature.return_annotation is not inspect.Signature.empty
-        assert signature.return_annotation in ("dict[str, Any] | None", "None")
+        assert signature.return_annotation in (
+            "AsyncIterator[dict[str, Any]]",
+            "dict[str, Any] | None",
+            "None",
+        )
 
 
 class TestZendeskTriggerOperations:

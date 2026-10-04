@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
+
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -1469,8 +1471,17 @@ class AzureiotcentralClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a AzureiotcentralClient.
@@ -1478,31 +1489,97 @@ class AzureiotcentralClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
     def connector_name(self) -> str:
         return "azureiotcentral"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def device_groups_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List device groups
 
         Get the list of device groups in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/deviceGroups"
@@ -1511,31 +1588,51 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_groups_get_async(
         self,
         device_group_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a device group
@@ -1553,12 +1650,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1579,6 +1680,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: DeviceGroup,
         device_group_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a device group
@@ -1596,12 +1702,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1621,6 +1731,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_group_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete device group
@@ -1638,12 +1753,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1658,11 +1777,19 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_group_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get devices by device group ID
 
         Get the list of devices in a device group in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1676,32 +1803,52 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def devices_get_cloud_properties_async(
         self,
         device_id: str,
         application: str,
         instance_of: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get device cloud properties (deprecated)
@@ -1720,17 +1867,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1752,6 +1903,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         application: str,
         instance_of: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update device cloud properties (deprecated)
@@ -1770,17 +1926,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1804,6 +1964,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         instance_of: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Execute a device command (deprecated)
@@ -1825,17 +1990,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1855,11 +2024,19 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List relationships
 
         List all relationships based on device ID.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1873,32 +2050,52 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_relationships_get_async(
         self,
         device_id: str,
         relationship_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get device relationship
@@ -1919,12 +2116,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1946,6 +2147,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         relationship_id: str,
         device_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a device relationship
@@ -1966,12 +2172,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1993,6 +2203,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         relationship_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a device relationship
@@ -2013,12 +2228,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2039,6 +2258,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         relationship_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a device relationship
@@ -2059,12 +2283,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2078,42 +2306,70 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def jobs_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List jobs
 
         Get the list of jobs in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/api/ga_2022_07_31/jobs"
         query_params = []
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def jobs_get_async(
         self,
         job_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a job
@@ -2128,12 +2384,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2155,6 +2415,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         job_id: str,
         application: str,
         job_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a job
@@ -2169,17 +2434,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2199,11 +2468,19 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         job_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get device statuses
 
         Get the list of individual device statuses by job ID.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2213,31 +2490,51 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def jobs_stop_async(
         self,
         job_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Stop a running job
@@ -2252,12 +2549,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2272,6 +2573,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         job_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Resume a stopped job
@@ -2286,12 +2592,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2307,6 +2617,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         job_id: str,
         rerun_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Resume a job on failed devices
@@ -2326,12 +2641,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=None
+            "PUT", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2350,11 +2669,19 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def organizations_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List organizations
 
         Get the list of organizations in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/organizations"
@@ -2363,31 +2690,51 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def organizations_get_async(
         self,
         organization_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get an organization
@@ -2405,12 +2752,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2431,6 +2782,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: Organization,
         organization_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create an organization
@@ -2448,12 +2804,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2473,6 +2833,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         organization_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete organization
@@ -2490,12 +2855,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2509,11 +2878,19 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def scheduled_jobs_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List scheduled jobs
 
         Get the list of scheduled jobs in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/scheduledJobs"
@@ -2522,31 +2899,51 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def scheduled_jobs_get_async(
         self,
         scheduled_job_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a scheduled job
@@ -2564,12 +2961,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2592,6 +2993,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         application: str,
         job_type: Optional[str] = None,
         scheduled_job_end_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a scheduled job
@@ -2609,22 +3015,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
                 value = value.lower()
-            query_params.append(f"scheduled_job_end_type={quote(value)}")
+            query_params.append(f"scheduled_job_end_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2646,6 +3056,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         scheduled_job_id: str,
         application: str,
         scheduled_job_end_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a scheduled job
@@ -2663,17 +3078,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
                 value = value.lower()
-            query_params.append(f"scheduled_job_end_type={quote(value)}")
+            query_params.append(f"scheduled_job_end_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2693,6 +3112,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         scheduled_job_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a scheduled job
@@ -2710,12 +3134,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2730,11 +3158,19 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         scheduled_job_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get jobs by scheduled job ID
 
         Get the list of jobs for a scheduled job definition.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2748,31 +3184,51 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def devices_get_async(
         self,
         device_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a device by ID
@@ -2787,12 +3243,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2814,6 +3274,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get device command response
@@ -2833,17 +3298,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2866,6 +3335,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get component command response
@@ -2887,17 +3361,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2920,6 +3398,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         telemetry_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get component telemetry value
@@ -2941,17 +3424,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2974,6 +3461,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get module command response
@@ -2995,17 +3487,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3029,6 +3525,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get module component command response
@@ -3052,17 +3553,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3086,6 +3591,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         telemetry_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get module component telemetry value
@@ -3109,17 +3619,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3141,6 +3655,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get module properties
@@ -3161,17 +3680,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3194,6 +3717,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         telemetry_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get module telemetry value
@@ -3215,17 +3743,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3246,6 +3778,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get device properties
@@ -3260,17 +3797,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3292,6 +3833,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         telemetry_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get device telemetry value
@@ -3311,17 +3857,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3340,42 +3890,70 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def devices_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List devices
 
         Get the list of devices in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/devices"
         query_params = []
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def devices_remove_async(
         self,
         device_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a device
@@ -3390,12 +3968,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3413,6 +3995,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Run a device command
@@ -3432,17 +4019,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3466,6 +4057,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Run a component command
@@ -3487,17 +4083,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3521,6 +4121,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Run a module command
@@ -3542,17 +4147,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3577,6 +4186,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         command_name: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Run a module component command
@@ -3600,17 +4214,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3631,6 +4249,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: DeviceV2,
         device_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create or update a device
@@ -3645,12 +4268,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3673,6 +4300,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update module properties
@@ -3693,17 +4325,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3725,6 +4361,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         application: str,
         template: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update device properties
@@ -3739,17 +4380,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3769,6 +4414,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         template_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a device template by ID
@@ -3783,12 +4433,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3807,42 +4461,70 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_templates_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/deviceTemplates"
         query_params = []
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_templates_remove_async(
         self,
         template_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a device template
@@ -3857,12 +4539,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3877,6 +4563,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         role_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get role
@@ -3891,12 +4582,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3915,6 +4610,11 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def roles_list_async(
         self,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List roles
@@ -3926,12 +4626,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3953,6 +4657,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         user_id: str,
         application: str,
         user_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create user
@@ -3967,17 +4676,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
                 value = value.lower()
-            query_params.append(f"user_type={quote(value)}")
+            query_params.append(f"user_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3997,6 +4710,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         user_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get user
@@ -4011,12 +4729,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4035,6 +4757,11 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def users_list_async(
         self,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List users
@@ -4046,12 +4773,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4071,6 +4802,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         user_id: str,
         application: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete user
@@ -4085,12 +4821,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4107,6 +4847,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         user_id: str,
         application: str,
         user_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update user
@@ -4121,17 +4866,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
                 value = value.lower()
-            query_params.append(f"user_type={quote(value)}")
+            query_params.append(f"user_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PATCH", request_url, body=input
+            "PATCH", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4149,39 +4898,70 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def applications_list_async(
         self,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get the list of applications accessible to the signed-in user
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/applications"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_templates_list_2_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/deviceTemplates"
@@ -4190,32 +4970,52 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def workflow_get_components_async(
         self,
         application: str,
         template: str,
         module: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Workflow_GetComponents
@@ -4228,21 +5028,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4265,6 +5069,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Workflow_GetCapabilities
@@ -4277,31 +5086,35 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4324,6 +5137,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Workflow_GetCapabilities_V1
@@ -4336,31 +5154,35 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4381,6 +5203,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         application: str,
         template: str,
         module: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Workflow_GetComponents_V1
@@ -4393,21 +5220,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4427,6 +5258,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         template: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Workflow_GetModules
@@ -4438,16 +5274,20 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4467,6 +5307,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         instance_of: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCloudProperties
@@ -4479,17 +5324,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4511,6 +5360,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         instance_of: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand
@@ -4523,27 +5377,31 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if capability is not None:
             value = str(capability)
             if isinstance(capability, bool):
                 value = value.lower()
-            query_params.append(f"capability={quote(value)}")
+            query_params.append(f"capability={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4566,6 +5424,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand_V1
@@ -4578,32 +5441,36 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if capability is not None:
             value = str(capability)
             if isinstance(capability, bool):
                 value = value.lower()
-            query_params.append(f"capability={quote(value)}")
+            query_params.append(f"capability={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4624,6 +5491,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         application: str,
         template: Optional[str] = None,
         module: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceProperties
@@ -4636,22 +5508,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4674,6 +5550,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceTelemetry
@@ -4686,32 +5567,36 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if capability is not None:
             value = str(capability)
             if isinstance(capability, bool):
                 value = value.lower()
-            query_params.append(f"capability={quote(value)}")
+            query_params.append(f"capability={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4731,6 +5616,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         job_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_Job
@@ -4743,17 +5633,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4775,6 +5669,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         scheduled_job_end_type: Optional[str] = None,
         job_type: Optional[str] = None,
         patch: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_ScheduledJob
@@ -4787,27 +5686,31 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
                 value = value.lower()
-            query_params.append(f"scheduled_job_end_type={quote(value)}")
+            query_params.append(f"scheduled_job_end_type={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if patch is not None:
             value = str(patch)
             if isinstance(patch, bool):
                 value = value.lower()
-            query_params.append(f"patch={quote(value)}")
+            query_params.append(f"patch={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4828,6 +5731,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         application: str,
         user_type: Optional[str] = None,
         patch: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Schema_User
@@ -4840,22 +5748,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
                 value = value.lower()
-            query_params.append(f"user_type={quote(value)}")
+            query_params.append(f"user_type={quote(value, safe='')}")
         if patch is not None:
             value = str(patch)
             if isinstance(patch, bool):
                 value = value.lower()
-            query_params.append(f"patch={quote(value)}")
+            query_params.append(f"patch={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4875,6 +5787,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         rule: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Schema_WebhookActionBody
@@ -4887,17 +5804,21 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if rule is not None:
             value = str(rule)
             if isinstance(rule, bool):
                 value = value.lower()
-            query_params.append(f"rule={quote(value)}")
+            query_params.append(f"rule={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

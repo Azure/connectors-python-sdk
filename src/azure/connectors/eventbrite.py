@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -107,8 +109,17 @@ class EventbriteClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a EventbriteClient.
@@ -116,17 +127,36 @@ class EventbriteClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -155,6 +185,11 @@ class EventbriteClient(ConnectorClientBase):
         event_hide_start_date: Optional[bool] = None,
         event_hide_end_date: Optional[bool] = None,
         event_show_remaining: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create event
@@ -169,96 +204,100 @@ class EventbriteClient(ConnectorClientBase):
         value = str(event_name_html)
         if isinstance(event_name_html, bool):
             value = value.lower()
-        query_params.append(f"event.name.html={quote(value)}")
+        query_params.append(f"event.name.html={quote(value, safe='')}")
         value = str(event_description_html)
         if isinstance(event_description_html, bool):
             value = value.lower()
-        query_params.append(f"event.description.html={quote(value)}")
+        query_params.append(f"event.description.html={quote(value, safe='')}")
         value = str(event_start_utc)
         if isinstance(event_start_utc, bool):
             value = value.lower()
-        query_params.append(f"event.start.utc={quote(value)}")
+        query_params.append(f"event.start.utc={quote(value, safe='')}")
         value = str(event_end_utc)
         if isinstance(event_end_utc, bool):
             value = value.lower()
-        query_params.append(f"event.end.utc={quote(value)}")
+        query_params.append(f"event.end.utc={quote(value, safe='')}")
         value = str(event_start_timezone)
         if isinstance(event_start_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.start.timezone={quote(value)}")
+        query_params.append(f"event.start.timezone={quote(value, safe='')}")
         value = str(event_end_timezone)
         if isinstance(event_end_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.end.timezone={quote(value)}")
+        query_params.append(f"event.end.timezone={quote(value, safe='')}")
         value = str(event_currency)
         if isinstance(event_currency, bool):
             value = value.lower()
-        query_params.append(f"event.currency={quote(value)}")
+        query_params.append(f"event.currency={quote(value, safe='')}")
         if event_organizer_id is not None:
             value = str(event_organizer_id)
             if isinstance(event_organizer_id, bool):
                 value = value.lower()
-            query_params.append(f"event.organizer_id={quote(value)}")
+            query_params.append(f"event.organizer_id={quote(value, safe='')}")
         if event_venue_id is not None:
             value = str(event_venue_id)
             if isinstance(event_venue_id, bool):
                 value = value.lower()
-            query_params.append(f"event.venue_id={quote(value)}")
+            query_params.append(f"event.venue_id={quote(value, safe='')}")
         if event_category_id is not None:
             value = str(event_category_id)
             if isinstance(event_category_id, bool):
                 value = value.lower()
-            query_params.append(f"event.category_id={quote(value)}")
+            query_params.append(f"event.category_id={quote(value, safe='')}")
         if event_password is not None:
             value = str(event_password)
             if isinstance(event_password, bool):
                 value = value.lower()
-            query_params.append(f"event.password={quote(value)}")
+            query_params.append(f"event.password={quote(value, safe='')}")
         if event_capacity is not None:
             value = str(event_capacity)
             if isinstance(event_capacity, bool):
                 value = value.lower()
-            query_params.append(f"event.capacity={quote(value)}")
+            query_params.append(f"event.capacity={quote(value, safe='')}")
         if event_shareable is not None:
             value = str(event_shareable)
             if isinstance(event_shareable, bool):
                 value = value.lower()
-            query_params.append(f"event.shareable={quote(value)}")
+            query_params.append(f"event.shareable={quote(value, safe='')}")
         if event_invite_only is not None:
             value = str(event_invite_only)
             if isinstance(event_invite_only, bool):
                 value = value.lower()
-            query_params.append(f"event.invite_only={quote(value)}")
+            query_params.append(f"event.invite_only={quote(value, safe='')}")
         if event_online_event is not None:
             value = str(event_online_event)
             if isinstance(event_online_event, bool):
                 value = value.lower()
-            query_params.append(f"event.online_event={quote(value)}")
+            query_params.append(f"event.online_event={quote(value, safe='')}")
         if event_listed is not None:
             value = str(event_listed)
             if isinstance(event_listed, bool):
                 value = value.lower()
-            query_params.append(f"event.listed={quote(value)}")
+            query_params.append(f"event.listed={quote(value, safe='')}")
         if event_hide_start_date is not None:
             value = str(event_hide_start_date)
             if isinstance(event_hide_start_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_start_date={quote(value)}")
+            query_params.append(f"event.hide_start_date={quote(value, safe='')}")
         if event_hide_end_date is not None:
             value = str(event_hide_end_date)
             if isinstance(event_hide_end_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_end_date={quote(value)}")
+            query_params.append(f"event.hide_end_date={quote(value, safe='')}")
         if event_show_remaining is not None:
             value = str(event_show_remaining)
             if isinstance(event_show_remaining, bool):
                 value = value.lower()
-            query_params.append(f"event.show_remaining={quote(value)}")
+            query_params.append(f"event.show_remaining={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -297,6 +336,11 @@ class EventbriteClient(ConnectorClientBase):
         event_hide_start_date: Optional[bool] = None,
         event_hide_end_date: Optional[bool] = None,
         event_show_remaining: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update event
@@ -311,104 +355,108 @@ class EventbriteClient(ConnectorClientBase):
         value = str(organization_id)
         if isinstance(organization_id, bool):
             value = value.lower()
-        query_params.append(f"organization_id={quote(value)}")
+        query_params.append(f"organization_id={quote(value, safe='')}")
         if event_name_html is not None:
             value = str(event_name_html)
             if isinstance(event_name_html, bool):
                 value = value.lower()
-            query_params.append(f"event.name.html={quote(value)}")
+            query_params.append(f"event.name.html={quote(value, safe='')}")
         if event_description_html is not None:
             value = str(event_description_html)
             if isinstance(event_description_html, bool):
                 value = value.lower()
-            query_params.append(f"event.description.html={quote(value)}")
+            query_params.append(f"event.description.html={quote(value, safe='')}")
         if event_start_utc is not None:
             value = str(event_start_utc)
             if isinstance(event_start_utc, bool):
                 value = value.lower()
-            query_params.append(f"event.start.utc={quote(value)}")
+            query_params.append(f"event.start.utc={quote(value, safe='')}")
         if event_end_utc is not None:
             value = str(event_end_utc)
             if isinstance(event_end_utc, bool):
                 value = value.lower()
-            query_params.append(f"event.end.utc={quote(value)}")
+            query_params.append(f"event.end.utc={quote(value, safe='')}")
         value = str(event_start_timezone)
         if isinstance(event_start_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.start.timezone={quote(value)}")
+        query_params.append(f"event.start.timezone={quote(value, safe='')}")
         value = str(event_end_timezone)
         if isinstance(event_end_timezone, bool):
             value = value.lower()
-        query_params.append(f"event.end.timezone={quote(value)}")
+        query_params.append(f"event.end.timezone={quote(value, safe='')}")
         value = str(event_currency)
         if isinstance(event_currency, bool):
             value = value.lower()
-        query_params.append(f"event.currency={quote(value)}")
+        query_params.append(f"event.currency={quote(value, safe='')}")
         if event_organizer_id is not None:
             value = str(event_organizer_id)
             if isinstance(event_organizer_id, bool):
                 value = value.lower()
-            query_params.append(f"event.organizer_id={quote(value)}")
+            query_params.append(f"event.organizer_id={quote(value, safe='')}")
         if event_venue_id is not None:
             value = str(event_venue_id)
             if isinstance(event_venue_id, bool):
                 value = value.lower()
-            query_params.append(f"event.venue_id={quote(value)}")
+            query_params.append(f"event.venue_id={quote(value, safe='')}")
         if event_category_id is not None:
             value = str(event_category_id)
             if isinstance(event_category_id, bool):
                 value = value.lower()
-            query_params.append(f"event.category_id={quote(value)}")
+            query_params.append(f"event.category_id={quote(value, safe='')}")
         if event_password is not None:
             value = str(event_password)
             if isinstance(event_password, bool):
                 value = value.lower()
-            query_params.append(f"event.password={quote(value)}")
+            query_params.append(f"event.password={quote(value, safe='')}")
         if event_capacity is not None:
             value = str(event_capacity)
             if isinstance(event_capacity, bool):
                 value = value.lower()
-            query_params.append(f"event.capacity={quote(value)}")
+            query_params.append(f"event.capacity={quote(value, safe='')}")
         if event_shareable is not None:
             value = str(event_shareable)
             if isinstance(event_shareable, bool):
                 value = value.lower()
-            query_params.append(f"event.shareable={quote(value)}")
+            query_params.append(f"event.shareable={quote(value, safe='')}")
         if event_invite_only is not None:
             value = str(event_invite_only)
             if isinstance(event_invite_only, bool):
                 value = value.lower()
-            query_params.append(f"event.invite_only={quote(value)}")
+            query_params.append(f"event.invite_only={quote(value, safe='')}")
         if event_online_event is not None:
             value = str(event_online_event)
             if isinstance(event_online_event, bool):
                 value = value.lower()
-            query_params.append(f"event.online_event={quote(value)}")
+            query_params.append(f"event.online_event={quote(value, safe='')}")
         if event_listed is not None:
             value = str(event_listed)
             if isinstance(event_listed, bool):
                 value = value.lower()
-            query_params.append(f"event.listed={quote(value)}")
+            query_params.append(f"event.listed={quote(value, safe='')}")
         if event_hide_start_date is not None:
             value = str(event_hide_start_date)
             if isinstance(event_hide_start_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_start_date={quote(value)}")
+            query_params.append(f"event.hide_start_date={quote(value, safe='')}")
         if event_hide_end_date is not None:
             value = str(event_hide_end_date)
             if isinstance(event_hide_end_date, bool):
                 value = value.lower()
-            query_params.append(f"event.hide_end_date={quote(value)}")
+            query_params.append(f"event.hide_end_date={quote(value, safe='')}")
         if event_show_remaining is not None:
             value = str(event_show_remaining)
             if isinstance(event_show_remaining, bool):
                 value = value.lower()
-            query_params.append(f"event.show_remaining={quote(value)}")
+            query_params.append(f"event.show_remaining={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -426,6 +474,11 @@ class EventbriteClient(ConnectorClientBase):
 
     async def get_organizations_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         GetOrganizations
@@ -437,7 +490,11 @@ class EventbriteClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -456,6 +513,11 @@ class EventbriteClient(ConnectorClientBase):
     async def get_organizers_async(
         self,
         organization_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get organizers
@@ -471,7 +533,11 @@ class EventbriteClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -490,6 +556,11 @@ class EventbriteClient(ConnectorClientBase):
     async def get_my_venues_async(
         self,
         organization_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get venues
@@ -502,7 +573,11 @@ class EventbriteClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -520,6 +595,11 @@ class EventbriteClient(ConnectorClientBase):
 
     async def get_categories_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get categories
@@ -529,7 +609,11 @@ class EventbriteClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v3/categories/"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -550,6 +634,11 @@ class EventbriteClient(ConnectorClientBase):
         organization_id: str,
         order_by: str,
         status: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get organization events
@@ -564,16 +653,20 @@ class EventbriteClient(ConnectorClientBase):
         value = str(order_by)
         if isinstance(order_by, bool):
             value = value.lower()
-        query_params.append(f"order_by={quote(value)}")
+        query_params.append(f"order_by={quote(value, safe='')}")
         value = str(status)
         if isinstance(status, bool):
             value = value.lower()
-        query_params.append(f"status={quote(value)}")
+        query_params.append(f"status={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

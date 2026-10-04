@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 import azure.connectors.textrequest as textrequest_module
 from azure.connectors.textrequest import (
     CreateContactInput,
@@ -21,9 +22,7 @@ from azure.connectors.textrequest import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
@@ -118,55 +117,54 @@ class TestTextrequestClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = TextrequestClient("https://example.azure.com/connections/test")
+        client = TextrequestClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "textrequest"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = TextrequestClient("https://example.azure.com/connections/test/")
+        client = TextrequestClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = TextrequestClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = TextrequestClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TextrequestClient("")
+            TextrequestClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TextrequestClient(None)
+            TextrequestClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'textrequest'."""
         client = TextrequestClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "textrequest"
@@ -176,11 +174,11 @@ class TestTextrequestClientLifecycle:
     """Tests for TextrequestClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = TextrequestClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -188,12 +186,12 @@ class TestTextrequestClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(TextrequestClient, "close", new_callable=AsyncMock) as mock_close:
             async with TextrequestClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, TextrequestClient)
 
@@ -203,10 +201,10 @@ class TestTextrequestClientLifecycle:
 class TestTextrequestClientOperations:
     """Tests for TextrequestClient operations against expected HTTP calls."""
 
-    def _make_client(self, mock_token_provider):
+    def _make_client(self, mock_credential):
         return TextrequestClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
     def test_all_generated_operations_are_covered(self):
@@ -227,10 +225,10 @@ class TestTextrequestClientOperations:
         expected_method,
         expected_url_suffix,
         expects_body,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation's successful HTTP contract."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
 
         with patch.object(
             client._http_client,
@@ -251,9 +249,9 @@ class TestTextrequestClientOperations:
         assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_get_messages_by_contact_phone_success(self, mock_token_provider):
+    async def test_get_messages_by_contact_phone_success(self, mock_credential):
         """Test get_messages_by_contact_phone issues a GET with paging query."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
@@ -272,9 +270,9 @@ class TestTextrequestClientOperations:
             assert result == {"items": []}
 
     @pytest.mark.asyncio
-    async def test_send_message_by_phone_number_success(self, mock_token_provider):
+    async def test_send_message_by_phone_number_success(self, mock_credential):
         """Test send_message_by_phone_number issues a POST with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = SendMessageByPhoneNumberInput(body="hello")
         mock_response = MockResponse(status=200, text='{"message_id": "m1"}')
 
@@ -292,9 +290,9 @@ class TestTextrequestClientOperations:
             assert result == {"message_id": "m1"}
 
     @pytest.mark.asyncio
-    async def test_archive_conversation_success(self, mock_token_provider):
+    async def test_archive_conversation_success(self, mock_credential):
         """Test archive_conversation issues a PUT to the archive route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
@@ -310,9 +308,9 @@ class TestTextrequestClientOperations:
             assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_unarchive_conversation_success(self, mock_token_provider):
+    async def test_unarchive_conversation_success(self, mock_credential):
         """Test unarchive_conversation issues a PUT to the unarchive route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
@@ -328,9 +326,9 @@ class TestTextrequestClientOperations:
             assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_get_contact_by_phone_number_success(self, mock_token_provider):
+    async def test_get_contact_by_phone_number_success(self, mock_credential):
         """Test get_contact_by_phone_number issues a GET to the contact route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"phone_number": "+15551112222"}')
 
         with patch.object(
@@ -346,9 +344,9 @@ class TestTextrequestClientOperations:
             assert result == {"phone_number": "+15551112222"}
 
     @pytest.mark.asyncio
-    async def test_delete_contact_success(self, mock_token_provider):
+    async def test_delete_contact_success(self, mock_credential):
         """Test delete_contact issues a DELETE to the contact route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
@@ -364,9 +362,9 @@ class TestTextrequestClientOperations:
             assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_create_contact_success(self, mock_token_provider):
+    async def test_create_contact_success(self, mock_credential):
         """Test create_contact issues a POST with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = CreateContactInput(first_name="Ada")
         mock_response = MockResponse(status=200, text='{"phone_number": "+15551112222"}')
 
@@ -384,9 +382,9 @@ class TestTextrequestClientOperations:
             assert result == {"phone_number": "+15551112222"}
 
     @pytest.mark.asyncio
-    async def test_get_contacts_success(self, mock_token_provider):
+    async def test_get_contacts_success(self, mock_credential):
         """Test get_contacts issues a GET with optional and paging query params."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
@@ -405,9 +403,9 @@ class TestTextrequestClientOperations:
             assert result == {"items": []}
 
     @pytest.mark.asyncio
-    async def test_get_group_by_id_success(self, mock_token_provider):
+    async def test_get_group_by_id_success(self, mock_credential):
         """Test get_group_by_id issues a GET to the group route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
         with patch.object(
@@ -421,9 +419,9 @@ class TestTextrequestClientOperations:
             assert result == {"id": 3}
 
     @pytest.mark.asyncio
-    async def test_update_group_success(self, mock_token_provider):
+    async def test_update_group_success(self, mock_credential):
         """Test update_group issues a PUT with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = UpdateGroupInput()
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
@@ -441,9 +439,9 @@ class TestTextrequestClientOperations:
             assert result == {"id": 3}
 
     @pytest.mark.asyncio
-    async def test_create_group_success(self, mock_token_provider):
+    async def test_create_group_success(self, mock_credential):
         """Test create_group issues a POST with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = CreateGroupInput()
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
@@ -459,9 +457,9 @@ class TestTextrequestClientOperations:
             assert result == {"id": 3}
 
     @pytest.mark.asyncio
-    async def test_get_custom_fields_success(self, mock_token_provider):
+    async def test_get_custom_fields_success(self, mock_credential):
         """Test get_custom_fields issues a GET to the fields route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='[]')
 
         with patch.object(
@@ -475,9 +473,9 @@ class TestTextrequestClientOperations:
             assert result == []
 
     @pytest.mark.asyncio
-    async def test_mark_payment_paid_success(self, mock_token_provider):
+    async def test_mark_payment_paid_success(self, mock_credential):
         """Test mark_payment_paid issues a POST to the mark_as_paid route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
@@ -491,9 +489,9 @@ class TestTextrequestClientOperations:
             assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_create_payment_success(self, mock_token_provider):
+    async def test_create_payment_success(self, mock_credential):
         """Test create_payment issues a POST with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = CreatePaymentInput()
         mock_response = MockResponse(status=200, text='{"id": 9}')
 
@@ -509,9 +507,9 @@ class TestTextrequestClientOperations:
             assert result == {"id": 9}
 
     @pytest.mark.asyncio
-    async def test_get_dashboards_success(self, mock_token_provider):
+    async def test_get_dashboards_success(self, mock_credential):
         """Test get_dashboards issues a GET to the dashboards route."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
@@ -527,9 +525,9 @@ class TestTextrequestClientOperations:
             assert result == {"items": []}
 
     @pytest.mark.asyncio
-    async def test_create_dashboard_success(self, mock_token_provider):
+    async def test_create_dashboard_success(self, mock_credential):
         """Test create_dashboard issues a POST with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = CreateDashboardInput()
         mock_response = MockResponse(status=200, text='{"id": 1}')
 
@@ -545,9 +543,9 @@ class TestTextrequestClientOperations:
             assert result == {"id": 1}
 
     @pytest.mark.asyncio
-    async def test_update_dashboards_name_success(self, mock_token_provider):
+    async def test_update_dashboards_name_success(self, mock_credential):
         """Test update_dashboards_name issues a PUT with the input body."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         payload = UpdateDashboardsNameInput()
         mock_response = MockResponse(status=200, text='{"id": 7}')
 
@@ -563,9 +561,9 @@ class TestTextrequestClientOperations:
             assert result == {"id": 7}
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
-        client = self._make_client(mock_token_provider)
+        client = self._make_client(mock_credential)
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
@@ -614,11 +612,11 @@ class TestTextrequestClientErrorHandling:
             "create_dashboard",
         ],
     )
-    async def test_error_response_raises_exception(self, mock_token_provider, operation):
+    async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = TextrequestClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

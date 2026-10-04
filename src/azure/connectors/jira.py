@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -662,8 +664,17 @@ class JiraClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a JiraClient.
@@ -671,17 +682,36 @@ class JiraClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The default request timeout in seconds.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -690,6 +720,11 @@ class JiraClient(ConnectorClientBase):
 
     async def list_resources_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list of Resources
@@ -701,7 +736,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -721,6 +760,11 @@ class JiraClient(ConnectorClientBase):
         self,
         jql: Optional[str] = None,
         next_page_token: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list of issues
@@ -735,17 +779,21 @@ class JiraClient(ConnectorClientBase):
             value = str(jql)
             if isinstance(jql, bool):
                 value = value.lower()
-            query_params.append(f"jql={quote(value)}")
+            query_params.append(f"jql={quote(value, safe='')}")
         if next_page_token is not None:
             value = str(next_page_token)
             if isinstance(next_page_token, bool):
                 value = value.lower()
-            query_params.append(f"nextPageToken={quote(value)}")
+            query_params.append(f"nextPageToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -763,6 +811,11 @@ class JiraClient(ConnectorClientBase):
 
     async def list_issues_datacenter_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list of issues (Datacenter)
@@ -772,7 +825,11 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/datacenter/search"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -791,6 +848,11 @@ class JiraClient(ConnectorClientBase):
     async def list_transitions_async(
         self,
         issue_id_or_key: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list of Transitions
@@ -804,7 +866,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -824,6 +890,11 @@ class JiraClient(ConnectorClientBase):
         self,
         input: TransitionInput,
         issue_id_or_key: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Performs an issue transition
@@ -836,7 +907,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -855,6 +930,11 @@ class JiraClient(ConnectorClientBase):
     async def get_current_user_async(
         self,
         expand: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get current user
@@ -867,12 +947,16 @@ class JiraClient(ConnectorClientBase):
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"expand={quote(value)}")
+            query_params.append(f"expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -892,6 +976,11 @@ class JiraClient(ConnectorClientBase):
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Jira MCP Server
@@ -904,12 +993,16 @@ class JiraClient(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -929,6 +1022,11 @@ class JiraClient(ConnectorClientBase):
         self,
         input: Comment,
         issue_key: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add comment
@@ -941,7 +1039,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -960,6 +1062,11 @@ class JiraClient(ConnectorClientBase):
     async def cancel_task_async(
         self,
         task_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Cancel Task
@@ -973,7 +1080,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -994,6 +1105,11 @@ class JiraClient(ConnectorClientBase):
         input: CreateIssueInput,
         project_key: str,
         issue_type_ids: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a new issue
@@ -1005,16 +1121,20 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         value = str(issue_type_ids)
         if isinstance(issue_type_ids, bool):
             value = value.lower()
-        query_params.append(f"issueTypeIds={quote(value)}")
+        query_params.append(f"issueTypeIds={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1033,6 +1153,11 @@ class JiraClient(ConnectorClientBase):
     async def create_project_async(
         self,
         input: CreateProjectInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a new project
@@ -1042,7 +1167,11 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v2/project"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1061,6 +1190,11 @@ class JiraClient(ConnectorClientBase):
     async def create_project_category_async(
         self,
         input: CreateProjectCategoryInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create Project Category
@@ -1071,7 +1205,11 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v2/projectCategory"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1091,6 +1229,11 @@ class JiraClient(ConnectorClientBase):
         self,
         project_id_or_key: str,
         enable_undo: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete Project
@@ -1107,12 +1250,16 @@ class JiraClient(ConnectorClientBase):
             value = str(enable_undo)
             if isinstance(enable_undo, bool):
                 value = value.lower()
-            query_params.append(f"enableUndo={quote(value)}")
+            query_params.append(f"enableUndo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1130,6 +1277,11 @@ class JiraClient(ConnectorClientBase):
         notify_users: Optional[bool] = None,
         override_screen_security: Optional[bool] = None,
         override_editable_flag: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Edit Issue
@@ -1147,22 +1299,26 @@ class JiraClient(ConnectorClientBase):
             value = str(notify_users)
             if isinstance(notify_users, bool):
                 value = value.lower()
-            query_params.append(f"notifyUsers={quote(value)}")
+            query_params.append(f"notifyUsers={quote(value, safe='')}")
         if override_screen_security is not None:
             value = str(override_screen_security)
             if isinstance(override_screen_security, bool):
                 value = value.lower()
-            query_params.append(f"overrideScreenSecurity={quote(value)}")
+            query_params.append(f"overrideScreenSecurity={quote(value, safe='')}")
         if override_editable_flag is not None:
             value = str(override_editable_flag)
             if isinstance(override_editable_flag, bool):
                 value = value.lower()
-            query_params.append(f"overrideEditableFlag={quote(value)}")
+            query_params.append(f"overrideEditableFlag={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1180,6 +1336,11 @@ class JiraClient(ConnectorClientBase):
 
     async def get_all_project_categories_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get All Project Categories
@@ -1189,7 +1350,11 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v2/projectCategory"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1208,6 +1373,11 @@ class JiraClient(ConnectorClientBase):
     async def get_issue_async(
         self,
         issue_key: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get issue by key
@@ -1221,7 +1391,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1240,6 +1414,11 @@ class JiraClient(ConnectorClientBase):
     async def get_task_async(
         self,
         task_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Task
@@ -1253,7 +1432,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1273,6 +1456,11 @@ class JiraClient(ConnectorClientBase):
         self,
         account_id: str,
         expand: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get User
@@ -1284,17 +1472,21 @@ class JiraClient(ConnectorClientBase):
         value = str(account_id)
         if isinstance(account_id, bool):
             value = value.lower()
-        query_params.append(f"accountId={quote(value)}")
+        query_params.append(f"accountId={quote(value, safe='')}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"expand={quote(value)}")
+            query_params.append(f"expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1312,6 +1504,11 @@ class JiraClient(ConnectorClientBase):
 
     async def list_filters_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get list of Filters
@@ -1321,7 +1518,11 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v2/filter/search"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1339,6 +1540,11 @@ class JiraClient(ConnectorClientBase):
 
     async def list_projects_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get projects
@@ -1349,7 +1555,11 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v2/project/search"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1368,6 +1578,11 @@ class JiraClient(ConnectorClientBase):
     async def list_project_users_async(
         self,
         project_key: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List users by project
@@ -1382,12 +1597,16 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1406,6 +1625,11 @@ class JiraClient(ConnectorClientBase):
     async def remove_project_category_async(
         self,
         id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Remove Project Category
@@ -1419,7 +1643,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1434,6 +1662,11 @@ class JiraClient(ConnectorClientBase):
         self,
         input: UpdateProjectInput,
         project_id_or_key: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update Project
@@ -1446,7 +1679,11 @@ class JiraClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1465,6 +1702,11 @@ class JiraClient(ConnectorClientBase):
     async def list_issue_types_async(
         self,
         project_key: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get issue types
@@ -1479,12 +1721,16 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1504,6 +1750,11 @@ class JiraClient(ConnectorClientBase):
         self,
         project_key: str,
         issuetype_ids: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get issue types fields
@@ -1516,16 +1767,20 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         value = str(issuetype_ids)
         if isinstance(issuetype_ids, bool):
             value = value.lower()
-        query_params.append(f"issuetypeIds={quote(value)}")
+        query_params.append(f"issuetypeIds={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
