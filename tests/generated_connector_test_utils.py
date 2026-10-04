@@ -55,6 +55,7 @@ async def invoke_generated_operation(
     operation: str,
     module: ModuleType,
     include_optional_parameters: bool = False,
+    request_controls: dict[str, Any] | None = None,
 ) -> Any:
     """Invoke a generated operation with representative arguments."""
     method = getattr(client, f"{operation}_async")
@@ -65,6 +66,7 @@ async def invoke_generated_operation(
         if parameter.name not in _REQUEST_CONTROL_PARAMETER_NAMES
         and (include_optional_parameters or parameter.default is inspect.Parameter.empty)
     }
+    arguments.update(request_controls or {})
     return await resolve_generated_result(method(**arguments))
 
 

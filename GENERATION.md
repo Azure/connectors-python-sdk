@@ -629,7 +629,7 @@ The generated code depends on the runtime SDK for:
 Install the package with Azure Identity support:
 
 ```bash
-python -m pip install "azure-connectors[identity]"
+python -m pip install azure-connectors
 ```
 
 ## Regeneration Schedule

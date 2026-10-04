@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Made `azure-identity` a required runtime dependency so Azure Identity credentials and the shipped samples work with the default package installation.
 - Updated all connector samples to match generated method signatures and added literal-type validation to the sample contract checks.
 - Added focused success, route, request-body, response, and error coverage for newly generated operations.
 - Clarified that Azure Functions SDK-type deserialization is owned by the Azure Functions connector extension rather than generated connector clients.
