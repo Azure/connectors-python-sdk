@@ -720,6 +720,7 @@ class JiraClient(ConnectorClientBase):
     async def list_issues_async(
         self,
         jql: Optional[str] = None,
+        fields: Optional[str] = None,
         next_page_token: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -730,12 +731,16 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
         query_params.append("expand=" + quote("*"))
-        query_params.append("fields=" + quote("*all"))
         if jql is not None:
             value = str(jql)
             if isinstance(jql, bool):
                 value = value.lower()
             query_params.append(f"jql={quote(value, safe='')}")
+        if fields is not None:
+            value = str(fields)
+            if isinstance(fields, bool):
+                value = value.lower()
+            query_params.append(f"fields={quote(value, safe='')}")
         if next_page_token is not None:
             value = str(next_page_token)
             if isinstance(next_page_token, bool):

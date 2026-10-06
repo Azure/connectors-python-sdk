@@ -2,6 +2,8 @@
 
 """Unit tests for JiraClient."""
 
+import inspect
+from typing import Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -156,6 +158,65 @@ class TestListResourcesAsync:
 
 class TestListIssuesAsync:
     """Tests for list_issues_async method."""
+
+    def test_fields_are_an_optional_string(self):
+        """Test the live fields parameter is exposed without an implicit all-fields default."""
+        fields = inspect.signature(JiraClient.list_issues_async).parameters["fields"]
+
+        assert fields.default is None
+        assert get_type_hints(JiraClient.list_issues_async)["fields"] == Optional[str]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "fields,expected_query",
+        [(None, None), ("summary,folder/a", "fields=summary%2Cfolder%2Fa"), ("", "fields=")],
+    )
+    async def test_fields_query_matches_live_optional_contract(
+        self, mock_token_provider, fields, expected_query,
+    ):
+        """Test omitted, populated, and empty fields through actual generated dispatch."""
+        async with JiraClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        ) as client:
+            with patch.object(
+                client._http_client,
+                "send_async",
+                new_callable=AsyncMock,
+                return_value=MockResponse(status=200, text='{"issues": []}'),
+            ) as transport:
+                arguments = {"jql": "project = DEMO"}
+                if fields is not None:
+                    arguments["fields"] = fields
+                await client.list_issues_async(**arguments)
+
+            transport.assert_awaited_once()
+            method, request_url = transport.await_args.args
+            assert method == "GET"
+            if expected_query is None:
+                assert "fields=" not in request_url
+            else:
+                assert expected_query in request_url
+            assert "%2Aall" not in request_url
+
+    @pytest.mark.asyncio
+    async def test_named_continuation_token_keeps_its_query_binding(self, mock_token_provider):
+        """Test callers can retain token binding by using the existing named parameter."""
+        async with JiraClient(
+            "https://example.azure.com/connections/test",
+            token_provider=mock_token_provider,
+        ) as client:
+            with patch.object(
+                client._http_client,
+                "send_async",
+                new_callable=AsyncMock,
+                return_value=MockResponse(status=200, text='{"issues": []}'),
+            ) as transport:
+                await client.list_issues_async(next_page_token="page/2")
+
+            request_url = transport.await_args.args[1]
+            assert "nextPageToken=page%2F2" in request_url
+            assert "fields=" not in request_url
 
     @pytest.mark.asyncio
     async def test_success(self, mock_token_provider):

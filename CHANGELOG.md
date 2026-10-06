@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Jira `list_issues_async` now exposes the live optional `fields` query parameter
+  instead of sending an internal `fields=*all` default. Pass `fields` and
+  `next_page_token` by keyword; `fields` precedes the token in the generated signature.
+
 - This regeneration propagates the existing async-iterator paging contract to
   32 additional connectors, extending [Fix Dataverse list pagination (#84)](https://github.com/Azure/connectors-python-sdk/pull/84).
   Pageable operations return items rather than response dictionaries. Consume them
