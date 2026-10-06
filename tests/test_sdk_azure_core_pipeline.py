@@ -1,9 +1,13 @@
 """Tests for the Azure Core asynchronous connector pipeline."""
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from aiohttp import web
+from aiohttp.test_utils import TestServer
 from azure.core.credentials import AccessToken, AzureKeyCredential
+from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline.policies import RetryMode, SansIOHTTPPolicy
 from azure.core.pipeline.transport import AsyncHttpTransport
 
@@ -156,10 +160,55 @@ async def test_request_controls_and_response_hook_are_applied() -> None:
     assert transport.requests[0].headers["x-custom"] == "value"
     assert transport.requests[0].headers["Authorization"] == "Bearer test-key"
     assert transport.request_options[0]["connection_timeout"] == 5.0
+    assert transport.request_options[0]["read_timeout"] == 5.0
     assert transport.requests[0].headers["x-ms-client-request-id"] == "request-id"
     hook.assert_called_once_with(response, response.headers)
     with pytest.raises(TypeError):
         response.headers["x-new"] = "value"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("default_timeout", "request_timeout"),
+    [
+        (0.05, None),
+        (1.0, 0.05),
+    ],
+)
+async def test_timeout_bounds_slow_response_body(
+    default_timeout: float,
+    request_timeout: float | None,
+) -> None:
+    """Bound response body I/O by the default or per-call total timeout."""
+
+    async def delayed_body(request: web.Request) -> web.StreamResponse:
+        response = web.StreamResponse(status=200)
+        await response.prepare(request)
+        await asyncio.sleep(0.2)
+        await response.write(b"ok")
+        await response.write_eof()
+        return response
+
+    application = web.Application()
+    application.router.add_get("/", delayed_body)
+    server = TestServer(application)
+    await server.start_server()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+        timeout_seconds=default_timeout,
+    )
+
+    try:
+        with pytest.raises(ServiceResponseTimeoutError):
+            await client.send_async(
+                "GET",
+                str(server.make_url("/")),
+                timeout=request_timeout,
+            )
+    finally:
+        await client.close()
+        await server.close()
 
 
 @pytest.mark.asyncio

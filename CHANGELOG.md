@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Request timeout enforcement**: `timeout_seconds` and per-operation `timeout`
+  now bound the complete network operation, including retries, response loading,
+  and body reads.
 - **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
 
 ## [0.5.0b1] - 2026-08-31

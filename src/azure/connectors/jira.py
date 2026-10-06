@@ -684,7 +684,8 @@ class JiraClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The default request timeout in seconds.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
             maximum_retry_delay_seconds: The maximum retry delay in seconds.
@@ -759,6 +760,7 @@ class JiraClient(ConnectorClientBase):
     async def list_issues_async(
         self,
         jql: Optional[str] = None,
+        fields: Optional[str] = None,
         next_page_token: Optional[str] = None,
         *,
         timeout: Optional[float] = None,
@@ -774,12 +776,16 @@ class JiraClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
         query_params.append("expand=" + quote("*"))
-        query_params.append("fields=" + quote("*all"))
         if jql is not None:
             value = str(jql)
             if isinstance(jql, bool):
                 value = value.lower()
             query_params.append(f"jql={quote(value, safe='')}")
+        if fields is not None:
+            value = str(fields)
+            if isinstance(fields, bool):
+                value = value.lower()
+            query_params.append(f"fields={quote(value, safe='')}")
         if next_page_token is not None:
             value = str(next_page_token)
             if isinstance(next_page_token, bool):

@@ -352,7 +352,10 @@ client = Office365Client(
 )
 ```
 
-Each generated operation also accepts keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` request controls.
+`timeout_seconds` is one total network budget for each request, including
+retries, response loading, and body reads. Each generated operation also accepts
+keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook`
+request controls; `timeout` overrides that total budget for one operation.
 
 ## Project Structure
 

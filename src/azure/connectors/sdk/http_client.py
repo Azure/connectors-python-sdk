@@ -2,6 +2,7 @@
 
 """Asynchronous HTTP client for connector operations."""
 
+import asyncio
 import json
 import random
 from importlib.metadata import PackageNotFoundError, version
@@ -9,6 +10,7 @@ from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar
 
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline import AsyncPipeline
 from azure.core.pipeline.policies import (
     AsyncBearerTokenCredentialPolicy,
@@ -260,7 +262,7 @@ class ConnectorHttpClient:
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> ConnectorResponseSnapshot:
-        """Send an HTTP request with authentication and retry."""
+        """Send an HTTP request within the selected total network timeout."""
         is_binary_body = isinstance(body, (bytes, bytearray))
         if content_type is None:
             content_type = (
@@ -305,12 +307,17 @@ class ConnectorHttpClient:
         client_request_id: Optional[str] = None,
         timeout: Optional[float] = None,
     ) -> ConnectorResponseSnapshot:
-        """Send a request through the Azure Core retry pipeline."""
+        """Send a request within one total Azure Core pipeline timeout."""
         normalized_method = method.upper()
         request = HttpRequest(normalized_method, url, headers=headers, content=body)
+        selected_timeout = (
+            timeout if timeout is not None else self._timeout_seconds
+        )
         request_options: Dict[str, Any] = {
-            "timeout": timeout if timeout is not None else self._timeout_seconds,
+            "timeout": selected_timeout,
         }
+        if selected_timeout > 0:
+            request_options["read_timeout"] = selected_timeout
         if normalized_method not in _SAFE_RETRY_METHODS:
             if self._retry_unsafe_http_methods:
                 request_options["retry_on_methods"] = _ALL_RETRY_METHODS
@@ -318,15 +325,34 @@ class ConnectorHttpClient:
                 request_options["retry_total"] = 0
         if client_request_id is not None:
             request_options["request_id"] = client_request_id
-        pipeline_response = await pipeline.run(request, **request_options)
-        http_response = pipeline_response.http_response
-        response_content = await http_response.read()
-        return ConnectorResponseSnapshot(
-            status=http_response.status_code,
-            headers=dict(http_response.headers),
-            text=http_response.text(),
-            content=response_content,
-        )
+
+        async def send_request() -> ConnectorResponseSnapshot:
+            pipeline_response = await pipeline.run(request, **request_options)
+            http_response = pipeline_response.http_response
+            response_content = await http_response.read()
+            return ConnectorResponseSnapshot(
+                status=http_response.status_code,
+                headers=dict(http_response.headers),
+                text=http_response.text(),
+                content=response_content,
+            )
+
+        if selected_timeout <= 0:
+            return await send_request()
+
+        try:
+            return await asyncio.wait_for(
+                send_request(),
+                timeout=selected_timeout,
+            )
+        except asyncio.TimeoutError as ex:
+            raise ServiceResponseTimeoutError(
+                message=(
+                    f"Request to '{url}' exceeded the total timeout of "
+                    f"'{selected_timeout}' seconds."
+                ),
+                error=ex,
+            ) from ex
 
     async def get_async(self, request_uri: str) -> Any:
         """Send a GET request."""

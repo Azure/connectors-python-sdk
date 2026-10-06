@@ -173,13 +173,18 @@ class TestListIssuesAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_issues_async(jql="created >= -3650d")
+            result = await client.list_issues_async(
+                jql="created >= -3650d",
+                fields="summary,status",
+            )
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/2/search" in path
             assert "jql=created%20%3E%3D%20-3650d" in path
+            assert "fields=summary%2Cstatus" in path
+            assert "fields=%2Aall" not in path
             assert result is not None
             assert "issues" in result
 
