@@ -2,8 +2,10 @@
 
 """Unit tests for OnedriveClient."""
 
-import pytest
+from urllib.parse import urlparse
 from unittest.mock import AsyncMock, patch
+
+import pytest
 from azure.core.credentials import AzureKeyCredential
 from azure.connectors.onedrive import (
     OnedriveClient,
@@ -811,7 +813,7 @@ class TestCreateShareLink:
             assert call_args[0][0] == "POST"
             assert "/shareV2" in call_args[0][1]
             assert "type=view" in call_args[0][1]
-            assert "onedrive.live.com" in result["webUrl"]
+            assert urlparse(result["webUrl"]).hostname == "onedrive.live.com"
 
 
 class TestGetFileTags:
@@ -1050,7 +1052,7 @@ class TestDataClasses:
         """Test SharingLink dataclass creation."""
         link = SharingLink(web_url="https://onedrive.live.com/share/abc123")
 
-        assert "onedrive.live.com" in link.web_url
+        assert urlparse(link.web_url).hostname == "onedrive.live.com"
 
     def test_tags_creation(self):
         """Test Tags dataclass creation."""
