@@ -5,7 +5,9 @@
 from __future__ import annotations
 
 import ast
+import importlib
 import importlib.util
+from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import AsyncIterator
@@ -173,3 +175,51 @@ def test_sample_validator_rejects_unscoped_async_credential() -> None:
     assert [issue.message for issue in visitor.issues] == [
         "DefaultAzureCredential must use an async context manager",
     ]
+
+
+@pytest.mark.asyncio
+async def test_zendesk_sample_reports_collected_items(
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test the Zendesk sample displays nonempty pageable results."""
+    sample_module = importlib.import_module(
+        "samples.sample_connector_usage.sample_connector_usage_zendesk"
+    )
+    sent_requests: list[dict[str, object]] = []
+
+    class RecordingCredential(AbstractAsyncContextManager[object]):
+        """Provide an async credential context for the sample."""
+
+        async def __aexit__(self, *args: object) -> None:
+            """Exit the credential context."""
+
+    class RecordingClient(AbstractAsyncContextManager[object]):
+        """Record the generated client call and yield one synthetic item."""
+
+        def __init__(self, connection_runtime_url: str, credential: object) -> None:
+            """Initialize the recording client."""
+            del connection_runtime_url, credential
+
+        async def __aexit__(self, *args: object) -> None:
+            """Exit the client context."""
+
+        async def get_items_async(
+            self,
+            **kwargs: object,
+        ) -> AsyncIterator[dict[str, str]]:
+            """Record request arguments and yield one ticket."""
+            sent_requests.append(kwargs)
+            yield {"id": "synthetic-ticket"}
+
+    monkeypatch.setattr(
+        sample_module,
+        "DefaultAzureCredential",
+        RecordingCredential,
+    )
+    monkeypatch.setattr(sample_module, "ZendeskClient", RecordingClient)
+
+    await sample_module.example_2_get_items()
+
+    assert sent_requests == [{"table": "tickets", "top": 10}]
+    assert "Retrieved 1 item(s)." in capsys.readouterr().out
