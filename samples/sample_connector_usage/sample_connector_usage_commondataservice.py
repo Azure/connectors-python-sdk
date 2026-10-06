@@ -57,23 +57,23 @@ async def example_1_list_datasets():
     """Example 1: List the datasets (environments) available to the connection."""
     print("\n=== Example 1: List Datasets ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_data_sets_async()
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_data_sets_async()
 
-            if result and result.get("value"):
-                print(f"Found {len(result['value'])} datasets:")
-                for dataset in result["value"][:5]:
-                    print(f"  - {dataset.get('Name', dataset.get('DisplayName', 'N/A'))}")
-            else:
-                print("No datasets found")
+                if result and result.get("value"):
+                    print(f"Found {len(result['value'])} datasets:")
+                    for dataset in result["value"][:5]:
+                        print(f"  - {dataset.get('Name', dataset.get('DisplayName', 'N/A'))}")
+                else:
+                    print("No datasets found")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_list_accounts():
@@ -83,182 +83,182 @@ async def example_2_list_accounts():
     """
     print("\n=== Example 2: List Accounts ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            accounts = [
-                account
-                async for account in client.get_items_async(
-                    dataset=DATASET,
-                    table="accounts",
-                    filter="statecode eq 0",  # Active accounts only
-                    orderby="name asc",
-                    top=10,
-                )
-            ]
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                accounts = [
+                    account
+                    async for account in client.get_items_async(
+                        dataset=DATASET,
+                        table="accounts",
+                        filter="statecode eq 0",  # Active accounts only
+                        orderby="name asc",
+                        top=10,
+                    )
+                ]
 
-            if accounts:
-                print(f"Found {len(accounts)} accounts:")
-                for account in accounts[:5]:
-                    print(f"  - {account.get('name', 'N/A')}")
-            else:
-                print("No accounts found")
+                if accounts:
+                    print(f"Found {len(accounts)} accounts:")
+                    for account in accounts[:5]:
+                        print(f"  - {account.get('name', 'N/A')}")
+                else:
+                    print("No accounts found")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_get_account_by_id():
     """Example 3: Get a single account row by its primary id."""
     print("\n=== Example 3: Get Account by ID ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    # Replace with an actual account id from your Dataverse environment.
-    account_id = "00000000-0000-0000-0000-000000000000"
+        # Replace with an actual account id from your Dataverse environment.
+        account_id = "00000000-0000-0000-0000-000000000000"
 
-    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_item_async(
-                dataset=DATASET,
-                table="accounts",
-                id=account_id,
-            )
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_item_async(
+                    dataset=DATASET,
+                    table="accounts",
+                    id=account_id,
+                )
 
-            if result:
-                print(f"Account: {result.get('name', 'N/A')}")
-                print(f"Revenue: {result.get('revenue', 'N/A')}")
-            else:
-                print("Account not found")
+                if result:
+                    print(f"Account: {result.get('name', 'N/A')}")
+                    print(f"Revenue: {result.get('revenue', 'N/A')}")
+                else:
+                    print("Account not found")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_create_account():
     """Example 4: Add a new row to the 'accounts' table."""
     print("\n=== Example 4: Create Account ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            new_account = PostItemInput(
-                additional_properties={
-                    "name": "Contoso Ltd.",
-                    "description": "Sample account created via SDK",
-                    "revenue": 1000000.00,
-                    "websiteurl": "https://contoso.com",
-                }
-            )
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                new_account = PostItemInput(
+                    additional_properties={
+                        "name": "Contoso Ltd.",
+                        "description": "Sample account created via SDK",
+                        "revenue": 1000000.00,
+                        "websiteurl": "https://contoso.com",
+                    }
+                )
 
-            result = await client.post_item_async(
-                input=new_account,
-                dataset=DATASET,
-                table="accounts",
-            )
+                result = await client.post_item_async(
+                    input=new_account,
+                    dataset=DATASET,
+                    table="accounts",
+                )
 
-            if result:
-                print(f"Account created with id: {result.get('accountid', 'N/A')}")
-            else:
-                print("Account created successfully")
+                if result:
+                    print(f"Account created with id: {result.get('accountid', 'N/A')}")
+                else:
+                    print("Account created successfully")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_update_account():
     """Example 5: Update an existing row in the 'accounts' table."""
     print("\n=== Example 5: Update Account ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    # Replace with an actual account id.
-    account_id = "00000000-0000-0000-0000-000000000000"
+        # Replace with an actual account id.
+        account_id = "00000000-0000-0000-0000-000000000000"
 
-    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            update_data = PatchItemInput(
-                additional_properties={
-                    "description": "Updated via SDK",
-                    "revenue": 2000000.00,
-                }
-            )
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                update_data = PatchItemInput(
+                    additional_properties={
+                        "description": "Updated via SDK",
+                        "revenue": 2000000.00,
+                    }
+                )
 
-            await client.patch_item_async(
-                input=update_data,
-                dataset=DATASET,
-                table="accounts",
-                id=account_id,
-            )
+                await client.patch_item_async(
+                    input=update_data,
+                    dataset=DATASET,
+                    table="accounts",
+                    id=account_id,
+                )
 
-            print("Account updated successfully")
+                print("Account updated successfully")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_6_create_attachment():
     """Example 6: Add a note attachment to an account row."""
     print("\n=== Example 6: Create Account Attachment ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    # Replace with an actual account id from your Dataverse environment.
-    account_id = "00000000-0000-0000-0000-000000000000"
+        # Replace with an actual account id from your Dataverse environment.
+        account_id = "00000000-0000-0000-0000-000000000000"
 
-    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.create_attachment_async(
-                input=b"Sample attachment content",
-                dataset=DATASET,
-                table="accounts",
-                id=account_id,
-                display_name="sample-note.txt",
-            )
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.create_attachment_async(
+                    input=b"Sample attachment content",
+                    dataset=DATASET,
+                    table="accounts",
+                    id=account_id,
+                    display_name="sample-note.txt",
+                )
 
-            if result:
-                print(f"Attachment created with id: {result.get('annotationid', 'N/A')}")
-            else:
-                print("Attachment created successfully")
+                if result:
+                    print(f"Attachment created with id: {result.get('annotationid', 'N/A')}")
+                else:
+                    print("Attachment created successfully")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_7_get_table_metadata():
     """Example 7: Get metadata for the 'accounts' table."""
     print("\n=== Example 7: Get Table Metadata ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_table_async(
-                dataset=DATASET,
-                table="accounts",
-            )
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_table_async(
+                    dataset=DATASET,
+                    table="accounts",
+                )
 
-            if result:
-                print(f"Table: {result.get('Name', result.get('DisplayName', 'N/A'))}")
-            else:
-                print("Table metadata not found")
+                if result:
+                    print(f"Table: {result.get('Name', result.get('DisplayName', 'N/A'))}")
+                else:
+                    print("Table metadata not found")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

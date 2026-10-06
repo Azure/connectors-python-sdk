@@ -40,40 +40,40 @@ async def example_1_list_boards() -> None:
     """Example 1: List the boards the user has access to."""
     print("\n=== Example 1: List Boards ===")
 
-    credential = DefaultAzureCredential()
-    async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        boards = await client.list_boards_async()
-        print(f"Boards: {boards}")
+    async with DefaultAzureCredential() as credential:
+        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            boards = await client.list_boards_async()
+            print(f"Boards: {boards}")
 
 
 async def example_2_create_card() -> None:
     """Example 2: Create a card on a board."""
     print("\n=== Example 2: Create Card ===")
 
-    credential = DefaultAzureCredential()
-    async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        card = await client.create_card_async(
-            input=CreateCardInput(
-                column_id=123456,
-                title="SDK sample card",
-                description="Created from the projectplace SDK sample.",
-            ),
-            board_id=789012,
-        )
-        print(f"Created card: {card}")
+    async with DefaultAzureCredential() as credential:
+        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            card = await client.create_card_async(
+                input=CreateCardInput(
+                    column_id=123456,
+                    title="SDK sample card",
+                    description="Created from the projectplace SDK sample.",
+                ),
+                board_id=789012,
+            )
+            print(f"Created card: {card}")
 
 
 async def example_3_move_card() -> None:
     """Example 3: Move a card to another column."""
     print("\n=== Example 3: Move Card ===")
 
-    credential = DefaultAzureCredential()
-    async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        card = await client.move_card_async(
-            input=MoveCardInput(card_id=123456, column_id=654321),
-            board_id=789012,
-        )
-        print(f"Moved card: {card}")
+    async with DefaultAzureCredential() as credential:
+        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            card = await client.move_card_async(
+                input=MoveCardInput(card_id=123456, column_id=654321),
+                board_id=789012,
+            )
+            print(f"Moved card: {card}")
 
 
 async def main() -> None:

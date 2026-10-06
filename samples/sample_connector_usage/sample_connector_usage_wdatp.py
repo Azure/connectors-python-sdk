@@ -44,84 +44,84 @@ async def example_1_list_alerts():
     """Example 1: List recent security alerts."""
     print("\n=== Example 1: List Security Alerts ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_alerts_async(
-                top=5,
-                orderby="alertCreationTime desc"
-            )
+        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.get_alerts_async(
+                    top=5,
+                    orderby="alertCreationTime desc"
+                )]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} alerts:")
-                for alert in result["value"][:5]:
-                    print(f"  - [{alert.get('severity', 'N/A')}] {alert.get('title', 'N/A')}")
-                    print(f"    ID: {alert.get('id', 'N/A')}")
-                    print(f"    Status: {alert.get('status', 'N/A')}")
-            else:
-                print("No alerts found.")
+                if result:
+                    print(f"Found {len(result)} alerts:")
+                    for alert in result[:5]:
+                        print(f"  - [{alert.get('severity', 'N/A')}] {alert.get('title', 'N/A')}")
+                        print(f"    ID: {alert.get('id', 'N/A')}")
+                        print(f"    Status: {alert.get('status', 'N/A')}")
+                else:
+                    print("No alerts found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_get_machines():
     """Example 2: List machines in the organization."""
     print("\n=== Example 2: List Machines ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_machines_async(top=10)
+        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.get_machines_async(top=10)]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} machines:")
-                for machine in result["value"][:5]:
-                    print(f"  - {machine.get('computerDnsName', 'N/A')}")
-                    print(f"    ID: {machine.get('id', 'N/A')}")
-                    print(f"    OS: {machine.get('osPlatform', 'N/A')}")
-                    print(f"    Health: {machine.get('healthStatus', 'N/A')}")
-            else:
-                print("No machines found.")
+                if result:
+                    print(f"Found {len(result)} machines:")
+                    for machine in result[:5]:
+                        print(f"  - {machine.get('computerDnsName', 'N/A')}")
+                        print(f"    ID: {machine.get('id', 'N/A')}")
+                        print(f"    OS: {machine.get('osPlatform', 'N/A')}")
+                        print(f"    Health: {machine.get('healthStatus', 'N/A')}")
+                else:
+                    print("No machines found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_advanced_hunting():
     """Example 3: Run an advanced hunting query."""
     print("\n=== Example 3: Advanced Hunting Query ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Query for device information
-            query = "DeviceInfo | take 5 | project DeviceName, OSPlatform, PublicIP"
-            input_data = AdvancedHuntingInput(query=query)
+        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Query for device information
+                query = "DeviceInfo | take 5 | project DeviceName, OSPlatform, PublicIP"
+                input_data = AdvancedHuntingInput(query=query)
 
-            result = await client.advanced_hunting_async(input=input_data)
+                result = await client.advanced_hunting_async(input=input_data)
 
-            if result and result.get("results"):
-                print(f"Query returned {len(result['results'])} results:")
-                for row in result["results"]:
-                    print(f"  - {row}")
-            else:
-                print("No results from query.")
+                if result and result.get("results"):
+                    print(f"Query returned {len(result['results'])} results:")
+                    for row in result["results"]:
+                        print(f"  - {row}")
+                else:
+                    print("No results from query.")
 
-            if result and result.get("stats"):
-                print(f"Execution time: {result['stats'].get('executionTime', 'N/A')}s")
+                if result and result.get("stats"):
+                    print(f"Execution time: {result['stats'].get('executionTime', 'N/A')}s")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_update_alert():
@@ -135,29 +135,29 @@ async def example_4_update_alert():
         print("Skipping this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            input_data = PatchAlertInput(
-                status="InProgress",
-                assigned_to="security-team@example.com",
-                classification="TruePositive"
-            )
+        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                input_data = PatchAlertInput(
+                    status="InProgress",
+                    assigned_to="security-team@example.com",
+                    classification="TruePositive"
+                )
 
-            result = await client.patch_alert_async(
-                input=input_data,
-                alert_id=alert_id
-            )
+                result = await client.patch_alert_async(
+                    input=input_data,
+                    alert_id=alert_id
+                )
 
-            print("Alert updated:")
-            print(f"  ID: {result.get('id', 'N/A')}")
-            print(f"  Status: {result.get('status', 'N/A')}")
+                print("Alert updated:")
+                print(f"  ID: {result.get('id', 'N/A')}")
+                print(f"  Status: {result.get('status', 'N/A')}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_get_file_stats():
@@ -171,74 +171,74 @@ async def example_5_get_file_stats():
         print("Skipping this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_file_stats_async(file_id=file_sha1)
+        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_file_stats_async(file_id=file_sha1)
 
-            print(f"File statistics for {file_sha1}:")
-            print(f"  Global prevalence: {result.get('globallyPrevalence', 'N/A')}")
-            print(f"  Org prevalence: {result.get('organizationPrevalence', 'N/A')}")
-            print(f"  First seen globally: {result.get('globalFirstObserved', 'N/A')}")
+                print(f"File statistics for {file_sha1}:")
+                print(f"  Global prevalence: {result.get('globallyPrevalence', 'N/A')}")
+                print(f"  Org prevalence: {result.get('organizationPrevalence', 'N/A')}")
+                print(f"  First seen globally: {result.get('globalFirstObserved', 'N/A')}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_6_machine_actions():
     """Example 6: List recent machine actions."""
     print("\n=== Example 6: List Machine Actions ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_machine_actions_async(
-                top=5,
-                orderby="creationDateTimeUtc desc"
-            )
+        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.get_machine_actions_async(
+                    top=5,
+                    orderby="creationDateTimeUtc desc"
+                )]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} actions:")
-                for action in result["value"][:5]:
-                    print(f"  - Type: {action.get('type', 'N/A')}")
-                    print(f"    Status: {action.get('status', 'N/A')}")
-                    print(f"    Machine: {action.get('machineId', 'N/A')[:20]}...")
-            else:
-                print("No machine actions found.")
+                if result:
+                    print(f"Found {len(result)} actions:")
+                    for action in result[:5]:
+                        print(f"  - Type: {action.get('type', 'N/A')}")
+                        print(f"    Status: {action.get('status', 'N/A')}")
+                        print(f"    Machine: {action.get('machineId', 'N/A')[:20]}...")
+                else:
+                    print("No machine actions found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_7_investigations():
     """Example 7: List automated investigations."""
     print("\n=== Example 7: List Investigations ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_investigations_async(top=5)
+        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.get_investigations_async(top=5)]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} investigations:")
-                for inv in result["value"][:5]:
-                    print(f"  - ID: {inv.get('id', 'N/A')}")
-                    print(f"    State: {inv.get('state', 'N/A')}")
-                    print(f"    Machine: {inv.get('computerDnsName', 'N/A')}")
-            else:
-                print("No investigations found.")
+                if result:
+                    print(f"Found {len(result)} investigations:")
+                    for inv in result[:5]:
+                        print(f"  - ID: {inv.get('id', 'N/A')}")
+                        print(f"    State: {inv.get('state', 'N/A')}")
+                        print(f"    Machine: {inv.get('computerDnsName', 'N/A')}")
+                else:
+                    print("No investigations found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

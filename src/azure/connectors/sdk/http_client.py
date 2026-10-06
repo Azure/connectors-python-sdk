@@ -39,6 +39,10 @@ _SAFE_RETRY_METHODS = frozenset({"GET", "HEAD", "OPTIONS", "TRACE"})
 _ALL_RETRY_METHODS = frozenset(
     {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}
 )
+_AUTHENTICATION_AND_CONTENT_HEADERS = frozenset({"authorization", "content-type"})
+_PROTECTED_OPERATION_HEADERS = _AUTHENTICATION_AND_CONTENT_HEADERS | frozenset(
+    {"x-ms-client-request-id"}
+)
 
 try:
     _SDK_VERSION = version("azure-connectors")
@@ -145,6 +149,11 @@ class ConnectorHttpClient:
         per_retry_policies = self._as_policy_list(
             policy_options.pop("per_retry_policies", [])
         )
+        default_headers = {
+            name: value
+            for name, value in policy_options.pop("headers", {}).items()
+            if name.lower() not in _AUTHENTICATION_AND_CONTENT_HEADERS
+        }
         retry_total = policy_options.pop(
             "retry_total", max(0, max_retry_attempts - 1)
         )
@@ -166,10 +175,10 @@ class ConnectorHttpClient:
             "retry_jitter_factor", retry_jitter_factor
         )
         policies = [
+            policy_options.pop("headers_policy", None)
+            or HeadersPolicy(base_headers=default_headers, **policy_options),
             policy_options.pop("request_id_policy", None)
             or RequestIdPolicy(**policy_options),
-            policy_options.pop("headers_policy", None)
-            or HeadersPolicy(**policy_options),
             policy_options.pop("user_agent_policy", None)
             or UserAgentPolicy(
                 sdk_moniker=f"connectors/{_SDK_VERSION}", **policy_options
@@ -268,16 +277,12 @@ class ConnectorHttpClient:
             content_type = (
                 "application/octet-stream" if is_binary_body else "application/json"
             )
-        protected_headers = {
-            "authorization",
-            "content-type",
-            "x-ms-client-request-id",
-        }
-        request_headers = {
+        operation_headers = {
             name: value
             for name, value in (headers or {}).items()
-            if name.lower() not in protected_headers
+            if name.lower() not in _PROTECTED_OPERATION_HEADERS
         }
+        request_headers = dict(operation_headers)
         request_headers["Content-Type"] = content_type
         request_body: Optional[Any] = None
         if body is not None:
@@ -315,12 +320,15 @@ class ConnectorHttpClient:
         )
         request_options: Dict[str, Any] = {
             "timeout": selected_timeout,
+            "headers": headers,
         }
         if selected_timeout > 0:
             request_options["read_timeout"] = selected_timeout
         if normalized_method not in _SAFE_RETRY_METHODS:
             if self._retry_unsafe_http_methods:
-                request_options["retry_on_methods"] = _ALL_RETRY_METHODS
+                request_options["retry_on_methods"] = (
+                    _ALL_RETRY_METHODS | {normalized_method}
+                )
             else:
                 request_options["retry_total"] = 0
         if client_request_id is not None:

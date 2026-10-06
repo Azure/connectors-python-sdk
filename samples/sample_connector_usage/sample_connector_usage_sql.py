@@ -52,30 +52,30 @@ async def example_1_list_servers_and_databases():
     """Example 1: Discover servers, databases, and tables."""
     print("\n=== Example 1: List Servers, Databases, and Tables ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
-        servers = await client.get_servers_async()
-        server_values = servers.get("value", []) if servers else []
-        print(f"Found {len(server_values)} server(s).")
+        async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
+            servers = await client.get_servers_async()
+            server_values = servers.get("value", []) if servers else []
+            print(f"Found {len(server_values)} server(s).")
 
-        if not SERVER:
-            print("Set SQL_SERVER to list databases and tables.")
-            return
+            if not SERVER:
+                print("Set SQL_SERVER to list databases and tables.")
+                return
 
-        databases = await client.get_databases_async(server=SERVER)
-        database_values = databases.get("value", []) if databases else []
-        print(f"Found {len(database_values)} database(s) on '{SERVER}'.")
+            databases = await client.get_databases_async(server=SERVER)
+            database_values = databases.get("value", []) if databases else []
+            print(f"Found {len(database_values)} database(s) on '{SERVER}'.")
 
-        if not DATABASE:
-            print("Set SQL_DATABASE to list tables.")
-            return
+            if not DATABASE:
+                print("Set SQL_DATABASE to list tables.")
+                return
 
-        tables = await client.get_tables_async(server=SERVER, database=DATABASE)
-        table_values = tables.get("value", []) if tables else []
-        print(f"Found {len(table_values)} table(s) in '{DATABASE}'.")
-        for table in table_values[:10]:
-            print(f"  - {table.get('DisplayName', table.get('Name', 'N/A'))}")
+            tables = await client.get_tables_async(server=SERVER, database=DATABASE)
+            table_values = tables.get("value", []) if tables else []
+            print(f"Found {len(table_values)} table(s) in '{DATABASE}'.")
+            for table in table_values[:10]:
+                print(f"  - {table.get('DisplayName', table.get('Name', 'N/A'))}")
 
 
 async def example_2_read_rows():
@@ -86,21 +86,21 @@ async def example_2_read_rows():
         print("Set SQL_SERVER, SQL_DATABASE, and SQL_TABLE to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_items_async(
-                server=SERVER,
-                database=DATABASE,
-                table=TABLE,
-                top=5,
-                orderby="Id desc",
-            )
-            rows = result.get("value", []) if result else []
-            print(f"Retrieved {len(rows)} row(s) from '{TABLE}'.")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+        async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.get_items_async(
+                    server=SERVER,
+                    database=DATABASE,
+                    table=TABLE,
+                    top=5,
+                    orderby="Id desc",
+                )]
+                rows = result if result else []
+                print(f"Retrieved {len(rows)} row(s) from '{TABLE}'.")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 async def example_3_insert_update_delete_row():
@@ -111,42 +111,42 @@ async def example_3_insert_update_delete_row():
         print("Set SQL_SERVER, SQL_DATABASE, and SQL_TABLE to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            inserted = await client.post_item_async(
-                input=PostItemInput(
-                    additional_properties={"Name": "Contoso", "Status": "Active"},
-                ),
-                server=SERVER,
-                database=DATABASE,
-                table=TABLE,
-            )
-            row_id = str((inserted or {}).get("Id", "")) if inserted else ""
-            print(f"Inserted row id: {row_id or 'N/A'}")
+        async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                inserted = await client.post_item_async(
+                    input=PostItemInput(
+                        additional_properties={"Name": "Contoso", "Status": "Active"},
+                    ),
+                    server=SERVER,
+                    database=DATABASE,
+                    table=TABLE,
+                )
+                row_id = str((inserted or {}).get("Id", "")) if inserted else ""
+                print(f"Inserted row id: {row_id or 'N/A'}")
 
-            if not row_id:
-                return
+                if not row_id:
+                    return
 
-            await client.patch_item_async(
-                input=PatchItemInput(additional_properties={"Status": "Updated"}),
-                server=SERVER,
-                database=DATABASE,
-                table=TABLE,
-                id=row_id,
-            )
-            print(f"Updated row id: {row_id}")
+                await client.patch_item_async(
+                    input=PatchItemInput(additional_properties={"Status": "Updated"}),
+                    server=SERVER,
+                    database=DATABASE,
+                    table=TABLE,
+                    id=row_id,
+                )
+                print(f"Updated row id: {row_id}")
 
-            await client.delete_item_async(
-                server=SERVER,
-                database=DATABASE,
-                table=TABLE,
-                id=row_id,
-            )
-            print(f"Deleted row id: {row_id}")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+                await client.delete_item_async(
+                    server=SERVER,
+                    database=DATABASE,
+                    table=TABLE,
+                    id=row_id,
+                )
+                print(f"Deleted row id: {row_id}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 async def example_4_query_and_procedures():
@@ -157,37 +157,37 @@ async def example_4_query_and_procedures():
         print("Set SQL_SERVER and SQL_DATABASE to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            query_result = await client.execute_pass_through_native_query_async(
-                input=SqlPassThroughNativeQueryBody(query="SELECT TOP 1 * FROM sys.tables"),
-                server=SERVER,
-                database=DATABASE,
-            )
-            result_sets = (query_result or {}).get("resultSets", {})
-            print(f"Query returned {len(result_sets)} result set(s).")
+        async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                query_result = await client.execute_pass_through_native_query_async(
+                    input=SqlPassThroughNativeQueryBody(query="SELECT TOP 1 * FROM sys.tables"),
+                    server=SERVER,
+                    database=DATABASE,
+                )
+                result_sets = (query_result or {}).get("resultSets", {})
+                print(f"Query returned {len(result_sets)} result set(s).")
 
-            procedures = await client.get_procedures_v2_async(
-                server=SERVER,
-                database=DATABASE,
-            )
-            procedure_values = procedures.get("value", []) if procedures else []
-            print(f"Found {len(procedure_values)} stored procedure(s).")
+                procedures = await client.get_procedures_v2_async(
+                    server=SERVER,
+                    database=DATABASE,
+                )
+                procedure_values = procedures.get("value", []) if procedures else []
+                print(f"Found {len(procedure_values)} stored procedure(s).")
 
-            if procedure_values:
-                procedure_name = procedure_values[0].get("Name")
-                if procedure_name:
-                    await client.execute_procedure_async(
-                        input=ExecuteProcedureInput(),
-                        server=SERVER,
-                        database=DATABASE,
-                        procedure=procedure_name,
-                    )
-                    print(f"Executed stored procedure '{procedure_name}'.")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+                if procedure_values:
+                    procedure_name = procedure_values[0].get("Name")
+                    if procedure_name:
+                        await client.execute_procedure_async(
+                            input=ExecuteProcedureInput(),
+                            server=SERVER,
+                            database=DATABASE,
+                            procedure=procedure_name,
+                        )
+                        print(f"Executed stored procedure '{procedure_name}'.")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 async def main():

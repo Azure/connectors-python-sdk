@@ -197,7 +197,7 @@ async def test_safe_method_uses_exact_configured_attempts() -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("method", ["POST", "post", "PoSt"])
+@pytest.mark.parametrize("method", ["POST", "post", "PoSt", "CUSTOM", "custom", "CuStOm"])
 @pytest.mark.parametrize("failure", ["response", "transport"])
 async def test_unsafe_method_retries_when_enabled(
     method: str,
@@ -218,7 +218,7 @@ async def test_unsafe_method_retries_when_enabled(
 
     assert response.status == 200
     assert len(transport.requests) == 2
-    assert all(request.method == "POST" for request in transport.requests)
+    assert all(request.method == method.upper() for request in transport.requests)
 
 
 @pytest.mark.asyncio

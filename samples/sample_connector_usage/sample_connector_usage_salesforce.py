@@ -40,85 +40,85 @@ async def example_1_get_tables():
     """Example 1: List Salesforce object types."""
     print("\n=== Example 1: Get Tables ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_tables_async()
-            tables = result.get("value", []) if result else []
+        async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.get_tables_async()]
+                tables = result if result else []
 
-            if tables:
-                print(f"Found {len(tables)} table(s):")
-                for table in tables[:10]:
-                    print(
-                        f"  - {table.get('name')}"
-                        f" ({table.get('displayName', 'no display name')})"
-                    )
-            else:
-                print("No tables found.")
+                if tables:
+                    print(f"Found {len(tables)} table(s):")
+                    for table in tables[:10]:
+                        print(
+                            f"  - {table.get('name')}"
+                            f" ({table.get('displayName', 'no display name')})"
+                        )
+                else:
+                    print("No tables found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_get_records():
     """Example 2: Read records from Account table."""
     print("\n=== Example 2: Get Account Records ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_items_async(
-                table="account",
-                top=5,
-                select="Id,Name,Phone",
-            )
+        async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.get_items_async(
+                    table="account",
+                    top=5,
+                    select="Id,Name,Phone",
+                )]
 
-            records = result.get("value", []) if result else []
-            if records:
-                print(f"Found {len(records)} account record(s):")
-                for record in records:
-                    print(
-                        f"  - {record.get('Name', 'Unknown')}"
-                        f" (Id: {record.get('Id')})"
-                    )
-            else:
-                print("No account records found.")
+                records = result if result else []
+                if records:
+                    print(f"Found {len(records)} account record(s):")
+                    for record in records:
+                        print(
+                            f"  - {record.get('Name', 'Unknown')}"
+                            f" (Id: {record.get('Id')})"
+                        )
+                else:
+                    print("No account records found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_execute_soql():
     """Example 3: Execute a SOQL query."""
     print("\n=== Example 3: Execute SOQL Query ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            query_input = ExecuteSoqlQueryParameters(
-                query="SELECT Id, Name FROM Account LIMIT 5",
-            )
-            result = await client.execute_soql_query_async(input=query_input)
+        async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                query_input = ExecuteSoqlQueryParameters(
+                    query="SELECT Id, Name FROM Account LIMIT 5",
+                )
+                result = await client.execute_soql_query_async(input=query_input)
 
-            if result:
-                records = result.get("records", [])
-                print(f"SOQL returned {len(records)} record(s).")
-                for record in records:
-                    print(f"  - {record.get('Name', 'Unknown')} ({record.get('Id')})")
-            else:
-                print("SOQL returned no data.")
+                if result:
+                    records = result.get("records", [])
+                    print(f"SOQL returned {len(records)} record(s).")
+                    for record in records:
+                        print(f"  - {record.get('Name', 'Unknown')} ({record.get('Id')})")
+                else:
+                    print("SOQL returned no data.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

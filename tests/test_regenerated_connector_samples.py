@@ -8,6 +8,7 @@ import ast
 import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
+from typing import AsyncIterator
 
 import pytest
 
@@ -40,6 +41,10 @@ class TypedClient:
 
     async def create_item_async(self, *, input: TypedInput) -> None:
         """Represent a generated method with a typed request body."""
+
+    async def page_items_async(self) -> AsyncIterator[dict[str, str]]:
+        """Represent a generated pageable method."""
+        yield {"id": "item"}
 
 
 @pytest.mark.parametrize(
@@ -135,4 +140,36 @@ def test_sample_validator_rejects_dynamic_dict_for_typed_input() -> None:
 
     assert [issue.message for issue in visitor.issues] == [
         "argument 'input' has type 'dict', expected 'TypedInput'",
+    ]
+
+
+def test_sample_validator_rejects_awaited_async_iterator() -> None:
+    """Test pageable generated operations must be consumed with async iteration."""
+    tree = ast.parse(
+        "async def main():\n"
+        "    client = TypedClient('https://example.azure.com/connections/test')\n"
+        "    await client.page_items_async()\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "async iterator 'TypedClient.page_items_async' must use async iteration",
+    ]
+
+
+def test_sample_validator_rejects_unscoped_async_credential() -> None:
+    """Test asynchronous credentials must use an async context manager."""
+    tree = ast.parse(
+        "async def main():\n"
+        "    credential = DefaultAzureCredential()\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "DefaultAzureCredential must use an async context manager",
     ]

@@ -36,59 +36,59 @@ async def example_1_list_boards() -> None:
     """Example 1: List boards available to the current member."""
     print("\n=== Example 1: List Boards ===")
 
-    credential = DefaultAzureCredential()
-    async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-        boards = await client.list_boards_simple_async()
-        print(f"Boards: {boards}")
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            boards = await client.list_boards_simple_async()
+            print(f"Boards: {boards}")
 
 
 async def example_2_create_board() -> None:
     """Example 2: Create a board."""
     print("\n=== Example 2: Create Board ===")
 
-    credential = DefaultAzureCredential()
-    async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-        board = await client.create_board_async(
-            input=CreateBoard(
-                name="SDK sample board",
-                desc="Created from the Trello connector SDK sample.",
-                default_lists="false",
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            board = await client.create_board_async(
+                input=CreateBoard(
+                    name="SDK sample board",
+                    desc="Created from the Trello connector SDK sample.",
+                    default_lists="false",
+                )
             )
-        )
-        print(f"Created board: {board}")
+            print(f"Created board: {board}")
 
 
 async def example_3_create_list() -> None:
     """Example 3: Create a list on an existing board."""
     print("\n=== Example 3: Create List ===")
 
-    credential = DefaultAzureCredential()
-    async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-        created_list = await client.create_list_async(
-            input=CreateList(
-                name="SDK sample list",
-                id_board="board-id",
-                pos="bottom",
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            created_list = await client.create_list_async(
+                input=CreateList(
+                    name="SDK sample list",
+                    id_board="board-id",
+                    pos="bottom",
+                )
             )
-        )
-        print(f"Created list: {created_list}")
+            print(f"Created list: {created_list}")
 
 
 async def example_4_create_card() -> None:
     """Example 4: Create a card in an existing list."""
     print("\n=== Example 4: Create Card ===")
 
-    credential = DefaultAzureCredential()
-    async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-        card = await client.create_card_async(
-            input=CreateCard(
-                id_list="list-id",
-                name="SDK sample card",
-                desc="Created from the Trello connector SDK sample.",
-            ),
-            board_id="board-id",
-        )
-        print(f"Created card: {card}")
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            card = await client.create_card_async(
+                input=CreateCard(
+                    id_list="list-id",
+                    name="SDK sample card",
+                    desc="Created from the Trello connector SDK sample.",
+                ),
+                board_id="board-id",
+            )
+            print(f"Created card: {card}")
 
 
 async def main() -> None:

@@ -40,154 +40,156 @@ async def example_1_list_my_tasks():
     """Example 1: List all tasks assigned to me"""
     print("\n=== Example 1: List My Tasks ===")
 
-    credential = DefaultAzureCredential()
-    client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
+    async with DefaultAzureCredential() as credential:
+        client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
-    try:
-        tasks = await client.list_my_tasks_async()
+        try:
+            tasks = [
+                task async for task in client.list_my_tasks_async()
+            ]
 
-        if tasks and tasks.get('value'):
-            print(f"Found {len(tasks.get('value', []))} tasks assigned to me")
-            for task in tasks.get('value', [])[:5]:  # Show first 5
-                print(f"  - {task.get('title')} ({task.get('percentComplete')}% complete)")
-        else:
-            print("No tasks assigned to me")
+            if tasks:
+                print(f"Found {len(tasks)} tasks assigned to me")
+                for task in tasks[:5]:  # Show first 5
+                    print(f"  - {task.get('title')} ({task.get('percentComplete')}% complete)")
+            else:
+                print("No tasks assigned to me")
 
-    except Exception as ex:
-        print(f"Error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
 
 
 async def example_2_list_group_plans(group_id: str):
     """Example 2: List all plans in a group"""
     print("\n=== Example 2: List Group Plans ===")
 
-    credential = DefaultAzureCredential()
-    client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
+    async with DefaultAzureCredential() as credential:
+        client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
-    try:
-        plans = await client.list_group_plans_async(group_id=group_id)
+        try:
+            plans = await client.list_group_plans_async(group_id=group_id)
 
-        if plans and plans.get('value'):
-            print(f"Found {len(plans.get('value', []))} plans in group")
-            for plan in plans.get('value', [])[:5]:  # Show first 5
-                print(f"  - {plan.get('title')} ({plan.get('id')})")
-        else:
-            print("No plans found in group")
+            if plans and plans.get('value'):
+                print(f"Found {len(plans.get('value', []))} plans in group")
+                for plan in plans.get('value', [])[:5]:  # Show first 5
+                    print(f"  - {plan.get('title')} ({plan.get('id')})")
+            else:
+                print("No plans found in group")
 
-    except Exception as ex:
-        print(f"Error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
 
 
 async def example_3_get_task_details(task_id: str):
     """Example 3: Get task and task details"""
     print("\n=== Example 3: Get Task Details ===")
 
-    credential = DefaultAzureCredential()
-    client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
+    async with DefaultAzureCredential() as credential:
+        client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
-    try:
-        # Get basic task info
-        task = await client.get_task_async(id=task_id)
-        if task:
-            print(f"Task: {task.get('title')}")
-            print(f"  - Percent Complete: {task.get('percentComplete')}%")
-            print(f"  - Created: {task.get('createdDateTime')}")
+        try:
+            # Get basic task info
+            task = await client.get_task_async(id=task_id)
+            if task:
+                print(f"Task: {task.get('title')}")
+                print(f"  - Percent Complete: {task.get('percentComplete')}%")
+                print(f"  - Created: {task.get('createdDateTime')}")
 
-        # Get detailed task info
-        details = await client.get_task_details_async(id=task_id)
-        if details:
-            print(f"  - Description: {details.get('description', 'No description')}")
+            # Get detailed task info
+            details = await client.get_task_details_async(id=task_id)
+            if details:
+                print(f"  - Description: {details.get('description', 'No description')}")
 
-    except Exception as ex:
-        print(f"Error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
 
 
 async def example_4_create_bucket(group_id: str, plan_id: str):
     """Example 4: Create a new bucket in a plan"""
     print("\n=== Example 4: Create Bucket ===")
 
-    credential = DefaultAzureCredential()
-    client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
+    async with DefaultAzureCredential() as credential:
+        client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
-    try:
-        bucket_input = CreateBucketInput(
-            name="New Bucket",
-            group_id=group_id,
-            plan_id=plan_id
-        )
+        try:
+            bucket_input = CreateBucketInput(
+                name="New Bucket",
+                group_id=group_id,
+                plan_id=plan_id
+            )
 
-        bucket = await client.create_bucket_async(input=bucket_input)
+            bucket = await client.create_bucket_async(input=bucket_input)
 
-        if bucket:
-            print(f"Created bucket: {bucket.get('name')} ({bucket.get('id')})")
+            if bucket:
+                print(f"Created bucket: {bucket.get('name')} ({bucket.get('id')})")
 
-    except Exception as ex:
-        print(f"Error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
 
 
 async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_id: str):
     """Example 5: Create and update a task"""
     print("\n=== Example 5: Create and Update Task ===")
 
-    credential = DefaultAzureCredential()
-    client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
+    async with DefaultAzureCredential() as credential:
+        client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
-    try:
-        # Create a new task
-        task_input = CreateTaskRequest(
-            group_id=group_id,
-            plan_id=plan_id,
-            bucket_id=bucket_id,
-            title="Sample Task from SDK",
-            priority=5  # Medium priority
-        )
-
-        task = await client.create_task_async(input=task_input)
-
-        if task:
-            task_id = task.get('id')
-            print(f"Created task: {task.get('title')} ({task_id})")
-
-            # Update the task
-            update_input = UpdateTaskRequest(
-                title="Updated Sample Task",
-                percent_complete=50
+        try:
+            # Create a new task
+            task_input = CreateTaskRequest(
+                group_id=group_id,
+                plan_id=plan_id,
+                bucket_id=bucket_id,
+                title="Sample Task from SDK",
+                priority=5  # Medium priority
             )
 
-            updated = await client.update_task_async(input=update_input, id=task_id)
+            task = await client.create_task_async(input=task_input)
 
-            if updated:
-                print("Updated task to 50% complete")
+            if task:
+                task_id = task.get('id')
+                print(f"Created task: {task.get('title')} ({task_id})")
 
-            # Clean up - delete the task
-            await client.delete_task_async(id=task_id)
-            print("Deleted task")
+                # Update the task
+                update_input = UpdateTaskRequest(
+                    title="Updated Sample Task",
+                    percent_complete=50
+                )
 
-    except Exception as ex:
-        print(f"Error: {ex}")
+                updated = await client.update_task_async(input=update_input, id=task_id)
+
+                if updated:
+                    print("Updated task to 50% complete")
+
+                # Clean up - delete the task
+                await client.delete_task_async(id=task_id)
+                print("Deleted task")
+
+        except Exception as ex:
+            print(f"Error: {ex}")
 
 
 async def example_6_get_plan_details(plan_id: str):
     """Example 6: Get plan details"""
     print("\n=== Example 6: Get Plan Details ===")
 
-    credential = DefaultAzureCredential()
-    client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
+    async with DefaultAzureCredential() as credential:
+        client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
-    try:
-        details = await client.get_plan_details_async(id=plan_id)
+        try:
+            details = await client.get_plan_details_async(id=plan_id)
 
-        if details:
-            print(f"Plan ID: {details.get('id')}")
-            categories = details.get('categoryDescriptions', {})
-            if categories:
-                print("Categories:")
-                for key, value in categories.items():
-                    if value:
-                        print(f"  - {key}: {value}")
+            if details:
+                print(f"Plan ID: {details.get('id')}")
+                categories = details.get('categoryDescriptions', {})
+                if categories:
+                    print("Categories:")
+                    for key, value in categories.items():
+                        if value:
+                            print(f"  - {key}: {value}")
 
-    except Exception as ex:
-        print(f"Error: {ex}")
+        except Exception as ex:
+            print(f"Error: {ex}")
 
 
 async def main():

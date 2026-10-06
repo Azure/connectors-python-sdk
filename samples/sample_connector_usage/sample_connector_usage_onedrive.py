@@ -38,18 +38,18 @@ async def example_1_list_root_folder():
     """Example 1: List files in root folder."""
     print("\n=== Example 1: List Root Folder ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.list_root_folder_async()
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.list_root_folder_async()
 
-        if result and "value" in result:
-            print(f"Found {len(result['value'])} items in root folder:")
-            for item in result["value"][:10]:  # Show first 10
-                item_type = "📁" if item.get("IsFolder") else "📄"
-                print(f"  {item_type} {item.get('Name', 'N/A')}")
-        else:
-            print("No items found in root folder.")
+            if result and "value" in result:
+                print(f"Found {len(result['value'])} items in root folder:")
+                for item in result["value"][:10]:  # Show first 10
+                    item_type = "📁" if item.get("IsFolder") else "📄"
+                    print(f"  {item_type} {item.get('Name', 'N/A')}")
+            else:
+                print("No items found in root folder.")
 
 
 async def example_2_get_file_metadata():
@@ -62,23 +62,23 @@ async def example_2_get_file_metadata():
         print("Example: $env:TEST_FILE_PATH = '/Documents/report.docx'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            metadata = await client.get_file_metadata_by_path_async(path=file_path)
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                metadata = await client.get_file_metadata_by_path_async(path=file_path)
 
-            if metadata:
-                print(f"File Metadata for '{file_path}':")
-                print(f"  ID: {metadata.get('Id', 'N/A')}")
-                print(f"  Name: {metadata.get('Name', 'N/A')}")
-                print(f"  Size: {metadata.get('Size', 'N/A')} bytes")
-                print(f"  Last Modified: {metadata.get('LastModified', 'N/A')}")
-                print(f"  Media Type: {metadata.get('MediaType', 'N/A')}")
-            else:
-                print(f"No metadata returned for: {file_path}")
-        except ConnectorException as e:
-            print(f"Error getting file metadata: {e}")
+                if metadata:
+                    print(f"File Metadata for '{file_path}':")
+                    print(f"  ID: {metadata.get('Id', 'N/A')}")
+                    print(f"  Name: {metadata.get('Name', 'N/A')}")
+                    print(f"  Size: {metadata.get('Size', 'N/A')} bytes")
+                    print(f"  Last Modified: {metadata.get('LastModified', 'N/A')}")
+                    print(f"  Media Type: {metadata.get('MediaType', 'N/A')}")
+                else:
+                    print(f"No metadata returned for: {file_path}")
+            except ConnectorException as e:
+                print(f"Error getting file metadata: {e}")
 
 
 async def example_3_download_file():
@@ -90,24 +90,24 @@ async def example_3_download_file():
         print("Set TEST_FILE_PATH environment variable to a file path.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            content = await client.get_file_content_by_path_async(path=file_path)
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                content = await client.get_file_content_by_path_async(path=file_path)
 
-            if content:
-                print(f"Downloaded {len(content)} bytes")
-                # Show first 100 characters if text-like
-                try:
-                    preview = content[:100].decode('utf-8')
-                    print(f"Content preview: {preview}...")
-                except UnicodeDecodeError:
-                    print("Content is binary data.")
-            else:
-                print("No content returned.")
-        except ConnectorException as e:
-            print(f"Error downloading file: {e}")
+                if content:
+                    print(f"Downloaded {len(content)} bytes")
+                    # Show first 100 characters if text-like
+                    try:
+                        preview = content[:100].decode('utf-8')
+                        print(f"Content preview: {preview}...")
+                    except UnicodeDecodeError:
+                        print("Content is binary data.")
+                else:
+                    print("No content returned.")
+            except ConnectorException as e:
+                print(f"Error downloading file: {e}")
 
 
 async def example_4_list_folder():
@@ -120,22 +120,22 @@ async def example_4_list_folder():
         print("You can get folder IDs from list_root_folder_async results.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.list_folder_async(id=folder_id)
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.list_folder_async(id=folder_id)]
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items:")
-                for item in result["value"][:10]:
-                    item_type = "📁" if item.get("IsFolder") else "📄"
-                    size = item.get("Size", 0)
-                    print(f"  {item_type} {item.get('Name', 'N/A')} ({size} bytes)")
-            else:
-                print("No items found in folder.")
-        except ConnectorException as e:
-            print(f"Error listing folder: {e}")
+                if result:
+                    print(f"Found {len(result)} items:")
+                    for item in result[:10]:
+                        item_type = "📁" if item.get("IsFolder") else "📄"
+                        size = item.get("Size", 0)
+                        print(f"  {item_type} {item.get('Name', 'N/A')} ({size} bytes)")
+                else:
+                    print("No items found in folder.")
+            except ConnectorException as e:
+                print(f"Error listing folder: {e}")
 
 
 async def example_5_search_files():
@@ -149,24 +149,24 @@ async def example_5_search_files():
         print("Set TEST_FOLDER_ID environment variable to search in a folder.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.find_files_async(
-                id=folder_id,
-                query=search_query,
-                find_mode="search"
-            )
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.find_files_async(
+                    id=folder_id,
+                    query=search_query,
+                    find_mode="search"
+                )
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} files matching '{search_query}':")
-                for item in result["value"]:
-                    print(f"  📄 {item.get('Name', 'N/A')}")
-            else:
-                print(f"No files found matching '{search_query}'.")
-        except ConnectorException as e:
-            print(f"Error searching files: {e}")
+                if result and "value" in result:
+                    print(f"Found {len(result['value'])} files matching '{search_query}':")
+                    for item in result["value"]:
+                        print(f"  📄 {item.get('Name', 'N/A')}")
+                else:
+                    print(f"No files found matching '{search_query}'.")
+            except ConnectorException as e:
+                print(f"Error searching files: {e}")
 
 
 async def example_6_create_share_link():
@@ -178,22 +178,22 @@ async def example_6_create_share_link():
         print("Set TEST_FILE_ID environment variable to create a share link.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.create_share_link_async(
-                id=file_id,
-                type_="view"  # "view" or "edit"
-            )
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.create_share_link_async(
+                    id=file_id,
+                    type_="view"  # "view" or "edit"
+                )
 
-            if result and "webUrl" in result:
-                print("Share link created:")
-                print(f"  URL: {result['webUrl']}")
-            else:
-                print("Failed to create share link.")
-        except ConnectorException as e:
-            print(f"Error creating share link: {e}")
+                if result and "webUrl" in result:
+                    print("Share link created:")
+                    print(f"  URL: {result['webUrl']}")
+                else:
+                    print("Failed to create share link.")
+            except ConnectorException as e:
+                print(f"Error creating share link: {e}")
 
 
 async def example_7_file_tags():
@@ -205,28 +205,28 @@ async def example_7_file_tags():
         print("Set TEST_FILE_ID environment variable to manage tags.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Get existing tags
-            tags_result = await client.get_file_tags_async(id=file_id)
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Get existing tags
+                tags_result = await client.get_file_tags_async(id=file_id)
 
-            if tags_result and "tags" in tags_result:
-                print(f"Current tags: {', '.join(tags_result['tags'])}")
-            else:
-                print("No tags found on file.")
+                if tags_result and "tags" in tags_result:
+                    print(f"Current tags: {', '.join(tags_result['tags'])}")
+                else:
+                    print("No tags found on file.")
 
-            # Add a new tag
-            print("Adding tag 'sdk-sample'...")
-            await client.add_file_tag_async(id=file_id, tag="sdk-sample")
+                # Add a new tag
+                print("Adding tag 'sdk-sample'...")
+                await client.add_file_tag_async(id=file_id, tag="sdk-sample")
 
-            # Get updated tags
-            tags_result = await client.get_file_tags_async(id=file_id)
-            if tags_result and "tags" in tags_result:
-                print(f"Updated tags: {', '.join(tags_result['tags'])}")
-        except ConnectorException as e:
-            print(f"Error managing tags: {e}")
+                # Get updated tags
+                tags_result = await client.get_file_tags_async(id=file_id)
+                if tags_result and "tags" in tags_result:
+                    print(f"Updated tags: {', '.join(tags_result['tags'])}")
+            except ConnectorException as e:
+                print(f"Error managing tags: {e}")
 
 
 async def example_8_copy_file():
@@ -240,24 +240,24 @@ async def example_8_copy_file():
         print("Set TEST_FILE_ID environment variable to copy a file.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.copy_drive_file_async(
-                id=file_id,
-                destination=dest_folder,
-                overwrite=False
-            )
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.copy_drive_file_async(
+                    id=file_id,
+                    destination=dest_folder,
+                    overwrite=False
+                )
 
-            if result:
-                print("File copied successfully:")
-                print(f"  New ID: {result.get('Id', 'N/A')}")
-                print(f"  New Name: {result.get('Name', 'N/A')}")
-            else:
-                print("Copy operation returned no result.")
-        except ConnectorException as e:
-            print(f"Error copying file: {e}")
+                if result:
+                    print("File copied successfully:")
+                    print(f"  New ID: {result.get('Id', 'N/A')}")
+                    print(f"  New Name: {result.get('Name', 'N/A')}")
+                else:
+                    print("Copy operation returned no result.")
+            except ConnectorException as e:
+                print(f"Error copying file: {e}")
 
 
 async def main():

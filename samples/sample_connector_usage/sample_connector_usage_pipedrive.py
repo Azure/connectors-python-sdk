@@ -42,57 +42,57 @@ async def example_1_list_deals():
     """Example 1: List deals for the authorized account."""
     print("\n=== Example 1: List Deals ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.list_deals_async()
+        async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.list_deals_async()
 
-            deals = (result or {}).get("data", []) if isinstance(result, dict) else []
-            print(f"Found {len(deals)} deal(s).")
+                deals = (result or {}).get("data", []) if isinstance(result, dict) else []
+                print(f"Found {len(deals)} deal(s).")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_get_deal():
     """Example 2: Retrieve a single deal by id."""
     print("\n=== Example 2: Get Deal ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_deal_async(deal_id=1)
-            print(f"Deal: {result}")
+        async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_deal_async(deal_id=1)
+                print(f"Deal: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_add_deal():
     """Example 3: Create a new deal for the authorized account."""
     print("\n=== Example 3: Add Deal ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            new_deal = AddDealRequest(
-                title="Sample deal",
-            )
+        async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                new_deal = AddDealRequest(
+                    title="Sample deal",
+                )
 
-            result = await client.add_deal_async(input=new_deal)
-            print(f"Created deal: {result}")
+                result = await client.add_deal_async(input=new_deal)
+                print(f"Created deal: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

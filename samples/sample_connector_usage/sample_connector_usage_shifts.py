@@ -36,47 +36,47 @@ async def example_1_list_teams() -> list[dict]:
     """Example 1: List joined teams."""
     print("\n=== Example 1: List Teams ===")
 
-    credential = DefaultAzureCredential()
-    async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        teams_response = await client.get_all_teams_async()
-        teams = teams_response.get("value", []) if teams_response else []
+    async with DefaultAzureCredential() as credential:
+        async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            teams_response = await client.get_all_teams_async()
+            teams = teams_response.get("value", []) if teams_response else []
 
-        print(f"Found {len(teams)} teams")
-        for team in teams[:10]:
-            print(f"  - {team.get('displayName')} ({team.get('id')})")
+            print(f"Found {len(teams)} teams")
+            for team in teams[:10]:
+                print(f"  - {team.get('displayName')} ({team.get('id')})")
 
-        return teams
+            return teams
 
 
 async def example_2_get_schedule(team_id: str) -> None:
     """Example 2: Get a team's schedule."""
     print("\n=== Example 2: Get Schedule ===")
 
-    credential = DefaultAzureCredential()
-    async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        schedule = await client.get_schedule_async(team_id=team_id)
+    async with DefaultAzureCredential() as credential:
+        async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            schedule = await client.get_schedule_async(team_id=team_id)
 
-        if not schedule:
-            print("No schedule returned")
-            return
+            if not schedule:
+                print("No schedule returned")
+                return
 
-        print(f"Schedule ID: {schedule.get('id')}")
-        print(f"Time Zone: {schedule.get('timeZone')}")
-        print(f"Provision Status: {schedule.get('provisionStatus')}")
+            print(f"Schedule ID: {schedule.get('id')}")
+            print(f"Time Zone: {schedule.get('timeZone')}")
+            print(f"Provision Status: {schedule.get('provisionStatus')}")
 
 
 async def example_3_list_shifts(team_id: str) -> None:
     """Example 3: List shifts for a team."""
     print("\n=== Example 3: List Shifts ===")
 
-    credential = DefaultAzureCredential()
-    async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        shifts_response = await client.list_shifts_async(team_id=team_id, top=10)
-        shifts = shifts_response.get("value", []) if shifts_response else []
+    async with DefaultAzureCredential() as credential:
+        async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            shifts_response = [item async for item in client.list_shifts_async(team_id=team_id, top=10)]
+            shifts = shifts_response if shifts_response else []
 
-        print(f"Found {len(shifts)} shifts")
-        for shift in shifts[:10]:
-            print(f"  - {shift.get('id')} assigned to {shift.get('userId')}")
+            print(f"Found {len(shifts)} shifts")
+            for shift in shifts[:10]:
+                print(f"  - {shift.get('id')} assigned to {shift.get('userId')}")
 
 
 async def main() -> None:

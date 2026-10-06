@@ -168,6 +168,35 @@ async def test_request_controls_and_response_hook_are_applied() -> None:
 
 
 @pytest.mark.asyncio
+async def test_request_controls_override_client_default_headers() -> None:
+    """Apply operation headers and request IDs after client defaults."""
+    transport = RecordingTransport(create_response())
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        headers={
+            "Authorization": "ignored",
+            "Content-Type": "ignored",
+            "x-custom": "client",
+            "x-ms-client-request-id": "fixed",
+        },
+        transport=transport,
+    )
+
+    await client.send_async(
+        "GET",
+        "https://example.test/items",
+        headers={"x-custom": "operation"},
+        client_request_id="per-call",
+    )
+
+    request_headers = transport.requests[0].headers
+    assert request_headers["Authorization"] == "Bearer test-key"
+    assert request_headers["Content-Type"] == "application/json"
+    assert request_headers["x-custom"] == "operation"
+    assert request_headers["x-ms-client-request-id"] == "per-call"
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("default_timeout", "request_timeout"),
     [

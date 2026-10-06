@@ -40,49 +40,49 @@ async def example_1_list_recent_shares():
     """Example 1: List recently used printer shares."""
     print("\n=== Example 1: List Recent Printer Shares ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.list_recent_shares_async()
+        async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.list_recent_shares_async()
 
-            shares = (result or {}).get("value", []) if isinstance(result, dict) else []
-            print(f"Found {len(shares)} recent printer share(s).")
-            for share in shares:
-                print(f"  - {share}")
+                shares = (result or {}).get("value", []) if isinstance(result, dict) else []
+                print(f"Found {len(shares)} recent printer share(s).")
+                for share in shares:
+                    print(f"  - {share}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_print_file():
     """Example 2: Print a PDF to a printer share."""
     print("\n=== Example 2: Print File ===")
 
-    credential = DefaultAzureCredential()
-    pdf_file_path = Path(
-        os.environ.get("UNIVERSALPRINT_PDF_PATH", "document.pdf")
-    )
+    async with DefaultAzureCredential() as credential:
+        pdf_file_path = Path(
+            os.environ.get("UNIVERSALPRINT_PDF_PATH", "document.pdf")
+        )
 
-    async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            await client.print_file_async(
-                input=pdf_file_path.read_bytes(),
-                printer="your-printer-share-id",
-                file_name=pdf_file_path.name,
-                configuration_copies=1,
-                configuration_color_mode="color",
-                configuration_orientation="portrait",
-            )
+        async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                await client.print_file_async(
+                    input=pdf_file_path.read_bytes(),
+                    printer="your-printer-share-id",
+                    file_name=pdf_file_path.name,
+                    configuration_copies=1,
+                    configuration_color_mode="color",
+                    configuration_orientation="portrait",
+                )
 
-            print("Print job submitted successfully.")
+                print("Print job submitted successfully.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

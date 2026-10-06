@@ -52,28 +52,28 @@ async def example_1_send_basic_email():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            email = Email(
-                from_=sender,
-                to=recipient,
-                subject="Test Email from Azure Connectors SDK",
-                body="Hello! This is a test email sent via the Azure Connectors SDK for Python.",
-            )
+        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                email = Email(
+                    from_=sender,
+                    to=recipient,
+                    subject="Test Email from Azure Connectors SDK",
+                    body="Hello! This is a test email sent via the Azure Connectors SDK for Python.",
+                )
 
-            await client.send_email_async(input=email)
+                await client.send_email_async(input=email)
 
-            print("Email sent successfully:")
-            print(f"  From: {sender}")
-            print(f"  To: {recipient}")
-            print(f"  Subject: {email.subject}")
+                print("Email sent successfully:")
+                print(f"  From: {sender}")
+                print(f"  To: {recipient}")
+                print(f"  Subject: {email.subject}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_send_email_with_cc_bcc():
@@ -93,33 +93,33 @@ async def example_2_send_email_with_cc_bcc():
         print("  $env:TEST_SMTP_BCC = 'bcc@example.com'  (optional)")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            email = Email(
-                from_=sender,
-                to=recipient,
-                c_c=cc_recipient if cc_recipient else None,
-                bcc=bcc_recipient if bcc_recipient else None,
-                subject="Test Email with CC/BCC",
-                body="This email demonstrates CC and BCC functionality.",
-            )
+        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                email = Email(
+                    from_=sender,
+                    to=recipient,
+                    c_c=cc_recipient if cc_recipient else None,
+                    bcc=bcc_recipient if bcc_recipient else None,
+                    subject="Test Email with CC/BCC",
+                    body="This email demonstrates CC and BCC functionality.",
+                )
 
-            await client.send_email_async(input=email)
+                await client.send_email_async(input=email)
 
-            print("Email sent successfully:")
-            print(f"  From: {sender}")
-            print(f"  To: {recipient}")
-            if cc_recipient:
-                print(f"  CC: {cc_recipient}")
-            if bcc_recipient:
-                print(f"  BCC: {bcc_recipient}")
+                print("Email sent successfully:")
+                print(f"  From: {sender}")
+                print(f"  To: {recipient}")
+                if cc_recipient:
+                    print(f"  CC: {cc_recipient}")
+                if bcc_recipient:
+                    print(f"  BCC: {bcc_recipient}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_send_html_email():
@@ -135,51 +135,51 @@ async def example_3_send_html_email():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            html_body = """
-            <html>
-            <head>
-                <style>
-                    body { font-family: Arial, sans-serif; }
-                    .header { color: #0078d4; }
-                    .content { margin: 20px 0; }
-                </style>
-            </head>
-            <body>
-                <h1 class="header">Azure Connectors SDK</h1>
-                <div class="content">
-                    <p>This is an <strong>HTML-formatted</strong> email.</p>
-                    <ul>
-                        <li>Feature 1: Easy to use</li>
-                        <li>Feature 2: Async support</li>
-                        <li>Feature 3: Type safety</li>
-                    </ul>
-                </div>
-            </body>
-            </html>
-            """
+        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                html_body = """
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        .header { color: #0078d4; }
+                        .content { margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <h1 class="header">Azure Connectors SDK</h1>
+                    <div class="content">
+                        <p>This is an <strong>HTML-formatted</strong> email.</p>
+                        <ul>
+                            <li>Feature 1: Easy to use</li>
+                            <li>Feature 2: Async support</li>
+                            <li>Feature 3: Type safety</li>
+                        </ul>
+                    </div>
+                </body>
+                </html>
+                """
 
-            email = Email(
-                from_=sender,
-                to=recipient,
-                subject="HTML Email from Azure Connectors SDK",
-                body=html_body.strip(),
-            )
+                email = Email(
+                    from_=sender,
+                    to=recipient,
+                    subject="HTML Email from Azure Connectors SDK",
+                    body=html_body.strip(),
+                )
 
-            await client.send_email_async(input=email)
+                await client.send_email_async(input=email)
 
-            print("HTML email sent successfully:")
-            print(f"  From: {sender}")
-            print(f"  To: {recipient}")
-            print(f"  Subject: {email.subject}")
+                print("HTML email sent successfully:")
+                print(f"  From: {sender}")
+                print(f"  To: {recipient}")
+                print(f"  Subject: {email.subject}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_send_email_with_attachment():
@@ -195,39 +195,39 @@ async def example_4_send_email_with_attachment():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create a sample text file content
-            file_content = "This is a sample attachment created by Azure Connectors SDK."
-            encoded_content = base64.b64encode(file_content.encode()).decode()
+        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create a sample text file content
+                file_content = "This is a sample attachment created by Azure Connectors SDK."
+                encoded_content = base64.b64encode(file_content.encode()).decode()
 
-            attachment = Attachment(
-                file_name="sample.txt",
-                content_data=encoded_content,
-                content_type="text/plain",
-            )
+                attachment = Attachment(
+                    file_name="sample.txt",
+                    content_data=encoded_content,
+                    content_type="text/plain",
+                )
 
-            email = Email(
-                from_=sender,
-                to=recipient,
-                subject="Email with Attachment",
-                body="Please find the attached file.",
-                attachments=[attachment],
-            )
+                email = Email(
+                    from_=sender,
+                    to=recipient,
+                    subject="Email with Attachment",
+                    body="Please find the attached file.",
+                    attachments=[attachment],
+                )
 
-            await client.send_email_async(input=email)
+                await client.send_email_async(input=email)
 
-            print("Email with attachment sent successfully:")
-            print(f"  From: {sender}")
-            print(f"  To: {recipient}")
-            print(f"  Attachment: {attachment.file_name}")
+                print("Email with attachment sent successfully:")
+                print(f"  From: {sender}")
+                print(f"  To: {recipient}")
+                print(f"  Attachment: {attachment.file_name}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_send_email_with_options():
@@ -243,33 +243,33 @@ async def example_5_send_email_with_options():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            email = Email(
-                from_=sender,
-                to=recipient,
-                subject="High Importance Email",
-                body="This is a high-importance email with read receipt requested.",
-                importance="High",
-                read_receipt=sender,
-                delivery_receipt=sender,
-            )
+        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                email = Email(
+                    from_=sender,
+                    to=recipient,
+                    subject="High Importance Email",
+                    body="This is a high-importance email with read receipt requested.",
+                    importance="High",
+                    read_receipt=sender,
+                    delivery_receipt=sender,
+                )
 
-            await client.send_email_async(input=email)
+                await client.send_email_async(input=email)
 
-            print("Email with options sent successfully:")
-            print(f"  From: {sender}")
-            print(f"  To: {recipient}")
-            print(f"  Importance: {email.importance}")
-            print(f"  Read Receipt: {email.read_receipt}")
-            print(f"  Delivery Receipt: {email.delivery_receipt}")
+                print("Email with options sent successfully:")
+                print(f"  From: {sender}")
+                print(f"  To: {recipient}")
+                print(f"  Importance: {email.importance}")
+                print(f"  Read Receipt: {email.read_receipt}")
+                print(f"  Delivery Receipt: {email.delivery_receipt}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

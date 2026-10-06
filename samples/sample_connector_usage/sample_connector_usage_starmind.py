@@ -14,23 +14,23 @@ CONNECTION_RUNTIME_URL = os.environ.get("STARMIND_CONNECTION_URL", "")
 
 async def find_questions() -> None:
     """Find questions matching a query."""
-    credential = DefaultAzureCredential()
-    async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
-        questions = await client.find_questions_async(
-            query="distributed systems",
-            limit=10,
-        )
-        print(f"Questions: {questions}")
+    async with DefaultAzureCredential() as credential:
+        async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
+            questions = await client.find_questions_async(
+                query="distributed systems",
+                limit=10,
+            )
+            print(f"Questions: {questions}")
 
 
 async def find_experts() -> None:
     """Find experts for a topic."""
-    credential = DefaultAzureCredential()
-    async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
-        experts = await client.find_experts_async(
-            input=FindExpertsInput(text_query="distributed systems"),
-        )
-        print(f"Experts: {experts}")
+    async with DefaultAzureCredential() as credential:
+        async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
+            experts = await client.find_experts_async(
+                input=FindExpertsInput(text_query="distributed systems"),
+            )
+            print(f"Experts: {experts}")
 
 
 async def main() -> None:

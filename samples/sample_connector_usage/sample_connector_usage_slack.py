@@ -36,45 +36,45 @@ async def example_1_list_channels() -> None:
     """Example 1: List channels."""
     print("\n=== Example 1: List Channels ===")
 
-    credential = DefaultAzureCredential()
-    async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-        channels_response = await client.list_channels_async()
-        channels = channels_response.get("value", []) if channels_response else []
+    async with DefaultAzureCredential() as credential:
+        async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
+            channels_response = [item async for item in client.list_channels_async()]
+            channels = channels_response if channels_response else []
 
-        print(f"Found {len(channels)} channels")
-        for channel in channels[:5]:
-            print(f"  - {channel.get('name')} ({channel.get('id')})")
+            print(f"Found {len(channels)} channels")
+            for channel in channels[:5]:
+                print(f"  - {channel.get('name')} ({channel.get('id')})")
 
 
 async def example_2_create_channel() -> None:
     """Example 2: Create a channel."""
     print("\n=== Example 2: Create Channel ===")
 
-    credential = DefaultAzureCredential()
-    async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-        created = await client.create_channel_async(
-            name="sdk-sample-channel",
-            is_private=False,
-        )
-        channel = created.get("channel", {}) if created else {}
-        print(f"Created channel: {channel.get('name')} ({channel.get('id')})")
+    async with DefaultAzureCredential() as credential:
+        async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
+            created = await client.create_channel_async(
+                name="sdk-sample-channel",
+                is_private=False,
+            )
+            channel = created.get("channel", {}) if created else {}
+            print(f"Created channel: {channel.get('name')} ({channel.get('id')})")
 
 
 async def example_3_post_message() -> None:
     """Example 3: Post a message to a channel."""
     print("\n=== Example 3: Post Message ===")
 
-    credential = DefaultAzureCredential()
-    async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-        payload = PostMessageRequest(
-            channel="#general",
-            text="Hello from Slack Python SDK sample",
-        )
-        posted = await client.post_message_async(input=payload)
-        print(
-            f"Posted: ok={posted.get('ok') if posted else None}, "
-            f"ts={posted.get('ts') if posted else None}"
-        )
+    async with DefaultAzureCredential() as credential:
+        async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
+            payload = PostMessageRequest(
+                channel="#general",
+                text="Hello from Slack Python SDK sample",
+            )
+            posted = await client.post_message_async(input=payload)
+            print(
+                f"Posted: ok={posted.get('ok') if posted else None}, "
+                f"ts={posted.get('ts') if posted else None}"
+            )
 
 
 async def main() -> None:

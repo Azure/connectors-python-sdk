@@ -41,44 +41,44 @@ async def example_1_get_file_cabinets():
     """Example 1: List available file cabinets and document trays."""
     print("\n=== Example 1: Get file cabinets ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_file_cabinets_async(
-                file_cabinet_type="<file-cabinet-type>",
-            )
+        async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_file_cabinets_async(
+                    file_cabinet_type="<file-cabinet-type>",
+                )
 
-            print(f"File cabinets result: {result}")
+                print(f"File cabinets result: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_search_documents():
     """Example 2: Search a file cabinet for matching documents."""
     print("\n=== Example 2: Search documents in file cabinet ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            request = SearchForDocumentsInFileCabinetInput()
+        async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                request = SearchForDocumentsInFileCabinetInput()
 
-            result = await client.search_for_documents_in_file_cabinet_async(
-                input=request,
-                file_cabinet="<file-cabinet-id>",
-                search_dialog_id="<search-dialog-id>",
-            )
+                result = await client.search_for_documents_in_file_cabinet_async(
+                    input=request,
+                    file_cabinet="<file-cabinet-id>",
+                    search_dialog_id="<search-dialog-id>",
+                )
 
-            print(f"Search result: {result}")
+                print(f"Search result: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

@@ -36,46 +36,46 @@ async def example_1_list_tasks() -> None:
     """Example 1: List tasks."""
     print("\n=== Example 1: List Tasks ===")
 
-    credential = DefaultAzureCredential()
-    async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-        response = await client.list_tasks_async()
-        tasks = response.get("tasks", []) if response else []
+    async with DefaultAzureCredential() as credential:
+        async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            response = await client.list_tasks_async()
+            tasks = response.get("tasks", []) if response else []
 
-        print(f"Found {len(tasks)} tasks")
-        for task in tasks[:5]:
-            print(f"  - {task.get('TASK_ID')}: {task.get('TITLE')}")
+            print(f"Found {len(tasks)} tasks")
+            for task in tasks[:5]:
+                print(f"  - {task.get('TASK_ID')}: {task.get('TITLE')}")
 
 
 async def example_2_list_contacts() -> None:
     """Example 2: List contacts."""
     print("\n=== Example 2: List Contacts ===")
 
-    credential = DefaultAzureCredential()
-    async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-        response = await client.list_contacts_async()
-        contacts = response.get("contacts", []) if response else []
+    async with DefaultAzureCredential() as credential:
+        async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            response = await client.list_contacts_async()
+            contacts = response.get("contacts", []) if response else []
 
-        print(f"Found {len(contacts)} contacts")
-        for contact in contacts[:5]:
-            first = contact.get("FIRST_NAME", "")
-            last = contact.get("LAST_NAME", "")
-            print(f"  - {contact.get('CONTACT_ID')}: {first} {last}".rstrip())
+            print(f"Found {len(contacts)} contacts")
+            for contact in contacts[:5]:
+                first = contact.get("FIRST_NAME", "")
+                last = contact.get("LAST_NAME", "")
+                print(f"  - {contact.get('CONTACT_ID')}: {first} {last}".rstrip())
 
 
 async def example_3_add_task() -> None:
     """Example 3: Add a task."""
     print("\n=== Example 3: Add Task ===")
 
-    credential = DefaultAzureCredential()
-    async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = TaskRequest(
-            t_i_t_l_e="SDK sample task",
-            d_e_t_a_i_l_s="Created from insightly SDK sample.",
-            s_t_a_t_u_s="NOT STARTED",
-        )
+    async with DefaultAzureCredential() as credential:
+        async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = TaskRequest(
+                t_i_t_l_e="SDK sample task",
+                d_e_t_a_i_l_s="Created from insightly SDK sample.",
+                s_t_a_t_u_s="NOT STARTED",
+            )
 
-        created = await client.add_task_async(input=request)
-        print(f"Created task: {created.get('TASK_ID') if created else 'n/a'}")
+            created = await client.add_task_async(input=request)
+            print(f"Created task: {created.get('TASK_ID') if created else 'n/a'}")
 
 
 async def main() -> None:

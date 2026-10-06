@@ -67,94 +67,94 @@ async def example_list_discovery_values():
     """List subscriptions and resource groups using discovery APIs."""
     print("\n=== Example 1: Discovery Operations ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            subscriptions = await client.list_subscriptions_async()
-            count = len(subscriptions.get("value", [])) if subscriptions else 0
-            print(f"Found {count} subscriptions.")
+        async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                subscriptions = [item async for item in client.list_subscriptions_async()]
+                count = len(subscriptions) if subscriptions else 0
+                print(f"Found {count} subscriptions.")
 
-            resource_groups = await client.list_resource_groups_async(
-                subscriptions=SUBSCRIPTION_ID
-            )
-            rg_count = len(resource_groups.get("value", [])) if resource_groups else 0
-            print(f"Found {rg_count} resource groups in subscription.")
+                resource_groups = [item async for item in client.list_resource_groups_async(
+                    subscriptions=SUBSCRIPTION_ID
+                )]
+                rg_count = len(resource_groups) if resource_groups else 0
+                print(f"Found {rg_count} resource groups in subscription.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_run_query():
     """Run a KQL query and list tabular rows."""
     print("\n=== Example 2: Run Query Data ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            request = QueryDataInput(
-                query="Heartbeat | take 5",
-                timerangetype="SetInQuery",
-            )
+        async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                request = QueryDataInput(
+                    query="Heartbeat | take 5",
+                    timerangetype="SetInQuery",
+                )
 
-            result = await client.query_data_async(
-                input=request,
-                subscriptions=SUBSCRIPTION_ID,
-                resourcegroups=RESOURCE_GROUP,
-                resourcetype=RESOURCE_TYPE,
-                resourcename=RESOURCE_NAME,
-            )
+                result = await client.query_data_async(
+                    input=request,
+                    subscriptions=SUBSCRIPTION_ID,
+                    resourcegroups=RESOURCE_GROUP,
+                    resourcetype=RESOURCE_TYPE,
+                    resourcename=RESOURCE_NAME,
+                )
 
-            rows = result.get("value", []) if result else []
-            print(f"Returned {len(rows)} rows.")
-            for index, row in enumerate(rows[:3], 1):
-                print(f"  Row {index}: {row}")
+                rows = result.get("value", []) if result else []
+                print(f"Returned {len(rows)} rows.")
+                for index, row in enumerate(rows[:3], 1):
+                    print(f"  Row {index}: {row}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_visualize_query():
     """Run query visualization."""
     print("\n=== Example 3: Visualize Query ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            request = VisualizeQueryInput(
-                query=(
-                    "Heartbeat "
-                    "| summarize Count=count() by bin(TimeGenerated, 1h) "
-                    "| order by TimeGenerated asc"
-                ),
-                timerangetype="SetInQuery",
-            )
+        async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                request = VisualizeQueryInput(
+                    query=(
+                        "Heartbeat "
+                        "| summarize Count=count() by bin(TimeGenerated, 1h) "
+                        "| order by TimeGenerated asc"
+                    ),
+                    timerangetype="SetInQuery",
+                )
 
-            result = await client.visualize_query_async(
-                input=request,
-                subscriptions=SUBSCRIPTION_ID,
-                resourcegroups=RESOURCE_GROUP,
-                resourcetype=RESOURCE_TYPE,
-                resourcename=RESOURCE_NAME,
-                vis_type="linechart",
-            )
+                result = await client.visualize_query_async(
+                    input=request,
+                    subscriptions=SUBSCRIPTION_ID,
+                    resourcegroups=RESOURCE_GROUP,
+                    resourcetype=RESOURCE_TYPE,
+                    resourcename=RESOURCE_NAME,
+                    vis_type="linechart",
+                )
 
-            if result:
-                print("Visualization payload returned.")
-                print(f"Keys: {list(result.keys())}")
-            else:
-                print("Visualization completed with empty response.")
+                if result:
+                    print("Visualization payload returned.")
+                    print(f"Keys: {list(result.keys())}")
+                else:
+                    print("Visualization completed with empty response.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

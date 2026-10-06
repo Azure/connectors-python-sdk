@@ -48,15 +48,15 @@ async def example_1_list_instances():
     """Example 1: List accessible Dynamics 365 Fin & Ops instances."""
     print("\n=== Example 1: List Instances ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.get_data_sets_async()
-        datasets = result.get("value", []) if result else []
+        async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.get_data_sets_async()
+            datasets = result.get("value", []) if result else []
 
-        print(f"Found {len(datasets)} instance(s).")
-        for dataset in datasets[:10]:
-            print(f"  - {dataset.get('name', 'N/A')}")
+            print(f"Found {len(datasets)} instance(s).")
+            for dataset in datasets[:10]:
+                print(f"  - {dataset.get('name', 'N/A')}")
 
 
 async def example_2_list_tables():
@@ -67,15 +67,15 @@ async def example_2_list_tables():
         print("Set DYNAMICSAX_DATASET to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.get_tables_async(dataset=DATASET)
-        tables = result.get("value", []) if result else []
+        async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.get_tables_async(dataset=DATASET)
+            tables = result.get("value", []) if result else []
 
-        print(f"Found {len(tables)} table(s).")
-        for table in tables[:10]:
-            print(f"  - {table.get('name', 'N/A')}")
+            print(f"Found {len(tables)} table(s).")
+            for table in tables[:10]:
+                print(f"  - {table.get('name', 'N/A')}")
 
 
 async def example_3_create_record():
@@ -88,20 +88,20 @@ async def example_3_create_record():
         print("Set DYNAMICSAX_DATASET and DYNAMICSAX_TABLE to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            record = PostItemInput()
-            record.additional_properties = {"Name": "SDK Sample"}
-            result = await client.post_item_async(
-                input=record,
-                dataset=DATASET,
-                table=table,
-            )
-            print(f"Record created: {result}")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+        async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                record = PostItemInput()
+                record.additional_properties = {"Name": "SDK Sample"}
+                result = await client.post_item_async(
+                    input=record,
+                    dataset=DATASET,
+                    table=table,
+                )
+                print(f"Record created: {result}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 async def main():

@@ -36,73 +36,73 @@ async def example_1_list_resources() -> list[dict]:
     """Example 1: List accessible Jira cloud resources."""
     print("\n=== Example 1: List Resources ===")
 
-    credential = DefaultAzureCredential()
-    async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
-        resources_response = await client.list_resources_async()
-        resources = (
-            resources_response
-            if isinstance(resources_response, list)
-            else resources_response.get("value", []) if resources_response else []
-        )
+    async with DefaultAzureCredential() as credential:
+        async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
+            resources_response = await client.list_resources_async()
+            resources = (
+                resources_response
+                if isinstance(resources_response, list)
+                else resources_response.get("value", []) if resources_response else []
+            )
 
-        print(f"Found {len(resources)} resources")
-        for resource in resources[:5]:
-            print(f"  - {resource.get('name')} ({resource.get('id')})")
+            print(f"Found {len(resources)} resources")
+            for resource in resources[:5]:
+                print(f"  - {resource.get('name')} ({resource.get('id')})")
 
-        return resources
+            return resources
 
 
 async def example_2_list_issues(cloud_id: str) -> None:
     """Example 2: List issues in a Jira site."""
     print("\n=== Example 2: List Issues ===")
 
-    credential = DefaultAzureCredential()
-    async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
-        del cloud_id
+    async with DefaultAzureCredential() as credential:
+        async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
+            del cloud_id
 
-        issues_response = await client.list_issues_async()
+            issues_response = await client.list_issues_async()
 
-        issues = issues_response.get("issues", []) if issues_response else []
-        print(f"Found {len(issues)} issues")
-        for issue in issues[:5]:
-            print(f"  - {issue.get('key')}: {issue.get('fields', {}).get('summary')}")
+            issues = issues_response.get("issues", []) if issues_response else []
+            print(f"Found {len(issues)} issues")
+            for issue in issues[:5]:
+                print(f"  - {issue.get('key')}: {issue.get('fields', {}).get('summary')}")
 
 
 async def example_3_create_issue(cloud_id: str) -> None:
     """Example 3: Create an issue (requires valid project + issue type)."""
     print("\n=== Example 3: Create Issue ===")
 
-    credential = DefaultAzureCredential()
-    async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
-        del cloud_id
+    async with DefaultAzureCredential() as credential:
+        async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
+            del cloud_id
 
-        request = CreateIssueInput(
-            additional_properties={
-                "fields": {
-                    "project": {"key": "PROJ"},
-                    "summary": "SDK sample issue",
-                    "issuetype": {"name": "Task"},
-                    "description": {
-                        "type": "doc",
-                        "version": 1,
-                        "content": [{
-                            "type": "paragraph",
+            request = CreateIssueInput(
+                additional_properties={
+                    "fields": {
+                        "project": {"key": "PROJ"},
+                        "summary": "SDK sample issue",
+                        "issuetype": {"name": "Task"},
+                        "description": {
+                            "type": "doc",
+                            "version": 1,
                             "content": [{
-                                "type": "text",
-                                "text": "Created from jira SDK sample.",
+                                "type": "paragraph",
+                                "content": [{
+                                    "type": "text",
+                                    "text": "Created from jira SDK sample.",
+                                }],
                             }],
-                        }],
-                    },
+                        },
+                    }
                 }
-            }
-        )
+            )
 
-        created = await client.create_issue_async(
-            input=request,
-            project_key="PROJ",
-            issue_type_ids="10001",
-        )
-        print(f"Created issue: {created.get('key') if created else 'n/a'}")
+            created = await client.create_issue_async(
+                input=request,
+                project_key="PROJ",
+                issue_type_ids="10001",
+            )
+            print(f"Created issue: {created.get('key') if created else 'n/a'}")
 
 
 async def main() -> None:

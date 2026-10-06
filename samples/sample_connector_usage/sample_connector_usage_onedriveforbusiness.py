@@ -16,25 +16,25 @@ CONNECTION_RUNTIME_URL = os.environ.get("ONEDRIVEFORBUSINESS_CONNECTION_URL", ""
 
 async def example_list_root_folder() -> None:
     """List files in the root folder."""
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.list_root_folder_async()
-        values = result.get("value", []) if result else []
-        print(f"Found {len(values)} items in root folder.")
+        async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.list_root_folder_async()
+            values = result.get("value", []) if result else []
+            print(f"Found {len(values)} items in root folder.")
 
 
 async def example_get_file_metadata() -> None:
     """Get file metadata by path."""
     file_path = os.environ.get("TEST_FILE_PATH", "/Documents/report.docx")
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        metadata = await client.get_file_metadata_by_path_async(path=file_path)
-        if metadata:
-            print(f"Name: {metadata.get('name')}, Size: {metadata.get('size')} bytes")
-        else:
-            print("No metadata was returned.")
+        async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            metadata = await client.get_file_metadata_by_path_async(path=file_path)
+            if metadata:
+                print(f"Name: {metadata.get('name')}, Size: {metadata.get('size')} bytes")
+            else:
+                print("No metadata was returned.")
 
 
 async def example_create_share_link() -> None:
@@ -44,14 +44,14 @@ async def example_create_share_link() -> None:
         print("Set TEST_FILE_ID to run the share-link example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.create_share_link_async(id=file_id, type_="view")
-        if result:
-            print(f"Share URL: {result.get('webUrl')}")
-        else:
-            print("No share link was returned.")
+        async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.create_share_link_async(id=file_id, type_="view")
+            if result:
+                print(f"Share URL: {result.get('webUrl')}")
+            else:
+                print("No share link was returned.")
 
 
 async def main() -> None:

@@ -36,62 +36,62 @@ async def example_1_list_lists() -> list[dict]:
     """Example 1: List all to-do lists."""
     print("\n=== Example 1: List To-Do Lists ===")
 
-    credential = DefaultAzureCredential()
-    async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-        lists_response = await client.get_all_todo_lists_async()
-        lists = lists_response.get("value", []) if lists_response else []
+    async with DefaultAzureCredential() as credential:
+        async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            lists_response = await client.get_all_todo_lists_async()
+            lists = lists_response.get("value", []) if lists_response else []
 
-        print(f"Found {len(lists)} lists")
-        for todo_list in lists[:10]:
-            print(f"  - {todo_list.get('displayName')} ({todo_list.get('id')})")
+            print(f"Found {len(lists)} lists")
+            for todo_list in lists[:10]:
+                print(f"  - {todo_list.get('displayName')} ({todo_list.get('id')})")
 
-        return lists
+            return lists
 
 
 async def example_2_create_list() -> str | None:
     """Example 2: Create a to-do list."""
     print("\n=== Example 2: Create To-Do List ===")
 
-    credential = DefaultAzureCredential()
-    async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = CreateToDoList(display_name="SDK Sample List")
-        created = await client.create_to_do_list_async(input=request)
+    async with DefaultAzureCredential() as credential:
+        async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = CreateToDoList(display_name="SDK Sample List")
+            created = await client.create_to_do_list_async(input=request)
 
-        if not created:
-            print("No list was created")
-            return None
+            if not created:
+                print("No list was created")
+                return None
 
-        list_id = created.get("id")
-        print(f"Created list id: {list_id}")
-        return list_id
+            list_id = created.get("id")
+            print(f"Created list id: {list_id}")
+            return list_id
 
 
 async def example_3_create_and_update_todo(list_id: str) -> None:
     """Example 3: Create and update a to-do item."""
     print("\n=== Example 3: Create And Update To-Do ===")
 
-    credential = DefaultAzureCredential()
-    async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-        create_request = CreateToDo(title="SDK sample task", status="notStarted")
-        created_todo = await client.create_to_do_async(input=create_request, folder_id=list_id)
+    async with DefaultAzureCredential() as credential:
+        async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            create_request = CreateToDo(title="SDK sample task", status="notStarted")
+            created_todo = await client.create_to_do_async(input=create_request, folder_id=list_id)
 
-        if not created_todo:
-            print("No to-do item returned from create operation")
-            return
+            if not created_todo:
+                print("No to-do item returned from create operation")
+                return
 
-        todo_id = created_todo.get("id")
-        print(f"Created to-do id: {todo_id}")
+            todo_id = created_todo.get("id")
+            print(f"Created to-do id: {todo_id}")
 
-        if not todo_id:
-            return
+            if not todo_id:
+                return
 
-        update_request = UpdateToDo(title="SDK sample task (updated)", status="inProgress")
-        updated_todo = await client.update_to_do_async(
-            input=update_request,
-            folder_id=list_id,
-            id=todo_id,
-        )
-        print(f"Updated title: {updated_todo.get('title') if updated_todo else 'n/a'}")
+            update_request = UpdateToDo(title="SDK sample task (updated)", status="inProgress")
+            updated_todo = await client.update_to_do_async(
+                input=update_request,
+                folder_id=list_id,
+                id=todo_id,
+            )
+            print(f"Updated title: {updated_todo.get('title') if updated_todo else 'n/a'}")
 
 
 async def main() -> None:

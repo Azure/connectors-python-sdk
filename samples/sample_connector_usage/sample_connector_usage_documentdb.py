@@ -62,33 +62,33 @@ async def example_1_query_all_documents():
         print("  $env:DOCUMENTDB_CONTAINER = '<container-id>'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.query_documents_async(
-                cosmos_db_account_name=COSMOS_DB_ACCOUNT,
-                database_id=DATABASE_ID,
-                container_id=CONTAINER_ID,
-                query_text="SELECT * FROM c"
-            )
+        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = [item async for item in client.query_documents_async(
+                    cosmos_db_account_name=COSMOS_DB_ACCOUNT,
+                    database_id=DATABASE_ID,
+                    container_id=CONTAINER_ID,
+                    query_text="SELECT * FROM c"
+                )]
 
-            if result:
-                documents = result.get("value", [])
-                count = result.get("count", len(documents))
-                print(f"Found {count} document(s) in container '{CONTAINER_ID}':")
-                for i, doc in enumerate(documents[:3], 1):  # Show first 3
-                    doc_id = doc.get("id", "N/A")
-                    print(f"  {i}. id: {doc_id}")
-                if count > 3:
-                    print(f"  ... and {count - 3} more documents")
-            else:
-                print("No documents found or empty response.")
+                if result:
+                    documents = result
+                    count = len(documents)
+                    print(f"Found {count} document(s) in container '{CONTAINER_ID}':")
+                    for i, doc in enumerate(documents[:3], 1):  # Show first 3
+                        doc_id = doc.get("id", "N/A")
+                        print(f"  {i}. id: {doc_id}")
+                    if count > 3:
+                        print(f"  ... and {count - 3} more documents")
+                else:
+                    print("No documents found or empty response.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_query_with_filter():
@@ -99,78 +99,68 @@ async def example_2_query_with_filter():
         print("Set environment variables to query documents.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Query with WHERE clause - adjust field names for your schema
-            result = await client.query_documents_async(
-                cosmos_db_account_name=COSMOS_DB_ACCOUNT,
-                database_id=DATABASE_ID,
-                container_id=CONTAINER_ID,
-                query_text="SELECT * FROM c WHERE c.type = 'sample'"
-            )
+        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Query with WHERE clause - adjust field names for your schema
+                result = [item async for item in client.query_documents_async(
+                    cosmos_db_account_name=COSMOS_DB_ACCOUNT,
+                    database_id=DATABASE_ID,
+                    container_id=CONTAINER_ID,
+                    query_text="SELECT * FROM c WHERE c.type = 'sample'"
+                )]
 
-            if result:
-                documents = result.get("value", [])
-                count = result.get("count", len(documents))
-                print(f"Found {count} document(s) matching filter:")
-                for doc in documents[:5]:
-                    doc_id = doc.get("id", "N/A")
-                    doc_type = doc.get("type", "N/A")
-                    print(f"  - id: {doc_id}, type: {doc_type}")
-            else:
-                print("No matching documents found.")
+                if result:
+                    documents = result
+                    count = len(documents)
+                    print(f"Found {count} document(s) matching filter:")
+                    for doc in documents[:5]:
+                        doc_id = doc.get("id", "N/A")
+                        doc_type = doc.get("type", "N/A")
+                        print(f"  - id: {doc_id}, type: {doc_type}")
+                else:
+                    print("No matching documents found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_query_with_pagination():
-    """Example 3: Query documents with pagination."""
-    print("\n=== Example 3: Query with Pagination ===")
+    """Example 3: Query documents across automatically followed pages."""
+    print("\n=== Example 3: Query with Automatic Pagination ===")
 
     if not COSMOS_DB_ACCOUNT or not DATABASE_ID or not CONTAINER_ID:
         print("Set environment variables to query documents.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # First page - limit to 2 items
-            result = await client.query_documents_async(
-                cosmos_db_account_name=COSMOS_DB_ACCOUNT,
-                database_id=DATABASE_ID,
-                container_id=CONTAINER_ID,
-                query_text="SELECT c.id, c.type FROM c",
-                max_item_count=2
-            )
+        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # The iterator follows continuation links until all pages are consumed.
+                result = [item async for item in client.query_documents_async(
+                    cosmos_db_account_name=COSMOS_DB_ACCOUNT,
+                    database_id=DATABASE_ID,
+                    container_id=CONTAINER_ID,
+                    query_text="SELECT c.id, c.type FROM c",
+                    max_item_count=2
+                )]
 
-            if result:
-                documents = result.get("value", [])
-                continuation = result.get("continuation_token")
-                request_charge = result.get("request_charge", 0)
-
-                print(f"Page 1: Retrieved {len(documents)} document(s)")
-                print(f"  Request charge: {request_charge} RUs")
-                for doc in documents:
-                    print(f"  - id: {doc.get('id', 'N/A')}")
-
-                if continuation:
-                    print(f"  Continuation token available (truncated): {continuation[:30]}...")
-                    print("  Use continuation_token parameter to fetch next page.")
+                if result:
+                    documents = result
+                    print(f"Retrieved {len(documents)} document(s) across all pages")
+                    for doc in documents:
+                        print(f"  - id: {doc.get('id', 'N/A')}")
                 else:
-                    print("  No more pages available.")
-            else:
-                print("No documents found.")
+                    print("No documents found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_query_with_partition_key():
@@ -188,31 +178,31 @@ async def example_4_query_with_partition_key():
         print("Skipping partition key example...")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Query within a specific partition
-            result = await client.query_documents_async(
-                cosmos_db_account_name=COSMOS_DB_ACCOUNT,
-                database_id=DATABASE_ID,
-                container_id=CONTAINER_ID,
-                query_text="SELECT * FROM c",
-                partition_key=partition_key
-            )
+        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Query within a specific partition
+                result = [item async for item in client.query_documents_async(
+                    cosmos_db_account_name=COSMOS_DB_ACCOUNT,
+                    database_id=DATABASE_ID,
+                    container_id=CONTAINER_ID,
+                    query_text="SELECT * FROM c",
+                    partition_key=partition_key
+                )]
 
-            if result:
-                documents = result.get("value", [])
-                print(f"Found {len(documents)} document(s) in partition '{partition_key}':")
-                for doc in documents[:5]:
-                    print(f"  - id: {doc.get('id', 'N/A')}")
-            else:
-                print(f"No documents found in partition '{partition_key}'.")
+                if result:
+                    documents = result
+                    print(f"Found {len(documents)} document(s) in partition '{partition_key}':")
+                    for doc in documents[:5]:
+                        print(f"  - id: {doc.get('id', 'N/A')}")
+                else:
+                    print(f"No documents found in partition '{partition_key}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_query_with_consistency():
@@ -223,41 +213,34 @@ async def example_5_query_with_consistency():
         print("Set environment variables to query documents.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Query with Session consistency (common for read-your-writes)
-            # Valid levels: Strong, BoundedStaleness, Session, Eventual
-            result = await client.query_documents_async(
-                cosmos_db_account_name=COSMOS_DB_ACCOUNT,
-                database_id=DATABASE_ID,
-                container_id=CONTAINER_ID,
-                query_text="SELECT TOP 5 c.id FROM c ORDER BY c._ts DESC",
-                consistency_level="Session"
-            )
+        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Query with Session consistency (common for read-your-writes)
+                # Valid levels: Strong, BoundedStaleness, Session, Eventual
+                result = [item async for item in client.query_documents_async(
+                    cosmos_db_account_name=COSMOS_DB_ACCOUNT,
+                    database_id=DATABASE_ID,
+                    container_id=CONTAINER_ID,
+                    query_text="SELECT TOP 5 c.id FROM c ORDER BY c._ts DESC",
+                    consistency_level="Session"
+                )]
 
-            if result:
-                documents = result.get("value", [])
-                session_token = result.get("session_token", "N/A")
-                activity_id = result.get("activity_id", "N/A")
+                if result:
+                    documents = result
+                    print("Query completed with Session consistency:")
+                    print(f"  Documents retrieved: {len(documents)}")
 
-                print("Query completed with Session consistency:")
-                print(f"  Documents retrieved: {len(documents)}")
-                print(f"  Activity ID: {activity_id}")
-                if session_token and session_token != "N/A":
-                    token_preview = session_token[:30] if len(session_token) > 30 else session_token
-                    print(f"  Session token: {token_preview}...")
+                    for doc in documents:
+                        print(f"  - id: {doc.get('id', 'N/A')}")
+                else:
+                    print("No documents found.")
 
-                for doc in documents:
-                    print(f"  - id: {doc.get('id', 'N/A')}")
-            else:
-                print("No documents found.")
-
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

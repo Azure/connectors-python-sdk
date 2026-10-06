@@ -46,47 +46,47 @@ async def example_1_list_task_lists():
     """Example 1: List task lists."""
     print("\n=== Example 1: List Task Lists ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.list_task_lists_async()
-        items = result.get("items", []) if result else []
+        async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.list_task_lists_async()
+            items = result.get("items", []) if result else []
 
-        print(f"Found {len(items)} task list(s).")
-        for task_list in items[:10]:
-            print(f"  - {task_list.get('title', 'N/A')} ({task_list.get('id', 'N/A')})")
+            print(f"Found {len(items)} task list(s).")
+            for task_list in items[:10]:
+                print(f"  - {task_list.get('title', 'N/A')} ({task_list.get('id', 'N/A')})")
 
 
 async def example_2_create_task_list_and_task():
     """Example 2: Create a task list and task."""
     print("\n=== Example 2: Create Task List and Task ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            list_result = await client.create_task_list_async(
-                input=TaskListCreate(title="SDK Sample List"),
-            )
-            task_list_id = list_result.get("id") if list_result else None
+        async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                list_result = await client.create_task_list_async(
+                    input=TaskListCreate(title="SDK Sample List"),
+                )
+                task_list_id = list_result.get("id") if list_result else None
 
-            if not task_list_id:
-                print("Task list creation returned no id.")
-                return
+                if not task_list_id:
+                    print("Task list creation returned no id.")
+                    return
 
-            task_result = await client.create_task_async(
-                input=TaskCreate(
-                    title="Follow up sample",
-                    notes="Created by azure-connectors sample.",
-                    due="2026-07-10T12:00:00Z",
-                ),
-                task_list_id=task_list_id,
-            )
+                task_result = await client.create_task_async(
+                    input=TaskCreate(
+                        title="Follow up sample",
+                        notes="Created by azure-connectors sample.",
+                        due="2026-07-10T12:00:00Z",
+                    ),
+                    task_list_id=task_list_id,
+                )
 
-            print(f"Created list id: {task_list_id}")
-            print(f"Created task id: {(task_result or {}).get('id', 'N/A')}")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+                print(f"Created list id: {task_list_id}")
+                print(f"Created task id: {(task_result or {}).get('id', 'N/A')}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 def example_3_list_triggers():

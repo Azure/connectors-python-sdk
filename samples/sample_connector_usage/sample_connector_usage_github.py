@@ -36,48 +36,48 @@ async def example_1_get_authenticated_user() -> None:
     """Example 1: Get authenticated GitHub user."""
     print("\n=== Example 1: Get Authenticated User ===")
 
-    credential = DefaultAzureCredential()
-    async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-        user = await client.get_user_async()
-        print(f"Authenticated as: {user.get('login') if user else 'unknown'}")
+    async with DefaultAzureCredential() as credential:
+        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+            user = await client.get_user_async()
+            print(f"Authenticated as: {user.get('login') if user else 'unknown'}")
 
 
 async def example_2_list_issues(repository_owner: str, repository_name: str) -> None:
     """Example 2: List open issues in a repository."""
     print("\n=== Example 2: List Issues ===")
 
-    credential = DefaultAzureCredential()
-    async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-        issues = await client.get_issues_async(
-            repository_owner=repository_owner,
-            repository_name=repository_name,
-            state="open",
-            per_page=5,
-        )
+    async with DefaultAzureCredential() as credential:
+        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+            issues = await client.get_issues_async(
+                repository_owner=repository_owner,
+                repository_name=repository_name,
+                state="open",
+                per_page=5,
+            )
 
-        issue_list = issues if isinstance(issues, list) else []
-        print(f"Found {len(issue_list)} issues")
-        for issue in issue_list[:5]:
-            print(f"  - #{issue.get('number')}: {issue.get('title')}")
+            issue_list = issues if isinstance(issues, list) else []
+            print(f"Found {len(issue_list)} issues")
+            for issue in issue_list[:5]:
+                print(f"  - #{issue.get('number')}: {issue.get('title')}")
 
 
 async def example_3_create_issue(repository_owner: str, repository_name: str) -> None:
     """Example 3: Create a new issue in a repository."""
     print("\n=== Example 3: Create Issue ===")
 
-    credential = DefaultAzureCredential()
-    async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = IssueBasicDetailsModel(
-            title="SDK sample issue",
-            body="Created from github Python SDK sample.",
-        )
-        created = await client.create_issue_async(
-            input=request,
-            repository_owner=repository_owner,
-            repository_name=repository_name,
-        )
+    async with DefaultAzureCredential() as credential:
+        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = IssueBasicDetailsModel(
+                title="SDK sample issue",
+                body="Created from github Python SDK sample.",
+            )
+            created = await client.create_issue_async(
+                input=request,
+                repository_owner=repository_owner,
+                repository_name=repository_name,
+            )
 
-        print(f"Created issue: #{created.get('number') if created else 'n/a'}")
+            print(f"Created issue: #{created.get('number') if created else 'n/a'}")
 
 
 async def main() -> None:

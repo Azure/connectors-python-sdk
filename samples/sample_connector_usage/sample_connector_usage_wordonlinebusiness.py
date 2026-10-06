@@ -50,34 +50,34 @@ async def example_1_populate_word_template():
     """
     print("\n=== Example 1: Populate Word Template ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create input with template field values
-            # The additional_properties dict contains the template field mappings
-            input_data = CreateFileItemInput(
-                additional_properties={
-                    "templateId": "your-template-id",
-                    "field_Name": "John Doe",
-                    "field_Date": "2024-01-15",
-                    "field_Company": "Contoso Ltd.",
-                }
-            )
+        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create input with template field values
+                # The additional_properties dict contains the template field mappings
+                input_data = CreateFileItemInput(
+                    additional_properties={
+                        "templateId": "your-template-id",
+                        "field_Name": "John Doe",
+                        "field_Date": "2024-01-15",
+                        "field_Company": "Contoso Ltd.",
+                    }
+                )
 
-            result = await client.create_file_item_async(
-                input=input_data,
-                source=SOURCE,
-                drive=DRIVE,
-                file=FILE
-            )
+                result = await client.create_file_item_async(
+                    input=input_data,
+                    source=SOURCE,
+                    drive=DRIVE,
+                    file=FILE
+                )
 
-            print(f"Generated document size: {len(result)} bytes")
+                print(f"Generated document size: {len(result)} bytes")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_create_word_document():
@@ -87,31 +87,31 @@ async def example_2_create_word_document():
     """
     print("\n=== Example 2: Create Word Document ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create document content
-            content = ContentBody(
-                content="This is the content of my Word document.\n\n"
-                        "It can include multiple paragraphs and formatting."
-            )
+        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create document content
+                content = ContentBody(
+                    content="This is the content of my Word document.\n\n"
+                            "It can include multiple paragraphs and formatting."
+                )
 
-            result = await client.create_word_file_with_content_async(
-                input=content,
-                file_name="MyDocument.docx"
-            )
+                result = await client.create_word_file_with_content_async(
+                    input=content,
+                    file_name="MyDocument.docx"
+                )
 
-            if result:
-                print(f"Document created with ID: {result.get('id', 'N/A')}")
-                print(f"Document name: {result.get('name', 'N/A')}")
-            else:
-                print("Document created successfully")
+                if result:
+                    print(f"Document created with ID: {result.get('id', 'N/A')}")
+                    print(f"Document name: {result.get('name', 'N/A')}")
+                else:
+                    print("Document created successfully")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_create_word_document_without_filename():
@@ -121,23 +121,23 @@ async def example_3_create_word_document_without_filename():
     """
     print("\n=== Example 3: Create Word Document (Auto-named) ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            content = ContentBody(content="Auto-generated document content.")
+        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                content = ContentBody(content="Auto-generated document content.")
 
-            result = await client.create_word_file_with_content_async(input=content)
+                result = await client.create_word_file_with_content_async(input=content)
 
-            if result:
-                print(f"Document created: {result}")
-            else:
-                print("Document created successfully")
+                if result:
+                    print(f"Document created: {result}")
+                else:
+                    print("Document created successfully")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_convert_word_to_pdf():
@@ -147,22 +147,22 @@ async def example_4_convert_word_to_pdf():
     """
     print("\n=== Example 4: Convert Word to PDF ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_file_pdf_async(
-                source=SOURCE,
-                drive=DRIVE,
-                file=FILE
-            )
+        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_file_pdf_async(
+                    source=SOURCE,
+                    drive=DRIVE,
+                    file=FILE
+                )
 
-            print(f"PDF generated, size: {len(result)} bytes")
+                print(f"PDF generated, size: {len(result)} bytes")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_convert_with_sensitivity_labels():
@@ -172,24 +172,24 @@ async def example_5_convert_with_sensitivity_labels():
     """
     print("\n=== Example 5: Convert with Sensitivity Labels ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_file_pdf_async(
-                source=SOURCE,
-                drive=DRIVE,
-                file=FILE,
-                extract_sensitivity_label=True,
-                fetch_sensitivity_label_metadata=True
-            )
+        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_file_pdf_async(
+                    source=SOURCE,
+                    drive=DRIVE,
+                    file=FILE,
+                    extract_sensitivity_label=True,
+                    fetch_sensitivity_label_metadata=True
+                )
 
-            print(f"PDF generated with sensitivity labels, size: {len(result)} bytes")
+                print(f"PDF generated with sensitivity labels, size: {len(result)} bytes")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

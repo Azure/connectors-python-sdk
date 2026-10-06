@@ -46,61 +46,61 @@ async def example_1_list_calendars():
     """Example 1: List available calendars."""
     print("\n=== Example 1: List Calendars ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.calendar_get_tables_async()
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.calendar_get_tables_async()
 
-            if result:
-                calendars = result.get("value", [])
-                print(f"Found {len(calendars)} calendar(s):")
-                for cal in calendars:
-                    name = cal.get("Name", cal.get("name", "N/A"))
-                    cal_id = cal.get("Id", cal.get("id", "N/A"))
-                    print(f"  - {name}")
-                    cal_id_str = str(cal_id)
-                    if len(cal_id_str) > 40:
-                        print(f"    ID: {cal_id_str[:40]}...")
-                    else:
-                        print(f"    ID: {cal_id_str}")
-            else:
-                print("No calendars found.")
+                if result:
+                    calendars = result.get("value", [])
+                    print(f"Found {len(calendars)} calendar(s):")
+                    for cal in calendars:
+                        name = cal.get("Name", cal.get("name", "N/A"))
+                        cal_id = cal.get("Id", cal.get("id", "N/A"))
+                        print(f"  - {name}")
+                        cal_id_str = str(cal_id)
+                        if len(cal_id_str) > 40:
+                            print(f"    ID: {cal_id_str[:40]}...")
+                        else:
+                            print(f"    ID: {cal_id_str}")
+                else:
+                    print("No calendars found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_list_contact_folders():
     """Example 2: List available contact folders."""
     print("\n=== Example 2: List Contact Folders ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.contact_get_tables_async()
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.contact_get_tables_async()
 
-            if result:
-                folders = result.get("value", [])
-                print(f"Found {len(folders)} contact folder(s):")
-                for folder in folders:
-                    name = folder.get("Name", folder.get("name", "N/A"))
-                    folder_id = folder.get("Id", folder.get("id", "N/A"))
-                    print(f"  - {name}")
-                    if len(str(folder_id)) > 40:
-                        print(f"    ID: {folder_id[:40]}...")
-                    else:
-                        print(f"    ID: {folder_id}")
-            else:
-                print("No contact folders found.")
+                if result:
+                    folders = result.get("value", [])
+                    print(f"Found {len(folders)} contact folder(s):")
+                    for folder in folders:
+                        name = folder.get("Name", folder.get("name", "N/A"))
+                        folder_id = folder.get("Id", folder.get("id", "N/A"))
+                        print(f"  - {name}")
+                        if len(str(folder_id)) > 40:
+                            print(f"    ID: {folder_id[:40]}...")
+                        else:
+                            print(f"    ID: {folder_id}")
+                else:
+                    print("No contact folders found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_get_calendar_events():
@@ -110,30 +110,30 @@ async def example_3_get_calendar_events():
     # Calendar ID - use 'Calendar' for default calendar or get ID from Example 1
     calendar_id = os.environ.get("OUTLOOK_CALENDAR_ID", "Calendar")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.calendar_get_items_async(
-                table=calendar_id,
-                top=5  # Get up to 5 events
-            )
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.calendar_get_items_async(
+                    table=calendar_id,
+                    top=5  # Get up to 5 events
+                )
 
-            if result:
-                events = result.get("value", [])
-                print(f"Found {len(events)} event(s) in calendar:")
-                for event in events[:5]:
-                    subject = event.get("Subject", event.get("subject", "N/A"))
-                    start = event.get("Start", event.get("start", "N/A"))
-                    print(f"  - {subject}")
-                    print(f"    Start: {start}")
-            else:
-                print("No events found.")
+                if result:
+                    events = result.get("value", [])
+                    print(f"Found {len(events)} event(s) in calendar:")
+                    for event in events[:5]:
+                        subject = event.get("Subject", event.get("subject", "N/A"))
+                        start = event.get("Start", event.get("start", "N/A"))
+                        print(f"  - {subject}")
+                        print(f"    Start: {start}")
+                else:
+                    print("No events found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_get_contacts():
@@ -143,33 +143,33 @@ async def example_4_get_contacts():
     # Contact folder ID - use 'Contacts' for default folder or get ID from Example 2
     folder_id = os.environ.get("OUTLOOK_CONTACTS_FOLDER_ID", "Contacts")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.contact_get_items_async(
-                table=folder_id,
-                top=10  # Get up to 10 contacts
-            )
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.contact_get_items_async(
+                    table=folder_id,
+                    top=10  # Get up to 10 contacts
+                )
 
-            if result:
-                contacts = result.get("value", [])
-                print(f"Found {len(contacts)} contact(s):")
-                for contact in contacts[:5]:
-                    display_name = contact.get("DisplayName", "N/A")
-                    email = contact.get("EmailAddresses", [])
-                    email_str = email[0].get("Address", "N/A") if email else "N/A"
-                    print(f"  - {display_name}")
-                    print(f"    Email: {email_str}")
-                if len(contacts) > 5:
-                    print(f"  ... and {len(contacts) - 5} more contacts")
-            else:
-                print("No contacts found.")
+                if result:
+                    contacts = result.get("value", [])
+                    print(f"Found {len(contacts)} contact(s):")
+                    for contact in contacts[:5]:
+                        display_name = contact.get("DisplayName", "N/A")
+                        email = contact.get("EmailAddresses", [])
+                        email_str = email[0].get("Address", "N/A") if email else "N/A"
+                        print(f"  - {display_name}")
+                        print(f"    Email: {email_str}")
+                    if len(contacts) > 5:
+                        print(f"  ... and {len(contacts) - 5} more contacts")
+                else:
+                    print("No contacts found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_send_email():
@@ -183,29 +183,29 @@ async def example_5_send_email():
         print("Skipping email send example...")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            email = ClientSendHtmlMessage(
-                to=recipient,
-                subject="Test from Azure Connectors SDK for Python",
-                body="<html><body><h1>Hello!</h1>"
-                     "<p>This email was sent using the Azure Connectors SDK.</p>"
-                     "</body></html>",
-                importance="Normal"
-            )
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                email = ClientSendHtmlMessage(
+                    to=recipient,
+                    subject="Test from Azure Connectors SDK for Python",
+                    body="<html><body><h1>Hello!</h1>"
+                         "<p>This email was sent using the Azure Connectors SDK.</p>"
+                         "</body></html>",
+                    importance="Normal"
+                )
 
-            await client.send_email_async(input=email)
+                await client.send_email_async(input=email)
 
-            print("Email sent successfully!")
-            print(f"  To: {recipient}")
-            print(f"  Subject: {email.subject}")
+                print("Email sent successfully!")
+                print(f"  To: {recipient}")
+                print(f"  Subject: {email.subject}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

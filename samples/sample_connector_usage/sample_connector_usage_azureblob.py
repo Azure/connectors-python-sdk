@@ -56,25 +56,25 @@ async def example_1_get_blob_metadata():
         print("Example: $env:TEST_BLOB_PATH = 'container/folder/file.txt'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
 
-        metadata = await client.get_file_metadata_by_path_async(
-            dataset=STORAGE_ACCOUNT,
-            path=blob_path,
-        )
+            metadata = await client.get_file_metadata_by_path_async(
+                dataset=STORAGE_ACCOUNT,
+                path=blob_path,
+            )
 
-        if metadata:
-            print(f"Blob Metadata for '{blob_path}':")
-            print(f"  Name: {metadata.get('Name', 'N/A')}")
-            print(f"  Path: {metadata.get('Path', 'N/A')}")
-            print(f"  Size: {metadata.get('Size', 'N/A')} bytes")
-            print(f"  Last Modified: {metadata.get('LastModified', 'N/A')}")
-            print(f"  Media Type: {metadata.get('MediaType', 'N/A')}")
-            print(f"  ETag: {metadata.get('ETag', 'N/A')}")
-        else:
-            print(f"No metadata returned for: {blob_path}")
+            if metadata:
+                print(f"Blob Metadata for '{blob_path}':")
+                print(f"  Name: {metadata.get('Name', 'N/A')}")
+                print(f"  Path: {metadata.get('Path', 'N/A')}")
+                print(f"  Size: {metadata.get('Size', 'N/A')} bytes")
+                print(f"  Last Modified: {metadata.get('LastModified', 'N/A')}")
+                print(f"  Media Type: {metadata.get('MediaType', 'N/A')}")
+                print(f"  ETag: {metadata.get('ETag', 'N/A')}")
+            else:
+                print(f"No metadata returned for: {blob_path}")
 
 
 async def example_2_download_blob():
@@ -87,27 +87,27 @@ async def example_2_download_blob():
         print("Example: $env:TEST_BLOB_PATH = 'container/folder/file.txt'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
-        content = await client.get_file_content_by_path_async(
-            dataset=STORAGE_ACCOUNT,
-            path=blob_path,
-        )
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+            content = await client.get_file_content_by_path_async(
+                dataset=STORAGE_ACCOUNT,
+                path=blob_path,
+            )
 
-        if content:
-            file_name = os.path.basename(blob_path)
-            print(f"Downloaded blob '{file_name}': {len(content)} bytes")
+            if content:
+                file_name = os.path.basename(blob_path)
+                print(f"Downloaded blob '{file_name}': {len(content)} bytes")
 
-            # Show preview for text files
-            if len(content) < 1000:
-                try:
-                    text_preview = content.decode("utf-8")[:200]
-                    print(f"  Preview: {text_preview}...")
-                except UnicodeDecodeError:
-                    print("  (Binary content)")
-        else:
-            print(f"No content returned for: {blob_path}")
+                # Show preview for text files
+                if len(content) < 1000:
+                    try:
+                        text_preview = content.decode("utf-8")[:200]
+                        print(f"  Preview: {text_preview}...")
+                    except UnicodeDecodeError:
+                        print("  (Binary content)")
+            else:
+                print(f"No content returned for: {blob_path}")
 
 
 async def example_3_upload_blob():
@@ -124,29 +124,29 @@ async def example_3_upload_blob():
     blob_content = "Hello from Azure Connectors SDK for Python!\nUploaded at: " + \
                    asyncio.get_event_loop().time().__str__()
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            metadata = await client.create_file_async(
-                input=blob_content.encode("utf-8"),
-                dataset=STORAGE_ACCOUNT,
-                folder_path=folder_path,
-                name=blob_name,
-            )
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                metadata = await client.create_file_async(
+                    input=blob_content.encode("utf-8"),
+                    dataset=STORAGE_ACCOUNT,
+                    folder_path=folder_path,
+                    name=blob_name,
+                )
 
-            if metadata:
-                print(f"Uploaded blob '{blob_name}' to '{folder_path}':")
-                print(f"  ID: {metadata.get('Id', 'N/A')}")
-                print(f"  Path: {metadata.get('Path', 'N/A')}")
-                print(f"  Size: {len(blob_content)} bytes")
-            else:
-                print("Blob uploaded (no metadata returned).")
+                if metadata:
+                    print(f"Uploaded blob '{blob_name}' to '{folder_path}':")
+                    print(f"  ID: {metadata.get('Id', 'N/A')}")
+                    print(f"  Path: {metadata.get('Path', 'N/A')}")
+                    print(f"  Size: {len(blob_content)} bytes")
+                else:
+                    print("Blob uploaded (no metadata returned).")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_list_blobs():
@@ -161,55 +161,55 @@ async def example_4_list_blobs():
 
         # Try listing root folder instead
         print("\nListing root folder blobs instead...")
-        credential = DefaultAzureCredential()
+        async with DefaultAzureCredential() as credential:
+
+            async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+                try:
+                    blobs = [item async for item in client.list_root_folder_async(
+                        dataset=STORAGE_ACCOUNT,
+                    )]
+
+                    if blobs:
+                        print(f"Found {len(blobs)} items in root:")
+                        for blob in blobs[:10]:  # Show first 10
+                            name = blob.get("Name", "N/A")
+                            is_folder = blob.get("IsFolder", False)
+                            size = blob.get("Size", 0)
+                            item_type = "folder" if is_folder else f"{size} bytes"
+                            print(f"  - {name} ({item_type})")
+                    else:
+                        print("No blobs found in root folder.")
+
+                except ConnectorException as ex:
+                    print(f"Connector error: {ex}")
+                except Exception as ex:
+                    print(f"Error: {ex}")
+            return
+
+    async with DefaultAzureCredential() as credential:
 
         async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                blobs = await client.list_root_folder_async(
+                blobs = [item async for item in client.list_folder_async(
                     dataset=STORAGE_ACCOUNT,
-                )
+                    id=folder_id,
+                )]
 
-                if blobs and "value" in blobs:
-                    print(f"Found {len(blobs['value'])} items in root:")
-                    for blob in blobs["value"][:10]:  # Show first 10
+                if blobs:
+                    print(f"Found {len(blobs)} items:")
+                    for blob in blobs[:10]:  # Show first 10
                         name = blob.get("Name", "N/A")
                         is_folder = blob.get("IsFolder", False)
                         size = blob.get("Size", 0)
                         item_type = "folder" if is_folder else f"{size} bytes"
                         print(f"  - {name} ({item_type})")
                 else:
-                    print("No blobs found in root folder.")
+                    print("No blobs found in folder.")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
             except Exception as ex:
                 print(f"Error: {ex}")
-        return
-
-    credential = DefaultAzureCredential()
-
-    async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            blobs = await client.list_folder_async(
-                dataset=STORAGE_ACCOUNT,
-                id=folder_id,
-            )
-
-            if blobs and "value" in blobs:
-                print(f"Found {len(blobs['value'])} items:")
-                for blob in blobs["value"][:10]:  # Show first 10
-                    name = blob.get("Name", "N/A")
-                    is_folder = blob.get("IsFolder", False)
-                    size = blob.get("Size", 0)
-                    item_type = "folder" if is_folder else f"{size} bytes"
-                    print(f"  - {name} ({item_type})")
-            else:
-                print("No blobs found in folder.")
-
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
 
 
 async def example_5_delete_blob():
@@ -223,21 +223,21 @@ async def example_5_delete_blob():
         print("You can get blob IDs from the list_folder_async response.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            await client.delete_file_async(
-                dataset=STORAGE_ACCOUNT,
-                id=blob_id,
-            )
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                await client.delete_file_async(
+                    dataset=STORAGE_ACCOUNT,
+                    id=blob_id,
+                )
 
-            print(f"Successfully deleted blob: {blob_id}")
+                print(f"Successfully deleted blob: {blob_id}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

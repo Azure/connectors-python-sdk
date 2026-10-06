@@ -41,43 +41,43 @@ async def example_1_get_profile():
     """Example 1: Get the current account profile."""
     print("\n=== Example 1: Get current profile ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.profiles_me_get_async()
+        async with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.profiles_me_get_async()
 
-            print(f"Profile result: {result}")
+                print(f"Profile result: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_extract_text_from_pdf():
     """Example 2: Extract text content from a PDF document."""
     print("\n=== Example 2: Extract text from PDF ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            request = Pdf2TextRequest(
-                document_content="<base64-encoded-pdf-content>",
-                result_type="Raw",
-            )
+        async with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                request = Pdf2TextRequest(
+                    document_content="<base64-encoded-pdf-content>",
+                    result_type="Raw",
+                )
 
-            result = await client.flow_v1_documents_jobs_extract_text_from_pdf_async(
-                input=request,
-            )
+                result = await client.flow_v1_documents_jobs_extract_text_from_pdf_async(
+                    input=request,
+                )
 
-            print(f"Extracted text result: {result}")
+                print(f"Extracted text result: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

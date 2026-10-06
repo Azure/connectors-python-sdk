@@ -14,24 +14,24 @@ CONNECTION_RUNTIME_URL = os.environ.get("TWITTER_CONNECTION_URL", "")
 
 async def list_user_timeline() -> None:
     """List recent posts from a user's timeline."""
-    credential = DefaultAzureCredential()
-    async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-        timeline = await client.user_timeline_async(
-            user_name="Azure",
-            max_results=10,
-        )
-        print(f"Timeline: {timeline}")
+    async with DefaultAzureCredential() as credential:
+        async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
+            timeline = await client.user_timeline_async(
+                user_name="Azure",
+                max_results=10,
+            )
+            print(f"Timeline: {timeline}")
 
 
 async def search_posts() -> None:
     """Search recent posts."""
-    credential = DefaultAzureCredential()
-    async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-        results = await client.search_tweet_async(
-            search_query="Azure Logic Apps",
-            max_results=10,
-        )
-        print(f"Search results: {results}")
+    async with DefaultAzureCredential() as credential:
+        async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
+            results = await client.search_tweet_async(
+                search_query="Azure Logic Apps",
+                max_results=10,
+            )
+            print(f"Search results: {results}")
 
 
 async def main() -> None:

@@ -14,25 +14,25 @@ CONNECTION_RUNTIME_URL = os.environ.get("TALLYFY_CONNECTION_URL", "")
 
 async def list_organizations() -> None:
     """List organizations available to the current user."""
-    credential = DefaultAzureCredential()
-    async with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
-        organizations = await client.get_user_organizations_async()
-        print(f"Organizations: {organizations}")
+    async with DefaultAzureCredential() as credential:
+        async with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            organizations = await client.get_user_organizations_async()
+            print(f"Organizations: {organizations}")
 
 
 async def create_run() -> None:
     """Create a run from a checklist."""
-    credential = DefaultAzureCredential()
-    async with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
-        run = await client.create_run_async(
-            input=CreateRunInput(
-                name="Quarterly review",
-                checklist_id="CHECKLIST_ID",
-                summary="Created with the Azure Connectors Python SDK.",
-            ),
-            org="ORGANIZATION_ID",
-        )
-        print(f"Created run: {run}")
+    async with DefaultAzureCredential() as credential:
+        async with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            run = await client.create_run_async(
+                input=CreateRunInput(
+                    name="Quarterly review",
+                    checklist_id="CHECKLIST_ID",
+                    summary="Created with the Azure Connectors Python SDK.",
+                ),
+                org="ORGANIZATION_ID",
+            )
+            print(f"Created run: {run}")
 
 
 async def main() -> None:

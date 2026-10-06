@@ -43,32 +43,32 @@ async def example_1_list_subscriptions():
     """Example 1: List Azure subscriptions available to the principal."""
     print("\n=== Example 1: List Subscriptions ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.subscriptions_list_async()
-        subscriptions = result.get("value", []) if result else []
+        async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.subscriptions_list_async()
+            subscriptions = result.get("value", []) if result else []
 
-        print(f"Found {len(subscriptions)} subscription(s).")
-        for subscription in subscriptions[:10]:
-            display_name = subscription.get("displayName", "N/A")
-            subscription_id = subscription.get("subscriptionId", "N/A")
-            print(f"  - {display_name} ({subscription_id})")
+            print(f"Found {len(subscriptions)} subscription(s).")
+            for subscription in subscriptions[:10]:
+                display_name = subscription.get("displayName", "N/A")
+                subscription_id = subscription.get("subscriptionId", "N/A")
+                print(f"  - {display_name} ({subscription_id})")
 
 
 async def example_2_list_topic_types():
     """Example 2: List Event Grid topic types."""
     print("\n=== Example 2: List Topic Types ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.topic_types_list_async()
-        topic_types = result.get("value", []) if result else []
+        async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.topic_types_list_async()
+            topic_types = result.get("value", []) if result else []
 
-        print(f"Found {len(topic_types)} topic type(s).")
-        for topic_type in topic_types[:10]:
-            print(f"  - {topic_type.get('name', 'N/A')}")
+            print(f"Found {len(topic_types)} topic type(s).")
+            for topic_type in topic_types[:10]:
+                print(f"  - {topic_type.get('name', 'N/A')}")
 
 
 async def example_3_build_event_request():

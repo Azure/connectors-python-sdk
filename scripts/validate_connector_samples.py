@@ -37,6 +37,7 @@ class SampleVisitor(ast.NodeVisitor):
         self.imported_symbols: dict[str, Any] = {}
         self.client_variables: dict[str, type[Any]] = {}
         self.variable_types: dict[str, type[Any]] = {}
+        self.scoped_async_credentials: set[int] = set()
         self.issues: list[ValidationIssue] = []
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
@@ -77,9 +78,34 @@ class SampleVisitor(ast.NodeVisitor):
                     self.variable_types[target.id] = value_type
         self.generic_visit(node)
 
+    def visit_Await(self, node: ast.Await) -> None:
+        """Reject awaiting generated operations that return async iterators."""
+        if (
+            isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Attribute)
+        ):
+            client_type = self._client_type_for_receiver(node.value.func.value)
+            method_name = node.value.func.attr
+            method = getattr(client_type, method_name, None) if client_type else None
+            if method is not None and inspect.isasyncgenfunction(method):
+                self._add_issue(
+                    node,
+                    f"async iterator '{client_type.__name__}.{method_name}' "
+                    "must use async iteration",
+                )
+
+        self.generic_visit(node)
+
     def visit_AsyncWith(self, node: ast.AsyncWith) -> None:
         """Track generated clients introduced by async context managers."""
         for item in node.items:
+            if (
+                isinstance(item.context_expr, ast.Call)
+                and isinstance(item.context_expr.func, ast.Name)
+                and item.context_expr.func.id == "DefaultAzureCredential"
+            ):
+                self.scoped_async_credentials.add(id(item.context_expr))
+
             client_type = self._client_type_from_expression(item.context_expr)
             if client_type is not None and isinstance(item.optional_vars, ast.Name):
                 self.client_variables[item.optional_vars.id] = client_type
@@ -87,6 +113,16 @@ class SampleVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node: ast.Call) -> None:
         """Validate generated model construction and client method calls."""
+        if (
+            isinstance(node.func, ast.Name)
+            and node.func.id == "DefaultAzureCredential"
+            and id(node) not in self.scoped_async_credentials
+        ):
+            self._add_issue(
+                node,
+                "DefaultAzureCredential must use an async context manager",
+            )
+
         if isinstance(node.func, ast.Name):
             target = self.imported_symbols.get(node.func.id)
             if inspect.isclass(target):

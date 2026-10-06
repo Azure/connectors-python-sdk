@@ -14,23 +14,23 @@ CONNECTION_RUNTIME_URL = os.environ.get("REVAI_CONNECTION_URL", "")
 
 async def get_account() -> None:
     """Get account information."""
-    credential = DefaultAzureCredential()
-    async with RevaiClient(CONNECTION_RUNTIME_URL, credential) as client:
-        account = await client.account_get_async()
-        print(f"Account: {account}")
+    async with DefaultAzureCredential() as credential:
+        async with RevaiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            account = await client.account_get_async()
+            print(f"Account: {account}")
 
 
 async def submit_transcription() -> None:
     """Submit an audio file for transcription."""
-    credential = DefaultAzureCredential()
-    async with RevaiClient(CONNECTION_RUNTIME_URL, credential) as client:
-        job = await client.transcription_async(
-            input=TranscriptionInput(
-                source_config={"url": "https://example.com/audio.wav"},
-                metadata="connector-sdk-sample",
-            ),
-        )
-        print(f"Transcription job: {job}")
+    async with DefaultAzureCredential() as credential:
+        async with RevaiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            job = await client.transcription_async(
+                input=TranscriptionInput(
+                    source_config={"url": "https://example.com/audio.wav"},
+                    metadata="connector-sdk-sample",
+                ),
+            )
+            print(f"Transcription job: {job}")
 
 
 async def main() -> None:
