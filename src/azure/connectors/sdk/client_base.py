@@ -37,6 +37,8 @@ class ConnectorClientBase(ABC):
             timeout_seconds: Total network timeout for each request, including
                 retries, response loading, and body reads. Nonpositive values
                 disable SDK and transport deadlines.
+            transport: Optional Azure Core async HTTP transport closed by the
+                client through its asynchronous lifecycle.
         """
         if credential is None:
             raise ValueError("credential cannot be None")

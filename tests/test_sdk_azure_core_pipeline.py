@@ -4,14 +4,15 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import requests
 from aiohttp import web
 from aiohttp.test_utils import TestServer
 from azure.core.credentials import AccessToken, AzureKeyCredential
-from azure.core.exceptions import ServiceResponseTimeoutError
+from azure.core.exceptions import ServiceRequestError, ServiceResponseTimeoutError
 from azure.core.pipeline.policies import RetryMode, SansIOHTTPPolicy
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.pipeline.transport import AsyncHttpTransport, AsyncioRequestsTransport
 
-from azure.connectors.sdk import ConnectorHttpClient
+from azure.connectors.sdk import ConnectorClientBase, ConnectorException, ConnectorHttpClient
 from azure.connectors.sdk.http_client import _JitterRetryPolicy
 
 
@@ -90,6 +91,15 @@ class RecordingPolicy(SansIOHTTPPolicy):
         )
 
 
+class ConcreteConnectorClient(ConnectorClientBase):
+    """Provide a concrete generated-client lifecycle test double."""
+
+    @property
+    def connector_name(self) -> str:
+        """Get the connector name."""
+        return "test"
+
+
 def create_response(
     status: int = 200,
     *,
@@ -100,6 +110,7 @@ def create_response(
     response = MagicMock()
     response.status_code = status
     response.headers = headers or {}
+    response.body = MagicMock(return_value=content)
     response.read = AsyncMock(return_value=content)
     response.text = MagicMock(return_value=content.decode("utf-8"))
     return response
@@ -160,7 +171,7 @@ async def test_request_controls_and_response_hook_are_applied() -> None:
     assert transport.requests[0].headers["x-custom"] == "value"
     assert transport.requests[0].headers["Authorization"] == "Bearer test-key"
     assert transport.request_options[0]["connection_timeout"] == 5.0
-    assert transport.request_options[0]["read_timeout"] == 5.0
+    assert "read_timeout" not in transport.request_options[0]
     assert transport.requests[0].headers["x-ms-client-request-id"] == "request-id"
     hook.assert_called_once_with(response, response.headers)
     with pytest.raises(TypeError):
@@ -271,7 +282,7 @@ async def test_nonpositive_timeout_disables_request_deadlines(
     assert response.status == 200
     assert len(transport.requests) == 1
     assert transport.request_options[0]["connection_timeout"] is None
-    assert transport.request_options[0]["read_timeout"] is None
+    assert "read_timeout" not in transport.request_options[0]
 
 
 @pytest.mark.asyncio
@@ -318,6 +329,131 @@ async def test_nonpositive_timeout_allows_slow_response_body(
 
     assert response.status == 200
     assert response.content == b"ok"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("method", "status"),
+    [
+        ("GET", 204),
+        ("HEAD", 200),
+        ("GET", 200),
+    ],
+)
+async def test_empty_buffered_response_creates_snapshot_and_invokes_hook(
+    method: str,
+    status: int,
+) -> None:
+    """Use already-buffered empty content without reading the stream again."""
+
+    async def empty_response(request: web.Request) -> web.Response:
+        del request
+        return web.Response(status=status, body=b"")
+
+    application = web.Application()
+    application.router.add_route("*", "/", empty_response)
+    server = TestServer(application)
+    await server.start_server()
+    hook = MagicMock()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+    )
+
+    try:
+        response = await client.send_async(
+            method,
+            str(server.make_url("/")),
+            response_hook=hook,
+        )
+    finally:
+        await client.close()
+        await server.close()
+
+    assert response.status == status
+    assert response.content == b""
+    assert response.text == ""
+    hook.assert_called_once_with(response, response.headers)
+
+
+@pytest.mark.asyncio
+async def test_empty_buffered_error_raises_connector_exception() -> None:
+    """Preserve normal connector error handling for an empty response body."""
+
+    async def empty_error(request: web.Request) -> web.Response:
+        del request
+        return web.Response(status=400, body=b"")
+
+    application = web.Application()
+    application.router.add_get("/", empty_error)
+    server = TestServer(application)
+    await server.start_server()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+    )
+
+    try:
+        with pytest.raises(ConnectorException) as error:
+            await client.get_async(str(server.make_url("/")))
+    finally:
+        await client.close()
+        await server.close()
+
+    assert error.value.status_code == 400
+    assert error.value.response_body == ""
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("request_timeout", [None, 5.0, 0.0, -1.0])
+async def test_requests_transport_accepts_timeout_controls(
+    request_timeout: float | None,
+) -> None:
+    """Keep timeout options compatible with the requests-backed transport."""
+    transport = AsyncioRequestsTransport()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+        transport=transport,
+    )
+    request_options = (
+        {} if request_timeout is None else {"timeout": request_timeout}
+    )
+
+    try:
+        with patch.object(
+            requests.Session,
+            "request",
+            autospec=True,
+            side_effect=requests.ConnectionError("synthetic connection error"),
+        ) as request:
+            with pytest.raises(ServiceRequestError):
+                await client.send_async(
+                    "GET",
+                    "https://example.test/items",
+                    **request_options,
+                )
+    finally:
+        await client.close()
+
+    request.assert_called_once()
+    assert "read_timeout" not in request.call_args.kwargs
+
+
+@pytest.mark.asyncio
+async def test_requests_transport_closes_through_generated_client_lifecycle() -> None:
+    """Close a synchronous-close transport through its async context lifecycle."""
+    direct_client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        transport=AsyncioRequestsTransport(),
+    )
+    await direct_client.close()
+
+    async with ConcreteConnectorClient(
+        AzureKeyCredential("test-key"),
+        transport=AsyncioRequestsTransport(),
+    ) as generated_client:
+        assert generated_client.connector_name == "test"
 
 
 @pytest.mark.asyncio

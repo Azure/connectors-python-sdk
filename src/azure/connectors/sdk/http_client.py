@@ -257,7 +257,7 @@ class ConnectorHttpClient:
 
     async def close(self) -> None:
         """Close the HTTP transport without closing the caller credential."""
-        await self._transport.close()
+        await self._pipeline.__aexit__(None, None, None)
 
     async def send_async(
         self,
@@ -321,11 +321,13 @@ class ConnectorHttpClient:
         request_options: Dict[str, Any] = {"headers": headers}
         if selected_timeout > 0:
             request_options["timeout"] = selected_timeout
-            request_options["read_timeout"] = selected_timeout
+            if isinstance(self._transport, AioHttpTransport):
+                request_options["read_timeout"] = selected_timeout
         else:
             request_options["timeout"] = float("inf")
             request_options["connection_timeout"] = None
-            request_options["read_timeout"] = None
+            if isinstance(self._transport, AioHttpTransport):
+                request_options["read_timeout"] = None
         if normalized_method not in _SAFE_RETRY_METHODS:
             if self._retry_unsafe_http_methods:
                 request_options["retry_on_methods"] = (
@@ -339,7 +341,7 @@ class ConnectorHttpClient:
         async def send_request() -> ConnectorResponseSnapshot:
             pipeline_response = await pipeline.run(request, **request_options)
             http_response = pipeline_response.http_response
-            response_content = await http_response.read()
+            response_content = http_response.body()
             return ConnectorResponseSnapshot(
                 status=http_response.status_code,
                 headers=dict(http_response.headers),

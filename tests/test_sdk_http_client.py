@@ -122,15 +122,15 @@ class TestConnectorHttpClient:
         ]
 
     @pytest.mark.asyncio
-    async def test_close_closes_transport_not_credential(self, mock_credential) -> None:
-        """Release owned transport resources without closing caller credentials."""
+    async def test_close_exits_transport_not_credential(self, mock_credential) -> None:
+        """Exit the transport lifecycle without closing caller credentials."""
         transport = AsyncMock(spec=AsyncHttpTransport)
         mock_credential.close = AsyncMock()
         client = ConnectorHttpClient(mock_credential, transport=transport)
 
         await client.close()
 
-        transport.close.assert_awaited_once()
+        transport.__aexit__.assert_awaited_once_with(None, None, None)
         mock_credential.close.assert_not_awaited()
 
     @pytest.mark.asyncio

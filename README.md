@@ -359,6 +359,11 @@ request controls; `timeout` overrides that total budget for one operation. Set
 either timeout to zero or a negative value to disable SDK and transport
 deadlines for the selected requests.
 
+Generated clients accept any Azure Core `AsyncHttpTransport`. The client closes
+an injected transport through its asynchronous lifecycle; the caller retains
+ownership of the credential. The SDK enforces the total request budget across
+transports and applies transport-specific timeout options only when supported.
+
 ## Project Structure
 
 ```text
