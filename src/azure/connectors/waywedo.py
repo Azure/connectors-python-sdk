@@ -825,7 +825,7 @@ class WaywedoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/Procedures"
         query_params = []
-        query_params.append("type=" + quote("2"))
+        query_params.append("type=" + quote("2", safe=''))
         if query is not None:
             value = str(query)
             if isinstance(query, bool):

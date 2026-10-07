@@ -137,7 +137,7 @@ class AzureeventgridClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-11-01"))
+        query_params.append("x-ms-api-version=" + quote("2015-11-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -169,7 +169,7 @@ class AzureeventgridClient(ConnectorClientBase):
             f"/providers/Microsoft.EventGrid/topicTypes"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-15-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-15-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

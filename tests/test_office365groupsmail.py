@@ -279,7 +279,7 @@ class TestOffice365groupsmailClientMethods:
             await client.list_groups_async()
 
             call_path = mock_send.call_args[0][1]
-            assert "$filter=" in call_path
+            assert "$filter=groupTypes%2Fany%28c%3Ac%20eq%20%27Unified%27%29" in call_path
             assert "$select=id%2CdisplayName" in call_path
             assert "$top=999" in call_path
 

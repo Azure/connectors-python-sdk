@@ -1845,7 +1845,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/copyFile"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
@@ -1969,7 +1969,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/files"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
@@ -2276,7 +2276,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/GetFileByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
@@ -2319,7 +2319,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/GetFileContentByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
@@ -2406,7 +2406,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/GetFolderByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
@@ -4037,7 +4037,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/extractFolderV2"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()

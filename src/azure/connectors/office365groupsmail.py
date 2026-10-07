@@ -1015,7 +1015,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/{quote(str(post_id), safe='')}"
         )
         query_params = []
-        query_params.append("$expand=" + quote("attachments"))
+        query_params.append("$expand=" + quote("attachments", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1244,9 +1244,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/v1.0/me/memberOf/$/microsoft.graph.group"
         )
         query_params = []
-        query_params.append("$filter=" + quote("groupTypes/any(c:c eq 'Unified')"))
-        query_params.append("$select=" + quote("id,displayName"))
-        query_params.append("$top=" + quote("999"))
+        query_params.append("$filter=" + quote("groupTypes/any(c:c eq 'Unified')", safe=''))
+        query_params.append("$select=" + quote("id,displayName", safe=''))
+        query_params.append("$top=" + quote("999", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

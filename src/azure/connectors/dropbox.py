@@ -344,7 +344,7 @@ class DropboxClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
@@ -384,7 +384,7 @@ class DropboxClient(ConnectorClientBase):
             f"/datasets/default/GetFileContentByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
@@ -465,7 +465,7 @@ class DropboxClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
@@ -512,7 +512,7 @@ class DropboxClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/copyFile"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
@@ -625,7 +625,7 @@ class DropboxClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()

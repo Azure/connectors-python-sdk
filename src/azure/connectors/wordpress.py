@@ -275,7 +275,7 @@ class WordpressClient(ConnectorClientBase):
             f"/sites/{quote(str(site_id), safe='')}/stats"
         )
         query_params = []
-        query_params.append("fields=" + quote("stats"))
+        query_params.append("fields=" + quote("stats", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -376,7 +376,8 @@ class WordpressClient(ConnectorClientBase):
         query_params.append(
             "fields=" + quote(
                 "ID, name, description, URL,  is_multisite, post_count,subscribers_count,"
-                " lang,visible,is_private,single_user_site,is_vip,is_following"
+                " lang,visible,is_private,single_user_site,is_vip,is_following",
+                safe=''
             )
         )
         if query_params:

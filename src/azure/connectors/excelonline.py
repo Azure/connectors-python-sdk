@@ -465,7 +465,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/tables"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -510,8 +510,8 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/createIdColumn"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
-        query_params.append("populateColumn=" + quote("false"))
+        query_params.append("source=" + quote("me", safe=''))
+        query_params.append("populateColumn=" + quote("false", safe=''))
         if id_column is not None:
             value = str(id_column)
             if isinstance(id_column, bool):
@@ -563,7 +563,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/items"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -652,7 +652,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         value = str(id_column)
         if isinstance(id_column, bool):
             value = value.lower()
@@ -707,7 +707,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         value = str(id_column)
         if isinstance(id_column, bool):
             value = value.lower()
@@ -757,7 +757,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         value = str(id_column)
         if isinstance(id_column, bool):
             value = value.lower()
@@ -809,7 +809,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/worksheets"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -853,7 +853,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/worksheets"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -896,7 +896,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/tables"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -944,7 +944,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/rows"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         if date_time_format is not None:
             value = str(date_time_format)
             if isinstance(date_time_format, bool):
@@ -995,7 +995,7 @@ class ExcelonlineClient(ConnectorClientBase):
             f"/columns"
         )
         query_params = []
-        query_params.append("source=" + quote("me"))
+        query_params.append("source=" + quote("me", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

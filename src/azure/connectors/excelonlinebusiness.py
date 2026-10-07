@@ -814,7 +814,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             f"/createIdColumn"
         )
         query_params = []
-        query_params.append("populateColumn=" + quote("false"))
+        query_params.append("populateColumn=" + quote("false", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()

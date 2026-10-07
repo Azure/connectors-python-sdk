@@ -519,7 +519,7 @@ class GooglecalendarClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/users/me/calendarList/1"
         query_params = []
-        query_params.append("minAccessRole=" + quote("writer"))
+        query_params.append("minAccessRole=" + quote("writer", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
