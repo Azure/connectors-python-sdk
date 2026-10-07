@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and `aiohttp.ClientError`. Set `ConnectorClientOptions(retry_unsafe_http_methods=True)` per client only when replay is acceptable; existing retry count, timeout, and backoff settings remain available. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
+
 - Seismic Planner `CustomPropertyValues.localizations` now exposes `Dict[str, CustomPropertyDataDisplay]` instead of `Dict[str, Any]`. Callers can access typed values directly, such as `localizations["en-US"].name`. ([Azure/Connectors-NET-SDK#262](https://github.com/Azure/Connectors-NET-SDK/issues/262), AzureUX-BPM PR 17131877)
 
 - Microsoft Dataverse `get_items_async` now returns an `AsyncIterator[dict[str, Any]]`. Callers must use `async for` instead of awaiting a single response dictionary; iteration preserves and follows `@odata.nextLink` until all rows are returned. ([Azure/Connectors-NET-SDK#208](https://github.com/Azure/Connectors-NET-SDK/issues/208), AzureUX-BPM PR 17086991)
