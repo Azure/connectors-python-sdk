@@ -6,6 +6,7 @@ This repository contains the Python SDK for Azure Connectors. Code must follow P
 
 ## Client Refresh and Review
 
+- Paired generator/SDK PRs may publish generated output from the linked active BPM PR. Record its exact source commit and active/unmerged status. Do not require upstream merge merely to show the generated result; upstream integration is a separate final SDK merge gate.
 - Follow the live-download procedure in [GENERATION.md](../GENERATION.md). Refresh existing clients from live definitions with an explicit subscription/region and a new empty temporary `ARMCACHE_PATH`; never seed it from stored responses or fixtures.
 - Reviewers independently fetch live definitions using their own empty temporary directory. Do not supply the producer's responses as review inputs or substitute a cache when live results differ.
 - Keep refreshes within the existing repository structure. Do not introduce cache folders, replay manifests, or new scaffolding unless explicitly requested. Temporary response stores are removed after the run.

@@ -42,8 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Generated caller-supplied query values now escape reserved characters, including `/`, so paths,
-  URLs, and collection values remain within their intended query parameters.
+- Generated caller-supplied and internal-default query values escape reserved
+  characters, including `/`, so paths, URLs, and collection values remain within
+  their intended query parameters.
 
 - **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
 

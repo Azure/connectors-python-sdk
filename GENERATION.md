@@ -122,8 +122,10 @@ finally {
 }
 ```
 
-Check per-connector failures as well as the CLI exit code. Record the merged
-generator revision, source subscription, region, and capture time in the PR.
+Check per-connector failures as well as the CLI exit code. Record the exact
+generator revision, linked PR and its status, source subscription, region, and capture time.
+Paired generator/SDK PRs show generated output from the active generator PR before
+it merges. Label that source as unmerged; final SDK merge still requires upstream integration.
 Do not add cache folders or replay scaffolding as part of a client refresh.
 
 Reviewers must fetch live definitions independently using their own new empty
