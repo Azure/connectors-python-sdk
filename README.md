@@ -355,7 +355,9 @@ client = Office365Client(
 `timeout_seconds` is one total network budget for each request, including
 retries, response loading, and body reads. Each generated operation also accepts
 keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook`
-request controls; `timeout` overrides that total budget for one operation.
+request controls; `timeout` overrides that total budget for one operation. Set
+either timeout to zero or a negative value to disable SDK and transport
+deadlines for the selected requests.
 
 ## Project Structure
 

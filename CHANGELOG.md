@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Request timeout enforcement**: `timeout_seconds` and per-operation `timeout`
   now bound the complete network operation, including retries, response loading,
-  and body reads.
+  and body reads. Zero and negative values disable SDK and transport deadlines.
 - **Per-operation request controls**: Explicit headers and client request IDs now
   override client defaults without allowing default authorization or content-type
   headers to replace SDK-owned values.

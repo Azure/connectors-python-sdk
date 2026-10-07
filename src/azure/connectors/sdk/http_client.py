@@ -318,12 +318,14 @@ class ConnectorHttpClient:
         selected_timeout = (
             timeout if timeout is not None else self._timeout_seconds
         )
-        request_options: Dict[str, Any] = {
-            "timeout": selected_timeout,
-            "headers": headers,
-        }
+        request_options: Dict[str, Any] = {"headers": headers}
         if selected_timeout > 0:
+            request_options["timeout"] = selected_timeout
             request_options["read_timeout"] = selected_timeout
+        else:
+            request_options["timeout"] = float("inf")
+            request_options["connection_timeout"] = None
+            request_options["read_timeout"] = None
         if normalized_method not in _SAFE_RETRY_METHODS:
             if self._retry_unsafe_http_methods:
                 request_options["retry_on_methods"] = (

@@ -410,6 +410,7 @@ class GoogledriveClient(ConnectorClientBase):
             max_retry_attempts: The maximum number of request attempts.
             timeout_seconds: The total network timeout for each request,
                 including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
             maximum_retry_delay_seconds: The maximum retry delay in seconds.

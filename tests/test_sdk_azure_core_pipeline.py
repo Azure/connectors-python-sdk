@@ -241,6 +241,86 @@ async def test_timeout_bounds_slow_response_body(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("default_timeout", "request_timeout"),
+    [
+        (0.0, None),
+        (30.0, 0.0),
+        (-1.0, None),
+        (30.0, -1.0),
+    ],
+)
+async def test_nonpositive_timeout_disables_request_deadlines(
+    default_timeout: float,
+    request_timeout: float | None,
+) -> None:
+    """Dispatch without SDK or transport deadlines for nonpositive timeouts."""
+    transport = RecordingTransport(create_response())
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        timeout_seconds=default_timeout,
+        transport=transport,
+    )
+
+    response = await client.send_async(
+        "GET",
+        "https://example.test/items",
+        timeout=request_timeout,
+    )
+
+    assert response.status == 200
+    assert len(transport.requests) == 1
+    assert transport.request_options[0]["connection_timeout"] is None
+    assert transport.request_options[0]["read_timeout"] is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("default_timeout", "request_timeout"),
+    [
+        (0.0, None),
+        (30.0, 0.0),
+    ],
+)
+async def test_nonpositive_timeout_allows_slow_response_body(
+    default_timeout: float,
+    request_timeout: float | None,
+) -> None:
+    """Load a slow response body without SDK or transport deadlines."""
+
+    async def delayed_body(request: web.Request) -> web.StreamResponse:
+        response = web.StreamResponse(status=200)
+        await response.prepare(request)
+        await asyncio.sleep(0.05)
+        await response.write(b"ok")
+        await response.write_eof()
+        return response
+
+    application = web.Application()
+    application.router.add_get("/", delayed_body)
+    server = TestServer(application)
+    await server.start_server()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+        timeout_seconds=default_timeout,
+    )
+
+    try:
+        response = await client.send_async(
+            "GET",
+            str(server.make_url("/")),
+            timeout=request_timeout,
+        )
+    finally:
+        await client.close()
+        await server.close()
+
+    assert response.status == 200
+    assert response.content == b"ok"
+
+
+@pytest.mark.asyncio
 async def test_unsafe_method_does_not_retry_by_default() -> None:
     """Keep unsafe connector operations to one attempt by default."""
     transport = RecordingTransport(
