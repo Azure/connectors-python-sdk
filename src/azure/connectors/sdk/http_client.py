@@ -14,6 +14,7 @@ from .exceptions import ConnectorException
 from .serialization import to_wire
 
 T = TypeVar("T")
+_SAFE_RETRY_METHODS = frozenset({"GET", "HEAD", "OPTIONS", "TRACE"})
 
 
 class _ResponseSnapshot(NamedTuple):
@@ -99,7 +100,9 @@ class ConnectorHttpClient:
         Send an HTTP request with authentication and retry.
 
         Args:
-            method: The HTTP method.
+            method: The HTTP method. GET, HEAD, OPTIONS, and TRACE use configured
+                retries by default. Other methods require the explicit per-client
+                retry_unsafe_http_methods opt-in to retry.
             url: The request URL.
             scopes: The authentication scopes. Defaults to API Hub scopes.
             body: Optional request body. Raw ``bytes`` and ``bytearray``
@@ -160,9 +163,15 @@ class ConnectorHttpClient:
         body: Optional[Any],
     ) -> _ResponseSnapshot:
         """Send request with retry logic."""
+        method = method.upper()
         last_exception = None
+        max_attempts = (
+            self._options.max_retry_attempts
+            if self._options.retry_unsafe_http_methods or method in _SAFE_RETRY_METHODS
+            else 1
+        )
 
-        for attempt in range(self._options.max_retry_attempts):
+        for attempt in range(max_attempts):
             try:
                 async with session.request(
                     method, url, headers=headers, data=body
@@ -170,7 +179,7 @@ class ConnectorHttpClient:
                     # For transient errors, retry
                     if response.status >= 500 or response.status == 429:
                         if (
-                            attempt < self._options.max_retry_attempts - 1
+                            attempt < max_attempts - 1
                         ):
                             await self._delay_retry(attempt)
                             continue
@@ -187,7 +196,7 @@ class ConnectorHttpClient:
 
             except aiohttp.ClientError as ex:
                 last_exception = ex
-                if attempt < self._options.max_retry_attempts - 1:
+                if attempt < max_attempts - 1:
                     await self._delay_retry(attempt)
                     continue
                 raise
