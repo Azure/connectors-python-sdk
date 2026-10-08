@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
+import json
 from collections.abc import AsyncIterator, Awaitable
 from types import ModuleType
 from typing import Any, get_args, get_origin, get_type_hints
@@ -67,6 +68,7 @@ class GeneratedConnectorContractTests:
     connector_module: ModuleType
     connector_name: str
     operation_contracts: dict[str, tuple[str, bool]]
+    pageable_item_fields: dict[str, str] = {}
 
     def test_init_with_defaults(self) -> None:
         """Test initialization with default authentication."""
@@ -138,6 +140,13 @@ class GeneratedConnectorContractTests:
     async def test_generated_operation_success_contracts(self, mock_token_provider: Any) -> None:
         """Test every generated operation's successful HTTP contract."""
         for operation, (expected_method, expects_body) in self.operation_contracts.items():
+            is_pageable = inspect.isasyncgenfunction(
+                getattr(self.client_type, f"{operation}_async")
+            )
+            items = [{"id": f"{self.connector_name}.{operation}.item", "name": "first item"}]
+            response_payload = (
+                {self.pageable_item_fields[operation]: items} if is_pageable else {"ok": True}
+            )
             client = self.client_type(
                 "https://example.azure.com/connections/test",
                 token_provider=mock_token_provider,
@@ -147,7 +156,7 @@ class GeneratedConnectorContractTests:
                 client._http_client,
                 "send_async",
                 new_callable=AsyncMock,
-                return_value=MockResponse(status=200, text='{"ok": true}'),
+                return_value=MockResponse(status=200, text=json.dumps(response_payload)),
             ) as mock_send:
                 result = await invoke_generated_operation(
                     client,
@@ -174,8 +183,8 @@ class GeneratedConnectorContractTests:
                 assert result is None, operation
             elif return_type is bytes:
                 assert result == b'{"ok": true}', operation
-            elif inspect.isasyncgenfunction(getattr(client, f"{operation}_async")):
-                assert result == [], operation
+            elif is_pageable:
+                assert result == items, operation
             else:
                 assert result == {"ok": True}, operation
 

@@ -9,6 +9,7 @@ import json
 from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, patch
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -142,6 +143,100 @@ CASE_PARAMETER_NAMES = (
     "connector_module,client_type,operation,expected_method,"
     "expected_path,expects_body"
 )
+
+PAGEABLE_OPERATION_CASES = [
+    operation_case for operation_case in OPERATION_CASES
+    if inspect.isasyncgenfunction(getattr(operation_case[1], f"{operation_case[2]}_async"))
+]
+
+
+@pytest.mark.parametrize("empty_first_page", [False, True])
+@pytest.mark.parametrize(
+    CASE_PARAMETER_NAMES,
+    PAGEABLE_OPERATION_CASES,
+    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+)
+@pytest.mark.asyncio
+async def test_newly_generated_pageable_contract_follows_later_pages(
+    connector_module: ModuleType,
+    client_type: type[Any],
+    operation: str,
+    expected_method: str,
+    expected_path: str,
+    expects_body: bool,
+    empty_first_page: bool,
+    mock_token_provider: Any,
+) -> None:
+    """Test concrete ARM value/nextLink contracts through each generated operation."""
+    first_items = [] if empty_first_page else [{"id": "item-1", "name": "First"}]
+    last_items = [{"id": "item-2", "details": {"name": "Second"}}]
+    continuation_path = urlsplit(expected_path).path + "?$skiptoken=page-2"
+    async with client_type(
+        "https://example.azure.com/connections/test",
+        token_provider=mock_token_provider,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(status=200, text=json.dumps({
+                    "value": first_items,
+                    "nextLink": "https://management.azure.com" + continuation_path,
+                })),
+                MockResponse(status=200, text=json.dumps({"value": last_items, "nextLink": None})),
+            ],
+        ) as transport:
+            items = await invoke_generated_operation(
+                client, operation, connector_module, include_optional_parameters=True,
+            )
+
+        assert items == first_items + last_items
+        assert transport.await_count == 2
+        assert transport.await_args_list[0].args[0] == expected_method
+        assert expected_path in transport.await_args_list[0].args[1]
+        assert transport.await_args_list[1].args == (
+            "GET", "https://example.azure.com/connections/test" + continuation_path,
+        )
+        assert (transport.await_args_list[0].kwargs["body"] is not None) is expects_body
+        assert transport.await_args_list[1].kwargs == {"body": None}
+
+
+@pytest.mark.parametrize("status,body", [(200, ""), (200, '{"value": []}'), (204, "")])
+@pytest.mark.parametrize(
+    CASE_PARAMETER_NAMES,
+    PAGEABLE_OPERATION_CASES,
+    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+)
+@pytest.mark.asyncio
+async def test_newly_generated_pageable_contract_preserves_empty_response(
+    connector_module: ModuleType,
+    client_type: type[Any],
+    operation: str,
+    expected_method: str,
+    expected_path: str,
+    expects_body: bool,
+    status: int,
+    body: str,
+    mock_token_provider: Any,
+) -> None:
+    """Test no-content responses terminate without a spurious continuation request."""
+    async with client_type(
+        "https://example.azure.com/connections/test",
+        token_provider=mock_token_provider,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=status, text=body),
+        ) as transport:
+            items = await invoke_generated_operation(client, operation, connector_module)
+
+        assert items == []
+        transport.assert_awaited_once()
+        assert transport.await_args.args[0] == expected_method
+        assert expected_path in transport.await_args.args[1]
 
 
 @pytest.mark.parametrize(

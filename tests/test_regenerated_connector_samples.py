@@ -111,6 +111,58 @@ def test_sample_validator_rejects_dictionary_access_on_collected_items() -> None
     ]
 
 
+def test_sample_validator_checks_rhs_before_reassigning_the_same_name() -> None:
+    """Test a same-name assignment cannot erase the invalid receiver's old list type."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(ast.parse(
+        "items = [item async for item in client.get_items_async()]\n"
+        "items = items.get('value', [])\n"
+    ))
+
+    assert [issue.message for issue in visitor.issues] == ["'list' has no method 'get'"]
+
+
+@pytest.mark.parametrize("function_kind", ["def", "async def"])
+@pytest.mark.parametrize(
+    "parameters", ["items: dict, client", "items: dict, /, client", "*, items: dict, client"],
+)
+def test_sample_validator_parameters_shadow_outer_facts(
+    function_kind: str, parameters: str,
+) -> None:
+    """Test parameters shadow outer container and client facts without losing outer checks."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(ast.parse(
+        "items = []\n"
+        "client = TypedClient('https://example.com')\n"
+        f"{function_kind} consume({parameters}):\n"
+        "    items.get('value', [])\n"
+        "    client.unrelated_method()\n"
+        "items.get('value', [])\n"
+    ))
+
+    assert [issue.message for issue in visitor.issues] == ["'list' has no method 'get'"]
+    assert visitor.issues[0].line == 6
+
+
+def test_sample_validator_function_defaults_use_outer_facts() -> None:
+    """Test default expressions are validated before a parameter shadows its outer name."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(ast.parse(
+        "client = TypedClient('https://example.com')\n"
+        "async def consume(client=client.missing_method()):\n"
+        "    pass\n"
+    ))
+
+    assert [issue.message for issue in visitor.issues] == [
+        "'TypedClient' has no method 'missing_method'",
+    ]
+
+
 @pytest.mark.parametrize(
     "source,expected_messages",
     [
