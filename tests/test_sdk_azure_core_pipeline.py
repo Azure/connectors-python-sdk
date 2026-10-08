@@ -11,11 +11,17 @@ from azure.core.credentials import AccessToken, AzureKeyCredential
 from azure.core.exceptions import ServiceRequestError, ServiceResponseTimeoutError
 from azure.core.pipeline.policies import (
     AsyncRetryPolicy,
+    AzureKeyCredentialPolicy,
     HeadersPolicy,
+    RequestIdPolicy,
     RetryMode,
     SansIOHTTPPolicy,
 )
-from azure.core.pipeline.transport import AsyncHttpTransport, AsyncioRequestsTransport
+from azure.core.pipeline.transport import (
+    AioHttpTransport,
+    AsyncHttpTransport,
+    AsyncioRequestsTransport,
+)
 
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException, ConnectorHttpClient
 from azure.connectors.sdk.http_client import _JitterRetryPolicy
@@ -626,3 +632,77 @@ def test_explicit_chain_rejects_per_retry_policy_without_retry() -> None:
         )
 
     assert events == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "transport_type",
+    [AioHttpTransport, AsyncioRequestsTransport],
+)
+@pytest.mark.parametrize("request_timeout", [None, 5.0, 0.0, -1.0])
+async def test_explicit_no_retry_chain_dispatches_through_builtin_transport(
+    transport_type: type[AsyncHttpTransport],
+    request_timeout: float | None,
+) -> None:
+    """Keep retry-only options out of explicit chains without retries."""
+    requests: list[web.Request] = []
+
+    async def successful_response(request: web.Request) -> web.Response:
+        requests.append(request)
+        return web.Response(status=200, body=b"{}")
+
+    application = web.Application()
+    application.router.add_get("/", successful_response)
+    server = TestServer(application)
+    await server.start_server()
+    credential = AzureKeyCredential("test-key")
+    client = ConnectorHttpClient(
+        credential,
+        policies=[
+            HeadersPolicy(),
+            RequestIdPolicy(),
+            AzureKeyCredentialPolicy(
+                credential,
+                "Authorization",
+                prefix="Bearer",
+            ),
+        ],
+        transport=transport_type(),
+    )
+    request_options = (
+        {} if request_timeout is None else {"timeout": request_timeout}
+    )
+
+    try:
+        response = await client.send_async(
+            "GET",
+            str(server.make_url("/")),
+            **request_options,
+        )
+    finally:
+        await client.close()
+        await server.close()
+
+    assert response.status == 200
+    assert len(requests) == 1
+    assert requests[0].headers["Authorization"] == "Bearer test-key"
+    assert "x-ms-client-request-id" in requests[0].headers
+
+
+@pytest.mark.asyncio
+async def test_explicit_no_retry_chain_omits_retry_policy_options() -> None:
+    """Do not forward generated retry options without a retry policy."""
+    transport = RecordingTransport(create_response())
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        policies=[HeadersPolicy()],
+        retry_unsafe_http_methods=True,
+        transport=transport,
+    )
+
+    response = await client.send_async("POST", "https://example.test/items")
+
+    assert response.status == 200
+    assert "timeout" not in transport.request_options[0]
+    assert "retry_total" not in transport.request_options[0]
+    assert "retry_on_methods" not in transport.request_options[0]

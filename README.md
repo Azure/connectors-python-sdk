@@ -365,7 +365,9 @@ ownership of the credential. The SDK enforces the total request budget across
 transports and applies transport-specific timeout options only when supported.
 `per_call_policies` and `per_retry_policies` are composed with the default or an
 explicit `policies` chain. An explicit chain using `per_retry_policies` must
-contain an `AsyncRetryPolicy`.
+contain an `AsyncRetryPolicy`. Explicit chains without a retry policy remain
+supported; the SDK enforces positive total request deadlines without forwarding
+retry-only options to the transport.
 
 ## Project Structure
 

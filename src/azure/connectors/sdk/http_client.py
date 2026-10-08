@@ -142,6 +142,9 @@ class ConnectorHttpClient:
                 per_call_policies=per_call_policies,
                 per_retry_policies=per_retry_policies,
             )
+        self._has_retry_policy = any(
+            isinstance(policy, AsyncRetryPolicy) for policy in policies
+        )
         self._pipeline = AsyncPipeline(self._transport, policies=policies)
 
     def _build_policies(
@@ -364,15 +367,19 @@ class ConnectorHttpClient:
         )
         request_options: Dict[str, Any] = {"headers": headers}
         if selected_timeout > 0:
-            request_options["timeout"] = selected_timeout
-            if isinstance(self._transport, AioHttpTransport):
+            if self._has_retry_policy:
+                request_options["timeout"] = selected_timeout
+            if self._has_retry_policy and isinstance(
+                self._transport, AioHttpTransport
+            ):
                 request_options["read_timeout"] = selected_timeout
         else:
-            request_options["timeout"] = float("inf")
+            if self._has_retry_policy:
+                request_options["timeout"] = float("inf")
             request_options["connection_timeout"] = None
             if isinstance(self._transport, AioHttpTransport):
                 request_options["read_timeout"] = None
-        if normalized_method not in _SAFE_RETRY_METHODS:
+        if self._has_retry_policy and normalized_method not in _SAFE_RETRY_METHODS:
             if self._retry_unsafe_http_methods:
                 request_options["retry_on_methods"] = (
                     _ALL_RETRY_METHODS | {normalized_method}
