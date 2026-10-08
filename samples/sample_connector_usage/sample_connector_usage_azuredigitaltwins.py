@@ -59,13 +59,13 @@ async def example_1_list_models():
         ) as client:
             try:
                 # List all models
-                result = [item async for item in client.list_models_async(
+                models = [item async for item in client.list_models_async(
                     include_model_definition="true"
                 )]
 
-                if result:
-                    print(f"Found {len(result)} models:")
-                    for model in result:
+                if models:
+                    print(f"Found {len(models)} models:")
+                    for model in models:
                         print(f"  - {model.get('id', 'Unknown')}")
                 else:
                     print("No models found")

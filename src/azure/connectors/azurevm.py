@@ -369,7 +369,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/{quote(str(virtual_machine_in_scale_set_instance_id), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -429,7 +429,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/deallocate"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -483,7 +483,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/poweroff"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -536,7 +536,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/redeploy"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -589,7 +589,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/reimage"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -641,7 +641,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/restart"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -693,7 +693,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/start"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -741,7 +741,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/{quote(str(virtual_machine_name), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2019-12-01"))
+        query_params.append("api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -795,7 +795,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/start"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2019-12-01"))
+        query_params.append("api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -846,7 +846,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/deallocate"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2019-12-01"))
+        query_params.append("api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -897,7 +897,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/powerOff"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2019-12-01"))
+        query_params.append("api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -946,7 +946,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/reapply"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2019-12-01"))
+        query_params.append("api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -996,7 +996,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/redeploy"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2019-12-01"))
+        query_params.append("api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1045,7 +1045,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/restart"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2019-12-01"))
+        query_params.append("api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1083,7 +1083,7 @@ class AzurevmClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2020-01-01"))
+        query_params.append("x-ms-api-version=" + quote("2020-01-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -1143,7 +1143,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/resourcegroups"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2020-01-01"))
+        query_params.append("x-ms-api-version=" + quote("2020-01-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -1208,7 +1208,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/virtualMachineScaleSets"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -1276,7 +1276,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/virtualMachines"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -1341,7 +1341,7 @@ class AzurevmClient(ConnectorClientBase):
             f"/virtualMachines"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2019-12-01"))
+        query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None

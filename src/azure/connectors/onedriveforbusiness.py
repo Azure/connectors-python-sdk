@@ -1454,8 +1454,8 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        query_params.append("skipToken=" + quote(""))
-        query_params.append("top=" + quote("20"))
+        query_params.append("skipToken=" + quote("", safe=''))
+        query_params.append("top=" + quote("20", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None

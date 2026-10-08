@@ -71,7 +71,7 @@ async def example_1_list_table_rows():
 
         async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = [item async for item in client.get_items_async(
+                rows = [item async for item in client.get_items_async(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     table=TABLE_NAME,
@@ -79,8 +79,7 @@ async def example_1_list_table_rows():
                     top=10,  # Limit to 10 rows
                 )]
 
-                if result:
-                    rows = result
+                if rows:
                     print(f"Found {len(rows)} row(s) in table '{TABLE_NAME}':")
                     for i, row in enumerate(rows[:5], 1):
                         print(f"  Row {i}: {row}")

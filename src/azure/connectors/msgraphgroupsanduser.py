@@ -416,7 +416,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
-        query_params.append("$count=" + quote("true"))
+        query_params.append("$count=" + quote("true", safe=''))
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
@@ -503,7 +503,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(group_id), safe='')}/members"
         )
         query_params = []
-        query_params.append("$count=" + quote("true"))
+        query_params.append("$count=" + quote("true", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):

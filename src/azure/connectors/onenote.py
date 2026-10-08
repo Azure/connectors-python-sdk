@@ -729,7 +729,7 @@ class OnenoteClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/pages/Dynamic/content"
         query_params = []
-        query_params.append("preAuthenticated=" + quote("true"))
+        query_params.append("preAuthenticated=" + quote("true", safe=''))
         value = str(notebook_key)
         if isinstance(notebook_key, bool):
             value = value.lower()

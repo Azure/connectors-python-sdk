@@ -2,6 +2,7 @@
 
 """Contract tests for ElfsquaddataClient."""
 
+import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -89,3 +90,80 @@ async def test_get_entities_serializes_query_and_response(
         response_hook=None,
     )
     assert result == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("empty_first_page", [False, True])
+async def test_get_entities_follows_odata_pages_and_terminates(
+    mock_credential,
+    empty_first_page,
+) -> None:
+    """Follow Elfsquad OData pages, including an empty first page."""
+    first_items = [] if empty_first_page else [
+        {"id": "product-1", "name": "First"}
+    ]
+    last_items = [{"id": "product-2", "details": {"name": "Second"}}]
+    async with ElfsquaddataClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(status=200, text=json.dumps({
+                    "value": first_items,
+                    "@odata.nextLink": "?$skiptoken=page-2",
+                })),
+                MockResponse(status=200, text=json.dumps({
+                    "value": last_items,
+                    "@odata.nextLink": None,
+                })),
+            ],
+        ) as transport:
+            entities = [
+                entity async for entity in client.get_entities_async(
+                    entity_name="products",
+                    top=10,
+                )
+            ]
+
+    assert entities == first_items + last_items
+    assert transport.await_count == 2
+    assert transport.await_args_list[0].args == (
+        "GET",
+        "https://example.azure.com/connections/test/data/1/products?$top=10",
+    )
+    assert transport.await_args_list[1].args == (
+        "GET",
+        "https://example.azure.com/connections/test/data/1/products?$skiptoken=page-2",
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("status,body", [(200, ""), (200, '{"value": []}'), (204, "")])
+async def test_get_entities_empty_response_is_a_single_request(
+    mock_credential,
+    status,
+    body,
+) -> None:
+    """Terminate empty Elfsquad responses without a continuation request."""
+    async with ElfsquaddataClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=status, text=body),
+        ) as transport:
+            entities = [
+                entity async for entity in client.get_entities_async(
+                    entity_name="products"
+                )
+            ]
+
+    assert entities == []
+    transport.assert_awaited_once()

@@ -547,7 +547,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/copyFile"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
@@ -666,7 +666,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/files"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
@@ -819,7 +819,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/extractFolderV2"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
@@ -998,7 +998,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/GetFileContentByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
@@ -1124,7 +1124,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/GetFileByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
@@ -1275,7 +1275,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/foldersV2"
         )
         query_params = []
-        query_params.append("useFlatListing=" + quote("false"))
+        query_params.append("useFlatListing=" + quote("false", safe=''))
         if next_page_marker is not None:
             value = str(next_page_marker)
             if isinstance(next_page_marker, bool):

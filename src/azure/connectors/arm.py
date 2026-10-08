@@ -1010,7 +1010,7 @@ class ArmClient(ConnectorClientBase):
             f"/subscriptions/{quote(str(subscription_id), safe='')}/locations"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1054,7 +1054,7 @@ class ArmClient(ConnectorClientBase):
             f"/subscriptions/{quote(str(subscription_id), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1097,7 +1097,7 @@ class ArmClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -1162,7 +1162,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(deployment_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if wait is not None:
             value = str(wait)
             if isinstance(wait, bool):
@@ -1223,7 +1223,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(deployment_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if wait is not None:
             value = str(wait)
             if isinstance(wait, bool):
@@ -1282,7 +1282,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(deployment_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1332,7 +1332,7 @@ class ArmClient(ConnectorClientBase):
             f"/cancel"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1384,7 +1384,7 @@ class ArmClient(ConnectorClientBase):
             f"/validate"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1438,7 +1438,7 @@ class ArmClient(ConnectorClientBase):
             f"/exportTemplate"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1495,7 +1495,7 @@ class ArmClient(ConnectorClientBase):
             f"/deployments"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -1571,7 +1571,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(operation_id), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1628,7 +1628,7 @@ class ArmClient(ConnectorClientBase):
             f"/operations"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
@@ -1695,7 +1695,7 @@ class ArmClient(ConnectorClientBase):
             f"/unregister"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1745,7 +1745,7 @@ class ArmClient(ConnectorClientBase):
             f"/register"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1794,7 +1794,7 @@ class ArmClient(ConnectorClientBase):
             f"/subscriptions/{quote(str(subscription_id), safe='')}/providers"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
@@ -1864,7 +1864,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(resource_provider_namespace), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
@@ -1924,7 +1924,7 @@ class ArmClient(ConnectorClientBase):
             f"/resources"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -1998,7 +1998,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2048,7 +2048,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2096,7 +2096,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2141,7 +2141,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(resource_group_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2193,7 +2193,7 @@ class ArmClient(ConnectorClientBase):
             f"/exportTemplate"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2245,7 +2245,7 @@ class ArmClient(ConnectorClientBase):
             f"/resourcegroups"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -2317,7 +2317,7 @@ class ArmClient(ConnectorClientBase):
             f"/subscriptions/{quote(str(subscription_id), safe='')}/resources"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -2731,7 +2731,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(tag_value), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2782,7 +2782,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(tag_value), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2825,7 +2825,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(tag_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2873,7 +2873,7 @@ class ArmClient(ConnectorClientBase):
             f"/{quote(str(tag_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2915,7 +2915,7 @@ class ArmClient(ConnectorClientBase):
             f"/subscriptions/{quote(str(subscription_id), safe='')}/tagNames"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01"))
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None

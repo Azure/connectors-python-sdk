@@ -310,7 +310,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/templates/convertFile"
         )
         query_params = []
-        query_params.append("format=" + quote("pdf"))
+        query_params.append("format=" + quote("pdf", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
@@ -369,7 +369,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
         query_params = []
-        query_params.append("$top=" + quote(""))
+        query_params.append("$top=" + quote("", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -409,8 +409,8 @@ class WordonlinebusinessClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
         query_params = []
-        query_params.append("source=" + quote("me"))
-        query_params.append("$select=" + quote(""))
+        query_params.append("source=" + quote("me", safe=''))
+        query_params.append("$select=" + quote("", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

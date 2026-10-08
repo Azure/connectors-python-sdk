@@ -2529,7 +2529,7 @@ class TrelloClient(ConnectorClientBase):
             f"/boards/{quote(str(board_id), safe='')}/labels"
         )
         query_params = []
-        query_params.append("limit=" + quote("1000"))
+        query_params.append("limit=" + quote("1000", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

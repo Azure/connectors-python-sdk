@@ -5,9 +5,11 @@
 from __future__ import annotations
 
 import inspect
+import json
 from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, patch
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -142,6 +144,128 @@ CASE_PARAMETER_NAMES = (
     "expected_path,expects_body"
 )
 
+EXPECTED_PAGEABLE_OPERATIONS = {
+    (azureautomation.AzureautomationClient, "subscriptions_list"),
+    (azureautomation.AzureautomationClient, "resource_groups_list"),
+    (azuredatafactory.AzuredatafactoryClient, "list_subscriptions"),
+    (azuredatafactory.AzuredatafactoryClient, "list_resource_groups"),
+    (azuredatafactory.AzuredatafactoryClient, "list_data_factories"),
+    (azuredatafactory.AzuredatafactoryClient, "list_pipelines"),
+    (azurevm.AzurevmClient, "subscriptions_list"),
+    (azurevm.AzurevmClient, "resource_groups_list"),
+    (azurevm.AzurevmClient, "virtual_machine_scale_sets_list"),
+    (azurevm.AzurevmClient, "virtual_machines_in_scale_set_list"),
+    (azurevm.AzurevmClient, "virtual_machines_list"),
+}
+
+PAGEABLE_OPERATION_CASES = [
+    operation_case for operation_case in OPERATION_CASES
+    if (operation_case[1], operation_case[2]) in EXPECTED_PAGEABLE_OPERATIONS
+]
+
+
+def test_expected_pageable_operations_remain_iterator_contracts() -> None:
+    """Test every declared pageable operation stays in coverage and is an async iterator."""
+    assert {(case[1], case[2]) for case in PAGEABLE_OPERATION_CASES} == EXPECTED_PAGEABLE_OPERATIONS
+    assert len(PAGEABLE_OPERATION_CASES) == 11
+    for client_type, operation in EXPECTED_PAGEABLE_OPERATIONS:
+        assert inspect.isasyncgenfunction(getattr(client_type, f"{operation}_async")), operation
+
+
+@pytest.mark.parametrize("empty_first_page", [False, True])
+@pytest.mark.parametrize(
+    CASE_PARAMETER_NAMES,
+    PAGEABLE_OPERATION_CASES,
+    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+)
+@pytest.mark.asyncio
+async def test_newly_generated_pageable_contract_follows_later_pages(
+    connector_module: ModuleType,
+    client_type: type[Any],
+    operation: str,
+    expected_method: str,
+    expected_path: str,
+    expects_body: bool,
+    empty_first_page: bool,
+    mock_credential: Any,
+) -> None:
+    """Test concrete ARM value/nextLink contracts through each generated operation."""
+    first_items = [] if empty_first_page else [{"id": "item-1", "name": "First"}]
+    last_items = [{"id": "item-2", "details": {"name": "Second"}}]
+    continuation_path = urlsplit(expected_path).path + "?$skiptoken=page-2"
+    async with client_type(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(status=200, text=json.dumps({
+                    "value": first_items,
+                    "nextLink": "https://management.azure.com" + continuation_path,
+                })),
+                MockResponse(status=200, text=json.dumps({"value": last_items, "nextLink": None})),
+            ],
+        ) as transport:
+            items = await invoke_generated_operation(
+                client, operation, connector_module, include_optional_parameters=True,
+            )
+
+        assert items == first_items + last_items
+        assert transport.await_count == 2
+        assert transport.await_args_list[0].args[0] == expected_method
+        assert expected_path in transport.await_args_list[0].args[1]
+        assert transport.await_args_list[1].args == (
+            "GET", "https://example.azure.com/connections/test" + continuation_path,
+        )
+        assert (transport.await_args_list[0].kwargs["body"] is not None) is expects_body
+        assert transport.await_args_list[1].kwargs == {
+            "body": None,
+            "timeout": None,
+            "headers": None,
+            "client_request_id": None,
+            "response_hook": None,
+        }
+
+
+@pytest.mark.parametrize("status,body", [(200, ""), (200, '{"value": []}'), (204, "")])
+@pytest.mark.parametrize(
+    CASE_PARAMETER_NAMES,
+    PAGEABLE_OPERATION_CASES,
+    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+)
+@pytest.mark.asyncio
+async def test_newly_generated_pageable_contract_preserves_empty_response(
+    connector_module: ModuleType,
+    client_type: type[Any],
+    operation: str,
+    expected_method: str,
+    expected_path: str,
+    expects_body: bool,
+    status: int,
+    body: str,
+    mock_credential: Any,
+) -> None:
+    """Test no-content responses terminate without a spurious continuation request."""
+    async with client_type(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            return_value=MockResponse(status=status, text=body),
+        ) as transport:
+            items = await invoke_generated_operation(client, operation, connector_module)
+
+        assert items == []
+        transport.assert_awaited_once()
+        assert transport.await_args.args[0] == expected_method
+        assert expected_path in transport.await_args.args[1]
+
 
 @pytest.mark.parametrize(
     CASE_PARAMETER_NAMES,
@@ -163,17 +287,14 @@ async def test_newly_generated_operation_success_contract(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )
-    generated_method = getattr(client, f"{operation}_async")
-    is_pageable = inspect.isasyncgenfunction(generated_method)
-    response_text = (
-        '{"value": [{"ok": true}]}' if is_pageable else '{"ok": true}'
-    )
+    is_pageable = (client_type, operation) in EXPECTED_PAGEABLE_OPERATIONS
+    response_payload = {"value": [{"id": "item-1"}]} if is_pageable else {"ok": True}
 
     with patch.object(
         client._http_client,
         "send_async",
         new_callable=AsyncMock,
-        return_value=MockResponse(status=200, text=response_text),
+        return_value=MockResponse(status=200, text=json.dumps(response_payload)),
     ) as mock_send:
         result = await invoke_generated_operation(
             client,
@@ -186,10 +307,7 @@ async def test_newly_generated_operation_success_contract(
     assert method == expected_method
     assert expected_path in request_url
     assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-    if is_pageable:
-        assert result == [{"ok": True}]
-    else:
-        assert result == {"ok": True}
+    assert result == (response_payload["value"] if is_pageable else response_payload)
 
 
 @pytest.mark.parametrize(

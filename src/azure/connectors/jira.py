@@ -777,7 +777,7 @@ class JiraClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
-        query_params.append("expand=" + quote("*"))
+        query_params.append("expand=" + quote("*", safe=''))
         if jql is not None:
             value = str(jql)
             if isinstance(jql, bool):

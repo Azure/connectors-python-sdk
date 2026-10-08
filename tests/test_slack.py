@@ -2,6 +2,7 @@
 
 """Unit tests for SlackClient."""
 
+import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -333,3 +334,50 @@ class TestPostMessageAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.post_message_async(input=payload)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("empty_first_page", [False, True])
+async def test_channels_continuation_yields_later_channels(
+    mock_credential,
+    empty_first_page,
+):
+    """Follow Slack's OData continuation after populated and empty pages."""
+    first_items = [] if empty_first_page else [
+        {"id": "channel-1", "name": "first"}
+    ]
+    later_items = [{"id": "channel-2", "details": {"name": "second"}}]
+    async with SlackClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(status=200, text=json.dumps({
+                    "value": first_items,
+                    "@odata.nextLink": "?cursor=page-2",
+                })),
+                MockResponse(status=200, text=json.dumps({
+                    "value": later_items,
+                    "@odata.nextLink": None,
+                })),
+            ],
+        ) as transport:
+            channels = [
+                channel async for channel in client.list_channels_async()
+            ]
+
+    assert channels == first_items + later_items
+    assert transport.await_count == 2
+    assert transport.await_args_list[0].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v3/conversations.list",
+    )
+    assert transport.await_args_list[1].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v3/conversations.list"
+        "?cursor=page-2",
+    )

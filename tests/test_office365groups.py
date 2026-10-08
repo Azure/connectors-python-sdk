@@ -797,3 +797,30 @@ class TestDataclasses:
         assert request.subject == "HTML Meeting"
         assert request.body["contentType"] == "HTML"
         assert request.is_all_day is True
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "operation",
+    ["list_group_members", "list_deleted_groups"],
+)
+async def test_pageable_group_operation_empty_response_yields_no_items(
+    mock_credential,
+    operation,
+):
+    """Yield no group items for an empty successful response."""
+    client = Office365groupsClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    )
+    method = getattr(client, f"{operation}_async")
+    arguments = {"group_id": "group-123"} if operation == "list_group_members" else {}
+    with patch.object(
+        client._http_client,
+        "send_async",
+        new_callable=AsyncMock,
+        return_value=MockResponse(status=200, text=""),
+    ):
+        items = [item async for item in method(**arguments)]
+
+    assert items == []

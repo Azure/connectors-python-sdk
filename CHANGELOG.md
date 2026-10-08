@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Generated clients now use the asynchronous Azure Core pipeline** — every client requires a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, transport, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
 - **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and transport errors. Set `retry_unsafe_http_methods=True` directly on a generated client only when replay is acceptable; retry count, timeout, and backoff settings are also direct client keyword arguments. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
+- Jira `list_issues_async` now exposes the live optional `fields` query parameter
+  instead of sending an internal `fields=*all` default. Pass `fields` and
+  `next_page_token` by keyword; `fields` precedes the token in the generated signature.
+- This regeneration propagates the async-iterator paging contract to 32 additional
+  connectors, extending [Fix Dataverse list pagination (#84)](https://github.com/Azure/connectors-python-sdk/pull/84).
+  Pageable operations return items rather than response dictionaries. Consume them
+  with `async for`, or collect them with
+  `[item async for item in client.get_items_async(...)]`; samples use this contract.
 
 - Seismic Planner `CustomPropertyValues.localizations` now exposes `Dict[str, CustomPropertyDataDisplay]` instead of `Dict[str, Any]`. Callers can access typed values directly, such as `localizations["en-US"].name`. ([Azure/Connectors-NET-SDK#262](https://github.com/Azure/Connectors-NET-SDK/issues/262), AzureUX-BPM PR 17131877)
 
@@ -54,6 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   extension methods as well as standard unsafe HTTP verbs.
 - **Connector samples**: Samples now close caller-owned Azure credentials and use
   async iteration for pageable operations.
+- Generated caller-supplied and internal-default query values escape reserved
+  characters, including `/`, so paths, URLs, and collection values remain within
+  their intended query parameters.
 - **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
 
 ## [0.5.0b1] - 2026-08-31

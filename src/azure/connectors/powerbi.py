@@ -932,7 +932,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/internalScorecards"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -981,7 +981,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/internalScorecards"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1031,8 +1031,8 @@ class PowerbiClient(ConnectorClientBase):
             f"/goals"
         )
         query_params = []
-        query_params.append("$expand=" + quote("aggregations"))
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("$expand=" + quote("aggregations", safe=''))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1083,7 +1083,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/goals"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1134,8 +1134,8 @@ class PowerbiClient(ConnectorClientBase):
             f"/goals({quote(str(goal_id), safe='')})"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
-        query_params.append("$expand=" + quote("aggregations"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
+        query_params.append("$expand=" + quote("aggregations", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1187,7 +1187,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/goals({quote(str(goal_id), safe='')})"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1234,7 +1234,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/executeQueries"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1287,7 +1287,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/executeQueries"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1342,7 +1342,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/rows"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1392,7 +1392,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/notes"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1440,7 +1440,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/goalValues"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1487,8 +1487,8 @@ class PowerbiClient(ConnectorClientBase):
             f"/goalValues"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
-        query_params.append("$expand=" + quote("notes"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
+        query_params.append("$expand=" + quote("notes", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1542,7 +1542,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/goalValues({quote(str(goal_checkin), safe='')})"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1590,8 +1590,8 @@ class PowerbiClient(ConnectorClientBase):
             f"/goalValues({quote(str(goal_checkin), safe='')})"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
-        query_params.append("$expand=" + quote("notes"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
+        query_params.append("$expand=" + quote("notes", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1642,7 +1642,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/refreshes"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1767,7 +1767,7 @@ class PowerbiClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/myorg/groups"
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1807,7 +1807,7 @@ class PowerbiClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/metadata/v201606/alerts"
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1851,7 +1851,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/v1.0/myorg/groups/{quote(str(groupid), safe='')}/datasets"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1902,7 +1902,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/tables"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1996,7 +1996,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/columns"
         )
         query_params = []
-        query_params.append("pbi_source=" + quote("powerAutomate"))
+        query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

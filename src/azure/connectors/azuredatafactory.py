@@ -488,7 +488,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
             f"/CreateRun"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if reference_pipeline_run_id is not None:
             value = str(reference_pipeline_run_id)
             if isinstance(reference_pipeline_run_id, bool):
@@ -549,7 +549,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
             f"/{quote(str(pipeline_run_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -600,7 +600,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
             f"/{quote(str(pipeline_run_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -643,7 +643,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -706,7 +706,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
             f"/resourcegroups"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
@@ -781,7 +781,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
             f"/factories"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -849,7 +849,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
             f"/pipelines"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview"))
+        query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None

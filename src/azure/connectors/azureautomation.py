@@ -287,7 +287,7 @@ class AzureautomationClient(ConnectorClientBase):
             f"/output"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        query_params.append("x-ms-api-version=" + quote("2015-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -340,7 +340,7 @@ class AzureautomationClient(ConnectorClientBase):
             f"/{quote(str(job_id), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        query_params.append("x-ms-api-version=" + quote("2015-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -397,7 +397,7 @@ class AzureautomationClient(ConnectorClientBase):
             f"/jobs"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        query_params.append("x-ms-api-version=" + quote("2015-10-31", safe=''))
         if runbook_name is not None:
             value = str(runbook_name)
             if isinstance(runbook_name, bool):
@@ -450,7 +450,7 @@ class AzureautomationClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-11-01"))
+        query_params.append("x-ms-api-version=" + quote("2015-11-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -511,7 +511,7 @@ class AzureautomationClient(ConnectorClientBase):
             f"/resourcegroups"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        query_params.append("x-ms-api-version=" + quote("2015-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None
@@ -573,7 +573,7 @@ class AzureautomationClient(ConnectorClientBase):
             f"/automationAccounts"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        query_params.append("x-ms-api-version=" + quote("2015-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -627,7 +627,7 @@ class AzureautomationClient(ConnectorClientBase):
             f"/runbooks"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        query_params.append("x-ms-api-version=" + quote("2015-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -683,7 +683,7 @@ class AzureautomationClient(ConnectorClientBase):
             f"/{quote(str(runbook_name), safe='')}"
         )
         query_params = []
-        query_params.append("x-ms-api-version=" + quote("2015-10-31"))
+        query_params.append("x-ms-api-version=" + quote("2015-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

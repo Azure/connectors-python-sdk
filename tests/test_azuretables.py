@@ -2,6 +2,7 @@
 
 """Unit tests for AzuretablesClient."""
 
+import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
@@ -1173,3 +1174,56 @@ class TestGetStorageAccounts:
                 await client.get_storage_accounts_async()
 
             assert exc_info.value.status_code == 500
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("empty_first_page", [False, True])
+async def test_entities_continuation_yields_later_entities(
+    mock_credential,
+    empty_first_page,
+):
+    """Follow Azure Tables nextLink after populated and empty pages."""
+    first_items = [] if empty_first_page else [
+        {"PartitionKey": "pk", "RowKey": "row-1"}
+    ]
+    later_items = [
+        {"PartitionKey": "pk", "RowKey": "row-2", "Value": {"count": 2}}
+    ]
+    async with AzuretablesClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(status=200, text=json.dumps({
+                    "value": first_items,
+                    "nextLink": "?$skiptoken=page-2",
+                })),
+                MockResponse(status=200, text=json.dumps({
+                    "value": later_items,
+                    "nextLink": None,
+                })),
+            ],
+        ) as transport:
+            entities = [
+                entity async for entity in client.get_entities_async(
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                )
+            ]
+
+    assert entities == first_items + later_items
+    assert transport.await_count == 2
+    assert transport.await_args_list[0].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v2/storageAccounts/"
+        "mystorageaccount/tables/mytable/entities",
+    )
+    assert transport.await_args_list[1].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v2/storageAccounts/"
+        "mystorageaccount/tables/mytable/entities?$skiptoken=page-2",
+    )

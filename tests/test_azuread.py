@@ -2,6 +2,7 @@
 
 """Unit tests for AzureadClient."""
 
+import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
@@ -1482,3 +1483,84 @@ class TestAdditionalDataClasses:
         request = GetMemberGroupsRequest(security_enabled_only=True)
 
         assert request.security_enabled_only is True
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("empty_first_page", [False, True])
+async def test_group_members_continuation_yields_later_members(
+    mock_credential,
+    empty_first_page,
+):
+    """Follow the actual OData next-link after populated and empty pages."""
+    first_items = [] if empty_first_page else [
+        {"id": "user-1", "displayName": "First"}
+    ]
+    later_items = [{"id": "user-2", "details": {"name": "Second"}}]
+    async with AzureadClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(status=200, text=json.dumps({
+                    "value": first_items,
+                    "@odata.nextLink": "?$skiptoken=page-2",
+                })),
+                MockResponse(status=200, text=json.dumps({
+                    "value": later_items,
+                    "@odata.nextLink": None,
+                })),
+            ],
+        ) as transport:
+            members = [
+                member async for member in client.get_group_members_async(
+                    id="group-123"
+                )
+            ]
+
+    assert members == first_items + later_items
+    assert transport.await_count == 2
+    assert transport.await_args_list[0].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v1.0/groups/group-123/members",
+    )
+    assert transport.await_args_list[1].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v1.0/groups/group-123/members"
+        "?$skiptoken=page-2",
+    )
+    assert all(
+        request.kwargs == {
+            "body": None,
+            "timeout": None,
+            "headers": None,
+            "client_request_id": None,
+            "response_hook": None,
+        }
+        for request in transport.await_args_list
+    )
+
+
+@pytest.mark.asyncio
+async def test_group_members_empty_response_yields_no_items(mock_credential):
+    """Yield no members for an empty successful response."""
+    client = AzureadClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    )
+    with patch.object(
+        client._http_client,
+        "send_async",
+        new_callable=AsyncMock,
+        return_value=MockResponse(status=200, text=""),
+    ):
+        members = [
+            member async for member in client.get_group_members_async(
+                id="group-123"
+            )
+        ]
+
+    assert members == []

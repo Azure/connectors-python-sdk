@@ -94,10 +94,11 @@ async def example_3_get_messages():
         async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get recent messages (limit to 10)
-                result = [item async for item in client.get_all_messages_async(limit=10)]
+                messages = [
+                    item async for item in client.get_all_messages_async(limit=10)
+                ]
 
-                if result:
-                    messages = result
+                if messages:
                     print(f"Found {len(messages)} message(s):")
                     for msg in messages[:3]:  # Show first 3
                         excerpt = msg.get("content_excerpt", "")[:50]
@@ -119,10 +120,13 @@ async def example_4_get_following_feed():
 
         async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = [item async for item in client.get_messages_following_async(limit=5)]
+                messages = [
+                    item async for item in client.get_messages_following_async(
+                        limit=5
+                    )
+                ]
 
-                if result:
-                    messages = result
+                if messages:
                     print(f"Found {len(messages)} message(s) in following feed:")
                     for msg in messages[:3]:
                         sender_id = msg.get("sender_id")

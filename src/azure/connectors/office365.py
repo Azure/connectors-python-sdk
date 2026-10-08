@@ -4929,9 +4929,9 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
         )
         query_params = []
-        query_params.append("skip=" + quote("0"))
-        query_params.append("top=" + quote("256"))
-        query_params.append("orderBy=" + quote("name"))
+        query_params.append("skip=" + quote("0", safe=''))
+        query_params.append("top=" + quote("256", safe=''))
+        query_params.append("orderBy=" + quote("name", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5777,7 +5777,7 @@ class Office365Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v3/Mail"
         query_params = []
-        query_params.append("fetchOnlyFlagged=" + quote("false"))
+        query_params.append("fetchOnlyFlagged=" + quote("false", safe=''))
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):

@@ -4447,7 +4447,7 @@ class DocusignClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/Management/v2/organizations"
         )
         query_params = []
-        query_params.append("mode=" + quote("org_admin"))
+        query_params.append("mode=" + quote("org_admin", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

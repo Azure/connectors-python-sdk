@@ -8228,7 +8228,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
         query_params = []
-        query_params.append("IncludeDetails=" + quote("true"))
+        query_params.append("IncludeDetails=" + quote("true", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -8385,7 +8385,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/api/v1/Individuals/Lookup/{quote(str(page_number), safe='')}"
         )
         query_params = []
-        query_params.append("includeOrgAddresses=" + quote("true"))
+        query_params.append("includeOrgAddresses=" + quote("true", safe=''))
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
@@ -8602,7 +8602,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
         query_params = []
-        query_params.append("includeDescription=" + quote("true"))
+        query_params.append("includeDescription=" + quote("true", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -8683,7 +8683,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/api/v1/Organizations/Lookup/{quote(str(page_number), safe='')}"
         )
         query_params = []
-        query_params.append("includeAddresses=" + quote("true"))
+        query_params.append("includeAddresses=" + quote("true", safe=''))
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
@@ -8993,9 +8993,9 @@ class ImpexiumClient(ConnectorClientBase):
             f"/api/v1/Customers/{quote(str(page_number), safe='')}"
         )
         query_params = []
-        query_params.append("includeAddress=" + quote("true"))
-        query_params.append("includePhone=" + quote("true"))
-        query_params.append("includeEmail=" + quote("true"))
+        query_params.append("includeAddress=" + quote("true", safe=''))
+        query_params.append("includePhone=" + quote("true", safe=''))
+        query_params.append("includeEmail=" + quote("true", safe=''))
         value = str(phone_number)
         if isinstance(phone_number, bool):
             value = value.lower()
@@ -9169,7 +9169,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
         query_params = []
-        query_params.append("includeDetails=" + quote("true"))
+        query_params.append("includeDetails=" + quote("true", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -9220,7 +9220,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
         query_params = []
-        query_params.append("includeDetails=" + quote("true"))
+        query_params.append("includeDetails=" + quote("true", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

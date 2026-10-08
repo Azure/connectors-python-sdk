@@ -422,7 +422,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -468,7 +468,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if dependencies_for is not None:
             value = str(dependencies_for)
             if isinstance(dependencies_for, bool):
@@ -539,7 +539,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/models/{quote(str(modelid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -579,7 +579,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/models/{quote(str(modelid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if include_model_definition is not None:
             value = str(include_model_definition)
             if isinstance(include_model_definition, bool):
@@ -629,7 +629,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/models/{quote(str(modelid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -668,7 +668,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -713,7 +713,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -753,7 +753,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -798,7 +798,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -841,7 +841,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(component_path), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -890,7 +890,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(component_path), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -933,7 +933,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -981,7 +981,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1025,7 +1025,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1074,7 +1074,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1119,7 +1119,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/incomingrelationships"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
@@ -1180,7 +1180,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}/telemetry"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1225,7 +1225,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/telemetry"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1268,7 +1268,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}/relationships"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
@@ -1326,7 +1326,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/query"
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
