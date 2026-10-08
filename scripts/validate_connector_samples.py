@@ -140,6 +140,47 @@ class SampleVisitor(ast.NodeVisitor):
                 self.client_variables[item.optional_vars.id] = client_type
         self.generic_visit(node)
 
+    def visit_ListComp(self, node: ast.ListComp) -> None:
+        """Validate list comprehensions with local target facts."""
+        self._visit_comprehension(node)
+
+    def visit_SetComp(self, node: ast.SetComp) -> None:
+        """Validate set comprehensions with local target facts."""
+        self._visit_comprehension(node)
+
+    def visit_DictComp(self, node: ast.DictComp) -> None:
+        """Validate dictionary comprehensions with local target facts."""
+        self._visit_comprehension(node)
+
+    def visit_GeneratorExp(self, node: ast.GeneratorExp) -> None:
+        """Validate generator expressions without leaking target facts."""
+        self._visit_comprehension(node)
+
+    def _visit_comprehension(
+        self, node: ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp,
+    ) -> None:
+        """Visit iterables before binding targets and restore the enclosing facts."""
+        variable_types = self.variable_types.copy()
+        client_variables = self.client_variables.copy()
+        try:
+            for generator in node.generators:
+                self.visit(generator.iter)
+                for target in ast.walk(generator.target):
+                    if isinstance(target, ast.Name) and isinstance(target.ctx, ast.Store):
+                        self.variable_types.pop(target.id, None)
+                        self.client_variables.pop(target.id, None)
+                self.visit(generator.target)
+                for condition in generator.ifs:
+                    self.visit(condition)
+            if isinstance(node, ast.DictComp):
+                self.visit(node.key)
+                self.visit(node.value)
+            else:
+                self.visit(node.elt)
+        finally:
+            self.variable_types = variable_types
+            self.client_variables = client_variables
+
     def visit_Await(self, node: ast.Await) -> None:
         """Reject awaiting a generated pageable operation instead of iterating it."""
         call = node.value

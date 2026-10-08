@@ -140,9 +140,7 @@ class GeneratedConnectorContractTests:
     async def test_generated_operation_success_contracts(self, mock_token_provider: Any) -> None:
         """Test every generated operation's successful HTTP contract."""
         for operation, (expected_method, expects_body) in self.operation_contracts.items():
-            is_pageable = inspect.isasyncgenfunction(
-                getattr(self.client_type, f"{operation}_async")
-            )
+            is_pageable = operation in self.pageable_item_fields
             items = [{"id": f"{self.connector_name}.{operation}.item", "name": "first item"}]
             response_payload = (
                 {self.pageable_item_fields[operation]: items} if is_pageable else {"ok": True}

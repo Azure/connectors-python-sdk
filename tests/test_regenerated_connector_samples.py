@@ -164,6 +164,51 @@ def test_sample_validator_function_defaults_use_outer_facts() -> None:
 
 
 @pytest.mark.parametrize(
+    "expression",
+    [
+        "[item.get('id') for item in [{'id': 'entry-1'}]]",
+        "{item.get('id') for item in [{'id': 'entry-1'}]}",
+        "{item.get('id'): item for item in [{'id': 'entry-1'}]}",
+        "(item.get('id') for item in [{'id': 'entry-1'}])",
+    ],
+)
+def test_sample_validator_comprehension_targets_shadow_outer_facts(expression: str) -> None:
+    """Test valid dictionary iteration is not confused with the outer same-name list."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(ast.parse("item = []\nidentifiers = " + expression))
+
+    assert visitor.issues == []
+    assert visitor.variable_types["item"] is list
+
+
+def test_sample_validator_comprehension_clears_client_target_facts() -> None:
+    """Test comprehension-local receivers do not retain an outer generated client type."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+    visitor.imported_symbols["TypedClient"] = TypedClient
+
+    visitor.visit(ast.parse(
+        "client = TypedClient('https://example.com')\n"
+        "identifiers = [client.get('id') for client in [{'id': 'entry-1'}]]\n"
+    ))
+
+    assert visitor.issues == []
+    assert visitor.client_variables["client"] is TypedClient
+
+
+def test_sample_validator_comprehension_iterable_uses_outer_facts() -> None:
+    """Test the iterable is checked before its target shadows an invalid outer receiver."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(ast.parse(
+        "item = []\n"
+        "identifiers = [item for item in item.get('value', [])]\n"
+    ))
+
+    assert [issue.message for issue in visitor.issues] == ["'list' has no method 'get'"]
+
+
+@pytest.mark.parametrize(
     "source,expected_messages",
     [
         (

@@ -2,8 +2,10 @@
 
 """Unit tests for AzuretablesClient."""
 
-import pytest
+import json
 from unittest.mock import AsyncMock, patch
+
+import pytest
 from azure.connectors.azuretables import (
     AzuretablesClient,
     CreateEntityInput,
@@ -355,6 +357,42 @@ class TestDeleteTable:
 
 class TestGetEntities:
     """Tests for get_entities_async method."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("empty_first_page", [False, True])
+    async def test_continuation_yields_later_entities(self, mock_token_provider, empty_first_page):
+        """Test Azure Tables uses nextLink and terminates after the exact second request."""
+        first_items = [] if empty_first_page else [{"PartitionKey": "pk", "RowKey": "row-1"}]
+        later_items = [{"PartitionKey": "pk", "RowKey": "row-2", "Value": {"count": 2}}]
+        async with AzuretablesClient(
+            "https://example.azure.com/connections/test", token_provider=mock_token_provider,
+        ) as client:
+            with patch.object(
+                client._http_client, "send_async", new_callable=AsyncMock,
+                side_effect=[
+                    MockResponse(status=200, text=json.dumps({
+                        "value": first_items, "nextLink": "?$skiptoken=page-2",
+                    })),
+                    MockResponse(status=200, text=json.dumps({
+                        "value": later_items, "nextLink": None,
+                    })),
+                ],
+            ) as transport:
+                entities = [entity async for entity in client.get_entities_async(
+                    storage_account_name="mystorageaccount", table_name="mytable",
+                )]
+
+            assert entities == first_items + later_items
+            assert transport.await_count == 2
+            assert transport.await_args_list[0].args == (
+                "GET", "https://example.azure.com/connections/test/v2/storageAccounts/"
+                "mystorageaccount/tables/mytable/entities",
+            )
+            assert transport.await_args_list[1].args == (
+                "GET", "https://example.azure.com/connections/test/v2/storageAccounts/"
+                "mystorageaccount/tables/mytable/entities?$skiptoken=page-2",
+            )
+            assert all(request.kwargs == {"body": None} for request in transport.await_args_list)
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_token_provider):

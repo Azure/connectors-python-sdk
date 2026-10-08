@@ -144,10 +144,32 @@ CASE_PARAMETER_NAMES = (
     "expected_path,expects_body"
 )
 
+EXPECTED_PAGEABLE_OPERATIONS = {
+    (azureautomation.AzureautomationClient, "subscriptions_list"),
+    (azureautomation.AzureautomationClient, "resource_groups_list"),
+    (azuredatafactory.AzuredatafactoryClient, "list_subscriptions"),
+    (azuredatafactory.AzuredatafactoryClient, "list_resource_groups"),
+    (azuredatafactory.AzuredatafactoryClient, "list_data_factories"),
+    (azuredatafactory.AzuredatafactoryClient, "list_pipelines"),
+    (azurevm.AzurevmClient, "subscriptions_list"),
+    (azurevm.AzurevmClient, "resource_groups_list"),
+    (azurevm.AzurevmClient, "virtual_machine_scale_sets_list"),
+    (azurevm.AzurevmClient, "virtual_machines_in_scale_set_list"),
+    (azurevm.AzurevmClient, "virtual_machines_list"),
+}
+
 PAGEABLE_OPERATION_CASES = [
     operation_case for operation_case in OPERATION_CASES
-    if inspect.isasyncgenfunction(getattr(operation_case[1], f"{operation_case[2]}_async"))
+    if (operation_case[1], operation_case[2]) in EXPECTED_PAGEABLE_OPERATIONS
 ]
+
+
+def test_expected_pageable_operations_remain_iterator_contracts() -> None:
+    """Test every declared pageable operation stays in coverage and is an async iterator."""
+    assert {(case[1], case[2]) for case in PAGEABLE_OPERATION_CASES} == EXPECTED_PAGEABLE_OPERATIONS
+    assert len(PAGEABLE_OPERATION_CASES) == 11
+    for client_type, operation in EXPECTED_PAGEABLE_OPERATIONS:
+        assert inspect.isasyncgenfunction(getattr(client_type, f"{operation}_async")), operation
 
 
 @pytest.mark.parametrize("empty_first_page", [False, True])
@@ -259,7 +281,7 @@ async def test_newly_generated_operation_success_contract(
         "https://example.azure.com/connections/test",
         token_provider=mock_token_provider,
     )
-    is_pageable = inspect.isasyncgenfunction(getattr(client, f"{operation}_async"))
+    is_pageable = (client_type, operation) in EXPECTED_PAGEABLE_OPERATIONS
     response_payload = {"value": [{"id": "item-1"}]} if is_pageable else {"ok": True}
 
     with patch.object(
