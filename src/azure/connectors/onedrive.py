@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -229,6 +229,45 @@ class OnedriveClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "onedrive"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def get_file_metadata_async(
         self,
         id: str,
@@ -346,7 +385,7 @@ class OnedriveClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -385,12 +424,12 @@ class OnedriveClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -431,7 +470,7 @@ class OnedriveClient(ConnectorClientBase):
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -465,11 +504,11 @@ class OnedriveClient(ConnectorClientBase):
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -511,16 +550,16 @@ class OnedriveClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -564,12 +603,12 @@ class OnedriveClient(ConnectorClientBase):
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -608,16 +647,16 @@ class OnedriveClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -661,12 +700,12 @@ class OnedriveClient(ConnectorClientBase):
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -705,16 +744,16 @@ class OnedriveClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -759,7 +798,7 @@ class OnedriveClient(ConnectorClientBase):
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -797,12 +836,12 @@ class OnedriveClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -877,7 +916,7 @@ class OnedriveClient(ConnectorClientBase):
         value = str(tag)
         if isinstance(tag, bool):
             value = value.lower()
-        query_params.append(f"tag={quote(value)}")
+        query_params.append(f"tag={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -920,7 +959,7 @@ class OnedriveClient(ConnectorClientBase):
         value = str(tag)
         if isinstance(tag, bool):
             value = value.lower()
-        query_params.append(f"tag={quote(value)}")
+        query_params.append(f"tag={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -959,7 +998,7 @@ class OnedriveClient(ConnectorClientBase):
         value = str(size)
         if isinstance(size, bool):
             value = value.lower()
-        query_params.append(f"size={quote(value)}")
+        query_params.append(f"size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1035,16 +1074,16 @@ class OnedriveClient(ConnectorClientBase):
         value = str(query)
         if isinstance(query, bool):
             value = value.lower()
-        query_params.append(f"query={quote(value)}")
+        query_params.append(f"query={quote(value, safe='')}")
         value = str(find_mode)
         if isinstance(find_mode, bool):
             value = value.lower()
-        query_params.append(f"findMode={quote(value)}")
+        query_params.append(f"findMode={quote(value, safe='')}")
         if max_file_count is not None:
             value = str(max_file_count)
             if isinstance(max_file_count, bool):
                 value = value.lower()
-            query_params.append(f"maxFileCount={quote(value)}")
+            query_params.append(f"maxFileCount={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1085,20 +1124,20 @@ class OnedriveClient(ConnectorClientBase):
         value = str(query)
         if isinstance(query, bool):
             value = value.lower()
-        query_params.append(f"query={quote(value)}")
+        query_params.append(f"query={quote(value, safe='')}")
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         value = str(find_mode)
         if isinstance(find_mode, bool):
             value = value.lower()
-        query_params.append(f"findMode={quote(value)}")
+        query_params.append(f"findMode={quote(value, safe='')}")
         if max_file_count is not None:
             value = str(max_file_count)
             if isinstance(max_file_count, bool):
                 value = value.lower()
-            query_params.append(f"maxFileCount={quote(value)}")
+            query_params.append(f"maxFileCount={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1141,7 +1180,7 @@ class OnedriveClient(ConnectorClientBase):
         value = str(type_)
         if isinstance(type_, bool):
             value = value.lower()
-        query_params.append(f"type={quote(value)}")
+        query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1180,11 +1219,11 @@ class OnedriveClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         value = str(type_)
         if isinstance(type_, bool):
             value = value.lower()
-        query_params.append(f"type={quote(value)}")
+        query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1224,16 +1263,16 @@ class OnedriveClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1257,11 +1296,14 @@ class OnedriveClient(ConnectorClientBase):
     async def list_folder_async(
         self,
         id: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List files in folder
 
         This operation gets the list of files and subfolders in a folder.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1271,27 +1313,38 @@ class OnedriveClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        query_params.append("skipToken=" + quote(""))
-        query_params.append("top=" + quote("20"))
+        query_params.append("skipToken=" + quote("", safe=''))
+        query_params.append("top=" + quote("20", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
 
 # Trigger Operations

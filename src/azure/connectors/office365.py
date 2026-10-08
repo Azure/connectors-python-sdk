@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -545,6 +545,11 @@ class EntityListResponseContactResponse:
 
     value: Optional[List[ContactResponse]] = None
     """List of values"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -2910,7 +2915,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -4104,6 +4109,45 @@ class Office365Client(ConnectorClientBase):
     def connector_name(self) -> str:
         return "office365"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def get_outlook_category_names_async(
         self,
     ) -> dict[str, Any] | None:
@@ -4149,17 +4193,17 @@ class Office365Client(ConnectorClientBase):
             value = str(message_id)
             if isinstance(message_id, bool):
                 value = value.lower()
-            query_params.append(f"messageId={quote(value)}")
+            query_params.append(f"messageId={quote(value, safe='')}")
         if draft_type is not None:
             value = str(draft_type)
             if isinstance(draft_type, bool):
                 value = value.lower()
-            query_params.append(f"draftType={quote(value)}")
+            query_params.append(f"draftType={quote(value, safe='')}")
         if comment is not None:
             value = str(comment)
             if isinstance(comment, bool):
                 value = value.lower()
-            query_params.append(f"comment={quote(value)}")
+            query_params.append(f"comment={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4195,7 +4239,7 @@ class Office365Client(ConnectorClientBase):
         value = str(message_id)
         if isinstance(message_id, bool):
             value = value.lower()
-        query_params.append(f"messageId={quote(value)}")
+        query_params.append(f"messageId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4252,11 +4296,11 @@ class Office365Client(ConnectorClientBase):
         value = str(message_id)
         if isinstance(message_id, bool):
             value = value.lower()
-        query_params.append(f"messageId={quote(value)}")
+        query_params.append(f"messageId={quote(value, safe='')}")
         value = str(category)
         if isinstance(category, bool):
             value = value.lower()
-        query_params.append(f"category={quote(value)}")
+        query_params.append(f"category={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4462,7 +4506,7 @@ class Office365Client(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4499,7 +4543,7 @@ class Office365Client(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4536,7 +4580,7 @@ class Office365Client(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4655,22 +4699,22 @@ class Office365Client(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4703,9 +4747,9 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
         )
         query_params = []
-        query_params.append("skip=" + quote("0"))
-        query_params.append("top=" + quote("256"))
-        query_params.append("orderBy=" + quote("name"))
+        query_params.append("skip=" + quote("0", safe=''))
+        query_params.append("top=" + quote("256", safe=''))
+        query_params.append("orderBy=" + quote("name", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4880,11 +4924,14 @@ class Office365Client(ConnectorClientBase):
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get contacts
 
         This operation gets contacts from a contacts folder.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4900,41 +4947,52 @@ class Office365Client(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def contact_get_tables_async(
         self,
@@ -5060,7 +5118,7 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5100,7 +5158,7 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5174,7 +5232,7 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5217,17 +5275,17 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5271,17 +5329,17 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5325,27 +5383,27 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if include_attachments is not None:
             value = str(include_attachments)
             if isinstance(include_attachments, bool):
                 value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
+            query_params.append(f"includeAttachments={quote(value, safe='')}")
         if internet_message_id is not None:
             value = str(internet_message_id)
             if isinstance(internet_message_id, bool):
                 value = value.lower()
-            query_params.append(f"internetMessageId={quote(value)}")
+            query_params.append(f"internetMessageId={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5393,72 +5451,72 @@ class Office365Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v3/Mail"
         query_params = []
-        query_params.append("fetchOnlyFlagged=" + quote("false"))
+        query_params.append("fetchOnlyFlagged=" + quote("false", safe=''))
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
                 value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
+            query_params.append(f"folderPath={quote(value, safe='')}")
         if to is not None:
             value = str(to)
             if isinstance(to, bool):
                 value = value.lower()
-            query_params.append(f"to={quote(value)}")
+            query_params.append(f"to={quote(value, safe='')}")
         if cc is not None:
             value = str(cc)
             if isinstance(cc, bool):
                 value = value.lower()
-            query_params.append(f"cc={quote(value)}")
+            query_params.append(f"cc={quote(value, safe='')}")
         if to_or_cc is not None:
             value = str(to_or_cc)
             if isinstance(to_or_cc, bool):
                 value = value.lower()
-            query_params.append(f"toOrCc={quote(value)}")
+            query_params.append(f"toOrCc={quote(value, safe='')}")
         if from_ is not None:
             value = str(from_)
             if isinstance(from_, bool):
                 value = value.lower()
-            query_params.append(f"from={quote(value)}")
+            query_params.append(f"from={quote(value, safe='')}")
         if importance is not None:
             value = str(importance)
             if isinstance(importance, bool):
                 value = value.lower()
-            query_params.append(f"importance={quote(value)}")
+            query_params.append(f"importance={quote(value, safe='')}")
         if fetch_only_with_attachment is not None:
             value = str(fetch_only_with_attachment)
             if isinstance(fetch_only_with_attachment, bool):
                 value = value.lower()
-            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
+            query_params.append(f"fetchOnlyWithAttachment={quote(value, safe='')}")
         if subject_filter is not None:
             value = str(subject_filter)
             if isinstance(subject_filter, bool):
                 value = value.lower()
-            query_params.append(f"subjectFilter={quote(value)}")
+            query_params.append(f"subjectFilter={quote(value, safe='')}")
         if fetch_only_unread is not None:
             value = str(fetch_only_unread)
             if isinstance(fetch_only_unread, bool):
                 value = value.lower()
-            query_params.append(f"fetchOnlyUnread={quote(value)}")
+            query_params.append(f"fetchOnlyUnread={quote(value, safe='')}")
         if mailbox_address is not None:
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if include_attachments is not None:
             value = str(include_attachments)
             if isinstance(include_attachments, bool):
                 value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
+            query_params.append(f"includeAttachments={quote(value, safe='')}")
         if search_query is not None:
             value = str(search_query)
             if isinstance(search_query, bool):
                 value = value.lower()
-            query_params.append(f"searchQuery={quote(value)}")
+            query_params.append(f"searchQuery={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"top={quote(value)}")
+            query_params.append(f"top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5504,40 +5562,40 @@ class Office365Client(ConnectorClientBase):
         value = str(calendar_id)
         if isinstance(calendar_id, bool):
             value = value.lower()
-        query_params.append(f"calendarId={quote(value)}")
+        query_params.append(f"calendarId={quote(value, safe='')}")
         value = str(start_date_time_utc)
         if isinstance(start_date_time_utc, bool):
             value = value.lower()
-        query_params.append(f"startDateTimeUtc={quote(value)}")
+        query_params.append(f"startDateTimeUtc={quote(value, safe='')}")
         value = str(end_date_time_utc)
         if isinstance(end_date_time_utc, bool):
             value = value.lower()
-        query_params.append(f"endDateTimeUtc={quote(value)}")
+        query_params.append(f"endDateTimeUtc={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
-            query_params.append(f"search={quote(value)}")
+            query_params.append(f"search={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5707,7 +5765,7 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5743,12 +5801,12 @@ class Office365Client(ConnectorClientBase):
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         if mailbox_address is not None:
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -5789,7 +5847,7 @@ class Office365Client(ConnectorClientBase):
             value = str(mailbox_address)
             if isinstance(mailbox_address, bool):
                 value = value.lower()
-            query_params.append(f"mailboxAddress={quote(value)}")
+            query_params.append(f"mailboxAddress={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

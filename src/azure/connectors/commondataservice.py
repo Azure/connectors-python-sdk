@@ -50,7 +50,7 @@ class Item:
     Response for Associates one row to another on the provided relationship
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -424,7 +424,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, str]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -568,7 +568,7 @@ class EntityItem:
     Definition: EntityItem
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -963,7 +963,7 @@ class CommondataserviceClient(ConnectorClientBase):
         value = str(display_name)
         if isinstance(display_name, bool):
             value = value.lower()
-        query_params.append(f"displayName={quote(value)}")
+        query_params.append(f"displayName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1368,27 +1368,27 @@ class CommondataserviceClient(ConnectorClientBase):
             value = str(apply)
             if isinstance(apply, bool):
                 value = value.lower()
-            query_params.append(f"$apply={quote(value)}")
+            query_params.append(f"$apply={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"$expand={quote(value)}")
+            query_params.append(f"$expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
         request_body = None

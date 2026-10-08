@@ -170,15 +170,15 @@ class WordonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(drive)
         if isinstance(drive, bool):
             value = value.lower()
-        query_params.append(f"drive={quote(value)}")
+        query_params.append(f"drive={quote(value, safe='')}")
         value = str(file)
         if isinstance(file, bool):
             value = value.lower()
-        query_params.append(f"file={quote(value)}")
+        query_params.append(f"file={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -216,7 +216,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
             value = str(file_name)
             if isinstance(file_name, bool):
                 value = value.lower()
-            query_params.append(f"fileName={quote(value)}")
+            query_params.append(f"fileName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -254,29 +254,29 @@ class WordonlinebusinessClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/templates/convertFile"
         )
         query_params = []
-        query_params.append("format=" + quote("pdf"))
+        query_params.append("format=" + quote("pdf", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(drive)
         if isinstance(drive, bool):
             value = value.lower()
-        query_params.append(f"drive={quote(value)}")
+        query_params.append(f"drive={quote(value, safe='')}")
         value = str(file)
         if isinstance(file, bool):
             value = value.lower()
-        query_params.append(f"file={quote(value)}")
+        query_params.append(f"file={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if fetch_sensitivity_label_metadata is not None:
             value = str(fetch_sensitivity_label_metadata)
             if isinstance(fetch_sensitivity_label_metadata, bool):
                 value = value.lower()
-            query_params.append(f"fetchSensitivityLabelMetadata={quote(value)}")
+            query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -304,7 +304,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
         query_params = []
-        query_params.append("$top=" + quote(""))
+        query_params.append("$top=" + quote("", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -335,8 +335,8 @@ class WordonlinebusinessClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
         query_params = []
-        query_params.append("source=" + quote("me"))
-        query_params.append("$select=" + quote(""))
+        query_params.append("source=" + quote("me", safe=''))
+        query_params.append("$select=" + quote("", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -373,15 +373,15 @@ class WordonlinebusinessClient(ConnectorClientBase):
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(drive)
         if isinstance(drive, bool):
             value = value.lower()
-        query_params.append(f"drive={quote(value)}")
+        query_params.append(f"drive={quote(value, safe='')}")
         value = str(file)
         if isinstance(file, bool):
             value = value.lower()
-        query_params.append(f"file={quote(value)}")
+        query_params.append(f"file={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

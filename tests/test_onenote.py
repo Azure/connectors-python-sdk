@@ -35,6 +35,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestOnenoteClientInitialization:
@@ -331,10 +332,10 @@ class TestGetPagesInSectionAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_pages_in_section_async(
+            result = await collect_operation_result(client.get_pages_in_section_async(
                 notebook_key="nb-123",
                 section_id="sec-123"
-            )
+            ))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -360,10 +361,10 @@ class TestGetPagesInSectionAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_pages_in_section_async(
+                await collect_operation_result(client.get_pages_in_section_async(
                     notebook_key="nb-123",
                     section_id="sec-123"
-                )
+                ))
 
 
 class TestCreatePageInSectionAsync:

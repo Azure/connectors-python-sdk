@@ -28,6 +28,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestOffice365ClientInitialization:
@@ -859,8 +860,8 @@ class TestContactMethods:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.contact_get_items_async("Contacts")
-            assert "value" in result
+            result = await collect_operation_result(client.contact_get_items_async("Contacts"))
+            assert len(result) > 0
 
 
 class TestDataClasses:

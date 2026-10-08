@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -1495,14 +1495,56 @@ class AzureiotcentralClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "azureiotcentral"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def device_groups_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List device groups
 
         Get the list of device groups in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/deviceGroups"
@@ -1511,26 +1553,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_groups_get_async(
         self,
@@ -1553,7 +1606,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1596,7 +1649,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1638,7 +1691,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1658,11 +1711,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_group_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get devices by device group ID
 
         Get the list of devices in a device group in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1676,26 +1732,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def devices_get_cloud_properties_async(
         self,
@@ -1720,12 +1787,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1770,12 +1837,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1825,12 +1892,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1855,11 +1922,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List relationships
 
         List all relationships based on device ID.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1873,26 +1943,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_relationships_get_async(
         self,
@@ -1919,7 +2000,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1966,7 +2047,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2013,7 +2094,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2059,7 +2140,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2078,37 +2159,51 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def jobs_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List jobs
 
         Get the list of jobs in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/api/ga_2022_07_31/jobs"
         query_params = []
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def jobs_get_async(
         self,
@@ -2128,7 +2223,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2169,12 +2264,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2199,11 +2294,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         job_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get device statuses
 
         Get the list of individual device statuses by job ID.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2213,26 +2311,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def jobs_stop_async(
         self,
@@ -2252,7 +2361,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2286,7 +2395,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2326,7 +2435,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2350,11 +2459,14 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def organizations_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List organizations
 
         Get the list of organizations in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/organizations"
@@ -2363,26 +2475,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def organizations_get_async(
         self,
@@ -2405,7 +2528,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2448,7 +2571,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2490,7 +2613,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2509,11 +2632,14 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def scheduled_jobs_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List scheduled jobs
 
         Get the list of scheduled jobs in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/scheduledJobs"
@@ -2522,26 +2648,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def scheduled_jobs_get_async(
         self,
@@ -2564,7 +2701,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2609,17 +2746,17 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
                 value = value.lower()
-            query_params.append(f"scheduled_job_end_type={quote(value)}")
+            query_params.append(f"scheduled_job_end_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2663,12 +2800,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
                 value = value.lower()
-            query_params.append(f"scheduled_job_end_type={quote(value)}")
+            query_params.append(f"scheduled_job_end_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2710,7 +2847,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2730,11 +2867,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         scheduled_job_id: str,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get jobs by scheduled job ID
 
         Get the list of jobs for a scheduled job definition.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2748,26 +2888,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def devices_get_async(
         self,
@@ -2787,7 +2938,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2833,12 +2984,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2887,12 +3038,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2941,12 +3092,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2995,12 +3146,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3052,12 +3203,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3109,12 +3260,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3161,12 +3312,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3215,12 +3366,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3260,12 +3411,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3311,12 +3462,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3340,37 +3491,51 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def devices_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List devices
 
         Get the list of devices in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/devices"
         query_params = []
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def devices_remove_async(
         self,
@@ -3390,7 +3555,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3432,12 +3597,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3487,12 +3652,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3542,12 +3707,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3600,12 +3765,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3645,7 +3810,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3693,12 +3858,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3739,12 +3904,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3783,7 +3948,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3807,37 +3972,51 @@ class AzureiotcentralClient(ConnectorClientBase):
     async def device_templates_list_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/deviceTemplates"
         query_params = []
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_templates_remove_async(
         self,
@@ -3857,7 +4036,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3891,7 +4070,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3926,7 +4105,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3967,12 +4146,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
                 value = value.lower()
-            query_params.append(f"user_type={quote(value)}")
+            query_params.append(f"user_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4011,7 +4190,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4046,7 +4225,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4085,7 +4264,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4121,12 +4300,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
                 value = value.lower()
-            query_params.append(f"user_type={quote(value)}")
+            query_params.append(f"user_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4149,39 +4328,56 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def applications_list_async(
         self,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get the list of applications accessible to the signed-in user
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/applications"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def device_templates_list_2_async(
         self,
         application: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/deviceTemplates"
@@ -4190,26 +4386,37 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def workflow_get_components_async(
         self,
@@ -4228,16 +4435,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4277,26 +4484,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4336,26 +4543,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4393,16 +4600,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4438,11 +4645,11 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         value = str(template)
         if isinstance(template, bool):
             value = value.lower()
-        query_params.append(f"template={quote(value)}")
+        query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4479,12 +4686,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4523,22 +4730,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if instance_of is not None:
             value = str(instance_of)
             if isinstance(instance_of, bool):
                 value = value.lower()
-            query_params.append(f"instanceOf={quote(value)}")
+            query_params.append(f"instanceOf={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if capability is not None:
             value = str(capability)
             if isinstance(capability, bool):
                 value = value.lower()
-            query_params.append(f"capability={quote(value)}")
+            query_params.append(f"capability={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4578,27 +4785,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if capability is not None:
             value = str(capability)
             if isinstance(capability, bool):
                 value = value.lower()
-            query_params.append(f"capability={quote(value)}")
+            query_params.append(f"capability={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4636,17 +4843,17 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4686,27 +4893,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if template is not None:
             value = str(template)
             if isinstance(template, bool):
                 value = value.lower()
-            query_params.append(f"template={quote(value)}")
+            query_params.append(f"template={quote(value, safe='')}")
         if module is not None:
             value = str(module)
             if isinstance(module, bool):
                 value = value.lower()
-            query_params.append(f"module={quote(value)}")
+            query_params.append(f"module={quote(value, safe='')}")
         if component is not None:
             value = str(component)
             if isinstance(component, bool):
                 value = value.lower()
-            query_params.append(f"component={quote(value)}")
+            query_params.append(f"component={quote(value, safe='')}")
         if capability is not None:
             value = str(capability)
             if isinstance(capability, bool):
                 value = value.lower()
-            query_params.append(f"capability={quote(value)}")
+            query_params.append(f"capability={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4743,12 +4950,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4787,22 +4994,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if scheduled_job_end_type is not None:
             value = str(scheduled_job_end_type)
             if isinstance(scheduled_job_end_type, bool):
                 value = value.lower()
-            query_params.append(f"scheduled_job_end_type={quote(value)}")
+            query_params.append(f"scheduled_job_end_type={quote(value, safe='')}")
         if job_type is not None:
             value = str(job_type)
             if isinstance(job_type, bool):
                 value = value.lower()
-            query_params.append(f"job_type={quote(value)}")
+            query_params.append(f"job_type={quote(value, safe='')}")
         if patch is not None:
             value = str(patch)
             if isinstance(patch, bool):
                 value = value.lower()
-            query_params.append(f"patch={quote(value)}")
+            query_params.append(f"patch={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4840,17 +5047,17 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if user_type is not None:
             value = str(user_type)
             if isinstance(user_type, bool):
                 value = value.lower()
-            query_params.append(f"user_type={quote(value)}")
+            query_params.append(f"user_type={quote(value, safe='')}")
         if patch is not None:
             value = str(patch)
             if isinstance(patch, bool):
                 value = value.lower()
-            query_params.append(f"patch={quote(value)}")
+            query_params.append(f"patch={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4887,12 +5094,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         value = str(application)
         if isinstance(application, bool):
             value = value.lower()
-        query_params.append(f"application={quote(value)}")
+        query_params.append(f"application={quote(value, safe='')}")
         if rule is not None:
             value = str(rule)
             if isinstance(rule, bool):
                 value = value.lower()
-            query_params.append(f"rule={quote(value)}")
+            query_params.append(f"rule={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

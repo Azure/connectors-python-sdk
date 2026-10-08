@@ -20,6 +20,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestShiftsClientInitialization:
@@ -236,12 +237,12 @@ class TestListShiftsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_shifts_async(
+            result = await collect_operation_result(client.list_shifts_async(
                 team_id="team-123",
                 start_time="2026-07-01T00:00:00Z",
                 end_time="2026-07-31T00:00:00Z",
                 top="10",
-            )
+            ))
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -268,7 +269,7 @@ class TestListShiftsAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_shifts_async(team_id="team-123")
+                await collect_operation_result(client.list_shifts_async(team_id="team-123"))
 
 
 class TestCreateShiftAsync:

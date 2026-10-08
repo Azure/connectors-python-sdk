@@ -313,7 +313,7 @@ class MeetingroommapClient(ConnectorClientBase):
             value = str(category)
             if isinstance(category, bool):
                 value = value.lower()
-            query_params.append(f"Category={quote(value)}")
+            query_params.append(f"Category={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -356,7 +356,7 @@ class MeetingroommapClient(ConnectorClientBase):
             value = str(large)
             if isinstance(large, bool):
                 value = value.lower()
-            query_params.append(f"Large={quote(value)}")
+            query_params.append(f"Large={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -420,7 +420,7 @@ class MeetingroommapClient(ConnectorClientBase):
             value = str(large)
             if isinstance(large, bool):
                 value = value.lower()
-            query_params.append(f"Large={quote(value)}")
+            query_params.append(f"Large={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -607,7 +607,7 @@ class MeetingroommapClient(ConnectorClientBase):
             value = str(inlude_user_info)
             if isinstance(inlude_user_info, bool):
                 value = value.lower()
-            query_params.append(f"InludeUserInfo={quote(value)}")
+            query_params.append(f"InludeUserInfo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -650,7 +650,7 @@ class MeetingroommapClient(ConnectorClientBase):
             value = str(large)
             if isinstance(large, bool):
                 value = value.lower()
-            query_params.append(f"Large={quote(value)}")
+            query_params.append(f"Large={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

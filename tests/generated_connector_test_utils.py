@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
+import json
+from collections.abc import AsyncIterator, Awaitable
 from types import ModuleType
 from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
@@ -27,8 +29,19 @@ def get_generated_operations(client_type: type[Any]) -> set[str]:
         name.removesuffix("_async")
         for name in dir(client_type)
         if name.endswith("_async")
-        and inspect.iscoroutinefunction(getattr(client_type, name))
+        and (
+            inspect.iscoroutinefunction(getattr(client_type, name))
+            or inspect.isasyncgenfunction(getattr(client_type, name))
+        )
     }
+
+
+async def collect_operation_result(result: Awaitable[Any] | AsyncIterator[Any]) -> Any:
+    """Await an operation or collect its pageable items without changing their shape."""
+    if isinstance(result, AsyncIterator):
+        return [item async for item in result]
+
+    return await result
 
 
 async def invoke_generated_operation(
@@ -45,7 +58,7 @@ async def invoke_generated_operation(
         for parameter in inspect.signature(method).parameters.values()
         if include_optional_parameters or parameter.default is inspect.Parameter.empty
     }
-    return await method(**arguments)
+    return await collect_operation_result(method(**arguments))
 
 
 class GeneratedConnectorContractTests:
@@ -55,6 +68,7 @@ class GeneratedConnectorContractTests:
     connector_module: ModuleType
     connector_name: str
     operation_contracts: dict[str, tuple[str, bool]]
+    pageable_item_fields: dict[str, str] = {}
 
     def test_init_with_defaults(self) -> None:
         """Test initialization with default authentication."""
@@ -126,6 +140,11 @@ class GeneratedConnectorContractTests:
     async def test_generated_operation_success_contracts(self, mock_token_provider: Any) -> None:
         """Test every generated operation's successful HTTP contract."""
         for operation, (expected_method, expects_body) in self.operation_contracts.items():
+            is_pageable = operation in self.pageable_item_fields
+            items = [{"id": f"{self.connector_name}.{operation}.item", "name": "first item"}]
+            response_payload = (
+                {self.pageable_item_fields[operation]: items} if is_pageable else {"ok": True}
+            )
             client = self.client_type(
                 "https://example.azure.com/connections/test",
                 token_provider=mock_token_provider,
@@ -135,7 +154,7 @@ class GeneratedConnectorContractTests:
                 client._http_client,
                 "send_async",
                 new_callable=AsyncMock,
-                return_value=MockResponse(status=200, text='{"ok": true}'),
+                return_value=MockResponse(status=200, text=json.dumps(response_payload)),
             ) as mock_send:
                 result = await invoke_generated_operation(
                     client,
@@ -162,6 +181,8 @@ class GeneratedConnectorContractTests:
                 assert result is None, operation
             elif return_type is bytes:
                 assert result == b'{"ok": true}', operation
+            elif is_pageable:
+                assert result == items, operation
             else:
                 assert result == {"ok": True}, operation
 

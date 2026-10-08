@@ -27,6 +27,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockTokenProvider, MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestSharepointonlineClientInitialization:
@@ -587,13 +588,13 @@ class TestItemOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_items_async(
+            result = await collect_operation_result(client.get_items_async(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList"
-            )
+            ))
 
-            assert "value" in result
-            assert len(result["value"]) == 2
+            assert len(result) > 0
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_post_item(self, mock_token_provider):
@@ -730,10 +731,10 @@ class TestItemOperations:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_items_async(
+                await collect_operation_result(client.get_items_async(
                     "https://contoso.sharepoint.com/sites/site1",
                     "MissingList"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 

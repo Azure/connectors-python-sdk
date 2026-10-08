@@ -459,7 +459,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -498,7 +498,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -537,7 +537,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -576,7 +576,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -617,7 +617,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -656,7 +656,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -690,7 +690,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -729,7 +729,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -768,7 +768,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -807,7 +807,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -841,7 +841,7 @@ class RepliconClient(ConnectorClientBase):
         value = str(host_url)
         if isinstance(host_url, bool):
             value = value.lower()
-        query_params.append(f"hostUrl={quote(value)}")
+        query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

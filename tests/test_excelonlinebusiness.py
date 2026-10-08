@@ -25,6 +25,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestExcelonlinebusinessClientInitialization:
@@ -264,18 +265,18 @@ class TestGetItems:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_items_async(
+            result = await collect_operation_result(client.get_items_async(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
                 source="me"
-            )
+            ))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/items" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_token_provider):
@@ -293,7 +294,7 @@ class TestGetItems:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_items_async(
+            await collect_operation_result(client.get_items_async(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -302,7 +303,7 @@ class TestGetItems:
                 orderby="Name asc",
                 top="10",
                 skip="5"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -328,12 +329,12 @@ class TestGetItems:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_items_async(
+                await collect_operation_result(client.get_items_async(
                     drive="drive-id",
                     file="file-id",
                     table="NonexistentTable",
                     source="me"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 
@@ -1206,13 +1207,13 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_items_async(
+            result = await collect_operation_result(client.get_items_async(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
                 source="me"
-            )
-            assert result is None
+            ))
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_token_provider):
@@ -1230,17 +1231,17 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_items_async(
+            await collect_operation_result(client.get_items_async(
                 drive="drive1",
                 file="file1",
                 table="Table1",
                 source="me"
-            )
-            await client.get_items_async(
+            ))
+            await collect_operation_result(client.get_items_async(
                 drive="drive2",
                 file="file2",
                 table="Table2",
                 source="me"
-            )
+            ))
 
             assert mock_send.call_count == 2

@@ -192,7 +192,7 @@ class ZohosignClient(ConnectorClientBase):
         value = str(method)
         if isinstance(method, bool):
             value = value.lower()
-        query_params.append(f"method={quote(value)}")
+        query_params.append(f"method={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

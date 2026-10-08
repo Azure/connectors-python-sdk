@@ -188,7 +188,7 @@ class InfusionsoftClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/crm/rest/v1/tasks/search"
         )
         query_params = []
-        query_params.append("order=" + quote("-due_date"))
+        query_params.append("order=" + quote("-due_date", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

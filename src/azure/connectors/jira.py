@@ -720,6 +720,7 @@ class JiraClient(ConnectorClientBase):
     async def list_issues_async(
         self,
         jql: Optional[str] = None,
+        fields: Optional[str] = None,
         next_page_token: Optional[str] = None,
     ) -> dict[str, Any] | None:
         """
@@ -729,18 +730,22 @@ class JiraClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
-        query_params.append("expand=" + quote("*"))
-        query_params.append("fields=" + quote("*all"))
+        query_params.append("expand=" + quote("*", safe=''))
         if jql is not None:
             value = str(jql)
             if isinstance(jql, bool):
                 value = value.lower()
-            query_params.append(f"jql={quote(value)}")
+            query_params.append(f"jql={quote(value, safe='')}")
+        if fields is not None:
+            value = str(fields)
+            if isinstance(fields, bool):
+                value = value.lower()
+            query_params.append(f"fields={quote(value, safe='')}")
         if next_page_token is not None:
             value = str(next_page_token)
             if isinstance(next_page_token, bool):
                 value = value.lower()
-            query_params.append(f"nextPageToken={quote(value)}")
+            query_params.append(f"nextPageToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -867,7 +872,7 @@ class JiraClient(ConnectorClientBase):
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"expand={quote(value)}")
+            query_params.append(f"expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -904,7 +909,7 @@ class JiraClient(ConnectorClientBase):
             value = str(session_id)
             if isinstance(session_id, bool):
                 value = value.lower()
-            query_params.append(f"sessionId={quote(value)}")
+            query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1005,11 +1010,11 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         value = str(issue_type_ids)
         if isinstance(issue_type_ids, bool):
             value = value.lower()
-        query_params.append(f"issueTypeIds={quote(value)}")
+        query_params.append(f"issueTypeIds={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1107,7 +1112,7 @@ class JiraClient(ConnectorClientBase):
             value = str(enable_undo)
             if isinstance(enable_undo, bool):
                 value = value.lower()
-            query_params.append(f"enableUndo={quote(value)}")
+            query_params.append(f"enableUndo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1147,17 +1152,17 @@ class JiraClient(ConnectorClientBase):
             value = str(notify_users)
             if isinstance(notify_users, bool):
                 value = value.lower()
-            query_params.append(f"notifyUsers={quote(value)}")
+            query_params.append(f"notifyUsers={quote(value, safe='')}")
         if override_screen_security is not None:
             value = str(override_screen_security)
             if isinstance(override_screen_security, bool):
                 value = value.lower()
-            query_params.append(f"overrideScreenSecurity={quote(value)}")
+            query_params.append(f"overrideScreenSecurity={quote(value, safe='')}")
         if override_editable_flag is not None:
             value = str(override_editable_flag)
             if isinstance(override_editable_flag, bool):
                 value = value.lower()
-            query_params.append(f"overrideEditableFlag={quote(value)}")
+            query_params.append(f"overrideEditableFlag={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1284,12 +1289,12 @@ class JiraClient(ConnectorClientBase):
         value = str(account_id)
         if isinstance(account_id, bool):
             value = value.lower()
-        query_params.append(f"accountId={quote(value)}")
+        query_params.append(f"accountId={quote(value, safe='')}")
         if expand is not None:
             value = str(expand)
             if isinstance(expand, bool):
                 value = value.lower()
-            query_params.append(f"expand={quote(value)}")
+            query_params.append(f"expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1382,7 +1387,7 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1479,7 +1484,7 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1516,11 +1521,11 @@ class JiraClient(ConnectorClientBase):
         value = str(project_key)
         if isinstance(project_key, bool):
             value = value.lower()
-        query_params.append(f"projectKey={quote(value)}")
+        query_params.append(f"projectKey={quote(value, safe='')}")
         value = str(issuetype_ids)
         if isinstance(issuetype_ids, bool):
             value = value.lower()
-        query_params.append(f"issuetypeIds={quote(value)}")
+        query_params.append(f"issuetypeIds={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

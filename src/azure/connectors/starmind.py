@@ -664,22 +664,22 @@ class StarmindClient(ConnectorClientBase):
             value = str(query)
             if isinstance(query, bool):
                 value = value.lower()
-            query_params.append(f"query={quote(value)}")
+            query_params.append(f"query={quote(value, safe='')}")
         if limit is not None:
             value = str(limit)
             if isinstance(limit, bool):
                 value = value.lower()
-            query_params.append(f"limit={quote(value)}")
+            query_params.append(f"limit={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"filter={quote(value)}")
+            query_params.append(f"filter={quote(value, safe='')}")
         if sort is not None:
             value = str(sort)
             if isinstance(sort, bool):
                 value = value.lower()
-            query_params.append(f"sort={quote(value)}")
+            query_params.append(f"sort={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

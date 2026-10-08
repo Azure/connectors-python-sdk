@@ -31,7 +31,7 @@ class Event:
         default=None,
         metadata={"wire_name": "ContentData"},
     )
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "Properties"},
     )
@@ -97,7 +97,7 @@ class SendEvent:
         metadata={"wire_name": "ContentData"},
     )
     """Content of the event"""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "Properties"},
     )
@@ -158,7 +158,7 @@ class EventhubsClient(ConnectorClientBase):
             value = str(partition_key)
             if isinstance(partition_key, bool):
                 value = value.lower()
-            query_params.append(f"partitionKey={quote(value)}")
+            query_params.append(f"partitionKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -193,7 +193,7 @@ class EventhubsClient(ConnectorClientBase):
         value = str(partition_key)
         if isinstance(partition_key, bool):
             value = value.lower()
-        query_params.append(f"partitionKey={quote(value)}")
+        query_params.append(f"partitionKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -277,7 +277,7 @@ class EventhubsClient(ConnectorClientBase):
         value = str(event_hub_name)
         if isinstance(event_hub_name, bool):
             value = value.lower()
-        query_params.append(f"eventHubName={quote(value)}")
+        query_params.append(f"eventHubName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -312,7 +312,7 @@ class EventhubsClient(ConnectorClientBase):
         value = str(event_hub_name)
         if isinstance(event_hub_name, bool):
             value = value.lower()
-        query_params.append(f"eventHubName={quote(value)}")
+        query_params.append(f"eventHubName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -348,12 +348,12 @@ class EventhubsClient(ConnectorClientBase):
         value = str(content_type)
         if isinstance(content_type, bool):
             value = value.lower()
-        query_params.append(f"contentType={quote(value)}")
+        query_params.append(f"contentType={quote(value, safe='')}")
         if content_schema is not None:
             value = str(content_schema)
             if isinstance(content_schema, bool):
                 value = value.lower()
-            query_params.append(f"contentSchema={quote(value)}")
+            query_params.append(f"contentSchema={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

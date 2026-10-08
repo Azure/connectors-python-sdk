@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -86,6 +86,11 @@ class GetItemsResponse:
     """List of Sensitivity Labels"""
     value: Optional[List[SqlItem]] = None
     """List of Columns"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -193,6 +198,11 @@ class TablesList:
 
     value: Optional[List[Table]] = None
     """List of Tables"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "@odata.nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -295,7 +305,7 @@ class Database:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the database."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -503,7 +513,7 @@ class Item:
     Definition: Item
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -576,12 +586,12 @@ class PassThroughNativeQueryBody:
 
     query: Optional[str] = None
     """Query Text"""
-    formal_parameters: Optional[Dict[str, Any]] = field(
+    formal_parameters: Optional[Dict[str, str]] = field(
         default=None,
         metadata={"wire_name": "formalParameters"},
     )
     """Formal Parameters"""
-    actual_parameters: Optional[Dict[str, Any]] = field(
+    actual_parameters: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "actualParameters"},
     )
@@ -594,12 +604,12 @@ class PassThroughNativeQueryResult:
     Definition: PassThroughNativeQueryResult
     """
 
-    output_parameters: Optional[Dict[str, Any]] = field(
+    output_parameters: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "OutputParameters"},
     )
     """Output parameter values"""
-    result_sets: Optional[Dict[str, Any]] = field(
+    result_sets: Optional[Dict[str, List[Dict[str, ObjectEntity]]]] = field(
         default=None,
         metadata={"wire_name": "ResultSets"},
     )
@@ -627,7 +637,7 @@ class ProcedureResult:
     Definition: ProcedureResult
     """
 
-    output_parameters: Optional[Dict[str, Any]] = field(
+    output_parameters: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "OutputParameters"},
     )
@@ -639,7 +649,7 @@ class ProcedureResult:
         metadata={"wire_name": "ReturnCode"},
     )
     """Return code of a procedure."""
-    result_sets: Optional[Dict[str, Any]] = field(
+    result_sets: Optional[Dict[str, List[Dict[str, ObjectEntity]]]] = field(
         default=None,
         metadata={"wire_name": "ResultSets"},
     )
@@ -708,7 +718,7 @@ class Server:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the server."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -725,7 +735,7 @@ class SqlItem:
     Definition: SqlItem
     """
 
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "dynamicProperties"},
     )
@@ -737,14 +747,14 @@ class SqlPassThroughNativeQueryBody:
     Definition: SqlPassThroughNativeQueryBody
     """
 
-    actual_parameters: Optional[Dict[str, Any]] = field(
+    actual_parameters: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "actualParameters"},
     )
     """Actual parameters"""
     query: Optional[str] = None
     """Query Text"""
-    formal_parameters: Optional[Dict[str, Any]] = field(
+    formal_parameters: Optional[Dict[str, str]] = field(
         default=None,
         metadata={"wire_name": "formalParameters"},
     )
@@ -757,12 +767,12 @@ class SqlPassThroughNativeQueryResult:
     Definition: SqlPassThroughNativeQueryResult
     """
 
-    output_parameters: Optional[Dict[str, Any]] = field(
+    output_parameters: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "OutputParameters"},
     )
     """Output parameter values"""
-    result_sets: Optional[Dict[str, Any]] = field(
+    result_sets: Optional[Dict[str, List[Dict[str, ObjectEntity]]]] = field(
         default=None,
         metadata={"wire_name": "ResultSets"},
     )
@@ -782,7 +792,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -1011,6 +1021,45 @@ class SqlClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "sql"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def delete_item_async(
         self,
         server: str,
@@ -1187,11 +1236,14 @@ class SqlClient(ConnectorClientBase):
         count: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Get rows
 
         This operation gets rows from a table.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1210,66 +1262,77 @@ class SqlClient(ConnectorClientBase):
             value = str(apply)
             if isinstance(apply, bool):
                 value = value.lower()
-            query_params.append(f"$apply={quote(value)}")
+            query_params.append(f"$apply={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if select is not None:
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if count is not None:
             value = str(count)
             if isinstance(count, bool):
                 value = value.lower()
-            query_params.append(f"$count={quote(value)}")
+            query_params.append(f"$count={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_tables_async(
         self,
@@ -1298,12 +1361,12 @@ class SqlClient(ConnectorClientBase):
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1451,7 +1514,7 @@ class SqlClient(ConnectorClientBase):
         value = str(server)
         if isinstance(server, bool):
             value = value.lower()
-        query_params.append(f"server={quote(value)}")
+        query_params.append(f"server={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1476,11 +1539,14 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         GetTablesForDeleteItem
 
         GetTablesForDeleteItem
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1493,23 +1559,34 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/deleteitem"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_pass_through_native_query_metadata_async(
         self,
@@ -1635,11 +1712,14 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         GetTablesForGetItem
 
         GetTablesForGetItem
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1652,23 +1732,34 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getitem"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_table_async(
         self,
@@ -1700,12 +1791,12 @@ class SqlClient(ConnectorClientBase):
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1730,11 +1821,14 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         GetTablesForOnItemCreated
 
         GetTablesForOnItemCreated
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1747,33 +1841,47 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getonnewitems"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_tables_for_get_on_updated_items_async(
         self,
         server: str,
         database: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         GetTablesForOnItemUpdated
 
         GetTablesForOnItemUpdated
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1786,33 +1894,47 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getonupdateditems"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_tables_for_patch_item_async(
         self,
         server: str,
         database: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         GetTablesForPatchItem
 
         GetTablesForPatchItem
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1825,23 +1947,34 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/patchitem"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_table_for_patch_async(
         self,
@@ -1889,11 +2022,14 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         GetTablesForPostItem
 
         GetTablesForPostItem
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1906,23 +2042,34 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/postitem"
         )
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("@odata.nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def get_procedure_async(
         self,

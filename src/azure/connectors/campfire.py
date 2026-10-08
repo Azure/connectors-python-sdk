@@ -208,11 +208,11 @@ class CampfireClient(ConnectorClientBase):
         value = str(account)
         if isinstance(account, bool):
             value = value.lower()
-        query_params.append(f"account={quote(value)}")
+        query_params.append(f"account={quote(value, safe='')}")
         value = str(message)
         if isinstance(message, bool):
             value = value.lower()
-        query_params.append(f"message={quote(value)}")
+        query_params.append(f"message={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -251,7 +251,7 @@ class CampfireClient(ConnectorClientBase):
         value = str(account)
         if isinstance(account, bool):
             value = value.lower()
-        query_params.append(f"account={quote(value)}")
+        query_params.append(f"account={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -287,7 +287,7 @@ class CampfireClient(ConnectorClientBase):
             value = str(parent_operation)
             if isinstance(parent_operation, bool):
                 value = value.lower()
-            query_params.append(f"parentOperation={quote(value)}")
+            query_params.append(f"parentOperation={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -322,7 +322,7 @@ class CampfireClient(ConnectorClientBase):
         value = str(account)
         if isinstance(account, bool):
             value = value.lower()
-        query_params.append(f"account={quote(value)}")
+        query_params.append(f"account={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

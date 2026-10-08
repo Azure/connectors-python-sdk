@@ -103,13 +103,12 @@ async def example_3_get_pages_in_section():
 
     async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_pages_in_section_async(
+            pages = [item async for item in client.get_pages_in_section_async(
                 notebook_key=NOTEBOOK_KEY,
                 section_id=SECTION_ID
-            )
+            )]
 
-            if result and "value" in result:
-                pages = result["value"]
+            if pages:
                 print(f"Found {len(pages)} pages:")
                 for page in pages[:5]:
                     print(f"  - {page.get('title', 'Untitled')} (id: {page.get('id', 'N/A')})")

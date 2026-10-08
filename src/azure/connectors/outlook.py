@@ -2045,7 +2045,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, Any]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
         default=None,
         metadata={"wire_name": "DynamicProperties"},
     )
@@ -2732,12 +2732,12 @@ class OutlookClient(ConnectorClientBase):
             value = str(include_attachments)
             if isinstance(include_attachments, bool):
                 value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
+            query_params.append(f"includeAttachments={quote(value, safe='')}")
         if internet_message_id is not None:
             value = str(internet_message_id)
             if isinstance(internet_message_id, bool):
                 value = value.lower()
-            query_params.append(f"internetMessageId={quote(value)}")
+            query_params.append(f"internetMessageId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2802,7 +2802,7 @@ class OutlookClient(ConnectorClientBase):
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3090,22 +3090,22 @@ class OutlookClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3401,22 +3401,22 @@ class OutlookClient(ConnectorClientBase):
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3535,67 +3535,67 @@ class OutlookClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/Mail"
         query_params = []
-        query_params.append("fetchOnlyFlagged=" + quote("false"))
+        query_params.append("fetchOnlyFlagged=" + quote("false", safe=''))
         if folder_path is not None:
             value = str(folder_path)
             if isinstance(folder_path, bool):
                 value = value.lower()
-            query_params.append(f"folderPath={quote(value)}")
+            query_params.append(f"folderPath={quote(value, safe='')}")
         if to is not None:
             value = str(to)
             if isinstance(to, bool):
                 value = value.lower()
-            query_params.append(f"to={quote(value)}")
+            query_params.append(f"to={quote(value, safe='')}")
         if cc is not None:
             value = str(cc)
             if isinstance(cc, bool):
                 value = value.lower()
-            query_params.append(f"cc={quote(value)}")
+            query_params.append(f"cc={quote(value, safe='')}")
         if to_or_cc is not None:
             value = str(to_or_cc)
             if isinstance(to_or_cc, bool):
                 value = value.lower()
-            query_params.append(f"toOrCc={quote(value)}")
+            query_params.append(f"toOrCc={quote(value, safe='')}")
         if from_ is not None:
             value = str(from_)
             if isinstance(from_, bool):
                 value = value.lower()
-            query_params.append(f"from={quote(value)}")
+            query_params.append(f"from={quote(value, safe='')}")
         if importance is not None:
             value = str(importance)
             if isinstance(importance, bool):
                 value = value.lower()
-            query_params.append(f"importance={quote(value)}")
+            query_params.append(f"importance={quote(value, safe='')}")
         if fetch_only_with_attachment is not None:
             value = str(fetch_only_with_attachment)
             if isinstance(fetch_only_with_attachment, bool):
                 value = value.lower()
-            query_params.append(f"fetchOnlyWithAttachment={quote(value)}")
+            query_params.append(f"fetchOnlyWithAttachment={quote(value, safe='')}")
         if subject_filter is not None:
             value = str(subject_filter)
             if isinstance(subject_filter, bool):
                 value = value.lower()
-            query_params.append(f"subjectFilter={quote(value)}")
+            query_params.append(f"subjectFilter={quote(value, safe='')}")
         if fetch_only_unread is not None:
             value = str(fetch_only_unread)
             if isinstance(fetch_only_unread, bool):
                 value = value.lower()
-            query_params.append(f"fetchOnlyUnread={quote(value)}")
+            query_params.append(f"fetchOnlyUnread={quote(value, safe='')}")
         if include_attachments is not None:
             value = str(include_attachments)
             if isinstance(include_attachments, bool):
                 value = value.lower()
-            query_params.append(f"includeAttachments={quote(value)}")
+            query_params.append(f"includeAttachments={quote(value, safe='')}")
         if search_query is not None:
             value = str(search_query)
             if isinstance(search_query, bool):
                 value = value.lower()
-            query_params.append(f"searchQuery={quote(value)}")
+            query_params.append(f"searchQuery={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"top={quote(value)}")
+            query_params.append(f"top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -3641,40 +3641,40 @@ class OutlookClient(ConnectorClientBase):
         value = str(calendar_id)
         if isinstance(calendar_id, bool):
             value = value.lower()
-        query_params.append(f"calendarId={quote(value)}")
+        query_params.append(f"calendarId={quote(value, safe='')}")
         value = str(start_date_time_offset)
         if isinstance(start_date_time_offset, bool):
             value = value.lower()
-        query_params.append(f"startDateTimeOffset={quote(value)}")
+        query_params.append(f"startDateTimeOffset={quote(value, safe='')}")
         value = str(end_date_time_offset)
         if isinstance(end_date_time_offset, bool):
             value = value.lower()
-        query_params.append(f"endDateTimeOffset={quote(value)}")
+        query_params.append(f"endDateTimeOffset={quote(value, safe='')}")
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if orderby is not None:
             value = str(orderby)
             if isinstance(orderby, bool):
                 value = value.lower()
-            query_params.append(f"$orderby={quote(value)}")
+            query_params.append(f"$orderby={quote(value, safe='')}")
         if top is not None:
             value = str(top)
             if isinstance(top, bool):
                 value = value.lower()
-            query_params.append(f"$top={quote(value)}")
+            query_params.append(f"$top={quote(value, safe='')}")
         if skip is not None:
             value = str(skip)
             if isinstance(skip, bool):
                 value = value.lower()
-            query_params.append(f"$skip={quote(value)}")
+            query_params.append(f"$skip={quote(value, safe='')}")
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
-            query_params.append(f"search={quote(value)}")
+            query_params.append(f"search={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

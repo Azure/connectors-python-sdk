@@ -31,6 +31,7 @@ from azure.connectors.sdk import (
     ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 async def _invoke_operation(client: SqlClient, operation: str):
@@ -57,7 +58,9 @@ async def _invoke_operation(client: SqlClient, operation: str):
             server="srv", database="db", table="tbl", id="1"
         )
     if operation == "get_items":
-        return await client.get_items_async(server="srv", database="db", table="tbl")
+        return await collect_operation_result(
+            client.get_items_async(server="srv", database="db", table="tbl")
+        )
     if operation == "get_tables":
         return await client.get_tables_async(server="srv", database="db")
     if operation == "patch_item":
@@ -77,7 +80,9 @@ async def _invoke_operation(client: SqlClient, operation: str):
     if operation == "get_databases":
         return await client.get_databases_async(server="srv")
     if operation == "get_tables_for_delete_item":
-        return await client.get_tables_for_delete_item_async(server="srv", database="db")
+        return await collect_operation_result(
+            client.get_tables_for_delete_item_async(server="srv", database="db")
+        )
     if operation == "get_procedures_v2":
         return await client.get_procedures_v2_async(server="srv", database="db")
     if operation == "get_procedure_v2":
@@ -85,23 +90,29 @@ async def _invoke_operation(client: SqlClient, operation: str):
             server="srv", database="db", procedure="proc"
         )
     if operation == "get_tables_for_get_item":
-        return await client.get_tables_for_get_item_async(server="srv", database="db")
+        return await collect_operation_result(
+            client.get_tables_for_get_item_async(server="srv", database="db")
+        )
     if operation == "get_tables_for_get_on_new_items":
-        return await client.get_tables_for_get_on_new_items_async(
+        return await collect_operation_result(client.get_tables_for_get_on_new_items_async(
             server="srv", database="db"
-        )
+        ))
     if operation == "get_tables_for_get_on_updated_items":
-        return await client.get_tables_for_get_on_updated_items_async(
+        return await collect_operation_result(client.get_tables_for_get_on_updated_items_async(
             server="srv", database="db"
-        )
+        ))
     if operation == "get_tables_for_patch_item":
-        return await client.get_tables_for_patch_item_async(server="srv", database="db")
+        return await collect_operation_result(
+            client.get_tables_for_patch_item_async(server="srv", database="db")
+        )
     if operation == "get_table_for_patch":
         return await client.get_table_for_patch_async(
             server="srv", database="db", table="tbl"
         )
     if operation == "get_tables_for_post_item":
-        return await client.get_tables_for_post_item_async(server="srv", database="db")
+        return await collect_operation_result(
+            client.get_tables_for_post_item_async(server="srv", database="db")
+        )
     if operation == "get_table":
         return await client.get_table_async(server="srv", database="db", table="tbl")
     if operation == "get_pass_through_native_query_metadata":
@@ -291,11 +302,11 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_items_async(
+            result = await collect_operation_result(client.get_items_async(
                 server="srv", database="db", table="tbl"
-            )
+            ))
 
-            assert "value" in result
+            assert len(result) > 0
             assert "/v2/datasets/srv,db/tables/tbl/items" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
@@ -313,13 +324,13 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_items_async(
+            await collect_operation_result(client.get_items_async(
                 server="srv",
                 database="db",
                 table="tbl",
                 filter="Id eq 1",
                 top="10",
-            )
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert "$filter=Id%20eq%201" in request_url
@@ -657,7 +668,7 @@ class TestSqlTriggerOperations:
         actual_signatures = {
             name: tuple(inspect.signature(method).parameters)
             for name, method in vars(SqlClient).items()
-            if inspect.iscoroutinefunction(method)
+            if inspect.iscoroutinefunction(method) or inspect.isasyncgenfunction(method)
         }
 
         assert actual_signatures == expected_signatures

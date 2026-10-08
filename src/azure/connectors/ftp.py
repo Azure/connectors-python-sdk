@@ -246,15 +246,15 @@ class FtpClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -400,20 +400,20 @@ class FtpClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/copyFile"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -447,11 +447,11 @@ class FtpClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -487,16 +487,16 @@ class FtpClient(ConnectorClientBase):
             f"/datasets/default/GetFileContentByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -537,7 +537,7 @@ class FtpClient(ConnectorClientBase):
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -635,25 +635,25 @@ class FtpClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if create_folders is not None:
             value = str(create_folders)
             if isinstance(create_folders, bool):
                 value = value.lower()
-            query_params.append(f"createFolders={quote(value)}")
+            query_params.append(f"createFolders={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

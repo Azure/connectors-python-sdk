@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -193,6 +193,11 @@ class ListOfBlobsWithSensitivityLabels:
 
     value: Optional[List[DataWithSensitivityLabelInfo]] = None
     """List of Blobs"""
+    next_link: Optional[str] = field(
+        default=None,
+        metadata={"wire_name": "nextLink"},
+    )
+    """The URL to retrieve the next page."""
 
 
 @dataclass
@@ -439,6 +444,45 @@ class AzureblobClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "azureblob"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def copy_file_async(
         self,
         dataset: str,
@@ -465,20 +509,20 @@ class AzureblobClient(ConnectorClientBase):
             f"/copyFile"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -523,11 +567,11 @@ class AzureblobClient(ConnectorClientBase):
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -566,15 +610,15 @@ class AzureblobClient(ConnectorClientBase):
             f"/files"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(folder_path)
         if isinstance(folder_path, bool):
             value = value.lower()
-        query_params.append(f"folderPath={quote(value)}")
+        query_params.append(f"folderPath={quote(value, safe='')}")
         value = str(name)
         if isinstance(name, bool):
             value = value.lower()
-        query_params.append(f"name={quote(value)}")
+        query_params.append(f"name={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -620,7 +664,7 @@ class AzureblobClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -692,20 +736,20 @@ class AzureblobClient(ConnectorClientBase):
             f"/extractFolderV2"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(source)
         if isinstance(source, bool):
             value = value.lower()
-        query_params.append(f"source={quote(value)}")
+        query_params.append(f"source={quote(value, safe='')}")
         value = str(destination)
         if isinstance(destination, bool):
             value = value.lower()
-        query_params.append(f"destination={quote(value)}")
+        query_params.append(f"destination={quote(value, safe='')}")
         if overwrite is not None:
             value = str(overwrite)
             if isinstance(overwrite, bool):
                 value = value.lower()
-            query_params.append(f"overwrite={quote(value)}")
+            query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -747,7 +791,7 @@ class AzureblobClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -795,17 +839,17 @@ class AzureblobClient(ConnectorClientBase):
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -844,26 +888,26 @@ class AzureblobClient(ConnectorClientBase):
             f"/GetFileContentByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if infer_content_type is not None:
             value = str(infer_content_type)
             if isinstance(infer_content_type, bool):
                 value = value.lower()
-            query_params.append(f"inferContentType={quote(value)}")
+            query_params.append(f"inferContentType={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -906,12 +950,12 @@ class AzureblobClient(ConnectorClientBase):
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -952,21 +996,21 @@ class AzureblobClient(ConnectorClientBase):
             f"/GetFileByPath"
         )
         query_params = []
-        query_params.append("queryParametersSingleEncoded=" + quote("true"))
+        query_params.append("queryParametersSingleEncoded=" + quote("true", safe=''))
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -995,11 +1039,14 @@ class AzureblobClient(ConnectorClientBase):
         use_flat_listing: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Lists blobs
 
         This operation lists blobs in a container.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1014,51 +1061,65 @@ class AzureblobClient(ConnectorClientBase):
             value = str(next_page_marker)
             if isinstance(next_page_marker, bool):
                 value = value.lower()
-            query_params.append(f"nextPageMarker={quote(value)}")
+            query_params.append(f"nextPageMarker={quote(value, safe='')}")
         if use_flat_listing is not None:
             value = str(use_flat_listing)
             if isinstance(use_flat_listing, bool):
                 value = value.lower()
-            query_params.append(f"useFlatListing={quote(value)}")
+            query_params.append(f"useFlatListing={quote(value, safe='')}")
         if extract_sensitivity_label is not None:
             value = str(extract_sensitivity_label)
             if isinstance(extract_sensitivity_label, bool):
                 value = value.lower()
-            query_params.append(f"extractSensitivityLabel={quote(value)}")
+            query_params.append(f"extractSensitivityLabel={quote(value, safe='')}")
         if purview_account_name is not None:
             value = str(purview_account_name)
             if isinstance(purview_account_name, bool):
                 value = value.lower()
-            query_params.append(f"purviewAccountName={quote(value)}")
+            query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def list_root_folder_async(
         self,
         dataset: str,
         next_page_marker: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         Lists blobs in the root folder
 
         This operation lists blobs in the Azure Blob Storage root folder.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1068,31 +1129,42 @@ class AzureblobClient(ConnectorClientBase):
             f"/foldersV2"
         )
         query_params = []
-        query_params.append("useFlatListing=" + quote("false"))
+        query_params.append("useFlatListing=" + quote("false", safe=''))
         if next_page_marker is not None:
             value = str(next_page_marker)
             if isinstance(next_page_marker, bool):
                 value = value.lower()
-            query_params.append(f"nextPageMarker={quote(value)}")
+            query_params.append(f"nextPageMarker={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def set_blob_tier_by_path_async(
         self,
@@ -1117,11 +1189,11 @@ class AzureblobClient(ConnectorClientBase):
         value = str(path)
         if isinstance(path, bool):
             value = value.lower()
-        query_params.append(f"path={quote(value)}")
+        query_params.append(f"path={quote(value, safe='')}")
         value = str(new_tier)
         if isinstance(new_tier, bool):
             value = value.lower()
-        query_params.append(f"newTier={quote(value)}")
+        query_params.append(f"newTier={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

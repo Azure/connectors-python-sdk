@@ -31,6 +31,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 WRITE_OPERATIONS = [
@@ -195,7 +196,7 @@ class TestWriteOperationSignatures:
             return_value=MockResponse(status=200, text="{}"),
         ) as mock_send:
             method = getattr(client, f"{operation}_async")
-            await method(input=input_value, **operation_args)
+            await collect_operation_result(method(input=input_value, **operation_args))
 
             mock_send.assert_called_once_with(
                 http_method,
@@ -231,7 +232,7 @@ class TestWriteOperationSignatures:
         ):
             method = getattr(client, f"{operation}_async")
             with pytest.raises(ConnectorException) as exc_info:
-                await method(input=input_value, **operation_args)
+                await collect_operation_result(method(input=input_value, **operation_args))
 
             assert exc_info.value.status_code == 400
 
@@ -272,13 +273,13 @@ class TestListModelsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_models_async()
+            result = await collect_operation_result(client.list_models_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/models" in call_args[0][1]
-            assert result["value"][0]["id"] == "dtmi:example:Room;1"
+            assert result[0]["id"] == "dtmi:example:Room;1"
 
     @pytest.mark.asyncio
     async def test_with_optional_parameters(self, mock_token_provider):
@@ -296,10 +297,10 @@ class TestListModelsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_models_async(
+            await collect_operation_result(client.list_models_async(
                 dependencies_for="dtmi:example:Room;1",
                 include_model_definition="true"
-            )
+            ))
 
             call_args = mock_send.call_args
             assert "dependenciesFor=" in call_args[0][1]
@@ -322,7 +323,7 @@ class TestListModelsAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_models_async()
+                await collect_operation_result(client.list_models_async())
 
             assert exc_info.value.status_code == 401
 
@@ -673,12 +674,12 @@ class TestListRelationshipsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_relationships_async(
+            result = await collect_operation_result(client.list_relationships_async(
                 twinid="room1"
-            )
+            ))
 
             mock_send.assert_called_once()
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
 
 class TestListIncomingRelationshipsAsync:
@@ -703,13 +704,13 @@ class TestListIncomingRelationshipsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_incoming_relationships_async(
+            result = await collect_operation_result(client.list_incoming_relationships_async(
                 twinid="room1"
-            )
+            ))
 
             mock_send.assert_called_once()
             assert "/incomingrelationships" in mock_send.call_args[0][1]
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
 
 class TestQueryTwinsAsync:

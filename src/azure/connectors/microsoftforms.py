@@ -148,7 +148,7 @@ class MicrosoftformsClient(ConnectorClientBase):
         value = str(response_id)
         if isinstance(response_id, bool):
             value = value.lower()
-        query_params.append(f"response_id={quote(value)}")
+        query_params.append(f"response_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -183,7 +183,12 @@ class MicrosoftformsClient(ConnectorClientBase):
             f"/formapi/api/forms('{quote(str(form_id), safe='')}')"
         )
         query_params = []
-        query_params.append("$select=" + quote("title,modifiedDate,createdDate,status,createdBy"))
+        query_params.append(
+            "$select=" + quote(
+                "title,modifiedDate,createdDate,status,createdBy",
+                safe=''
+            )
+        )
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

@@ -69,13 +69,68 @@ class SampleVisitor(ast.NodeVisitor):
         """Track client instances and statically typed values assigned to names."""
         client_type = self._client_type_from_expression(node.value)
         value_type = self._infer_static_type(node.value)
+        self.visit(node.value)
         for target in node.targets:
             if isinstance(target, ast.Name):
+                if (
+                    isinstance(node.value, ast.IfExp)
+                    and isinstance(node.value.body, ast.Name)
+                    and isinstance(node.value.test, ast.Name)
+                    and node.value.body.id == target.id == node.value.test.id
+                    and isinstance(node.value.orelse, ast.List)
+                    and not node.value.orelse.elts
+                    and self.variable_types.get(target.id) is list
+                ):
+                    self._add_issue(node, "remove redundant fallback for collected items")
+                if (
+                    target.id == "result"
+                    and isinstance(node.value, ast.ListComp)
+                    and any(generator.is_async for generator in node.value.generators)
+                ):
+                    self._add_issue(
+                        node, "capture collected items in a semantic name instead of 'result'"
+                    )
                 if client_type is not None:
                     self.client_variables[target.id] = client_type
+                else:
+                    self.client_variables.pop(target.id, None)
                 if value_type is not None:
                     self.variable_types[target.id] = value_type
-        self.generic_visit(node)
+                else:
+                    self.variable_types.pop(target.id, None)
+            self.visit(target)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        """Keep local variable facts from leaking into another sample function."""
+        self._visit_function(node)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        """Validate synchronous functions with the same parameter scope rules."""
+        self._visit_function(node)
+
+    def _visit_function(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        """Clear inherited parameter facts and restore the enclosing scope after visiting."""
+        for decorator in node.decorator_list:
+            self.visit(decorator)
+        self.visit(node.args)
+        if node.returns is not None:
+            self.visit(node.returns)
+        variable_types = self.variable_types.copy()
+        client_variables = self.client_variables.copy()
+        parameters = [*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs]
+        if node.args.vararg is not None:
+            parameters.append(node.args.vararg)
+        if node.args.kwarg is not None:
+            parameters.append(node.args.kwarg)
+        try:
+            for parameter in parameters:
+                self.variable_types.pop(parameter.arg, None)
+                self.client_variables.pop(parameter.arg, None)
+            for statement in node.body:
+                self.visit(statement)
+        finally:
+            self.variable_types = variable_types
+            self.client_variables = client_variables
 
     def visit_AsyncWith(self, node: ast.AsyncWith) -> None:
         """Track generated clients introduced by async context managers."""
@@ -83,6 +138,65 @@ class SampleVisitor(ast.NodeVisitor):
             client_type = self._client_type_from_expression(item.context_expr)
             if client_type is not None and isinstance(item.optional_vars, ast.Name):
                 self.client_variables[item.optional_vars.id] = client_type
+        self.generic_visit(node)
+
+    def visit_ListComp(self, node: ast.ListComp) -> None:
+        """Validate list comprehensions with local target facts."""
+        self._visit_comprehension(node)
+
+    def visit_SetComp(self, node: ast.SetComp) -> None:
+        """Validate set comprehensions with local target facts."""
+        self._visit_comprehension(node)
+
+    def visit_DictComp(self, node: ast.DictComp) -> None:
+        """Validate dictionary comprehensions with local target facts."""
+        self._visit_comprehension(node)
+
+    def visit_GeneratorExp(self, node: ast.GeneratorExp) -> None:
+        """Validate generator expressions without leaking target facts."""
+        self._visit_comprehension(node)
+
+    def _visit_comprehension(
+        self, node: ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp,
+    ) -> None:
+        """Visit iterables before binding targets and restore the enclosing facts."""
+        variable_types = self.variable_types.copy()
+        client_variables = self.client_variables.copy()
+        try:
+            for generator in node.generators:
+                self.visit(generator.iter)
+                for target in ast.walk(generator.target):
+                    if isinstance(target, ast.Name) and isinstance(target.ctx, ast.Store):
+                        self.variable_types.pop(target.id, None)
+                        self.client_variables.pop(target.id, None)
+                self.visit(generator.target)
+                for condition in generator.ifs:
+                    self.visit(condition)
+            if isinstance(node, ast.DictComp):
+                self.visit(node.key)
+                self.visit(node.value)
+            else:
+                self.visit(node.elt)
+        finally:
+            self.variable_types = variable_types
+            self.client_variables = client_variables
+
+    def visit_Await(self, node: ast.Await) -> None:
+        """Reject awaiting a generated pageable operation instead of iterating it."""
+        call = node.value
+        if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute):
+            client_type = self._client_type_for_receiver(call.func.value)
+            method = getattr(client_type, call.func.attr, None)
+            if inspect.isasyncgenfunction(method):
+                self._add_issue(node, f"'{call.func.attr}' must be consumed with async for")
+        self.generic_visit(node)
+
+    def visit_BoolOp(self, node: ast.BoolOp) -> None:
+        """Reject repeated simple-name conditions in sample consumer code."""
+        if isinstance(node.op, ast.And):
+            names = [value.id for value in node.values if isinstance(value, ast.Name)]
+            if len(names) != len(set(names)):
+                self._add_issue(node, "remove repeated conditions")
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
@@ -103,6 +217,14 @@ class SampleVisitor(ast.NodeVisitor):
                     )
                 else:
                     self._validate_signature(node, method, include_instance=True)
+            else:
+                receiver_type = self._infer_static_type(node.func.value)
+                if receiver_type in {list, dict, set, tuple} and not hasattr(
+                    receiver_type, node.func.attr
+                ):
+                    self._add_issue(
+                        node, f"'{receiver_type.__name__}' has no method '{node.func.attr}'"
+                    )
 
         self.generic_visit(node)
 
@@ -127,6 +249,12 @@ class SampleVisitor(ast.NodeVisitor):
         if isinstance(node, ast.Name):
             return self.variable_types.get(node.id)
 
+        if isinstance(node, ast.IfExp):
+            body_type = self._infer_static_type(node.body)
+            if body_type is not None and body_type is self._infer_static_type(node.orelse):
+                return body_type
+            return None
+
         try:
             return type(ast.literal_eval(node))
         except (ValueError, TypeError, SyntaxError):
@@ -134,8 +262,11 @@ class SampleVisitor(ast.NodeVisitor):
 
         container_types: tuple[tuple[type[ast.AST], type[Any]], ...] = (
             (ast.Dict, dict),
+            (ast.DictComp, dict),
             (ast.List, list),
+            (ast.ListComp, list),
             (ast.Set, set),
+            (ast.SetComp, set),
             (ast.Tuple, tuple),
         )
         for node_type, container_type in container_types:

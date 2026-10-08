@@ -2,6 +2,7 @@
 
 """Unit tests for SlackClient."""
 
+import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -13,6 +14,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.slack import PostMessageRequest, SlackClient, TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestSlackClientInitialization:
@@ -174,6 +176,39 @@ class TestListChannelsAsync:
     """Tests for list_channels_async method."""
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("empty_first_page", [False, True])
+    async def test_continuation_yields_later_channels(self, mock_token_provider, empty_first_page):
+        """Test Slack's OData continuation and exact item/transport contracts."""
+        first_items = [] if empty_first_page else [{"id": "channel-1", "name": "first"}]
+        later_items = [{"id": "channel-2", "details": {"name": "second"}}]
+        async with SlackClient(
+            "https://example.azure.com/connections/test", token_provider=mock_token_provider,
+        ) as client:
+            with patch.object(
+                client._http_client, "send_async", new_callable=AsyncMock,
+                side_effect=[
+                    MockResponse(status=200, text=json.dumps({
+                        "value": first_items, "@odata.nextLink": "?cursor=page-2",
+                    })),
+                    MockResponse(status=200, text=json.dumps({
+                        "value": later_items, "@odata.nextLink": None,
+                    })),
+                ],
+            ) as transport:
+                channels = [channel async for channel in client.list_channels_async()]
+
+            assert channels == first_items + later_items
+            assert transport.await_count == 2
+            assert transport.await_args_list[0].args == (
+                "GET", "https://example.azure.com/connections/test/v3/conversations.list",
+            )
+            assert transport.await_args_list[1].args == (
+                "GET", "https://example.azure.com/connections/test/v3/conversations.list"
+                "?cursor=page-2",
+            )
+            assert all(request.kwargs == {"body": None} for request in transport.await_args_list)
+
+    @pytest.mark.asyncio
     async def test_success(self, mock_token_provider):
         """Test successful channel listing."""
         client = SlackClient(
@@ -191,14 +226,14 @@ class TestListChannelsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_channels_async()
+            result = await collect_operation_result(client.list_channels_async())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/v3/conversations.list" in path
             assert result is not None
-            assert "value" in result
+            assert len(result) > 0
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_token_provider):
@@ -219,7 +254,7 @@ class TestListChannelsAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_channels_async()
+                await collect_operation_result(client.list_channels_async())
 
 
 class TestCreateChannelAsync:

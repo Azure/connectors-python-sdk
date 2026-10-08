@@ -369,12 +369,12 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
-        query_params.append("$count=" + quote("true"))
+        query_params.append("$count=" + quote("true", safe=''))
         if search is not None:
             value = str(search)
             if isinstance(search, bool):
                 value = value.lower()
-            query_params.append(f"$search={quote(value)}")
+            query_params.append(f"$search={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -438,17 +438,17 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(group_id), safe='')}/members"
         )
         query_params = []
-        query_params.append("$count=" + quote("true"))
+        query_params.append("$count=" + quote("true", safe=''))
         if filter is not None:
             value = str(filter)
             if isinstance(filter, bool):
                 value = value.lower()
-            query_params.append(f"$filter={quote(value)}")
+            query_params.append(f"$filter={quote(value, safe='')}")
         if select is not None:
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -488,7 +488,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             value = str(select)
             if isinstance(select, bool):
                 value = value.lower()
-            query_params.append(f"$select={quote(value)}")
+            query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

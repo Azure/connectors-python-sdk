@@ -48,14 +48,14 @@ async def example_1_list_alerts():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_alerts_async(
+            alerts = [item async for item in client.get_alerts_async(
                 top=5,
                 orderby="alertCreationTime desc"
-            )
+            )]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} alerts:")
-                for alert in result["value"][:5]:
+            if alerts:
+                print(f"Found {len(alerts)} alerts:")
+                for alert in alerts[:5]:
                     print(f"  - [{alert.get('severity', 'N/A')}] {alert.get('title', 'N/A')}")
                     print(f"    ID: {alert.get('id', 'N/A')}")
                     print(f"    Status: {alert.get('status', 'N/A')}")
@@ -76,11 +76,11 @@ async def example_2_get_machines():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_machines_async(top=10)
+            machines = [item async for item in client.get_machines_async(top=10)]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} machines:")
-                for machine in result["value"][:5]:
+            if machines:
+                print(f"Found {len(machines)} machines:")
+                for machine in machines[:5]:
                     print(f"  - {machine.get('computerDnsName', 'N/A')}")
                     print(f"    ID: {machine.get('id', 'N/A')}")
                     print(f"    OS: {machine.get('osPlatform', 'N/A')}")
@@ -106,17 +106,17 @@ async def example_3_advanced_hunting():
             query = "DeviceInfo | take 5 | project DeviceName, OSPlatform, PublicIP"
             input_data = AdvancedHuntingInput(query=query)
 
-            result = await client.advanced_hunting_async(input=input_data)
+            hunting_response = await client.advanced_hunting_async(input=input_data)
 
-            if result and result.get("results"):
-                print(f"Query returned {len(result['results'])} results:")
-                for row in result["results"]:
+            if hunting_response and hunting_response.get("results"):
+                print(f"Query returned {len(hunting_response['results'])} results:")
+                for row in hunting_response["results"]:
                     print(f"  - {row}")
             else:
                 print("No results from query.")
 
-            if result and result.get("stats"):
-                print(f"Execution time: {result['stats'].get('executionTime', 'N/A')}s")
+            if hunting_response and hunting_response.get("stats"):
+                print(f"Execution time: {hunting_response['stats'].get('executionTime', 'N/A')}s")
 
         except ConnectorException as ex:
             print(f"Connector error (status {ex.status_code}): {ex}")
@@ -196,14 +196,14 @@ async def example_6_machine_actions():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_machine_actions_async(
+            machine_actions = [item async for item in client.get_machine_actions_async(
                 top=5,
                 orderby="creationDateTimeUtc desc"
-            )
+            )]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} actions:")
-                for action in result["value"][:5]:
+            if machine_actions:
+                print(f"Found {len(machine_actions)} actions:")
+                for action in machine_actions[:5]:
                     print(f"  - Type: {action.get('type', 'N/A')}")
                     print(f"    Status: {action.get('status', 'N/A')}")
                     print(f"    Machine: {action.get('machineId', 'N/A')[:20]}...")
@@ -224,11 +224,11 @@ async def example_7_investigations():
 
     async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
         try:
-            result = await client.get_investigations_async(top=5)
+            investigations = [item async for item in client.get_investigations_async(top=5)]
 
-            if result and result.get("value"):
-                print(f"Found {result.get('count', len(result['value']))} investigations:")
-                for inv in result["value"][:5]:
+            if investigations:
+                print(f"Found {len(investigations)} investigations:")
+                for inv in investigations[:5]:
                     print(f"  - ID: {inv.get('id', 'N/A')}")
                     print(f"    State: {inv.get('state', 'N/A')}")
                     print(f"    Machine: {inv.get('computerDnsName', 'N/A')}")

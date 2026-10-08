@@ -877,27 +877,27 @@ class WebexClient(ConnectorClientBase):
         value = str(room_id)
         if isinstance(room_id, bool):
             value = value.lower()
-        query_params.append(f"roomId={quote(value)}")
+        query_params.append(f"roomId={quote(value, safe='')}")
         if mentioned_people is not None:
             value = str(mentioned_people)
             if isinstance(mentioned_people, bool):
                 value = value.lower()
-            query_params.append(f"mentionedPeople={quote(value)}")
+            query_params.append(f"mentionedPeople={quote(value, safe='')}")
         if before_message is not None:
             value = str(before_message)
             if isinstance(before_message, bool):
                 value = value.lower()
-            query_params.append(f"beforeMessage={quote(value)}")
+            query_params.append(f"beforeMessage={quote(value, safe='')}")
         if before is not None:
             value = str(before)
             if isinstance(before, bool):
                 value = value.lower()
-            query_params.append(f"before={quote(value)}")
+            query_params.append(f"before={quote(value, safe='')}")
         if max is not None:
             value = str(max)
             if isinstance(max, bool):
                 value = value.lower()
-            query_params.append(f"max={quote(value)}")
+            query_params.append(f"max={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -993,12 +993,12 @@ class WebexClient(ConnectorClientBase):
             value = str(id)
             if isinstance(id, bool):
                 value = value.lower()
-            query_params.append(f"id={quote(value)}")
+            query_params.append(f"id={quote(value, safe='')}")
         if email is not None:
             value = str(email)
             if isinstance(email, bool):
                 value = value.lower()
-            query_params.append(f"email={quote(value)}")
+            query_params.append(f"email={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1063,17 +1063,17 @@ class WebexClient(ConnectorClientBase):
             value = str(max)
             if isinstance(max, bool):
                 value = value.lower()
-            query_params.append(f"max={quote(value)}")
+            query_params.append(f"max={quote(value, safe='')}")
         if type_ is not None:
             value = str(type_)
             if isinstance(type_, bool):
                 value = value.lower()
-            query_params.append(f"type={quote(value)}")
+            query_params.append(f"type={quote(value, safe='')}")
         if sort_by is not None:
             value = str(sort_by)
             if isinstance(sort_by, bool):
                 value = value.lower()
-            query_params.append(f"sortBy={quote(value)}")
+            query_params.append(f"sortBy={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

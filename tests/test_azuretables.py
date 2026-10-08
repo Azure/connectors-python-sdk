@@ -2,8 +2,10 @@
 
 """Unit tests for AzuretablesClient."""
 
-import pytest
+import json
 from unittest.mock import AsyncMock, patch
+
+import pytest
 from azure.connectors.azuretables import (
     AzuretablesClient,
     CreateEntityInput,
@@ -27,6 +29,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import collect_operation_result
 
 
 class TestAzuretablesClientInitialization:
@@ -356,6 +359,42 @@ class TestGetEntities:
     """Tests for get_entities_async method."""
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("empty_first_page", [False, True])
+    async def test_continuation_yields_later_entities(self, mock_token_provider, empty_first_page):
+        """Test Azure Tables uses nextLink and terminates after the exact second request."""
+        first_items = [] if empty_first_page else [{"PartitionKey": "pk", "RowKey": "row-1"}]
+        later_items = [{"PartitionKey": "pk", "RowKey": "row-2", "Value": {"count": 2}}]
+        async with AzuretablesClient(
+            "https://example.azure.com/connections/test", token_provider=mock_token_provider,
+        ) as client:
+            with patch.object(
+                client._http_client, "send_async", new_callable=AsyncMock,
+                side_effect=[
+                    MockResponse(status=200, text=json.dumps({
+                        "value": first_items, "nextLink": "?$skiptoken=page-2",
+                    })),
+                    MockResponse(status=200, text=json.dumps({
+                        "value": later_items, "nextLink": None,
+                    })),
+                ],
+            ) as transport:
+                entities = [entity async for entity in client.get_entities_async(
+                    storage_account_name="mystorageaccount", table_name="mytable",
+                )]
+
+            assert entities == first_items + later_items
+            assert transport.await_count == 2
+            assert transport.await_args_list[0].args == (
+                "GET", "https://example.azure.com/connections/test/v2/storageAccounts/"
+                "mystorageaccount/tables/mytable/entities",
+            )
+            assert transport.await_args_list[1].args == (
+                "GET", "https://example.azure.com/connections/test/v2/storageAccounts/"
+                "mystorageaccount/tables/mytable/entities?$skiptoken=page-2",
+            )
+            assert all(request.kwargs == {"body": None} for request in transport.await_args_list)
+
+    @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_token_provider):
         """Test successful GET request."""
         client = AzuretablesClient(
@@ -377,16 +416,16 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_entities_async(
+            result = await collect_operation_result(client.get_entities_async(
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
-            )
+            ))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/storageAccounts/mystorageaccount/tables/mytable/entities" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_token_provider):
@@ -404,12 +443,12 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_entities_async(
+            await collect_operation_result(client.get_entities_async(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 filter="PartitionKey eq 'pk1'",
                 select="Name,Value"
-            )
+            ))
 
             call_args = mock_send.call_args
             url = call_args[0][1]
@@ -433,10 +472,10 @@ class TestGetEntities:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_entities_async(
+                await collect_operation_result(client.get_entities_async(
                     storage_account_name="mystorageaccount",
                     table_name="nonexistent"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 

@@ -1347,15 +1347,15 @@ class MondayClient(ConnectorClientBase):
         value = str(workspace_id)
         if isinstance(workspace_id, bool):
             value = value.lower()
-        query_params.append(f"workspaceId={quote(value)}")
+        query_params.append(f"workspaceId={quote(value, safe='')}")
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"boardId={quote(value)}")
+        query_params.append(f"boardId={quote(value, safe='')}")
         value = str(item_id)
         if isinstance(item_id, bool):
             value = value.lower()
-        query_params.append(f"itemId={quote(value)}")
+        query_params.append(f"itemId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1423,15 +1423,15 @@ class MondayClient(ConnectorClientBase):
         value = str(item_id)
         if isinstance(item_id, bool):
             value = value.lower()
-        query_params.append(f"itemId={quote(value)}")
+        query_params.append(f"itemId={quote(value, safe='')}")
         value = str(workspace_id)
         if isinstance(workspace_id, bool):
             value = value.lower()
-        query_params.append(f"workspaceId={quote(value)}")
+        query_params.append(f"workspaceId={quote(value, safe='')}")
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"boardId={quote(value)}")
+        query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1515,75 +1515,75 @@ class MondayClient(ConnectorClientBase):
         value = str(workspace_id)
         if isinstance(workspace_id, bool):
             value = value.lower()
-        query_params.append(f"workspaceId={quote(value)}")
+        query_params.append(f"workspaceId={quote(value, safe='')}")
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"boardId={quote(value)}")
+        query_params.append(f"boardId={quote(value, safe='')}")
         value = str(group_id)
         if isinstance(group_id, bool):
             value = value.lower()
-        query_params.append(f"groupId={quote(value)}")
+        query_params.append(f"groupId={quote(value, safe='')}")
         if filter1_column is not None:
             value = str(filter1_column)
             if isinstance(filter1_column, bool):
                 value = value.lower()
-            query_params.append(f"filter1Column={quote(value)}")
+            query_params.append(f"filter1Column={quote(value, safe='')}")
         if filter1_operator is not None:
             value = str(filter1_operator)
             if isinstance(filter1_operator, bool):
                 value = value.lower()
-            query_params.append(f"filter1Operator={quote(value)}")
+            query_params.append(f"filter1Operator={quote(value, safe='')}")
         if filter1_value is not None:
             value = str(filter1_value)
             if isinstance(filter1_value, bool):
                 value = value.lower()
-            query_params.append(f"filter1Value={quote(value)}")
+            query_params.append(f"filter1Value={quote(value, safe='')}")
         if filter2_column is not None:
             value = str(filter2_column)
             if isinstance(filter2_column, bool):
                 value = value.lower()
-            query_params.append(f"filter2Column={quote(value)}")
+            query_params.append(f"filter2Column={quote(value, safe='')}")
         if filter2_operator is not None:
             value = str(filter2_operator)
             if isinstance(filter2_operator, bool):
                 value = value.lower()
-            query_params.append(f"filter2Operator={quote(value)}")
+            query_params.append(f"filter2Operator={quote(value, safe='')}")
         if filter2_value is not None:
             value = str(filter2_value)
             if isinstance(filter2_value, bool):
                 value = value.lower()
-            query_params.append(f"filter2Value={quote(value)}")
+            query_params.append(f"filter2Value={quote(value, safe='')}")
         if filter3_column is not None:
             value = str(filter3_column)
             if isinstance(filter3_column, bool):
                 value = value.lower()
-            query_params.append(f"filter3Column={quote(value)}")
+            query_params.append(f"filter3Column={quote(value, safe='')}")
         if filter3_operator is not None:
             value = str(filter3_operator)
             if isinstance(filter3_operator, bool):
                 value = value.lower()
-            query_params.append(f"filter3Operator={quote(value)}")
+            query_params.append(f"filter3Operator={quote(value, safe='')}")
         if filter3_value is not None:
             value = str(filter3_value)
             if isinstance(filter3_value, bool):
                 value = value.lower()
-            query_params.append(f"filter3Value={quote(value)}")
+            query_params.append(f"filter3Value={quote(value, safe='')}")
         if filter4_column is not None:
             value = str(filter4_column)
             if isinstance(filter4_column, bool):
                 value = value.lower()
-            query_params.append(f"filter4Column={quote(value)}")
+            query_params.append(f"filter4Column={quote(value, safe='')}")
         if filter4_operator is not None:
             value = str(filter4_operator)
             if isinstance(filter4_operator, bool):
                 value = value.lower()
-            query_params.append(f"filter4Operator={quote(value)}")
+            query_params.append(f"filter4Operator={quote(value, safe='')}")
         if filter4_value is not None:
             value = str(filter4_value)
             if isinstance(filter4_value, bool):
                 value = value.lower()
-            query_params.append(f"filter4Value={quote(value)}")
+            query_params.append(f"filter4Value={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1701,7 +1701,7 @@ class MondayClient(ConnectorClientBase):
             value = str(workspace_id)
             if isinstance(workspace_id, bool):
                 value = value.lower()
-            query_params.append(f"workspaceId={quote(value)}")
+            query_params.append(f"workspaceId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1739,7 +1739,7 @@ class MondayClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"boardId={quote(value)}")
+        query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1777,7 +1777,7 @@ class MondayClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"boardId={quote(value)}")
+        query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1816,12 +1816,12 @@ class MondayClient(ConnectorClientBase):
         value = str(board_id)
         if isinstance(board_id, bool):
             value = value.lower()
-        query_params.append(f"boardId={quote(value)}")
+        query_params.append(f"boardId={quote(value, safe='')}")
         if column_id is not None:
             value = str(column_id)
             if isinstance(column_id, bool):
                 value = value.lower()
-            query_params.append(f"columnId={quote(value)}")
+            query_params.append(f"columnId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1859,7 +1859,7 @@ class MondayClient(ConnectorClientBase):
             value = str(board_id)
             if isinstance(board_id, bool):
                 value = value.lower()
-            query_params.append(f"boardId={quote(value)}")
+            query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1898,12 +1898,12 @@ class MondayClient(ConnectorClientBase):
             value = str(board_id)
             if isinstance(board_id, bool):
                 value = value.lower()
-            query_params.append(f"boardId={quote(value)}")
+            query_params.append(f"boardId={quote(value, safe='')}")
         if column_id is not None:
             value = str(column_id)
             if isinstance(column_id, bool):
                 value = value.lower()
-            query_params.append(f"columnId={quote(value)}")
+            query_params.append(f"columnId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1943,7 +1943,7 @@ class MondayClient(ConnectorClientBase):
             value = str(board_id)
             if isinstance(board_id, bool):
                 value = value.lower()
-            query_params.append(f"boardId={quote(value)}")
+            query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -1982,7 +1982,7 @@ class MondayClient(ConnectorClientBase):
             value = str(board_id)
             if isinstance(board_id, bool):
                 value = value.lower()
-            query_params.append(f"boardId={quote(value)}")
+            query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2022,7 +2022,7 @@ class MondayClient(ConnectorClientBase):
             value = str(board_id)
             if isinstance(board_id, bool):
                 value = value.lower()
-            query_params.append(f"boardId={quote(value)}")
+            query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2059,7 +2059,7 @@ class MondayClient(ConnectorClientBase):
         value = str(parent_board_id)
         if isinstance(parent_board_id, bool):
             value = value.lower()
-        query_params.append(f"parentBoardId={quote(value)}")
+        query_params.append(f"parentBoardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2096,7 +2096,7 @@ class MondayClient(ConnectorClientBase):
         value = str(parent_board_id)
         if isinstance(parent_board_id, bool):
             value = value.lower()
-        query_params.append(f"parentBoardId={quote(value)}")
+        query_params.append(f"parentBoardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2136,7 +2136,7 @@ class MondayClient(ConnectorClientBase):
             value = str(board_id)
             if isinstance(board_id, bool):
                 value = value.lower()
-            query_params.append(f"boardId={quote(value)}")
+            query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2175,7 +2175,7 @@ class MondayClient(ConnectorClientBase):
         value = str(parent_board_id)
         if isinstance(parent_board_id, bool):
             value = value.lower()
-        query_params.append(f"parentBoardId={quote(value)}")
+        query_params.append(f"parentBoardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -2215,7 +2215,7 @@ class MondayClient(ConnectorClientBase):
             value = str(board_id)
             if isinstance(board_id, bool):
                 value = value.lower()
-            query_params.append(f"boardId={quote(value)}")
+            query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 

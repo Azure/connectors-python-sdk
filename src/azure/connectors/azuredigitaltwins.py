@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Dict, List
+from urllib.parse import quote, urlsplit
 import json
 
 from azure.connectors.sdk import (
@@ -333,6 +333,45 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "azuredigitaltwins"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     async def add_models_async(
         self,
         input: AddModelsInput,
@@ -345,7 +384,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -371,49 +410,63 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         dependencies_for: Optional[str] = None,
         include_model_definition: Optional[str] = None,
         continuation_token: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List Models
 
         Retrieves model metadata and, optionally, model definitions.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if dependencies_for is not None:
             value = str(dependencies_for)
             if isinstance(dependencies_for, bool):
                 value = value.lower()
-            query_params.append(f"dependenciesFor={quote(value)}")
+            query_params.append(f"dependenciesFor={quote(value, safe='')}")
         if include_model_definition is not None:
             value = str(include_model_definition)
             if isinstance(include_model_definition, bool):
                 value = value.lower()
-            query_params.append(f"includeModelDefinition={quote(value)}")
+            query_params.append(f"includeModelDefinition={quote(value, safe='')}")
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
                 value = value.lower()
-            query_params.append(f"continuationToken={quote(value)}")
+            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def delete_model_async(
         self,
@@ -430,7 +483,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/models/{quote(str(modelid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -461,12 +514,12 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/models/{quote(str(modelid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if include_model_definition is not None:
             value = str(include_model_definition)
             if isinstance(include_model_definition, bool):
                 value = value.lower()
-            query_params.append(f"includeModelDefinition={quote(value)}")
+            query_params.append(f"includeModelDefinition={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -502,7 +555,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/models/{quote(str(modelid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -532,7 +585,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -568,7 +621,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -599,7 +652,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -635,7 +688,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -669,7 +722,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(component_path), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -709,7 +762,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(component_path), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -743,7 +796,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -782,7 +835,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -817,7 +870,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -857,7 +910,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/{quote(str(relationship_id), safe='')}"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -877,11 +930,14 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         continuation_token: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List Incoming Relationships
 
         Retrieves all incoming relationships for a digital twin.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -890,31 +946,42 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/incomingrelationships"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
                 value = value.lower()
-            query_params.append(f"continuationToken={quote(value)}")
+            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def send_telemetry_async(
         self,
@@ -931,7 +998,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/digitaltwins/{quote(str(twinid), safe='')}/telemetry"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -967,7 +1034,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             f"/telemetry"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -987,42 +1054,56 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         self,
         twinid: str,
         continuation_token: Optional[str] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncIterator[dict[str, Any]]:
         """
         List Relationships
 
         Retrieves all outgoing relationships from a digital twin.
+
+        Yields items from every response page and automatically follows the
+        connector continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/digitaltwins/{quote(str(twinid), safe='')}/relationships"
         )
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if continuation_token is not None:
             value = str(continuation_token)
             if isinstance(continuation_token, bool):
                 value = value.lower()
-            query_params.append(f"continuationToken={quote(value)}")
+            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        while True:
+            response = await self.http_client.send_async(
+                "GET", request_url, body=request_body
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            if not response.text:
+                return
+
+            page = json.loads(response.text)
+            for item in page.get("value", []):
+                yield item
+
+            next_link = page.get("nextLink")
+            if not next_link:
+                return
+
+            request_url = self._resolve_pagination_url(next_link, request_url)
+            request_body = None
 
     async def query_twins_async(
         self,
@@ -1036,7 +1117,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/query"
         query_params = []
-        query_params.append("api-version=" + quote("2020-10-31"))
+        query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
