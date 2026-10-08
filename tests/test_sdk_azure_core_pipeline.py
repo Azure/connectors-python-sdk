@@ -9,7 +9,12 @@ from aiohttp import web
 from aiohttp.test_utils import TestServer
 from azure.core.credentials import AccessToken, AzureKeyCredential
 from azure.core.exceptions import ServiceRequestError, ServiceResponseTimeoutError
-from azure.core.pipeline.policies import RetryMode, SansIOHTTPPolicy
+from azure.core.pipeline.policies import (
+    AsyncRetryPolicy,
+    HeadersPolicy,
+    RetryMode,
+    SansIOHTTPPolicy,
+)
 from azure.core.pipeline.transport import AsyncHttpTransport, AsyncioRequestsTransport
 
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException, ConnectorHttpClient
@@ -578,3 +583,46 @@ async def test_injected_policies_run_at_their_configured_retry_scope() -> None:
         ("per-retry", "Bearer test-key"),
         ("per-retry", "Bearer test-key"),
     ]
+
+
+@pytest.mark.asyncio
+async def test_explicit_chain_composes_injected_policy_scopes() -> None:
+    """Compose per-call and per-retry extensions with an explicit chain."""
+    events: list[tuple[str, str | None]] = []
+    transport = RecordingTransport(
+        create_response(status=500),
+        create_response(status=200),
+    )
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        policies=[
+            HeadersPolicy(),
+            AsyncRetryPolicy(retry_total=1, retry_backoff_factor=0),
+        ],
+        per_call_policies=RecordingPolicy("per-call", events),
+        per_retry_policies=[RecordingPolicy("per-retry", events)],
+        transport=transport,
+    )
+
+    response = await client.send_async("GET", "https://example.test/items")
+
+    assert response.status == 200
+    assert events == [
+        ("per-call", None),
+        ("per-retry", None),
+        ("per-retry", None),
+    ]
+
+
+def test_explicit_chain_rejects_per_retry_policy_without_retry() -> None:
+    """Reject per-retry extensions when an explicit chain cannot run them."""
+    events: list[tuple[str, str | None]] = []
+
+    with pytest.raises(ValueError, match="no AsyncRetryPolicy"):
+        ConnectorHttpClient(
+            AzureKeyCredential("test-key"),
+            policies=[HeadersPolicy()],
+            per_retry_policies=RecordingPolicy("per-retry", events),
+        )
+
+    assert events == []

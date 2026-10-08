@@ -42,6 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   snapshots and connector errors without re-reading consumed streams. Injected
   transports receive only supported timeout options and close through their
   asynchronous lifecycle.
+- **Explicit Azure Core policy chains**: `per_call_policies` and
+  `per_retry_policies` now compose with an explicit `policies` chain instead of
+  being silently discarded. Per-retry extensions require an `AsyncRetryPolicy`.
 - **Per-operation request controls**: Explicit headers and client request IDs now
   override client defaults without allowing default authorization or content-type
   headers to replace SDK-owned values.

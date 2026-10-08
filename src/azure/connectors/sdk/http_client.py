@@ -116,17 +116,31 @@ class ConnectorHttpClient:
         self._retry_unsafe_http_methods = retry_unsafe_http_methods
         self._transport = transport or AioHttpTransport()
         policy_options = dict(kwargs)
+        per_call_policies = self._as_policy_list(
+            policy_options.pop("per_call_policies", [])
+        )
+        per_retry_policies = self._as_policy_list(
+            policy_options.pop("per_retry_policies", [])
+        )
         policies = policy_options.pop("policies", None)
         if policies is None:
             policies = self._build_policies(
                 credential,
                 policy_options,
+                per_call_policies=per_call_policies,
+                per_retry_policies=per_retry_policies,
                 max_retry_attempts=max_retry_attempts,
                 timeout_seconds=timeout_seconds,
                 use_exponential_backoff=use_exponential_backoff,
                 initial_retry_delay_seconds=initial_retry_delay_seconds,
                 maximum_retry_delay_seconds=maximum_retry_delay_seconds,
                 retry_jitter_factor=retry_jitter_factor,
+            )
+        else:
+            policies = self._compose_policies(
+                policies,
+                per_call_policies=per_call_policies,
+                per_retry_policies=per_retry_policies,
             )
         self._pipeline = AsyncPipeline(self._transport, policies=policies)
 
@@ -135,6 +149,8 @@ class ConnectorHttpClient:
         credential: AsyncTokenCredential | AzureKeyCredential,
         policy_options: Dict[str, Any],
         *,
+        per_call_policies: List[Any],
+        per_retry_policies: List[Any],
         max_retry_attempts: int,
         timeout_seconds: float,
         use_exponential_backoff: bool,
@@ -143,12 +159,6 @@ class ConnectorHttpClient:
         retry_jitter_factor: float,
     ) -> List[Any]:
         """Build the standard Azure Core asynchronous policy chain."""
-        per_call_policies = self._as_policy_list(
-            policy_options.pop("per_call_policies", [])
-        )
-        per_retry_policies = self._as_policy_list(
-            policy_options.pop("per_retry_policies", [])
-        )
         default_headers = {
             name: value
             for name, value in policy_options.pop("headers", {}).items()
@@ -224,6 +234,40 @@ class ConnectorHttpClient:
             ]
         )
         return policies
+
+    @classmethod
+    def _compose_policies(
+        cls,
+        policies: Any,
+        *,
+        per_call_policies: List[Any],
+        per_retry_policies: List[Any],
+    ) -> List[Any]:
+        """Compose extension policies with an explicit Azure Core chain."""
+        composed_policies = per_call_policies + cls._as_policy_list(policies)
+        if not per_retry_policies:
+            return composed_policies
+
+        retry_policy_index = next(
+            (
+                index
+                for index in range(len(composed_policies) - 1, -1, -1)
+                if isinstance(composed_policies[index], AsyncRetryPolicy)
+            ),
+            None,
+        )
+        if retry_policy_index is None:
+            raise ValueError(
+                "Cannot add per_retry_policies because the explicit policy "
+                "chain has no AsyncRetryPolicy."
+            )
+
+        insertion_index = retry_policy_index + 1
+        return (
+            composed_policies[:insertion_index]
+            + per_retry_policies
+            + composed_policies[insertion_index:]
+        )
 
     @classmethod
     def _build_authentication_policy(

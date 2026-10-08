@@ -363,6 +363,9 @@ Generated clients accept any Azure Core `AsyncHttpTransport`. The client closes
 an injected transport through its asynchronous lifecycle; the caller retains
 ownership of the credential. The SDK enforces the total request budget across
 transports and applies transport-specific timeout options only when supported.
+`per_call_policies` and `per_retry_policies` are composed with the default or an
+explicit `policies` chain. An explicit chain using `per_retry_policies` must
+contain an `AsyncRetryPolicy`.
 
 ## Project Structure
 
