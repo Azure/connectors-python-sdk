@@ -55,45 +55,45 @@ async def example_1_create_pipeline_run():
     """Example 1: Create a new pipeline run."""
     print("\n=== Example 1: Create Pipeline Run ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuredatafactoryClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Create parameters for the pipeline run
-            parameters = ParameterValueSpecification(
-                additional_properties={
-                    # Add your pipeline parameters here
-                    # "inputPath": "/data/input",
-                    # "outputPath": "/data/output",
-                }
-            )
+        async with AzuredatafactoryClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Create parameters for the pipeline run
+                parameters = ParameterValueSpecification(
+                    additional_properties={
+                        # Add your pipeline parameters here
+                        # "inputPath": "/data/input",
+                        # "outputPath": "/data/output",
+                    }
+                )
 
-            # Create the pipeline run
-            result = await client.create_pipeline_run_async(
-                input=parameters,
-                subscription_id=SUBSCRIPTION_ID,
-                resource_group_name=RESOURCE_GROUP,
-                data_factory_name=DATA_FACTORY_NAME,
-                pipeline_name=PIPELINE_NAME,
-            )
+                # Create the pipeline run
+                result = await client.create_pipeline_run_async(
+                    input=parameters,
+                    subscription_id=SUBSCRIPTION_ID,
+                    resource_group_name=RESOURCE_GROUP,
+                    data_factory_name=DATA_FACTORY_NAME,
+                    pipeline_name=PIPELINE_NAME,
+                )
 
-            if result:
-                run_id = result.get("runId", "Unknown")
-                print("Pipeline run created successfully!")
-                print(f"Run ID: {run_id}")
-                return run_id
-            else:
-                print("Pipeline run created (no response body)")
+                if result:
+                    run_id = result.get("runId", "Unknown")
+                    print("Pipeline run created successfully!")
+                    print(f"Run ID: {run_id}")
+                    return run_id
+                else:
+                    print("Pipeline run created (no response body)")
+                    return None
+
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code} - {ex.response_body}")
                 return None
-
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code} - {ex.response_body}")
-            return None
-        except Exception as ex:
-            print(f"Error: {ex}")
-            return None
+            except Exception as ex:
+                print(f"Error: {ex}")
+                return None
 
 
 async def example_2_get_pipeline_run_status(run_id: str):
@@ -104,39 +104,39 @@ async def example_2_get_pipeline_run_status(run_id: str):
         print("No run ID provided, skipping...")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuredatafactoryClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Get the pipeline run status
-            result = await client.get_pipeline_run_async(
-                subscription_id=SUBSCRIPTION_ID,
-                resource_group_name=RESOURCE_GROUP,
-                data_factory_name=DATA_FACTORY_NAME,
-                pipeline_run_name=run_id,
-            )
+        async with AzuredatafactoryClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Get the pipeline run status
+                result = await client.get_pipeline_run_async(
+                    subscription_id=SUBSCRIPTION_ID,
+                    resource_group_name=RESOURCE_GROUP,
+                    data_factory_name=DATA_FACTORY_NAME,
+                    pipeline_run_name=run_id,
+                )
 
-            if result:
-                print(f"Pipeline: {result.get('pipelineName', 'N/A')}")
-                print(f"Run ID: {result.get('runId', 'N/A')}")
-                print(f"Status: {result.get('status', 'Unknown')}")
-                print(f"Start Time: {result.get('runStart', 'N/A')}")
-                print(f"End Time: {result.get('runEnd', 'N/A')}")
-                duration = result.get('durationInMs')
-                if duration:
-                    print(f"Duration: {duration}ms ({duration / 1000:.2f}s)")
-                message = result.get('message')
-                if message:
-                    print(f"Message: {message}")
-            else:
-                print("No run status returned")
+                if result:
+                    print(f"Pipeline: {result.get('pipelineName', 'N/A')}")
+                    print(f"Run ID: {result.get('runId', 'N/A')}")
+                    print(f"Status: {result.get('status', 'Unknown')}")
+                    print(f"Start Time: {result.get('runStart', 'N/A')}")
+                    print(f"End Time: {result.get('runEnd', 'N/A')}")
+                    duration = result.get('durationInMs')
+                    if duration:
+                        print(f"Duration: {duration}ms ({duration / 1000:.2f}s)")
+                    message = result.get('message')
+                    if message:
+                        print(f"Message: {message}")
+                else:
+                    print("No run status returned")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_cancel_pipeline_run(run_id: str):
@@ -147,26 +147,26 @@ async def example_3_cancel_pipeline_run(run_id: str):
         print("No run ID provided, skipping...")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuredatafactoryClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Cancel the pipeline run
-            await client.cancel_pipeline_run_async(
-                subscription_id=SUBSCRIPTION_ID,
-                resource_group_name=RESOURCE_GROUP,
-                data_factory_name=DATA_FACTORY_NAME,
-                pipeline_run_name=run_id,
-            )
+        async with AzuredatafactoryClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Cancel the pipeline run
+                await client.cancel_pipeline_run_async(
+                    subscription_id=SUBSCRIPTION_ID,
+                    resource_group_name=RESOURCE_GROUP,
+                    data_factory_name=DATA_FACTORY_NAME,
+                    pipeline_run_name=run_id,
+                )
 
-            print(f"Pipeline run {run_id} cancellation requested")
+                print(f"Pipeline run {run_id} cancellation requested")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_dataclass_usage():

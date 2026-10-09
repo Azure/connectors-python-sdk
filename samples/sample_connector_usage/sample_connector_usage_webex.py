@@ -40,47 +40,47 @@ async def example_1_send_message() -> None:
     """Example 1: Send a message to a space."""
     print("\n=== Example 1: Send Message ===")
 
-    credential = DefaultAzureCredential()
-    async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.send_message_async(
-            input=SendMessageInput(
-                room_id="ROOM_ID",
-                text="Hello from the Webex connector SDK.",
-            ),
-        )
-        print(f"Send result: {result}")
+    async with DefaultAzureCredential() as credential:
+        async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.send_message_async(
+                input=SendMessageInput(
+                    room_id="ROOM_ID",
+                    text="Hello from the Webex connector SDK.",
+                ),
+            )
+            print(f"Send result: {result}")
 
 
 async def example_2_get_spaces() -> None:
     """Example 2: List spaces."""
     print("\n=== Example 2: Get Spaces ===")
 
-    credential = DefaultAzureCredential()
-    async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-        spaces = await client.get_spaces_async()
-        print(f"Spaces: {spaces}")
+    async with DefaultAzureCredential() as credential:
+        async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
+            spaces = await client.get_spaces_async()
+            print(f"Spaces: {spaces}")
 
 
 async def example_3_create_space() -> None:
     """Example 3: Create a space."""
     print("\n=== Example 3: Create Space ===")
 
-    credential = DefaultAzureCredential()
-    async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-        space = await client.create_space_async(
-            input=CreateSpaceInput(title="My New Space"),
-        )
-        print(f"Created space: {space}")
+    async with DefaultAzureCredential() as credential:
+        async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
+            space = await client.create_space_async(
+                input=CreateSpaceInput(title="My New Space"),
+            )
+            print(f"Created space: {space}")
 
 
 async def example_4_get_my_own_details() -> None:
     """Example 4: Get details about the authenticated user."""
     print("\n=== Example 4: Get My Own Details ===")
 
-    credential = DefaultAzureCredential()
-    async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-        me = await client.get_my_own_details_async()
-        print(f"My details: {me}")
+    async with DefaultAzureCredential() as credential:
+        async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
+            me = await client.get_my_own_details_async()
+            print(f"My details: {me}")
 
 
 async def main() -> None:

@@ -36,42 +36,42 @@ async def example_1_list_groups() -> list[dict]:
     """Example 1: List Power BI workspaces (groups)."""
     print("\n=== Example 1: List Groups ===")
 
-    credential = DefaultAzureCredential()
-    async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-        groups_response = await client.list_groups_async()
-        groups = groups_response.get("value", []) if groups_response else []
+    async with DefaultAzureCredential() as credential:
+        async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            groups_response = await client.list_groups_async()
+            groups = groups_response.get("value", []) if groups_response else []
 
-        print(f"Found {len(groups)} groups")
-        for group in groups[:5]:
-            print(f"  - {group.get('name')} ({group.get('id')})")
+            print(f"Found {len(groups)} groups")
+            for group in groups[:5]:
+                print(f"  - {group.get('name')} ({group.get('id')})")
 
-        return groups
+            return groups
 
 
 async def example_2_list_datasets(group_id: str) -> list[dict]:
     """Example 2: List datasets in a specific workspace."""
     print("\n=== Example 2: List Datasets ===")
 
-    credential = DefaultAzureCredential()
-    async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-        datasets_response = await client.list_datasets_async(groupid=group_id)
-        datasets = datasets_response.get("value", []) if datasets_response else []
+    async with DefaultAzureCredential() as credential:
+        async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            datasets_response = await client.list_datasets_async(groupid=group_id)
+            datasets = datasets_response.get("value", []) if datasets_response else []
 
-        print(f"Found {len(datasets)} datasets in group '{group_id}'")
-        for dataset in datasets[:5]:
-            print(f"  - {dataset.get('name')} ({dataset.get('id')})")
+            print(f"Found {len(datasets)} datasets in group '{group_id}'")
+            for dataset in datasets[:5]:
+                print(f"  - {dataset.get('name')} ({dataset.get('id')})")
 
-        return datasets
+            return datasets
 
 
 async def example_3_refresh_dataset(group_id: str, dataset_id: str) -> None:
     """Example 3: Trigger dataset refresh."""
     print("\n=== Example 3: Refresh Dataset ===")
 
-    credential = DefaultAzureCredential()
-    async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-        await client.refresh_dataset_async(groupid=group_id, datasetid=dataset_id)
-        print(f"Refresh requested for dataset '{dataset_id}'")
+    async with DefaultAzureCredential() as credential:
+        async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            await client.refresh_dataset_async(groupid=group_id, datasetid=dataset_id)
+            print(f"Refresh requested for dataset '{dataset_id}'")
 
 
 async def main() -> None:

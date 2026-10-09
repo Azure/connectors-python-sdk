@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.monday import (
     CreateBoardInput,
     CreateColumnInput,
@@ -28,9 +29,7 @@ from azure.connectors.monday import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import get_generated_operations
@@ -157,55 +156,54 @@ class TestMondayClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = MondayClient("https://example.azure.com/connections/test")
+        client = MondayClient("https://example.azure.com/connections/test",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "monday"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = MondayClient("https://example.azure.com/connections/test/")
+        client = MondayClient("https://example.azure.com/connections/test/",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MondayClient("")
+            MondayClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MondayClient(None)
+            MondayClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'monday'."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "monday"
@@ -215,11 +213,11 @@ class TestMondayClientLifecycle:
     """Tests for MondayClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -227,12 +225,12 @@ class TestMondayClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(MondayClient, "close", new_callable=AsyncMock) as mock_close:
             async with MondayClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, MondayClient)
 
@@ -247,11 +245,11 @@ class TestMondayClientOperations:
         assert get_generated_operations(MondayClient) == set(ALL_OPERATIONS)
 
     @pytest.mark.asyncio
-    async def test_create_item_success(self, mock_token_provider):
+    async def test_create_item_success(self, mock_credential):
         """Test create item issues a POST to executePowerAutomateAction/CreateItem."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data": {"id": "9"}}')
 
@@ -270,11 +268,11 @@ class TestMondayClientOperations:
             assert result == {"data": {"id": "9"}}
 
     @pytest.mark.asyncio
-    async def test_update_item_column_success(self, mock_token_provider):
+    async def test_update_item_column_success(self, mock_credential):
         """Test update item column POSTs to executePowerAutomateAction/UpdateItemColumn."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data": {"id": "5"}}')
 
@@ -293,11 +291,11 @@ class TestMondayClientOperations:
             assert result == {"data": {"id": "5"}}
 
     @pytest.mark.asyncio
-    async def test_get_tags_success(self, mock_token_provider):
+    async def test_get_tags_success(self, mock_credential):
         """Test get tags issues a GET to getData/getTagsV2."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data": []}')
 
@@ -315,11 +313,11 @@ class TestMondayClientOperations:
             assert result == {"data": []}
 
     @pytest.mark.asyncio
-    async def test_get_boards_includes_query_parameter(self, mock_token_provider):
+    async def test_get_boards_includes_query_parameter(self, mock_credential):
         """Test get boards appends the workspaceId query parameter."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data": []}')
 
@@ -337,11 +335,11 @@ class TestMondayClientOperations:
             assert "workspaceId=42" in path
 
     @pytest.mark.asyncio
-    async def test_get_subitems_includes_query_parameters(self, mock_token_provider):
+    async def test_get_subitems_includes_query_parameters(self, mock_credential):
         """Test get subitems appends the item lookup query parameters."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data": []}')
 
@@ -359,11 +357,11 @@ class TestMondayClientOperations:
             assert "itemId=3" in path
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -385,13 +383,13 @@ class TestMondayClientErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

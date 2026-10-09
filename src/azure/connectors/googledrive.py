@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -386,8 +388,17 @@ class GoogledriveClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a GoogledriveClient.
@@ -395,17 +406,39 @@ class GoogledriveClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -415,6 +448,11 @@ class GoogledriveClient(ConnectorClientBase):
     async def get_file_metadata_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get file metadata using id
@@ -430,7 +468,11 @@ class GoogledriveClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -450,6 +492,11 @@ class GoogledriveClient(ConnectorClientBase):
         self,
         input: bytes,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update file
@@ -469,6 +516,10 @@ class GoogledriveClient(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -487,6 +538,11 @@ class GoogledriveClient(ConnectorClientBase):
     async def delete_file_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete file
@@ -502,7 +558,11 @@ class GoogledriveClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -516,6 +576,11 @@ class GoogledriveClient(ConnectorClientBase):
     async def get_file_metadata_by_path_async(
         self,
         path: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get file metadata using path
@@ -535,7 +600,11 @@ class GoogledriveClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -555,6 +624,11 @@ class GoogledriveClient(ConnectorClientBase):
         self,
         path: str,
         infer_content_type: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Get file content using path
@@ -580,7 +654,11 @@ class GoogledriveClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -597,6 +675,11 @@ class GoogledriveClient(ConnectorClientBase):
         self,
         id: str,
         infer_content_type: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Get file content using id
@@ -621,7 +704,11 @@ class GoogledriveClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -639,6 +726,11 @@ class GoogledriveClient(ConnectorClientBase):
         source: str,
         destination: str,
         overwrite: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Copy file
@@ -667,7 +759,11 @@ class GoogledriveClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -686,6 +782,11 @@ class GoogledriveClient(ConnectorClientBase):
     async def list_folder_async(
         self,
         id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List files in folder
@@ -701,7 +802,11 @@ class GoogledriveClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -719,6 +824,11 @@ class GoogledriveClient(ConnectorClientBase):
 
     async def list_root_folder_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List files in root folder
@@ -730,7 +840,11 @@ class GoogledriveClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -751,6 +865,11 @@ class GoogledriveClient(ConnectorClientBase):
         input: bytes,
         folder_id: str,
         name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create file
@@ -778,6 +897,10 @@ class GoogledriveClient(ConnectorClientBase):
             request_url,
             body=input,
             content_type="application/octet-stream",
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -798,6 +921,11 @@ class GoogledriveClient(ConnectorClientBase):
         source: str,
         destination: str,
         overwrite: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Extract archive to folder
@@ -826,7 +954,11 @@ class GoogledriveClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

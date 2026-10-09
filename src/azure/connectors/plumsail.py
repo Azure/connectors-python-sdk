@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -1164,8 +1166,17 @@ class PlumsailClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a PlumsailClient.
@@ -1173,17 +1184,39 @@ class PlumsailClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -1192,6 +1225,11 @@ class PlumsailClient(ConnectorClientBase):
 
     async def profiles_me_get_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Profile Info
@@ -1201,7 +1239,11 @@ class PlumsailClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/profiles/me"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1220,6 +1262,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_docx_template_async(
         self,
         input: ApplyDocxTemplateRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Create document from DOCX template
@@ -1233,7 +1280,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1249,6 +1300,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_xlsx_template_async(
         self,
         input: ApplyXlsxTemplateRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Create document from XLSX template
@@ -1262,7 +1318,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1278,6 +1338,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_pptx_async(
         self,
         input: ApplyPptxTemplateRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create document from PPTX template
@@ -1290,7 +1355,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1309,6 +1378,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_docx_async(
         self,
         input: MergeFieldsTemplateRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Fill merge fields in DOCX document
@@ -1324,7 +1398,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1343,6 +1421,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_apply_html_async(
         self,
         input: ApplyHtmlFlowTemplateRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create HTML from template
@@ -1358,7 +1441,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1377,6 +1464,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_html2_pdf_async(
         self,
         input: Html2PdfFlowRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert HTML to PDF
@@ -1390,7 +1482,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1409,6 +1505,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_html2_docx_async(
         self,
         input: Html2DocxFlowRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert HTML to DOCX
@@ -1422,7 +1523,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1441,6 +1546,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_docx2_pdf_async(
         self,
         input: Docx2PdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert DOCX to PDF
@@ -1454,7 +1564,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1473,6 +1587,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_xslx2_pdf_async(
         self,
         input: Xlsx2PdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert XLSX to PDF
@@ -1486,7 +1605,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1502,6 +1625,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_pptx2_pdf_async(
         self,
         input: Pptx2PdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert PPTX to PDF
@@ -1515,7 +1643,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1531,6 +1663,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_any2_pdf_v2_async(
         self,
         input: Any2PdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert to PDF
@@ -1543,7 +1680,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1559,6 +1700,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_email2_pdf_async(
         self,
         input: Email2PdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert Email to PDF
@@ -1571,7 +1717,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1587,6 +1737,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_doc2_docx_async(
         self,
         input: Doc2DocxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert DOC to DOCX
@@ -1600,7 +1755,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1616,6 +1775,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_xls2_xlsx_async(
         self,
         input: Xls2XlsxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert XLS to XLSX
@@ -1629,7 +1793,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1645,6 +1813,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_ppt2_pptx_async(
         self,
         input: Ppt2PptxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert PPT to PPTX
@@ -1658,7 +1831,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1675,6 +1852,11 @@ class PlumsailClient(ConnectorClientBase):
         self,
         input: FlowDocumentsJobsSplitPdfInput,
         type_: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Split PDF
@@ -1694,7 +1876,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1713,6 +1899,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_merge_any_to_pdf_v2_async(
         self,
         input: MergeAny2PdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Merge any files into PDF
@@ -1727,7 +1918,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1743,6 +1938,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_extract_text_from_pdf_async(
         self,
         input: Pdf2TextRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Extract text from PDF document
@@ -1757,7 +1957,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1776,6 +1980,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_pdf2_image_v2_async(
         self,
         input: Pdf2ImageRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert PDF to Image
@@ -1790,7 +1999,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1809,6 +2022,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_image2_pdf_async(
         self,
         input: Image2PdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert Images to PDF
@@ -1820,7 +2038,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1836,6 +2058,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_fill_in_pdf_form_async(
         self,
         input: FillInPdfFormRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Fill in PDF Form
@@ -1849,7 +2076,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1868,6 +2099,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_get_pdf_form_async(
         self,
         input: GetPdfFormRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get Form from PDF
@@ -1881,7 +2117,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1900,6 +2140,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_protect_pdf_async(
         self,
         input: ProtectPdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Protect PDF document
@@ -1913,7 +2158,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1932,6 +2181,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_get_pdf_protection_info_async(
         self,
         input: PdfProtectionInfoRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get information about PDF protection
@@ -1946,7 +2200,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1965,6 +2223,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_compress_pdf_async(
         self,
         input: CompressPdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Compress PDF document
@@ -1978,7 +2241,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1995,6 +2262,11 @@ class PlumsailClient(ConnectorClientBase):
         self,
         input: FlowDocumentsJobsAddWatermarkToPdfInput,
         type_: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add a watermark to PDF
@@ -2015,7 +2287,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2034,6 +2310,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_merge_docx_async(
         self,
         input: MergeDocxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Merge DOCX files
@@ -2047,7 +2328,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2066,6 +2351,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_parse_csv_async(
         self,
         input: ParseCsvFlowRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Parse CSV
@@ -2078,7 +2368,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2097,6 +2391,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_csv2_xlsx_async(
         self,
         input: Csv2XlsxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert CSV to Excel
@@ -2109,7 +2408,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2125,6 +2428,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_json2_xlsx_async(
         self,
         input: Json2XlsxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert JSON to Excel
@@ -2137,7 +2445,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2153,6 +2465,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_json2_csv_async(
         self,
         input: Json2CsvRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert JSON to CSV
@@ -2165,7 +2482,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2181,6 +2502,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_reg_exp_match_async(
         self,
         input: RegExpMatchRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Regular Expression Match
@@ -2197,7 +2523,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2216,6 +2546,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_reg_exp_replace_async(
         self,
         input: RegExpReplaceRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Regular Expression Replace
@@ -2232,7 +2567,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2251,6 +2590,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_reg_exp_test_async(
         self,
         input: RegExpTestRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Regular Expression Test
@@ -2266,7 +2610,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2285,6 +2633,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_create_archive_async(
         self,
         input: CreateArchiveRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create Archive
@@ -2297,7 +2650,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2316,6 +2673,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_extract_archive_async(
         self,
         input: ExtractArchiveRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Extract Archive
@@ -2328,7 +2690,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2347,6 +2713,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_jobs_merge_xlsx_async(
         self,
         input: MergeXlsxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Merge XLSX files
@@ -2360,7 +2731,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2380,6 +2755,11 @@ class PlumsailClient(ConnectorClientBase):
         self,
         input: FlowProcessesFlowJobsExecuteProcessInput,
         process_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Start document generation process with json
@@ -2402,7 +2782,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2419,6 +2803,11 @@ class PlumsailClient(ConnectorClientBase):
         self,
         input: ProcessJsonData,
         process_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Start document generation process
@@ -2441,7 +2830,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2457,6 +2850,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_flow_schema_split_pdf_async(
         self,
         type_: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         SplitPdfSchema
@@ -2476,7 +2874,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2490,6 +2892,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_flow_schema_add_watermark_to_pdf_async(
         self,
         type_: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         AddWatermarkToPdfSchema
@@ -2509,7 +2916,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2522,6 +2933,11 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_processes_flow_schema_get_processes_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         GetProcessesSchema
@@ -2534,7 +2950,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2547,7 +2967,12 @@ class PlumsailClient(ConnectorClientBase):
 
     async def flow_v1_documents_flow_schema_parse_csv_async(
         self,
-        headers: str,
+        headers_parameter: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         ParseCsv
@@ -2559,15 +2984,19 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/DocumentsFlow/Schema/ParseCsv"
         )
         query_params = []
-        value = str(headers)
-        if isinstance(headers, bool):
+        value = str(headers_parameter)
+        if isinstance(headers_parameter, bool):
             value = value.lower()
         query_params.append(f"headers={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2581,6 +3010,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_processes_flow_schema_get_json_data_async(
         self,
         process_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         GetJsonSchema
@@ -2600,7 +3034,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2614,6 +3052,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_processes_flow_triggers_by_process_id_schema_get_async(
         self,
         process_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Get schema of a process
@@ -2631,7 +3074,11 @@ class PlumsailClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2645,6 +3092,11 @@ class PlumsailClient(ConnectorClientBase):
     async def flow_v1_documents_flow_schema_reg_exp_match_async(
         self,
         pattern: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         RegexMatchSchema
@@ -2664,7 +3116,11 @@ class PlumsailClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

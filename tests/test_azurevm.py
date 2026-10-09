@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.azurevm import (
     AzurevmClient,
     VirtualMachine,
@@ -21,8 +22,6 @@ from azure.connectors.azurevm import (
     SubscriptionListResult,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
@@ -34,7 +33,8 @@ class TestAzurevmClientInitialization:
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
         client = AzurevmClient(
-            "https://example.azure.com/connections/test"
+            "https://example.azure.com/connections/test",
+            AzureKeyCredential("test-key"),
         )
 
         assert client._connection_runtime_url == (
@@ -42,62 +42,58 @@ class TestAzurevmClientInitialization:
         )
         assert client.connector_name == "azurevm"
         assert isinstance(
-            client._http_client._token_provider, ManagedIdentityTokenProvider
+            client._http_client._credential, AzureKeyCredential
         )
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
         client = AzurevmClient(
-            "https://example.azure.com/connections/test/"
+            "https://example.azure.com/connections/test/",
+            AzureKeyCredential("test-key"),
         )
 
         assert client._connection_runtime_url == (
             "https://example.azure.com/connections/test"
         )
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(
-            timeout_seconds=60.0, max_retry_attempts=5
-        )
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzurevmClient("")
+            AzurevmClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzurevmClient(None)
+            AzurevmClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azurevm'."""
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "azurevm"
@@ -107,11 +103,11 @@ class TestAzurevmClientLifecycle:
     """Tests for AzurevmClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -121,14 +117,14 @@ class TestAzurevmClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             AzurevmClient, 'close', new_callable=AsyncMock
         ) as mock_close:
             async with AzurevmClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, AzurevmClient)
 
@@ -139,7 +135,7 @@ class TestVirtualMachineGetAsync:
     """Tests for virtual_machine_get_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_vm_data(self, mock_token_provider):
+    async def test_success_returns_vm_data(self, mock_credential):
         """Test successful request returns VM data."""
         response_json = (
             '{"id": "/subscriptions/sub1/resourceGroups/rg1/providers/'
@@ -150,7 +146,7 @@ class TestVirtualMachineGetAsync:
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -175,13 +171,13 @@ class TestVirtualMachineGetAsync:
             assert result["name"] == "vm1"
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test empty response returns None."""
         mock_response = MockResponse(status=200, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -199,7 +195,7 @@ class TestVirtualMachineGetAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(
             status=404,
@@ -208,7 +204,7 @@ class TestVirtualMachineGetAsync:
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -231,13 +227,13 @@ class TestVirtualMachineStartAsync:
     """Tests for virtual_machine_start_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -262,13 +258,13 @@ class TestVirtualMachineDeallocateAsync:
     """Tests for virtual_machine_deallocate_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -293,13 +289,13 @@ class TestVirtualMachinePowerOffAsync:
     """Tests for virtual_machine_poweroff_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -324,13 +320,13 @@ class TestVirtualMachineReapplyAsync:
     """Tests for virtual_machine_reapply_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -355,13 +351,13 @@ class TestVirtualMachineRedeployAsync:
     """Tests for virtual_machine_redeploy_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -386,13 +382,13 @@ class TestVirtualMachineRestartAsync:
     """Tests for virtual_machine_restart_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -417,7 +413,7 @@ class TestVirtualMachineInScaleSetGetAsync:
     """Tests for virtual_machine_in_scale_set_get_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_vm_data(self, mock_token_provider):
+    async def test_success_returns_vm_data(self, mock_credential):
         """Test successful request returns VM in scale set data."""
         response_json = (
             '{"id": "/subscriptions/sub1/resourceGroups/rg1/providers/'
@@ -429,7 +425,7 @@ class TestVirtualMachineInScaleSetGetAsync:
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -453,7 +449,7 @@ class TestVirtualMachineInScaleSetGetAsync:
             assert result["instanceId"] == "0"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(
             status=404,
@@ -462,7 +458,7 @@ class TestVirtualMachineInScaleSetGetAsync:
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -486,13 +482,13 @@ class TestVirtualMachineInScaleSetDeallocateAsync:
     """Tests for virtual_machine_in_scale_set_deallocate_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -518,13 +514,13 @@ class TestVirtualMachineInScaleSetPowerOffAsync:
     """Tests for virtual_machine_in_scale_set_power_off_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -550,13 +546,13 @@ class TestVirtualMachineInScaleSetRedeployAsync:
     """Tests for virtual_machine_in_scale_set_redeploy_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -582,13 +578,13 @@ class TestVirtualMachineInScaleSetReimageAsync:
     """Tests for virtual_machine_in_scale_set_reimage_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -614,13 +610,13 @@ class TestVirtualMachineInScaleSetRestartAsync:
     """Tests for virtual_machine_in_scale_set_restart_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -646,13 +642,13 @@ class TestVirtualMachineInScaleSetStartAsync:
     """Tests for virtual_machine_in_scale_set_start_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(

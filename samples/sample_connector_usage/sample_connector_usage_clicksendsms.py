@@ -40,51 +40,51 @@ async def example_1_send_sms() -> None:
     """Example 1: Send an SMS message."""
     print("\n=== Example 1: Send SMS ===")
 
-    credential = DefaultAzureCredential()
-    async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.sms_send_async(
-            input=SmsSendInput(
-                messages=[
-                    {
-                        "to": "+61411111111",
-                        "body": "Hello from the ClickSend SMS connector SDK.",
-                    }
-                ],
-            ),
-        )
-        print(f"Send result: {result}")
+    async with DefaultAzureCredential() as credential:
+        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.sms_send_async(
+                input=SmsSendInput(
+                    messages=[
+                        {
+                            "to": "+61411111111",
+                            "body": "Hello from the ClickSend SMS connector SDK.",
+                        }
+                    ],
+                ),
+            )
+            print(f"Send result: {result}")
 
 
 async def example_2_get_contact_lists() -> None:
     """Example 2: Get contact lists."""
     print("\n=== Example 2: Get Contact Lists ===")
 
-    credential = DefaultAzureCredential()
-    async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        lists = await client.get_contact_lists_async(page=1, limit=10)
-        print(f"Contact lists: {lists}")
+    async with DefaultAzureCredential() as credential:
+        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            lists = await client.get_contact_lists_async(page=1, limit=10)
+            print(f"Contact lists: {lists}")
 
 
 async def example_3_create_list() -> None:
     """Example 3: Create a new contact list."""
     print("\n=== Example 3: Create Contact List ===")
 
-    credential = DefaultAzureCredential()
-    async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.create_list_async(
-            input=CreateListInput(list_name="My New List"),
-        )
-        print(f"Created list: {result}")
+    async with DefaultAzureCredential() as credential:
+        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.create_list_async(
+                input=CreateListInput(list_name="My New List"),
+            )
+            print(f"Created list: {result}")
 
 
 async def example_4_search_contact_lists() -> None:
     """Example 4: Search contact lists."""
     print("\n=== Example 4: Search Contact Lists ===")
 
-    credential = DefaultAzureCredential()
-    async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        results = await client.search_contact_list_async(q="friends")
-        print(f"Search results: {results}")
+    async with DefaultAzureCredential() as credential:
+        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            results = await client.search_contact_list_async(q="friends")
+            print(f"Search results: {results}")
 
 
 async def main() -> None:

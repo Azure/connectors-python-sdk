@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.webex import (
     CreateSpaceInput,
     CreateSpaceMemberInput,
@@ -15,9 +16,7 @@ from azure.connectors.webex import (
     WebexClient,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -27,55 +26,54 @@ class TestWebexClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = WebexClient("https://example.azure.com/connections/test")
+        client = WebexClient("https://example.azure.com/connections/test",
+                             AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "webex"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = WebexClient("https://example.azure.com/connections/test/")
+        client = WebexClient("https://example.azure.com/connections/test/",
+                             AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WebexClient("")
+            WebexClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WebexClient(None)
+            WebexClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'webex'."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "webex"
@@ -85,11 +83,11 @@ class TestWebexClientLifecycle:
     """Tests for WebexClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -97,12 +95,12 @@ class TestWebexClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(WebexClient, "close", new_callable=AsyncMock) as mock_close:
             async with WebexClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, WebexClient)
 
@@ -113,11 +111,11 @@ class TestWebexClientOperations:
     """Tests for WebexClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
-    async def test_create_space_member_success(self, mock_token_provider):
+    async def test_create_space_member_success(self, mock_credential):
         """Test add member to space issues a POST to the memberships route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "m1"}')
 
@@ -138,11 +136,11 @@ class TestWebexClientOperations:
             assert result == {"id": "m1"}
 
     @pytest.mark.asyncio
-    async def test_get_messages_success(self, mock_token_provider):
+    async def test_get_messages_success(self, mock_credential):
         """Test get messages issues a GET with the roomId query parameter."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"items": []}')
 
@@ -161,11 +159,11 @@ class TestWebexClientOperations:
             assert result == {"items": []}
 
     @pytest.mark.asyncio
-    async def test_send_message_success(self, mock_token_provider):
+    async def test_send_message_success(self, mock_credential):
         """Test send message issues a POST to the messages route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "msg1"}')
 
@@ -186,11 +184,11 @@ class TestWebexClientOperations:
             assert result == {"id": "msg1"}
 
     @pytest.mark.asyncio
-    async def test_get_message_details_success(self, mock_token_provider):
+    async def test_get_message_details_success(self, mock_credential):
         """Test get message details issues a GET to the message route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "msg1"}')
 
@@ -208,11 +206,11 @@ class TestWebexClientOperations:
             assert result == {"id": "msg1"}
 
     @pytest.mark.asyncio
-    async def test_get_people_success(self, mock_token_provider):
+    async def test_get_people_success(self, mock_credential):
         """Test get people issues a GET with query parameters."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"items": []}')
 
@@ -231,11 +229,11 @@ class TestWebexClientOperations:
             assert result == {"items": []}
 
     @pytest.mark.asyncio
-    async def test_get_my_own_details_success(self, mock_token_provider):
+    async def test_get_my_own_details_success(self, mock_credential):
         """Test get my own details issues a GET to the people/me route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "me"}')
 
@@ -253,11 +251,11 @@ class TestWebexClientOperations:
             assert result == {"id": "me"}
 
     @pytest.mark.asyncio
-    async def test_get_spaces_success(self, mock_token_provider):
+    async def test_get_spaces_success(self, mock_credential):
         """Test get spaces issues a GET to the rooms route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"items": []}')
 
@@ -275,11 +273,11 @@ class TestWebexClientOperations:
             assert result == {"items": []}
 
     @pytest.mark.asyncio
-    async def test_create_space_success(self, mock_token_provider):
+    async def test_create_space_success(self, mock_credential):
         """Test create space issues a POST to the rooms route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "R1"}')
 
@@ -300,11 +298,11 @@ class TestWebexClientOperations:
             assert result == {"id": "R1"}
 
     @pytest.mark.asyncio
-    async def test_get_space_detail_success(self, mock_token_provider):
+    async def test_get_space_detail_success(self, mock_credential):
         """Test get space detail issues a GET to the room route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "R1"}')
 
@@ -322,11 +320,11 @@ class TestWebexClientOperations:
             assert result == {"id": "R1"}
 
     @pytest.mark.asyncio
-    async def test_create_team_member_success(self, mock_token_provider):
+    async def test_create_team_member_success(self, mock_credential):
         """Test add member to team issues a POST to the team memberships route."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "tm1"}')
 
@@ -347,11 +345,11 @@ class TestWebexClientOperations:
             assert result == {"id": "tm1"}
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -385,11 +383,11 @@ class TestWebexClientErrorHandling:
             "create_team_member",
         ],
     )
-    async def test_error_response_raises_exception(self, mock_token_provider, operation):
+    async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = WebexClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

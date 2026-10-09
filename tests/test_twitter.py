@@ -6,11 +6,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 import azure.connectors.twitter as twitter_module
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from azure.connectors.twitter import TRIGGER_OPERATIONS, TwitterClient
 from tests.conftest import MockResponse
@@ -40,54 +39,56 @@ class TestTwitterClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = TwitterClient("https://example.azure.com/connections/test")
+        client = TwitterClient("https://example.azure.com/connections/test",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "twitter"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that initialization removes a trailing slash."""
-        client = TwitterClient("https://example.azure.com/connections/test/")
+        client = TwitterClient("https://example.azure.com/connections/test/",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with a custom token provider."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
+    def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom client options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
 
-        assert client._options is options
+        assert client._http_client._timeout_seconds == 60.0
 
     @pytest.mark.parametrize("connection_runtime_url", ["", None])
     def test_init_with_invalid_url_raises_error(self, connection_runtime_url):
         """Test that an empty runtime URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TwitterClient(connection_runtime_url)
+            TwitterClient(connection_runtime_url, AzureKeyCredential("test-key"))
 
 
 class TestTwitterClientLifecycle:
     """Tests for TwitterClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close delegates to the HTTP client."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -96,12 +97,12 @@ class TestTwitterClientLifecycle:
         mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager cleanup."""
         with patch.object(TwitterClient, "close", new_callable=AsyncMock) as mock_close:
             async with TwitterClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, TwitterClient)
 
@@ -129,12 +130,12 @@ class TestTwitterClientOperations:
         expected_method,
         expected_url_suffix,
         expects_body,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation's successful HTTP contract."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -152,11 +153,11 @@ class TestTwitterClientOperations:
         assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_user_timeline_success(self, mock_token_provider):
+    async def test_user_timeline_success(self, mock_credential):
         """Test user timeline query construction."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         response = MockResponse(status=200, text='{"value": []}')
 
@@ -174,11 +175,11 @@ class TestTwitterClientOperations:
         assert result == {"value": []}
 
     @pytest.mark.asyncio
-    async def test_tweet_success(self, mock_token_provider):
+    async def test_tweet_success(self, mock_credential):
         """Test tweet body and query construction."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         response = MockResponse(status=200, text='{"id": "tweet-1"}')
 
@@ -197,11 +198,11 @@ class TestTwitterClientOperations:
         assert result == {"id": "tweet-1"}
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test an empty successful response returns None."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -225,12 +226,12 @@ class TestTwitterClientOperations:
     async def test_non_success_response_raises_exception(
         self,
         operation,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation raises for a non-success response."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(

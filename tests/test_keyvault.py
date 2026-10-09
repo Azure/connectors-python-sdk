@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.keyvault import (
     KeyvaultClient,
     KeyMetadataCollection,
@@ -17,8 +18,6 @@ from azure.connectors.keyvault import (
     KeyDecryptInput,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
@@ -30,7 +29,8 @@ class TestKeyvaultClientInitialization:
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
         client = KeyvaultClient(
-            "https://example.azure.com/connections/test"
+            "https://example.azure.com/connections/test",
+            AzureKeyCredential("test-key"),
         )
 
         assert client._connection_runtime_url == (
@@ -38,62 +38,58 @@ class TestKeyvaultClientInitialization:
         )
         assert client.connector_name == "keyvault"
         assert isinstance(
-            client._http_client._token_provider, ManagedIdentityTokenProvider
+            client._http_client._credential, AzureKeyCredential
         )
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
         client = KeyvaultClient(
-            "https://example.azure.com/connections/test/"
+            "https://example.azure.com/connections/test/",
+            AzureKeyCredential("test-key"),
         )
 
         assert client._connection_runtime_url == (
             "https://example.azure.com/connections/test"
         )
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(
-            timeout_seconds=60.0, max_retry_attempts=5
-        )
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            KeyvaultClient("")
+            KeyvaultClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            KeyvaultClient(None)
+            KeyvaultClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'keyvault'."""
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "keyvault"
@@ -103,11 +99,11 @@ class TestKeyvaultClientLifecycle:
     """Tests for KeyvaultClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -117,14 +113,14 @@ class TestKeyvaultClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             KeyvaultClient, 'close', new_callable=AsyncMock
         ) as mock_close:
             async with KeyvaultClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, KeyvaultClient)
 
@@ -135,7 +131,7 @@ class TestListKeysAsync:
     """Tests for list_keys_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_keys(self, mock_token_provider):
+    async def test_success_returns_keys(self, mock_credential):
         """Test successful request returns key list."""
         response_json = (
             '{"value": [{"name": "key1", "version": "v1"}], '
@@ -145,7 +141,7 @@ class TestListKeysAsync:
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -164,13 +160,13 @@ class TestListKeysAsync:
             assert "value" in result
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test empty response returns None."""
         mock_response = MockResponse(status=200, text='')
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -183,7 +179,7 @@ class TestListKeysAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(
             status=403,
@@ -192,7 +188,7 @@ class TestListKeysAsync:
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -211,14 +207,14 @@ class TestListKeyVersionsAsync:
     """Tests for list_key_versions_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns key versions."""
         response_json = '{"value": [{"version": "v1"}, {"version": "v2"}]}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -240,7 +236,7 @@ class TestGetKeyMetadataAsync:
     """Tests for get_key_metadata_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns key metadata."""
         response_json = (
             '{"name": "mykey", "version": "v1", "is_enabled": true, '
@@ -250,7 +246,7 @@ class TestGetKeyMetadataAsync:
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -269,13 +265,13 @@ class TestGetKeyMetadataAsync:
             assert result["name"] == "mykey"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -294,14 +290,14 @@ class TestGetKeyVersionMetadataAsync:
     """Tests for get_key_version_metadata_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns key version metadata."""
         response_json = '{"name": "mykey", "version": "v1", "is_enabled": true}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -326,14 +322,14 @@ class TestEncryptDataAsync:
     """Tests for encrypt_data_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful encryption."""
         response_json = '{"encrypted_data": "base64encodeddata=="}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         encrypt_input = KeyEncryptInput(
@@ -360,7 +356,7 @@ class TestEncryptDataAsync:
             assert result["encrypted_data"] == "base64encodeddata=="
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(
             status=400,
@@ -369,7 +365,7 @@ class TestEncryptDataAsync:
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         encrypt_input = KeyEncryptInput(
@@ -396,14 +392,14 @@ class TestEncryptDataWithVersionAsync:
     """Tests for encrypt_data_with_version_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful encryption with specific version."""
         response_json = '{"encrypted_data": "encryptedwithv1=="}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         encrypt_input = KeyEncryptInput(
@@ -434,14 +430,14 @@ class TestDecryptDataAsync:
     """Tests for decrypt_data_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful decryption."""
         response_json = '{"raw_data": "Hello, World!"}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         decrypt_input = KeyDecryptInput(
@@ -472,14 +468,14 @@ class TestDecryptDataWithVersionAsync:
     """Tests for decrypt_data_with_version_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful decryption with specific version."""
         response_json = '{"raw_data": "Decrypted data"}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         decrypt_input = KeyDecryptInput(
@@ -510,14 +506,14 @@ class TestListSecretsAsync:
     """Tests for list_secrets_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns secret list."""
         response_json = '{"value": [{"name": "secret1"}, {"name": "secret2"}]}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -535,13 +531,13 @@ class TestListSecretsAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -560,14 +556,14 @@ class TestListSecretVersionsAsync:
     """Tests for list_secret_versions_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns secret versions."""
         response_json = '{"value": [{"version": "v1"}, {"version": "v2"}]}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -591,7 +587,7 @@ class TestGetSecretMetadataAsync:
     """Tests for get_secret_metadata_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns secret metadata."""
         response_json = (
             '{"name": "mysecret", "version": "v1", "is_enabled": true, '
@@ -601,7 +597,7 @@ class TestGetSecretMetadataAsync:
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -626,14 +622,14 @@ class TestGetSecretVersionMetadataAsync:
     """Tests for get_secret_version_metadata_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns secret version metadata."""
         response_json = '{"name": "mysecret", "version": "v1", "is_enabled": true}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -658,7 +654,7 @@ class TestGetSecretAsync:
     """Tests for get_secret_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns secret value."""
         response_json = (
             '{"value": "supersecretvalue", "name": "mysecret", '
@@ -668,7 +664,7 @@ class TestGetSecretAsync:
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -687,13 +683,13 @@ class TestGetSecretAsync:
             assert result["value"] == "supersecretvalue"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -712,14 +708,14 @@ class TestGetSecretVersionAsync:
     """Tests for get_secret_version_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful request returns secret version value."""
         response_json = '{"value": "secretvaluev1", "name": "mysecret"}'
         mock_response = MockResponse(status=200, text=response_json)
 
         client = KeyvaultClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(

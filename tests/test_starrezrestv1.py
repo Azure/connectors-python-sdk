@@ -57,12 +57,12 @@ class TestStarrezrestv1Client(GeneratedConnectorContractTests):
 
 @pytest.mark.asyncio
 async def test_select_booking_sends_filter_and_deserializes_response(
-    mock_token_provider,
+    mock_credential,
 ) -> None:
     """Test a bounded booking query sends a meaningful request body."""
     client = Starrezrestv1Client(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
     request = SelectBookingInput(
         return_empty_array_on_no_result=True,
@@ -81,6 +81,10 @@ async def test_select_booking_sends_filter_and_deserializes_response(
         "POST",
         "https://example.azure.com/connections/test/select/Booking.json",
         body=request,
+        timeout=None,
+        headers=None,
+        client_request_id=None,
+        response_hook=None,
     )
     assert to_wire(request) == {
         "_returnEmptyArrayOnNoResult": True,

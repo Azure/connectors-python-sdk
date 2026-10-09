@@ -7,6 +7,7 @@ import inspect
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.googlecalendar import (
     CalendarEventChangedList,
     CalendarEventList,
@@ -21,9 +22,7 @@ from azure.connectors.googlecalendar import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -65,55 +64,54 @@ class TestGooglecalendarClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = GooglecalendarClient("https://example.azure.com/connections/test")
+        client = GooglecalendarClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "googlecalendar"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = GooglecalendarClient("https://example.azure.com/connections/test/")
+        client = GooglecalendarClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GooglecalendarClient("")
+            GooglecalendarClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GooglecalendarClient(None)
+            GooglecalendarClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'googlecalendar'."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "googlecalendar"
@@ -123,11 +121,11 @@ class TestGooglecalendarClientLifecycle:
     """Tests for GooglecalendarClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -135,7 +133,7 @@ class TestGooglecalendarClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             GooglecalendarClient,
@@ -144,7 +142,7 @@ class TestGooglecalendarClientLifecycle:
         ) as mock_close:
             async with GooglecalendarClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, GooglecalendarClient)
 
@@ -155,11 +153,11 @@ class TestGooglecalendarClientMethods:
     """Success path tests for representative Google Calendar methods."""
 
     @pytest.mark.asyncio
-    async def test_list_calendars_success(self, mock_token_provider):
+    async def test_list_calendars_success(self, mock_credential):
         """Test list_calendars_async returns parsed JSON and query params."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"items":[{"id":"cal1"}]}')
 
@@ -178,11 +176,11 @@ class TestGooglecalendarClientMethods:
             assert "minAccessRole=reader" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_list_events_success(self, mock_token_provider):
+    async def test_list_events_success(self, mock_credential):
         """Test list_events_async serializes optional query parameters."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"items": []}')
 
@@ -207,11 +205,11 @@ class TestGooglecalendarClientMethods:
             assert "q=planning" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_create_event_success(self, mock_token_provider):
+    async def test_create_event_success(self, mock_credential):
         """Test create_event_async sends request body and returns JSON."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"id":"evt123"}')
 
@@ -232,11 +230,11 @@ class TestGooglecalendarClientMethods:
             assert isinstance(call_args.kwargs["body"], RequestEvent)
 
     @pytest.mark.asyncio
-    async def test_list_writable_calendars_success(self, mock_token_provider):
+    async def test_list_writable_calendars_success(self, mock_credential):
         """Test list_writable_calendars_async includes fixed writer query."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"items": []}')
 
@@ -271,13 +269,13 @@ class TestGooglecalendarClientErrorHandling:
     )
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = GooglecalendarClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
@@ -307,10 +305,23 @@ class TestGooglecalendarApiSurface:
             "list_writable_calendars_async": ("self",),
             "update_event_async": ("self", "input", "calendar_id", "event_id"),
         }
+        request_control_parameters = (
+            "timeout",
+            "headers",
+            "client_request_id",
+            "response_hook",
+        )
+        expected_signatures = {
+            name: parameters + request_control_parameters
+            for name, parameters in expected_signatures.items()
+        }
         actual_signatures = {
             name: tuple(inspect.signature(method).parameters)
             for name, method in vars(GooglecalendarClient).items()
-            if inspect.iscoroutinefunction(method)
+            if (
+                inspect.iscoroutinefunction(method)
+                or inspect.isasyncgenfunction(method)
+            )
         }
 
         assert actual_signatures == expected_signatures

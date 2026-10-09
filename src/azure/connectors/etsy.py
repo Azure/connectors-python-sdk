@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, List, Literal
+from typing import Optional, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -2740,8 +2742,17 @@ class EtsyClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a EtsyClient.
@@ -2749,17 +2760,39 @@ class EtsyClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -2768,6 +2801,11 @@ class EtsyClient(ConnectorClientBase):
 
     async def ping_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Ping
@@ -2777,7 +2815,11 @@ class EtsyClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/openapi-ping"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2800,6 +2842,11 @@ class EtsyClient(ConnectorClientBase):
         max_created: int,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a shop payment account ledger's entries
@@ -2836,7 +2883,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2856,6 +2907,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         ledger_entry_ids: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a payment from a payment account ledger entry ID
@@ -2879,7 +2935,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2899,6 +2959,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         receipt_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a payment from a specific receipt
@@ -2916,7 +2981,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2936,6 +3005,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         payment_ids: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a list of payments
@@ -2956,7 +3030,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2976,6 +3054,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         receipt_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a receipt
@@ -2991,7 +3074,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3018,6 +3105,11 @@ class EtsyClient(ConnectorClientBase):
         offset: Optional[int] = None,
         was_paid: Optional[bool] = None,
         was_shipped: Optional[bool] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get receipts
@@ -3074,7 +3166,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3095,6 +3191,11 @@ class EtsyClient(ConnectorClientBase):
         input: ReceiptCreateShipmentInput,
         shop_id: int,
         receipt_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a Shipment Receipt
@@ -3116,7 +3217,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3138,6 +3243,11 @@ class EtsyClient(ConnectorClientBase):
         listing_id: int,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Retrieve a listing's transactions
@@ -3167,7 +3277,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3187,6 +3301,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         receipt_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a receipt's transaction
@@ -3203,7 +3322,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3223,6 +3346,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         transaction_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a transaction
@@ -3238,7 +3366,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3259,6 +3391,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a shop's transaction
@@ -3284,7 +3421,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3305,6 +3446,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get reviews
@@ -3330,7 +3476,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3349,6 +3499,11 @@ class EtsyClient(ConnectorClientBase):
     async def shipping_carriers_async(
         self,
         origin_country_iso: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get shipping carriers
@@ -3366,7 +3521,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3385,6 +3544,11 @@ class EtsyClient(ConnectorClientBase):
     async def shipping_profiles_async(
         self,
         shop_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get shipping profiles
@@ -3398,7 +3562,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3418,6 +3586,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         input: ShippingCreateProfileInput,
         shop_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a shipping profile
@@ -3433,7 +3606,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3453,6 +3630,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         shipping_profile_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Get a shipping profile
@@ -3468,7 +3650,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3483,6 +3669,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         shipping_profile_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete a shipping profile
@@ -3498,7 +3689,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3519,6 +3714,11 @@ class EtsyClient(ConnectorClientBase):
         input: ShippingUpdateProfileInput,
         shop_id: int,
         shipping_profile_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a shipping profile
@@ -3534,7 +3734,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3556,6 +3760,11 @@ class EtsyClient(ConnectorClientBase):
         shipping_profile_id: int,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get profile destinations by shipping profile
@@ -3586,7 +3795,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3607,6 +3820,11 @@ class EtsyClient(ConnectorClientBase):
         input: ShippingCreateDestinationInput,
         shop_id: int,
         shipping_profile_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a shipping profile destination
@@ -3632,7 +3850,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3653,6 +3875,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         shipping_profile_id: int,
         shipping_profile_destination_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a shipping profile destination
@@ -3675,7 +3902,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3692,6 +3923,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         shipping_profile_id: str,
         shipping_profile_destination_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a shipping profile destination
@@ -3710,7 +3946,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3730,6 +3970,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         shipping_profile_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get shipping profile upgrades
@@ -3747,7 +3992,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3768,6 +4017,11 @@ class EtsyClient(ConnectorClientBase):
         input: ShippingCreateUpgradeInput,
         shop_id: int,
         shipping_profile_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a shipping profile upgrade
@@ -3785,7 +4039,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3806,6 +4064,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         shipping_profile_id: int,
         upgrade_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a shipping profile upgrade
@@ -3824,7 +4087,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3841,6 +4108,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         shipping_profile_id: int,
         upgrade_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a shipping profile upgrade
@@ -3859,7 +4131,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3879,6 +4155,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         input: ShopUpdateInput,
         shop_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a shop
@@ -3892,7 +4173,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3911,6 +4196,11 @@ class EtsyClient(ConnectorClientBase):
     async def shop_get_by_owner_id_async(
         self,
         user_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get shop by owner ID
@@ -3923,7 +4213,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3944,6 +4238,11 @@ class EtsyClient(ConnectorClientBase):
         shop_name: str,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Search shops
@@ -3970,7 +4269,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -3989,6 +4292,11 @@ class EtsyClient(ConnectorClientBase):
     async def shop_get_sections_async(
         self,
         shop_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get shop sections
@@ -4002,7 +4310,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4022,6 +4334,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         input: ShopCreateSectionInput,
         shop_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a shop section
@@ -4034,7 +4351,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4053,6 +4374,11 @@ class EtsyClient(ConnectorClientBase):
     async def user_get_async(
         self,
         user_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get user
@@ -4065,7 +4391,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4085,6 +4415,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         shop_section_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get shop section
@@ -4100,7 +4435,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4119,6 +4458,11 @@ class EtsyClient(ConnectorClientBase):
     async def user_get_address_async(
         self,
         user_address_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get user's address
@@ -4132,7 +4476,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4152,6 +4500,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get user addresses
@@ -4174,7 +4527,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4192,6 +4549,11 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_get_taxonomy_nodes_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get seller taxonomy nodes
@@ -4201,7 +4563,11 @@ class EtsyClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/seller-taxonomy/nodes"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4220,6 +4586,11 @@ class EtsyClient(ConnectorClientBase):
     async def listing_get_properties_by_taxonomy_async(
         self,
         taxonomy_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get product properties by taxonomy ID
@@ -4236,7 +4607,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4260,6 +4635,11 @@ class EtsyClient(ConnectorClientBase):
         offset: Optional[int] = None,
         sort_on: Optional[str] = None,
         sort_order: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get listings by shop
@@ -4301,7 +4681,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4321,6 +4705,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         input: ListingCreateInput,
         shop_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a draft listing
@@ -4333,7 +4722,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4353,6 +4746,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         listing_id: int,
         includes: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Get a listing
@@ -4373,7 +4771,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4387,6 +4789,11 @@ class EtsyClient(ConnectorClientBase):
     async def listing_delete_async(
         self,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a listing
@@ -4402,7 +4809,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4424,6 +4835,11 @@ class EtsyClient(ConnectorClientBase):
         max_price: Optional[float] = None,
         taxonomy_id: Optional[int] = None,
         shop_location: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get active listings
@@ -4482,7 +4898,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4504,6 +4924,11 @@ class EtsyClient(ConnectorClientBase):
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         keywords: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get active listings by shop
@@ -4535,7 +4960,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4555,6 +4984,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         listing_ids: str,
         includes: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get listings by ID
@@ -4577,7 +5011,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4598,6 +5036,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get featured listings by shop
@@ -4623,7 +5066,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4644,6 +5091,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         property_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a listing property
@@ -4661,7 +5113,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4678,6 +5134,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         property_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a listing property
@@ -4698,7 +5159,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4718,6 +5183,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         listing_id: int,
         property_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing's property (Beta)
@@ -4734,7 +5204,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4754,6 +5228,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing's properties
@@ -4770,7 +5249,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4791,6 +5274,11 @@ class EtsyClient(ConnectorClientBase):
         input: ListingUpdateInput,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a listing
@@ -4807,7 +5295,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4829,6 +5321,11 @@ class EtsyClient(ConnectorClientBase):
         receipt_id: int,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get listings by shop receipt
@@ -4858,7 +5355,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4882,6 +5383,11 @@ class EtsyClient(ConnectorClientBase):
         offset: Optional[int] = None,
         sort_on: Optional[str] = None,
         sort_order: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get listings by shop section ID
@@ -4921,7 +5427,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4942,6 +5452,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         listing_file_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a file from a listing
@@ -4960,7 +5475,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4981,6 +5500,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         listing_file_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a file from listing
@@ -5001,7 +5525,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5016,6 +5544,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all listing files
@@ -5033,7 +5566,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5054,6 +5591,11 @@ class EtsyClient(ConnectorClientBase):
         input: ListingUploadInput,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Upload a listing file
@@ -5075,7 +5617,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5096,6 +5642,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         listing_image_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing image
@@ -5114,7 +5665,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5135,6 +5690,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         listing_image_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a listing image
@@ -5154,7 +5714,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5169,6 +5733,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing's images
@@ -5186,7 +5755,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5207,6 +5780,11 @@ class EtsyClient(ConnectorClientBase):
         input: ListingUploadImageInput,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Upload a listing image
@@ -5229,7 +5807,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5249,6 +5831,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         listing_id: int,
         includes: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing's inventory
@@ -5272,7 +5859,11 @@ class EtsyClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5292,6 +5883,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         input: ListingUpdateInventoryInput,
         listing_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a listing's inventory
@@ -5308,7 +5904,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5329,6 +5929,11 @@ class EtsyClient(ConnectorClientBase):
         listing_id: int,
         product_id: int,
         product_offering_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing's offering
@@ -5346,7 +5951,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5366,6 +5975,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         listing_id: int,
         product_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing's product
@@ -5382,7 +5996,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5403,6 +6021,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         language: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a listing's translation
@@ -5420,7 +6043,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5442,6 +6069,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         language: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a listing translation
@@ -5459,7 +6091,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5481,6 +6117,11 @@ class EtsyClient(ConnectorClientBase):
         shop_id: int,
         listing_id: int,
         language: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a listing translation
@@ -5498,7 +6139,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5518,6 +6163,11 @@ class EtsyClient(ConnectorClientBase):
         self,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get listing's variation images
@@ -5534,7 +6184,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5555,6 +6209,11 @@ class EtsyClient(ConnectorClientBase):
         input: ListingUpdateVariationInput,
         shop_id: int,
         listing_id: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update a listing's variation images
@@ -5571,7 +6230,11 @@ class EtsyClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

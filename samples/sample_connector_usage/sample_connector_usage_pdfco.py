@@ -42,44 +42,44 @@ async def example_1_html_to_pdf():
     """Example 1: Convert an HTML snippet to a PDF."""
     print("\n=== Example 1: HTML to PDF ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            request = HtmlToPdfInput(
-                html="<h1>Hello from PDF.co</h1>",
-            )
+        async with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                request = HtmlToPdfInput(
+                    html="<h1>Hello from PDF.co</h1>",
+                )
 
-            result = await client.html_to_pdf_async(input=request)
+                result = await client.html_to_pdf_async(input=request)
 
-            print(f"HTML to PDF result: {result}")
+                print(f"HTML to PDF result: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_url_to_pdf():
     """Example 2: Create a PDF from a public URL."""
     print("\n=== Example 2: URL to PDF ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            request = UrlToPdfInput(
-                url="https://example.com",
-            )
+        async with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                request = UrlToPdfInput(
+                    url="https://example.com",
+                )
 
-            result = await client.url_to_pdf_async(input=request)
+                result = await client.url_to_pdf_async(input=request)
 
-            print(f"URL to PDF result: {result}")
+                print(f"URL to PDF result: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

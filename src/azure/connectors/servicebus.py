@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -226,8 +228,17 @@ class ServicebusClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a ServicebusClient.
@@ -235,17 +246,39 @@ class ServicebusClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -257,6 +290,11 @@ class ServicebusClient(ConnectorClientBase):
         input: ServiceBusMessage,
         entity_name: str,
         system_properties: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Send message
@@ -277,7 +315,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -293,6 +335,11 @@ class ServicebusClient(ConnectorClientBase):
         input: SendMessagesInput,
         entity_name: str,
         system_properties: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Send one or more messages
@@ -315,7 +362,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -332,6 +383,11 @@ class ServicebusClient(ConnectorClientBase):
         lock_token: str,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Complete the message in a queue
@@ -363,7 +419,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -380,6 +440,11 @@ class ServicebusClient(ConnectorClientBase):
         lock_token: str,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Abandon the message in a queue
@@ -411,7 +476,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -428,6 +497,11 @@ class ServicebusClient(ConnectorClientBase):
         sequence_number: int,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get deferred message from a queue
@@ -459,7 +533,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -481,6 +559,11 @@ class ServicebusClient(ConnectorClientBase):
         lock_token: str,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Defer the message in a queue
@@ -512,7 +595,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -530,6 +617,11 @@ class ServicebusClient(ConnectorClientBase):
         session_id: Optional[str] = None,
         dead_letter_reason: Optional[str] = None,
         dead_letter_error_description: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Dead-letter the message in a queue
@@ -566,7 +658,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -582,6 +678,11 @@ class ServicebusClient(ConnectorClientBase):
         queue_name: str,
         lock_token: str,
         queue_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Renew lock on the message in a queue
@@ -608,7 +709,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -625,6 +730,11 @@ class ServicebusClient(ConnectorClientBase):
         max_message_count: Optional[int] = None,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get messages from a queue (peek-lock)
@@ -659,7 +769,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -679,6 +793,11 @@ class ServicebusClient(ConnectorClientBase):
         self,
         queue_name: str,
         session_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Close a session in a queue
@@ -694,7 +813,11 @@ class ServicebusClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -709,6 +832,11 @@ class ServicebusClient(ConnectorClientBase):
         self,
         queue_name: str,
         session_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Renew lock on the session in a queue
@@ -724,7 +852,11 @@ class ServicebusClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -742,6 +874,11 @@ class ServicebusClient(ConnectorClientBase):
         lock_token: str,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Complete the message in a topic subscription
@@ -775,7 +912,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -793,6 +934,11 @@ class ServicebusClient(ConnectorClientBase):
         lock_token: str,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Abandon the message in a topic subscription
@@ -826,7 +972,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -844,6 +994,11 @@ class ServicebusClient(ConnectorClientBase):
         sequence_number: int,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get deferred message from a topic subscription
@@ -877,7 +1032,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -900,6 +1059,11 @@ class ServicebusClient(ConnectorClientBase):
         lock_token: str,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Defer the message in a topic subscription
@@ -933,7 +1097,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -952,6 +1120,11 @@ class ServicebusClient(ConnectorClientBase):
         session_id: Optional[str] = None,
         dead_letter_reason: Optional[str] = None,
         dead_letter_error_description: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Dead-letter the message in a topic subscription
@@ -990,7 +1163,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1007,6 +1184,11 @@ class ServicebusClient(ConnectorClientBase):
         subscription_name: str,
         lock_token: str,
         subscription_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Renew lock on the message in a topic subscription
@@ -1035,7 +1217,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1052,6 +1238,11 @@ class ServicebusClient(ConnectorClientBase):
         topic_name: str,
         subscription_name: str,
         subscription_filter_type: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a topic subscription
@@ -1074,7 +1265,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1094,6 +1289,11 @@ class ServicebusClient(ConnectorClientBase):
         self,
         topic_name: str,
         subscription_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a topic subscription
@@ -1108,7 +1308,11 @@ class ServicebusClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1126,6 +1330,11 @@ class ServicebusClient(ConnectorClientBase):
         max_message_count: Optional[int] = None,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get messages from a topic subscription (peek-lock)
@@ -1163,7 +1372,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1184,6 +1397,11 @@ class ServicebusClient(ConnectorClientBase):
         topic_name: str,
         subscription_name: str,
         session_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Close a session in the topic
@@ -1201,7 +1419,11 @@ class ServicebusClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1217,6 +1439,11 @@ class ServicebusClient(ConnectorClientBase):
         topic_name: str,
         subscription_name: str,
         session_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Renew lock on the session in a topic subscription
@@ -1234,7 +1461,11 @@ class ServicebusClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=None
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1247,6 +1478,11 @@ class ServicebusClient(ConnectorClientBase):
 
     async def get_entities_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all entities
@@ -1256,7 +1492,11 @@ class ServicebusClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/entities"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1274,6 +1514,11 @@ class ServicebusClient(ConnectorClientBase):
 
     async def get_system_properties_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the list of system properties
@@ -1283,7 +1528,11 @@ class ServicebusClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/systemproperties"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1301,6 +1550,11 @@ class ServicebusClient(ConnectorClientBase):
 
     async def get_queues_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all queues
@@ -1310,7 +1564,11 @@ class ServicebusClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/queues"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1328,6 +1586,11 @@ class ServicebusClient(ConnectorClientBase):
 
     async def get_session_options_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get session options
@@ -1338,7 +1601,11 @@ class ServicebusClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/sessionoptions"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1356,6 +1623,11 @@ class ServicebusClient(ConnectorClientBase):
 
     async def get_topics_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all topics
@@ -1365,7 +1637,11 @@ class ServicebusClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/topics"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1384,6 +1660,11 @@ class ServicebusClient(ConnectorClientBase):
     async def get_subscriptions_async(
         self,
         topic_name: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get the subscriptions for a topic
@@ -1399,7 +1680,11 @@ class ServicebusClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1418,6 +1703,11 @@ class ServicebusClient(ConnectorClientBase):
     async def get_subscription_filter_async(
         self,
         subscription_filter_type: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get metadata of a filter
@@ -1434,7 +1724,11 @@ class ServicebusClient(ConnectorClientBase):
             request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

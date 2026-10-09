@@ -7,10 +7,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from azure.connectors.trello import (
     Card,
@@ -134,55 +133,54 @@ class TestTrelloClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = TrelloClient("https://example.azure.com/connections/test")
+        client = TrelloClient("https://example.azure.com/connections/test",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "trello"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = TrelloClient("https://example.azure.com/connections/test/")
+        client = TrelloClient("https://example.azure.com/connections/test/",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TrelloClient("")
+            TrelloClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TrelloClient(None)
+            TrelloClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'trello'."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "trello"
@@ -192,11 +190,11 @@ class TestTrelloClientLifecycle:
     """Tests for TrelloClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -204,12 +202,12 @@ class TestTrelloClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(TrelloClient, "close", new_callable=AsyncMock) as mock_close:
             async with TrelloClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, TrelloClient)
 
@@ -230,11 +228,11 @@ class TestTrelloClientOperations:
         assert generated_operations == set(ALL_OPERATIONS)
 
     @pytest.mark.asyncio
-    async def test_list_cards_serializes_path_and_query(self, mock_token_provider):
+    async def test_list_cards_serializes_path_and_query(self, mock_credential):
         """Test list_cards_async serializes its board and query values."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='[{"id":"card"}]')
 
@@ -257,11 +255,11 @@ class TestTrelloClientOperations:
             assert "limit=10" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_create_card_sends_request_body(self, mock_token_provider):
+    async def test_create_card_sends_request_body(self, mock_credential):
         """Test create_card_async sends the request body and board identifier."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         request = CreateCard(name="SDK card", id_list="list")
         mock_response = MockResponse(status=201, text='{"id":"card"}')
@@ -280,11 +278,11 @@ class TestTrelloClientOperations:
             assert mock_send.call_args.kwargs["body"] is request
 
     @pytest.mark.asyncio
-    async def test_delete_card_empty_response_returns_none(self, mock_token_provider):
+    async def test_delete_card_empty_response_returns_none(self, mock_credential):
         """Test delete_card_async returns None for an empty success response."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204, text="")
 
@@ -304,13 +302,13 @@ class TestTrelloClientOperations:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_connector_exception(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test every Trello operation raises for a non-success response."""
         client = TrelloClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"failed"}')
 

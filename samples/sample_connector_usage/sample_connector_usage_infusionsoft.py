@@ -36,45 +36,45 @@ async def example_1_list_tasks() -> None:
     """Example 1: List tasks ordered by due date."""
     print("\n=== Example 1: List Tasks ===")
 
-    credential = DefaultAzureCredential()
-    async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
-        response = await client.list_tasks_async()
-        tasks = response.get("tasks", []) if response else []
+    async with DefaultAzureCredential() as credential:
+        async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
+            response = await client.list_tasks_async()
+            tasks = response.get("tasks", []) if response else []
 
-        print(f"Found {len(tasks)} tasks")
-        for task in tasks[:5]:
-            print(f"  - {task.get('id')}: {task.get('title')}")
+            print(f"Found {len(tasks)} tasks")
+            for task in tasks[:5]:
+                print(f"  - {task.get('id')}: {task.get('title')}")
 
 
 async def example_2_create_task() -> None:
     """Example 2: Create a task."""
     print("\n=== Example 2: Create Task ===")
 
-    credential = DefaultAzureCredential()
-    async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = CreateTaskRequest(
-            title="SDK sample task",
-            description="Created from the infusionsoft SDK sample.",
-            priority=1,
-        )
+    async with DefaultAzureCredential() as credential:
+        async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = CreateTaskRequest(
+                title="SDK sample task",
+                description="Created from the infusionsoft SDK sample.",
+                priority=1,
+            )
 
-        created = await client.create_task_async(input=request)
-        print(f"Created task: {created.get('id') if created else 'n/a'}")
+            created = await client.create_task_async(input=request)
+            print(f"Created task: {created.get('id') if created else 'n/a'}")
 
 
 async def example_3_update_task() -> None:
     """Example 3: Update an existing task."""
     print("\n=== Example 3: Update Task ===")
 
-    credential = DefaultAzureCredential()
-    async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = CreateTaskRequest(
-            title="Updated SDK sample task",
-            description="Updated from the infusionsoft SDK sample.",
-        )
+    async with DefaultAzureCredential() as credential:
+        async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = CreateTaskRequest(
+                title="Updated SDK sample task",
+                description="Updated from the infusionsoft SDK sample.",
+            )
 
-        updated = await client.update_task_async(input=request, id=1)
-        print(f"Updated task: {updated.get('id') if updated else 'n/a'}")
+            updated = await client.update_task_async(input=request, id=1)
+            print(f"Updated task: {updated.get('id') if updated else 'n/a'}")
 
 
 async def main() -> None:

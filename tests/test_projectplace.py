@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.projectplace import (
     CreateCardInput,
     MoveCardInput,
@@ -13,9 +14,7 @@ from azure.connectors.projectplace import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -25,55 +24,54 @@ class TestProjectplaceClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ProjectplaceClient("https://example.azure.com/connections/test")
+        client = ProjectplaceClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "projectplace"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ProjectplaceClient("https://example.azure.com/connections/test/")
+        client = ProjectplaceClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ProjectplaceClient("")
+            ProjectplaceClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ProjectplaceClient(None)
+            ProjectplaceClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'projectplace'."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "projectplace"
@@ -83,11 +81,11 @@ class TestProjectplaceClientLifecycle:
     """Tests for ProjectplaceClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -95,12 +93,12 @@ class TestProjectplaceClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(ProjectplaceClient, "close", new_callable=AsyncMock) as mock_close:
             async with ProjectplaceClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, ProjectplaceClient)
 
@@ -111,11 +109,11 @@ class TestProjectplaceClientOperations:
     """Tests for ProjectplaceClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
-    async def test_create_card_success(self, mock_token_provider):
+    async def test_create_card_success(self, mock_credential):
         """Test create card issues a POST to the create_card route with a body."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": 9}')
 
@@ -134,11 +132,11 @@ class TestProjectplaceClientOperations:
             assert result == {"id": 9}
 
     @pytest.mark.asyncio
-    async def test_move_card_success(self, mock_token_provider):
+    async def test_move_card_success(self, mock_credential):
         """Test move card issues a POST to the move_card route with a body."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": 5}')
 
@@ -157,11 +155,11 @@ class TestProjectplaceClientOperations:
             assert result == {"id": 5}
 
     @pytest.mark.asyncio
-    async def test_list_boards_success(self, mock_token_provider):
+    async def test_list_boards_success(self, mock_credential):
         """Test list boards issues a GET to the list_boards route."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='[]')
 
@@ -179,11 +177,11 @@ class TestProjectplaceClientOperations:
             assert result == []
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_token_provider):
+    async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -206,11 +204,11 @@ class TestProjectplaceClientErrorHandling:
         "operation",
         ["create_card", "move_card", "list_boards"],
     )
-    async def test_error_response_raises_exception(self, mock_token_provider, operation):
+    async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = ProjectplaceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

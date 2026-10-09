@@ -48,32 +48,40 @@ async def example_1_list_devices():
     """Example 1: List devices in the IoT Central application."""
     print("\n=== Example 1: List Devices ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
-        devices = [item async for item in client.devices_list_async(application=APPLICATION)]
+        async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
+            devices = [
+                item async for item in client.devices_list_async(
+                    application=APPLICATION
+                )
+            ]
 
-        print(f"Found {len(devices)} device(s).")
-        for device in devices[:10]:
-            display_name = device.get("displayName", "N/A")
-            device_id = device.get("id", "N/A")
-            print(f"  - {display_name} ({device_id})")
+            print(f"Found {len(devices)} device(s).")
+            for device in devices[:10]:
+                display_name = device.get("displayName", "N/A")
+                device_id = device.get("id", "N/A")
+                print(f"  - {display_name} ({device_id})")
 
 
 async def example_2_list_device_groups():
     """Example 2: List device groups in the IoT Central application."""
     print("\n=== Example 2: List Device Groups ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
-        device_groups = [item async for item in client.device_groups_list_async(application=APPLICATION)]
+        async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
+            device_groups = [
+                item async for item in client.device_groups_list_async(
+                    application=APPLICATION
+                )
+            ]
 
-        print(f"Found {len(device_groups)} device group(s).")
-        for device_group in device_groups[:10]:
-            display_name = device_group.get("displayName", "N/A")
-            group_id = device_group.get("id", "N/A")
-            print(f"  - {display_name} ({group_id})")
+            print(f"Found {len(device_groups)} device group(s).")
+            for device_group in device_groups[:10]:
+                display_name = device_group.get("displayName", "N/A")
+                group_id = device_group.get("id", "N/A")
+                print(f"  - {display_name} ({group_id})")
 
 
 async def example_3_create_device_group():
@@ -86,19 +94,19 @@ async def example_3_create_device_group():
         print("Set AZUREIOTCENTRAL_DEVICE_GROUP_ID to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.device_groups_set_async(
-                input=DeviceGroup(display_name="SDK sample group"),
-                device_group_id=device_group_id,
-                application=APPLICATION,
-            )
-            group_id = result.get("id", "N/A") if result else "N/A"
-            print(f"Device group upserted: {group_id}")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+        async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.device_groups_set_async(
+                    input=DeviceGroup(display_name="SDK sample group"),
+                    device_group_id=device_group_id,
+                    application=APPLICATION,
+                )
+                group_id = result.get("id", "N/A") if result else "N/A"
+                print(f"Device group upserted: {group_id}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 async def main():

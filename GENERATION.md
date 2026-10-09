@@ -8,8 +8,8 @@ The **CodefulSdkGenerator** tool generates typed Python clients from managed con
 
 - **Type-safe contracts** - Dataclass models with proper JSON field mappings
 - **Typed client classes** - Async methods for each connector action with comprehensive docstrings
-- **Authentication handling** - Built-in token acquisition for API Hub using `TokenProvider` interface
-- **Async/await support** - Native asyncio integration with aiohttp
+- **Authentication handling** - Caller-owned Azure Core token or key credentials
+- **Async/await support** - Native asyncio integration through the Azure Core pipeline
 
 ## Prerequisites
 
@@ -169,7 +169,11 @@ async for item in client.get_items_async(...):
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from azure.connectors.sdk import ConnectorClientBase, TokenProvider
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
+from azure.connectors.sdk import ConnectorClientBase
 
 # ===== Types =====
 
@@ -196,18 +200,25 @@ class Office365Client(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
-        """
-        Initialize the Office 365 client.
-        
-        Args:
-            connection_runtime_url: Runtime URL for the connection
-            token_provider: Provider for authentication tokens
-            options: Client configuration options
-        """
-        super().__init__(connection_runtime_url, token_provider, options)
+        """Initialize the Office 365 client with an Azure Core credential."""
+        if not connection_runtime_url:
+            raise ValueError("connection_runtime_url cannot be None or empty")
+
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            transport=transport,
+            **kwargs,
+        )
+        self._connection_runtime_url = connection_runtime_url.rstrip("/")
     
     async def send_email_v2_async(
         self,
@@ -275,14 +286,19 @@ All generated clients extend `ConnectorClientBase`:
 ```python
 class SharepointonlineClient(ConnectorClientBase):
     """Typed client for SharePoint Online connector."""
-    
-    def __init__(self, connection_runtime_url: str, token_provider: Optional[TokenProvider] = None):
-        super().__init__(connection_runtime_url, token_provider)
+
+    def __init__(
+        self,
+        connection_runtime_url: str,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+    ):
+        super().__init__(credential)
+        self._connection_runtime_url = connection_runtime_url.rstrip("/")
 ```
 
 This inheritance provides:
 - HTTP client with retry logic
-- Token acquisition via `TokenProvider`
+- Authentication through caller-owned Azure Core credentials
 - Lifecycle management (async context manager, close)
 - Error handling with `ConnectorException`
 
@@ -671,14 +687,14 @@ The connector SDK spans 4 repositories with a strict data flow:
 
 The generated code depends on the runtime SDK for:
 
-- `ITokenProvider` / `ManagedIdentityTokenProvider` - Authentication
-- `ConnectorHttpClient` - HTTP operations with retry
-- `ConnectorJsonSerializer` - JSON serialization helpers
+- `AsyncTokenCredential` or `AzureKeyCredential` authentication
+- `ConnectorHttpClient` Azure Core pipeline, retry, and request controls
+- Shared wire serialization and immutable response-hook contracts
 
-Install the SDK NuGet package in your project:
+Install the package with Azure Identity support:
 
-```xml
-<PackageReference Include="Microsoft.Azure.Connectors.Sdk" Version="1.0.0" />
+```bash
+python -m pip install azure-connectors
 ```
 
 ## Regeneration Schedule

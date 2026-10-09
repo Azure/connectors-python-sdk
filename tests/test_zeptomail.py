@@ -38,7 +38,7 @@ class TestZeptomailClient(GeneratedConnectorContractTests):
 
 @pytest.mark.asyncio
 async def test_send_template_mail_preserves_mixed_values(
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test the template-mail request serializes mixed merge values unchanged."""
     type_hints = get_type_hints(SendTemplateMailInput)
@@ -47,7 +47,7 @@ async def test_send_template_mail_preserves_mixed_values(
     )
     client = ZeptomailClient(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
 
     with patch.object(
@@ -63,6 +63,10 @@ async def test_send_template_mail_preserves_mixed_values(
         "POST",
         "https://example.azure.com/connections/test/v1.0/email/template",
         body=model,
+        timeout=None,
+        headers=None,
+        client_request_id=None,
+        response_hook=None,
     )
     request_body = mock_send.call_args.kwargs["body"]
     assert to_wire(request_body)["merge_key_detail"] == [
@@ -84,12 +88,12 @@ def test_reply_to_uses_corrected_model_in_both_requests() -> None:
 
 @pytest.mark.asyncio
 async def test_get_processed_emails_uses_exact_encoded_query(
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test the processed-email route and every encoded query key and value."""
     client = ZeptomailClient(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
     expected_url = (
         "https://example.azure.com/connections/test/v1.0/email"
@@ -117,5 +121,13 @@ async def test_get_processed_emails_uses_exact_encoded_query(
             is_sb=False,
         )
 
-    mock_send.assert_awaited_once_with("GET", expected_url, body=None)
+    mock_send.assert_awaited_once_with(
+        "GET",
+        expected_url,
+        body=None,
+        timeout=None,
+        headers=None,
+        client_request_id=None,
+        response_hook=None,
+    )
     assert result == {"data": []}

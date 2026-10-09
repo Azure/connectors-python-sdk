@@ -6,15 +6,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 import json
+
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -4762,8 +4764,17 @@ class PdfcoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a PdfcoClient.
@@ -4771,17 +4782,39 @@ class PdfcoClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -4791,6 +4824,11 @@ class PdfcoClient(ConnectorClientBase):
     async def html_to_pdf_async(
         self,
         input: HtmlToPdfInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         HTML to PDF
@@ -4804,7 +4842,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4823,6 +4865,11 @@ class PdfcoClient(ConnectorClientBase):
     async def url_to_pdf_async(
         self,
         input: UrlToPdfInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         URL to PDF
@@ -4834,7 +4881,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/url"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4853,6 +4904,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_filler_async(
         self,
         input: PdfFillerInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add Text, Images, Form Fields to PDF
@@ -4865,7 +4921,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/add"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4884,6 +4944,11 @@ class PdfcoClient(ConnectorClientBase):
     async def merge_pdf_simplified_async(
         self,
         input: MergePdfSimplifiedInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Merge PDF
@@ -4895,7 +4960,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/merge"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4914,6 +4983,11 @@ class PdfcoClient(ConnectorClientBase):
     async def merge_pdf_async(
         self,
         input: MergePdfInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Merge PDF (Advanced)
@@ -4927,7 +5001,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/merge2"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4946,6 +5024,11 @@ class PdfcoClient(ConnectorClientBase):
     async def split_pdf_async(
         self,
         input: SplitPdfInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Split PDF
@@ -4958,7 +5041,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/split"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -4977,6 +5064,11 @@ class PdfcoClient(ConnectorClientBase):
     async def split_pdf2_async(
         self,
         input: SplitPdf2Input,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Split PDF (Advanced)
@@ -4989,7 +5081,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/split2"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5008,6 +5104,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_search_text_async(
         self,
         input: PDFSearchTextInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Search Text
@@ -5020,7 +5121,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/find"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5039,6 +5144,11 @@ class PdfcoClient(ConnectorClientBase):
     async def document_parser_async(
         self,
         input: DocumentParserInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Document Parser
@@ -5053,7 +5163,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/documentparser"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5072,6 +5186,11 @@ class PdfcoClient(ConnectorClientBase):
     async def job_check_async(
         self,
         input: JobCheckInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Background Jobs Check
@@ -5084,7 +5203,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/job/check"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5103,6 +5226,11 @@ class PdfcoClient(ConnectorClientBase):
     async def barcode_generator_async(
         self,
         input: BarcodeGeneratorInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Barcode Generator
@@ -5116,7 +5244,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/barcode/generate"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5135,6 +5267,11 @@ class PdfcoClient(ConnectorClientBase):
     async def barcode_reader_async(
         self,
         input: BarcodeReaderInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Barcode Reader
@@ -5150,7 +5287,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5169,6 +5310,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_info_reader_async(
         self,
         input: PDFInfoReaderInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Info Reader
@@ -5181,7 +5327,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/info"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5200,6 +5350,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_forms_info_reader_async(
         self,
         input: PDFFormsInfoReaderInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Forms Info Reader
@@ -5212,7 +5367,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/info/fields"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5231,6 +5390,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_find_table_async(
         self,
         input: PDFFindTableInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Find Table
@@ -5244,7 +5408,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/find/table"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5263,6 +5431,11 @@ class PdfcoClient(ConnectorClientBase):
     async def search_and_replace_async(
         self,
         input: SearchAndReplaceInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Search and Replace Text
@@ -5277,7 +5450,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5296,6 +5473,11 @@ class PdfcoClient(ConnectorClientBase):
     async def search_and_replace_with_image_async(
         self,
         input: SearchAndReplaceWithImageInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Search and Replace Text with Image
@@ -5311,7 +5493,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5330,6 +5516,11 @@ class PdfcoClient(ConnectorClientBase):
     async def search_and_delete_text_async(
         self,
         input: SearchAndDeleteTextInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Search and Delete Text from PDF
@@ -5342,7 +5533,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/delete-text"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5361,6 +5556,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_searchable_async(
         self,
         input: PDFSearchableInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Make Scanned PDF to Text Searchable
@@ -5373,7 +5573,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/makesearchable"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5392,6 +5596,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_unsearchable_async(
         self,
         input: PDFUnSearchableInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF to Scanned PDF
@@ -5404,7 +5613,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/makeunsearchable"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5423,6 +5636,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_csv_async(
         self,
         input: PDFToCSVInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To CSV
@@ -5435,7 +5653,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/csv"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5454,6 +5676,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_json_async(
         self,
         input: PDFToJSONInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To JSON
@@ -5466,7 +5693,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/json2"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5485,6 +5716,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_json_meta_async(
         self,
         input: PDFToJSONMetaInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To JSON (AI Powered)
@@ -5500,7 +5736,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5519,6 +5759,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_text_async(
         self,
         input: PDFToTextInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To Text (with layout and ocr)
@@ -5531,7 +5776,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/text"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5550,6 +5799,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_text_simple_async(
         self,
         input: PDFToTextSimpleInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To Text (without layout and ocr)
@@ -5564,7 +5818,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5583,6 +5841,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_xls_async(
         self,
         input: PDFToXLSInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To XLS
@@ -5595,7 +5858,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xls"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5614,6 +5881,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_xlsx_async(
         self,
         input: PDFToXLSXInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To XLSX
@@ -5626,7 +5898,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xlsx"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5645,6 +5921,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_xml_async(
         self,
         input: PDFToXMLInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF To XML
@@ -5657,7 +5938,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xml"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5676,6 +5961,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_jpg_async(
         self,
         input: PDFToJPGInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF to JPG
@@ -5688,7 +5978,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/jpg"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5707,6 +6001,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_png_async(
         self,
         input: PDFToPNGInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF to PNG
@@ -5719,7 +6018,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/png"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5738,6 +6041,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_webp_async(
         self,
         input: PDFToWEBPInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF to WEBP
@@ -5750,7 +6058,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/webp"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5769,6 +6081,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_to_tiff_async(
         self,
         input: PDFToTIFFInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF to TIFF
@@ -5782,7 +6099,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/tiff"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5801,6 +6122,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_from_csv_async(
         self,
         input: PDFFromCSVInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF from CSV
@@ -5813,7 +6139,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/csv"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5832,6 +6162,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_from_doc_async(
         self,
         input: PDFFromDocInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF from Document (Doc, DocX, RTF, TXT, XPS)
@@ -5844,7 +6179,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/doc"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5863,6 +6202,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_from_images_async(
         self,
         input: PDFFromImagesInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF from Image
@@ -5877,7 +6221,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5896,6 +6244,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_from_email_async(
         self,
         input: PDFFromEmailInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF from Email
@@ -5911,7 +6264,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5930,6 +6287,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_add_security_async(
         self,
         input: PDFAddSecurityInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Add Security
@@ -5942,7 +6304,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/security/add"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5961,6 +6327,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_security_remove_async(
         self,
         input: PDFSecurityRemoveInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Remove Security
@@ -5973,7 +6344,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/security/remove"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5992,6 +6367,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_from_xls_xlsx_async(
         self,
         input: PDFFromXLSXLSXInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF From Spreadsheet
@@ -6003,7 +6383,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/pdf"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6022,6 +6406,11 @@ class PdfcoClient(ConnectorClientBase):
     async def xls_to_csv_async(
         self,
         input: XLStoCSVInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Spreadsheet to CSV
@@ -6034,7 +6423,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/csv"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6053,6 +6446,11 @@ class PdfcoClient(ConnectorClientBase):
     async def xls_to_json_async(
         self,
         input: XLStoJSONInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Spreadsheet to JSON
@@ -6064,7 +6462,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/json"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6083,6 +6485,11 @@ class PdfcoClient(ConnectorClientBase):
     async def xls_to_html_async(
         self,
         input: XLStoHTMLInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Spreadsheet to HTML
@@ -6094,7 +6501,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/html"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6113,6 +6524,11 @@ class PdfcoClient(ConnectorClientBase):
     async def xls_to_txt_async(
         self,
         input: XLStoTXTInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Spreadsheet to TXT
@@ -6124,7 +6540,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/txt"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6143,6 +6563,11 @@ class PdfcoClient(ConnectorClientBase):
     async def xls_to_xml_async(
         self,
         input: XLStoXMLInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Spreadsheet to XML
@@ -6154,7 +6579,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/xml"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6173,6 +6602,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_rotate_pages_async(
         self,
         input: PDFRotatePagesInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Rotate PDF Pages
@@ -6184,7 +6618,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/rotate"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6203,6 +6641,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_auto_rotate_pages_async(
         self,
         input: PDFAutoRotatePagesInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Rotate PDF Pages (Auto)
@@ -6215,7 +6658,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/rotate/auto"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6234,6 +6681,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_delete_pages_async(
         self,
         input: PDFDeletePagesInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Delete Pages
@@ -6247,7 +6699,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6266,6 +6722,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_compress_async(
         self,
         input: PDFCompressInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Compress and Optimize
@@ -6277,7 +6738,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/optimize"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6296,6 +6761,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_classifier_async(
         self,
         input: PDFClassifierInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Document Classifier
@@ -6310,7 +6780,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/pdf/classifier"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6329,6 +6803,11 @@ class PdfcoClient(ConnectorClientBase):
     async def email_send_async(
         self,
         input: EmailSendInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Send Email with Attachments
@@ -6340,7 +6819,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/email/send"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6359,6 +6842,11 @@ class PdfcoClient(ConnectorClientBase):
     async def email_decode_async(
         self,
         input: EmailDecodeInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Email Information
@@ -6371,7 +6859,11 @@ class PdfcoClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1/email/decode"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6390,6 +6882,11 @@ class PdfcoClient(ConnectorClientBase):
     async def email_attachment_extraction_async(
         self,
         input: EmailAttachmentExtractionInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Email Attachment Extraction
@@ -6404,7 +6901,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6423,6 +6924,11 @@ class PdfcoClient(ConnectorClientBase):
     async def pdf_attachment_extraction_async(
         self,
         input: PDFAttachmentExtractionInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         PDF Attachment Extraction
@@ -6437,7 +6943,11 @@ class PdfcoClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

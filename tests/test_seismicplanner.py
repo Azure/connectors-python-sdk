@@ -64,12 +64,12 @@ class TestSeismicplannerClient(GeneratedConnectorContractTests):
         ],
     )
     async def test_get_requests_encodes_csv_and_compatibility_values(
-        self, mock_token_provider: Any, identifiers: Any, expected_query: str | None,
+        self, mock_credential: Any, identifiers: Any, expected_query: str | None,
     ) -> None:
         """Test generated CSV and legacy scalar-fallback paths encode complete query values."""
         async with SeismicplannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         ) as client:
             with patch.object(
                 client._http_client,

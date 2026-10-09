@@ -6,15 +6,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.docuware import (
     DocuwareClient,
     SearchForDocumentsInFileCabinetInput,
     UpdateIndexFieldsInput,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -24,55 +23,54 @@ class TestDocuwareClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = DocuwareClient("https://example.azure.com/connections/test")
+        client = DocuwareClient("https://example.azure.com/connections/test",
+                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "docuware"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = DocuwareClient("https://example.azure.com/connections/test/")
+        client = DocuwareClient("https://example.azure.com/connections/test/",
+                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocuwareClient("")
+            DocuwareClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocuwareClient(None)
+            DocuwareClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'docuware'."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "docuware"
@@ -82,11 +80,11 @@ class TestDocuwareClientLifecycle:
     """Tests for DocuwareClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -94,12 +92,12 @@ class TestDocuwareClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(DocuwareClient, "close", new_callable=AsyncMock) as mock_close:
             async with DocuwareClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, DocuwareClient)
 
@@ -110,11 +108,11 @@ class TestGetOrganizationAsync:
     """Tests for get_organization_async method (GET, no body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_get(self, mock_token_provider):
+    async def test_success_sends_get(self, mock_credential):
         """Test that the operation issues a GET and returns parsed JSON."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"Name": "Contoso"}')
 
@@ -135,11 +133,11 @@ class TestGetOrganizationAsync:
             assert result["Name"] == "Contoso"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=401, text="Unauthorized")
 
@@ -159,11 +157,11 @@ class TestGetFileCabinetsAsync:
     """Tests for get_file_cabinets_async method (GET with query parameter)."""
 
     @pytest.mark.asyncio
-    async def test_success_appends_query_parameter(self, mock_token_provider):
+    async def test_success_appends_query_parameter(self, mock_credential):
         """Test that the query parameter is appended to the request URL."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"FileCabinets": []}')
 
@@ -187,11 +185,11 @@ class TestSearchForDocumentsInFileCabinetAsync:
     """Tests for search_for_documents_in_file_cabinet_async (POST with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_forwards_request_body(self, mock_token_provider):
+    async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         request = SearchForDocumentsInFileCabinetInput()
         mock_response = MockResponse(status=200, text='{"Count": 1, "Documents": []}')
@@ -218,11 +216,11 @@ class TestSearchForDocumentsInFileCabinetAsync:
             assert result["Count"] == 1
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         request = SearchForDocumentsInFileCabinetInput()
         mock_response = MockResponse(status=400, text="Bad Request")
@@ -247,11 +245,11 @@ class TestUpdateIndexFieldsAsync:
     """Tests for update_index_fields_async method (PUT with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_forwards_request_body(self, mock_token_provider):
+    async def test_success_forwards_request_body(self, mock_credential):
         """Test that the PUT operation forwards the request body to send_async."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         request: UpdateIndexFieldsInput = []
         mock_response = MockResponse(status=200, text="{}")
@@ -276,11 +274,11 @@ class TestDeleteDocumentAsync:
     """Tests for delete_document_async method (DELETE, no return value)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_delete(self, mock_token_provider):
+    async def test_success_sends_delete(self, mock_credential):
         """Test that the operation issues a DELETE and returns None."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204, text="")
 
@@ -302,11 +300,11 @@ class TestDeleteDocumentAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text="Not Found")
 
@@ -329,11 +327,11 @@ class TestDownloadFileAsync:
     """Tests for download_file_async method (GET, returns raw content bytes)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_content_bytes(self, mock_token_provider):
+    async def test_success_returns_content_bytes(self, mock_credential):
         """Test that the operation returns the raw response content."""
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, content=b"file-bytes")
 
@@ -412,9 +410,9 @@ class TestDocuwareClientAllOperations:
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
-    async def test_all_operations_success(self, mock_token_provider, operation):
+    async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation issues a request and returns without error."""
-        client = DocuwareClient(BASE_URL, token_provider=mock_token_provider)
+        client = DocuwareClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(
@@ -436,11 +434,11 @@ class TestDocuwareClientAllOperationsErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = DocuwareClient(BASE_URL, token_provider=mock_token_provider)
+        client = DocuwareClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(

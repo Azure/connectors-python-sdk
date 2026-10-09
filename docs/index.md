@@ -15,21 +15,22 @@ The SDK requires Python 3.10 or later and provides asynchronous connector client
 
 ## Create a client
 
+Generated clients require a caller-owned asynchronous Azure Identity credential or an `AzureKeyCredential`.
+
 ```python
+from azure.identity.aio import DefaultAzureCredential
+
 from azure.connectors.office365 import Office365Client
-from azure.connectors.sdk import ManagedIdentityTokenProvider
 
 
 async def list_messages(connection_url: str) -> None:
-    token_provider = ManagedIdentityTokenProvider()
-
-    async with Office365Client(connection_url, token_provider) as client:
-        messages = await client.get_emails_async(
-            folder_path="Inbox",
-        )
-        print(messages)
+    async with DefaultAzureCredential() as credential:
+        async with Office365Client(connection_url, credential) as client:
+            messages = await client.get_emails_async(
+                folder_path="Inbox",
+            )
+            print(messages)
 ```
-
 Connector signatures are generated from their managed connector contracts. Consult the [API reference](api/index.md) for the exact client method and model names in the current branch.
 
 ## Next steps

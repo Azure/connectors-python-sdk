@@ -56,25 +56,25 @@ async def example_1_list_booking_businesses():
     """Example 1: List booking businesses where user is an admin."""
     print("\n=== Example 1: List Booking Businesses ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.list_bookings_business_user_as_admin_async()
+        async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.list_bookings_business_user_as_admin_async()
 
-            if result and result.get("mailboxes"):
-                mailboxes = result["mailboxes"]
-                print(f"Found {len(mailboxes)} booking business(es):")
-                for mailbox in mailboxes:
-                    print(f"  - {mailbox.get('display_name')}")
-                    print(f"    Email: {mailbox.get('email')}")
-            else:
-                print("No booking businesses found where you are an admin")
+                if result and result.get("mailboxes"):
+                    mailboxes = result["mailboxes"]
+                    print(f"Found {len(mailboxes)} booking business(es):")
+                    for mailbox in mailboxes:
+                        print(f"  - {mailbox.get('display_name')}")
+                        print(f"    Email: {mailbox.get('email')}")
+                else:
+                    print("No booking businesses found where you are an admin")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_build_create_webhook():

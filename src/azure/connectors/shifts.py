@@ -6,16 +6,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Any, Dict, List, Literal
+from typing import Optional, AsyncIterator, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
+
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -1383,8 +1385,17 @@ class ShiftsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a ShiftsClient.
@@ -1392,17 +1403,39 @@ class ShiftsClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -1451,6 +1484,11 @@ class ShiftsClient(ConnectorClientBase):
     async def get_schedule_async(
         self,
         team_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a Schedule's details
@@ -1464,7 +1502,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1486,6 +1528,11 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Time Off instances in a team
@@ -1521,7 +1568,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -1550,6 +1601,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         input: CreateTimeOffRequest,
         team_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a new Time Off instance
@@ -1563,7 +1619,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1583,6 +1643,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         time_off_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a Time Off instance
@@ -1600,7 +1665,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1620,6 +1689,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         time_off_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a Time Off instance
@@ -1637,7 +1711,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1654,6 +1732,11 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Shifts in a team
@@ -1689,7 +1772,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -1718,6 +1805,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         input: CreateShiftRequest,
         team_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a new Shift
@@ -1731,7 +1823,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1751,6 +1847,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         shift_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a Shift
@@ -1768,7 +1869,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1788,6 +1893,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         shift_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete a Shift
@@ -1805,7 +1915,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1822,6 +1936,11 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Open Shifts in a team
@@ -1857,7 +1976,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -1886,6 +2009,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         input: EditOpenShiftRequest,
         team_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a new Open Shift
@@ -1898,7 +2026,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1918,6 +2050,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         open_shift_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get an Open Shift
@@ -1935,7 +2072,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1956,6 +2097,11 @@ class ShiftsClient(ConnectorClientBase):
         input: EditOpenShiftRequest,
         team_id: str,
         open_shift_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update an Open Shift
@@ -1973,7 +2119,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "PUT", request_url, body=input
+            "PUT", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -1993,6 +2143,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         open_shift_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
         Delete an Open Shift
@@ -2010,7 +2165,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "DELETE", request_url, body=None
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2025,6 +2184,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Time Off Reasons in a team
@@ -2055,7 +2219,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -2084,6 +2252,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Scheduling Groups in a team
@@ -2113,7 +2286,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -2142,6 +2319,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         scheduling_group_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a Scheduling Group
@@ -2160,7 +2342,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2181,6 +2367,11 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Time Off requests in a team
@@ -2215,7 +2406,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -2244,6 +2439,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         time_off_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a Time Off request
@@ -2261,7 +2461,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2282,6 +2486,11 @@ class ShiftsClient(ConnectorClientBase):
         input: TimeOffRequestApproveInput,
         team_id: str,
         time_off_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Approve a Time Off request
@@ -2300,7 +2509,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2321,6 +2534,11 @@ class ShiftsClient(ConnectorClientBase):
         input: TimeOffRequestDeclineInput,
         team_id: str,
         time_off_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Decline a Time Off request
@@ -2339,7 +2557,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2360,6 +2582,11 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Offer Shift requests in a team
@@ -2394,7 +2621,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -2423,6 +2654,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         offer_shift_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get an Offer Shift request
@@ -2440,7 +2676,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2461,6 +2701,11 @@ class ShiftsClient(ConnectorClientBase):
         input: OfferShiftRequestApproveInput,
         team_id: str,
         offer_shift_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Approve an Offer Shift request
@@ -2480,7 +2725,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2501,6 +2750,11 @@ class ShiftsClient(ConnectorClientBase):
         input: OfferShiftRequestDeclineInput,
         team_id: str,
         offer_shift_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Decline an Offer Shift request
@@ -2519,7 +2773,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2540,6 +2798,11 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Swap Shifts requests in a team
@@ -2574,7 +2837,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -2603,6 +2870,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         swap_shifts_change_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a Swap Shifts request
@@ -2620,7 +2892,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2641,6 +2917,11 @@ class ShiftsClient(ConnectorClientBase):
         input: SwapShiftsChangeRequestApproveInput,
         team_id: str,
         swap_shifts_change_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Approve a Swap Shifts request
@@ -2659,7 +2940,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2680,6 +2965,11 @@ class ShiftsClient(ConnectorClientBase):
         input: SwapShiftsChangeRequestDeclineInput,
         team_id: str,
         swap_shifts_change_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Decline a Swap Shifts request
@@ -2698,7 +2988,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2719,6 +3013,11 @@ class ShiftsClient(ConnectorClientBase):
         team_id: str,
         top: Optional[int] = None,
         state: Optional[str] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Open Shift requests in a team
@@ -2753,7 +3052,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -2782,6 +3085,11 @@ class ShiftsClient(ConnectorClientBase):
         self,
         team_id: str,
         open_shift_change_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get an Open Shift request
@@ -2799,7 +3107,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2820,6 +3132,11 @@ class ShiftsClient(ConnectorClientBase):
         input: OpenShiftChangeRequestApproveInput,
         team_id: str,
         open_shift_change_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Approve an Open Shift request
@@ -2838,7 +3155,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2859,6 +3180,11 @@ class ShiftsClient(ConnectorClientBase):
         input: OpenShiftChangeRequestDeclineInput,
         team_id: str,
         open_shift_change_request_id: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Decline an Open Shift request
@@ -2877,7 +3203,11 @@ class ShiftsClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -2898,6 +3228,11 @@ class ShiftsClient(ConnectorClientBase):
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Open Shifts from my teams
@@ -2933,7 +3268,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -2964,6 +3303,11 @@ class ShiftsClient(ConnectorClientBase):
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Shifts from my teams
@@ -3003,7 +3347,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -3034,6 +3382,11 @@ class ShiftsClient(ConnectorClientBase):
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
         List all Times Off from my teams
@@ -3073,7 +3426,11 @@ class ShiftsClient(ConnectorClientBase):
 
         while True:
             response = await self.http_client.send_async(
-                "GET", request_url, body=request_body
+                "GET", request_url, body=request_body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
             if not (200 <= response.status < 300):
@@ -3100,6 +3457,11 @@ class ShiftsClient(ConnectorClientBase):
 
     async def get_all_teams_async(
         self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         List teams
@@ -3110,7 +3472,11 @@ class ShiftsClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/v1.0/me/joinedTeams"
 
         response = await self.http_client.send_async(
-            "GET", request_url, body=None
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

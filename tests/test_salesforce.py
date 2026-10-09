@@ -6,18 +6,17 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.salesforce import (
     CloseJobRequest,
     SalesforceClient,
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import collect_operation_result
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestSalesforceClientInitialization:
@@ -25,68 +24,64 @@ class TestSalesforceClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = SalesforceClient("https://example.azure.com/connections/test")
+        client = SalesforceClient("https://example.azure.com/connections/test",
+                                  AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == (
             "https://example.azure.com/connections/test"
         )
         assert client.connector_name == "salesforce"
         assert isinstance(
-            client._http_client._token_provider, ManagedIdentityTokenProvider
+            client._http_client._credential, AzureKeyCredential
         )
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = SalesforceClient("https://example.azure.com/connections/test/")
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == (
             "https://example.azure.com/connections/test"
         )
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
+        client = SalesforceClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential,
             timeout_seconds=60.0,
             max_retry_attempts=5,
         )
-        client = SalesforceClient(
-            "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
-        )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            SalesforceClient("")
+            SalesforceClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            SalesforceClient(None)
+            SalesforceClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'salesforce'."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "salesforce"
@@ -96,11 +91,11 @@ class TestSalesforceClientLifecycle:
     """Tests for SalesforceClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -112,7 +107,7 @@ class TestSalesforceClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             SalesforceClient,
@@ -121,7 +116,7 @@ class TestSalesforceClientLifecycle:
         ) as mock_close:
             async with SalesforceClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, SalesforceClient)
 
@@ -132,11 +127,11 @@ class TestGetTables:
     """Tests for get_tables_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful GET request."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(
@@ -150,7 +145,7 @@ class TestGetTables:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await collect_operation_result(client.get_tables_async())
+            result = await resolve_generated_result(client.get_tables_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -159,11 +154,11 @@ class TestGetTables:
             assert result[0]["name"] == "account"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
@@ -175,7 +170,7 @@ class TestGetTables:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await collect_operation_result(client.get_tables_async())
+                await resolve_generated_result(client.get_tables_async())
 
             assert exc_info.value.status_code == 401
 
@@ -184,11 +179,11 @@ class TestGetItems:
     """Tests for get_items_async method."""
 
     @pytest.mark.asyncio
-    async def test_with_query_parameters(self, mock_token_provider):
+    async def test_with_query_parameters(self, mock_credential):
         """Test GET request includes expected query parameters."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')
@@ -199,7 +194,7 @@ class TestGetItems:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await collect_operation_result(client.get_items_async(
+            await resolve_generated_result(client.get_items_async(
                 table="account",
                 filter="Name eq 'Contoso'",
                 top="5",
@@ -218,11 +213,11 @@ class TestCreateJob:
     """Tests for create_job_async method."""
 
     @pytest.mark.asyncio
-    async def test_sends_request_body(self, mock_token_provider):
+    async def test_sends_request_body(self, mock_credential):
         """Test create_job_async sends the input payload in request body."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         payload = {
@@ -247,11 +242,11 @@ class TestCreateJob:
             assert result["id"] == "750xx0000000001"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test create_job_async raises for a non-success response."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = {
             "object": "Account",
@@ -273,6 +268,10 @@ class TestCreateJob:
                 "POST",
                 "https://example.azure.com/connections/test/bulk/createjob",
                 body=payload,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert exc_info.value.status_code == 400
 
@@ -281,11 +280,11 @@ class TestPostItem:
     """Tests for post_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_sends_request_body(self, mock_token_provider):
+    async def test_sends_request_body(self, mock_credential):
         """Test post_item_async sends the input payload in request body."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         payload = {
@@ -313,11 +312,11 @@ class TestDeleteItemAsync:
     """Tests for delete_item_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful record deletion."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text="")
 
@@ -335,11 +334,11 @@ class TestDeleteItemAsync:
             assert "/datasets/default/tables/account/items/001xx0000000001" in path
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test DELETE error path raises ConnectorException."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
@@ -357,11 +356,11 @@ class TestUploadJobDataAsync:
     """Tests for upload_job_data_async method (PUT with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_body(self, mock_token_provider):
+    async def test_success_sends_body(self, mock_credential):
         """Test PUT operation sends input body."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = b"Name\r\nContoso\r\n"
         mock_response = MockResponse(status=201, text="")
@@ -385,11 +384,11 @@ class TestUploadJobDataAsync:
             )
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test PUT error path raises ConnectorException."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = b"Name\r\nContoso\r\n"
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -408,11 +407,11 @@ class TestHttpRequestAsync:
     """Tests for http_request_async raw request bodies."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_raw_body(self, mock_token_provider):
+    async def test_success_sends_raw_body(self, mock_credential):
         """Test generic HTTP requests send raw bytes and parse the response."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = b'{"method":"GET","url":"/services/data"}'
         mock_response = MockResponse(status=200, text='{"status": 200}')
@@ -430,15 +429,19 @@ class TestHttpRequestAsync:
                 "https://example.azure.com/connections/test/codeless/httprequest",
                 body=payload,
                 content_type="application/octet-stream",
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"status": 200}
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test generic HTTP request errors raise ConnectorException."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
@@ -458,11 +461,11 @@ class TestExecuteSoslQueryAsync:
     """Tests for execute_sosl_query_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_uses_acronym_aware_name(self, mock_token_provider):
+    async def test_success_uses_acronym_aware_name(self, mock_credential):
         """Test executing SOSL through its acronym-aware method name."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"searchRecords": []}')
 
@@ -482,11 +485,11 @@ class TestExecuteSoslQueryAsync:
             assert not hasattr(SalesforceClient, "execute_s_o_s_l_query_async")
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test SOSL errors raise ConnectorException."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=400, text='{"error": "Bad query"}')
 
@@ -504,11 +507,11 @@ class TestCloseJobAsync:
     """Tests for close_job_async method (PATCH with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+    async def test_success_sends_body_and_returns_result(self, mock_credential):
         """Test PATCH sends input body and returns result."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CloseJobRequest(state="UploadComplete")
         mock_response = MockResponse(status=200, text='{"id": "job-1", "state": "UploadComplete"}')
@@ -530,11 +533,11 @@ class TestCloseJobAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test PATCH error path raises ConnectorException."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CloseJobRequest(state="Aborted")
         mock_response = MockResponse(status=404, text='{"error": "Job not found"}')
@@ -580,14 +583,14 @@ class TestSalesforceDiscoveryOperations:
     )
     async def test_success_uses_expected_path(
         self,
-        mock_token_provider,
+        mock_credential,
         method_name,
         path_suffix,
     ):
         """Test each discovery operation uses its generated GET route."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"name": "account"}')
 
@@ -597,12 +600,16 @@ class TestSalesforceDiscoveryOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await collect_operation_result(getattr(client, method_name)(table="account"))
+            result = await getattr(client, method_name)(table="account")
 
             mock_send.assert_called_once_with(
                 "GET",
                 f"https://example.azure.com/connections/test{path_suffix}",
                 body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"name": "account"}
 
@@ -619,13 +626,13 @@ class TestSalesforceDiscoveryOperations:
     )
     async def test_error_response_raises_exception(
         self,
-        mock_token_provider,
+        mock_credential,
         method_name,
     ):
         """Test each discovery operation raises for a non-success response."""
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
@@ -636,7 +643,7 @@ class TestSalesforceDiscoveryOperations:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await collect_operation_result(getattr(client, method_name)(table="account"))
+                await getattr(client, method_name)(table="account")
 
             assert exc_info.value.status_code == 404
 

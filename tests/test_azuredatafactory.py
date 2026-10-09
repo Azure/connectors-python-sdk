@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.azuredatafactory import (
     AzuredatafactoryClient,
     CreatePipelineRunResponse,
@@ -23,8 +24,6 @@ from azure.connectors.azuredatafactory import (
     ResourceGroupProperties,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
@@ -36,7 +35,8 @@ class TestAzuredatafactoryClientInitialization:
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
         client = AzuredatafactoryClient(
-            "https://example.azure.com/connections/test"
+            "https://example.azure.com/connections/test",
+            AzureKeyCredential("test-key"),
         )
 
         assert client._connection_runtime_url == (
@@ -44,62 +44,58 @@ class TestAzuredatafactoryClientInitialization:
         )
         assert client.connector_name == "azuredatafactory"
         assert isinstance(
-            client._http_client._token_provider, ManagedIdentityTokenProvider
+            client._http_client._credential, AzureKeyCredential
         )
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
         client = AzuredatafactoryClient(
-            "https://example.azure.com/connections/test/"
+            "https://example.azure.com/connections/test/",
+            AzureKeyCredential("test-key"),
         )
 
         assert client._connection_runtime_url == (
             "https://example.azure.com/connections/test"
         )
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(
-            timeout_seconds=60.0, max_retry_attempts=5
-        )
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzuredatafactoryClient("")
+            AzuredatafactoryClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzuredatafactoryClient(None)
+            AzuredatafactoryClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azuredatafactory'."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "azuredatafactory"
@@ -109,11 +105,11 @@ class TestAzuredatafactoryClientLifecycle:
     """Tests for AzuredatafactoryClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -123,14 +119,14 @@ class TestAzuredatafactoryClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
             AzuredatafactoryClient, 'close', new_callable=AsyncMock
         ) as mock_close:
             async with AzuredatafactoryClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, AzuredatafactoryClient)
 
@@ -141,11 +137,11 @@ class TestCreatePipelineRunAsync:
     """Tests for create_pipeline_run_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful pipeline run creation with JSON response."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -178,12 +174,12 @@ class TestCreatePipelineRunAsync:
 
     @pytest.mark.asyncio
     async def test_success_with_reference_pipeline_run_id(
-        self, mock_token_provider
+        self, mock_credential
     ):
         """Test pipeline run creation with reference pipeline run ID."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -212,11 +208,11 @@ class TestCreatePipelineRunAsync:
             assert result["runId"] == "run-67890"
 
     @pytest.mark.asyncio
-    async def test_success_with_empty_response(self, mock_token_provider):
+    async def test_success_with_empty_response(self, mock_credential):
         """Test successful request with empty response body."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -239,11 +235,11 @@ class TestCreatePipelineRunAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -271,11 +267,11 @@ class TestCreatePipelineRunAsync:
             assert exc_info.value.status_code == 400
 
     @pytest.mark.asyncio
-    async def test_method_exists(self, mock_token_provider):
+    async def test_method_exists(self, mock_credential):
         """Test that create_pipeline_run_async method exists on client."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert hasattr(client, 'create_pipeline_run_async')
@@ -286,11 +282,11 @@ class TestCancelPipelineRunAsync:
     """Tests for cancel_pipeline_run_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful pipeline run cancellation."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -314,11 +310,11 @@ class TestCancelPipelineRunAsync:
             assert "/cancelpipelineRun/" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_method_exists(self, mock_token_provider):
+    async def test_method_exists(self, mock_credential):
         """Test that cancel_pipeline_run_async method exists on client."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert hasattr(client, 'cancel_pipeline_run_async')
@@ -329,11 +325,11 @@ class TestGetPipelineRunAsync:
     """Tests for get_pipeline_run_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful pipeline run retrieval with JSON response."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -363,11 +359,11 @@ class TestGetPipelineRunAsync:
             assert result["status"] == "Succeeded"
 
     @pytest.mark.asyncio
-    async def test_success_with_empty_response(self, mock_token_provider):
+    async def test_success_with_empty_response(self, mock_credential):
         """Test successful request with empty response body."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -388,11 +384,11 @@ class TestGetPipelineRunAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -417,11 +413,11 @@ class TestGetPipelineRunAsync:
             assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_method_exists(self, mock_token_provider):
+    async def test_method_exists(self, mock_credential):
         """Test that get_pipeline_run_async method exists on client."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert hasattr(client, 'get_pipeline_run_async')
@@ -600,11 +596,11 @@ class TestEdgeCases:
     """Tests for edge cases and special scenarios."""
 
     @pytest.mark.asyncio
-    async def test_http_client_property_access(self, mock_token_provider):
+    async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
         client = AzuredatafactoryClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.http_client is not None
@@ -623,15 +619,15 @@ class TestEdgeCases:
         assert factory.name is None
         assert factory.location is None
 
-    def test_multiple_client_instances(self, mock_token_provider):
+    def test_multiple_client_instances(self, mock_credential):
         """Test creating multiple client instances."""
         client1 = AzuredatafactoryClient(
             "https://example1.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
         client2 = AzuredatafactoryClient(
             "https://example2.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client1._connection_runtime_url != client2._connection_runtime_url

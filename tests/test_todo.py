@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.todo import (
     CreateToDo,
     CreateToDoList,
@@ -15,9 +16,7 @@ from azure.connectors.todo import (
     UpdateToDo,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
@@ -28,55 +27,54 @@ class TestTodoClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = TodoClient("https://example.azure.com/connections/test")
+        client = TodoClient("https://example.azure.com/connections/test",
+                            AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "todo"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = TodoClient("https://example.azure.com/connections/test/")
+        client = TodoClient("https://example.azure.com/connections/test/",
+                            AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TodoClient("")
+            TodoClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TodoClient(None)
+            TodoClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'todo'."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "todo"
@@ -86,11 +84,11 @@ class TestTodoClientLifecycle:
     """Tests for TodoClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -98,12 +96,12 @@ class TestTodoClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(TodoClient, "close", new_callable=AsyncMock) as mock_close:
             async with TodoClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, TodoClient)
 
@@ -127,11 +125,11 @@ class TestGetAllTodoListsAsync:
     """Tests for get_all_todo_lists_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful listing of todo lists."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value": [{"id": "list-1"}]}')
 
@@ -151,11 +149,11 @@ class TestGetAllTodoListsAsync:
             assert "value" in result
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
@@ -173,11 +171,11 @@ class TestGetTodoListAsync:
     """Tests for get_to_do_list_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_encodes_folder_id(self, mock_token_provider):
+    async def test_success_encodes_folder_id(self, mock_credential):
         """Test successful retrieval encodes the to-do list identifier."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(
             status=200,
@@ -196,15 +194,19 @@ class TestGetTodoListAsync:
                 "GET",
                 "https://example.azure.com/connections/test/lists/list%201",
                 body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"id": "list 1", "displayName": "Work"}
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test retrieval raises for a non-success response."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
@@ -224,11 +226,11 @@ class TestCreateTodoListAsync:
     """Tests for create_to_do_list_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful todo list creation."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateToDoList(display_name="Work")
         mock_response = MockResponse(status=201, text='{"id": "list-1", "displayName": "Work"}')
@@ -250,11 +252,11 @@ class TestCreateTodoListAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test create list error path."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateToDoList(display_name="Work")
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -273,11 +275,11 @@ class TestUpdateTodoListAsync:
     """Tests for update_to_do_list_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_encodes_folder_id_and_sends_body(self, mock_token_provider):
+    async def test_success_encodes_folder_id_and_sends_body(self, mock_credential):
         """Test successful update encodes the identifier and sends the body."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateToDoList(display_name="Updated work")
         mock_response = MockResponse(
@@ -300,15 +302,19 @@ class TestUpdateTodoListAsync:
                 "PATCH",
                 "https://example.azure.com/connections/test/lists/list%201",
                 body=payload,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"id": "list 1", "displayName": "Updated work"}
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test update raises for a non-success response."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateToDoList(display_name="Updated work")
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -332,11 +338,11 @@ class TestDeleteTodoListAsync:
     """Tests for delete_to_do_list_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful to-do list deletion."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204)
 
@@ -352,15 +358,19 @@ class TestDeleteTodoListAsync:
                 "DELETE",
                 "https://example.azure.com/connections/test/lists/list%201",
                 body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test to-do list deletion raises for a non-success response."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
@@ -380,11 +390,11 @@ class TestGetTodoAsync:
     """Tests for get_to_do_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_encodes_folder_and_todo_ids(self, mock_token_provider):
+    async def test_success_encodes_folder_and_todo_ids(self, mock_credential):
         """Test successful retrieval encodes both route identifiers."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(
             status=200,
@@ -406,15 +416,19 @@ class TestGetTodoAsync:
                 "GET",
                 "https://example.azure.com/connections/test/lists/list%201/tasks/task%201",
                 body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"id": "task 1", "title": "Buy milk"}
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test retrieval raises for a non-success response."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
@@ -437,11 +451,11 @@ class TestCreateAndUpdateTodoAsync:
     """Tests for create_to_do_async and update_to_do_async methods."""
 
     @pytest.mark.asyncio
-    async def test_create_to_do_success(self, mock_token_provider):
+    async def test_create_to_do_success(self, mock_credential):
         """Test successful to-do creation."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateToDo(title="Buy milk", status="notStarted")
         mock_response = MockResponse(status=201, text='{"id": "task-1", "title": "Buy milk"}')
@@ -463,11 +477,11 @@ class TestCreateAndUpdateTodoAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_update_to_do_success(self, mock_token_provider):
+    async def test_update_to_do_success(self, mock_credential):
         """Test successful to-do update."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = UpdateToDo(title="Buy milk and eggs", status="inProgress")
         mock_response = MockResponse(
@@ -494,11 +508,11 @@ class TestDeleteTodoAsync:
     """Tests for delete_to_do_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful to-do deletion."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204)
 
@@ -517,15 +531,19 @@ class TestDeleteTodoAsync:
                 "DELETE",
                 "https://example.azure.com/connections/test/lists/list%201/tasks/task%201",
                 body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test to-do deletion raises for a non-success response."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
@@ -548,11 +566,11 @@ class TestListTodosByFolderAsync:
     """Tests for list_to_dos_by_folder_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_top_query(self, mock_token_provider):
+    async def test_success_with_top_query(self, mock_credential):
         """Test list-to-dos query parameter handling."""
         client = TodoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value": [{"id": "task-1"}]}')
 

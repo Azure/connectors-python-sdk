@@ -52,160 +52,160 @@ async def example_1_list_models():
     """Example 1: List all models in the instance."""
     print("\n=== Example 1: List Models ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuredigitaltwinsClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # List all models
-            models = [item async for item in client.list_models_async(
-                include_model_definition="true"
-            )]
+        async with AzuredigitaltwinsClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # List all models
+                models = [item async for item in client.list_models_async(
+                    include_model_definition="true"
+                )]
 
-            if models:
-                print(f"Found {len(models)} models:")
-                for model in models:
-                    print(f"  - {model.get('id', 'Unknown')}")
-            else:
-                print("No models found")
+                if models:
+                    print(f"Found {len(models)} models:")
+                    for model in models:
+                        print(f"  - {model.get('id', 'Unknown')}")
+                else:
+                    print("No models found")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code} - {ex.response_body}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code} - {ex.response_body}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_get_twin():
     """Example 2: Get a specific digital twin."""
     print("\n=== Example 2: Get Twin ===")
 
-    credential = DefaultAzureCredential()
-    twin_id = "room1"  # Replace with your twin ID
+    async with DefaultAzureCredential() as credential:
+        twin_id = "room1"  # Replace with your twin ID
 
-    async with AzuredigitaltwinsClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Get a twin by ID
-            result = await client.get_twin_by_id_async(twinid=twin_id)
+        async with AzuredigitaltwinsClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Get a twin by ID
+                result = await client.get_twin_by_id_async(twinid=twin_id)
 
-            if result:
-                print(f"Twin ID: {result.get('$dtId', 'Unknown')}")
-                metadata = result.get("$metadata", {})
-                print(f"Model: {metadata.get('$model', 'Unknown')}")
+                if result:
+                    print(f"Twin ID: {result.get('$dtId', 'Unknown')}")
+                    metadata = result.get("$metadata", {})
+                    print(f"Model: {metadata.get('$model', 'Unknown')}")
 
-                # Print properties
-                for key, value in result.items():
-                    if not key.startswith("$"):
-                        print(f"  {key}: {value}")
-            else:
-                print(f"Twin '{twin_id}' not found")
+                    # Print properties
+                    for key, value in result.items():
+                        if not key.startswith("$"):
+                            print(f"  {key}: {value}")
+                else:
+                    print(f"Twin '{twin_id}' not found")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_query_twins():
     """Example 3: Query digital twins."""
     print("\n=== Example 3: Query Twins ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuredigitaltwinsClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Query all twins
-            query_input = QueryTwinsInput(
-                query="SELECT * FROM digitaltwins"
-            )
-            query_response = await client.query_twins_async(input=query_input)
+        async with AzuredigitaltwinsClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Query all twins
+                query_input = QueryTwinsInput(
+                    query="SELECT * FROM digitaltwins"
+                )
+                result = await client.query_twins_async(input=query_input)
 
-            if query_response and query_response.get("value"):
-                print(f"Query results: {query_response['value']}")
-            else:
-                print("No twins found matching query")
+                if result and result.get("value"):
+                    print(f"Query results: {result['value']}")
+                else:
+                    print("No twins found matching query")
 
-            # Check for continuation token for pagination
-            if query_response and query_response.get("continuation_token"):
-                print("More results available (use continuation_token)")
+                # Check for continuation token for pagination
+                if result and result.get("continuation_token"):
+                    print("More results available (use continuation_token)")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_list_relationships():
     """Example 4: List relationships for a twin."""
     print("\n=== Example 4: List Relationships ===")
 
-    credential = DefaultAzureCredential()
-    twin_id = "room1"  # Replace with your twin ID
+    async with DefaultAzureCredential() as credential:
+        twin_id = "room1"  # Replace with your twin ID
 
-    async with AzuredigitaltwinsClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # List outgoing relationships
-            outgoing = [item async for item in client.list_relationships_async(twinid=twin_id)]
+        async with AzuredigitaltwinsClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # List outgoing relationships
+                outgoing = [item async for item in client.list_relationships_async(twinid=twin_id)]
 
-            if outgoing:
-                print(f"Outgoing relationships from {twin_id}:")
-                for rel in outgoing:
-                    print(f"  -> {rel.get('$targetId')} "
-                          f"({rel.get('$relationshipName')})")
-            else:
-                print(f"No outgoing relationships from {twin_id}")
+                if outgoing:
+                    print(f"Outgoing relationships from {twin_id}:")
+                    for rel in outgoing:
+                        print(f"  -> {rel.get('$targetId')} "
+                              f"({rel.get('$relationshipName')})")
+                else:
+                    print(f"No outgoing relationships from {twin_id}")
 
-            # List incoming relationships
-            incoming = [item async for item in client.list_incoming_relationships_async(
-                twinid=twin_id
-            )]
+                # List incoming relationships
+                incoming = [item async for item in client.list_incoming_relationships_async(
+                    twinid=twin_id
+                )]
 
-            if incoming:
-                print(f"Incoming relationships to {twin_id}:")
-                for rel in incoming:
-                    print(f"  <- {rel.get('$sourceId')} "
-                          f"({rel.get('$relationshipName')})")
-            else:
-                print(f"No incoming relationships to {twin_id}")
+                if incoming:
+                    print(f"Incoming relationships to {twin_id}:")
+                    for rel in incoming:
+                        print(f"  <- {rel.get('$sourceId')} "
+                              f"({rel.get('$relationshipName')})")
+                else:
+                    print(f"No incoming relationships to {twin_id}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_send_telemetry():
     """Example 5: Send telemetry from a twin."""
     print("\n=== Example 5: Send Telemetry ===")
 
-    credential = DefaultAzureCredential()
-    twin_id = "room1"  # Replace with your twin ID
+    async with DefaultAzureCredential() as credential:
+        twin_id = "room1"  # Replace with your twin ID
 
-    async with AzuredigitaltwinsClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Send telemetry
-            telemetry = SendTelemetryInput(
-                value='{"temperature": 72.5, "humidity": 45}'
-            )
-            await client.send_telemetry_async(
-                input=telemetry,
-                twinid=twin_id
-            )
+        async with AzuredigitaltwinsClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Send telemetry
+                telemetry = SendTelemetryInput(
+                    value='{"temperature": 72.5, "humidity": 45}'
+                )
+                await client.send_telemetry_async(
+                    input=telemetry,
+                    twinid=twin_id
+                )
 
-            print(f"Telemetry sent for twin '{twin_id}'")
+                print(f"Telemetry sent for twin '{twin_id}'")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_6_dataclass_usage():

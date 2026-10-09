@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.impexium import ImpexiumClient
 
 
@@ -18,13 +18,13 @@ async def main() -> None:
         print("Set IMPEXIUM_CONNECTION_URL to run this sample.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    try:
-        async with ImpexiumClient(CONNECTION_RUNTIME_URL, token_provider) as client:
-            countries = await client.list_all_countries_async(page_number=1)
-            print(f"Countries: {countries}")
-    except ConnectorException as ex:
-        print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with ImpexiumClient(CONNECTION_RUNTIME_URL, credential) as client:
+                countries = await client.list_all_countries_async(page_number=1)
+                print(f"Countries: {countries}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":

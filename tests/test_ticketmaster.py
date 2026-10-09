@@ -40,12 +40,12 @@ class TestTicketmasterClient(GeneratedConnectorContractTests):
 
 @pytest.mark.asyncio
 async def test_attractions_get_serializes_query_and_response(
-    mock_token_provider,
+    mock_credential,
 ) -> None:
     """Test array query serialization and response deserialization."""
     client = TicketmasterClient(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
 
     with patch.object(
@@ -64,5 +64,9 @@ async def test_attractions_get_serializes_query_and_response(
         "https://example.azure.com/connections/test/discovery/v2/attractions"
         "?keyword=rock%20%26%20roll&classificationName=music%2Ccomedy",
         body=None,
+        timeout=None,
+        headers=None,
+        client_request_id=None,
+        response_hook=None,
     )
     assert result == {"items": []}

@@ -3,20 +3,21 @@
 """Pytest configuration and shared fixtures."""
 
 import pytest
-from azure.connectors.sdk import TokenProvider
+from azure.core.credentials import AccessToken
 
 
-class MockTokenProvider(TokenProvider):
-    """Mock token provider for testing."""
+class MockAsyncCredential:
+    """Mock asynchronous token credential for testing."""
 
     def __init__(self, token: str = "mock_token"):
         """Initialize with a mock token."""
         self._token = token
         self.close_called = False
 
-    async def get_access_token_async(self, scopes: list[str]) -> str:
-        """Return the mock token."""
-        return self._token
+    async def get_token(self, *scopes: str, **kwargs: object) -> AccessToken:
+        """Return the mock access token."""
+        del scopes, kwargs
+        return AccessToken(self._token, 4_102_444_800)
 
     async def close(self):
         """Mark that close was called."""
@@ -41,9 +42,9 @@ class MockResponse:
 
 
 @pytest.fixture
-def mock_token_provider():
-    """Fixture providing a mock token provider."""
-    return MockTokenProvider()
+def mock_credential():
+    """Provide a mock asynchronous credential."""
+    return MockAsyncCredential()
 
 
 @pytest.fixture

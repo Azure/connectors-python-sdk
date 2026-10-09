@@ -5,6 +5,7 @@
 import json
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.kusto import (
     KustoClient,
     QueryAndListSchema,
@@ -14,11 +15,9 @@ from azure.connectors.kusto import (
     MCPQueryRequest,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
-from tests.conftest import MockTokenProvider, MockResponse
+from tests.conftest import MockResponse
 
 
 class TestKustoClientInitialization:
@@ -26,55 +25,54 @@ class TestKustoClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = KustoClient("https://example.azure.com/connections/test")
+        client = KustoClient("https://example.azure.com/connections/test",
+                             AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "kusto"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = KustoClient("https://example.azure.com/connections/test/")
+        client = KustoClient("https://example.azure.com/connections/test/",
+                             AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            KustoClient("")
+            KustoClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            KustoClient(None)
+            KustoClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'kusto'."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "kusto"
@@ -84,11 +82,11 @@ class TestKustoClientLifecycle:
     """Tests for KustoClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -96,12 +94,12 @@ class TestKustoClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(KustoClient, 'close', new_callable=AsyncMock) as mock_close:
             async with KustoClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, KustoClient)
 
@@ -112,11 +110,11 @@ class TestListKustoResults:
     """Tests for list_kusto_results_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful query execution with JSON response."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -140,16 +138,20 @@ class TestListKustoResults:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/ListKustoResults/false",
-                body=input_schema
+                body=input_schema,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"rows": [{"col1": "value1"}], "columns": ["col1"]}
 
     @pytest.mark.asyncio
-    async def test_success_with_empty_response(self, mock_token_provider):
+    async def test_success_with_empty_response(self, mock_credential):
         """Test successful query with empty response body."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -166,11 +168,11 @@ class TestListKustoResults:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -195,11 +197,11 @@ class TestListKustoResults:
             assert expected_op in exc_info.value.operation
 
     @pytest.mark.asyncio
-    async def test_500_error_raises_exception(self, mock_token_provider):
+    async def test_500_error_raises_exception(self, mock_credential):
         """Test that 500 error raises ConnectorException."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -223,11 +225,11 @@ class TestListKustoShowCommandResults:
     """Tests for list_kusto_show_command_results_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful show command execution."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -251,16 +253,20 @@ class TestListKustoShowCommandResults:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/ListKustoShowCommandResults",
-                body=input_schema
+                body=input_schema,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"command_result": "success"}
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -278,11 +284,11 @@ class TestListKustoShowCommandResults:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -308,11 +314,11 @@ class TestRunKustoQueryAndVisualizeResults:
     """Tests for run_kusto_query_and_visualize_results_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_chart_data(self, mock_token_provider):
+    async def test_success_with_chart_data(self, mock_credential):
         """Test successful query with chart visualization."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -337,16 +343,20 @@ class TestRunKustoQueryAndVisualizeResults:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/RunKustoAndVisualizeResults/false",
-                body=input_schema
+                body=input_schema,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"chart": "data", "type": "line"}
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -372,11 +382,11 @@ class TestRunKustoCommandAndVisualizeResults:
     """Tests for run_kusto_command_and_visualize_results_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_chart_data(self, mock_token_provider):
+    async def test_success_with_chart_data(self, mock_credential):
         """Test successful control command with chart visualization."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -401,16 +411,20 @@ class TestRunKustoCommandAndVisualizeResults:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/RunKustoAndVisualizeResults/true",
-                body=input_schema
+                body=input_schema,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"visualization": "bar_chart"}
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -432,11 +446,11 @@ class TestRunAsyncControlCommandAndWait:
     """Tests for run_async_control_command_and_wait_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_command_id(self, mock_token_provider):
+    async def test_success_with_command_id(self, mock_credential):
         """Test successful async command execution."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -460,18 +474,22 @@ class TestRunAsyncControlCommandAndWait:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/RunAsyncControlCommandAndWait",
-                body=input_schema
+                body=input_schema,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result["commandId"] == "123"
             assert result["state"] == "Completed"
             assert result["status"] == "Success"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -497,11 +515,11 @@ class TestMCPKustoQueryManagement:
     """Tests for mcp_kusto_query_management_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_without_session_id(self, mock_token_provider):
+    async def test_success_without_session_id(self, mock_credential):
         """Test successful MCP query without session ID."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -526,17 +544,21 @@ class TestMCPKustoQueryManagement:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/mcp/KustoQueryManagement",
-                body=input_request
+                body=input_request,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result["jsonrpc"] == "2.0"
             assert result["id"] == "1"
 
     @pytest.mark.asyncio
-    async def test_success_with_session_id(self, mock_token_provider):
+    async def test_success_with_session_id(self, mock_credential):
         """Test successful MCP query with session ID."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -561,16 +583,20 @@ class TestMCPKustoQueryManagement:
             mock_send.assert_called_once_with(
                 "POST",
                 expected_path,
-                body=input_request
+                body=input_request,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result["jsonrpc"] == "2.0"
 
     @pytest.mark.asyncio
-    async def test_session_id_with_special_characters(self, mock_token_provider):
+    async def test_session_id_with_special_characters(self, mock_credential):
         """Test MCP query with session ID containing special characters."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"result": "ok"}')
@@ -591,11 +617,11 @@ class TestMCPKustoQueryManagement:
             assert "session%20with%20spaces" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -611,11 +637,11 @@ class TestMCPKustoQueryManagement:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -721,11 +747,11 @@ class TestEdgeCases:
     """Tests for edge cases and boundary conditions."""
 
     @pytest.mark.asyncio
-    async def test_multiple_consecutive_calls(self, mock_token_provider):
+    async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls work correctly."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response_1 = MockResponse(status=200, text='{"result": "first"}')
@@ -744,11 +770,11 @@ class TestEdgeCases:
             assert result_2 == {"result": "second"}
 
     @pytest.mark.asyncio
-    async def test_json_parse_error_raises_exception(self, mock_token_provider):
+    async def test_json_parse_error_raises_exception(self, mock_credential):
         """Test that invalid JSON in response raises an error."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='invalid json{')
@@ -767,17 +793,17 @@ class TestEdgeCases:
         """Test URL construction handles multiple trailing slashes."""
         client = KustoClient(
             "https://example.azure.com/connections/test///",
-            token_provider=MockTokenProvider()
+            credential=AzureKeyCredential("test-key")
         )
 
         # rstrip('/') should remove all trailing slashes
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_http_client_property_access(self, mock_token_provider):
+    def test_http_client_property_access(self, mock_credential):
         """Test that http_client property is accessible."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.http_client is not None
@@ -788,11 +814,11 @@ class TestListKustoResultsSchema:
     """Tests for list_kusto_results_schema_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_schema(self, mock_token_provider):
+    async def test_success_returns_schema(self, mock_credential):
         """Test successful query-schema retrieval."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
         input_schema = QueryAndListSchema(
             cluster="testcluster",
@@ -814,16 +840,20 @@ class TestListKustoResultsSchema:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/ListKustoResultsSchema",
-                body=input_schema
+                body=input_schema,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result["columns"][0]["name"] == "Timestamp"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test a non-2xx response raises ConnectorException."""
         client = KustoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(

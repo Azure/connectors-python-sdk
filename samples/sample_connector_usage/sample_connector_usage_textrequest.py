@@ -43,59 +43,59 @@ async def example_1_send_message() -> None:
     """Example 1: Send a message to a contact by phone number."""
     print("\n=== Example 1: Send Message ===")
 
-    credential = DefaultAzureCredential()
-    async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.send_message_by_phone_number_async(
-            input=SendMessageByPhoneNumberInput(
-                body="Hello from the TextRequest connector SDK.",
-                sender_name="Support Team",
-            ),
-            dashboard_id=DASHBOARD_ID,
-            phone_number="+15553334444",
-        )
-        print(f"Send result: {result}")
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.send_message_by_phone_number_async(
+                input=SendMessageByPhoneNumberInput(
+                    body="Hello from the TextRequest connector SDK.",
+                    sender_name="Support Team",
+                ),
+                dashboard_id=DASHBOARD_ID,
+                phone_number="+15553334444",
+            )
+            print(f"Send result: {result}")
 
 
 async def example_2_get_conversations() -> None:
     """Example 2: List all conversations for the dashboard."""
     print("\n=== Example 2: Get Conversations ===")
 
-    credential = DefaultAzureCredential()
-    async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-        conversations = await client.get_conversations_async(
-            dashboard_id=DASHBOARD_ID,
-            page=1,
-            page_size=20,
-        )
-        print(f"Conversations: {conversations}")
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            conversations = await client.get_conversations_async(
+                dashboard_id=DASHBOARD_ID,
+                page=1,
+                page_size=20,
+            )
+            print(f"Conversations: {conversations}")
 
 
 async def example_3_create_contact() -> None:
     """Example 3: Create or update a contact."""
     print("\n=== Example 3: Create Contact ===")
 
-    credential = DefaultAzureCredential()
-    async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.create_contact_async(
-            input=CreateContactInput(
-                first_name="Ada",
-                last_name="Lovelace",
-                display_name="Ada Lovelace",
-            ),
-            dashboard_id=DASHBOARD_ID,
-            phone_number="+15553334444",
-        )
-        print(f"Contact result: {result}")
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.create_contact_async(
+                input=CreateContactInput(
+                    first_name="Ada",
+                    last_name="Lovelace",
+                    display_name="Ada Lovelace",
+                ),
+                dashboard_id=DASHBOARD_ID,
+                phone_number="+15553334444",
+            )
+            print(f"Contact result: {result}")
 
 
 async def example_4_get_dashboards() -> None:
     """Example 4: Get all dashboards in the account."""
     print("\n=== Example 4: Get Dashboards ===")
 
-    credential = DefaultAzureCredential()
-    async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-        dashboards = await client.get_dashboards_async(page=1, page_size=20)
-        print(f"Dashboards: {dashboards}")
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            dashboards = await client.get_dashboards_async(page=1, page_size=20)
+            print(f"Dashboards: {dashboards}")
 
 
 async def main() -> None:

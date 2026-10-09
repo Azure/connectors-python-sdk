@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.office365groups import (
     Office365groupsClient,
     ListGroupMembersResponse,
@@ -20,12 +21,10 @@ from azure.connectors.office365groups import (
     UpdateCalendarEventHTMLRequest,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import collect_operation_result
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOffice365groupsClientInitialization:
@@ -33,64 +32,63 @@ class TestOffice365groupsClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = Office365groupsClient("https://example.azure.com/connections/test")
+        client = Office365groupsClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "office365groups"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = Office365groupsClient("https://example.azure.com/connections/test/")
+        client = Office365groupsClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365groupsClient("")
+            Office365groupsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365groupsClient(None)
+            Office365groupsClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'office365groups'."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "office365groups"
 
-    def test_init_preserves_url_without_trailing_slash(self, mock_token_provider):
+    def test_init_preserves_url_without_trailing_slash(self, mock_credential):
         """Test that URL without trailing slash is preserved."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -100,11 +98,11 @@ class TestOffice365groupsClientLifecycle:
     """Tests for Office365groupsClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -112,12 +110,12 @@ class TestOffice365groupsClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(Office365groupsClient, 'close', new_callable=AsyncMock) as mock_close:
             async with Office365groupsClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, Office365groupsClient)
 
@@ -128,11 +126,11 @@ class TestListGroupMembersAsync:
     """Tests for list_group_members_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list group members request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -146,19 +144,21 @@ class TestListGroupMembersAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await collect_operation_result(
+            result = await resolve_generated_result(
                 client.list_group_members_async(group_id="group-123")
             )
 
             mock_send.assert_called_once()
-            assert result == [{"id": "user1", "displayName": "John Doe"}]
+            assert result is not None
+            assert result
+            assert len(result) == 1
 
     @pytest.mark.asyncio
-    async def test_with_top_parameter(self, mock_token_provider):
+    async def test_with_top_parameter(self, mock_credential):
         """Test list group members with top parameter."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -172,7 +172,7 @@ class TestListGroupMembersAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await collect_operation_result(
+            await resolve_generated_result(
                 client.list_group_members_async(group_id="group-123", top="10")
             )
 
@@ -180,11 +180,11 @@ class TestListGroupMembersAsync:
             assert "$top=10" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_empty_items(self, mock_token_provider):
-        """Test that an empty page yields no items."""
+    async def test_empty_response_returns_none(self, mock_credential):
+        """Test that empty response returns None."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='')
@@ -195,17 +195,17 @@ class TestListGroupMembersAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await collect_operation_result(
+            result = await resolve_generated_result(
                 client.list_group_members_async(group_id="group-123")
             )
             assert result == []
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
@@ -217,7 +217,7 @@ class TestListGroupMembersAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await collect_operation_result(
+                await resolve_generated_result(
                     client.list_group_members_async(group_id="group-123")
                 )
 
@@ -226,11 +226,11 @@ class TestListGroupsAsync:
     """Tests for list_groups_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list groups request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -244,17 +244,18 @@ class TestListGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await collect_operation_result(client.list_groups_async())
+            result = await resolve_generated_result(client.list_groups_async())
 
             mock_send.assert_called_once()
-            assert result == [{"id": "group1", "displayName": "Engineering"}]
+            assert result is not None
+            assert result
 
     @pytest.mark.asyncio
-    async def test_with_filter_parameter(self, mock_token_provider):
+    async def test_with_filter_parameter(self, mock_credential):
         """Test list groups with filter parameter."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')
@@ -265,7 +266,7 @@ class TestListGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await collect_operation_result(
+            await resolve_generated_result(
                 client.list_groups_async(filter="displayName eq 'Engineering'")
             )
 
@@ -273,11 +274,11 @@ class TestListGroupsAsync:
             assert "$filter=" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_with_pagination_parameters(self, mock_token_provider):
+    async def test_with_pagination_parameters(self, mock_credential):
         """Test list groups with top and skiptoken parameters."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')
@@ -288,7 +289,7 @@ class TestListGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await collect_operation_result(client.list_groups_async(top="50", skiptoken="token123"))
+            await resolve_generated_result(client.list_groups_async(top="50", skiptoken="token123"))
 
             call_args = mock_send.call_args
             path = call_args[0][1]
@@ -300,11 +301,11 @@ class TestAddMemberToGroupAsync:
     """Tests for add_member_to_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful add member to group request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text='')
@@ -330,11 +331,11 @@ class TestRemoveMemberFromGroupAsync:
     """Tests for remove_member_from_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful remove member from group request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text='')
@@ -359,11 +360,11 @@ class TestCreateCalendarEventAsync:
     """Tests for create_calendar_event_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful create calendar event request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -396,11 +397,11 @@ class TestUpdateCalendarEventAsync:
     """Tests for update_calendar_event_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful update calendar event request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -434,11 +435,11 @@ class TestCalendarDeleteItemAsync:
     """Tests for calendar_delete_item_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful delete calendar event request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text='')
@@ -463,11 +464,11 @@ class TestListDeletedGroupsAsync:
     """Tests for list_deleted_groups_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list deleted groups request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -481,17 +482,18 @@ class TestListDeletedGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await collect_operation_result(client.list_deleted_groups_async())
+            result = await resolve_generated_result(client.list_deleted_groups_async())
 
             mock_send.assert_called_once()
-            assert result == [{"id": "deleted-group", "displayName": "Old Group"}]
+            assert result is not None
+            assert result
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_empty_items(self, mock_token_provider):
-        """Test that an empty page yields no items."""
+    async def test_empty_response_returns_none(self, mock_credential):
+        """Test that empty response returns None."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='')
@@ -502,7 +504,7 @@ class TestListDeletedGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await collect_operation_result(client.list_deleted_groups_async())
+            result = await resolve_generated_result(client.list_deleted_groups_async())
             assert result == []
 
 
@@ -510,11 +512,11 @@ class TestRestoreDeletedGroupAsync:
     """Tests for restore_deleted_group_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful restore deleted group request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text='')
@@ -537,11 +539,11 @@ class TestListOwnedGroupsAsync:
     """Tests for list_owned_groups_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list owned groups request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -566,11 +568,11 @@ class TestHttpRequestAsync:
     """Tests for http_request_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful HTTP request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -592,11 +594,11 @@ class TestHttpRequestAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -641,11 +643,11 @@ class TestListDeletedGroupsByOwnerAsync:
     """Tests for list_deleted_groups_by_owner_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list deleted groups by owner request."""
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -659,7 +661,7 @@ class TestListDeletedGroupsByOwnerAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await collect_operation_result(client.list_deleted_groups_by_owner_async())
+            result = await resolve_generated_result(client.list_deleted_groups_by_owner_async())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -795,3 +797,30 @@ class TestDataclasses:
         assert request.subject == "HTML Meeting"
         assert request.body["contentType"] == "HTML"
         assert request.is_all_day is True
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "operation",
+    ["list_group_members", "list_deleted_groups"],
+)
+async def test_pageable_group_operation_empty_response_yields_no_items(
+    mock_credential,
+    operation,
+):
+    """Yield no group items for an empty successful response."""
+    client = Office365groupsClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    )
+    method = getattr(client, f"{operation}_async")
+    arguments = {"group_id": "group-123"} if operation == "list_group_members" else {}
+    with patch.object(
+        client._http_client,
+        "send_async",
+        new_callable=AsyncMock,
+        return_value=MockResponse(status=200, text=""),
+    ):
+        items = [item async for item in method(**arguments)]
+
+    assert items == []

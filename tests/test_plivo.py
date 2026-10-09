@@ -6,9 +6,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 import azure.connectors.plivo as plivo_module
 from azure.connectors.plivo import Call, PlivoClient, SMS
-from azure.connectors.sdk import ConnectorException, ManagedIdentityTokenProvider
+from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
@@ -30,25 +31,26 @@ class TestPlivoClient:
 
     def test_init_with_defaults(self):
         """Test initialization with default authentication."""
-        client = PlivoClient("https://example.azure.com/connections/test/")
+        client = PlivoClient("https://example.azure.com/connections/test/",
+                             AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "plivo"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     @pytest.mark.parametrize("connection_runtime_url", ["", None])
     def test_init_with_invalid_url_raises_error(self, connection_runtime_url):
         """Test invalid runtime URLs are rejected."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PlivoClient(connection_runtime_url)
+            PlivoClient(connection_runtime_url, AzureKeyCredential("test-key"))
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager cleanup."""
         with patch.object(PlivoClient, "close", new_callable=AsyncMock) as mock_close:
             async with PlivoClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, PlivoClient)
 
@@ -72,12 +74,12 @@ class TestPlivoClient:
         expected_method,
         expected_url_suffix,
         expects_body,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation's successful HTTP contract."""
         client = PlivoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -95,11 +97,11 @@ class TestPlivoClient:
         assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_send_sms_success(self, mock_token_provider):
+    async def test_send_sms_success(self, mock_credential):
         """Test sending an SMS uses the account message route and body."""
         client = PlivoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -120,11 +122,11 @@ class TestPlivoClient:
         assert result == {"message_uuid": ["id"]}
 
     @pytest.mark.asyncio
-    async def test_make_call_success(self, mock_token_provider):
+    async def test_make_call_success(self, mock_credential):
         """Test making a call sends the generated call model."""
         client = PlivoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -150,12 +152,12 @@ class TestPlivoClient:
     async def test_non_success_response_raises_exception(
         self,
         operation,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation raises for a non-success response."""
         client = PlivoClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(

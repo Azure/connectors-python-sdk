@@ -50,34 +50,34 @@ async def example_1_create_office365_group():
         print("Example: $env:TEST_O365_GROUP_NAME = 'SDK Test Group'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            input_data = CreateOffice365GroupInput(
-                display_name=group_name,
-                description="Created via Azure Connectors SDK for Python",
-                mail_nickname=group_name.replace(" ", "-").lower(),
-                group_types=["Unified"],
-                security_enabled=False,
-                mail_enabled=True,
-            )
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                input_data = CreateOffice365GroupInput(
+                    display_name=group_name,
+                    description="Created via Azure Connectors SDK for Python",
+                    mail_nickname=group_name.replace(" ", "-").lower(),
+                    group_types=["Unified"],
+                    security_enabled=False,
+                    mail_enabled=True,
+                )
 
-            result = await client.create_office365_group_async(input=input_data)
+                result = await client.create_office365_group_async(input=input_data)
 
-            if result:
-                print("Office 365 group created:")
-                print(f"  ID: {result.get('id', 'N/A')}")
-                print(f"  Display Name: {result.get('displayName', 'N/A')}")
-                print(f"  Mail: {result.get('mail', 'N/A')}")
-                print(f"  Created: {result.get('createdDateTime', 'N/A')}")
-            else:
-                print("Group created (no response returned).")
+                if result:
+                    print("Office 365 group created:")
+                    print(f"  ID: {result.get('id', 'N/A')}")
+                    print(f"  Display Name: {result.get('displayName', 'N/A')}")
+                    print(f"  Mail: {result.get('mail', 'N/A')}")
+                    print(f"  Created: {result.get('createdDateTime', 'N/A')}")
+                else:
+                    print("Group created (no response returned).")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_create_security_group():
@@ -90,32 +90,32 @@ async def example_2_create_security_group():
         print("Example: $env:TEST_SECURITY_GROUP_NAME = 'SDK Security Group'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            input_data = CreateSecurityGroupInput(
-                display_name=group_name,
-                description="Security group created via Azure Connectors SDK",
-                mail_nickname=group_name.replace(" ", "-").lower(),
-                security_enabled=True,
-                mail_enabled=False,
-            )
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                input_data = CreateSecurityGroupInput(
+                    display_name=group_name,
+                    description="Security group created via Azure Connectors SDK",
+                    mail_nickname=group_name.replace(" ", "-").lower(),
+                    security_enabled=True,
+                    mail_enabled=False,
+                )
 
-            result = await client.create_security_group_async(input=input_data)
+                result = await client.create_security_group_async(input=input_data)
 
-            if result:
-                print("Security group created:")
-                print(f"  ID: {result.get('id', 'N/A')}")
-                print(f"  Display Name: {result.get('displayName', 'N/A')}")
-                print(f"  Security Enabled: {result.get('securityEnabled', 'N/A')}")
-            else:
-                print("Security group created (no response returned).")
+                if result:
+                    print("Security group created:")
+                    print(f"  ID: {result.get('id', 'N/A')}")
+                    print(f"  Display Name: {result.get('displayName', 'N/A')}")
+                    print(f"  Security Enabled: {result.get('securityEnabled', 'N/A')}")
+                else:
+                    print("Security group created (no response returned).")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_create_group():
@@ -132,35 +132,35 @@ async def example_3_create_group():
     group_type = os.environ.get("TEST_GROUP_TYPE", "Unified")
     group_types = [group_type] if group_type else []
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            input_data = CreateGroupInput(
-                display_name=group_name,
-                description="Group created via Azure Connectors SDK",
-                mail_nickname=group_name.replace(" ", "-").lower(),
-                group_types=group_types,
-                security_enabled=not bool(group_types),
-                mail_enabled=bool(group_types),
-            )
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                input_data = CreateGroupInput(
+                    display_name=group_name,
+                    description="Group created via Azure Connectors SDK",
+                    mail_nickname=group_name.replace(" ", "-").lower(),
+                    group_types=group_types,
+                    security_enabled=not bool(group_types),
+                    mail_enabled=bool(group_types),
+                )
 
-            result = await client.create_group_async(input=input_data)
+                result = await client.create_group_async(input=input_data)
 
-            if result:
-                print("Group created:")
-                print(f"  ID: {result.get('id', 'N/A')}")
-                print(f"  Display Name: {result.get('displayName', 'N/A')}")
-                print(f"  Group Types: {result.get('groupTypes', [])}")
-                print(f"  Mail Enabled: {result.get('mailEnabled', 'N/A')}")
-                print(f"  Security Enabled: {result.get('securityEnabled', 'N/A')}")
-            else:
-                print("Group created (no response returned).")
+                if result:
+                    print("Group created:")
+                    print(f"  ID: {result.get('id', 'N/A')}")
+                    print(f"  Display Name: {result.get('displayName', 'N/A')}")
+                    print(f"  Group Types: {result.get('groupTypes', [])}")
+                    print(f"  Mail Enabled: {result.get('mailEnabled', 'N/A')}")
+                    print(f"  Security Enabled: {result.get('securityEnabled', 'N/A')}")
+                else:
+                    print("Group created (no response returned).")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_create_user():
@@ -178,36 +178,36 @@ async def example_4_create_user():
         print("  $env:TEST_USER_PASSWORD = 'TempPassword123!'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            input_data = CreateUserRequest(
-                account_enabled=True,
-                display_name=display_name,
-                mail_nickname=user_principal_name.split("@")[0],
-                user_principal_name=user_principal_name,
-                password_profile={
-                    "password": temp_password or "TempPassword123!",
-                    "forceChangePasswordNextSignIn": True,
-                },
-            )
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                input_data = CreateUserRequest(
+                    account_enabled=True,
+                    display_name=display_name,
+                    mail_nickname=user_principal_name.split("@")[0],
+                    user_principal_name=user_principal_name,
+                    password_profile={
+                        "password": temp_password or "TempPassword123!",
+                        "forceChangePasswordNextSignIn": True,
+                    },
+                )
 
-            result = await client.create_user_async(input=input_data)
+                result = await client.create_user_async(input=input_data)
 
-            if result:
-                print("User created:")
-                print(f"  ID: {result.get('id', 'N/A')}")
-                print(f"  Display Name: {result.get('displayName', 'N/A')}")
-                print(f"  UPN: {result.get('userPrincipalName', 'N/A')}")
-                print(f"  Mail: {result.get('mail', 'N/A')}")
-            else:
-                print("User created (no response returned).")
+                if result:
+                    print("User created:")
+                    print(f"  ID: {result.get('id', 'N/A')}")
+                    print(f"  Display Name: {result.get('displayName', 'N/A')}")
+                    print(f"  UPN: {result.get('userPrincipalName', 'N/A')}")
+                    print(f"  Mail: {result.get('mail', 'N/A')}")
+                else:
+                    print("User created (no response returned).")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_remove_member_from_group():
@@ -223,23 +223,23 @@ async def example_5_remove_member_from_group():
         print("  $env:TEST_MEMBER_ID = '<user-object-id>'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            await client.remove_member_from_group_async(
-                group_id=group_id,
-                member_id=member_id,
-            )
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                await client.remove_member_from_group_async(
+                    group_id=group_id,
+                    member_id=member_id,
+                )
 
-            print("Member removed from group:")
-            print(f"  Group ID: {group_id}")
-            print(f"  Member ID: {member_id}")
+                print("Member removed from group:")
+                print(f"  Group ID: {group_id}")
+                print(f"  Member ID: {member_id}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

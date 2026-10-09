@@ -6,15 +6,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Any, Dict, List
+from typing import Optional, Dict, List, Any, Mapping
 import json
+
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
-    ConnectorClientOptions,
-    TokenProvider,
-    ManagedIdentityTokenProvider,
     ConnectorException,
+    ConnectorResponseHook,
 )
 
 
@@ -5148,8 +5150,17 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        token_provider: Optional[TokenProvider] = None,
-        options: Optional[ConnectorClientOptions] = None,
+        credential: AsyncTokenCredential | AzureKeyCredential,
+        *,
+        max_retry_attempts: int = 3,
+        timeout_seconds: float = 30.0,
+        use_exponential_backoff: bool = True,
+        initial_retry_delay_seconds: float = 0.5,
+        maximum_retry_delay_seconds: float = 120.0,
+        retry_jitter_factor: float = 0.1,
+        retry_unsafe_http_methods: bool = False,
+        transport: Optional[AsyncHttpTransport] = None,
+        **kwargs: Any,
     ):
         """
         Initialize a CloudmersiveconvertClient.
@@ -5157,17 +5168,39 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Args:
             connection_runtime_url: The connection runtime
                 URL from Azure Portal.
-            token_provider: Optional token provider.
-                Defaults to ManagedIdentityTokenProvider.
-            options: Optional connector client options.
+            credential: Caller-owned Azure Core credential.
+            max_retry_attempts: The maximum number of request attempts.
+            timeout_seconds: The total network timeout for each request,
+                including retries, response loading, and body reads.
+                Nonpositive values disable SDK and transport deadlines.
+            use_exponential_backoff: Whether retries use exponential backoff.
+            initial_retry_delay_seconds: The initial retry delay in seconds.
+            maximum_retry_delay_seconds: The maximum retry delay in seconds.
+            retry_jitter_factor: The jitter fraction applied to retry delays.
+            retry_unsafe_http_methods: Whether unsafe HTTP methods may be
+                retried.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
+            **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
             raise ValueError("connection_runtime_url cannot be None or empty")
 
-        if token_provider is None:
-            token_provider = ManagedIdentityTokenProvider()
+        if credential is None:
+            raise ValueError("credential cannot be None")
 
-        super().__init__(token_provider, options)
+        super().__init__(
+            credential,
+            max_retry_attempts=max_retry_attempts,
+            timeout_seconds=timeout_seconds,
+            use_exponential_backoff=use_exponential_backoff,
+            initial_retry_delay_seconds=initial_retry_delay_seconds,
+            maximum_retry_delay_seconds=maximum_retry_delay_seconds,
+            retry_jitter_factor=retry_jitter_factor,
+            retry_unsafe_http_methods=retry_unsafe_http_methods,
+            transport=transport,
+            **kwargs,
+        )
         self._connection_runtime_url = connection_runtime_url.rstrip('/')
 
     @property
@@ -5177,6 +5210,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_create_blank_document_async(
         self,
         input: CreateBlankDocxRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a blank Word DOCX document
@@ -5190,7 +5228,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5209,6 +5251,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_delete_pages_async(
         self,
         input: RemoveDocxPagesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Delete, remove pages from a Word DOCX document
@@ -5221,7 +5268,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5237,6 +5288,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_delete_table_row_async(
         self,
         input: DeleteDocxTableRowRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Deletes a table row in an existing table in a Word DOCX document
@@ -5250,7 +5306,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5269,6 +5329,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_delete_table_row_range_async(
         self,
         input: DeleteDocxTableRowRangeRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Deletes a range of multiple table rows in an existing table in a Word
@@ -5282,7 +5347,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5301,6 +5370,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_body_async(
         self,
         input: GetDocxBodyRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get body from a Word DOCX document
@@ -5313,7 +5387,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5332,6 +5410,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_comments_hierarchical_async(
         self,
         input: GetDocxGetCommentsHierarchicalRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get comments from a Word DOCX document hierarchically
@@ -5346,7 +5429,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5365,6 +5452,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_headers_and_footers_async(
         self,
         input: GetDocxHeadersAndFootersRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get content of a footer from a Word DOCX document
@@ -5377,7 +5469,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5396,6 +5492,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_images_async(
         self,
         input: GetDocxImagesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get images from a Word DOCX document
@@ -5407,7 +5508,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5426,6 +5531,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_pages_async(
         self,
         input: GetDocxPagesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get pages and content from a Word DOCX document
@@ -5438,7 +5548,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5457,6 +5571,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_sections_async(
         self,
         input: GetDocxSectionsRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get sections from a Word DOCX document
@@ -5468,7 +5587,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5487,6 +5610,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_styles_async(
         self,
         input: GetDocxStylesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get styles from a Word DOCX document
@@ -5498,7 +5626,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5517,6 +5649,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_table_row_async(
         self,
         input: GetDocxTableRowRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Gets the contents of an existing table row in an existing table in a W
@@ -5529,7 +5666,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5548,6 +5689,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_table_by_index_async(
         self,
         input: GetDocxTableByIndexRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get a specific table by index in a Word DOCX document
@@ -5561,7 +5707,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5580,6 +5730,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_get_tables_async(
         self,
         input: GetDocxTablesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get all tables in Word DOCX document
@@ -5591,7 +5746,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5610,6 +5769,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_comment_on_paragraph_async(
         self,
         input: DocxInsertCommentOnParagraphRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Insert a new comment into a Word DOCX document attached to a paragraph
@@ -5624,7 +5788,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5643,6 +5811,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_image_async(
         self,
         input: DocxInsertImageRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Insert image into a Word DOCX document
@@ -5655,7 +5828,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5674,6 +5851,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_paragraph_async(
         self,
         input: InsertDocxInsertParagraphRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Insert a new paragraph into a Word DOCX document
@@ -5689,7 +5871,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5708,6 +5894,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_table_async(
         self,
         input: InsertDocxTablesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Insert a new table into a Word DOCX document
@@ -5720,7 +5911,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5739,6 +5934,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_insert_table_row_async(
         self,
         input: InsertDocxTableRowRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Insert a new row into an existing table in a Word DOCX document
@@ -5752,7 +5952,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5771,6 +5975,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_remove_headers_and_footers_async(
         self,
         input: RemoveDocxHeadersAndFootersRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Remove headers and footers from Word DOCX document
@@ -5784,7 +5993,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5803,6 +6016,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_remove_object_async(
         self,
         input: DocxRemoveObjectRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete any object in a Word DOCX document
@@ -5818,7 +6036,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5837,6 +6059,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_replace_async(
         self,
         input: ReplaceStringRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Replace string in Word DOCX document
@@ -5848,7 +6075,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5864,6 +6095,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_set_footer_async(
         self,
         input: DocxSetFooterRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Set the footer in a Word DOCX document
@@ -5876,7 +6112,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5895,6 +6135,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_set_footer_add_page_number_async(
         self,
         input: DocxSetFooterAddPageNumberRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Add page number to footer in a Word DOCX document
@@ -5908,7 +6153,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5927,6 +6176,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_set_header_async(
         self,
         input: DocxSetHeaderRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Set the header in a Word DOCX document
@@ -5939,7 +6193,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5958,6 +6216,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_update_table_cell_async(
         self,
         input: UpdateDocxTableCellRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update, set contents of a table cell in an existing table in a Word DO
@@ -5972,7 +6235,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -5991,6 +6258,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_docx_update_table_row_async(
         self,
         input: UpdateDocxTableRowRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Update, set contents of a table row in an existing table in a Word DOCX
@@ -6006,7 +6278,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6025,6 +6301,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_finish_editing_async(
         self,
         input: FinishEditingRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Finish editing document, and download result from document editing
@@ -6038,7 +6319,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6054,6 +6339,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_pptx_delete_slides_async(
         self,
         input: RemovePptxSlidesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Delete, remove slides from a PowerPoint PPTX presentation document
@@ -6066,7 +6356,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6082,6 +6376,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_pptx_replace_async(
         self,
         input: ReplaceStringRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Replace string in PowerPoint PPTX presentation
@@ -6094,7 +6393,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6110,6 +6413,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_clear_cell_by_index_async(
         self,
         input: ClearXlsxCellRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Clear cell contents in an Excel XLSX spreadsheet, worksheet by index
@@ -6123,7 +6431,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6142,6 +6454,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_create_blank_spreadsheet_async(
         self,
         input: CreateBlankSpreadsheetRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a blank Excel XLSX spreadsheet
@@ -6153,7 +6470,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6172,6 +6493,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_create_spreadsheet_from_data_async(
         self,
         input: CreateSpreadsheetFromDataRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Create a new Excel XLSX spreadsheet from column and row data
@@ -6185,7 +6511,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6204,6 +6534,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_delete_worksheet_async(
         self,
         input: RemoveXlsxWorksheetRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Delete, remove worksheet from an Excel XLSX spreadsheet document
@@ -6218,7 +6553,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6237,6 +6576,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_cell_by_identifier_async(
         self,
         input: GetXlsxCellByIdentifierRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get cell from an Excel XLSX spreadsheet, worksheet by cell identifier
@@ -6250,7 +6594,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6269,6 +6617,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_cell_by_index_async(
         self,
         input: GetXlsxCellRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get cell from an Excel XLSX spreadsheet, worksheet by index
@@ -6282,7 +6635,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6301,6 +6658,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_columns_async(
         self,
         input: GetXlsxColumnsRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
@@ -6312,7 +6674,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6331,6 +6697,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_images_async(
         self,
         input: GetXlsxImagesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get images from a Excel XLSX spreadsheet, worksheet
@@ -6342,7 +6713,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6361,6 +6736,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_rows_and_cells_async(
         self,
         input: GetXlsxRowsAndCellsRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
@@ -6373,7 +6753,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6392,6 +6776,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_styles_async(
         self,
         input: GetXlsxStylesRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get styles from a Excel XLSX spreadsheet, worksheet
@@ -6403,7 +6792,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6422,6 +6815,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_get_worksheets_async(
         self,
         input: GetXlsxWorksheetsRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Get worksheets from a Excel XLSX spreadsheet
@@ -6434,7 +6832,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6453,6 +6855,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_insert_worksheet_async(
         self,
         input: InsertXlsxWorksheetRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Insert a new worksheet into an Excel XLSX spreadsheet
@@ -6465,7 +6872,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6484,6 +6895,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_set_cell_by_identifier_async(
         self,
         input: SetXlsxCellByIdentifierRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Set, update cell contents in an Excel XLSX spreadsheet, worksheet by c
@@ -6498,7 +6914,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6517,6 +6937,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def edit_document_xlsx_set_cell_by_index_async(
         self,
         input: SetXlsxCellRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Set, update cell contents in an Excel XLSX spreadsheet, worksheet by
@@ -6531,7 +6956,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6550,6 +6979,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_html_to_docx_async(
         self,
         input: HtmlToOfficeRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert HTML to Word DOCX Document
@@ -6559,7 +6993,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/convert/html/to/docx"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6575,6 +7013,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_data_json_to_xml_async(
         self,
         input: ConvertDataJsonToXmlInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert JSON to XML conversion
@@ -6584,7 +7027,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/convert/json/to/xml"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6603,6 +7050,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_template_apply_html_template_async(
         self,
         input: HtmlTemplateApplicationRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Apply HTML template
@@ -6615,7 +7067,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6634,6 +7090,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_html_to_pdf_async(
         self,
         input: HtmlToPdfRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert HTML string to PDF
@@ -6644,7 +7105,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/pdf"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6660,6 +7125,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_html_to_png_async(
         self,
         input: HtmlToPngRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert HTML string to PNG screenshot
@@ -6670,7 +7140,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/png"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6689,6 +7163,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_html_to_txt_async(
         self,
         input: HtmlToTextRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert HTML string to text (txt)
@@ -6698,7 +7177,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/txt"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6717,6 +7200,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_url_to_pdf_async(
         self,
         input: ScreenshotRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Convert a URL to PDF
@@ -6727,7 +7215,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/pdf"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6743,6 +7235,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_url_to_screenshot_async(
         self,
         input: ScreenshotRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> bytes:
         """
         Take screenshot of URL
@@ -6756,7 +7253,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         )
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):
@@ -6772,6 +7273,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     async def convert_web_url_to_txt_async(
         self,
         input: UrlToTextRequest,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
         Convert website URL page to text (txt)
@@ -6781,7 +7287,11 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/txt"
 
         response = await self.http_client.send_async(
-            "POST", request_url, body=input
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
         )
 
         if not (200 <= response.status < 300):

@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.shifts import (
     TRIGGER_OPERATIONS,
     ShiftsClient,
@@ -14,13 +15,11 @@ from azure.connectors.shifts import (
     WebhookPushResponseResourceEntity,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import collect_operation_result
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestShiftsClientInitialization:
@@ -28,55 +27,54 @@ class TestShiftsClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ShiftsClient("https://example.azure.com/connections/test")
+        client = ShiftsClient("https://example.azure.com/connections/test",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "shifts"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ShiftsClient("https://example.azure.com/connections/test/")
+        client = ShiftsClient("https://example.azure.com/connections/test/",
+                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ShiftsClient("")
+            ShiftsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ShiftsClient(None)
+            ShiftsClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'shifts'."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "shifts"
@@ -86,11 +84,11 @@ class TestShiftsClientLifecycle:
     """Tests for ShiftsClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -98,12 +96,12 @@ class TestShiftsClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(ShiftsClient, "close", new_callable=AsyncMock) as mock_close:
             async with ShiftsClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, ShiftsClient)
 
@@ -130,11 +128,11 @@ class TestGetAllTeamsAsync:
     """Tests for get_all_teams_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful teams retrieval."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(
             status=200, text='{"value": [{"id": "team-1", "displayName": "Store Team"}]}')
@@ -155,11 +153,11 @@ class TestGetAllTeamsAsync:
             assert "value" in result
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that teams retrieval error raises ConnectorException."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
@@ -177,11 +175,11 @@ class TestGetScheduleAsync:
     """Tests for get_schedule_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful schedule retrieval."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id": "schedule-1", "timeZone": "UTC"}')
 
@@ -201,11 +199,11 @@ class TestGetScheduleAsync:
             assert result.get("id") == "schedule-1"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that schedule retrieval error raises ConnectorException."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
@@ -223,11 +221,11 @@ class TestListShiftsAsync:
     """Tests for list_shifts_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_query_params(self, mock_token_provider):
+    async def test_success_with_query_params(self, mock_credential):
         """Test list shifts query parameter handling."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value": [{"id": "shift-1"}]}')
 
@@ -237,7 +235,7 @@ class TestListShiftsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await collect_operation_result(client.list_shifts_async(
+            result = await resolve_generated_result(client.list_shifts_async(
                 team_id="team-123",
                 start_time="2026-07-01T00:00:00Z",
                 end_time="2026-07-31T00:00:00Z",
@@ -254,11 +252,11 @@ class TestListShiftsAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that list shifts error raises ConnectorException."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
 
@@ -269,18 +267,18 @@ class TestListShiftsAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await collect_operation_result(client.list_shifts_async(team_id="team-123"))
+                await resolve_generated_result(client.list_shifts_async(team_id="team-123"))
 
 
 class TestCreateShiftAsync:
     """Tests for create_shift_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful shift creation."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateShiftRequest(scheduling_group_id="group-1", user_id="user-1")
         mock_response = MockResponse(status=201, text='{"id": "shift-1"}')
@@ -302,11 +300,11 @@ class TestCreateShiftAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that shift creation error raises ConnectorException."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CreateShiftRequest(scheduling_group_id="group-1", user_id="user-1")
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -338,11 +336,11 @@ class TestDeleteTimeOffAsync:
     """Tests for delete_time_off_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful time-off deletion."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204, text="")
 
@@ -360,11 +358,11 @@ class TestDeleteTimeOffAsync:
             assert "/teams/team-1/schedule/timesoff/toff-1" in path
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test DELETE error path raises ConnectorException."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Time off not found"}')
 
@@ -382,11 +380,11 @@ class TestUpdateOpenShiftAsync:
     """Tests for update_open_shift_async method (PUT with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+    async def test_success_sends_body_and_returns_result(self, mock_credential):
         """Test PUT sends input body and returns result."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = EditOpenShiftRequest()
         mock_response = MockResponse(status=200, text='{"id": "oshift-1"}')
@@ -412,11 +410,11 @@ class TestUpdateOpenShiftAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test PUT error path raises ConnectorException."""
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = EditOpenShiftRequest()
         mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')

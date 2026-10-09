@@ -3,9 +3,9 @@
 """Unit tests for AzuretablesClient."""
 
 import json
-from unittest.mock import AsyncMock, patch
-
 import pytest
+from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.azuretables import (
     AzuretablesClient,
     CreateEntityInput,
@@ -24,12 +24,10 @@ from azure.connectors.azuretables import (
     EntityItem,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import collect_operation_result
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestAzuretablesClientInitialization:
@@ -37,55 +35,54 @@ class TestAzuretablesClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzuretablesClient("https://example.azure.com/connections/test")
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "azuretables"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzuretablesClient("https://example.azure.com/connections/test/")
+        client = AzuretablesClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzuretablesClient("")
+            AzuretablesClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzuretablesClient(None)
+            AzuretablesClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azuretables'."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "azuretables"
@@ -95,11 +92,11 @@ class TestAzuretablesClientLifecycle:
     """Tests for AzuretablesClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -107,12 +104,12 @@ class TestAzuretablesClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(AzuretablesClient, 'close', new_callable=AsyncMock) as mock_close:
             async with AzuretablesClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, AzuretablesClient)
 
@@ -123,11 +120,11 @@ class TestCreateEntity:
     """Tests for create_entity_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -157,11 +154,11 @@ class TestCreateEntity:
             assert result["PartitionKey"] == "pk1"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid entity"}')
@@ -187,11 +184,11 @@ class TestCreateTable:
     """Tests for create_table_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -218,11 +215,11 @@ class TestCreateTable:
             assert result["TableName"] == "newtable"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=409, text='{"error": "Table already exists"}')
@@ -247,11 +244,11 @@ class TestDeleteEntity:
     """Tests for delete_entity_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful DELETE request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -275,11 +272,11 @@ class TestDeleteEntity:
             assert "/etag(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
@@ -305,11 +302,11 @@ class TestDeleteTable:
     """Tests for delete_table_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful DELETE request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -331,11 +328,11 @@ class TestDeleteTable:
             assert "/storageAccounts/mystorageaccount/tables/mytable" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
@@ -359,47 +356,11 @@ class TestGetEntities:
     """Tests for get_entities_async method."""
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("empty_first_page", [False, True])
-    async def test_continuation_yields_later_entities(self, mock_token_provider, empty_first_page):
-        """Test Azure Tables uses nextLink and terminates after the exact second request."""
-        first_items = [] if empty_first_page else [{"PartitionKey": "pk", "RowKey": "row-1"}]
-        later_items = [{"PartitionKey": "pk", "RowKey": "row-2", "Value": {"count": 2}}]
-        async with AzuretablesClient(
-            "https://example.azure.com/connections/test", token_provider=mock_token_provider,
-        ) as client:
-            with patch.object(
-                client._http_client, "send_async", new_callable=AsyncMock,
-                side_effect=[
-                    MockResponse(status=200, text=json.dumps({
-                        "value": first_items, "nextLink": "?$skiptoken=page-2",
-                    })),
-                    MockResponse(status=200, text=json.dumps({
-                        "value": later_items, "nextLink": None,
-                    })),
-                ],
-            ) as transport:
-                entities = [entity async for entity in client.get_entities_async(
-                    storage_account_name="mystorageaccount", table_name="mytable",
-                )]
-
-            assert entities == first_items + later_items
-            assert transport.await_count == 2
-            assert transport.await_args_list[0].args == (
-                "GET", "https://example.azure.com/connections/test/v2/storageAccounts/"
-                "mystorageaccount/tables/mytable/entities",
-            )
-            assert transport.await_args_list[1].args == (
-                "GET", "https://example.azure.com/connections/test/v2/storageAccounts/"
-                "mystorageaccount/tables/mytable/entities?$skiptoken=page-2",
-            )
-            assert all(request.kwargs == {"body": None} for request in transport.await_args_list)
-
-    @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -416,7 +377,7 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await collect_operation_result(client.get_entities_async(
+            result = await resolve_generated_result(client.get_entities_async(
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
             ))
@@ -428,11 +389,11 @@ class TestGetEntities:
             assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_with_query_parameters(self, mock_token_provider):
+    async def test_with_query_parameters(self, mock_credential):
         """Test GET request with query parameters."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')
@@ -443,7 +404,7 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await collect_operation_result(client.get_entities_async(
+            await resolve_generated_result(client.get_entities_async(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 filter="PartitionKey eq 'pk1'",
@@ -456,11 +417,11 @@ class TestGetEntities:
             assert "$select=" in url
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
@@ -472,7 +433,7 @@ class TestGetEntities:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await collect_operation_result(client.get_entities_async(
+                await resolve_generated_result(client.get_entities_async(
                     storage_account_name="mystorageaccount",
                     table_name="nonexistent"
                 ))
@@ -484,11 +445,11 @@ class TestGetEntity:
     """Tests for get_entity_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -516,11 +477,11 @@ class TestGetEntity:
             assert result["Name"] == "Test Entity"
 
     @pytest.mark.asyncio
-    async def test_with_select_parameter(self, mock_token_provider):
+    async def test_with_select_parameter(self, mock_credential):
         """Test GET request with select parameter."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"Name": "Test"}')
@@ -544,11 +505,11 @@ class TestGetEntity:
             assert "$select=Name" in url
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
@@ -574,11 +535,11 @@ class TestGetTable:
     """Tests for get_table_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -604,11 +565,11 @@ class TestGetTable:
             assert result["TableName"] == "mytable"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
@@ -632,11 +593,11 @@ class TestGetTables:
     """Tests for get_tables_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -661,11 +622,11 @@ class TestGetTables:
             assert len(result["value"]) == 2
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -682,11 +643,11 @@ class TestGetTables:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Storage account not found"}')
@@ -709,11 +670,11 @@ class TestInsertMergeEntity:
     """Tests for insert_merge_entity_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful PATCH request (upsert merge)."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -741,11 +702,11 @@ class TestInsertMergeEntity:
             assert "/entities(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid entity data"}')
@@ -773,11 +734,11 @@ class TestInsertReplaceEntity:
     """Tests for insert_replace_entity_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful PUT request (upsert replace)."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -805,11 +766,11 @@ class TestInsertReplaceEntity:
             assert "/entities(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid entity data"}')
@@ -837,11 +798,11 @@ class TestMergeEntity:
     """Tests for merge_entity_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful PATCH request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -869,11 +830,11 @@ class TestMergeEntity:
             assert "/etag(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
@@ -901,11 +862,11 @@ class TestReplaceEntity:
     """Tests for replace_entity_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful PUT request."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -933,11 +894,11 @@ class TestReplaceEntity:
             assert "/etag(PartitionKey='pk1',RowKey='rk1')" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
@@ -1104,22 +1065,22 @@ class TestEdgeCases:
     """Tests for edge cases and special scenarios."""
 
     @pytest.mark.asyncio
-    async def test_http_client_property_access(self, mock_token_provider):
+    async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.http_client is not None
         assert client._http_client is client.http_client
 
     @pytest.mark.asyncio
-    async def test_multiple_consecutive_calls(self, mock_token_provider):
+    async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"value": []}')
@@ -1136,11 +1097,11 @@ class TestEdgeCases:
             assert mock_send.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_special_characters_in_keys(self, mock_token_provider):
+    async def test_special_characters_in_keys(self, mock_credential):
         """Test handling of special characters in partition/row keys."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"PartitionKey": "pk-1", "RowKey": "rk_1"}')
@@ -1166,11 +1127,11 @@ class TestGetStorageAccounts:
     """Tests for get_storage_accounts_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_storage_accounts(self, mock_token_provider):
+    async def test_success_returns_storage_accounts(self, mock_credential):
         """Test successful storage-account discovery."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -1187,16 +1148,20 @@ class TestGetStorageAccounts:
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/v2/GetStorageAccounts",
-                body=None
+                body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result["value"][0]["name"] == "account1"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test a non-2xx response raises ConnectorException."""
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(
@@ -1209,3 +1174,56 @@ class TestGetStorageAccounts:
                 await client.get_storage_accounts_async()
 
             assert exc_info.value.status_code == 500
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("empty_first_page", [False, True])
+async def test_entities_continuation_yields_later_entities(
+    mock_credential,
+    empty_first_page,
+):
+    """Follow Azure Tables nextLink after populated and empty pages."""
+    first_items = [] if empty_first_page else [
+        {"PartitionKey": "pk", "RowKey": "row-1"}
+    ]
+    later_items = [
+        {"PartitionKey": "pk", "RowKey": "row-2", "Value": {"count": 2}}
+    ]
+    async with AzuretablesClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send_async",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(status=200, text=json.dumps({
+                    "value": first_items,
+                    "nextLink": "?$skiptoken=page-2",
+                })),
+                MockResponse(status=200, text=json.dumps({
+                    "value": later_items,
+                    "nextLink": None,
+                })),
+            ],
+        ) as transport:
+            entities = [
+                entity async for entity in client.get_entities_async(
+                    storage_account_name="mystorageaccount",
+                    table_name="mytable",
+                )
+            ]
+
+    assert entities == first_items + later_items
+    assert transport.await_count == 2
+    assert transport.await_args_list[0].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v2/storageAccounts/"
+        "mystorageaccount/tables/mytable/entities",
+    )
+    assert transport.await_args_list[1].args == (
+        "GET",
+        "https://example.azure.com/connections/test/v2/storageAccounts/"
+        "mystorageaccount/tables/mytable/entities?$skiptoken=page-2",
+    )

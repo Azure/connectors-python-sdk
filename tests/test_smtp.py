@@ -4,14 +4,13 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.smtp import (
     SmtpClient,
     Email,
     Attachment,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from azure.connectors.sdk.serialization import to_wire
@@ -23,55 +22,54 @@ class TestSmtpClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = SmtpClient("https://example.azure.com/connections/test")
+        client = SmtpClient("https://example.azure.com/connections/test",
+                            AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "smtp"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = SmtpClient("https://example.azure.com/connections/test/")
+        client = SmtpClient("https://example.azure.com/connections/test/",
+                            AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SmtpClient("")
+            SmtpClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SmtpClient(None)
+            SmtpClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'smtp'."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "smtp"
@@ -81,11 +79,11 @@ class TestSmtpClientLifecycle:
     """Tests for SmtpClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -93,12 +91,12 @@ class TestSmtpClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(SmtpClient, 'close', new_callable=AsyncMock) as mock_close:
             async with SmtpClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, SmtpClient)
 
@@ -109,11 +107,11 @@ class TestSendEmail:
     """Tests for send_email_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_basic_email(self, mock_token_provider):
+    async def test_success_basic_email(self, mock_credential):
         """Test successful POST request with basic email."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -138,11 +136,11 @@ class TestSendEmail:
             assert "/SendEmailV3" in call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_success_with_multiple_recipients(self, mock_token_provider):
+    async def test_success_with_multiple_recipients(self, mock_credential):
         """Test successful POST request with multiple recipients."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -170,11 +168,11 @@ class TestSendEmail:
             assert body is email_input
 
     @pytest.mark.asyncio
-    async def test_success_with_all_fields(self, mock_token_provider):
+    async def test_success_with_all_fields(self, mock_credential):
         """Test successful POST request with all optional fields."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -208,11 +206,11 @@ class TestSendEmail:
             mock_send.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_success_with_multiple_attachments(self, mock_token_provider):
+    async def test_success_with_multiple_attachments(self, mock_credential):
         """Test successful POST request with multiple attachments."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -245,11 +243,11 @@ class TestSendEmail:
             mock_send.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_with_high_importance(self, mock_token_provider):
+    async def test_with_high_importance(self, mock_credential):
         """Test email with high importance."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -270,11 +268,11 @@ class TestSendEmail:
             await client.send_email_async(input=email_input)
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid email format"}')
@@ -371,22 +369,22 @@ class TestEdgeCases:
     """Tests for edge cases and special scenarios."""
 
     @pytest.mark.asyncio
-    async def test_http_client_property_access(self, mock_token_provider):
+    async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.http_client is not None
         assert client._http_client is client.http_client
 
     @pytest.mark.asyncio
-    async def test_empty_body_email(self, mock_token_provider):
+    async def test_empty_body_email(self, mock_credential):
         """Test sending email with empty body."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -406,11 +404,11 @@ class TestEdgeCases:
             await client.send_email_async(input=email_input)
 
     @pytest.mark.asyncio
-    async def test_html_body_email(self, mock_token_provider):
+    async def test_html_body_email(self, mock_credential):
         """Test sending email with HTML body."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -430,11 +428,11 @@ class TestEdgeCases:
             await client.send_email_async(input=email_input)
 
     @pytest.mark.asyncio
-    async def test_multiple_consecutive_sends(self, mock_token_provider):
+    async def test_multiple_consecutive_sends(self, mock_credential):
         """Test multiple consecutive send operations."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -464,11 +462,11 @@ class TestEdgeCases:
             assert mock_send.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_special_characters_in_subject(self, mock_token_provider):
+    async def test_special_characters_in_subject(self, mock_credential):
         """Test email with special characters in subject."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
@@ -488,11 +486,11 @@ class TestEdgeCases:
             await client.send_email_async(input=email_input)
 
     @pytest.mark.asyncio
-    async def test_long_recipient_list(self, mock_token_provider):
+    async def test_long_recipient_list(self, mock_credential):
         """Test email with many recipients."""
         client = SmtpClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")

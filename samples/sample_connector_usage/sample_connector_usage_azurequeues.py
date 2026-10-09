@@ -53,32 +53,32 @@ async def example_1_list_queues():
         print("Example: $env:AZUREQUEUES_STORAGE_ACCOUNT = 'mystorageaccount'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.list_queues_async(
-                storage_account_name=STORAGE_ACCOUNT
-            )
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.list_queues_async(
+                    storage_account_name=STORAGE_ACCOUNT
+                )
 
-            if result:
-                print(f"Queues in storage account '{STORAGE_ACCOUNT}':")
-                # Result may be a list or dict with queue names
-                if isinstance(result, list):
-                    for queue in result:
-                        if isinstance(queue, dict):
-                            print(f"  - {queue.get('name', queue)}")
-                        else:
-                            print(f"  - {queue}")
-                elif isinstance(result, dict):
-                    print(f"  Response: {result}")
-            else:
-                print("No queues found or empty response.")
+                if result:
+                    print(f"Queues in storage account '{STORAGE_ACCOUNT}':")
+                    # Result may be a list or dict with queue names
+                    if isinstance(result, list):
+                        for queue in result:
+                            if isinstance(queue, dict):
+                                print(f"  - {queue.get('name', queue)}")
+                            else:
+                                print(f"  - {queue}")
+                    elif isinstance(result, dict):
+                        print(f"  Response: {result}")
+                else:
+                    print("No queues found or empty response.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_create_queue():
@@ -92,23 +92,23 @@ async def example_2_create_queue():
         print("  $env:AZUREQUEUES_NEW_QUEUE_NAME = 'my-new-queue'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.put_queue_async(
-                storage_account_name=STORAGE_ACCOUNT,
-                queue_name=new_queue_name
-            )
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.put_queue_async(
+                    storage_account_name=STORAGE_ACCOUNT,
+                    queue_name=new_queue_name
+                )
 
-            print(f"Queue '{new_queue_name}' created successfully.")
-            if result:
-                print(f"Response: {result}")
+                print(f"Queue '{new_queue_name}' created successfully.")
+                if result:
+                    print(f"Response: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_put_message():
@@ -121,25 +121,25 @@ async def example_3_put_message():
         print("  $env:AZUREQUEUES_QUEUE_NAME = '<queue-name>'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            message_input = "Hello from Azure Connectors SDK for Python!"
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                message_input = "Hello from Azure Connectors SDK for Python!"
 
-            await client.put_message_async(
-                input=message_input,
-                storage_account_name=STORAGE_ACCOUNT,
-                queue_name=QUEUE_NAME
-            )
+                await client.put_message_async(
+                    input=message_input,
+                    storage_account_name=STORAGE_ACCOUNT,
+                    queue_name=QUEUE_NAME
+                )
 
-            print(f"Message sent to queue '{QUEUE_NAME}':")
-            print(f"  Content: {message_input}")
+                print(f"Message sent to queue '{QUEUE_NAME}':")
+                print(f"  Content: {message_input}")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_get_messages():
@@ -152,38 +152,38 @@ async def example_4_get_messages():
         print("  $env:AZUREQUEUES_QUEUE_NAME = '<queue-name>'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_messages_async(
-                storage_account_name=STORAGE_ACCOUNT,
-                queue_name=QUEUE_NAME,
-                numofmessages="5",  # Get up to 5 messages
-                visibilitytimeout="30"  # Hide messages for 30 seconds
-            )
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_messages_async(
+                    storage_account_name=STORAGE_ACCOUNT,
+                    queue_name=QUEUE_NAME,
+                    numofmessages="5",  # Get up to 5 messages
+                    visibilitytimeout="30"  # Hide messages for 30 seconds
+                )
 
-            if result:
-                queue_messages_list = result.get("QueueMessagesList", {})
-                messages = queue_messages_list.get("QueueMessage", [])
-                if isinstance(messages, list):
-                    print(f"Retrieved {len(messages)} message(s) from '{QUEUE_NAME}':")
-                    for i, msg in enumerate(messages, 1):
-                        print(f"  Message {i}:")
-                        print(f"    ID: {msg.get('MessageId', 'N/A')}")
-                        print(f"    Text: {msg.get('MessageText', 'N/A')[:50]}...")
-                        print(f"    Pop Receipt: {msg.get('PopReceipt', 'N/A')[:20]}...")
-                        print(f"    Dequeue Count: {msg.get('DequeueCount', 'N/A')}")
-                        print(f"    Next Visible: {msg.get('TimeNextVisible', 'N/A')}")
+                if result:
+                    queue_messages_list = result.get("QueueMessagesList", {})
+                    messages = queue_messages_list.get("QueueMessage", [])
+                    if isinstance(messages, list):
+                        print(f"Retrieved {len(messages)} message(s) from '{QUEUE_NAME}':")
+                        for i, msg in enumerate(messages, 1):
+                            print(f"  Message {i}:")
+                            print(f"    ID: {msg.get('MessageId', 'N/A')}")
+                            print(f"    Text: {msg.get('MessageText', 'N/A')[:50]}...")
+                            print(f"    Pop Receipt: {msg.get('PopReceipt', 'N/A')[:20]}...")
+                            print(f"    Dequeue Count: {msg.get('DequeueCount', 'N/A')}")
+                            print(f"    Next Visible: {msg.get('TimeNextVisible', 'N/A')}")
+                    else:
+                        print(f"Response: {result}")
                 else:
-                    print(f"Response: {result}")
-            else:
-                print("No messages found or queue is empty.")
+                    print("No messages found or queue is empty.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_delete_message():
@@ -202,23 +202,23 @@ async def example_5_delete_message():
         print("\nNote: Get message ID and pop receipt from Example 4.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            await client.delete_message_async(
-                storage_account_name=STORAGE_ACCOUNT,
-                queue_name=QUEUE_NAME,
-                message_id=message_id,
-                popreceipt=pop_receipt
-            )
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                await client.delete_message_async(
+                    storage_account_name=STORAGE_ACCOUNT,
+                    queue_name=QUEUE_NAME,
+                    message_id=message_id,
+                    popreceipt=pop_receipt
+                )
 
-            print(f"Message '{message_id}' deleted from queue '{QUEUE_NAME}'.")
+                print(f"Message '{message_id}' deleted from queue '{QUEUE_NAME}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

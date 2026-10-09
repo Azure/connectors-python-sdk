@@ -80,6 +80,21 @@ def test_all_connector_samples_match_generated_apis() -> None:
     assert issues == []
 
 
+def test_sample_validator_rejects_unscoped_async_credential() -> None:
+    """Test asynchronous credentials must use an async context manager."""
+    tree = ast.parse(
+        "async def main():\n"
+        "    credential = DefaultAzureCredential()\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "DefaultAzureCredential must use an async context manager",
+    ]
+
+
 def test_sample_validator_rejects_awaiting_pageable_method() -> None:
     """Test pageable methods require iteration rather than await."""
     tree = ast.parse(

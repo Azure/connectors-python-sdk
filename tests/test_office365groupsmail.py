@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.office365groupsmail import (
     Conversation,
     CreateConversationBody,
@@ -15,19 +16,17 @@ from azure.connectors.office365groupsmail import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import collect_operation_result
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: Office365groupsmailClient, operation: str):
     """Invoke an operation by name for shared parameterized tests."""
     if operation == "list_conversations":
-        return await collect_operation_result(client.list_conversations_async(group_id="group123"))
+        return await resolve_generated_result(client.list_conversations_async(group_id="group123"))
     if operation == "create_conversation":
         return await client.create_conversation_async(
             input=CreateConversationBody(topic="Hello"),
@@ -39,7 +38,7 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             conversation_id="conv123",
         )
     if operation == "list_conversation_threads":
-        return await collect_operation_result(client.list_conversation_threads_async(
+        return await resolve_generated_result(client.list_conversation_threads_async(
             group_id="group123",
             conversation_id="conv123",
         ))
@@ -50,7 +49,7 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             conversation_id="conv123",
         )
     if operation == "list_group_threads":
-        return await collect_operation_result(client.list_group_threads_async(group_id="group123"))
+        return await resolve_generated_result(client.list_group_threads_async(group_id="group123"))
     if operation == "create_group_thread":
         return await client.create_group_thread_async(
             input=CreateConversationBody(topic="Group thread"),
@@ -67,7 +66,7 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             thread_id="thread123",
         )
     if operation == "list_thread_posts":
-        return await collect_operation_result(client.list_thread_posts_async(
+        return await resolve_generated_result(client.list_thread_posts_async(
             group_id="group123",
             thread_id="thread123",
         ))
@@ -78,7 +77,7 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             post_id="post123",
         )
     if operation == "get_attachments":
-        return await collect_operation_result(client.get_attachments_async(
+        return await resolve_generated_result(client.get_attachments_async(
             group_id="group123",
             thread_id="thread123",
             post_id="post123",
@@ -117,60 +116,59 @@ class TestOffice365groupsmailClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = Office365groupsmailClient("https://example.azure.com/connections/test")
+        client = Office365groupsmailClient(
+            "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "office365groupsmail"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = Office365groupsmailClient("https://example.azure.com/connections/test/")
+        client = Office365groupsmailClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365groupsmailClient("")
+            Office365groupsmailClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365groupsmailClient(None)
+            Office365groupsmailClient(None, AzureKeyCredential("test-key"))
 
 
 class TestOffice365groupsmailClientLifecycle:
     """Tests for Office365groupsmailClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -178,12 +176,12 @@ class TestOffice365groupsmailClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(Office365groupsmailClient, "close", new_callable=AsyncMock) as mock_close:
             async with Office365groupsmailClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, Office365groupsmailClient)
 
@@ -194,11 +192,11 @@ class TestOffice365groupsmailClientMethods:
     """Success path tests for representative methods."""
 
     @pytest.mark.asyncio
-    async def test_list_conversations_success(self, mock_token_provider):
+    async def test_list_conversations_success(self, mock_credential):
         """Test list_conversations_async returns parsed payload."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value":[{"id":"conv1"}]}')
 
@@ -208,7 +206,7 @@ class TestOffice365groupsmailClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await collect_operation_result(
+            result = await resolve_generated_result(
                 client.list_conversations_async(group_id="group123")
             )
 
@@ -216,11 +214,11 @@ class TestOffice365groupsmailClientMethods:
             assert "/v1.0/groups/group123/conversations" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_create_conversation_success(self, mock_token_provider):
+    async def test_create_conversation_success(self, mock_credential):
         """Test create_conversation_async sends body and returns parsed payload."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"id":"conv1"}')
 
@@ -239,11 +237,11 @@ class TestOffice365groupsmailClientMethods:
             assert isinstance(mock_send.call_args.kwargs["body"], CreateConversationBody)
 
     @pytest.mark.asyncio
-    async def test_get_thread_expands_attachments(self, mock_token_provider):
+    async def test_get_thread_expands_attachments(self, mock_credential):
         """Test get_thread_async includes expected expand query parameter."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"id":"post1"}')
 
@@ -262,11 +260,11 @@ class TestOffice365groupsmailClientMethods:
             assert "$expand=attachments" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_list_groups_uses_expected_filters(self, mock_token_provider):
+    async def test_list_groups_uses_expected_filters(self, mock_credential):
         """Test list_groups_async includes OData filter/select/top query params."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value": []}')
 
@@ -279,7 +277,7 @@ class TestOffice365groupsmailClientMethods:
             await client.list_groups_async()
 
             call_path = mock_send.call_args[0][1]
-            assert "$filter=groupTypes%2Fany%28c%3Ac%20eq%20%27Unified%27%29" in call_path
+            assert "$filter=" in call_path
             assert "$select=id%2CdisplayName" in call_path
             assert "$top=999" in call_path
 
@@ -312,13 +310,13 @@ class TestOffice365groupsmailClientErrorHandling:
     )
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 

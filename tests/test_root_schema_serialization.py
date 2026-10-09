@@ -8,7 +8,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from azure.connectors.sdk.http_client import ConnectorHttpClient
-from azure.connectors.sdk.options import ConnectorClientOptions
 from azure.connectors.sdk.serialization import to_wire
 from azure.connectors.signinghub import HandSignature, ValidationRule
 from azure.connectors.teams import (
@@ -47,11 +46,11 @@ def test_array_root_serializes_as_swagger_array() -> None:
 
 @pytest.mark.asyncio
 async def test_array_root_is_serialized_through_send_async(
-    mock_token_provider,
+    mock_credential,
 ) -> None:
     """Test that send_async serializes a top-level array of generated models."""
-    mock_token_provider.get_access_token_async = AsyncMock(return_value="token")
-    client = ConnectorHttpClient(mock_token_provider, ConnectorClientOptions())
+    mock_credential.get_access_token_async = AsyncMock(return_value="token")
+    client = ConnectorHttpClient(mock_credential)
     mock_response = MagicMock(status=200, headers={})
     mock_response.text = AsyncMock(return_value="{}")
     messages: ChatMessageList = [ChatMessage(id="message-1")]

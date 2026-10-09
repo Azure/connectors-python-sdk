@@ -6,8 +6,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 import azure.connectors.wordpress as wordpress_module
-from azure.connectors.sdk import ConnectorException, ManagedIdentityTokenProvider
+from azure.connectors.sdk import ConnectorException
 from azure.connectors.wordpress import (
     CreatePostModel,
     TRIGGER_OPERATIONS,
@@ -40,25 +41,26 @@ class TestWordpressClient:
 
     def test_init_with_defaults(self):
         """Test initialization with default authentication."""
-        client = WordpressClient("https://example.azure.com/connections/test/")
+        client = WordpressClient("https://example.azure.com/connections/test/",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "wordpress"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     @pytest.mark.parametrize("connection_runtime_url", ["", None])
     def test_init_with_invalid_url_raises_error(self, connection_runtime_url):
         """Test invalid runtime URLs are rejected."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WordpressClient(connection_runtime_url)
+            WordpressClient(connection_runtime_url, AzureKeyCredential("test-key"))
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager cleanup."""
         with patch.object(WordpressClient, "close", new_callable=AsyncMock) as mock_close:
             async with WordpressClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, WordpressClient)
 
@@ -82,12 +84,12 @@ class TestWordpressClient:
         expected_method,
         expected_url_suffix,
         expects_body,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation's successful HTTP contract."""
         client = WordpressClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -105,11 +107,11 @@ class TestWordpressClient:
         assert result == {"ok": True}
 
     @pytest.mark.asyncio
-    async def test_create_post_success(self, mock_token_provider):
+    async def test_create_post_success(self, mock_credential):
         """Test creating a post sends the generated request model."""
         client = WordpressClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         response = MockResponse(status=200, text='{"ID": 42}')
 
@@ -131,11 +133,11 @@ class TestWordpressClient:
         assert result == {"ID": 42}
 
     @pytest.mark.asyncio
-    async def test_list_sites_success(self, mock_token_provider):
+    async def test_list_sites_success(self, mock_credential):
         """Test listing sites uses the current WordPress route."""
         client = WordpressClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -164,12 +166,12 @@ class TestWordpressClient:
     async def test_non_success_response_raises_exception(
         self,
         operation,
-        mock_token_provider,
+        mock_credential,
     ):
         """Test every generated operation raises for a non-success response."""
         client = WordpressClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(

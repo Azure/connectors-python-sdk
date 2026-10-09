@@ -187,7 +187,7 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
     expected_path: str,
     expects_body: bool,
     empty_first_page: bool,
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test concrete ARM value/nextLink contracts through each generated operation."""
     first_items = [] if empty_first_page else [{"id": "item-1", "name": "First"}]
@@ -195,7 +195,7 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
     continuation_path = urlsplit(expected_path).path + "?$skiptoken=page-2"
     async with client_type(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     ) as client:
         with patch.object(
             client._http_client,
@@ -221,7 +221,13 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
             "GET", "https://example.azure.com/connections/test" + continuation_path,
         )
         assert (transport.await_args_list[0].kwargs["body"] is not None) is expects_body
-        assert transport.await_args_list[1].kwargs == {"body": None}
+        assert transport.await_args_list[1].kwargs == {
+            "body": None,
+            "timeout": None,
+            "headers": None,
+            "client_request_id": None,
+            "response_hook": None,
+        }
 
 
 @pytest.mark.parametrize("status,body", [(200, ""), (200, '{"value": []}'), (204, "")])
@@ -240,12 +246,12 @@ async def test_newly_generated_pageable_contract_preserves_empty_response(
     expects_body: bool,
     status: int,
     body: str,
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test no-content responses terminate without a spurious continuation request."""
     async with client_type(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     ) as client:
         with patch.object(
             client._http_client,
@@ -274,12 +280,12 @@ async def test_newly_generated_operation_success_contract(
     expected_method: str,
     expected_path: str,
     expects_body: bool,
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test a newly generated operation's route, body, and response."""
     client = client_type(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
     is_pageable = (client_type, operation) in EXPECTED_PAGEABLE_OPERATIONS
     response_payload = {"value": [{"id": "item-1"}]} if is_pageable else {"ok": True}
@@ -317,12 +323,12 @@ async def test_newly_generated_operation_rejects_error_response(
     expected_method: str,
     expected_path: str,
     expects_body: bool,
-    mock_token_provider: Any,
+    mock_credential: Any,
 ) -> None:
     """Test a newly generated operation raises for an error response."""
     client = client_type(
         "https://example.azure.com/connections/test",
-        token_provider=mock_token_provider,
+        credential=mock_credential,
     )
 
     with patch.object(

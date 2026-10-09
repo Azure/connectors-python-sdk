@@ -36,33 +36,33 @@ async def example_1_get_login_accounts() -> list[dict]:
     """Example 1: Get available DocuSign accounts."""
     print("\n=== Example 1: Get Login Accounts ===")
 
-    credential = DefaultAzureCredential()
-    async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-        accounts_response = await client.get_login_accounts_async()
-        accounts = accounts_response.get("accounts", []) if accounts_response else []
+    async with DefaultAzureCredential() as credential:
+        async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            accounts_response = await client.get_login_accounts_async()
+            accounts = accounts_response.get("accounts", []) if accounts_response else []
 
-        print(f"Found {len(accounts)} accounts")
-        for account in accounts[:10]:
-            print(f"  - {account.get('accountName')} ({account.get('accountId')})")
+            print(f"Found {len(accounts)} accounts")
+            for account in accounts[:10]:
+                print(f"  - {account.get('accountName')} ({account.get('accountId')})")
 
-        return accounts
+            return accounts
 
 
 async def example_2_search_envelopes(account_id: str) -> None:
     """Example 2: Search envelopes for an account."""
     print("\n=== Example 2: Search Envelopes ===")
 
-    credential = DefaultAzureCredential()
-    async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-        envelopes_response = await client.search_list_envelopes_async(
-            account_id=account_id,
-            top=5,
-        )
+    async with DefaultAzureCredential() as credential:
+        async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            envelopes_response = await client.search_list_envelopes_async(
+                account_id=account_id,
+                top=5,
+            )
 
-        envelopes = envelopes_response.get("value", []) if envelopes_response else []
-        print(f"Found {len(envelopes)} envelopes")
-        for envelope in envelopes[:5]:
-            print(f"  - {envelope.get('envelopeId')} ({envelope.get('status')})")
+            envelopes = envelopes_response.get("value", []) if envelopes_response else []
+            print(f"Found {len(envelopes)} envelopes")
+            for envelope in envelopes[:5]:
+                print(f"  - {envelope.get('envelopeId')} ({envelope.get('status')})")
 
 
 async def main() -> None:

@@ -44,15 +44,15 @@ async def example_1_list_calendars():
     """Example 1: List calendars visible to the connection account."""
     print("\n=== Example 1: List Calendars ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.list_calendars_async(min_access_role="reader")
+        async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.list_calendars_async(min_access_role="reader")
 
-        items = result.get("items", []) if result else []
-        print(f"Found {len(items)} calendar(s).")
-        for calendar in items[:10]:
-            print(f"  - {calendar.get('summary', 'N/A')} ({calendar.get('id', 'N/A')})")
+            items = result.get("items", []) if result else []
+            print(f"Found {len(items)} calendar(s).")
+            for calendar in items[:10]:
+                print(f"  - {calendar.get('summary', 'N/A')} ({calendar.get('id', 'N/A')})")
 
 
 async def example_2_list_events():
@@ -64,15 +64,15 @@ async def example_2_list_events():
         print("Set GOOGLECALENDAR_TEST_CALENDAR_ID to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-        result = await client.list_events_async(calendar_id=calendar_id)
+        async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.list_events_async(calendar_id=calendar_id)
 
-        events = result.get("items", []) if result else []
-        print(f"Found {len(events)} event(s) in calendar '{calendar_id}'.")
-        for event in events[:10]:
-            print(f"  - {event.get('summary', 'N/A')} ({event.get('id', 'N/A')})")
+            events = result.get("items", []) if result else []
+            print(f"Found {len(events)} event(s) in calendar '{calendar_id}'.")
+            for event in events[:10]:
+                print(f"  - {event.get('summary', 'N/A')} ({event.get('id', 'N/A')})")
 
 
 async def example_3_create_event():
@@ -84,26 +84,26 @@ async def example_3_create_event():
         print("Set GOOGLECALENDAR_TEST_CALENDAR_ID to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            payload = RequestEvent(
-                summary="SDK Sample Event",
-                start="2026-07-09T15:00:00Z",
-                end="2026-07-09T15:30:00Z",
-                description="Created by azure-connectors sample.",
-                location="Online",
-                status="confirmed",
-            )
+        async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                payload = RequestEvent(
+                    summary="SDK Sample Event",
+                    start="2026-07-09T15:00:00Z",
+                    end="2026-07-09T15:30:00Z",
+                    description="Created by azure-connectors sample.",
+                    location="Online",
+                    status="confirmed",
+                )
 
-            created = await client.create_event_async(input=payload, calendar_id=calendar_id)
-            if created:
-                print(f"Created event id: {created.get('id', 'N/A')}")
-            else:
-                print("Create completed with no response body.")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+                created = await client.create_event_async(input=payload, calendar_id=calendar_id)
+                if created:
+                    print(f"Created event id: {created.get('id', 'N/A')}")
+                else:
+                    print("Create completed with no response body.")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 async def example_4_list_events_for_polling():
@@ -115,20 +115,20 @@ async def example_4_list_events_for_polling():
         print("Set GOOGLECALENDAR_TEST_CALENDAR_ID to run this example.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.list_events_async(
-                calendar_id=calendar_id,
-                time_min="2026-07-09T00:00:00Z",
-                time_max="2026-07-10T00:00:00Z",
-            )
-            events = result.get("items", []) if result else []
-            print(f"Time-window query returned {len(events)} event(s).")
-            print("Persist event IDs and update times to implement change polling.")
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+        async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.list_events_async(
+                    calendar_id=calendar_id,
+                    time_min="2026-07-09T00:00:00Z",
+                    time_max="2026-07-10T00:00:00Z",
+                )
+                events = result.get("items", []) if result else []
+                print(f"Time-window query returned {len(events)} event(s).")
+                print("Persist event IDs and update times to implement change polling.")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
 
 
 async def main():

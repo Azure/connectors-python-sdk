@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.signinghub import (
     SigninghubClient,
     CheckBoxFieldRequest,
@@ -13,9 +14,7 @@ from azure.connectors.signinghub import (
     UpdateCheckBoxFieldRequest,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
@@ -26,55 +25,54 @@ class TestSigninghubClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = SigninghubClient("https://example.azure.com/connections/test")
+        client = SigninghubClient("https://example.azure.com/connections/test",
+                                  AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "signinghub"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = SigninghubClient("https://example.azure.com/connections/test/")
+        client = SigninghubClient(
+            "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SigninghubClient("")
+            SigninghubClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SigninghubClient(None)
+            SigninghubClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'signinghub'."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "signinghub"
@@ -84,11 +82,11 @@ class TestSigninghubClientLifecycle:
     """Tests for SigninghubClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -118,11 +116,11 @@ class TestDocumentsUploadStreamAsync:
     """Tests for raw document upload transport."""
 
     @pytest.mark.asyncio
-    async def test_forwards_exact_bytes_and_media_type(self, mock_token_provider):
+    async def test_forwards_exact_bytes_and_media_type(self, mock_credential):
         """Test document upload forwards bytes without transformation."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         document = b"\x00\xffPDF\r\n"
         mock_response = MockResponse(status=201, text='{"documentId": "doc-1"}')
@@ -142,12 +140,12 @@ class TestDocumentsUploadStreamAsync:
             assert mock_send.call_args.kwargs["content_type"] == "application/octet-stream"
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(SigninghubClient, "close", new_callable=AsyncMock) as mock_close:
             async with SigninghubClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, SigninghubClient)
 
@@ -158,11 +156,11 @@ class TestContactsGetAsync:
     """Tests for contacts_get_async method (GET with query parameters)."""
 
     @pytest.mark.asyncio
-    async def test_success_serializes_path_and_query(self, mock_token_provider):
+    async def test_success_serializes_path_and_query(self, mock_credential):
         """Test successful contacts retrieval serializes path and query params."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value": [{"email": "a@b.com"}]}')
 
@@ -189,11 +187,11 @@ class TestContactsGetAsync:
             assert "value" in result
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text="Not Found")
 
@@ -213,11 +211,11 @@ class TestCheckboxAddCheckBoxAsync:
     """Tests for checkbox_add_check_box_async method (POST with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_forwards_request_body(self, mock_token_provider):
+    async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         request = CheckBoxFieldRequest()
         mock_response = MockResponse(status=200, text='{"field_id": "cb-1"}')
@@ -242,11 +240,11 @@ class TestCheckboxAddCheckBoxAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=400, text="Bad Request")
 
@@ -268,11 +266,11 @@ class TestCheckboxUpdateCheckBoxAsync:
     """Tests for checkbox_update_check_box_async method (PUT with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_forwards_request_body(self, mock_token_provider):
+    async def test_success_forwards_request_body(self, mock_credential):
         """Test that the PUT operation forwards the request body to send_async."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         request = UpdateCheckBoxFieldRequest()
         mock_response = MockResponse(status=200, text='{"field_id": "cb-1"}')
@@ -295,11 +293,11 @@ class TestCheckboxUpdateCheckBoxAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_connector_exception(self, mock_token_provider):
+    async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=400, text="Bad Request")
 
@@ -321,11 +319,11 @@ class TestAttachmentDeleteAttachmentAsync:
     """Tests for attachment_delete_attachment_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success_completes_without_error(self, mock_token_provider):
+    async def test_success_completes_without_error(self, mock_credential):
         """Test successful delete completes without raising."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=204, text="")
 
@@ -350,11 +348,11 @@ class TestAttachmentDeleteAttachmentAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_not_found_raises_connector_exception(self, mock_token_provider):
+    async def test_not_found_raises_connector_exception(self, mock_credential):
         """Test that a 404 response raises ConnectorException."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text="Attachment not found")
 
@@ -374,11 +372,11 @@ class TestAttachmentDeleteAttachmentAsync:
             assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_server_error_raises_connector_exception(self, mock_token_provider):
+    async def test_server_error_raises_connector_exception(self, mock_credential):
         """Test that a 5xx response raises ConnectorException."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text="Internal Server Error")
 
@@ -640,9 +638,9 @@ class TestSigninghubClientAllOperations:
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
-    async def test_all_operations_success(self, mock_token_provider, operation):
+    async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation issues a request and returns without error."""
-        client = SigninghubClient(BASE_URL, token_provider=mock_token_provider)
+        client = SigninghubClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(
@@ -664,11 +662,11 @@ class TestSigninghubClientAllOperationsErrorHandling:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_error_response_raises_exception_for_all_operations(
         self,
-        mock_token_provider,
+        mock_credential,
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = SigninghubClient(BASE_URL, token_provider=mock_token_provider)
+        client = SigninghubClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(

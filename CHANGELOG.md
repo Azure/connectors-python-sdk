@@ -14,44 +14,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Generated clients now use the asynchronous Azure Core pipeline** — every client requires a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, transport, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
+- **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and transport errors. Set `retry_unsafe_http_methods=True` directly on a generated client only when replay is acceptable; retry count, timeout, and backoff settings are also direct client keyword arguments. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
 - Jira `list_issues_async` now exposes the live optional `fields` query parameter
   instead of sending an internal `fields=*all` default. Pass `fields` and
   `next_page_token` by keyword; `fields` precedes the token in the generated signature.
-
-- This regeneration propagates the existing async-iterator paging contract to
-  32 additional connectors, extending [Fix Dataverse list pagination (#84)](https://github.com/Azure/connectors-python-sdk/pull/84).
+- This regeneration propagates the async-iterator paging contract to 32 additional
+  connectors, extending [Fix Dataverse list pagination (#84)](https://github.com/Azure/connectors-python-sdk/pull/84).
   Pageable operations return items rather than response dictionaries. Consume them
   with `async for`, or collect them with
   `[item async for item in client.get_items_async(...)]`; samples use this contract.
-
-- **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and `aiohttp.ClientError`. Set `ConnectorClientOptions(retry_unsafe_http_methods=True)` per client only when replay is acceptable; existing retry count, timeout, and backoff settings remain available. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
 
 - Seismic Planner `CustomPropertyValues.localizations` now exposes `Dict[str, CustomPropertyDataDisplay]` instead of `Dict[str, Any]`. Callers can access typed values directly, such as `localizations["en-US"].name`. ([Azure/Connectors-NET-SDK#262](https://github.com/Azure/Connectors-NET-SDK/issues/262), AzureUX-BPM PR 17131877)
 
 - Microsoft Dataverse `get_items_async` now returns an `AsyncIterator[dict[str, Any]]`. Callers must use `async for` instead of awaiting a single response dictionary; iteration preserves and follows `@odata.nextLink` until all rows are returned. ([Azure/Connectors-NET-SDK#208](https://github.com/Azure/Connectors-NET-SDK/issues/208), AzureUX-BPM PR 17086991)
 
-- Regenerated all 98 supported connector clients from the current CodefulSdkGenerator and managed connector contracts; 62 clients contain public contract changes.
+- Regenerated all 99 supported connector clients from current live managed connector metadata using the Azure Core contract generator.
 - Corrected generated parameter types across connector operations, including pagination values, numeric identifiers, and Boolean options. Callers must now pass the annotated `int` and `bool` values instead of string representations.
 - Added current discovery and schema operations for Azure Automation, Azure Blob Storage, Azure Data Factory, Azure VM, Excel Online (Business), Microsoft Teams, and Microsoft Defender for Endpoint.
 
 ### Changed
 
+- Made `azure-identity` a required runtime dependency so Azure Identity credentials and the shipped samples work with the default package installation.
 - Updated all connector samples to match generated method signatures and added literal-type validation to the sample contract checks.
 - Added focused success, route, request-body, response, and error coverage for newly generated operations.
 - Clarified that Azure Functions SDK-type deserialization is owned by the Azure Functions connector extension rather than generated connector clients.
 
 ### Fixed
 
+- **Request timeout enforcement**: `timeout_seconds` and per-operation `timeout`
+  now bound the complete network operation, including retries, response loading,
+  and body reads across Azure Core async transports. Zero and negative values
+  disable SDK and transport deadlines.
+- **Async transport compatibility**: Empty buffered responses now produce normal
+  snapshots and connector errors without re-reading consumed streams. Injected
+  transports receive only supported timeout options and close through their
+  asynchronous lifecycle.
+- **Explicit Azure Core policy chains**: `per_call_policies` and
+  `per_retry_policies` now compose with an explicit `policies` chain instead of
+  being silently discarded. Per-retry extensions require an `AsyncRetryPolicy`,
+  while chains without retries no longer forward retry-only options to the
+  transport.
+- **Per-operation request controls**: Explicit headers and client request IDs now
+  override client defaults without allowing default authorization or content-type
+  headers to replace SDK-owned values.
+- **Unsafe retry opt-in**: `retry_unsafe_http_methods=True` now includes custom
+  extension methods as well as standard unsafe HTTP verbs.
+- **Connector samples**: Samples now close caller-owned Azure credentials and use
+  async iteration for pageable operations.
 - Generated caller-supplied and internal-default query values escape reserved
   characters, including `/`, so paths, URLs, and collection values remain within
   their intended query parameters.
-
 - **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
 
 ## [0.5.0b1] - 2026-08-31
 
 ### Breaking Changes
 
+- **Generated clients now use the asynchronous Azure Core pipeline** — every client requires a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, transport, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
 - Regenerated Microsoft To Do request models now use the current contract names `CreateToDoList`, `CreateToDo`, and `UpdateToDo` instead of the deprecated `V2`-suffixed names. Its polling triggers are now available through `TRIGGER_OPERATIONS`, not callable client methods.
 - Generated Python operation names now preserve Swagger `operationId` spelling by default while grouping acronym runs in snake_case. Connector-scoped corrections fix malformed Google Tasks and PDF.co operation names. This renames methods in DocuSign, GitHub, Google Tasks, PDF.co, Salesforce, SigningHub, Slack, Word Online (Business), and Zoho Sign.
 - Regenerated Google Tasks and Slack trigger routes are available through `TRIGGER_OPERATIONS`, not callable client methods. Slack also no longer exposes the deprecated `create_group_async` operation.
@@ -278,4 +298,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.0b1]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev2...v0.2.0b1
 [0.1.0dev2]: https://github.com/Azure/Connectors-Python-SDK/compare/v0.1.0dev1...v0.1.0dev2
 [0.1.0dev1]: https://github.com/Azure/Connectors-Python-SDK/releases/tag/v0.1.0dev1
-

@@ -57,31 +57,31 @@ async def example_1_list_tables():
         print("Example: $env:AZURETABLES_STORAGE_ACCOUNT = 'mystorageaccount'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_tables_async(
-                storage_account_name=STORAGE_ACCOUNT
-            )
+        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_tables_async(
+                    storage_account_name=STORAGE_ACCOUNT
+                )
 
-            if result:
-                print(f"Tables in storage account '{STORAGE_ACCOUNT}':")
-                # Response contains 'value' with list of tables
-                tables = result.get("value", [])
-                if tables:
-                    for table in tables:
-                        table_name = table.get("TableName", table)
-                        print(f"  - {table_name}")
+                if result:
+                    print(f"Tables in storage account '{STORAGE_ACCOUNT}':")
+                    # Response contains 'value' with list of tables
+                    tables = result.get("value", [])
+                    if tables:
+                        for table in tables:
+                            table_name = table.get("TableName", table)
+                            print(f"  - {table_name}")
+                    else:
+                        print("  No tables found.")
                 else:
-                    print("  No tables found.")
-            else:
-                print("No tables found or empty response.")
+                    print("No tables found or empty response.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_create_table():
@@ -95,29 +95,29 @@ async def example_2_create_table():
         print("  $env:AZURETABLES_NEW_TABLE_NAME = 'MyNewTable'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create table input with table name in additional_properties
-            table_input = CreateTableInput(
-                additional_properties={"TableName": new_table_name}
-            )
+        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create table input with table name in additional_properties
+                table_input = CreateTableInput(
+                    additional_properties={"TableName": new_table_name}
+                )
 
-            result = await client.create_table_async(
-                input=table_input,
-                storage_account_name=STORAGE_ACCOUNT
-            )
+                result = await client.create_table_async(
+                    input=table_input,
+                    storage_account_name=STORAGE_ACCOUNT
+                )
 
-            print(f"Table '{new_table_name}' created successfully.")
-            if result:
-                print(f"  OData ID: {result.get('odata.id', 'N/A')}")
-                print(f"  Table Name: {result.get('TableName', 'N/A')}")
+                print(f"Table '{new_table_name}' created successfully.")
+                if result:
+                    print(f"  OData ID: {result.get('odata.id', 'N/A')}")
+                    print(f"  Table Name: {result.get('TableName', 'N/A')}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_create_entity():
@@ -130,39 +130,39 @@ async def example_3_create_entity():
         print("  $env:AZURETABLES_TABLE_NAME = '<table-name>'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create entity with PartitionKey, RowKey, and custom properties
-            entity_input = CreateEntityInput(
-                additional_properties={
-                    "PartitionKey": "SamplePartition",
-                    "RowKey": "SampleRow001",
-                    "Name": "Sample Entity",
-                    "Description": "Created by Azure Connectors SDK for Python",
-                    "Count": 42,
-                    "IsActive": True
-                }
-            )
+        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create entity with PartitionKey, RowKey, and custom properties
+                entity_input = CreateEntityInput(
+                    additional_properties={
+                        "PartitionKey": "SamplePartition",
+                        "RowKey": "SampleRow001",
+                        "Name": "Sample Entity",
+                        "Description": "Created by Azure Connectors SDK for Python",
+                        "Count": 42,
+                        "IsActive": True
+                    }
+                )
 
-            result = await client.create_entity_async(
-                input=entity_input,
-                storage_account_name=STORAGE_ACCOUNT,
-                table_name=TABLE_NAME
-            )
+                result = await client.create_entity_async(
+                    input=entity_input,
+                    storage_account_name=STORAGE_ACCOUNT,
+                    table_name=TABLE_NAME
+                )
 
-            print(f"Entity created in table '{TABLE_NAME}':")
-            if result:
-                print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
-                print(f"  Row Key: {result.get('RowKey', 'N/A')}")
-            else:
-                print("  Entity created (no response body).")
+                print(f"Entity created in table '{TABLE_NAME}':")
+                if result:
+                    print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
+                    print(f"  Row Key: {result.get('RowKey', 'N/A')}")
+                else:
+                    print("  Entity created (no response body).")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_get_entities():
@@ -175,35 +175,35 @@ async def example_4_get_entities():
         print("  $env:AZURETABLES_TABLE_NAME = '<table-name>'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Query entities with optional filter
-            entities = [item async for item in client.get_entities_async(
-                storage_account_name=STORAGE_ACCOUNT,
-                table_name=TABLE_NAME,
-                # Optional: filter entities
-                # filter="PartitionKey eq 'SamplePartition'",
-                # Optional: select specific columns
-                # select="PartitionKey,RowKey,Name"
-            )]
+        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Query entities with optional filter
+                entities = [item async for item in client.get_entities_async(
+                    storage_account_name=STORAGE_ACCOUNT,
+                    table_name=TABLE_NAME,
+                    # Optional: filter entities
+                    # filter="PartitionKey eq 'SamplePartition'",
+                    # Optional: select specific columns
+                    # select="PartitionKey,RowKey,Name"
+                )]
 
-            if entities:
-                print(f"Entities in table '{TABLE_NAME}':")
-                for index, entity in enumerate(entities[:5], 1):
-                    partition_key = entity.get("PartitionKey", "N/A")
-                    row_key = entity.get("RowKey", "N/A")
-                    print(f"  {index}. PartitionKey: {partition_key}, RowKey: {row_key}")
-                if len(entities) > 5:
-                    print(f"  ... and {len(entities) - 5} more entities")
-            else:
-                print("No entities found or empty response.")
+                if entities:
+                    print(f"Entities in table '{TABLE_NAME}':")
+                    for i, entity in enumerate(entities[:5], 1):  # Show first 5
+                        pk = entity.get("PartitionKey", "N/A")
+                        rk = entity.get("RowKey", "N/A")
+                        print(f"  {i}. PartitionKey: {pk}, RowKey: {rk}")
+                    if len(entities) > 5:
+                        print(f"  ... and {len(entities) - 5} more entities")
+                else:
+                    print("No entities found or empty response.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_get_entity():
@@ -222,40 +222,40 @@ async def example_5_get_entity():
         print("  $env:AZURETABLES_ROW_KEY = '<row-key>'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_entity_async(
-                storage_account_name=STORAGE_ACCOUNT,
-                table_name=TABLE_NAME,
-                partition_key=partition_key,
-                row_key=row_key
-            )
+        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_entity_async(
+                    storage_account_name=STORAGE_ACCOUNT,
+                    table_name=TABLE_NAME,
+                    partition_key=partition_key,
+                    row_key=row_key
+                )
 
-            if result:
-                print(f"Entity found in '{TABLE_NAME}':")
-                print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
-                print(f"  Row Key: {result.get('RowKey', 'N/A')}")
-                # Print custom properties (excluding system properties)
-                system_props = {
-                    'PartitionKey', 'RowKey', 'Timestamp',
-                    'odata.metadata', 'odata.etag'
-                }
-                custom_props = {
-                    k: v for k, v in result.items() if k not in system_props
-                }
-                if custom_props:
-                    print("  Custom properties:")
-                    for key, value in custom_props.items():
-                        print(f"    {key}: {value}")
-            else:
-                print("Entity not found.")
+                if result:
+                    print(f"Entity found in '{TABLE_NAME}':")
+                    print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
+                    print(f"  Row Key: {result.get('RowKey', 'N/A')}")
+                    # Print custom properties (excluding system properties)
+                    system_props = {
+                        'PartitionKey', 'RowKey', 'Timestamp',
+                        'odata.metadata', 'odata.etag'
+                    }
+                    custom_props = {
+                        k: v for k, v in result.items() if k not in system_props
+                    }
+                    if custom_props:
+                        print("  Custom properties:")
+                        for key, value in custom_props.items():
+                            print(f"    {key}: {value}")
+                else:
+                    print("Entity not found.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

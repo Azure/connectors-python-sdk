@@ -72,149 +72,149 @@ async def example_1_client_initialization():
     """Example 1: Initialize and verify the client."""
     print("\n=== Example 1: Client Initialization ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureautomationClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            print("Client initialized successfully")
-            print(f"Connector name: {client.connector_name}")
-            print("Client is ready for Azure Automation operations")
+        async with AzureautomationClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                print("Client initialized successfully")
+                print(f"Connector name: {client.connector_name}")
+                print("Client is ready for Azure Automation operations")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_create_job():
     """Example 2: Create an automation job."""
     print("\n=== Example 2: Create Automation Job ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureautomationClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Create a new automation job
-            result = await client.create_job_async(
-                input=CreateJobInput(properties={}),
-                subscription_id=SUBSCRIPTION_ID,
-                resource_group_name=RESOURCE_GROUP_NAME,
-                automation_account=AUTOMATION_ACCOUNT,
-            )
+        async with AzureautomationClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Create a new automation job
+                result = await client.create_job_async(
+                    input=CreateJobInput(properties={}),
+                    subscription_id=SUBSCRIPTION_ID,
+                    resource_group_name=RESOURCE_GROUP_NAME,
+                    automation_account=AUTOMATION_ACCOUNT,
+                )
 
-            if result:
-                print(f"Job created: {result.get('id', 'N/A')}")
-                props = result.get("properties", {})
-                print(f"Status: {props.get('status', 'Unknown')}")
-            else:
-                print("Job created (no response body)")
+                if result:
+                    print(f"Job created: {result.get('id', 'N/A')}")
+                    props = result.get("properties", {})
+                    print(f"Status: {props.get('status', 'Unknown')}")
+                else:
+                    print("Job created (no response body)")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code} - {ex.response_body}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code} - {ex.response_body}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_create_job_and_wait():
     """Example 3: Create a job and wait for completion."""
     print("\n=== Example 3: Create Job and Wait ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureautomationClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Create job with wait parameter to wait for completion
-            result = await client.create_job_async(
-                input=CreateJobInput(properties={}),
-                subscription_id=SUBSCRIPTION_ID,
-                resource_group_name=RESOURCE_GROUP_NAME,
-                automation_account=AUTOMATION_ACCOUNT,
-                wait=True,
-            )
+        async with AzureautomationClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Create job with wait parameter to wait for completion
+                result = await client.create_job_async(
+                    input=CreateJobInput(properties={}),
+                    subscription_id=SUBSCRIPTION_ID,
+                    resource_group_name=RESOURCE_GROUP_NAME,
+                    automation_account=AUTOMATION_ACCOUNT,
+                    wait=True,
+                )
 
-            if result:
-                props = result.get("properties", {})
-                print(f"Job completed with status: {props.get('status')}")
-            else:
-                print("Job completed (no response body)")
+                if result:
+                    props = result.get("properties", {})
+                    print(f"Job completed with status: {props.get('status')}")
+                else:
+                    print("Job completed (no response body)")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_get_job_status():
     """Example 4: Get the status of a job."""
     print("\n=== Example 4: Get Job Status ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureautomationClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Get status of a job
-            result = await client.get_status_of_job_async(
-                subscription_id=SUBSCRIPTION_ID,
-                resource_group_name=RESOURCE_GROUP_NAME,
-                automation_account=AUTOMATION_ACCOUNT,
-                job_id=JOB_ID
-            )
+        async with AzureautomationClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Get status of a job
+                result = await client.get_status_of_job_async(
+                    subscription_id=SUBSCRIPTION_ID,
+                    resource_group_name=RESOURCE_GROUP_NAME,
+                    automation_account=AUTOMATION_ACCOUNT,
+                    job_id=JOB_ID
+                )
 
-            if result:
-                print(f"Job ID: {result.get('id', 'N/A')}")
-                props = result.get("properties", {})
-                print(f"Status: {props.get('status', 'Unknown')}")
-                print(f"Start time: {props.get('startTime', 'N/A')}")
-                print(f"End time: {props.get('endTime', 'N/A')}")
-            else:
-                print("No job status returned")
+                if result:
+                    print(f"Job ID: {result.get('id', 'N/A')}")
+                    props = result.get("properties", {})
+                    print(f"Status: {props.get('status', 'Unknown')}")
+                    print(f"Start time: {props.get('startTime', 'N/A')}")
+                    print(f"End time: {props.get('endTime', 'N/A')}")
+                else:
+                    print("No job status returned")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_get_job_output():
     """Example 5: Get the output of a job."""
     print("\n=== Example 5: Get Job Output ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with AzureautomationClient(
-        CONNECTION_RUNTIME_URL, credential
-    ) as client:
-        try:
-            # Get output from a completed job
-            output = await client.get_job_output_async(
-                subscription_id=SUBSCRIPTION_ID,
-                resource_group_name=RESOURCE_GROUP_NAME,
-                automation_account=AUTOMATION_ACCOUNT,
-                job_id=JOB_ID
-            )
+        async with AzureautomationClient(
+            CONNECTION_RUNTIME_URL, credential
+        ) as client:
+            try:
+                # Get output from a completed job
+                output = await client.get_job_output_async(
+                    subscription_id=SUBSCRIPTION_ID,
+                    resource_group_name=RESOURCE_GROUP_NAME,
+                    automation_account=AUTOMATION_ACCOUNT,
+                    job_id=JOB_ID
+                )
 
-            if output:
-                # Output is returned as bytes
-                print("Job output:")
-                if isinstance(output, bytes):
-                    print(output.decode("utf-8"))
+                if output:
+                    # Output is returned as bytes
+                    print("Job output:")
+                    if isinstance(output, bytes):
+                        print(output.decode("utf-8"))
+                    else:
+                        print(output)
                 else:
-                    print(output)
-            else:
-                print("No output returned")
+                    print("No output returned")
 
-        except ConnectorException as ex:
-            print(f"Connector error: {ex.status_code}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error: {ex.status_code}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_6_dataclass_usage():

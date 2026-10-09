@@ -1,178 +1,110 @@
-"""Unit tests for SDK client_base module."""
+# Copyright (c) Microsoft Corporation. All rights reserved.
+
+"""Unit tests for the connector client base."""
+
+from unittest.mock import AsyncMock, patch
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from azure.core.credentials import AzureKeyCredential
 
 from azure.connectors.sdk.client_base import ConnectorClientBase
-from azure.connectors.sdk.authentication import TokenProvider
-from azure.connectors.sdk.options import ConnectorClientOptions
+
+
+class TestClient(ConnectorClientBase):
+    """Concrete connector client used by base-class tests."""
+
+    @property
+    def connector_name(self) -> str:
+        """Return the test connector name."""
+        return "test"
 
 
 class TestConnectorClientBase:
     """Tests for ConnectorClientBase."""
 
-    def test_cannot_instantiate_abstract_class(self):
-        """Test that ConnectorClientBase cannot be instantiated directly."""
-        mock_token_provider = MagicMock(spec=TokenProvider)
-
+    def test_cannot_instantiate_abstract_class(self) -> None:
+        """Test that the abstract base class cannot be instantiated."""
         with pytest.raises(TypeError):
-            ConnectorClientBase(mock_token_provider)
+            ConnectorClientBase(AzureKeyCredential("test-key"))
 
-    def test_subclass_with_token_provider(self, mock_token_provider):
-        """Test subclass initialization with TokenProvider."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
-
-        client = TestClient(mock_token_provider)
-
-        assert client._options is not None
-        assert client._http_client is not None
-
-    def test_subclass_with_azure_identity_credential(self):
-        """Test subclass initialization with Azure Identity credential."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
-
-        mock_credential = MagicMock()
+    def test_init_with_credential(self, mock_credential) -> None:
+        """Test initialization with an asynchronous Azure Core credential."""
         client = TestClient(mock_credential)
 
-        assert client._http_client is not None
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_none_token_provider_raises_error(self):
-        """Test that None token provider raises ValueError."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
+    def test_init_with_key_credential(self) -> None:
+        """Test initialization with an Azure key credential."""
+        credential = AzureKeyCredential("test-key")
+        client = TestClient(credential)
 
-        with pytest.raises(ValueError, match="token_provider cannot be None"):
+        assert client._http_client._credential is credential
+
+    def test_init_with_none_credential_raises_error(self) -> None:
+        """Test that a missing credential is rejected."""
+        with pytest.raises(ValueError, match="credential cannot be None"):
             TestClient(None)
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
+    def test_init_forwards_pipeline_settings(self, mock_credential) -> None:
+        """Test that direct settings are forwarded to the HTTP client."""
+        with patch(
+            "azure.connectors.sdk.client_base.ConnectorHttpClient"
+        ) as mock_http_client:
+            TestClient(
+                mock_credential,
+                max_retry_attempts=5,
+                timeout_seconds=60.0,
+                retry_unsafe_http_methods=True,
+                retry_status=2,
+            )
 
-        options = ConnectorClientOptions(timeout_seconds=60.0)
-        client = TestClient(mock_token_provider, options)
+        call = mock_http_client.call_args
+        assert call.args == (mock_credential,)
+        assert call.kwargs["max_retry_attempts"] == 5
+        assert call.kwargs["timeout_seconds"] == 60.0
+        assert call.kwargs["retry_unsafe_http_methods"] is True
+        assert call.kwargs["retry_status"] == 2
 
-        assert client._options is options
+    def test_connector_name_property_is_abstract(self, mock_credential) -> None:
+        """Test that subclasses must implement the connector name."""
 
-    def test_init_without_options_creates_default(self, mock_token_provider):
-        """Test initialization without options creates default options."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
-
-        client = TestClient(mock_token_provider)
-
-        assert isinstance(client._options, ConnectorClientOptions)
-
-    def test_connector_name_property_is_abstract(self, mock_token_provider):
-        """Test that connector_name property must be implemented."""
         class IncompleteClient(ConnectorClientBase):
             pass
 
         with pytest.raises(TypeError):
-            IncompleteClient(mock_token_provider)
+            IncompleteClient(mock_credential)
 
-    def test_http_client_property(self, mock_token_provider):
-        """Test that http_client property is accessible."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
+    def test_http_client_property(self, mock_credential) -> None:
+        """Test that the HTTP client property exposes the owned client."""
+        client = TestClient(mock_credential)
 
-        client = TestClient(mock_token_provider)
-        http_client = client.http_client
-
-        assert http_client is not None
-        assert http_client is client._http_client
+        assert client.http_client is client._http_client
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
-        """Test close method."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
+    async def test_close(self, mock_credential) -> None:
+        """Test that close releases the HTTP client."""
+        client = TestClient(mock_credential)
 
-        client = TestClient(mock_token_provider)
-
-        with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
+        with patch.object(
+            client._http_client,
+            "close",
+            new_callable=AsyncMock,
+        ) as mock_close:
             await client.close()
-            mock_close.assert_called_once()
+
+        mock_close.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager_enter(self, mock_token_provider):
-        """Test async context manager enter."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
+    async def test_context_manager(self, mock_credential) -> None:
+        """Test asynchronous context manager cleanup."""
+        client = TestClient(mock_credential)
 
-        client = TestClient(mock_token_provider)
-        result = await client.__aenter__()
+        with patch.object(
+            client,
+            "close",
+            new_callable=AsyncMock,
+        ) as mock_close:
+            async with client as entered_client:
+                assert entered_client is client
 
-        assert result is client
-
-    @pytest.mark.asyncio
-    async def test_context_manager_exit(self, mock_token_provider):
-        """Test async context manager exit."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
-
-        client = TestClient(mock_token_provider)
-
-        with patch.object(client, 'close', new_callable=AsyncMock) as mock_close:
-            await client.__aexit__(None, None, None)
-            mock_close.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_context_manager_full_usage(self, mock_token_provider):
-        """Test full async context manager usage."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
-
-        client = TestClient(mock_token_provider)
-
-        with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
-            async with client as ctx_client:
-                assert ctx_client is client
-
-            mock_close.assert_called_once()
-
-    def test_wraps_non_token_provider_credential(self):
-        """Test that non-TokenProvider credentials are wrapped."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
-
-        mock_credential = MagicMock()
-
-        with patch('azure.connectors.sdk.client_base.AzureIdentityTokenProvider') as mock_wrapper:
-            TestClient(mock_credential)
-            mock_wrapper.assert_called_once_with(mock_credential)
-
-    def test_does_not_wrap_token_provider(self, mock_token_provider):
-        """Test that TokenProvider instances are not wrapped."""
-        class TestClient(ConnectorClientBase):
-            @property
-            def connector_name(self) -> str:
-                return "test"
-
-        with patch('azure.connectors.sdk.client_base.AzureIdentityTokenProvider') as mock_wrapper:
-            TestClient(mock_token_provider)
-            mock_wrapper.assert_not_called()
+        mock_close.assert_awaited_once()

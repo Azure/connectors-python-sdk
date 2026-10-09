@@ -57,37 +57,37 @@ async def example_1_send_message_to_queue():
         print("Example: $env:SERVICEBUS_QUEUE_NAME = 'my-queue'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create a message
-            message = ServiceBusMessage(
-                content_data=json.dumps({
-                    "orderId": "ORD-12345",
-                    "customerId": "CUST-001",
-                    "amount": 99.99,
-                    "timestamp": "2024-01-15T10:30:00Z"
-                }),
-                content_type="application/json",
-                label="order-created",
-                correlation_id="corr-abc-123"
-            )
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create a message
+                message = ServiceBusMessage(
+                    content_data=json.dumps({
+                        "orderId": "ORD-12345",
+                        "customerId": "CUST-001",
+                        "amount": 99.99,
+                        "timestamp": "2024-01-15T10:30:00Z"
+                    }),
+                    content_type="application/json",
+                    label="order-created",
+                    correlation_id="corr-abc-123"
+                )
 
-            await client.send_message_async(
-                input=message,
-                entity_name=QUEUE_NAME
-            )
+                await client.send_message_async(
+                    input=message,
+                    entity_name=QUEUE_NAME
+                )
 
-            print(f"Message sent to queue '{QUEUE_NAME}':")
-            print(f"  Content: {message.content_data[:50]}...")
-            print(f"  Label: {message.label}")
-            print(f"  Correlation ID: {message.correlation_id}")
+                print(f"Message sent to queue '{QUEUE_NAME}':")
+                print(f"  Content: {message.content_data[:50]}...")
+                print(f"  Label: {message.label}")
+                print(f"  Correlation ID: {message.correlation_id}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_receive_message_from_queue():
@@ -98,30 +98,30 @@ async def example_2_receive_message_from_queue():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_messages_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME,
-                max_message_count=1,
-            )
-            messages = result.get("value", []) if result else []
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_messages_from_queue_with_peek_lock_async(
+                    queue_name=QUEUE_NAME,
+                    max_message_count=1,
+                )
+                messages = result.get("value", []) if result else []
 
-            if messages:
-                message = messages[0]
-                print(f"Message received from queue '{QUEUE_NAME}':")
-                print(f"  Message ID: {message.get('messageId', 'N/A')}")
-                print(f"  Content: {message.get('contentData', 'N/A')}")
-                print(f"  Content Type: {message.get('contentType', 'N/A')}")
-                print("  Complete or abandon the message by using its lock token.")
-            else:
-                print(f"No messages available in queue '{QUEUE_NAME}'.")
+                if messages:
+                    message = messages[0]
+                    print(f"Message received from queue '{QUEUE_NAME}':")
+                    print(f"  Message ID: {message.get('messageId', 'N/A')}")
+                    print(f"  Content: {message.get('contentData', 'N/A')}")
+                    print(f"  Content Type: {message.get('contentType', 'N/A')}")
+                    print("  Complete or abandon the message by using its lock token.")
+                else:
+                    print(f"No messages available in queue '{QUEUE_NAME}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_receive_with_peek_lock():
@@ -132,41 +132,41 @@ async def example_3_receive_with_peek_lock():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Receive message with peek-lock (message is locked, not removed)
-            result = await client.get_messages_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME,
-                max_message_count=1,
-            )
-            messages = result.get("value", []) if result else []
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Receive message with peek-lock (message is locked, not removed)
+                result = await client.get_messages_from_queue_with_peek_lock_async(
+                    queue_name=QUEUE_NAME,
+                    max_message_count=1,
+                )
+                messages = result.get("value", []) if result else []
 
-            if messages:
-                message = messages[0]
-                lock_token = message.get("lockToken")
-                print("Message received with peek-lock:")
-                print(f"  Lock Token: {lock_token}")
-                print(f"  Content: {message.get('contentData', 'N/A')}")
+                if messages:
+                    message = messages[0]
+                    lock_token = message.get("lockToken")
+                    print("Message received with peek-lock:")
+                    print(f"  Lock Token: {lock_token}")
+                    print(f"  Content: {message.get('contentData', 'N/A')}")
 
-                # Process the message...
-                print("  Processing message...")
+                    # Process the message...
+                    print("  Processing message...")
 
-                # Complete the message (remove from queue)
-                if lock_token:
-                    await client.complete_message_in_queue_async(
-                        queue_name=QUEUE_NAME,
-                        lock_token=lock_token,
-                    )
-                    print("  Message completed successfully.")
-            else:
-                print(f"No messages available in queue '{QUEUE_NAME}'.")
+                    # Complete the message (remove from queue)
+                    if lock_token:
+                        await client.complete_message_in_queue_async(
+                            queue_name=QUEUE_NAME,
+                            lock_token=lock_token,
+                        )
+                        print("  Message completed successfully.")
+                else:
+                    print(f"No messages available in queue '{QUEUE_NAME}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_receive_and_abandon():
@@ -177,36 +177,36 @@ async def example_4_receive_and_abandon():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_messages_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME,
-                max_message_count=1,
-            )
-            messages = result.get("value", []) if result else []
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_messages_from_queue_with_peek_lock_async(
+                    queue_name=QUEUE_NAME,
+                    max_message_count=1,
+                )
+                messages = result.get("value", []) if result else []
 
-            if messages:
-                message = messages[0]
-                lock_token = message.get("lockToken")
-                print("Message received with peek-lock:")
-                print(f"  Content: {message.get('contentData', 'N/A')}")
+                if messages:
+                    message = messages[0]
+                    lock_token = message.get("lockToken")
+                    print("Message received with peek-lock:")
+                    print(f"  Content: {message.get('contentData', 'N/A')}")
 
-                # Abandon the message (return to queue for retry)
-                if lock_token:
-                    await client.abandon_message_in_queue_async(
-                        queue_name=QUEUE_NAME,
-                        lock_token=lock_token,
-                    )
-                    print("  Message abandoned and returned to queue.")
-            else:
-                print(f"No messages available in queue '{QUEUE_NAME}'.")
+                    # Abandon the message (return to queue for retry)
+                    if lock_token:
+                        await client.abandon_message_in_queue_async(
+                            queue_name=QUEUE_NAME,
+                            lock_token=lock_token,
+                        )
+                        print("  Message abandoned and returned to queue.")
+                else:
+                    print(f"No messages available in queue '{QUEUE_NAME}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_send_message_to_topic():
@@ -218,32 +218,32 @@ async def example_5_send_message_to_topic():
         print("Example: $env:SERVICEBUS_TOPIC_NAME = 'my-topic'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            message = ServiceBusMessage(
-                content_data=json.dumps({
-                    "eventType": "user.created",
-                    "userId": "USR-789",
-                    "email": "user@example.com"
-                }),
-                content_type="application/json",
-                label="user-event"
-            )
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                message = ServiceBusMessage(
+                    content_data=json.dumps({
+                        "eventType": "user.created",
+                        "userId": "USR-789",
+                        "email": "user@example.com"
+                    }),
+                    content_type="application/json",
+                    label="user-event"
+                )
 
-            await client.send_message_async(
-                input=message,
-                entity_name=TOPIC_NAME
-            )
+                await client.send_message_async(
+                    input=message,
+                    entity_name=TOPIC_NAME
+                )
 
-            print(f"Message sent to topic '{TOPIC_NAME}':")
-            print(f"  Content: {message.content_data}")
+                print(f"Message sent to topic '{TOPIC_NAME}':")
+                print(f"  Content: {message.content_data}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_6_receive_from_topic_subscription():
@@ -254,29 +254,29 @@ async def example_6_receive_from_topic_subscription():
         print("Set SERVICEBUS_TOPIC_NAME and SERVICEBUS_SUBSCRIPTION_NAME.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_messages_from_topic_with_peek_lock_async(
-                topic_name=TOPIC_NAME,
-                subscription_name=SUBSCRIPTION_NAME,
-                max_message_count=1,
-            )
-            messages = result.get("value", []) if result else []
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_messages_from_topic_with_peek_lock_async(
+                    topic_name=TOPIC_NAME,
+                    subscription_name=SUBSCRIPTION_NAME,
+                    max_message_count=1,
+                )
+                messages = result.get("value", []) if result else []
 
-            if messages:
-                message = messages[0]
-                print(f"Message received from '{TOPIC_NAME}/{SUBSCRIPTION_NAME}':")
-                print(f"  Message ID: {message.get('messageId', 'N/A')}")
-                print(f"  Content: {message.get('contentData', 'N/A')}")
-            else:
-                print(f"No messages in subscription '{SUBSCRIPTION_NAME}'.")
+                if messages:
+                    message = messages[0]
+                    print(f"Message received from '{TOPIC_NAME}/{SUBSCRIPTION_NAME}':")
+                    print(f"  Message ID: {message.get('messageId', 'N/A')}")
+                    print(f"  Content: {message.get('contentData', 'N/A')}")
+                else:
+                    print(f"No messages in subscription '{SUBSCRIPTION_NAME}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_7_dead_letter_message():
@@ -287,38 +287,38 @@ async def example_7_dead_letter_message():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_messages_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME,
-                max_message_count=1,
-            )
-            messages = result.get("value", []) if result else []
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_messages_from_queue_with_peek_lock_async(
+                    queue_name=QUEUE_NAME,
+                    max_message_count=1,
+                )
+                messages = result.get("value", []) if result else []
 
-            if messages:
-                message = messages[0]
-                lock_token = message.get("lockToken")
-                print("Message received:")
-                print(f"  Content: {message.get('contentData', 'N/A')}")
+                if messages:
+                    message = messages[0]
+                    lock_token = message.get("lockToken")
+                    print("Message received:")
+                    print(f"  Content: {message.get('contentData', 'N/A')}")
 
-                # Move to dead-letter queue
-                if lock_token:
-                    await client.dead_letter_message_in_queue_async(
-                        queue_name=QUEUE_NAME,
-                        lock_token=lock_token,
-                        dead_letter_reason="Processing failed",
-                        dead_letter_error_description="Max retries exceeded",
-                    )
-                    print("  Message moved to dead-letter queue.")
-            else:
-                print(f"No messages available in queue '{QUEUE_NAME}'.")
+                    # Move to dead-letter queue
+                    if lock_token:
+                        await client.dead_letter_message_in_queue_async(
+                            queue_name=QUEUE_NAME,
+                            lock_token=lock_token,
+                            dead_letter_reason="Processing failed",
+                            dead_letter_error_description="Max retries exceeded",
+                        )
+                        print("  Message moved to dead-letter queue.")
+                else:
+                    print(f"No messages available in queue '{QUEUE_NAME}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_8_batch_receive():
@@ -329,27 +329,27 @@ async def example_8_batch_receive():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_messages_from_queue_with_peek_lock_async(
-                queue_name=QUEUE_NAME,
-                max_message_count=5,
-            )
-            messages = result.get("value", []) if result else []
+        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_messages_from_queue_with_peek_lock_async(
+                    queue_name=QUEUE_NAME,
+                    max_message_count=5,
+                )
+                messages = result.get("value", []) if result else []
 
-            if messages:
-                print(f"Received {len(messages)} messages from '{QUEUE_NAME}':")
-                for i, msg in enumerate(messages, 1):
-                    print(f"  {i}. {msg.get('contentData', 'N/A')[:50]}...")
-            else:
-                print(f"No messages available in queue '{QUEUE_NAME}'.")
+                if messages:
+                    print(f"Received {len(messages)} messages from '{QUEUE_NAME}':")
+                    for i, msg in enumerate(messages, 1):
+                        print(f"  {i}. {msg.get('contentData', 'N/A')[:50]}...")
+                else:
+                    print(f"No messages available in queue '{QUEUE_NAME}'.")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

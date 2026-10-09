@@ -41,48 +41,48 @@ async def example_1_create_ticket() -> None:
     """Example 1: Create a ticket."""
     print("\n=== Example 1: Create Ticket ===")
 
-    credential = DefaultAzureCredential()
-    async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = CreateTicketRequest(
-            subject="SDK sample ticket",
-            description="Created from the freshservice SDK sample.",
-            email="requester@example.com",
-            priority="1",
-            status="2",
-        )
+    async with DefaultAzureCredential() as credential:
+        async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = CreateTicketRequest(
+                subject="SDK sample ticket",
+                description="Created from the freshservice SDK sample.",
+                email="requester@example.com",
+                priority="1",
+                status="2",
+            )
 
-        created = await client.create_ticket_async(input=request)
-        ticket = created.get("ticket", {}) if created else {}
-        print(f"Created ticket: {ticket.get('id')}")
+            created = await client.create_ticket_async(input=request)
+            ticket = created.get("ticket", {}) if created else {}
+            print(f"Created ticket: {ticket.get('id')}")
 
 
 async def example_2_update_ticket() -> None:
     """Example 2: Update an existing ticket."""
     print("\n=== Example 2: Update Ticket ===")
 
-    credential = DefaultAzureCredential()
-    async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = UpdateTicketRequest(priority="3", status="3")
+    async with DefaultAzureCredential() as credential:
+        async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = UpdateTicketRequest(priority="3", status="3")
 
-        updated = await client.update_ticket_async(input=request, ticket_id=1)
-        ticket = updated.get("ticket", {}) if updated else {}
-        print(f"Updated ticket: {ticket.get('id')}")
+            updated = await client.update_ticket_async(input=request, ticket_id=1)
+            ticket = updated.get("ticket", {}) if updated else {}
+            print(f"Updated ticket: {ticket.get('id')}")
 
 
 async def example_3_add_note() -> None:
     """Example 3: Add a note to a ticket."""
     print("\n=== Example 3: Add Note ===")
 
-    credential = DefaultAzureCredential()
-    async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
-        request = AddNoteRequest(
-            body="Note added from the freshservice SDK sample.",
-            private=True,
-        )
+    async with DefaultAzureCredential() as credential:
+        async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            request = AddNoteRequest(
+                body="Note added from the freshservice SDK sample.",
+                private=True,
+            )
 
-        note = await client.add_note_async(input=request, ticket_id=1)
-        conversation = note.get("conversation", {}) if note else {}
-        print(f"Added note: {conversation.get('id')}")
+            note = await client.add_note_async(input=request, ticket_id=1)
+            conversation = note.get("conversation", {}) if note else {}
+            print(f"Added note: {conversation.get('id')}")
 
 
 async def main() -> None:

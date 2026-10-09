@@ -5,6 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.planner import (
     PlannerClient,
     UnassignUsersInput,
@@ -28,13 +29,11 @@ from azure.connectors.planner import (
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import collect_operation_result
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestPlannerClientInitialization:
@@ -42,64 +41,63 @@ class TestPlannerClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = PlannerClient("https://example.azure.com/connections/test")
+        client = PlannerClient("https://example.azure.com/connections/test",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "planner"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = PlannerClient("https://example.azure.com/connections/test/")
+        client = PlannerClient("https://example.azure.com/connections/test/",
+                               AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PlannerClient("")
+            PlannerClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PlannerClient(None)
+            PlannerClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'planner'."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "planner"
 
-    def test_init_preserves_url_without_trailing_slash(self, mock_token_provider):
+    def test_init_preserves_url_without_trailing_slash(self, mock_credential):
         """Test that URL without trailing slash is preserved."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -109,11 +107,11 @@ class TestPlannerClientLifecycle:
     """Tests for PlannerClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -121,12 +119,12 @@ class TestPlannerClientLifecycle:
             mock_close.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(PlannerClient, 'close', new_callable=AsyncMock) as mock_close:
             async with PlannerClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, PlannerClient)
 
@@ -137,11 +135,11 @@ class TestListMyTasksAsync:
     """Tests for list_my_tasks_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list my tasks request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -155,18 +153,18 @@ class TestListMyTasksAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await collect_operation_result(client.list_my_tasks_async())
+            result = await resolve_generated_result(client.list_my_tasks_async())
 
             mock_send.assert_called_once()
             assert result is not None
-            assert len(result) > 0
+            assert result
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='')
@@ -177,15 +175,15 @@ class TestListMyTasksAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await collect_operation_result(client.list_my_tasks_async())
+            result = await resolve_generated_result(client.list_my_tasks_async())
             assert result == []
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
@@ -197,18 +195,18 @@ class TestListMyTasksAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await collect_operation_result(client.list_my_tasks_async())
+                await resolve_generated_result(client.list_my_tasks_async())
 
 
 class TestListGroupPlansAsync:
     """Tests for list_group_plans_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful list group plans request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -230,11 +228,11 @@ class TestListGroupPlansAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
@@ -253,11 +251,11 @@ class TestGetTaskAsync:
     """Tests for get_task_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful get task request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -280,11 +278,11 @@ class TestGetTaskAsync:
             assert result["id"] == "task-123"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Task not found"}')
@@ -303,11 +301,11 @@ class TestGetTaskDetailsAsync:
     """Tests for get_task_details_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful get task details request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -328,11 +326,11 @@ class TestGetTaskDetailsAsync:
             assert result["description"] == "Task description"
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='')
@@ -351,11 +349,11 @@ class TestGetPlanDetailsAsync:
     """Tests for get_plan_details_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful get plan details request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -375,11 +373,11 @@ class TestGetPlanDetailsAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
@@ -398,11 +396,11 @@ class TestCreateTaskAsync:
     """Tests for create_task_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful create task request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -431,11 +429,11 @@ class TestCreateTaskAsync:
             assert result["title"] == "New Task"
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -456,11 +454,11 @@ class TestCreateBucketAsync:
     """Tests for create_bucket_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful create bucket request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -493,11 +491,11 @@ class TestUpdateTaskAsync:
     """Tests for update_task_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful update task request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -528,11 +526,11 @@ class TestUpdateTaskAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
@@ -553,11 +551,11 @@ class TestUpdateTaskDetailsAsync:
     """Tests for update_task_details_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful update task details request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -590,11 +588,11 @@ class TestDeleteTaskAsync:
     """Tests for delete_task_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful delete task request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text='')
@@ -617,11 +615,11 @@ class TestAssignUsersAsync:
     """Tests for assign_users_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful assign users request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -650,11 +648,11 @@ class TestAssignUsersAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid user"}')
@@ -675,11 +673,11 @@ class TestUnassignUsersAsync:
     """Tests for unassign_users_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful unassign users request."""
         client = PlannerClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(

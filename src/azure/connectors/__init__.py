@@ -9,14 +9,9 @@ strongly-typed generated connector clients.
 """
 
 from .sdk.client_base import ConnectorClientBase
-from .sdk.options import ConnectorClientOptions
-from .sdk.authentication import (
-    TokenProvider,
-    ManagedIdentityTokenProvider,
-    ConnectionStringTokenProvider,
-    AzureIdentityTokenProvider,
-)
 from .sdk.exceptions import ConnectorException
+from .sdk.http_client import ConnectorHttpClient, ConnectorResponse
+from .sdk.response import ConnectorResponseHook, ConnectorResponseSnapshot
 from .sdk.trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 
 # Generated connector clients — some may have import errors from incomplete
@@ -482,12 +477,11 @@ __version__ = '0.5.0b1'
 
 __all__ = [
     'ConnectorClientBase',
-    'ConnectorClientOptions',
-    'TokenProvider',
-    'ManagedIdentityTokenProvider',
-    'ConnectionStringTokenProvider',
-    'AzureIdentityTokenProvider',
     'ConnectorException',
+    'ConnectorHttpClient',
+    'ConnectorResponse',
+    'ConnectorResponseHook',
+    'ConnectorResponseSnapshot',
     'TriggerCallbackPayload',
     'TriggerCallbackBody',
     'ArmClient',

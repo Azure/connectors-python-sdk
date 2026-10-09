@@ -54,36 +54,36 @@ async def example_1_send_event():
         print("Example: $env:EVENTHUBS_HUB_NAME = 'my-event-hub'")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create a single event
-            event = SendEvent(
-                content_data=json.dumps({
-                    "message": "Hello from Azure Connectors SDK for Python!",
-                    "timestamp": "2024-01-15T10:30:00Z",
-                    "source": "python-sdk-sample"
-                }),
-                properties={
-                    "eventType": "sample",
-                    "version": "1.0"
-                }
-            )
+        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create a single event
+                event = SendEvent(
+                    content_data=json.dumps({
+                        "message": "Hello from Azure Connectors SDK for Python!",
+                        "timestamp": "2024-01-15T10:30:00Z",
+                        "source": "python-sdk-sample"
+                    }),
+                    properties={
+                        "eventType": "sample",
+                        "version": "1.0"
+                    }
+                )
 
-            await client.send_event_async(
-                input=event,
-                event_hub_name=EVENT_HUB_NAME
-            )
+                await client.send_event_async(
+                    input=event,
+                    event_hub_name=EVENT_HUB_NAME
+                )
 
-            print(f"Event sent to Event Hub '{EVENT_HUB_NAME}':")
-            print(f"  Content: {event.content_data[:50]}...")
-            print(f"  Properties: {event.properties}")
+                print(f"Event sent to Event Hub '{EVENT_HUB_NAME}':")
+                print(f"  Content: {event.content_data[:50]}...")
+                print(f"  Properties: {event.properties}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_2_send_event_with_partition_key():
@@ -95,34 +95,34 @@ async def example_2_send_event_with_partition_key():
         return
 
     partition_key = os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            event = SendEvent(
-                content_data=json.dumps({
-                    "orderId": "ORD-12345",
-                    "customerId": "CUST-001",
-                    "amount": 99.99
-                }),
-                properties={
-                    "eventType": "orderCreated"
-                }
-            )
+        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                event = SendEvent(
+                    content_data=json.dumps({
+                        "orderId": "ORD-12345",
+                        "customerId": "CUST-001",
+                        "amount": 99.99
+                    }),
+                    properties={
+                        "eventType": "orderCreated"
+                    }
+                )
 
-            await client.send_event_async(
-                input=event,
-                event_hub_name=EVENT_HUB_NAME,
-                partition_key=partition_key
-            )
+                await client.send_event_async(
+                    input=event,
+                    event_hub_name=EVENT_HUB_NAME,
+                    partition_key=partition_key
+                )
 
-            print(f"Event sent with partition key '{partition_key}':")
-            print(f"  Content: {event.content_data}")
+                print(f"Event sent with partition key '{partition_key}':")
+                print(f"  Content: {event.content_data}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_3_send_batch_events():
@@ -133,62 +133,62 @@ async def example_3_send_batch_events():
         print("Set EVENTHUBS_HUB_NAME environment variable.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            # Create batch with multiple events
-            batch_input = SendEventsInput(
-                additional_properties={
-                    "events": [
-                        {
-                            "contentData": json.dumps({"id": 1, "name": "Event 1"}),
-                            "properties": {"index": "1"}
-                        },
-                        {
-                            "contentData": json.dumps({"id": 2, "name": "Event 2"}),
-                            "properties": {"index": "2"}
-                        },
-                        {
-                            "contentData": json.dumps({"id": 3, "name": "Event 3"}),
-                            "properties": {"index": "3"}
-                        }
-                    ]
-                }
-            )
+        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                # Create batch with multiple events
+                batch_input = SendEventsInput(
+                    additional_properties={
+                        "events": [
+                            {
+                                "contentData": json.dumps({"id": 1, "name": "Event 1"}),
+                                "properties": {"index": "1"}
+                            },
+                            {
+                                "contentData": json.dumps({"id": 2, "name": "Event 2"}),
+                                "properties": {"index": "2"}
+                            },
+                            {
+                                "contentData": json.dumps({"id": 3, "name": "Event 3"}),
+                                "properties": {"index": "3"}
+                            }
+                        ]
+                    }
+                )
 
-            await client.send_events_async(
-                input=batch_input,
-                event_hub_name=EVENT_HUB_NAME,
-                partition_key=os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
-            )
+                await client.send_events_async(
+                    input=batch_input,
+                    event_hub_name=EVENT_HUB_NAME,
+                    partition_key=os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
+                )
 
-            events = batch_input.additional_properties.get("events", [])
-            print(f"Batch of {len(events)} events sent to '{EVENT_HUB_NAME}':")
-            for i, evt in enumerate(events, 1):
-                print(f"  {i}. {evt.get('contentData', 'N/A')[:40]}...")
+                events = batch_input.additional_properties.get("events", [])
+                print(f"Batch of {len(events)} events sent to '{EVENT_HUB_NAME}':")
+                for i, evt in enumerate(events, 1):
+                    print(f"  {i}. {evt.get('contentData', 'N/A')[:40]}...")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_4_list_event_hubs():
     """Example 4: List Event Hubs in the namespace."""
     print("\n=== Example 4: List Event Hubs ===")
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_event_hubs_async()
-            print(f"Event Hubs: {result}")
+        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_event_hubs_async()
+                print(f"Event Hubs: {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def example_5_list_consumer_groups():
@@ -199,19 +199,19 @@ async def example_5_list_consumer_groups():
         print("Set EVENTHUBS_HUB_NAME environment variable.")
         return
 
-    credential = DefaultAzureCredential()
+    async with DefaultAzureCredential() as credential:
 
-    async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
-        try:
-            result = await client.get_consumer_groups_async(
-                event_hub_name=EVENT_HUB_NAME
-            )
-            print(f"Consumer groups for '{EVENT_HUB_NAME}': {result}")
+        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_consumer_groups_async(
+                    event_hub_name=EVENT_HUB_NAME
+                )
+                print(f"Consumer groups for '{EVENT_HUB_NAME}': {result}")
 
-        except ConnectorException as ex:
-            print(f"Connector error (status {ex.status_code}): {ex}")
-        except Exception as ex:
-            print(f"Error: {ex}")
+            except ConnectorException as ex:
+                print(f"Connector error (status {ex.status_code}): {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
 
 
 async def main():

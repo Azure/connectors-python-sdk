@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.waywedo import WaywedoClient
 
 
@@ -18,13 +18,13 @@ async def main() -> None:
         print("Set WAYWEDO_CONNECTION_URL to run this sample.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    try:
-        async with WaywedoClient(CONNECTION_RUNTIME_URL, token_provider) as client:
-            checklists = await client.find_checklist_async()
-            print(f"Checklists: {checklists}")
-    except ConnectorException as ex:
-        print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with WaywedoClient(CONNECTION_RUNTIME_URL, credential) as client:
+                checklists = await client.find_checklist_async()
+                print(f"Checklists: {checklists}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":

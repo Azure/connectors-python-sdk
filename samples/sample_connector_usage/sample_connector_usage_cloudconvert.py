@@ -5,7 +5,7 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors import AzureIdentityTokenProvider, ConnectorException
+from azure.connectors import ConnectorException
 from azure.connectors.cloudconvert import CloudconvertClient
 
 
@@ -18,13 +18,13 @@ async def main() -> None:
         print("Set CLOUDCONVERT_CONNECTION_URL to run this sample.")
         return
 
-    token_provider = AzureIdentityTokenProvider(DefaultAzureCredential())
-    try:
-        async with CloudconvertClient(CONNECTION_RUNTIME_URL, token_provider) as client:
-            options = await client.get_convert_options_async()
-            print(f"Conversion options: {options}")
-    except ConnectorException as ex:
-        print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with CloudconvertClient(CONNECTION_RUNTIME_URL, credential) as client:
+                options = await client.get_convert_options_async()
+                print(f"Conversion options: {options}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":

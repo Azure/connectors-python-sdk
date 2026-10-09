@@ -5,6 +5,7 @@
 import json
 import pytest
 from unittest.mock import AsyncMock, patch
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.office365 import (
     Office365Client,
     DraftEmailInput,
@@ -23,12 +24,10 @@ from azure.connectors.office365 import (
     SendEmailInput,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
-    ManagedIdentityTokenProvider,
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import collect_operation_result
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOffice365ClientInitialization:
@@ -36,55 +35,54 @@ class TestOffice365ClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = Office365Client("https://example.azure.com/connections/test")
+        client = Office365Client("https://example.azure.com/connections/test",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "office365"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = Office365Client("https://example.azure.com/connections/test/")
+        client = Office365Client("https://example.azure.com/connections/test/",
+                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365Client("")
+            Office365Client("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365Client(None)
+            Office365Client(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'office365'."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         assert client.connector_name == "office365"
@@ -94,11 +92,11 @@ class TestOffice365ClientLifecycle:
     """Tests for Office365Client lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
@@ -110,11 +108,11 @@ class TestRespondToEventAsync:
     """Tests for respond_to_event_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_uses_response_path_parameter(self, mock_token_provider):
+    async def test_success_uses_response_path_parameter(self, mock_credential):
         """Test the response argument is encoded into the request path."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         input_value = ResponseToEventInvite()
 
@@ -135,14 +133,18 @@ class TestRespondToEventAsync:
                 "https://example.azure.com/connections/test/"
                 "codeless/v1.0/me/events/event%2F1/tentatively%20accept",
                 body=input_value,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test a non-2xx response raises ConnectorException."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(
@@ -161,12 +163,12 @@ class TestRespondToEventAsync:
             assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(Office365Client, 'close', new_callable=AsyncMock) as mock_close:
             async with Office365Client(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider
+                credential=mock_credential
             ) as client:
                 assert isinstance(client, Office365Client)
 
@@ -177,11 +179,11 @@ class TestGetOutlookCategoryNames:
     """Tests for get_outlook_category_names_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_json_response(self, mock_token_provider):
+    async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request without parameters."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -200,17 +202,21 @@ class TestGetOutlookCategoryNames:
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/Categories",
-                body=None
+                body=None,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert "value" in result
             assert len(result["value"]) == 2
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_token_provider):
+    async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -225,11 +231,11 @@ class TestGetOutlookCategoryNames:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -253,11 +259,11 @@ class TestDraftEmail:
     """Tests for draft_email_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_body_and_no_query_params(self, mock_token_provider):
+    async def test_success_with_body_and_no_query_params(self, mock_credential):
         """Test successful POST with body but no query parameters."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -277,16 +283,20 @@ class TestDraftEmail:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/Draft",
-                body=input_message
+                body=input_message,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result["id"] == "message123"
 
     @pytest.mark.asyncio
-    async def test_success_with_query_parameters(self, mock_token_provider):
+    async def test_success_with_query_parameters(self, mock_credential):
         """Test POST with query parameters."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -315,11 +325,11 @@ class TestDraftEmail:
             assert "comment=Replying%20to%20your%20message" in path
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -343,11 +353,11 @@ class TestUpdateDraftEmail:
     """Tests for update_draft_email_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_no_return_value(self, mock_token_provider):
+    async def test_success_no_return_value(self, mock_credential):
         """Test PATCH method with no return value."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -368,11 +378,11 @@ class TestUpdateDraftEmail:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Draft not found"}')
@@ -394,11 +404,11 @@ class TestSendDraftEmail:
     """Tests for send_draft_email_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_path_parameter(self, mock_token_provider):
+    async def test_success_with_path_parameter(self, mock_credential):
         """Test POST with path parameter."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=202, text="")
@@ -418,11 +428,11 @@ class TestSendDraftEmail:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_path_parameter_construction(self, mock_token_provider):
+    async def test_path_parameter_construction(self, mock_credential):
         """Test that path is constructed correctly."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=202, text="")
@@ -440,11 +450,11 @@ class TestSendDraftEmail:
             assert "https://example.azure.com/connections/test/Draft/Send/" in path
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Draft not found"}')
@@ -465,11 +475,11 @@ class TestAssignCategory:
     """Tests for assign_category_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_multiple_query_params(self, mock_token_provider):
+    async def test_success_with_multiple_query_params(self, mock_credential):
         """Test method with multiple query parameters."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text='{"success": true}')
@@ -491,11 +501,11 @@ class TestAssignCategory:
             assert "category=Red%20category" in path
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
@@ -519,11 +529,11 @@ class TestDeleteEmail:
     """Tests for delete_email_async method."""
 
     @pytest.mark.asyncio
-    async def test_delete_success(self, mock_token_provider):
+    async def test_delete_success(self, mock_credential):
         """Test successful DELETE request."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -545,11 +555,11 @@ class TestGetEmail:
     """Tests for get_email_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_complex_response(self, mock_token_provider):
+    async def test_success_with_complex_response(self, mock_credential):
         """Test GET with complex JSON response."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -577,11 +587,11 @@ class TestGetEmails:
     """Tests for get_emails_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_filtering_and_pagination(self, mock_token_provider):
+    async def test_success_with_filtering_and_pagination(self, mock_credential):
         """Test GET with complex query parameters for filtering."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -612,11 +622,11 @@ class TestSendEmail:
     """Tests for send_email_async method."""
 
     @pytest.mark.asyncio
-    async def test_send_email_success(self, mock_token_provider):
+    async def test_send_email_success(self, mock_credential):
         """Test successful email send."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=202, text="")
@@ -641,11 +651,11 @@ class TestFindMeetingTimes:
     """Tests for find_meeting_times_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_input_schema(self, mock_token_provider):
+    async def test_success_with_input_schema(self, mock_credential):
         """Test POST with complex input schema."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -673,11 +683,11 @@ class TestGetAttachment:
     """Tests for get_attachment_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_attachment_data(self, mock_token_provider):
+    async def test_success_with_attachment_data(self, mock_credential):
         """Test getting email attachment."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -705,11 +715,11 @@ class TestMCPEmailsManagement:
     """Tests for mcp_emails_management_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_without_session_id(self, mock_token_provider):
+    async def test_success_without_session_id(self, mock_credential):
         """Test MCP endpoint without session ID."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -729,16 +739,20 @@ class TestMCPEmailsManagement:
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/mcp/EmailsManagement",
-                body=request
+                body=request,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result["jsonrpc"] == "2.0"
 
     @pytest.mark.asyncio
-    async def test_success_with_session_id(self, mock_token_provider):
+    async def test_success_with_session_id(self, mock_credential):
         """Test MCP endpoint with session ID."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -767,11 +781,11 @@ class TestCalendarMethods:
     """Tests for calendar-related methods."""
 
     @pytest.mark.asyncio
-    async def test_get_calendars(self, mock_token_provider):
+    async def test_get_calendars(self, mock_credential):
         """Test getting list of calendars."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -790,11 +804,11 @@ class TestCalendarMethods:
             assert len(result["value"]) == 1
 
     @pytest.mark.asyncio
-    async def test_create_calendar_event(self, mock_token_provider):
+    async def test_create_calendar_event(self, mock_credential):
         """Test creating a calendar event."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -816,11 +830,11 @@ class TestCalendarMethods:
             assert result["id"] == "event123"
 
     @pytest.mark.asyncio
-    async def test_delete_calendar_event(self, mock_token_provider):
+    async def test_delete_calendar_event(self, mock_credential):
         """Test deleting a calendar event."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(status=204, text="")
@@ -842,11 +856,11 @@ class TestContactMethods:
     """Tests for contact-related methods."""
 
     @pytest.mark.asyncio
-    async def test_get_contacts(self, mock_token_provider):
+    async def test_get_contacts(self, mock_credential):
         """Test getting list of contacts."""
         client = Office365Client(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider
+            credential=mock_credential
         )
 
         mock_response = MockResponse(
@@ -860,8 +874,8 @@ class TestContactMethods:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await collect_operation_result(client.contact_get_items_async("Contacts"))
-            assert len(result) > 0
+            result = await resolve_generated_result(client.contact_get_items_async("Contacts"))
+            assert result
 
 
 class TestDataClasses:

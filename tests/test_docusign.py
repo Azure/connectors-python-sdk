@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.core.credentials import AzureKeyCredential
 from azure.connectors.docusign import (
     AdditionalURLForSenderView,
     CombinedEmailBodyAndCustomFields,
@@ -15,9 +16,7 @@ from azure.connectors.docusign import (
     UpdateDocgenFormFieldsInput,
 )
 from azure.connectors.sdk import (
-    ConnectorClientOptions,
     ConnectorException,
-    ManagedIdentityTokenProvider,
 )
 from tests.conftest import MockResponse
 
@@ -27,55 +26,54 @@ class TestDocusignClientInitialization:
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = DocusignClient("https://example.azure.com/connections/test")
+        client = DocusignClient("https://example.azure.com/connections/test",
+                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
         assert client.connector_name == "docusign"
-        assert isinstance(client._http_client._token_provider, ManagedIdentityTokenProvider)
+        assert isinstance(client._http_client._credential, AzureKeyCredential)
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = DocusignClient("https://example.azure.com/connections/test/")
+        client = DocusignClient("https://example.azure.com/connections/test/",
+                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
-    def test_init_with_custom_token_provider(self, mock_token_provider):
+    def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
-        assert client._http_client._token_provider is mock_token_provider
+        assert client._http_client._credential is mock_credential
 
-    def test_init_with_custom_options(self, mock_token_provider):
-        """Test initialization with custom options."""
-        options = ConnectorClientOptions(timeout_seconds=60.0, max_retry_attempts=5)
+    def test_init_with_custom_settings(self, mock_credential):
+        """Test initialization with custom pipeline settings."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
-            options=options,
+            credential=mock_credential,
+            timeout_seconds=60.0,
+            max_retry_attempts=5,
         )
-
-        assert client._options is options
-        assert client._options.timeout_seconds == 60.0
-        assert client._options.max_retry_attempts == 5
+        assert client._http_client._timeout_seconds == 60.0
 
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocusignClient("")
+            DocusignClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocusignClient(None)
+            DocusignClient(None, AzureKeyCredential("test-key"))
 
-    def test_connector_name_property(self, mock_token_provider):
+    def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'docusign'."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         assert client.connector_name == "docusign"
@@ -85,11 +83,11 @@ class TestDocusignClientLifecycle:
     """Tests for DocusignClient lifecycle methods."""
 
     @pytest.mark.asyncio
-    async def test_close(self, mock_token_provider):
+    async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
 
         with patch.object(client._http_client, "close", new_callable=AsyncMock) as mock_close:
@@ -121,12 +119,12 @@ class TestGeneratedContractSurface:
         assert not hasattr(DocusignClient, method_name)
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_token_provider):
+    async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(DocusignClient, "close", new_callable=AsyncMock) as mock_close:
             async with DocusignClient(
                 "https://example.azure.com/connections/test",
-                token_provider=mock_token_provider,
+                credential=mock_credential,
             ) as client:
                 assert isinstance(client, DocusignClient)
 
@@ -137,11 +135,11 @@ class TestEmbeddedUrlOperationNames:
     """Tests for acronym-aware embedded URL operation names."""
 
     @pytest.mark.asyncio
-    async def test_generate_embedded_sender_url_success(self, mock_token_provider):
+    async def test_generate_embedded_sender_url_success(self, mock_credential):
         """Test the sender URL operation uses its acronym-aware public name."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = AdditionalURLForSenderView()
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/send"}')
@@ -165,15 +163,19 @@ class TestEmbeddedUrlOperationNames:
                 "https://example.azure.com/connections/test/accounts/acct-1/"
                 "envelopes/env-1/views/sender?openIn=new%20window&returnUrl=callback",
                 body=payload,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"url": "https://example.com/send"}
 
     @pytest.mark.asyncio
-    async def test_generate_embedded_signing_url_success(self, mock_token_provider):
+    async def test_generate_embedded_signing_url_success(self, mock_credential):
         """Test the signing URL operation uses its acronym-aware public name."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = DynamicSigningUrlFields()
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/sign"}')
@@ -199,6 +201,10 @@ class TestEmbeddedUrlOperationNames:
                 "envelopes/env-1/views/recipientV2?isInPersonSigner=false&"
                 "authenticationMethod=none&returnUrl=callback",
                 body=payload,
+                timeout=None,
+                headers=None,
+                client_request_id=None,
+                response_hook=None,
             )
             assert result == {"url": "https://example.com/sign"}
 
@@ -207,11 +213,11 @@ class TestGetLoginAccountsAsync:
     """Tests for get_login_accounts_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful login accounts retrieval."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"accounts": [{"accountId": "123"}]}')
 
@@ -231,11 +237,11 @@ class TestGetLoginAccountsAsync:
             assert "accounts" in result
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test login accounts error path."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=401, text='{"error": "Unauthorized"}')
 
@@ -253,11 +259,11 @@ class TestSearchListEnvelopesAsync:
     """Tests for search_list_envelopes_async method."""
 
     @pytest.mark.asyncio
-    async def test_success_with_filters(self, mock_token_provider):
+    async def test_success_with_filters(self, mock_credential):
         """Test envelope search query parameter handling."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"value": [{"envelopeId": "env-1"}]}')
 
@@ -284,11 +290,11 @@ class TestSearchListEnvelopesAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test envelope search error path."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
@@ -306,11 +312,11 @@ class TestCreateBlankEnvelopeAsync:
     """Tests for create_blank_envelope_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful blank envelope creation."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CombinedEmailBodyAndCustomFields()
         mock_response = MockResponse(status=201, text='{"envelopeId": "env-1"}')
@@ -337,11 +343,11 @@ class TestCreateBlankEnvelopeAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test blank envelope creation error path."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = CombinedEmailBodyAndCustomFields()
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
@@ -364,11 +370,11 @@ class TestSendEnvelopeAsync:
     """Tests for send_envelope_async method."""
 
     @pytest.mark.asyncio
-    async def test_success(self, mock_token_provider):
+    async def test_success(self, mock_credential):
         """Test successful send envelope request."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = DynamicSigners()
         mock_response = MockResponse(status=201, text='{"envelopeId": "env-2"}')
@@ -398,11 +404,11 @@ class TestSendEnvelopeAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test send envelope error path raises ConnectorException."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload = DynamicSigners()
         mock_response = MockResponse(status=400, text='{"error": "Invalid template"}')
@@ -427,11 +433,11 @@ class TestUpdateDocgenFormFieldsAsync:
     """Tests for update_docgen_form_fields_async method (PUT with body)."""
 
     @pytest.mark.asyncio
-    async def test_success_sends_body_and_returns_result(self, mock_token_provider):
+    async def test_success_sends_body_and_returns_result(self, mock_credential):
         """Test PUT operation sends input body and returns response."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload: UpdateDocgenFormFieldsInput = []
         mock_response = MockResponse(status=200, text='{"docgenFields": []}')
@@ -457,11 +463,11 @@ class TestUpdateDocgenFormFieldsAsync:
             assert body is payload
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test PUT error path raises ConnectorException."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         payload: UpdateDocgenFormFieldsInput = []
         mock_response = MockResponse(status=422, text='{"error": "Invalid fields"}')
@@ -485,11 +491,11 @@ class TestRemoveRecipientFromEnvelopeAsync:
     """Tests for remove_recipient_from_envelope_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_result(self, mock_token_provider):
+    async def test_success_returns_result(self, mock_credential):
         """Test successful DELETE returns response."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"recipientsRemoved": true}')
 
@@ -512,11 +518,11 @@ class TestRemoveRecipientFromEnvelopeAsync:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_token_provider):
+    async def test_error_response_raises_exception(self, mock_credential):
         """Test DELETE error path raises ConnectorException."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
-            token_provider=mock_token_provider,
+            credential=mock_credential,
         )
         mock_response = MockResponse(status=404, text='{"error": "Envelope not found"}')
 
