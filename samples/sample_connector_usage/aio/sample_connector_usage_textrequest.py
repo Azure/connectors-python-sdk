@@ -1,7 +1,7 @@
 """
-TextRequest Connector SDK Sample
+TextRequest sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the TextRequest connector SDK.
+This sample demonstrates how to use the TextRequest client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a TextRequest connection
@@ -47,7 +47,7 @@ async def example_1_send_message() -> None:
         async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
             result = await client.send_message_by_phone_number(
                 input=SendMessageByPhoneNumberInput(
-                    body="Hello from the TextRequest connector SDK.",
+                    body="Hello from the TextRequest client in the Azure Connectors Python SDK.",
                     sender_name="Support Team",
                 ),
                 dashboard_id=DASHBOARD_ID,
@@ -105,7 +105,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("TextRequest Connector SDK - Sample Usage")
+    print("TextRequest sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

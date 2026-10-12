@@ -263,7 +263,7 @@ class AzurevmClient(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -280,7 +280,7 @@ class AzurevmClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -302,7 +302,7 @@ class AzurevmClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1083,7 +1083,7 @@ class AzurevmClient(ConnectorClientBase):
                 response.text,
             )
 
-    def subscriptions_list(
+    def list_subscriptions(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1150,7 +1150,7 @@ class AzurevmClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def resource_groups_list(
+    def list_resource_groups(
         self,
         subscription_id: str,
         *,
@@ -1223,7 +1223,7 @@ class AzurevmClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def virtual_machine_scale_sets_list(
+    def list_virtual_machine_scale_sets(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1301,7 +1301,7 @@ class AzurevmClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def virtual_machines_in_scale_set_list(
+    def list_virtual_machines_in_scale_set(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1382,7 +1382,7 @@ class AzurevmClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def virtual_machines_list(
+    def list_virtual_machines(
         self,
         subscription_id: str,
         resource_group_name: str,

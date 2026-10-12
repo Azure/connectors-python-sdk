@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Storage Queues Connector SDK Sample
+Azure Storage Queues sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Storage Queues connector SDK
+This sample demonstrates how to use the Azure Storage Queues client from the Azure Connectors Python SDK
 to interact with Azure Storage Queue messages.
 
 Prerequisites:
@@ -221,7 +221,7 @@ def example_5_delete_message():
 
 def main():
     """Run all examples."""
-    print("Azure Storage Queues Connector SDK - Sample Usage")
+    print("Azure Storage Queues sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

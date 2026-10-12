@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Kusto (Azure Data Explorer) Connector SDK Sample
+Kusto (Azure Data Explorer) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Kusto connector SDK.
+This sample demonstrates how to use the Kusto client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Kusto (Azure Data Explorer) cluster
@@ -370,7 +370,7 @@ def example_8_error_handling():
 
 def main():
     """Run all examples."""
-    print("Kusto (Azure Data Explorer) Connector SDK - Sample Usage")
+    print("Kusto (Azure Data Explorer) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
     print()
 

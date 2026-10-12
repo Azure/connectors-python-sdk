@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Pipedrive Connector SDK Sample
+Pipedrive sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Pipedrive connector SDK.
+This sample demonstrates how to use the Pipedrive client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Pipedrive connection

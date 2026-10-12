@@ -40,8 +40,8 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             table="Table1",
             id_column="ID",
         )
-    if operation == "get_items":
-        return await resolve_generated_result(client.get_items(
+    if operation == "list_items":
+        return await resolve_generated_result(client.list_items(
             drive="drive123",
             file="file123",
             table="Table1",
@@ -132,7 +132,7 @@ class TestExcelonlineClientInitialization:
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -228,7 +228,7 @@ class TestExcelonlineClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.get_items(
+            result = await resolve_generated_result(client.list_items(
                 drive="drive123",
                 file="file123",
                 table="Table1",
@@ -324,7 +324,7 @@ class TestExcelonlineClientErrorHandling:
         [
             "create_table",
             "create_id_column",
-            "get_items",
+            "list_items",
             "get_item",
             "delete_item",
             "patch_item",

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Google Tasks Connector SDK Sample
+Google Tasks sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Google Tasks connector SDK.
+This sample demonstrates how to use the Google Tasks client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Google Tasks connection

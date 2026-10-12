@@ -42,7 +42,7 @@ OPERATION_ARGS = {
         "dataset": "ds",
         "procedure": "proc",
     },
-    "get_items": {"dataset": "ds", "table": "tbl"},
+    "list_items": {"dataset": "ds", "table": "tbl"},
     "post_item": {
         "input": PostItemInput(),
         "dataset": "ds",
@@ -116,7 +116,7 @@ class TestDynamicsaxClientInitialization:
         client = DynamicsaxClient(
             BASE_URL,
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -193,7 +193,7 @@ class TestDynamicsaxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items(dataset="ds", table="tbl"))
+            await resolve_generated_result(client.list_items(dataset="ds", table="tbl"))
 
             request_url = mock_send.call_args[0][1]
             assert "/datasets/ds/tables/tbl/items" in request_url
@@ -210,7 +210,7 @@ class TestDynamicsaxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items(
+            await resolve_generated_result(client.list_items(
                 dataset="ds",
                 table="tbl",
                 filter="Name eq 'x'",
@@ -305,7 +305,7 @@ class TestDynamicsaxClientMethods:
         client = _make_client(credential=mock_credential)
         response_text = (
             '{"value":[{"value":"ok"}]}'
-            if operation == "get_items"
+            if operation == "list_items"
             else '{"value":"ok"}'
         )
         mock_response = MockResponse(status=200, text=response_text)
@@ -320,7 +320,7 @@ class TestDynamicsaxClientMethods:
 
             if operation in NO_JSON_OPERATIONS:
                 assert result is None
-            elif operation == "get_items":
+            elif operation == "list_items":
                 assert result == [{"value": "ok"}]
             else:
                 assert result == {"value": "ok"}

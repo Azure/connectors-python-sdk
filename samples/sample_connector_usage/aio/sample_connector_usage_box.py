@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Box Connector SDK Sample
+Box sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Box connector SDK.
+This sample demonstrates how to use the Box client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Box connection

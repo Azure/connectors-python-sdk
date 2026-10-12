@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Data Factory Connector SDK Sample
+Azure Data Factory sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Data Factory connector SDK
+This sample demonstrates how to use the Azure Data Factory client from the Azure Connectors Python SDK
 to create, monitor, and cancel pipeline runs.
 
 Prerequisites:

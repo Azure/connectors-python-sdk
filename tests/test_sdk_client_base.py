@@ -53,7 +53,7 @@ class TestConnectorClientBase:
             TestClient(
                 mock_credential,
                 max_retry_attempts=5,
-                timeout_seconds=60.0,
+                timeout=60.0,
                 retry_unsafe_http_methods=True,
                 retry_status=2,
             )

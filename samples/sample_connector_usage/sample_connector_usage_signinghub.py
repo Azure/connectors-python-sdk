@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-SigningHub Connector SDK Sample
+SigningHub sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SigningHub connector SDK.
+This sample demonstrates how to use the SigningHub client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a SigningHub connection

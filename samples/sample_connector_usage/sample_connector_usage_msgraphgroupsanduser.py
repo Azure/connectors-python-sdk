@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-MS Graph Groups & Users Connector SDK Sample
+MS Graph Groups & Users sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the MS Graph Groups & Users connector SDK.
+This sample demonstrates how to use the MS Graph Groups & Users client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with MS Graph Groups & Users connection
@@ -186,7 +186,7 @@ def example_5_list_subscribed_skus():
 
 def main():
     """Run all examples."""
-    print("MS Graph Groups & Users Connector SDK - Sample Usage")
+    print("MS Graph Groups & Users sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

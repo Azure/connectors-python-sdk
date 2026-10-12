@@ -1,4 +1,4 @@
-"""Seismic Planner connector SDK sample."""
+"""Seismic Planner sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Event Hubs Connector SDK Sample
+Azure Event Hubs sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Event Hubs connector SDK
+This sample demonstrates how to use the Azure Event Hubs client from the Azure Connectors Python SDK
 to send and receive events from Azure Event Hubs.
 
 Prerequisites:
@@ -214,7 +214,7 @@ def example_5_list_consumer_groups():
 
 def main():
     """Run all examples."""
-    print("Azure Event Hubs Connector SDK - Sample Usage")
+    print("Azure Event Hubs sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

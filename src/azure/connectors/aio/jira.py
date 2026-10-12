@@ -128,7 +128,7 @@ class JiraClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -145,7 +145,7 @@ class JiraClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -167,7 +167,7 @@ class JiraClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -222,10 +222,10 @@ class JiraClient(ConnectorClientBase):
 
     async def list_issues(
         self,
+        *,
         jql: Optional[str] = None,
         fields: Optional[str] = None,
         next_page_token: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -398,8 +398,8 @@ class JiraClient(ConnectorClientBase):
 
     async def get_current_user(
         self,
-        expand: Optional[str] = None,
         *,
+        expand: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -444,8 +444,8 @@ class JiraClient(ConnectorClientBase):
     async def mcp_jira_issue_management(
         self,
         input: MCPQueryRequest,
-        session_id: Optional[str] = None,
         *,
+        session_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -697,8 +697,8 @@ class JiraClient(ConnectorClientBase):
     async def delete_project(
         self,
         project_id_or_key: str,
-        enable_undo: Optional[bool] = None,
         *,
+        enable_undo: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -743,10 +743,10 @@ class JiraClient(ConnectorClientBase):
         self,
         input: EditIssueInput,
         issue_id_or_key: str,
+        *,
         notify_users: Optional[bool] = None,
         override_screen_security: Optional[bool] = None,
         override_editable_flag: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -924,8 +924,8 @@ class JiraClient(ConnectorClientBase):
     async def get_user(
         self,
         account_id: str,
-        expand: Optional[str] = None,
         *,
+        expand: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

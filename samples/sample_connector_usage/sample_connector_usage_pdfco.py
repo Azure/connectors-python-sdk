@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-PDF.co Connector SDK Sample
+PDF.co sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the PDF.co connector SDK.
+This sample demonstrates how to use the PDF.co client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a PDF.co connection

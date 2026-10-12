@@ -58,7 +58,7 @@ class TwitterClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -75,7 +75,7 @@ class TwitterClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -97,7 +97,7 @@ class TwitterClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -115,8 +115,8 @@ class TwitterClient(ConnectorClientBase):
     async def user_timeline(
         self,
         user_name: str,
-        max_results: Optional[int] = None,
         *,
+        max_results: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -165,8 +165,8 @@ class TwitterClient(ConnectorClientBase):
 
     async def home_timeline(
         self,
-        max_results: Optional[int] = None,
         *,
+        max_results: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -212,9 +212,9 @@ class TwitterClient(ConnectorClientBase):
     async def search_tweet(
         self,
         search_query: str,
+        *,
         max_results: Optional[int] = None,
         since_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -269,8 +269,8 @@ class TwitterClient(ConnectorClientBase):
     async def followers(
         self,
         user_name: str,
-        max_results: Optional[int] = None,
         *,
+        max_results: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -318,8 +318,8 @@ class TwitterClient(ConnectorClientBase):
 
     async def my_followers(
         self,
-        max_results: Optional[int] = None,
         *,
+        max_results: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -364,8 +364,8 @@ class TwitterClient(ConnectorClientBase):
     async def following(
         self,
         user_name: str,
-        max_results: Optional[int] = None,
         *,
+        max_results: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -413,8 +413,8 @@ class TwitterClient(ConnectorClientBase):
 
     async def my_following(
         self,
-        max_results: Optional[int] = None,
         *,
+        max_results: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -504,8 +504,8 @@ class TwitterClient(ConnectorClientBase):
     async def tweet(
         self,
         input: bytes,
-        tweet_text: Optional[str] = None,
         *,
+        tweet_text: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -553,8 +553,8 @@ class TwitterClient(ConnectorClientBase):
     async def retweet(
         self,
         tweet_id: str,
-        trim_user: Optional[bool] = None,
         *,
+        trim_user: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

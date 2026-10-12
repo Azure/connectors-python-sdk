@@ -1,4 +1,4 @@
-"""Replicon connector SDK sample."""
+"""Replicon sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.identity import DefaultAzureCredential

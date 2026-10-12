@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Word Online (Business) Connector SDK Sample
+Word Online (Business) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Word Online (Business) connector SDK.
+This sample demonstrates how to use the Word Online (Business) client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Word Online (Business) connection

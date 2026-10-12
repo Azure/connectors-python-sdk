@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Outlook.com Connector SDK Sample
+Outlook.com sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Outlook connector SDK
+This sample demonstrates how to use the Outlook client from the Azure Connectors Python SDK
 to interact with Outlook.com calendars, contacts, and email.
 
 Note: This connector is for Outlook.com (personal Microsoft accounts).
@@ -210,7 +210,7 @@ async def example_5_send_email():
 
 async def main():
     """Run all examples."""
-    print("Outlook.com Connector SDK - Sample Usage")
+    print("Outlook.com sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

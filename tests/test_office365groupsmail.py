@@ -76,8 +76,8 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
             thread_id="thread123",
             post_id="post123",
         )
-    if operation == "get_attachments":
-        return await resolve_generated_result(client.get_attachments(
+    if operation == "list_attachments":
+        return await resolve_generated_result(client.list_attachments(
             group_id="group123",
             thread_id="thread123",
             post_id="post123",
@@ -144,7 +144,7 @@ class TestOffice365groupsmailClientInitialization:
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -300,7 +300,7 @@ class TestOffice365groupsmailClientErrorHandling:
             "delete_conversation_thread",
             "list_thread_posts",
             "get_thread",
-            "get_attachments",
+            "list_attachments",
             "reply_to_a_thread",
             "reply",
             "http_request",

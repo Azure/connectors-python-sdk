@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Zoho Sign connector SDK sample."""
+"""Zoho Sign sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

@@ -1,4 +1,4 @@
-"""StarRez REST V1 connector SDK sample."""
+"""StarRez REST V1 sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.identity import DefaultAzureCredential

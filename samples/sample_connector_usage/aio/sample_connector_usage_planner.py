@@ -1,7 +1,7 @@
 """
-Microsoft Planner Connector SDK Sample
+Microsoft Planner sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Planner connector SDK.
+This sample demonstrates how to use the Planner client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Planner connection
@@ -194,7 +194,7 @@ async def example_6_get_plan_details(plan_id: str):
 
 async def main():
     """Run all examples"""
-    print("Planner Connector SDK - Sample Usage")
+    print("Planner sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 

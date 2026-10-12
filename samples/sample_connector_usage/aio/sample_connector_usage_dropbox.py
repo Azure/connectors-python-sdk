@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Dropbox Connector SDK Sample
+Dropbox sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Dropbox connector SDK.
+This sample demonstrates how to use the Dropbox client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Dropbox connection

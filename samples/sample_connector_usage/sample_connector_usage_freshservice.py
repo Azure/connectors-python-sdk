@@ -1,7 +1,7 @@
 """
-Freshservice Connector SDK Sample
+Freshservice sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Freshservice connector SDK.
+This sample demonstrates how to use the Freshservice client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Freshservice connection
@@ -90,7 +90,7 @@ def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Freshservice Connector SDK - Sample Usage")
+    print("Freshservice sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

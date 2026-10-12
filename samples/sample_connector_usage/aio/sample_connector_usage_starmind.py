@@ -1,4 +1,4 @@
-"""Starmind connector SDK sample."""
+"""Starmind sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

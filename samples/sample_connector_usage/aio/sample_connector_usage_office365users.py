@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Office 365 Users Connector SDK Sample
+Office 365 Users sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Office 365 Users connector SDK.
+This sample demonstrates how to use the Office 365 Users client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Office 365 Users connection
@@ -170,7 +170,7 @@ async def example_5_search_users():
 
         async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                results = [item async for item in client.search_user(
+                results = [item async for item in client.list_search_user(
                     search_term=search_term,
                     top=10,
                 )]
@@ -193,7 +193,7 @@ async def example_5_search_users():
 
 async def main():
     """Run all examples."""
-    print("Office 365 Users Connector SDK - Sample Usage")
+    print("Office 365 Users sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

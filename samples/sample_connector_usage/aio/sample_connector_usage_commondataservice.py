@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Microsoft Dataverse (Common Data Service) Connector SDK Sample
+Microsoft Dataverse (Common Data Service) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft Dataverse connector SDK.
+This sample demonstrates how to use the Microsoft Dataverse client from the Azure Connectors Python SDK.
 This connector was formerly known as Common Data Service (legacy).
 
 Prerequisites:
@@ -89,7 +89,7 @@ async def example_2_list_accounts():
             try:
                 accounts = [
                     account
-                    async for account in client.get_items(
+                    async for account in client.list_items(
                         dataset=DATASET,
                         table="accounts",
                         filter="statecode eq 0",  # Active accounts only

@@ -64,7 +64,7 @@ class YammerClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -81,7 +81,7 @@ class YammerClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -103,7 +103,7 @@ class YammerClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -195,10 +195,10 @@ class YammerClient(ConnectorClientBase):
 
     async def get_groups(
         self,
+        *,
         network_id: Optional[str] = None,
         mine: Optional[int] = None,
         show_all_company_group: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -331,14 +331,14 @@ class YammerClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_all_messages(
+    def list_all_messages(
         self,
+        *,
         network_id: Optional[str] = None,
         older_than: Optional[int] = None,
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -429,14 +429,14 @@ class YammerClient(ConnectorClientBase):
 
         return AsyncItemPaged(get_next, extract_data)
 
-    def get_messages_following(
+    def list_messages_following(
         self,
+        *,
         network_id: Optional[str] = None,
         older_than: Optional[int] = None,
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -529,15 +529,15 @@ class YammerClient(ConnectorClientBase):
 
         return AsyncItemPaged(get_next, extract_data)
 
-    def get_messages_in_group(
+    def list_messages_in_group(
         self,
         group_id: int,
+        *,
         network_id: Optional[str] = None,
         older_than: Optional[int] = None,
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -629,7 +629,7 @@ class YammerClient(ConnectorClientBase):
 
         return AsyncItemPaged(get_next, extract_data)
 
-    def get_messages_in_thread(
+    def list_messages_in_thread(
         self,
         thread_id: int,
         *,
@@ -699,8 +699,8 @@ class YammerClient(ConnectorClientBase):
     async def post_message(
         self,
         input: PostOperationRequest,
-        network_id: Optional[str] = None,
         *,
+        network_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

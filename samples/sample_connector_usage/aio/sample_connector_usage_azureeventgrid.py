@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Event Grid Connector SDK Sample
+Azure Event Grid sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Event Grid connector SDK.
+This sample demonstrates how to use the Azure Event Grid client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with an Azure Event Grid connection

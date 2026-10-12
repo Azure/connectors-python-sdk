@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Cosmos DB (DocumentDB) Connector SDK Sample
+Azure Cosmos DB (DocumentDB) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Cosmos DB connector SDK
+This sample demonstrates how to use the Azure Cosmos DB client from the Azure Connectors Python SDK
 to query documents in Cosmos DB containers.
 
 Note: The connector name "documentdb" reflects the original Azure DocumentDB
@@ -66,7 +66,7 @@ async def example_1_query_all_documents():
 
         async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                documents = [item async for item in client.query_documents(
+                documents = [item async for item in client.list_query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -103,7 +103,7 @@ async def example_2_query_with_filter():
         async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query with WHERE clause - adjust field names for your schema
-                documents = [item async for item in client.query_documents(
+                documents = [item async for item in client.list_query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -139,7 +139,7 @@ async def example_3_query_with_pagination():
         async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # The iterator follows continuation links until all pages are consumed.
-                documents = [item async for item in client.query_documents(
+                documents = [item async for item in client.list_query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -180,7 +180,7 @@ async def example_4_query_with_partition_key():
         async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query within a specific partition
-                documents = [item async for item in client.query_documents(
+                documents = [item async for item in client.list_query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -215,7 +215,7 @@ async def example_5_query_with_consistency():
             try:
                 # Query with Session consistency (common for read-your-writes)
                 # Valid levels: Strong, BoundedStaleness, Session, Eventual
-                documents = [item async for item in client.query_documents(
+                documents = [item async for item in client.list_query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -240,7 +240,7 @@ async def example_5_query_with_consistency():
 
 async def main():
     """Run all examples."""
-    print("Azure Cosmos DB (DocumentDB) Connector SDK - Sample Usage")
+    print("Azure Cosmos DB (DocumentDB) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

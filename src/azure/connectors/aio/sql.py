@@ -154,7 +154,7 @@ class SqlClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -171,7 +171,7 @@ class SqlClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -193,7 +193,7 @@ class SqlClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -445,11 +445,12 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_items(
+    def list_items(
         self,
         server: str,
         database: str,
         table: str,
+        *,
         apply: Optional[str] = None,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
@@ -459,7 +460,6 @@ class SqlClient(ConnectorClientBase):
         count: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -583,9 +583,9 @@ class SqlClient(ConnectorClientBase):
         self,
         server: str,
         database: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -825,7 +825,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables_for_delete_item(
+    def list_tables_for_delete_item(
         self,
         server: str,
         database: str,
@@ -1047,7 +1047,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables_for_get_item(
+    def list_tables_for_get_item(
         self,
         server: str,
         database: str,
@@ -1127,9 +1127,9 @@ class SqlClient(ConnectorClientBase):
         server: str,
         database: str,
         table: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1187,7 +1187,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables_for_get_on_new_items(
+    def list_tables_for_get_on_new_items(
         self,
         server: str,
         database: str,
@@ -1262,7 +1262,7 @@ class SqlClient(ConnectorClientBase):
 
         return AsyncItemPaged(get_next, extract_data)
 
-    def get_tables_for_get_on_updated_items(
+    def list_tables_for_get_on_updated_items(
         self,
         server: str,
         database: str,
@@ -1337,7 +1337,7 @@ class SqlClient(ConnectorClientBase):
 
         return AsyncItemPaged(get_next, extract_data)
 
-    def get_tables_for_patch_item(
+    def list_tables_for_patch_item(
         self,
         server: str,
         database: str,
@@ -1463,7 +1463,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables_for_post_item(
+    def list_tables_for_post_item(
         self,
         server: str,
         database: str,

@@ -1,4 +1,4 @@
-"""Rev.ai connector SDK sample."""
+"""Rev.ai sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

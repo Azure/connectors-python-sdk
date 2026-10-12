@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-SharePoint Online Connector SDK Sample
+SharePoint Online sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SharePoint Online connector SDK.
+This sample demonstrates how to use the SharePoint Online client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with SharePoint Online connection
@@ -91,7 +91,7 @@ async def example_2_get_list_items():
 
         async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = [item async for item in client.get_items(
+                items = [item async for item in client.list_items(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                 )]
@@ -250,7 +250,7 @@ async def example_5_query_with_filters():
 
                 # Query with filters
                 print("\nQuerying items (ordered by creation date, top 5)...")
-                items = [item async for item in client.get_items(
+                items = [item async for item in client.list_items(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     filter=None,
@@ -359,7 +359,7 @@ async def example_7_error_handling():
 
 async def main():
     """Run all examples."""
-    print("SharePoint Online Connector SDK - Sample Usage")
+    print("SharePoint Online sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-IBM MQ Connector SDK Sample
+IBM MQ sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the IBM MQ connector SDK.
+This sample demonstrates how to use the IBM MQ client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with IBM MQ connection
@@ -201,7 +201,7 @@ def example_5_delete_message():
 
 def main():
     """Run all examples."""
-    print("IBM MQ Connector SDK - Sample Usage")
+    print("IBM MQ sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

@@ -1,7 +1,7 @@
 """
-Infusionsoft (Keap) Connector SDK Sample
+Infusionsoft (Keap) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Infusionsoft connector SDK.
+This sample demonstrates how to use the Infusionsoft client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Infusionsoft connection
@@ -82,7 +82,7 @@ def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Infusionsoft (Keap) Connector SDK - Sample Usage")
+    print("Infusionsoft (Keap) sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

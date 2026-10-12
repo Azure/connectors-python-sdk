@@ -1,7 +1,7 @@
 """
-ClickSend SMS Connector SDK Sample
+ClickSend SMS sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the ClickSend SMS connector SDK.
+This sample demonstrates how to use the ClickSend SMS client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a ClickSend SMS connection
@@ -47,7 +47,7 @@ async def example_1_send_sms() -> None:
                     messages=[
                         {
                             "to": "+61411111111",
-                            "body": "Hello from the ClickSend SMS connector SDK.",
+                            "body": "Hello from the ClickSend SMS client in the Azure Connectors Python SDK.",
                         }
                     ],
                 ),
@@ -94,7 +94,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("ClickSend SMS Connector SDK - Sample Usage")
+    print("ClickSend SMS sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

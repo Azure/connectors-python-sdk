@@ -1,4 +1,4 @@
-"""Meeting Room Map connector SDK sample."""
+"""Meeting Room Map sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""OneDrive for Business Connector SDK sample."""
+"""OneDrive for Business sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.connectors import ConnectorException

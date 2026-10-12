@@ -58,7 +58,7 @@ class MeetingroommapClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -75,7 +75,7 @@ class MeetingroommapClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -97,7 +97,7 @@ class MeetingroommapClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -263,8 +263,8 @@ class MeetingroommapClient(ConnectorClientBase):
     async def search_locations(
         self,
         location_name: str,
-        category: Optional[str] = None,
         *,
+        category: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -315,8 +315,8 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_custom_location_image(
         self,
         location_id: str,
-        large: Optional[bool] = None,
         *,
+        large: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -400,8 +400,8 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_meeting_room_image(
         self,
         room_name: str,
-        large: Optional[bool] = None,
         *,
+        large: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -637,8 +637,8 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_room_with_persons_details(
         self,
         office_location_name: str,
-        inlude_user_info: Optional[bool] = None,
         *,
+        inlude_user_info: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -690,8 +690,8 @@ class MeetingroommapClient(ConnectorClientBase):
     async def get_office_location_image(
         self,
         office_location_name: str,
-        large: Optional[bool] = None,
         *,
+        large: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

@@ -34,11 +34,11 @@ BASE_URL = "https://example.azure.com/connections/test"
 # keyword arguments required to invoke it. The "input" body argument is passed
 # as an empty dict since send_async is mocked in every test.
 OPERATION_ARGS = {
-    "device_groups_list": {"application": "app-1"},
+    "list_device_groups": {"application": "app-1"},
     "device_groups_get": {"device_group_id": "dg-1", "application": "app-1"},
     "device_groups_set": {"input": {}, "device_group_id": "dg-1", "application": "app-1"},
     "device_groups_remove": {"device_group_id": "dg-1", "application": "app-1"},
-    "device_groups_get_devices": {"device_group_id": "dg-1", "application": "app-1"},
+    "list_device_groups_get_devices": {"device_group_id": "dg-1", "application": "app-1"},
     "devices_get_cloud_properties": {"device_id": "d-1", "application": "app-1"},
     "devices_update_cloud_properties": {"input": {}, "device_id": "d-1", "application": "app-1"},
     "devices_execute_component_command": {
@@ -48,7 +48,7 @@ OPERATION_ARGS = {
         "command_name": "cmd-1",
         "application": "app-1",
     },
-    "device_relationships_list": {"device_id": "d-1", "application": "app-1"},
+    "list_device_relationships": {"device_id": "d-1", "application": "app-1"},
     "device_relationships_get": {
         "device_id": "d-1",
         "relationship_id": "r-1",
@@ -71,14 +71,14 @@ OPERATION_ARGS = {
         "relationship_id": "r-1",
         "application": "app-1",
     },
-    "jobs_list": {"application": "app-1"},
+    "list_jobs": {"application": "app-1"},
     "jobs_get": {"job_id": "j-1", "application": "app-1"},
     "jobs_set": {"input": {}, "job_id": "j-1", "application": "app-1"},
-    "jobs_get_devices": {"job_id": "j-1", "application": "app-1"},
+    "list_jobs_get_devices": {"job_id": "j-1", "application": "app-1"},
     "jobs_stop": {"job_id": "j-1", "application": "app-1"},
     "jobs_resume": {"job_id": "j-1", "application": "app-1"},
     "jobs_rerun": {"job_id": "j-1", "rerun_id": "rr-1", "application": "app-1"},
-    "organizations_list": {"application": "app-1"},
+    "list_organizations": {"application": "app-1"},
     "organizations_get": {"organization_id": "o-1", "application": "app-1"},
     "organizations_set": {
         "input": {},
@@ -86,7 +86,7 @@ OPERATION_ARGS = {
         "application": "app-1",
     },
     "organizations_remove": {"organization_id": "o-1", "application": "app-1"},
-    "scheduled_jobs_list": {"application": "app-1"},
+    "list_scheduled_jobs": {"application": "app-1"},
     "scheduled_jobs_get": {"scheduled_job_id": "sj-1", "application": "app-1"},
     "scheduled_jobs_set": {
         "input": {},
@@ -99,7 +99,7 @@ OPERATION_ARGS = {
         "application": "app-1",
     },
     "scheduled_jobs_remove": {"scheduled_job_id": "sj-1", "application": "app-1"},
-    "scheduled_jobs_list_jobs": {"scheduled_job_id": "sj-1", "application": "app-1"},
+    "list_scheduled_jobs_list_jobs": {"scheduled_job_id": "sj-1", "application": "app-1"},
     "devices_get": {"device_id": "d-1", "application": "app-1"},
     "devices_get_command_response": {
         "device_id": "d-1",
@@ -151,7 +151,7 @@ OPERATION_ARGS = {
         "telemetry_name": "t-1",
         "application": "app-1",
     },
-    "devices_list": {"application": "app-1"},
+    "list_devices": {"application": "app-1"},
     "devices_remove": {"device_id": "d-1", "application": "app-1"},
     "devices_run_command": {
         "input": {},
@@ -190,8 +190,8 @@ OPERATION_ARGS = {
     },
     "devices_update_properties": {"input": {}, "device_id": "d-1", "application": "app-1"},
     "device_templates_get": {"template_id": "tpl-1", "application": "app-1"},
-    "device_templates_list": {"application": "app-1"},
-    "device_templates_list_2": {"application": "app-1"},
+    "list_device_templates": {"application": "app-1"},
+    "list_device_templates_2": {"application": "app-1"},
     "device_templates_remove": {"template_id": "tpl-1", "application": "app-1"},
     "roles_get": {"role_id": "role-1", "application": "app-1"},
     "roles_list": {"application": "app-1"},
@@ -200,7 +200,7 @@ OPERATION_ARGS = {
     "users_list": {"application": "app-1"},
     "users_remove": {"user_id": "u-1", "application": "app-1"},
     "users_update": {"input": {}, "user_id": "u-1", "application": "app-1"},
-    "applications_list": {},
+    "list_applications": {},
     "workflow_get_components": {"application": "app-1", "template": "tpl-1"},
     "workflow_get_capabilities": {"application": "app-1", "template": "tpl-1"},
     "workflow_get_capabilities_v1": {"application": "app-1", "template": "tpl-1"},
@@ -271,7 +271,7 @@ class TestAzureiotcentralClientInitialization:
         client = AzureiotcentralClient(
             BASE_URL,
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -333,7 +333,7 @@ class TestAzureiotcentralClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.devices_list(application="app-1"))
+            result = await resolve_generated_result(client.list_devices(application="app-1"))
 
             assert result[0]["id"] == "d-1"
             assert mock_send.call_args[0][0] == "GET"
@@ -512,7 +512,7 @@ class TestAzureiotcentralClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await resolve_generated_result(client.devices_list(application="app-1"))
+            result = await resolve_generated_result(client.list_devices(application="app-1"))
 
             assert result == []
 

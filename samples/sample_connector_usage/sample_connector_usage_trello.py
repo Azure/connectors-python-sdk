@@ -1,7 +1,7 @@
 """
-Trello Connector SDK Sample
+Trello sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Trello connector SDK.
+This sample demonstrates how to use the Trello client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Trello connection
@@ -49,7 +49,7 @@ def example_2_create_board() -> None:
             board = client.create_board(
                 input=CreateBoard(
                     name="SDK sample board",
-                    desc="Created from the Trello connector SDK sample.",
+                    desc="Created by the Trello client in the Azure Connectors Python SDK.",
                     default_lists="false",
                 )
             )
@@ -82,7 +82,7 @@ def example_4_create_card() -> None:
                 input=CreateCard(
                     id_list="list-id",
                     name="SDK sample card",
-                    desc="Created from the Trello connector SDK sample.",
+                    desc="Created by the Trello client in the Azure Connectors Python SDK.",
                 ),
                 board_id="board-id",
             )
@@ -96,7 +96,7 @@ def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Trello Connector SDK - Sample Usage")
+    print("Trello sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

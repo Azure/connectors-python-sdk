@@ -63,7 +63,7 @@ class TestAzuretablesClientInitialization:
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -377,7 +377,7 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_entities(
+            result = await resolve_generated_result(client.list_entities(
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
             ))
@@ -404,7 +404,7 @@ class TestGetEntities:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_entities(
+            await resolve_generated_result(client.list_entities(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 filter="PartitionKey eq 'pk1'",
@@ -433,7 +433,7 @@ class TestGetEntities:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_entities(
+                await resolve_generated_result(client.list_entities(
                     storage_account_name="mystorageaccount",
                     table_name="nonexistent"
                 ))
@@ -1209,7 +1209,7 @@ async def test_entities_continuation_yields_later_entities(
             ],
         ) as transport:
             entities = [
-                entity async for entity in client.get_entities(
+                entity async for entity in client.list_entities(
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
                 )

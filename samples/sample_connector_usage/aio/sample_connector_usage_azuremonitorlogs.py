@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Monitor Logs Connector SDK Sample
+Azure Monitor Logs sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Monitor Logs connector SDK.
+This sample demonstrates how to use the Azure Monitor Logs client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Azure Monitor Logs access

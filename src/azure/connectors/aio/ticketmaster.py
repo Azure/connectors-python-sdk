@@ -66,7 +66,7 @@ class TicketmasterClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -83,7 +83,7 @@ class TicketmasterClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -105,7 +105,7 @@ class TicketmasterClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -122,6 +122,7 @@ class TicketmasterClient(ConnectorClientBase):
 
     async def events_get(
         self,
+        *,
         size: Optional[int] = None,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
@@ -169,7 +170,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -608,9 +608,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def event_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -676,9 +676,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def event_images_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -742,6 +742,7 @@ class TicketmasterClient(ConnectorClientBase):
 
     async def attractions_get(
         self,
+        *,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
         source: Optional[str] = None,
@@ -762,7 +763,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -986,9 +986,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def attraction_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1052,6 +1052,7 @@ class TicketmasterClient(ConnectorClientBase):
 
     async def classifications_get(
         self,
+        *,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
         source: Optional[str] = None,
@@ -1064,7 +1065,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1178,9 +1178,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def classification_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1245,9 +1245,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def genre_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1311,9 +1311,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def segment_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1377,9 +1377,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def sub_genre_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1446,6 +1446,7 @@ class TicketmasterClient(ConnectorClientBase):
 
     async def venues_get(
         self,
+        *,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
         latlong: Optional[str] = None,
@@ -1463,7 +1464,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1599,9 +1599,9 @@ class TicketmasterClient(ConnectorClientBase):
     async def venue_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1665,6 +1665,7 @@ class TicketmasterClient(ConnectorClientBase):
 
     async def suggestions_get(
         self,
+        *,
         keyword: Optional[str] = None,
         latlong: Optional[str] = None,
         radius: Optional[str] = None,
@@ -1684,7 +1685,6 @@ class TicketmasterClient(ConnectorClientBase):
         local_start_end_date_time: Optional[List[str]] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

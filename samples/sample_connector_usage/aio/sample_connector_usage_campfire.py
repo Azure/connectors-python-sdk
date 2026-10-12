@@ -1,7 +1,7 @@
 """
-Campfire Connector SDK Sample
+Campfire sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Campfire connector SDK.
+This sample demonstrates how to use the Campfire client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Campfire connection
@@ -61,7 +61,7 @@ async def example_3_create_message() -> None:
             result = await client.create_message(
                 room_id="ROOM_ID",
                 account="ACCOUNT_ID",
-                message="Hello from the Campfire connector SDK.",
+                message="Hello from the Campfire client in the Azure Connectors Python SDK.",
             )
             print(f"Create message result: {result}")
 
@@ -83,7 +83,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Campfire Connector SDK - Sample Usage")
+    print("Campfire sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

@@ -1,4 +1,4 @@
-"""Typeform connector SDK sample."""
+"""Typeform sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

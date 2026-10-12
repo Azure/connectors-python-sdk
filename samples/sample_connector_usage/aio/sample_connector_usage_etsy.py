@@ -1,4 +1,4 @@
-"""Etsy connector SDK sample."""
+"""Etsy sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

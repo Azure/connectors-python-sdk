@@ -62,7 +62,7 @@ class TestSharepointonlineClientInitialization:
         client = SharepointonlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -476,7 +476,7 @@ class TestFolderOperations:
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
                 "/Shared Documents",
-                "NewFolder"
+                view="NewFolder"
             )
 
             assert result["Name"] == "NewFolder"
@@ -531,7 +531,7 @@ class TestFolderOperations:
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
                     "/Shared Documents",
-                    "ExistingFolder"
+                    view="ExistingFolder"
                 )
 
             assert exc_info.value.status_code == 409
@@ -586,7 +586,7 @@ class TestItemOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.get_items(
+            result = await resolve_generated_result(client.list_items(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList"
             ))
@@ -729,7 +729,7 @@ class TestItemOperations:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_items(
+                await resolve_generated_result(client.list_items(
                     "https://contoso.sharepoint.com/sites/site1",
                     "MissingList"
                 ))

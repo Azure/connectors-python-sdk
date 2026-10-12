@@ -4915,7 +4915,7 @@ class SigninghubClient(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -4932,7 +4932,7 @@ class SigninghubClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -4954,7 +4954,7 @@ class SigninghubClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -5286,9 +5286,9 @@ class SigninghubClient(ConnectorClientBase):
         self,
         record_per_page: int,
         page_no: int,
+        *,
         sort_by: Optional[str] = None,
         asc: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6613,8 +6613,8 @@ class SigninghubClient(ConnectorClientBase):
     def package_download_package_bytes(
         self,
         package_id_bulk_action: int,
-        document_ids: Optional[List[int]] = None,
         *,
+        document_ids: Optional[List[int]] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6831,6 +6831,7 @@ class SigninghubClient(ConnectorClientBase):
         document_status: str,
         page_no: int,
         record_per_page: int,
+        *,
         package_name: Optional[str] = None,
         package_id: Optional[int] = None,
         recipient_from: Optional[str] = None,
@@ -6850,7 +6851,6 @@ class SigninghubClient(ConnectorClientBase):
         document_statuses: Optional[List[str]] = None,
         owned_by: Optional[str] = None,
         smart_form: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7353,9 +7353,9 @@ class SigninghubClient(ConnectorClientBase):
         self,
         record_per_page: int,
         page_no: int,
+        *,
         sort_by: Optional[str] = None,
         asc: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7745,10 +7745,10 @@ class SigninghubClient(ConnectorClientBase):
         self,
         record_per_page: int,
         page_no: int,
+        *,
         sort_by: Optional[str] = None,
         asc: Optional[bool] = None,
         id: Optional[List[int]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

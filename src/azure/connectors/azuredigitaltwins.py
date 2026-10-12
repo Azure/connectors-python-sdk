@@ -336,7 +336,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -353,7 +353,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -375,7 +375,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -473,10 +473,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def list_models(
         self,
+        *,
         dependencies_for: Optional[str] = None,
         include_model_definition: Optional[str] = None,
-        continuation_token: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -503,11 +502,6 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             if isinstance(include_model_definition, bool):
                 value = value.lower()
             query_params.append(f"includeModelDefinition={quote(value, safe='')}")
-        if continuation_token is not None:
-            value = str(continuation_token)
-            if isinstance(continuation_token, bool):
-                value = value.lower()
-            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
         initial_request_url = request_url
@@ -599,8 +593,8 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     def get_model_by_id(
         self,
         modelid: str,
-        include_model_definition: Optional[str] = None,
         *,
+        include_model_definition: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1134,7 +1128,6 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     def list_incoming_relationships(
         self,
         twinid: str,
-        continuation_token: Optional[str] = None,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1157,11 +1150,6 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("api-version=" + quote("2020-10-31", safe=''))
-        if continuation_token is not None:
-            value = str(continuation_token)
-            if isinstance(continuation_token, bool):
-                value = value.lower()
-            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
         initial_request_url = request_url
@@ -1298,7 +1286,6 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     def list_relationships(
         self,
         twinid: str,
-        continuation_token: Optional[str] = None,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1319,11 +1306,6 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("api-version=" + quote("2020-10-31", safe=''))
-        if continuation_token is not None:
-            value = str(continuation_token)
-            if isinstance(continuation_token, bool):
-                value = value.lower()
-            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
         initial_request_url = request_url

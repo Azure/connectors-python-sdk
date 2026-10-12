@@ -49,7 +49,7 @@ class TestAzureblobClientInitialization:
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -903,8 +903,8 @@ class TestListFolder:
             assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_with_pagination_parameters(self, mock_credential):
-        """Test GET request with pagination parameters."""
+    async def test_with_optional_parameters(self, mock_credential):
+        """Test GET request with public optional parameters."""
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -921,12 +921,11 @@ class TestListFolder:
             await resolve_generated_result(client.list_folder(
                 dataset="mycontainer",
                 id="folder123",
-                next_page_marker="marker123",
                 use_flat_listing="true"
             ))
 
             call_args = mock_send.call_args
-            assert "nextPageMarker=" in call_args[0][1]
+            assert "nextPageMarker=" not in call_args[0][1]
             assert "useFlatListing=true" in call_args[0][1]
 
     @pytest.mark.asyncio
@@ -1009,8 +1008,8 @@ class TestListRootFolder:
             assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_with_pagination_parameters(self, mock_credential):
-        """Test GET request with pagination parameters."""
+    async def test_hides_continuation_parameter(self, mock_credential):
+        """Test that paging continuation is managed internally."""
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -1025,12 +1024,11 @@ class TestListRootFolder:
             return_value=mock_response
         ) as mock_send:
             await resolve_generated_result(client.list_root_folder(
-                dataset="mycontainer",
-                next_page_marker="marker456"
+                dataset="mycontainer"
             ))
 
             call_args = mock_send.call_args
-            assert "nextPageMarker=marker456" in call_args[0][1]
+            assert "nextPageMarker=" not in call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):

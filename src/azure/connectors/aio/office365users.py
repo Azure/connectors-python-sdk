@@ -76,7 +76,7 @@ class Office365usersClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -93,7 +93,7 @@ class Office365usersClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -115,7 +115,7 @@ class Office365usersClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -241,10 +241,10 @@ class Office365usersClient(ConnectorClientBase):
 
     async def my_trending_documents(
         self,
+        *,
         filter: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -386,10 +386,10 @@ class Office365usersClient(ConnectorClientBase):
     async def trending_documents(
         self,
         id: str,
+        *,
         filter: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -491,9 +491,9 @@ class Office365usersClient(ConnectorClientBase):
     async def direct_reports(
         self,
         id: str,
+        *,
         select: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -548,8 +548,8 @@ class Office365usersClient(ConnectorClientBase):
     async def manager(
         self,
         id: str,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -598,8 +598,8 @@ class Office365usersClient(ConnectorClientBase):
 
     async def my_profile(
         self,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -643,12 +643,12 @@ class Office365usersClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def search_user(
+    def list_search_user(
         self,
+        *,
         search_term: Optional[str] = None,
         top: Optional[int] = None,
         is_search_term_required: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -767,8 +767,8 @@ class Office365usersClient(ConnectorClientBase):
     async def user_profile(
         self,
         id: str,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

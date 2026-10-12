@@ -1,7 +1,7 @@
 """
-Power BI Connector SDK Sample
+Power BI sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Power BI connector SDK.
+This sample demonstrates how to use the Power BI client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Power BI connection
@@ -79,7 +79,7 @@ def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Power BI Connector SDK - Sample Usage")
+    print("Power BI sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

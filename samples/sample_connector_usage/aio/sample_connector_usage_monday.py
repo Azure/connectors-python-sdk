@@ -1,7 +1,7 @@
 """
-Monday.com Connector SDK Sample
+Monday.com sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Monday.com connector SDK.
+This sample demonstrates how to use the Monday.com client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Monday.com connection
@@ -110,7 +110,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Monday.com Connector SDK - Sample Usage")
+    print("Monday.com sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

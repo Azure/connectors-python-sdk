@@ -1214,7 +1214,7 @@ class TrelloClient(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1231,7 +1231,7 @@ class TrelloClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -1253,7 +1253,7 @@ class TrelloClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1271,6 +1271,7 @@ class TrelloClient(ConnectorClientBase):
     def list_cards(
         self,
         board_id: str,
+        *,
         actions: Optional[str] = None,
         attachments: Optional[bool] = None,
         attachment_fields: Optional[str] = None,
@@ -1284,7 +1285,6 @@ class TrelloClient(ConnectorClientBase):
         before: Optional[str] = None,
         filter: Optional[str] = None,
         fields: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1433,6 +1433,7 @@ class TrelloClient(ConnectorClientBase):
         self,
         card_id: str,
         board_id: str,
+        *,
         actions: Optional[str] = None,
         actions_entities: Optional[bool] = None,
         actions_display: Optional[bool] = None,
@@ -1456,7 +1457,6 @@ class TrelloClient(ConnectorClientBase):
         stickers: Optional[bool] = None,
         sticker_fields: Optional[str] = None,
         fields: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1665,6 +1665,7 @@ class TrelloClient(ConnectorClientBase):
 
     def list_boards(
         self,
+        *,
         filter: Optional[str] = None,
         fields: Optional[str] = None,
         actions: Optional[str] = None,
@@ -1677,7 +1678,6 @@ class TrelloClient(ConnectorClientBase):
         organization: Optional[bool] = None,
         organization_fields: Optional[str] = None,
         lists: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1814,6 +1814,7 @@ class TrelloClient(ConnectorClientBase):
     def get_board(
         self,
         board_id: str,
+        *,
         actions: Optional[str] = None,
         action_entities: Optional[bool] = None,
         actions_display: Optional[bool] = None,
@@ -1851,7 +1852,6 @@ class TrelloClient(ConnectorClientBase):
         organization_memberships: Optional[str] = None,
         my_perfs: Optional[bool] = None,
         fields: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2120,11 +2120,11 @@ class TrelloClient(ConnectorClientBase):
     def list_lists(
         self,
         board_id: str,
+        *,
         cards: Optional[str] = None,
         card_fields: Optional[str] = None,
         filter: Optional[str] = None,
         fields: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2228,12 +2228,12 @@ class TrelloClient(ConnectorClientBase):
         self,
         list_id: str,
         board_id: str,
+        *,
         cards: Optional[str] = None,
         card_fields: Optional[str] = None,
         board: Optional[bool] = None,
         board_fields: Optional[str] = None,
         fields: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2307,12 +2307,12 @@ class TrelloClient(ConnectorClientBase):
         self,
         list_id: str,
         board_id: str,
+        *,
         name: Optional[str] = None,
         closed: Optional[str] = None,
         id_board: Optional[str] = None,
         pos: Optional[str] = None,
         subscribed: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2383,8 +2383,8 @@ class TrelloClient(ConnectorClientBase):
 
     def get_user_profile(
         self,
-        fields: Optional[str] = None,
         *,
+        fields: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

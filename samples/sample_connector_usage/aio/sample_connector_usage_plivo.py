@@ -1,4 +1,4 @@
-"""Plivo connector SDK sample."""
+"""Plivo sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

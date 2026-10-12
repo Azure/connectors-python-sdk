@@ -1,7 +1,7 @@
 """
-Projectplace Connector SDK Sample
+Projectplace sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Projectplace connector SDK.
+This sample demonstrates how to use the Projectplace client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Projectplace connection
@@ -83,7 +83,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Projectplace Connector SDK - Sample Usage")
+    print("Projectplace sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

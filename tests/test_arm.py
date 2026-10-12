@@ -97,7 +97,7 @@ class TestArmClientInitialization:
         client = ArmClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -185,7 +185,7 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -215,7 +215,7 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -241,7 +241,7 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once()
             assert result is not None
@@ -258,7 +258,7 @@ class TestSubscriptionsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once()
             assert result == []
@@ -300,7 +300,7 @@ class TestSubscriptionsListAsync:
             side_effect=responses,
         ) as mock_send:
             result = await resolve_generated_result(
-                arm_client.subscriptions_list()
+                arm_client.list_subscriptions()
             )
 
         assert result == [first_subscription, second_subscription]
@@ -322,7 +322,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 401
 
@@ -341,7 +341,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 403
 
@@ -360,7 +360,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 404
 
@@ -379,7 +379,7 @@ class TestSubscriptionsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 500
 
@@ -798,7 +798,7 @@ class TestResourceGroupsListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.resource_groups_list(
+            result = await resolve_generated_result(arm_client.list_resource_groups(
                 subscription_id="sub-1"
             ))
 
@@ -831,7 +831,7 @@ class TestResourceGroupsListAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.resource_groups_list(
+                await resolve_generated_result(arm_client.list_resource_groups(
                     subscription_id="sub-1"
                 ))
 
@@ -1062,7 +1062,7 @@ class TestProvidersListAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.providers_list(
+            result = await resolve_generated_result(arm_client.list_providers(
                 subscription_id="sub-1"
             ))
 

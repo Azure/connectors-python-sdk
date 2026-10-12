@@ -72,7 +72,7 @@ class AzureblobClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -89,7 +89,7 @@ class AzureblobClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -111,7 +111,7 @@ class AzureblobClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -170,8 +170,8 @@ class AzureblobClient(ConnectorClientBase):
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[bool] = None,
         *,
+        overwrite: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -448,8 +448,8 @@ class AzureblobClient(ConnectorClientBase):
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[bool] = None,
         *,
+        overwrite: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -561,10 +561,10 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
+        *,
         infer_content_type: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -625,10 +625,10 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         path: str,
+        *,
         infer_content_type: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -692,9 +692,9 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -752,9 +752,9 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         path: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -816,11 +816,10 @@ class AzureblobClient(ConnectorClientBase):
         self,
         dataset: str,
         id: str,
-        next_page_marker: Optional[str] = None,
+        *,
         use_flat_listing: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -843,11 +842,6 @@ class AzureblobClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        if next_page_marker is not None:
-            value = str(next_page_marker)
-            if isinstance(next_page_marker, bool):
-                value = value.lower()
-            query_params.append(f"nextPageMarker={quote(value, safe='')}")
         if use_flat_listing is not None:
             value = str(use_flat_listing)
             if isinstance(use_flat_listing, bool):
@@ -914,7 +908,6 @@ class AzureblobClient(ConnectorClientBase):
     def list_root_folder(
         self,
         dataset: str,
-        next_page_marker: Optional[str] = None,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -938,11 +931,6 @@ class AzureblobClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("useFlatListing=" + quote("false", safe=''))
-        if next_page_marker is not None:
-            value = str(next_page_marker)
-            if isinstance(next_page_marker, bool):
-                value = value.lower()
-            query_params.append(f"nextPageMarker={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
         initial_request_url = request_url

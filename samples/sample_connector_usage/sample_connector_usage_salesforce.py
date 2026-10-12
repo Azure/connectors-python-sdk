@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Salesforce Connector SDK Sample
+Salesforce sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Salesforce connector SDK.
+This sample demonstrates how to use the Salesforce client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Salesforce connection
@@ -42,7 +42,7 @@ def example_1_get_tables():
 
         with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                tables = [item for item in client.get_tables()]
+                tables = [item for item in client.list_tables()]
 
                 if tables:
                     print(f"Found {len(tables)} table(s):")
@@ -68,7 +68,7 @@ def example_2_get_records():
 
         with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                records = [item for item in client.get_items(
+                records = [item for item in client.list_items(
                     table="account",
                     top=5,
                     select="Id,Name,Phone",

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Key Vault Connector SDK Sample
+Azure Key Vault sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Key Vault connector SDK to
+This sample demonstrates how to use the Azure Key Vault client from the Azure Connectors Python SDK to
 manage keys and secrets.
 
 Prerequisites:

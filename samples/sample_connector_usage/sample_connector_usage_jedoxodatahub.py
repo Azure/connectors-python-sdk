@@ -1,4 +1,4 @@
-"""Jedox OData Hub connector SDK sample."""
+"""Jedox OData Hub sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.identity import DefaultAzureCredential

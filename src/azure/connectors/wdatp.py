@@ -1135,7 +1135,7 @@ class WdatpClient(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1152,7 +1152,7 @@ class WdatpClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -1174,7 +1174,7 @@ class WdatpClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1308,8 +1308,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_alerts(
+    def list_alerts(
         self,
+        *,
         expand: Optional[str] = None,
         filter: Optional[str] = None,
         select: Optional[str] = None,
@@ -1317,7 +1318,6 @@ class WdatpClient(ConnectorClientBase):
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1715,15 +1715,15 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_machine_actions(
+    def list_machine_actions(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1820,8 +1820,8 @@ class WdatpClient(ConnectorClientBase):
     def get_file_stats(
         self,
         file_id: str,
-        look_back_hours: Optional[int] = None,
         *,
+        look_back_hours: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1870,8 +1870,8 @@ class WdatpClient(ConnectorClientBase):
     def get_domain_stats(
         self,
         domain_name: str,
-        look_back_hours: Optional[int] = None,
         *,
+        look_back_hours: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1920,8 +1920,8 @@ class WdatpClient(ConnectorClientBase):
     def get_ip_stats(
         self,
         ip_address: str,
-        look_back_hours: Optional[int] = None,
         *,
+        look_back_hours: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2007,15 +2007,15 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_investigations(
+    def list_investigations(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2449,15 +2449,15 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_remediation_activities(
+    def list_remediation_activities(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2591,7 +2591,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_remediation_activity_machine_list(
+    def list_get_remediation_activity_machine(
         self,
         remediation_id: str,
         *,
@@ -2662,15 +2662,15 @@ class WdatpClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def get_machines(
+    def list_machines(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

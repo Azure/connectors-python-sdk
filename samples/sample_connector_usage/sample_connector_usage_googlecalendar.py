@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Google Calendar Connector SDK Sample
+Google Calendar sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Google Calendar connector SDK.
+This sample demonstrates how to use the Google Calendar client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Google Calendar connection

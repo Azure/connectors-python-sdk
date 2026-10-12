@@ -59,9 +59,9 @@ async def _invoke_operation(client: SqlClient, operation: str):
         return await client.get_item(
             server="srv", database="db", table="tbl", id="1"
         )
-    if operation == "get_items":
+    if operation == "list_items":
         return await resolve_generated_result(
-            client.get_items(server="srv", database="db", table="tbl")
+            client.list_items(server="srv", database="db", table="tbl")
         )
     if operation == "get_tables":
         return await client.get_tables(server="srv", database="db")
@@ -81,9 +81,9 @@ async def _invoke_operation(client: SqlClient, operation: str):
         return await client.get_servers()
     if operation == "get_databases":
         return await client.get_databases(server="srv")
-    if operation == "get_tables_for_delete_item":
+    if operation == "list_tables_for_delete_item":
         return await resolve_generated_result(
-            client.get_tables_for_delete_item(server="srv", database="db")
+            client.list_tables_for_delete_item(server="srv", database="db")
         )
     if operation == "get_procedures_v2":
         return await client.get_procedures_v2(server="srv", database="db")
@@ -91,29 +91,29 @@ async def _invoke_operation(client: SqlClient, operation: str):
         return await client.get_procedure_v2(
             server="srv", database="db", procedure="proc"
         )
-    if operation == "get_tables_for_get_item":
+    if operation == "list_tables_for_get_item":
         return await resolve_generated_result(
-            client.get_tables_for_get_item(server="srv", database="db")
+            client.list_tables_for_get_item(server="srv", database="db")
         )
-    if operation == "get_tables_for_get_on_new_items":
-        return await resolve_generated_result(client.get_tables_for_get_on_new_items(
+    if operation == "list_tables_for_get_on_new_items":
+        return await resolve_generated_result(client.list_tables_for_get_on_new_items(
             server="srv", database="db"
         ))
-    if operation == "get_tables_for_get_on_updated_items":
-        return await resolve_generated_result(client.get_tables_for_get_on_updated_items(
+    if operation == "list_tables_for_get_on_updated_items":
+        return await resolve_generated_result(client.list_tables_for_get_on_updated_items(
             server="srv", database="db"
         ))
-    if operation == "get_tables_for_patch_item":
+    if operation == "list_tables_for_patch_item":
         return await resolve_generated_result(
-            client.get_tables_for_patch_item(server="srv", database="db")
+            client.list_tables_for_patch_item(server="srv", database="db")
         )
     if operation == "get_table_for_patch":
         return await client.get_table_for_patch(
             server="srv", database="db", table="tbl"
         )
-    if operation == "get_tables_for_post_item":
+    if operation == "list_tables_for_post_item":
         return await resolve_generated_result(
-            client.get_tables_for_post_item(server="srv", database="db")
+            client.list_tables_for_post_item(server="srv", database="db")
         )
     if operation == "get_table":
         return await client.get_table(server="srv", database="db", table="tbl")
@@ -136,21 +136,21 @@ ALL_OPERATIONS = [
     "execute_pass_through_native_query",
     "execute_procedure",
     "get_item",
-    "get_items",
+    "list_items",
     "get_tables",
     "patch_item",
     "post_item",
     "get_servers",
     "get_databases",
-    "get_tables_for_delete_item",
+    "list_tables_for_delete_item",
     "get_procedures_v2",
     "get_procedure_v2",
-    "get_tables_for_get_item",
-    "get_tables_for_get_on_new_items",
-    "get_tables_for_get_on_updated_items",
-    "get_tables_for_patch_item",
+    "list_tables_for_get_item",
+    "list_tables_for_get_on_new_items",
+    "list_tables_for_get_on_updated_items",
+    "list_tables_for_patch_item",
     "get_table_for_patch",
-    "get_tables_for_post_item",
+    "list_tables_for_post_item",
     "get_table",
     "get_pass_through_native_query_metadata",
     "get_procedure",
@@ -191,7 +191,7 @@ class TestSqlClientInitialization:
         client = SqlClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -303,7 +303,7 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.get_items(
+            result = await resolve_generated_result(client.list_items(
                 server="srv", database="db", table="tbl"
             ))
 
@@ -325,7 +325,7 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items(
+            await resolve_generated_result(client.list_items(
                 server="srv",
                 database="db",
                 table="tbl",
@@ -627,7 +627,7 @@ class TestSqlTriggerOperations:
             ),
             "get_databases": ("self", "server"),
             "get_item": ("self", "server", "database", "table", "id"),
-            "get_items": (
+            "list_items": (
                 "self", "server", "database", "table", "apply", "filter",
                 "orderby", "skip", "top", "select", "count",
                 "extract_sensitivity_label", "purview_account_name"
@@ -651,16 +651,16 @@ class TestSqlTriggerOperations:
                 "self", "server", "database", "extract_sensitivity_label",
                 "purview_account_name"
             ),
-            "get_tables_for_delete_item": ("self", "server", "database"),
-            "get_tables_for_get_item": ("self", "server", "database"),
-            "get_tables_for_get_on_new_items": (
+            "list_tables_for_delete_item": ("self", "server", "database"),
+            "list_tables_for_get_item": ("self", "server", "database"),
+            "list_tables_for_get_on_new_items": (
                 "self", "server", "database"
             ),
-            "get_tables_for_get_on_updated_items": (
+            "list_tables_for_get_on_updated_items": (
                 "self", "server", "database"
             ),
-            "get_tables_for_patch_item": ("self", "server", "database"),
-            "get_tables_for_post_item": ("self", "server", "database"),
+            "list_tables_for_patch_item": ("self", "server", "database"),
+            "list_tables_for_post_item": ("self", "server", "database"),
             "patch_item": (
                 "self", "input", "server", "database", "table", "id"
             ),

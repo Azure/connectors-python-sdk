@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure VM Connector SDK Sample
+Azure VM sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure VM connector SDK to manage
+This sample demonstrates how to use the Azure VM client from the Azure Connectors Python SDK to manage
 virtual machines and VM scale sets.
 
 Prerequisites:

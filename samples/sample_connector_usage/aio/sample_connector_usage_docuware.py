@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-DocuWare Connector SDK Sample
+DocuWare sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the DocuWare connector SDK.
+This sample demonstrates how to use the DocuWare client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a DocuWare connection

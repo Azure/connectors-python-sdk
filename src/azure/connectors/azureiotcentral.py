@@ -1559,7 +1559,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1576,7 +1576,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -1598,7 +1598,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1652,7 +1652,7 @@ class AzureiotcentralClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def device_groups_list(
+    def list_device_groups(
         self,
         application: str,
         *,
@@ -1874,7 +1874,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    def device_groups_get_devices(
+    def list_device_groups_get_devices(
         self,
         device_group_id: str,
         application: str,
@@ -1957,8 +1957,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2016,8 +2016,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: DeviceCloudProperties,
         device_id: str,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2077,8 +2077,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         component_name: str,
         command_name: str,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2134,7 +2134,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def device_relationships_list(
+    def list_device_relationships(
         self,
         device_id: str,
         application: str,
@@ -2430,7 +2430,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    def jobs_list(
+    def list_jobs(
         self,
         application: str,
         *,
@@ -2554,8 +2554,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: Job,
         job_id: str,
         application: str,
-        job_type: Optional[str] = None,
         *,
+        job_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2604,7 +2604,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def jobs_get_devices(
+    def list_jobs_get_devices(
         self,
         job_id: str,
         application: str,
@@ -2819,7 +2819,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def organizations_list(
+    def list_organizations(
         self,
         application: str,
         *,
@@ -3041,7 +3041,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    def scheduled_jobs_list(
+    def list_scheduled_jobs(
         self,
         application: str,
         *,
@@ -3170,9 +3170,9 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: ScheduledJob,
         scheduled_job_id: str,
         application: str,
+        *,
         job_type: Optional[str] = None,
         scheduled_job_end_type: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3234,8 +3234,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: ScheduledJobPatch,
         scheduled_job_id: str,
         application: str,
-        scheduled_job_end_type: Optional[str] = None,
         *,
+        scheduled_job_end_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3333,7 +3333,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    def scheduled_jobs_list_jobs(
+    def list_scheduled_jobs_list_jobs(
         self,
         scheduled_job_id: str,
         application: str,
@@ -3465,8 +3465,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3526,8 +3526,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3589,8 +3589,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         component_name: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3652,8 +3652,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3716,8 +3716,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3782,8 +3782,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         component_name: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3846,8 +3846,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         module: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3908,8 +3908,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3969,8 +3969,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         device_id: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4024,8 +4024,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4079,7 +4079,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def devices_list(
+    def list_devices(
         self,
         application: str,
         *,
@@ -4199,8 +4199,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4261,8 +4261,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4325,8 +4325,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         module: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4390,8 +4390,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4504,8 +4504,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         device_id: str,
         module: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4565,8 +4565,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: DeviceProperties,
         device_id: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4663,7 +4663,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def device_templates_list(
+    def list_device_templates(
         self,
         application: str,
         *,
@@ -4874,8 +4874,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: User,
         user_id: str,
         application: str,
-        user_type: Optional[str] = None,
         *,
+        user_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5064,8 +5064,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         input: UserPatch,
         user_id: str,
         application: str,
-        user_type: Optional[str] = None,
         *,
+        user_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5114,7 +5114,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def applications_list(
+    def list_applications(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5177,7 +5177,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def device_templates_list_2(
+    def list_device_templates_2(
         self,
         application: str,
         *,
@@ -5254,8 +5254,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         template: str,
-        module: Optional[str] = None,
         *,
+        module: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5310,10 +5310,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         template: str,
+        *,
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5378,10 +5378,10 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         template: str,
+        *,
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5446,8 +5446,8 @@ class AzureiotcentralClient(ConnectorClientBase):
         self,
         application: str,
         template: str,
-        module: Optional[str] = None,
         *,
+        module: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5550,8 +5550,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_device_cloud_properties(
         self,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5601,10 +5601,10 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_device_command(
         self,
         application: str,
+        *,
         instance_of: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5664,11 +5664,11 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_device_command_v1(
         self,
         application: str,
+        *,
         template: Optional[str] = None,
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5733,9 +5733,9 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_device_properties(
         self,
         application: str,
+        *,
         template: Optional[str] = None,
         module: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5790,11 +5790,11 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_device_telemetry(
         self,
         application: str,
+        *,
         template: Optional[str] = None,
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5859,8 +5859,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_job(
         self,
         application: str,
-        job_type: Optional[str] = None,
         *,
+        job_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5910,10 +5910,10 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_scheduled_job(
         self,
         application: str,
+        *,
         scheduled_job_end_type: Optional[str] = None,
         job_type: Optional[str] = None,
         patch: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5973,9 +5973,9 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_user(
         self,
         application: str,
+        *,
         user_type: Optional[str] = None,
         patch: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6030,8 +6030,8 @@ class AzureiotcentralClient(ConnectorClientBase):
     def schema_webhook_action_body(
         self,
         application: str,
-        rule: Optional[str] = None,
         *,
+        rule: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

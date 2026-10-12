@@ -1,7 +1,7 @@
 """
-SendGrid Connector SDK Sample
+SendGrid sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SendGrid connector SDK.
+This sample demonstrates how to use the SendGrid client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a SendGrid connection
@@ -46,7 +46,7 @@ async def example_1_send_email() -> None:
                     from_="sender@example.com",
                     to="recipient@example.com",
                     subject="Hello from the SDK sample",
-                    text="This message was sent via the SendGrid connector SDK.",
+                    text="This message was sent via the SendGrid client from the Azure Connectors Python SDK.",
                 ),
             )
             print(f"Send result: {result}")
@@ -89,7 +89,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("SendGrid Connector SDK - Sample Usage")
+    print("SendGrid sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

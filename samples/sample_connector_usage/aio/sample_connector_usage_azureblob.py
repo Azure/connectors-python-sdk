@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Blob Storage Connector SDK Sample
+Azure Blob Storage sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Blob Storage connector SDK.
+This sample demonstrates how to use the Azure Blob Storage client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Azure Blob Storage connection
@@ -242,7 +242,7 @@ async def example_5_delete_blob():
 
 async def main():
     """Run all examples."""
-    print("Azure Blob Storage Connector SDK - Sample Usage")
+    print("Azure Blob Storage sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

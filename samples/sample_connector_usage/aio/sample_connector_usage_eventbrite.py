@@ -1,4 +1,4 @@
-"""Eventbrite connector SDK sample."""
+"""Eventbrite sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

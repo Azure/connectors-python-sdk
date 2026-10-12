@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Cloudmersive Convert Connector SDK Sample
+Cloudmersive Convert sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Cloudmersive Convert connector SDK.
+This sample demonstrates how to use the Cloudmersive Convert client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Cloudmersive Convert connection

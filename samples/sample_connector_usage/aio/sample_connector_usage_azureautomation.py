@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Automation Connector SDK Sample
+Azure Automation sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Automation connector SDK
+This sample demonstrates how to use the Azure Automation client from the Azure Connectors Python SDK
 to interact with Azure Automation accounts, runbooks, and jobs.
 
 Prerequisites:

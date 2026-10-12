@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Windows Defender ATP (Microsoft Defender for Endpoint) Connector SDK Sample
+Windows Defender ATP (Microsoft Defender for Endpoint) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Windows Defender ATP connector SDK
+This sample demonstrates how to use the Windows Defender ATP client from the Azure Connectors Python SDK
 to interact with Microsoft Defender for Endpoint for security operations.
 
 Prerequisites:
@@ -46,7 +46,7 @@ def example_1_list_alerts():
 
         with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                alerts = [item for item in client.get_alerts(
+                alerts = [item for item in client.list_alerts(
                     top=5,
                     orderby="alertCreationTime desc"
                 )]
@@ -75,7 +75,7 @@ def example_2_get_machines():
         with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 machines = [
-                    item for item in client.get_machines(top=10)
+                    item for item in client.list_machines(top=10)
                 ]
 
                 if machines:
@@ -196,7 +196,7 @@ def example_6_machine_actions():
 
         with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                machine_actions = [item for item in client.get_machine_actions(
+                machine_actions = [item for item in client.list_machine_actions(
                     top=5,
                     orderby="creationDateTimeUtc desc"
                 )]
@@ -225,7 +225,7 @@ def example_7_investigations():
         with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 investigations = [
-                    item for item in client.get_investigations(top=5)
+                    item for item in client.list_investigations(top=5)
                 ]
 
                 if investigations:

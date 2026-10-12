@@ -1,7 +1,7 @@
 """
-Mailchimp Connector SDK Sample
+Mailchimp sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Mailchimp connector SDK.
+This sample demonstrates how to use the Mailchimp client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Mailchimp connection
@@ -92,7 +92,7 @@ def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Mailchimp Connector SDK - Sample Usage")
+    print("Mailchimp sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

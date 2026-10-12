@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-OneNote Connector SDK Sample
+OneNote sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the OneNote connector SDK
+This sample demonstrates how to use the OneNote client from the Azure Connectors Python SDK
 for notebook, section, and page operations.
 
 Prerequisites:
@@ -101,7 +101,7 @@ def example_3_get_pages_in_section():
 
         with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                pages = [item for item in client.get_pages_in_section(
+                pages = [item for item in client.list_pages_in_section(
                     notebook_key=NOTEBOOK_KEY,
                     section_id=SECTION_ID
                 )]

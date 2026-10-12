@@ -1,7 +1,7 @@
 """
-Microsoft Teams Connector SDK Sample
+Microsoft Teams sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Teams connector SDK.
+This sample demonstrates how to use the Teams client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Teams connection
@@ -60,7 +60,7 @@ def example_2_list_associated_teams():
 
 def main():
     """Run all examples"""
-    print("Teams Connector SDK - Sample Usage")
+    print("Teams sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 

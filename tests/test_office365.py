@@ -63,7 +63,7 @@ class TestOffice365ClientInitialization:
         client = Office365Client(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -874,7 +874,7 @@ class TestContactMethods:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.contact_get_items("Contacts"))
+            result = await resolve_generated_result(client.list_contact_get_items("Contacts"))
             assert result
 
 

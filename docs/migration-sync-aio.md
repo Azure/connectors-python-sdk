@@ -74,11 +74,11 @@ pagers and continue to yield connector items directly.
 
 ```python
 # Sync: azure.core.paging.ItemPaged
-for item in sync_client.get_items(dataset=site_url, table=list_name):
+for item in sync_client.list_items(dataset=site_url, table=list_name):
     process(item)
 
 # Async: azure.core.async_paging.AsyncItemPaged
-async for item in async_client.get_items(dataset=site_url, table=list_name):
+async for item in async_client.list_items(dataset=site_url, table=list_name):
     process(item)
 ```
 

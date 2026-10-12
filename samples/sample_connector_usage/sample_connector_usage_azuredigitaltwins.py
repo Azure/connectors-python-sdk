@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Digital Twins Connector SDK Sample
+Azure Digital Twins sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Digital Twins connector SDK
+This sample demonstrates how to use the Azure Digital Twins client from the Azure Connectors Python SDK
 to manage digital twins, models, relationships, and queries.
 
 Prerequisites:

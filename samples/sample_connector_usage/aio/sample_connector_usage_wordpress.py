@@ -1,4 +1,4 @@
-"""WordPress connector SDK sample."""
+"""WordPress sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

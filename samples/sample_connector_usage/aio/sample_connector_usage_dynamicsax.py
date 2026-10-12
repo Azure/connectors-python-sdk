@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Dynamics 365 for Finance and Operations (Dynamics AX) Connector SDK Sample
+Dynamics 365 for Finance and Operations (Dynamics AX) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Dynamics AX connector SDK.
+This sample demonstrates how to use the Dynamics AX client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Dynamics AX connection

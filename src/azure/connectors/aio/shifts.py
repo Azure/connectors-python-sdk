@@ -158,7 +158,7 @@ class ShiftsClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -175,7 +175,7 @@ class ShiftsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -197,7 +197,7 @@ class ShiftsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -295,10 +295,10 @@ class ShiftsClient(ConnectorClientBase):
     def list_times_off(
         self,
         team_id: str,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -512,10 +512,10 @@ class ShiftsClient(ConnectorClientBase):
     def list_shifts(
         self,
         team_id: str,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -729,10 +729,10 @@ class ShiftsClient(ConnectorClientBase):
     def list_open_shifts(
         self,
         team_id: str,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -992,8 +992,8 @@ class ShiftsClient(ConnectorClientBase):
     def list_time_off_reasons(
         self,
         team_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1073,8 +1073,8 @@ class ShiftsClient(ConnectorClientBase):
     def list_scheduling_groups(
         self,
         team_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1200,9 +1200,9 @@ class ShiftsClient(ConnectorClientBase):
     def list_time_off_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1428,9 +1428,9 @@ class ShiftsClient(ConnectorClientBase):
     def list_offer_shift_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1657,9 +1657,9 @@ class ShiftsClient(ConnectorClientBase):
     def list_swap_shifts_change_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1885,9 +1885,9 @@ class ShiftsClient(ConnectorClientBase):
     def list_open_shift_change_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2112,10 +2112,10 @@ class ShiftsClient(ConnectorClientBase):
 
     def list_open_shifts_cross_team(
         self,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2199,11 +2199,11 @@ class ShiftsClient(ConnectorClientBase):
 
     def list_shifts_cross_team(
         self,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2291,11 +2291,11 @@ class ShiftsClient(ConnectorClientBase):
 
     def list_times_off_cross_team(
         self,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

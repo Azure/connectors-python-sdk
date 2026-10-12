@@ -1,4 +1,4 @@
-"""Tallyfy connector SDK sample."""
+"""Tallyfy sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

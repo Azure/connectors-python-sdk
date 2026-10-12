@@ -1,4 +1,4 @@
-"""Impexium connector SDK sample."""
+"""Impexium sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.identity import DefaultAzureCredential

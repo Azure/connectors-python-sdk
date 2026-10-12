@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Storage Tables Connector SDK Sample
+Azure Storage Tables sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Storage Tables connector SDK
+This sample demonstrates how to use the Azure Storage Tables client from the Azure Connectors Python SDK
 to interact with Azure Table Storage.
 
 Prerequisites:
@@ -180,7 +180,7 @@ async def example_4_get_entities():
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query entities with optional filter
-                entities = [item async for item in client.get_entities(
+                entities = [item async for item in client.list_entities(
                     storage_account_name=STORAGE_ACCOUNT,
                     table_name=TABLE_NAME,
                     # Optional: filter entities
@@ -260,7 +260,7 @@ async def example_5_get_entity():
 
 async def main():
     """Run all examples."""
-    print("Azure Storage Tables Connector SDK - Sample Usage")
+    print("Azure Storage Tables sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

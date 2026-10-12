@@ -1,4 +1,4 @@
-"""Way We Do connector SDK sample."""
+"""Way We Do sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.identity import DefaultAzureCredential

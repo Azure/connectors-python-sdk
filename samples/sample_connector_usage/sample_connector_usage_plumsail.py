@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Plumsail Connector SDK Sample
+Plumsail sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Plumsail connector SDK.
+This sample demonstrates how to use the Plumsail client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Plumsail connection

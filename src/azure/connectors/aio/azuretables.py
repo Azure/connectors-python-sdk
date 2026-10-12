@@ -9,6 +9,7 @@ from typing import Optional, AsyncIterator, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
+from azure.core import MatchConditions
 from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
@@ -70,7 +71,7 @@ class AzuretablesClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -87,7 +88,7 @@ class AzuretablesClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -109,7 +110,7 @@ class AzuretablesClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -123,6 +124,43 @@ class AzuretablesClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "azuretables"
+
+    @staticmethod
+    def _prepare_match_headers(
+        headers: Optional[Mapping[str, str]],
+        etag: Optional[str],
+        match_condition: Optional[MatchConditions],
+        *,
+        if_match_required: bool,
+    ) -> Optional[Mapping[str, str]]:
+        request_headers = dict(headers) if headers is not None else {}
+        existing_if_match = next(
+            (name for name in request_headers if name.lower() == "if-match"),
+            None,
+        )
+        if etag is None and match_condition is None:
+            if if_match_required and existing_if_match is None:
+                request_headers["If-Match"] = "*"
+            return request_headers or None
+
+        if existing_if_match is not None:
+            del request_headers[existing_if_match]
+        if match_condition is None:
+            assert etag is not None
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.IfNotModified:
+            if etag is None:
+                raise ValueError(
+                    "etag is required for MatchConditions.IfNotModified."
+                )
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.Unconditionally:
+            request_headers["If-Match"] = "*"
+        else:
+            raise ValueError(
+                "If-Match operations support only IfNotModified or Unconditionally."
+            )
+        return request_headers or None
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
         parsed_next_link = urlsplit(next_link)
@@ -261,6 +299,8 @@ class AzuretablesClient(ConnectorClientBase):
         partition_key: str,
         row_key: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -271,6 +311,13 @@ class AzuretablesClient(ConnectorClientBase):
 
         Operation to delete an entity.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=False,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
@@ -342,13 +389,13 @@ class AzuretablesClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_entities(
+    def list_entities(
         self,
         storage_account_name: str,
         table_name: str,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -436,8 +483,8 @@ class AzuretablesClient(ConnectorClientBase):
         table_name: str,
         partition_key: str,
         row_key: str,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -686,6 +733,8 @@ class AzuretablesClient(ConnectorClientBase):
         partition_key: str,
         row_key: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -696,6 +745,13 @@ class AzuretablesClient(ConnectorClientBase):
 
         Operation to merge data with an entity in a table.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
@@ -735,6 +791,8 @@ class AzuretablesClient(ConnectorClientBase):
         partition_key: str,
         row_key: str,
         *,
+        etag: Optional[str] = "*",
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -745,6 +803,13 @@ class AzuretablesClient(ConnectorClientBase):
 
         Operation to replace an entity in a table.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"

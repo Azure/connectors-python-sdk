@@ -115,7 +115,7 @@ async def list_sharepoint_items():
         async with SharepointonlineClient(connection_url, credential) as client:
             items = [
                 item
-                async for item in client.get_items(
+                async for item in client.list_items(
                     dataset="https://contoso.sharepoint.com/sites/MySite",
                     table="MyList",
                 )
@@ -381,18 +381,18 @@ Pass retry, timeout, transport, and Azure Core policy settings directly to the g
 client = Office365Client(
     connection_url,
     credential,
-    timeout_seconds=60.0,
+    timeout=60.0,
     max_retry_attempts=5,
     use_exponential_backoff=True,
     initial_retry_delay_seconds=1.0,
 )
 ```
 
-`timeout_seconds` is one total network budget for each request, including
+The client-level `timeout` is one total network budget for each request, including
 retries, response loading, and body reads. Each generated operation also accepts
 keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook`
-request controls; `timeout` overrides that total budget for one operation. Set
-either timeout to zero or a negative value to disable SDK and transport
+request controls; the operation-level `timeout` overrides that total budget for
+one operation. Set either timeout to zero or a negative value to disable SDK and transport
 deadlines for the selected requests.
 
 Root clients accept Azure Core `HttpTransport` implementations and aio clients

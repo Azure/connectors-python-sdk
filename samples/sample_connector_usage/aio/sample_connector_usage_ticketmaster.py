@@ -1,4 +1,4 @@
-"""Ticketmaster connector SDK sample."""
+"""Ticketmaster sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

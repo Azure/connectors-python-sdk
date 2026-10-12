@@ -143,10 +143,10 @@ links and yields items directly; an empty response yields no items. Do not await
 pager construction:
 
 ```python
-for item in sync_client.get_items(...):
+for item in sync_client.list_items(...):
     process_item(item)
 
-async for item in async_client.get_items(...):
+async for item in async_client.list_items(...):
     process_item(item)
 ```
 
@@ -225,7 +225,7 @@ class Office365Client(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
@@ -236,7 +236,7 @@ class Office365Client(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             transport=transport,
             **kwargs,
         )
@@ -336,7 +336,7 @@ Root and aio clients expose the same unsuffixed operation names and parameters.
 The execution model and pager type differ:
 
 ```python
-def get_items(
+def list_items(
     self,
     dataset: str,
     table: str,
@@ -358,7 +358,7 @@ def get_items(
 ```
 
 ```python
-def get_items(
+def list_items(
     self,
     dataset: str,
     table: str,

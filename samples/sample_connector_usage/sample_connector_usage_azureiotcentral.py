@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure IoT Central Connector SDK Sample
+Azure IoT Central sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure IoT Central connector SDK.
+This sample demonstrates how to use the Azure IoT Central client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with an Azure IoT Central connection
@@ -50,7 +50,7 @@ def example_1_list_devices():
 
         with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
             devices = [
-                item for item in client.devices_list(
+                item for item in client.list_devices(
                     application=APPLICATION
                 )
             ]
@@ -70,7 +70,7 @@ def example_2_list_device_groups():
 
         with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
             device_groups = [
-                item for item in client.device_groups_list(
+                item for item in client.list_device_groups(
                     application=APPLICATION
                 )
             ]

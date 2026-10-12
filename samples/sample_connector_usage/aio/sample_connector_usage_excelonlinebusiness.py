@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Excel Online (Business) Connector SDK Sample
+Excel Online (Business) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Excel Online Business connector SDK
+This sample demonstrates how to use the Excel Online Business client from the Azure Connectors Python SDK
 to work with Excel files stored in SharePoint document libraries.
 
 Prerequisites:
@@ -71,7 +71,7 @@ async def example_1_list_table_rows():
 
         async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                rows = [item async for item in client.get_items(
+                rows = [item async for item in client.list_items(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     table=TABLE_NAME,
@@ -277,7 +277,7 @@ async def example_5_update_row():
 
 async def main():
     """Run all examples."""
-    print("Excel Online (Business) Connector SDK - Sample Usage")
+    print("Excel Online (Business) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

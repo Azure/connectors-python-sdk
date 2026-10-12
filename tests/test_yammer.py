@@ -64,7 +64,7 @@ class TestYammerClientInitialization:
         client = YammerClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -318,7 +318,7 @@ class TestGetAllMessages:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_all_messages())
+            _ = await resolve_generated_result(client.list_all_messages())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -341,7 +341,7 @@ class TestGetAllMessages:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_all_messages(
+            await resolve_generated_result(client.list_all_messages(
                 network_id="net123",
                 older_than="100",
                 newer_than="50",
@@ -380,7 +380,7 @@ class TestGetMessagesFollowing:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_messages_following())
+            _ = await resolve_generated_result(client.list_messages_following())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -410,7 +410,7 @@ class TestGetMessagesInGroup:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_messages_in_group(group_id="123"))
+            _ = await resolve_generated_result(client.list_messages_in_group(group_id="123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -440,7 +440,7 @@ class TestGetMessagesInThread:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_messages_in_thread(thread_id="456"))
+            _ = await resolve_generated_result(client.list_messages_in_thread(thread_id="456"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -742,6 +742,6 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_all_messages())
+                await resolve_generated_result(client.list_all_messages())
 
             assert exc_info.value.status_code == 500

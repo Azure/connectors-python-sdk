@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Universal Print Connector SDK Sample
+Universal Print sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Universal Print connector SDK.
+This sample demonstrates how to use the Universal Print client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Universal Print connection

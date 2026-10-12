@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Client timeout configuration now uses `timeout`** — generated sync and aio
+  client constructors use the same keyword as per-operation request controls.
 - **Location-backed operations now return pollers** — 44 Kusto and Plumsail operations move from immediate operation names to `begin_*`. Call `poller.result()` for root clients or await `poller.result()` for aio clients while the connector client remains open.
 - **Generated clients now follow the Azure SDK sync/aio namespace convention** — synchronous clients live in `azure.connectors.<connector>` and asynchronous clients live in `azure.connectors.aio.<connector>`. Both surfaces use the same unsuffixed operation names. The previous root asynchronous clients and `_async` operation aliases are removed without compatibility shims.
 - **Pageable operations now return Azure Core pagers** — root clients return `ItemPaged` and aio clients return `AsyncItemPaged`. Pager construction is not awaited; iterate normally or asynchronously, or use `by_page(continuation_token=...)` for page boundaries.
@@ -50,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Request timeout enforcement**: `timeout_seconds` and per-operation `timeout`
+- **Request timeout enforcement**: Client-level and per-operation `timeout`
   now bound the complete network operation, including retries, response loading,
   and body reads across Azure Core async transports. Zero and negative values
   disable SDK and transport deadlines.

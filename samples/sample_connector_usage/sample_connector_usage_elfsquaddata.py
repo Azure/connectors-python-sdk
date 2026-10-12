@@ -1,4 +1,4 @@
-"""Elfsquad Data connector SDK sample."""
+"""Elfsquad Data sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.identity import DefaultAzureCredential
@@ -26,7 +26,7 @@ def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                entities = [item for item in client.get_entities(
+                entities = [item for item in client.list_entities(
                     entity_name=ENTITY_NAME,
                     top=10,
                 )]

@@ -62,7 +62,7 @@ class TestAzureadClientInitialization:
         client = AzureadClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -1063,7 +1063,7 @@ class TestGetGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_group_members(id="group-123"))
+            result = await resolve_generated_result(client.list_group_members(id="group-123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -1101,7 +1101,7 @@ class TestGetGroupMembers:
             side_effect=responses,
         ) as mock_send:
             result = await resolve_generated_result(
-                client.get_group_members(id="group-123", top="10")
+                client.list_group_members(id="group-123", top="10")
             )
 
         assert "$top=10" in mock_send.call_args_list[0].args[1]
@@ -1125,7 +1125,7 @@ class TestGetGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.get_group_members(id="group-123"))
+            result = await resolve_generated_result(client.list_group_members(id="group-123"))
             assert result == []
 
     @pytest.mark.asyncio
@@ -1146,7 +1146,7 @@ class TestGetGroupMembers:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.get_group_members(id="nonexistent-group")
+                    client.list_group_members(id="nonexistent-group")
                 )
 
             assert exc_info.value.status_code == 404
@@ -1516,7 +1516,7 @@ async def test_group_members_continuation_yields_later_members(
             ],
         ) as transport:
             members = [
-                member async for member in client.get_group_members(
+                member async for member in client.list_group_members(
                     id="group-123"
                 )
             ]
@@ -1558,7 +1558,7 @@ async def test_group_members_empty_response_yields_no_items(mock_credential):
         return_value=MockResponse(status=200, text=""),
     ):
         members = [
-            member async for member in client.get_group_members(
+            member async for member in client.list_group_members(
                 id="group-123"
             )
         ]

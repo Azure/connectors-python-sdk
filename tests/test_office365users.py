@@ -49,7 +49,7 @@ class TestOffice365usersClientInitialization:
         client = Office365usersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -776,7 +776,7 @@ class TestSearchUser:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.search_user(search_term="John"))
+            result = await resolve_generated_result(client.list_search_user(search_term="John"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -799,7 +799,7 @@ class TestSearchUser:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.search_user(
+            await resolve_generated_result(client.list_search_user(
                 search_term="John",
                 top=25,
                 is_search_term_required=True
@@ -826,7 +826,7 @@ class TestSearchUser:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.search_user())
+            result = await resolve_generated_result(client.list_search_user())
             assert result == []
 
     @pytest.mark.asyncio
@@ -846,7 +846,7 @@ class TestSearchUser:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.search_user(search_term="test"))
+                await resolve_generated_result(client.list_search_user(search_term="test"))
 
             assert exc_info.value.status_code == 500
 

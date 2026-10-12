@@ -60,7 +60,7 @@ class TestExcelonlinebusinessClientInitialization:
         client = ExcelonlinebusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -263,7 +263,7 @@ class TestGetItems:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_items(
+            result = await resolve_generated_result(client.list_items(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -292,7 +292,7 @@ class TestGetItems:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_items(
+            await resolve_generated_result(client.list_items(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -327,7 +327,7 @@ class TestGetItems:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_items(
+                await resolve_generated_result(client.list_items(
                     drive="drive-id",
                     file="file-id",
                     table="NonexistentTable",
@@ -1205,7 +1205,7 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.get_items(
+            result = await resolve_generated_result(client.list_items(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -1229,13 +1229,13 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_items(
+            await resolve_generated_result(client.list_items(
                 drive="drive1",
                 file="file1",
                 table="Table1",
                 source="me"
             ))
-            await resolve_generated_result(client.get_items(
+            await resolve_generated_result(client.list_items(
                 drive="drive2",
                 file="file2",
                 table="Table2",

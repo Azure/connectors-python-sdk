@@ -1,4 +1,4 @@
-"""Formstack Forms connector SDK sample."""
+"""Formstack Forms sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

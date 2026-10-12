@@ -1,7 +1,7 @@
 """
-Microsoft To Do Connector SDK Sample
+Microsoft To Do sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft To Do connector SDK.
+This sample demonstrates how to use the Microsoft To Do client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Microsoft To Do connection
@@ -102,7 +102,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Microsoft To Do Connector SDK - Sample Usage")
+    print("Microsoft To Do sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

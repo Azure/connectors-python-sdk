@@ -104,7 +104,7 @@ class TextrequestClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -121,7 +121,7 @@ class TextrequestClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -143,7 +143,7 @@ class TextrequestClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -504,6 +504,7 @@ class TextrequestClient(ConnectorClientBase):
         dashboard_id: int,
         page: int,
         page_size: int,
+        *,
         contact_phone_number: Optional[str] = None,
         last_message_timestamp_before_utc: Optional[str] = None,
         last_message_timestamp_after_utc: Optional[str] = None,
@@ -526,7 +527,6 @@ class TextrequestClient(ConnectorClientBase):
         custom_field_value2: Optional[str] = None,
         custom_field_id3: Optional[str] = None,
         custom_field_value3: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1247,11 +1247,11 @@ class TextrequestClient(ConnectorClientBase):
         dashboard_id: int,
         page: int,
         page_size: int,
+        *,
         reference_number: Optional[str] = None,
         phone_number: Optional[str] = None,
         sort_type: Optional[str] = None,
         sort_direction: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1489,13 +1489,13 @@ class TextrequestClient(ConnectorClientBase):
     async def get_conversations(
         self,
         dashboard_id: int,
+        *,
         tags: Optional[str] = None,
         show_unresolved_only: Optional[str] = None,
         include_archived: Optional[str] = None,
         search: Optional[str] = None,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1568,9 +1568,9 @@ class TextrequestClient(ConnectorClientBase):
 
     async def get_dashboards(
         self,
+        *,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Google Drive Connector SDK Sample
+Google Drive sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Google Drive connector SDK.
+This sample demonstrates how to use the Google Drive client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Google Drive connection

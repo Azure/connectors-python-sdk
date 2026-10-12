@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Office 365 Groups Connector SDK Sample
+Office 365 Groups sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Office 365 Groups connector SDK
+This sample demonstrates how to use the Office 365 Groups client from the Azure Connectors Python SDK
 for group management and calendar operations.
 
 Prerequisites:

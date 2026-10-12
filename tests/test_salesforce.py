@@ -58,7 +58,7 @@ class TestSalesforceClientInitialization:
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -145,7 +145,7 @@ class TestGetTables:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.get_tables())
+            result = await resolve_generated_result(client.list_tables())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -170,7 +170,7 @@ class TestGetTables:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_tables())
+                await resolve_generated_result(client.list_tables())
 
             assert exc_info.value.status_code == 401
 
@@ -194,7 +194,7 @@ class TestGetItems:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items(
+            await resolve_generated_result(client.list_items(
                 table="account",
                 filter="Name eq 'Contoso'",
                 top="5",

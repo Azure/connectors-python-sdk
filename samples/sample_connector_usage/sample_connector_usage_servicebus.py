@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Service Bus Connector SDK Sample
+Azure Service Bus sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Service Bus connector SDK
+This sample demonstrates how to use the Azure Service Bus client from the Azure Connectors Python SDK
 to send and receive messages from Azure Service Bus queues and topics.
 
 Prerequisites:

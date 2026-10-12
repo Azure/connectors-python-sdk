@@ -1,4 +1,4 @@
-"""Typeform connector SDK sample."""
+"""Typeform sample for the Azure Connectors Python SDK."""
 import os
 
 from azure.identity import DefaultAzureCredential

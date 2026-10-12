@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Office365 Connector SDK Sample
+Office365 sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Office365 connector SDK.
+This sample demonstrates how to use the Office365 client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Office365 connection
@@ -75,10 +75,10 @@ def example_2_send_email():
             try:
                 email = SendEmailInput(
                     to=to_address,
-                    subject="Test Email from Office365 Connector SDK",
+                    subject="Test Email from the Azure Connectors Python SDK",
                     body=(
                         "<p>This is a test email sent from the "
-                        "<strong>Python Office365 Connector SDK</strong>.</p>"
+                        "<strong>Azure Connectors Python SDK</strong>.</p>"
                     ),
                 )
 
@@ -177,7 +177,7 @@ def example_5_error_handling():
 
 def main():
     """Run all examples."""
-    print("Office365 Connector SDK - Sample Usage")
+    print("Office365 sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 

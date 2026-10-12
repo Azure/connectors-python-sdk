@@ -305,15 +305,15 @@ def test_sample_validator_checks_consumer_principles(
     "connector,function_name,client_name,operation_name,expected_noun",
     [
         ("documentdb", "example_3_query_with_pagination", "DocumentdbClient",
-         "query_documents", "document(s)"),
+         "list_query_documents", "document(s)"),
         ("documentdb", "example_5_query_with_consistency", "DocumentdbClient",
-         "query_documents", "document(s)"),
+         "list_query_documents", "document(s)"),
         ("office365groupsmail", "main", "Office365groupsmailClient",
          "list_conversations", "conversation(s)"),
         ("zendesk", "example_2_get_items", "ZendeskClient",
-         "get_items", "item(s)"),
+         "list_items", "item(s)"),
         ("azuretables", "example_4_get_entities", "AzuretablesClient",
-         "get_entities", "entity(s)"),
+         "list_entities", "entity(s)"),
     ],
 )
 async def test_pageable_samples_report_collected_items(

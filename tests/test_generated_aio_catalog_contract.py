@@ -231,7 +231,10 @@ async def test_all_aio_operations_succeed_with_request_controls(
             ), operation
             assert "{" not in request_url and "}" not in request_url, operation
             assert call.kwargs["timeout"] == 5.0, operation
-            assert call.kwargs["headers"] == {"x-test": "value"}, operation
+            expected_headers = {"x-test": "value"}
+            if "match_condition" in inspect.signature(generated_method).parameters:
+                expected_headers["If-Match"] = "*"
+            assert call.kwargs["headers"] == expected_headers, operation
             assert call.kwargs["client_request_id"] == "request-id", operation
             assert call.kwargs["response_hook"] is response_hook, operation
             body = call.kwargs["body"]

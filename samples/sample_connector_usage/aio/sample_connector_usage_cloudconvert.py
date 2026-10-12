@@ -1,4 +1,4 @@
-"""CloudConvert connector SDK sample."""
+"""CloudConvert sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os

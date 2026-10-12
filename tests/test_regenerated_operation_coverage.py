@@ -37,8 +37,8 @@ CONNECTOR_OPERATION_CASES = [
         azureautomation,
         AzureautomationClient,
         [
-            ("subscriptions_list", "GET", "/subscriptions?", False),
-            ("resource_groups_list", "GET", "/resourcegroups?", False),
+            ("list_subscriptions", "GET", "/subscriptions?", False),
+            ("list_resource_groups", "GET", "/resourcegroups?", False),
             ("automation_accounts_list", "GET", "/automationAccounts?", False),
             ("runbooks_list", "GET", "/runbooks?", False),
             ("get_runbook", "GET", "/runbooks/value?", False),
@@ -68,22 +68,22 @@ CONNECTOR_OPERATION_CASES = [
         azurevm,
         AzurevmClient,
         [
-            ("subscriptions_list", "GET", "/subscriptions?", False),
-            ("resource_groups_list", "GET", "/resourcegroups?", False),
+            ("list_subscriptions", "GET", "/subscriptions?", False),
+            ("list_resource_groups", "GET", "/resourcegroups?", False),
             (
-                "virtual_machine_scale_sets_list",
+                "list_virtual_machine_scale_sets",
                 "GET",
                 "/virtualMachineScaleSets?",
                 False,
             ),
             (
-                "virtual_machines_in_scale_set_list",
+                "list_virtual_machines_in_scale_set",
                 "GET",
                 "/virtualMachineScaleSets/value/virtualMachines?",
                 False,
             ),
             (
-                "virtual_machines_list",
+                "list_virtual_machines",
                 "GET",
                 "/Microsoft.Compute/virtualMachines?",
                 False,
@@ -152,17 +152,17 @@ CASE_PARAMETER_NAMES = (
 )
 
 EXPECTED_PAGEABLE_OPERATIONS = {
-    (AzureautomationClient, "subscriptions_list"),
-    (AzureautomationClient, "resource_groups_list"),
+    (AzureautomationClient, "list_subscriptions"),
+    (AzureautomationClient, "list_resource_groups"),
     (AzuredatafactoryClient, "list_subscriptions"),
     (AzuredatafactoryClient, "list_resource_groups"),
     (AzuredatafactoryClient, "list_data_factories"),
     (AzuredatafactoryClient, "list_pipelines"),
-    (AzurevmClient, "subscriptions_list"),
-    (AzurevmClient, "resource_groups_list"),
-    (AzurevmClient, "virtual_machine_scale_sets_list"),
-    (AzurevmClient, "virtual_machines_in_scale_set_list"),
-    (AzurevmClient, "virtual_machines_list"),
+    (AzurevmClient, "list_subscriptions"),
+    (AzurevmClient, "list_resource_groups"),
+    (AzurevmClient, "list_virtual_machine_scale_sets"),
+    (AzurevmClient, "list_virtual_machines_in_scale_set"),
+    (AzurevmClient, "list_virtual_machines"),
 }
 
 PAGEABLE_OPERATION_CASES = [

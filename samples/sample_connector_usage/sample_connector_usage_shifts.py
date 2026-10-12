@@ -1,7 +1,7 @@
 """
-Shifts Connector SDK Sample
+Shifts sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Shifts connector SDK.
+This sample demonstrates how to use the Shifts client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Shifts connection
@@ -84,7 +84,7 @@ def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Shifts Connector SDK - Sample Usage")
+    print("Shifts sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

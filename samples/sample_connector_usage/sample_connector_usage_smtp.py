@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-SMTP Connector SDK Sample
+SMTP sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SMTP connector SDK.
+This sample demonstrates how to use the SMTP client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with SMTP connection
@@ -272,7 +272,7 @@ def example_5_send_email_with_options():
 
 def main():
     """Run all examples."""
-    print("SMTP Connector SDK - Sample Usage")
+    print("SMTP sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

@@ -1,7 +1,7 @@
 """
-Webex Connector SDK Sample
+Webex sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Webex connector SDK.
+This sample demonstrates how to use the Webex client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Webex connection
@@ -43,7 +43,7 @@ def example_1_send_message() -> None:
             result = client.send_message(
                 input=SendMessageInput(
                     room_id="ROOM_ID",
-                    text="Hello from the Webex connector SDK.",
+                    text="Hello from the Webex client in the Azure Connectors Python SDK.",
                 ),
             )
             print(f"Send result: {result}")
@@ -88,7 +88,7 @@ def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Webex Connector SDK - Sample Usage")
+    print("Webex sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

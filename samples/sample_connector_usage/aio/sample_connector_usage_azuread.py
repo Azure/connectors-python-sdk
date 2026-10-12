@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure AD (Microsoft Entra ID) Connector SDK Sample
+Azure AD (Microsoft Entra ID) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure AD connector SDK.
+This sample demonstrates how to use the Azure AD client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Azure AD connection
@@ -244,7 +244,7 @@ async def example_5_remove_member_from_group():
 
 async def main():
     """Run all examples."""
-    print("Azure AD (Microsoft Entra ID) Connector SDK - Sample Usage")
+    print("Azure AD (Microsoft Entra ID) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

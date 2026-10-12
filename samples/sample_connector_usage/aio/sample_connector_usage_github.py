@@ -1,7 +1,7 @@
 """
-GitHub Connector SDK Sample
+GitHub sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the GitHub connector SDK.
+This sample demonstrates how to use the GitHub client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with GitHub connection
@@ -92,7 +92,7 @@ async def main() -> None:
     repository_owner = "octocat"
     repository_name = "hello-world"
 
-    print("GitHub Connector SDK - Sample Usage")
+    print("GitHub sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

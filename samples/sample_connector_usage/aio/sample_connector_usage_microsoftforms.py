@@ -1,7 +1,7 @@
 """
-Microsoft Forms Connector SDK Sample
+Microsoft Forms sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft Forms connector SDK.
+This sample demonstrates how to use the Microsoft Forms client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Microsoft Forms connection
@@ -85,7 +85,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Microsoft Forms Connector SDK - Sample Usage")
+    print("Microsoft Forms sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

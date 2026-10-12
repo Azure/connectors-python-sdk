@@ -21,7 +21,7 @@ OPERATION_CONTRACTS = {
     "delete_entity_by_id": ("DELETE", False),
     **dict.fromkeys(
         [
-            "get_entities",
+            "list_entities",
             "get_entity_by_id",
             "get_function_definition",
             "get_functions",
@@ -73,7 +73,7 @@ async def test_get_entities_serializes_query_and_response(
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"value": []}'),
     ) as mock_send:
-        result = await resolve_generated_result(client.get_entities(
+        result = await resolve_generated_result(client.list_entities(
             entity_name="products",
             top=10,
             select="id,name",
@@ -124,7 +124,7 @@ async def test_get_entities_follows_odata_pages_and_terminates(
             ],
         ) as transport:
             entities = [
-                entity async for entity in client.get_entities(
+                entity async for entity in client.list_entities(
                     entity_name="products",
                     top=10,
                 )
@@ -161,7 +161,7 @@ async def test_get_entities_empty_response_is_a_single_request(
             return_value=MockResponse(status=status, text=body),
         ) as transport:
             entities = [
-                entity async for entity in client.get_entities(
+                entity async for entity in client.list_entities(
                     entity_name="products"
                 )
             ]

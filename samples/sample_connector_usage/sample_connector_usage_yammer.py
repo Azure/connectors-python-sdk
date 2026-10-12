@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Yammer (Viva Engage) Connector SDK Sample
+Yammer (Viva Engage) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Yammer connector SDK to interact with
+This sample demonstrates how to use the Yammer client from the Azure Connectors Python SDK to interact with
 Viva Engage (formerly Yammer) networks, groups, messages, and users.
 
 Prerequisites:
@@ -93,7 +93,7 @@ def example_3_get_messages():
             try:
                 # Get recent messages (limit to 10)
                 messages = [
-                    item for item in client.get_all_messages(limit=10)
+                    item for item in client.list_all_messages(limit=10)
                 ]
 
                 if messages:
@@ -119,7 +119,7 @@ def example_4_get_following_feed():
         with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 messages = [
-                    item for item in client.get_messages_following(
+                    item for item in client.list_messages_following(
                         limit=5
                     )
                 ]

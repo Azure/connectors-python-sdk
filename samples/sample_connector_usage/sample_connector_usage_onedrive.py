@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-OneDrive Connector SDK Sample
+OneDrive sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the OneDrive connector SDK.
+This sample demonstrates how to use the OneDrive client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with OneDrive connection
@@ -273,7 +273,7 @@ def main():
         print(f"$env:ONEDRIVE_CONNECTION_URL = '{url_example}'")
         return
 
-    print("OneDrive Connector SDK Sample")
+    print("OneDrive sample for the Azure Connectors Python SDK")
     print("=" * 50)
     print(f"Connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 

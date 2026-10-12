@@ -53,7 +53,7 @@ class TestCommondataserviceClientInitialization:
         client = CommondataserviceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -181,7 +181,7 @@ class TestGetItems:
             mock_send.return_value = mock_response
 
             result = [
-                item async for item in client.get_items(
+                item async for item in client.list_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -217,7 +217,7 @@ class TestGetItems:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items(
+                item async for item in client.list_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -252,7 +252,7 @@ class TestGetItems:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items(
+                item async for item in client.list_items(
                     dataset="default",
                     table="accounts",
                     filter="statecode eq 0",
@@ -290,7 +290,7 @@ class TestGetItems:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items(
+                item async for item in client.list_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -327,7 +327,7 @@ class TestGetItems:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items(
+                item async for item in client.list_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -447,7 +447,7 @@ class TestGetItems:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = client.get_items(
+            result = client.list_items(
                 dataset="default",
                 table="contacts",
                 apply="groupby((name))",
@@ -478,7 +478,7 @@ class TestGetItems:
 
             with pytest.raises(ConnectorException) as exc_info:
                 await anext(
-                    client.get_items(dataset="default", table="accounts")
+                    client.list_items(dataset="default", table="accounts")
                 )
 
             assert exc_info.value.status_code == 500
@@ -1401,7 +1401,7 @@ class TestPathParameterEncoding:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = client.get_items(
+            result = client.list_items(
                 dataset="https://org12345.crm.dynamics.com",
                 table="accounts",
             )

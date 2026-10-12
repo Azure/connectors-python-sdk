@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-SQL Server Connector SDK Sample
+SQL Server sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SQL Server connector SDK.
+This sample demonstrates how to use the SQL Server client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a SQL Server connection
@@ -90,7 +90,7 @@ async def example_2_read_rows():
 
         async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                rows = [item async for item in client.get_items(
+                rows = [item async for item in client.list_items(
                     server=SERVER,
                     database=DATABASE,
                     table=TABLE,

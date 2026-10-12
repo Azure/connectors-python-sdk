@@ -24,8 +24,8 @@ async def _invoke_operation(client: ZendeskClient, operation: str):
     """Invoke a Zendesk operation by name for shared tests."""
     if operation == "get_tables":
         return await client.get_tables()
-    if operation == "get_items":
-        return await resolve_generated_result(client.get_items(table="tickets"))
+    if operation == "list_items":
+        return await resolve_generated_result(client.list_items(table="tickets"))
     if operation == "post_item":
         return await client.post_item(input=Item(), table="tickets")
     if operation == "get_item":
@@ -75,7 +75,7 @@ class TestZendeskClientInitialization:
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -167,7 +167,7 @@ class TestZendeskClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items(
+            await resolve_generated_result(client.list_items(
                 table="tickets",
                 filter="status eq 'open'",
                 top="10",
@@ -339,7 +339,7 @@ class TestZendeskClientErrorHandling:
         "operation",
         [
             "get_tables",
-            "get_items",
+            "list_items",
             "post_item",
             "get_item",
             "delete_item",
@@ -401,7 +401,7 @@ class TestZendeskClientSignatures:
         "method_name",
         [
             "get_tables",
-            "get_items",
+            "list_items",
             "post_item",
             "get_item",
             "delete_item",

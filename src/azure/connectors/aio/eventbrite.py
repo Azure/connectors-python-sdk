@@ -60,7 +60,7 @@ class EventbriteClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -77,7 +77,7 @@ class EventbriteClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -99,7 +99,7 @@ class EventbriteClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -124,6 +124,7 @@ class EventbriteClient(ConnectorClientBase):
         event_start_timezone: str,
         event_end_timezone: str,
         event_currency: str,
+        *,
         event_organizer_id: Optional[str] = None,
         event_venue_id: Optional[str] = None,
         event_category_id: Optional[str] = None,
@@ -136,7 +137,6 @@ class EventbriteClient(ConnectorClientBase):
         event_hide_start_date: Optional[bool] = None,
         event_hide_end_date: Optional[bool] = None,
         event_show_remaining: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -271,6 +271,7 @@ class EventbriteClient(ConnectorClientBase):
         event_start_timezone: str,
         event_end_timezone: str,
         event_currency: str,
+        *,
         event_name_html: Optional[str] = None,
         event_description_html: Optional[str] = None,
         event_start_utc: Optional[str] = None,
@@ -287,7 +288,6 @@ class EventbriteClient(ConnectorClientBase):
         event_hide_start_date: Optional[bool] = None,
         event_hide_end_date: Optional[bool] = None,
         event_show_remaining: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

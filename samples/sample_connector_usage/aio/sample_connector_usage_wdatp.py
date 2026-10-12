@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Windows Defender ATP (Microsoft Defender for Endpoint) Connector SDK Sample
+Windows Defender ATP (Microsoft Defender for Endpoint) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Windows Defender ATP connector SDK
+This sample demonstrates how to use the Windows Defender ATP client from the Azure Connectors Python SDK
 to interact with Microsoft Defender for Endpoint for security operations.
 
 Prerequisites:
@@ -48,7 +48,7 @@ async def example_1_list_alerts():
 
         async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                alerts = [item async for item in client.get_alerts(
+                alerts = [item async for item in client.list_alerts(
                     top=5,
                     orderby="alertCreationTime desc"
                 )]
@@ -77,7 +77,7 @@ async def example_2_get_machines():
         async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 machines = [
-                    item async for item in client.get_machines(top=10)
+                    item async for item in client.list_machines(top=10)
                 ]
 
                 if machines:
@@ -198,7 +198,7 @@ async def example_6_machine_actions():
 
         async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                machine_actions = [item async for item in client.get_machine_actions(
+                machine_actions = [item async for item in client.list_machine_actions(
                     top=5,
                     orderby="creationDateTimeUtc desc"
                 )]
@@ -227,7 +227,7 @@ async def example_7_investigations():
         async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 investigations = [
-                    item async for item in client.get_investigations(top=5)
+                    item async for item in client.list_investigations(top=5)
                 ]
 
                 if investigations:

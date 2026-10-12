@@ -241,8 +241,10 @@ def test_generated_client_uses_synchronous_context_lifecycle() -> None:
 
     with ConcreteConnectorClient(
         AzureKeyCredential("test-key"),
+        timeout=60.0,
         transport=transport,
     ) as client:
         assert client.connector_name == "test"
+        assert client.http_client._timeout_seconds == 60.0
 
     assert transport.closed is True

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Microsoft Bookings Connector SDK Sample
+Microsoft Bookings sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft Bookings connector SDK to
+This sample demonstrates how to use the Microsoft Bookings client from the Azure Connectors Python SDK to
 manage booking businesses and appointment webhooks.
 
 Prerequisites:

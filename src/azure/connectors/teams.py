@@ -10,6 +10,7 @@ from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
+from azure.core import MatchConditions
 from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
@@ -3584,7 +3585,7 @@ class TeamsClient(ConnectorClientBase):
         credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -3601,7 +3602,7 @@ class TeamsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
+            timeout: The total network timeout for each request,
                 including retries, response loading, and body reads.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
@@ -3623,7 +3624,7 @@ class TeamsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -3637,6 +3638,43 @@ class TeamsClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "teams"
+
+    @staticmethod
+    def _prepare_match_headers(
+        headers: Optional[Mapping[str, str]],
+        etag: Optional[str],
+        match_condition: Optional[MatchConditions],
+        *,
+        if_match_required: bool,
+    ) -> Optional[Mapping[str, str]]:
+        request_headers = dict(headers) if headers is not None else {}
+        existing_if_match = next(
+            (name for name in request_headers if name.lower() == "if-match"),
+            None,
+        )
+        if etag is None and match_condition is None:
+            if if_match_required and existing_if_match is None:
+                request_headers["If-Match"] = "*"
+            return request_headers or None
+
+        if existing_if_match is not None:
+            del request_headers[existing_if_match]
+        if match_condition is None:
+            assert etag is not None
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.IfNotModified:
+            if etag is None:
+                raise ValueError(
+                    "etag is required for MatchConditions.IfNotModified."
+                )
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.Unconditionally:
+            request_headers["If-Match"] = "*"
+        else:
+            raise ValueError(
+                "If-Match operations support only IfNotModified or Unconditionally."
+            )
+        return request_headers or None
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
         parsed_next_link = urlsplit(next_link)
@@ -3797,9 +3835,9 @@ class TeamsClient(ConnectorClientBase):
     def get_channels_for_group(
         self,
         group_id: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4032,9 +4070,9 @@ class TeamsClient(ConnectorClientBase):
     def get_all_channels_for_team(
         self,
         group_id: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4223,7 +4261,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_messages_from_channel(
+    def list_messages_from_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -4350,8 +4388,8 @@ class TeamsClient(ConnectorClientBase):
         group_id: str,
         channel_id: str,
         message_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4409,8 +4447,8 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: DynamicListMembersSchema,
         thread_type: str,
-        filter: Optional[str] = None,
         *,
+        filter: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4619,13 +4657,13 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_messages_from_chat(
+    def list_messages_from_chat(
         self,
         chat_id: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4787,9 +4825,9 @@ class TeamsClient(ConnectorClientBase):
     def list_team_members(
         self,
         team_id: str,
+        *,
         filter: Optional[str] = None,
         top: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5784,6 +5822,8 @@ class TeamsClient(ConnectorClientBase):
         self,
         input: CreateSectionInput,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5794,6 +5834,13 @@ class TeamsClient(ConnectorClientBase):
 
         Creates a new teamwork section for the current user
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
         )
@@ -5864,6 +5911,8 @@ class TeamsClient(ConnectorClientBase):
         input: UpdateSectionInput,
         section_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5874,6 +5923,13 @@ class TeamsClient(ConnectorClientBase):
 
         Updates a teamwork section for the current user
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
@@ -5904,6 +5960,8 @@ class TeamsClient(ConnectorClientBase):
         self,
         section_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5914,6 +5972,13 @@ class TeamsClient(ConnectorClientBase):
 
         Deletes a teamwork section for the current user
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
@@ -5986,6 +6051,8 @@ class TeamsClient(ConnectorClientBase):
         input: AddSectionItemInput,
         section_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5998,6 +6065,13 @@ class TeamsClient(ConnectorClientBase):
         system-defined section to a user-defined teamwork section. Use Move
         Section Item to relocate items already in another user-defined section.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
@@ -6034,6 +6108,8 @@ class TeamsClient(ConnectorClientBase):
         section_id: str,
         section_item_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6046,6 +6122,13 @@ class TeamsClient(ConnectorClientBase):
         chat, channel, meeting, or community is not deleted; the item returns
         to its default system-defined section.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
@@ -6079,6 +6162,8 @@ class TeamsClient(ConnectorClientBase):
         section_id: str,
         section_item_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6092,6 +6177,13 @@ class TeamsClient(ConnectorClientBase):
         at a time. This action removes the item from its current section and
         adds it to the target section.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
@@ -6738,12 +6830,12 @@ class TeamsClient(ConnectorClientBase):
 
     def get_all_adhoc_call_recordings(
         self,
+        *,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
         top: Optional[int] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6810,12 +6902,12 @@ class TeamsClient(ConnectorClientBase):
 
     def get_all_adhoc_call_transcripts(
         self,
+        *,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
         top: Optional[int] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,

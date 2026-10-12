@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Zendesk Connector SDK Sample
+Zendesk sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Zendesk connector SDK.
+This sample demonstrates how to use the Zendesk client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Zendesk connection
@@ -65,7 +65,7 @@ def example_2_get_items():
 
         with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = [item for item in client.get_items(
+                items = [item for item in client.list_items(
                     table="tickets",
                     top=10,
                 )]

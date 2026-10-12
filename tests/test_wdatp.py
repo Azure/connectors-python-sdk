@@ -58,7 +58,7 @@ class TestWdatpClientInitialization:
         client = WdatpClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -178,7 +178,7 @@ class TestGetAlerts:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_alerts())
+            result = await resolve_generated_result(client.list_alerts())
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -197,7 +197,7 @@ class TestGetAlerts:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_alerts(filter="severity eq 'High'"))
+            await resolve_generated_result(client.list_alerts(filter="severity eq 'High'"))
 
             call_args = mock_send.call_args
             assert "$filter=" in call_args[0][1]
@@ -214,7 +214,7 @@ class TestGetAlerts:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_alerts(top="10", skip="5"))
+            await resolve_generated_result(client.list_alerts(top="10", skip="5"))
 
             call_args = mock_send.call_args
             assert "$top=10" in call_args[0][1]
@@ -306,7 +306,7 @@ class TestGetMachines:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_machines())
+            result = await resolve_generated_result(client.list_machines())
 
             call_args = mock_send.call_args
             assert "api/machines" in call_args[0][1]
@@ -461,7 +461,7 @@ class TestGetMachineActions:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_machine_actions())
+            result = await resolve_generated_result(client.list_machine_actions())
 
             call_args = mock_send.call_args
             assert "api/machineactions" in call_args[0][1]
@@ -487,7 +487,7 @@ class TestGetInvestigations:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_investigations())
+            result = await resolve_generated_result(client.list_investigations())
 
             call_args = mock_send.call_args
             assert "api/investigations" in call_args[0][1]
@@ -661,7 +661,7 @@ class TestGetRemediationActivities:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_remediation_activities())
+            result = await resolve_generated_result(client.list_remediation_activities())
 
             call_args = mock_send.call_args
             assert "api/remediationtasks" in call_args[0][1]

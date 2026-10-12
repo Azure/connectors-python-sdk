@@ -70,7 +70,7 @@ class TestOnenoteClientInitialization:
         client = OnenoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -330,7 +330,7 @@ class TestGetPagesInSectionAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_pages_in_section(
+            result = await resolve_generated_result(client.list_pages_in_section(
                 notebook_key="nb-123",
                 section_id="sec-123"
             ))
@@ -359,7 +359,7 @@ class TestGetPagesInSectionAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await resolve_generated_result(client.get_pages_in_section(
+                await resolve_generated_result(client.list_pages_in_section(
                     notebook_key="nb-123",
                     section_id="sec-123"
                 ))
