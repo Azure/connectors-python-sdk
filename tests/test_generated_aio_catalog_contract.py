@@ -8,12 +8,13 @@ import importlib
 import inspect
 from pathlib import Path
 from types import ModuleType
-from typing import Any, get_origin, get_type_hints
+from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from azure.core.async_paging import AsyncItemPaged
 from azure.core.paging import ItemPaged
+from azure.core.polling import AsyncLROPoller, LROPoller
 
 import azure.connectors as connectors_package
 from azure.connectors.sdk import ConnectorClientBase as SyncConnectorClientBase
@@ -105,7 +106,11 @@ async def invoke_generated_operation(
     if isinstance(result, AsyncItemPaged):
         return [item async for item in result]
 
-    return await result
+    awaited_result = await result
+    if isinstance(awaited_result, AsyncLROPoller):
+        return await awaited_result.result()
+
+    return awaited_result
 
 
 @pytest.mark.parametrize("module_name", CONNECTOR_MODULE_NAMES)
@@ -146,8 +151,14 @@ def test_root_and_aio_operation_surfaces_match(module_name: str) -> None:
             globalns=vars(aio_module),
         )["return"]
         is_pageable = get_origin(root_return_type) is ItemPaged
+        is_long_running = get_origin(root_return_type) is LROPoller
         if is_pageable:
             assert get_origin(aio_return_type) is AsyncItemPaged, operation_name
+        elif is_long_running:
+            assert get_origin(aio_return_type) is AsyncLROPoller, operation_name
+            assert get_args(aio_return_type) == get_args(
+                root_return_type
+            ), operation_name
         else:
             assert aio_return_type == root_return_type, operation_name
 
@@ -180,6 +191,11 @@ async def test_all_aio_operations_succeed_with_request_controls(
             globalns=vars(connector_module),
         )["return"]
         is_pageable = get_origin(return_type) is AsyncItemPaged
+        result_type = (
+            get_args(return_type)[0]
+            if get_origin(return_type) is AsyncLROPoller
+            else return_type
+        )
         response_text = (
             '{"value": [{"ok": true}]}'
             if is_pageable
@@ -222,11 +238,11 @@ async def test_all_aio_operations_succeed_with_request_controls(
             if body is not None:
                 assert to_wire(body) is not None, operation
 
-        if return_type is type(None):
+        if result_type is type(None):
             assert result is None, operation
         elif is_pageable:
             assert result == [{"ok": True}], operation
-        elif return_type is bytes:
+        elif result_type is bytes:
             assert result == b'{"ok": true}', operation
         else:
             assert result == {"ok": True}, operation

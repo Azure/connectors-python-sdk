@@ -17,6 +17,7 @@ import pytest
 from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.paging import ItemPaged
+from azure.core.polling import AsyncLROPoller, LROPoller
 
 from azure.connectors.sdk import ConnectorException
 from azure.connectors.sdk.serialization import (
@@ -55,19 +56,25 @@ def get_generated_operations(client_type: type[Any]) -> set[str]:
 
 
 def resolve_sync_generated_result(result: Any) -> Any:
-    """Resolve a generated result, consuming a synchronous pager."""
+    """Resolve a generated result, consuming a synchronous pager or poller."""
     if isinstance(result, ItemPaged):
         return list(result)
+    if isinstance(result, LROPoller):
+        return result.result()
 
     return result
 
 
 async def resolve_generated_result(result: Any) -> Any:
-    """Resolve an asynchronous generated result, consuming a pager."""
+    """Resolve an asynchronous generated result, consuming a pager or poller."""
     if isinstance(result, AsyncItemPaged):
         return [item async for item in result]
 
-    return await result
+    awaited_result = await result
+    if isinstance(awaited_result, AsyncLROPoller):
+        return await awaited_result.result()
+
+    return awaited_result
 
 
 def invoke_sync_generated_operation(

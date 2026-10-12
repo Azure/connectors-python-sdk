@@ -68,9 +68,10 @@ async def example_2_extract_text_from_pdf():
                     result_type="Raw",
                 )
 
-                result = await client.flow_v1_documents_jobs_extract_text_from_pdf(
+                poller = await client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
                     input=request,
                 )
+                result = await poller.result()
 
                 print(f"Extracted text result: {result}")
 

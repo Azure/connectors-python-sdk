@@ -31,12 +31,18 @@ contract.
   distinct client object.
 - Generated clients are imported from their connector modules. Package-level
   generated-client registries and barrel exports are not part of the contract.
-- LRO poller types and generated LRO methods are excluded until a later phase.
+- Retained operations with an HTTP 202 `Location` response contract use
+  `begin_*` and return `LROPoller[T]` or `AsyncLROPoller[T]`. LRO classification
+  takes precedence over paging, and bare HTTP 202 responses remain ordinary.
 
 Paging must preserve validation, connector error behavior, empty pages,
 continuation links, request controls, and response hooks on every request.
 Continuation links from a different origin are rebased onto the connection
 runtime origin before the next request.
+
+The shipped catalog contains exactly 44 paired LRO methods: 5 in Kusto and 39
+in Plumsail. Internal Kusto retrieval helpers and superseded Plumsail revisions
+remain filtered by the existing operation-retention rules.
 
 ## Regeneration evidence
 

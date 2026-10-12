@@ -8,12 +8,13 @@ import importlib
 import inspect
 from pathlib import Path
 from types import ModuleType
-from typing import Any, get_type_hints
+from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import MagicMock, patch
 
 import pytest
 from azure.core.credentials import AzureKeyCredential
 from azure.core.paging import ItemPaged
+from azure.core.polling import LROPoller
 
 import azure.connectors as connectors_package
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException
@@ -66,7 +67,12 @@ def test_all_generated_operations_succeed_with_request_controls(
             generated_method,
             globalns=vars(connector_module),
         )["return"]
-        is_pageable = getattr(return_type, "__origin__", None) is ItemPaged
+        is_pageable = get_origin(return_type) is ItemPaged
+        result_type = (
+            get_args(return_type)[0]
+            if get_origin(return_type) is LROPoller
+            else return_type
+        )
         response_text = (
             '{"value": [{"ok": true}]}'
             if is_pageable
@@ -110,11 +116,11 @@ def test_all_generated_operations_succeed_with_request_controls(
             if body is not None:
                 assert to_wire(body) is not None, operation
 
-        if return_type is type(None):
+        if result_type is type(None):
             assert result is None, operation
         elif is_pageable:
             assert result == [{"ok": True}], operation
-        elif return_type is bytes:
+        elif result_type is bytes:
             assert result == b'{"ok": true}', operation
         else:
             assert result == {"ok": True}, operation

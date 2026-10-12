@@ -107,6 +107,7 @@ def _generate_reference() -> None:
     navigation = mkdocs_gen_files.Nav()
     navigation["Home"] = "index.md"
     navigation[("Guides", "Connection setup")] = "connection-setup.md"
+    navigation[("Guides", "Long-running operations")] = "long-running-operations.md"
     navigation[("Guides", "Sync/aio migration")] = "migration-sync-aio.md"
     navigation[("Guides", "SDK-type bindings")] = "sdk-type-bindings.md"
     navigation[("Design", "Azure SDK guidelines")] = "azure-sdk-guidelines.md"

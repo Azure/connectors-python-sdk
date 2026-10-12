@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.core.polling import AsyncLROPoller
 from azure.connectors.aio.plumsail import PlumsailClient
 from azure.connectors.plumsail import (
     Pdf2TextRequest,
@@ -172,7 +173,10 @@ class TestExtractTextFromPdfAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.flow_v1_documents_jobs_extract_text_from_pdf(input=request)
+            poller = await client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
+                input=request
+            )
+            result = await poller.result()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -198,14 +202,14 @@ class TestExtractTextFromPdfAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.flow_v1_documents_jobs_extract_text_from_pdf(
+                await client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
                     input=Pdf2TextRequest()
                 )
 
 
 BASE_URL = "https://example.azure.com/connections/test"
 
-OPERATION_ARGS = {
+IMMEDIATE_OPERATION_ARGS = {
     "flow_v1_documents_flow_schema_add_watermark_to_pdf": {"type_": "test"},
     "flow_v1_documents_flow_schema_parse_csv": {"headers_parameter": "test"},
     "flow_v1_documents_flow_schema_reg_exp_match": {"pattern": "test"},
@@ -258,13 +262,28 @@ OPERATION_ARGS = {
     "profiles_me_get": {},
 }
 
+OPERATION_ARGS = {
+    (
+        f"begin_{operation}"
+        if operation.startswith(
+            ("flow_v1_documents_jobs_", "flow_v1_processes_flow_jobs_")
+        )
+        else operation
+    ): arguments
+    for operation, arguments in IMMEDIATE_OPERATION_ARGS.items()
+}
+
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 
 async def _invoke_operation(client: PlumsailClient, operation: str):
     """Invoke a Plumsail operation by name for shared method tests."""
     method = getattr(client, f"{operation}")
-    return await method(**OPERATION_ARGS[operation])
+    result = await method(**OPERATION_ARGS[operation])
+    if isinstance(result, AsyncLROPoller):
+        return await result.result()
+
+    return result
 
 
 class TestPlumsailClientAllOperations:

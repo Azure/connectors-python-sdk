@@ -66,9 +66,10 @@ def example_2_extract_text_from_pdf():
                     result_type="Raw",
                 )
 
-                result = client.flow_v1_documents_jobs_extract_text_from_pdf(
+                poller = client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
                     input=request,
                 )
+                result = poller.result()
 
                 print(f"Extracted text result: {result}")
 

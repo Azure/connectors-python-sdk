@@ -9,6 +9,7 @@ from typing import Optional, Any, Mapping
 from urllib.parse import quote
 import json
 
+from azure.core.polling import AsyncLROPoller
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -17,6 +18,7 @@ from azure.connectors.sdk.aio import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorPollingMethod,
 )
 
 from azure.connectors.plumsail import (
@@ -252,7 +254,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_apply_docx_template(
+    async def begin_flow_v1_documents_jobs_apply_docx_template(
         self,
         input: ApplyDocxTemplateRequest,
         *,
@@ -260,12 +262,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Create document from DOCX template
 
         Create document from DOCX template. More information:
         https://plumsail.com/docs/documents/v1.x/document-generation/docx/index.html
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -288,9 +292,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_apply_xlsx_template(
+    async def begin_flow_v1_documents_jobs_apply_xlsx_template(
         self,
         input: ApplyXlsxTemplateRequest,
         *,
@@ -298,12 +314,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Create document from XLSX template
 
         Create document from XLSX template. More information:
         https://plumsail.com/docs/documents/v1.x/document-generation/xlsx/index.html
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -326,9 +344,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_apply_pptx(
+    async def begin_flow_v1_documents_jobs_apply_pptx(
         self,
         input: ApplyPptxTemplateRequest,
         *,
@@ -336,12 +366,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Create document from PPTX template
 
         Create document from PPTX template. More information:
         https://plumsail.com/docs/documents/v1.x/document-generation/pptx/index.html
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyPptx"
@@ -363,12 +395,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_apply_docx(
+    async def begin_flow_v1_documents_jobs_apply_docx(
         self,
         input: MergeFieldsTemplateRequest,
         *,
@@ -376,7 +421,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Fill merge fields in DOCX document
 
@@ -385,6 +430,8 @@ class PlumsailClient(ConnectorClientBase):
         should be the same as names of MergeFields (Express block) in document.
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#fill-merge-fields-in-docx-document
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyDocx"
@@ -406,12 +453,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_apply_html(
+    async def begin_flow_v1_documents_jobs_apply_html(
         self,
         input: ApplyHtmlFlowTemplateRequest,
         *,
@@ -419,7 +479,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Create HTML from template
 
@@ -428,6 +488,8 @@ class PlumsailClient(ConnectorClientBase):
         templates internally. More information about templates in Mustache
         docs: http://mustache.github.io/mustache.5.html. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#create-html-from-template
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyHtml"
@@ -449,12 +511,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_html2_pdf(
+    async def begin_flow_v1_documents_jobs_html2_pdf(
         self,
         input: Html2PdfFlowRequest,
         *,
@@ -462,13 +537,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert HTML to PDF
 
         Convert HTML to PDF file. This action takes HTML markup, renders it and
         converts to PDF document. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-html-to-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Pdf"
@@ -490,12 +567,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_html2_docx(
+    async def begin_flow_v1_documents_jobs_html2_docx(
         self,
         input: Html2DocxFlowRequest,
         *,
@@ -503,13 +593,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert HTML to DOCX
 
         Convert HTML to DOCX document. This action takes HTML markup, renders
         it and converts to DOCX document. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-html-to-docx
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Docx"
@@ -531,12 +623,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_docx2_pdf(
+    async def begin_flow_v1_documents_jobs_docx2_pdf(
         self,
         input: Docx2PdfRequest,
         *,
@@ -544,13 +649,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert DOCX to PDF
 
         Convert DOCX to PDF files. This action takes DOCX document and converts
         it to PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-docx-to-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Docx2Pdf"
@@ -572,12 +679,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_xslx2_pdf(
+    async def begin_flow_v1_documents_jobs_xslx2_pdf(
         self,
         input: Xlsx2PdfRequest,
         *,
@@ -585,13 +705,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert XLSX to PDF
 
         Convert XLSX to PDF files. This action takes XLSX document and converts
         it to PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-xlsx-to-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xslx2Pdf"
@@ -613,9 +735,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_pptx2_pdf(
+    async def begin_flow_v1_documents_jobs_pptx2_pdf(
         self,
         input: Pptx2PdfRequest,
         *,
@@ -623,13 +757,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert PPTX to PDF
 
         Convert PPTX to PDF files. This action takes PPTX document and converts
         it to PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-pptx-to-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Pptx2Pdf"
@@ -651,9 +787,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_any2_pdf_v2(
+    async def begin_flow_v1_documents_jobs_any2_pdf_v2(
         self,
         input: Any2PdfRequest,
         *,
@@ -661,12 +809,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert to PDF
 
         Convert provided file to PDF file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-to-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Any2PdfV2"
@@ -688,9 +838,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_email2_pdf(
+    async def begin_flow_v1_documents_jobs_email2_pdf(
         self,
         input: Email2PdfRequest,
         *,
@@ -698,12 +860,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert Email to PDF
 
         Convert provided Email to PDF file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-email-to-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Email2Pdf"
@@ -725,9 +889,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_doc2_docx(
+    async def begin_flow_v1_documents_jobs_doc2_docx(
         self,
         input: Doc2DocxRequest,
         *,
@@ -735,13 +911,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert DOC to DOCX
 
         Convert DOC to DOCX files. This action takes DOC document and converts
         it to DOCX. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-doc-to-docx
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Doc2Docx"
@@ -763,9 +941,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_xls2_xlsx(
+    async def begin_flow_v1_documents_jobs_xls2_xlsx(
         self,
         input: Xls2XlsxRequest,
         *,
@@ -773,13 +963,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert XLS to XLSX
 
         Convert XLS to XLSX files. This action takes XLS document and converts
         it to XLSX. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-xls-to-xlsx
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xls2Xlsx"
@@ -801,9 +993,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_ppt2_pptx(
+    async def begin_flow_v1_documents_jobs_ppt2_pptx(
         self,
         input: Ppt2PptxRequest,
         *,
@@ -811,13 +1015,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert PPT to PPTX
 
         Convert PPT to PPTX files. This action takes PPT document and converts
         it to PPTX. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-ppt-to-pptx
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Ppt2Pptx"
@@ -839,9 +1045,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_split_pdf_v2(
+    async def begin_flow_v1_documents_jobs_split_pdf_v2(
         self,
         input: FlowDocumentsJobsSplitPdfInput,
         type_: str,
@@ -850,12 +1068,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Split PDF
 
         Split PDF takes PDF document and splits it. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#split-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/SplitPdfV2"
@@ -884,12 +1104,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_merge_any_to_pdf_v2(
+    async def begin_flow_v1_documents_jobs_merge_any_to_pdf_v2(
         self,
         input: MergeAny2PdfRequest,
         *,
@@ -897,13 +1130,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Merge any files into PDF
 
         Convert and merge multiple files into a single PDF document.
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-any-files-into-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -926,9 +1161,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_extract_text_from_pdf(
+    async def begin_flow_v1_documents_jobs_extract_text_from_pdf(
         self,
         input: Pdf2TextRequest,
         *,
@@ -936,13 +1183,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Extract text from PDF document
 
         Extract text from PDF takes PDF document and extracts text to Raw or
         HTML format. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#extract-text-from-pdf-document
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -965,12 +1214,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_pdf2_image_v2(
+    async def begin_flow_v1_documents_jobs_pdf2_image_v2(
         self,
         input: Pdf2ImageRequest,
         *,
@@ -978,13 +1240,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert PDF to Image
 
         Convert PDF to image. This action takes PDF document and converts it to
         Image (jpeg, png, gif, bmp, etc). Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-pdf-to-image
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1007,12 +1271,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_image2_pdf(
+    async def begin_flow_v1_documents_jobs_image2_pdf(
         self,
         input: Image2PdfRequest,
         *,
@@ -1020,11 +1297,13 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert Images to PDF
 
         It takes images and converts them to a PDF document
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Image2Pdf"
@@ -1046,9 +1325,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_fill_in_pdf_form(
+    async def begin_flow_v1_documents_jobs_fill_in_pdf_form(
         self,
         input: FillInPdfFormRequest,
         *,
@@ -1056,12 +1347,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Fill in PDF Form
 
         Fill in PDF Form fills out PDF from by provided data. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#fill-in-pdf-form
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1084,12 +1377,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_get_pdf_form(
+    async def begin_flow_v1_documents_jobs_get_pdf_form(
         self,
         input: GetPdfFormRequest,
         *,
@@ -1097,13 +1403,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Get Form from PDF
 
         Get Form from PDF returns fillable form data from PDF as JSON.
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#get-form-from-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/GetPdfForm"
@@ -1125,12 +1433,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_protect_pdf(
+    async def begin_flow_v1_documents_jobs_protect_pdf(
         self,
         input: ProtectPdfRequest,
         *,
@@ -1138,13 +1459,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Protect PDF document
 
         Protect PDF document adds passwords, copy, printing, and other
         protections to PDF files. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#protect-pdf-document
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ProtectPdf"
@@ -1166,12 +1489,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_get_pdf_protection_info(
+    async def begin_flow_v1_documents_jobs_get_pdf_protection_info(
         self,
         input: PdfProtectionInfoRequest,
         *,
@@ -1179,13 +1515,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Get information about PDF protection
 
         Get information about PDF protection returns information whether the
         document is password protected. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#get-pdf-protection-information
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1208,12 +1546,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_compress_pdf(
+    async def begin_flow_v1_documents_jobs_compress_pdf(
         self,
         input: CompressPdfRequest,
         *,
@@ -1221,12 +1572,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Compress PDF document
 
         Compress PDF document size if possible and optimize it. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#compress-pdf-document
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1249,9 +1602,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_add_watermark_to_pdf(
+    async def begin_flow_v1_documents_jobs_add_watermark_to_pdf(
         self,
         input: FlowDocumentsJobsAddWatermarkToPdfInput,
         type_: str,
@@ -1260,12 +1625,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Add a watermark to PDF
 
         Add a watermark to PDF as text, an image, HTML, or PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#add-watermark-to-pdf
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1295,12 +1662,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_merge_docx(
+    async def begin_flow_v1_documents_jobs_merge_docx(
         self,
         input: MergeDocxRequest,
         *,
@@ -1308,13 +1688,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Merge DOCX files
 
         Merge DOCX files takes an array of Docx documents and merge it into
         single file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-docx-files
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeDocx"
@@ -1336,12 +1718,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_parse_csv(
+    async def begin_flow_v1_documents_jobs_parse_csv(
         self,
         input: ParseCsvFlowRequest,
         *,
@@ -1349,12 +1744,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Parse CSV
 
         Parse CSV works like Parse JSON but for CSV files. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#parse-csv
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ParseCsv"
@@ -1376,12 +1773,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_csv2_xlsx(
+    async def begin_flow_v1_documents_jobs_csv2_xlsx(
         self,
         input: Csv2XlsxRequest,
         *,
@@ -1389,12 +1799,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert CSV to Excel
 
         Convert CSV to Excel file (XLSX). Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#csv-to-excel
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Csv2Xlsx"
@@ -1416,9 +1828,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_json2_xlsx(
+    async def begin_flow_v1_documents_jobs_json2_xlsx(
         self,
         input: Json2XlsxRequest,
         *,
@@ -1426,12 +1850,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert JSON to Excel
 
         Convert JSON to Excel file (XLSX). Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#json-to-excel
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Xlsx"
@@ -1453,9 +1879,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_json2_csv(
+    async def begin_flow_v1_documents_jobs_json2_csv(
         self,
         input: Json2CsvRequest,
         *,
@@ -1463,12 +1901,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert JSON to CSV
 
         Convert JSON to CSV file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#json-to-csv
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Csv"
@@ -1490,9 +1930,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_documents_jobs_reg_exp_match(
+    async def begin_flow_v1_documents_jobs_reg_exp_match(
         self,
         input: RegExpMatchRequest,
         *,
@@ -1500,7 +1952,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Regular Expression Match
 
@@ -1509,6 +1961,8 @@ class PlumsailClient(ConnectorClientBase):
         would recommend to use Regex Hero to test your expressions. It supports
         the same syntax as actions. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-match
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1531,12 +1985,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_reg_exp_replace(
+    async def begin_flow_v1_documents_jobs_reg_exp_replace(
         self,
         input: RegExpReplaceRequest,
         *,
@@ -1544,7 +2011,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Regular Expression Replace
 
@@ -1553,6 +2020,8 @@ class PlumsailClient(ConnectorClientBase):
         input string. We would recommend to use Regex Hero to test your
         expressions. It supports the same syntax as actions. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-replace
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1575,12 +2044,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_reg_exp_test(
+    async def begin_flow_v1_documents_jobs_reg_exp_test(
         self,
         input: RegExpTestRequest,
         *,
@@ -1588,7 +2070,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Regular Expression Test
 
@@ -1597,6 +2079,8 @@ class PlumsailClient(ConnectorClientBase):
         string. We would recommend to use Regex Hero to test your expressions.
         It supports the same syntax as actions. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-test
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/RegExpTest"
@@ -1618,12 +2102,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_create_archive(
+    async def begin_flow_v1_documents_jobs_create_archive(
         self,
         input: CreateArchiveRequest,
         *,
@@ -1631,11 +2128,13 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Create Archive
 
         Compresses and adds files to a ZIP archive.
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1658,12 +2157,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_extract_archive(
+    async def begin_flow_v1_documents_jobs_extract_archive(
         self,
         input: ExtractArchiveRequest,
         *,
@@ -1671,11 +2183,13 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Extract Archive
 
         Extract files from archive.
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1698,12 +2212,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_documents_jobs_merge_xlsx(
+    async def begin_flow_v1_documents_jobs_merge_xlsx(
         self,
         input: MergeXlsxRequest,
         *,
@@ -1711,13 +2238,15 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Merge XLSX files
 
         Merge XLSX files takes an array of Xlsx documents and merge it into
         single file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-xlsx-files
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeXlsx"
@@ -1739,12 +2268,25 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-        return json.loads(response.text)
-
-    async def flow_v1_processes_flow_jobs_execute_process(
+    async def begin_flow_v1_processes_flow_jobs_execute_process(
         self,
         input: FlowProcessesFlowJobsExecuteProcessInput,
         process_id: str,
@@ -1753,7 +2295,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Start document generation process with json
 
@@ -1761,6 +2303,8 @@ class PlumsailClient(ConnectorClientBase):
         template related to the selected process with the JSON data.
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html##start-process-json
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1790,9 +2334,21 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
-    async def flow_v1_processes_flow_jobs_execute_process_with_generated_data(
+    async def begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data(
         self,
         input: ProcessJsonData,
         process_id: str,
@@ -1801,7 +2357,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> bytes:
+    ) -> AsyncLROPoller[bytes]:
         """
         Start document generation process
 
@@ -1809,6 +2365,8 @@ class PlumsailClient(ConnectorClientBase):
         template related to the selected process with the JSON data.
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#start-document-generation-process
+
+        Returns an Azure Core async poller for the connector operation.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1838,7 +2396,19 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-        return response.content
+        return AsyncLROPoller(
+            client=self,
+            initial_response=response,
+            deserialization_callback=lambda polling_response: polling_response.content,
+            polling_method=ConnectorPollingMethod(
+                http_client=self.http_client,
+                polling_header_name="Location",
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            ),
+        )
 
     async def flow_v1_documents_flow_schema_split_pdf(
         self,

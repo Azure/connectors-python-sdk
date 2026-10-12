@@ -92,5 +92,7 @@ page boundaries or a saved continuation token are required.
 - Treating collected page items as a response envelope with a `value` field.
 - Importing a generated client from a package-level barrel module.
 
-Long-running operation pollers are not part of this release. Operations retain
-their current immediate response contracts until LRO support is introduced.
+Location-backed Kusto and Plumsail operations now use `begin_*` methods. Root
+clients return `LROPoller`; aio clients return `AsyncLROPoller` after awaiting
+the `begin_*` call. Resolve the terminal payload with `poller.result()` and keep
+the connector client open until polling completes.

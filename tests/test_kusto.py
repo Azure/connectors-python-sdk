@@ -20,6 +20,12 @@ from azure.connectors.sdk import (
 from tests.conftest import MockResponse
 
 
+async def resolve_lro(poller_awaitable):
+    """Await a generated asynchronous poller and return its terminal result."""
+    poller = await poller_awaitable
+    return await poller.result()
+
+
 class TestKustoClientInitialization:
     """Tests for KustoClient initialization."""
 
@@ -133,7 +139,9 @@ class TestListKustoResults:
                 db="testdb",
                 csl="TestTable | take 10"
             )
-            result = await client.list_kusto_results(input_schema)
+            result = await resolve_lro(
+                client.begin_list_kusto_results(input_schema)
+            )
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -163,7 +171,9 @@ class TestListKustoResults:
             return_value=mock_response
         ):
             input_schema = QueryAndListSchema()
-            result = await client.list_kusto_results(input_schema)
+            result = await resolve_lro(
+                client.begin_list_kusto_results(input_schema)
+            )
 
             assert result is None
 
@@ -189,7 +199,7 @@ class TestListKustoResults:
             input_schema = QueryAndListSchema()
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_kusto_results(input_schema)
+                await client.begin_list_kusto_results(input_schema)
 
             assert exc_info.value.status_code == 400
             assert exc_info.value.response_body == '{"error": "Invalid query"}'
@@ -216,7 +226,7 @@ class TestListKustoResults:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_kusto_results(QueryAndListSchema())
+                await client.begin_list_kusto_results(QueryAndListSchema())
 
             assert exc_info.value.status_code == 500
 
@@ -248,7 +258,9 @@ class TestListKustoShowCommandResults:
                 db="testdb",
                 csl=".show tables"
             )
-            result = await client.list_kusto_show_command_results(input_schema)
+            result = await resolve_lro(
+                client.begin_list_kusto_show_command_results(input_schema)
+            )
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -277,8 +289,10 @@ class TestListKustoShowCommandResults:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_kusto_show_command_results(
-                ControlCommandAndListSchema()
+            result = await resolve_lro(
+                client.begin_list_kusto_show_command_results(
+                    ControlCommandAndListSchema()
+                )
             )
 
             assert result is None
@@ -303,7 +317,7 @@ class TestListKustoShowCommandResults:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_kusto_show_command_results(
+                await client.begin_list_kusto_show_command_results(
                     ControlCommandAndListSchema()
                 )
 
@@ -338,7 +352,9 @@ class TestRunKustoQueryAndVisualizeResults:
                 csl="TestTable | summarize count() by timestamp",
                 chart_type="line"
             )
-            result = await client.run_kusto_query_and_visualize_results(input_schema)
+            result = await resolve_lro(
+                client.begin_run_kusto_query_and_visualize_results(input_schema)
+            )
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -371,7 +387,7 @@ class TestRunKustoQueryAndVisualizeResults:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.run_kusto_query_and_visualize_results(
+                await client.begin_run_kusto_query_and_visualize_results(
                     QueryAndVisualizeSchema()
                 )
 
@@ -406,7 +422,9 @@ class TestRunKustoCommandAndVisualizeResults:
                 csl=".show schema",
                 chart_type="bar"
             )
-            result = await client.run_kusto_command_and_visualize_results(input_schema)
+            result = await resolve_lro(
+                client.begin_run_kusto_command_and_visualize_results(input_schema)
+            )
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -435,8 +453,10 @@ class TestRunKustoCommandAndVisualizeResults:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.run_kusto_command_and_visualize_results(
-                CommandAndVisualizeSchema()
+            result = await resolve_lro(
+                client.begin_run_kusto_command_and_visualize_results(
+                    CommandAndVisualizeSchema()
+                )
             )
 
             assert result is None
@@ -469,7 +489,9 @@ class TestRunAsyncControlCommandAndWait:
                 db="testdb",
                 csl=".set-or-append async TargetTable <| SourceTable"
             )
-            result = await client.run_async_control_command_and_wait(input_schema)
+            result = await resolve_lro(
+                client.begin_run_async_control_command_and_wait(input_schema)
+            )
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -504,7 +526,7 @@ class TestRunAsyncControlCommandAndWait:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.run_async_control_command_and_wait(
+                await client.begin_run_async_control_command_and_wait(
                     ControlCommandAndListSchema()
                 )
 
@@ -763,8 +785,12 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             side_effect=[mock_response_1, mock_response_2]
         ):
-            result_1 = await client.list_kusto_results(QueryAndListSchema())
-            result_2 = await client.list_kusto_results(QueryAndListSchema())
+            result_1 = await resolve_lro(
+                client.begin_list_kusto_results(QueryAndListSchema())
+            )
+            result_2 = await resolve_lro(
+                client.begin_list_kusto_results(QueryAndListSchema())
+            )
 
             assert result_1 == {"result": "first"}
             assert result_2 == {"result": "second"}
@@ -786,7 +812,9 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(json.JSONDecodeError):
-                await client.list_kusto_results(QueryAndListSchema())
+                await resolve_lro(
+                    client.begin_list_kusto_results(QueryAndListSchema())
+                )
 
     @pytest.mark.asyncio
     async def test_url_construction_with_multiple_trailing_slashes(self):

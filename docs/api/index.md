@@ -17,8 +17,8 @@ re-exports the exact root-owned declarations. Both clients expose identical
 unsuffixed operation names.
 
 Root pageable operations return `ItemPaged`; aio pageable operations return
-`AsyncItemPaged`. Long-running operation pollers are not generated in this
-release.
+`AsyncItemPaged`. Location-backed long-running operations return `LROPoller`
+or `AsyncLROPoller` from matching `begin_*` methods.
 
 All four API sections are discovered automatically, so new paired modules
 appear without a separate documentation allow-list.

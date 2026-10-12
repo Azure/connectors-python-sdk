@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Azure Core long-running operations** — generated Kusto and Plumsail operations with an HTTP 202 `Location` polling contract now use paired `begin_*` methods returning `LROPoller` or `AsyncLROPoller`. Polling honors `Retry-After` and forwards operation request controls.
 - **Generated API documentation site** — adds a MkDocs Material reference for the core SDK and every shipped connector module, strict source-to-site coverage validation, and a GitHub Pages deployment workflow for `main`.
 - **Zoho ZeptoMail generated client** — adds five public mail-agent, send-mail, template-mail, and analytics actions. `SendTemplateMailInput.merge_key_detail` remains `List[Dict[str, Any]]` so fixed string fields and arbitrary non-string merge values stay representable. The malformed Swagger type `ReplyToAddresss` is exposed as `ReplyToAddress` without changing the `reply_to` wire field.
 
 ### Breaking Changes
 
+- **Location-backed operations now return pollers** — 44 Kusto and Plumsail operations move from immediate operation names to `begin_*`. Call `poller.result()` for root clients or await `poller.result()` for aio clients while the connector client remains open.
 - **Generated clients now follow the Azure SDK sync/aio namespace convention** — synchronous clients live in `azure.connectors.<connector>` and asynchronous clients live in `azure.connectors.aio.<connector>`. Both surfaces use the same unsuffixed operation names. The previous root asynchronous clients and `_async` operation aliases are removed without compatibility shims.
 - **Pageable operations now return Azure Core pagers** — root clients return `ItemPaged` and aio clients return `AsyncItemPaged`. Pager construction is not awaited; iterate normally or asynchronously, or use `by_page(continuation_token=...)` for page boundaries.
 - **Generated models have one owner** — dataclasses, aliases, enums, and `TRIGGER_OPERATIONS` are defined in root connector modules and shared by aio modules. Import models from `azure.connectors.<connector>` in both modes.

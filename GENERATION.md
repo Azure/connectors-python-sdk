@@ -154,6 +154,18 @@ Root clients return `ItemPaged`; aio clients return `AsyncItemPaged`. Both
 support `by_page(continuation_token=...)`. Request controls and response hooks
 apply to every page request.
 
+### Long-Running Operations
+
+Retained operations with an HTTP 202 `Location` polling contract use matching
+`begin_*` methods. Root clients return `LROPoller[T]`; aio clients return
+`AsyncLROPoller[T]` after the `begin_*` call is awaited. Resolve the final
+payload with `poller.result()` while the connector client remains open.
+
+The generator does not infer polling from HTTP 202 alone. Status-document
+protocols, cancellation, and poller continuation tokens are not currently
+generated. Request controls and response hooks apply to the initial request and
+every polling request.
+
 ### Consumer Review Checks
 
 - Capture known response collections directly in semantic names, such as

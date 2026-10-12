@@ -80,7 +80,8 @@ def example_1_simple_kql_query():
                     csl=query,
                 )
 
-                results = client.list_kusto_results(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results:
                     print(f"Query executed successfully. Found {len(results['value'])} rows:")
@@ -115,7 +116,8 @@ def example_2_aggregation_query():
                     csl=query,
                 )
 
-                results = client.list_kusto_results(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results:
                     print("Top 5 states by event count:")
@@ -154,7 +156,8 @@ def example_3_time_based_filtering():
                     csl=query,
                 )
 
-                results = client.list_kusto_results(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results:
                     print("Top 5 event types in the last year:")
@@ -192,9 +195,10 @@ def example_4_visualize_results():
                     chart_type="Time Chart",
                 )
 
-                chart = client.run_kusto_query_and_visualize_results(
+                poller = client.begin_run_kusto_query_and_visualize_results(
                     input=visualize_request
                 )
+                chart = poller.result()
 
                 if chart:
                     print("Chart data generated successfully")
@@ -229,9 +233,10 @@ def example_5_control_command():
                     csl=command,
                 )
 
-                results = client.list_kusto_show_command_results(
+                poller = client.begin_list_kusto_show_command_results(
                     input=command_request
                 )
+                results = poller.result()
 
                 if results and 'value' in results:
                     print(f"Found {len(results['value'])} tables in database '{KUSTO_DATABASE}':")
@@ -264,9 +269,10 @@ def example_6_table_schema():
                     csl=command,
                 )
 
-                results = client.list_kusto_show_command_results(
+                poller = client.begin_list_kusto_show_command_results(
                     input=command_request
                 )
+                results = poller.result()
 
                 if results and 'value' in results and len(results['value']) > 0:
                     print(f"Schema for table '{KUSTO_TABLE}':")
@@ -314,7 +320,8 @@ def example_7_statistical_analysis():
                     csl=query,
                 )
 
-                results = client.list_kusto_results(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results and len(results['value']) > 0:
                     stats = results['value'][0]
@@ -349,7 +356,8 @@ def example_8_error_handling():
                     csl=query,
                 )
 
-                results = client.list_kusto_results(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
                 print(f"Unexpected success: {results}")
 
             except ConnectorException as ex:

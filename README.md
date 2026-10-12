@@ -153,6 +153,36 @@ async def post_teams_message():
             )
 ```
 
+### Example: Wait for a long-running Kusto query
+
+Long-running operations use an Azure SDK-style `begin_*` method. Keep the
+client open until the poller reaches its terminal response:
+
+```python
+from azure.identity import DefaultAzureCredential
+
+from azure.connectors.kusto import KustoClient, QueryAndListSchema
+
+
+def run_kusto_query():
+    connection_url = "https://example.azure.com/connections/kusto"
+
+    with DefaultAzureCredential() as credential:
+        with KustoClient(connection_url, credential) as client:
+            poller = client.begin_list_kusto_results(
+                input=QueryAndListSchema(
+                    cluster="https://contoso.kusto.windows.net",
+                    db="Samples",
+                    csl="StormEvents | take 5",
+                )
+            )
+            return poller.result()
+```
+
+The matching aio method is awaited to create the poller, then
+`await poller.result()` waits for completion. See the
+[long-running operations guide](docs/long-running-operations.md).
+
 ### Retry safety
 
 By default, `GET`, `HEAD`, `OPTIONS`, and `TRACE` use the configured retry settings. `POST`, `PUT`, `PATCH`, `DELETE`, and other methods make one attempt after a transient response or transport error because the connector may already have completed the side effect.

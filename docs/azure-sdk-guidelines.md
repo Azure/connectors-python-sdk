@@ -14,7 +14,7 @@ decisions so future changes preserve the public contract.
 | Models | Define wire models once in the root connector module and share object identity with aio. | Project convention |
 | Imports | Require per-connector module imports; do not add generated-client barrel exports. | Project convention |
 | Request options | Expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` on both modes. | Follow |
-| Long-running operations | Keep current immediate responses; Azure Core pollers are deferred to a later phase. | Deferred |
+| Long-running operations | Return `LROPoller`/`AsyncLROPoller` for retained operations with an HTTP 202 `Location` contract. | Follow |
 | Return values | Return connector payloads directly rather than Azure Core `Response[T]` wrappers. | Intentional deviation |
 
 ## Namespace shape
@@ -30,6 +30,10 @@ from azure.connectors.office365 import SendEmailInput
 
 The two clients have distinct identities and runtimes. Models, type aliases,
 enums, and `TRIGGER_OPERATIONS` have shared identity across the paired modules.
+
+Location-backed operations use the same `begin_*` name in both modes. Azure
+status-document protocols, poller continuation tokens, and cancellation are
+not part of the current contract.
 
 ## Compatibility policy
 
